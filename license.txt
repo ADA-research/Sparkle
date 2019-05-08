@@ -1,0 +1,5 @@
+SPARKLE (PLATFORM FOR EVALUATING EMPIRICAL ALGORITHMS/SOLVERS) LICENSE INFORMATION
+
+This license allows the empirical evaluation and a study of the source codes in the scientific context for research purpose (e.g. during research projects). Particularly, it does not permit the application of the platform in a commercial context by others.
+
+Also, this license requires that, if others modify the source codes or the binaries of the platform to obtain modified softwares, or include the source codes or the binaries of the platform as a part of developed softwares, such resulting softwares must be open source.

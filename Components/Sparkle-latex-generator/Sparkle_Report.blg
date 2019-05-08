@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2013)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: Sparkle_Report.aux
+The style file: plain.bst
+Database file #1: Sparkle_Report.bib
+You've used 4 entries,
+            2118 wiz_defined-function locations,
+            525 strings with 4806 characters,
+and the built_in function-call counts, 1472 in all, are:
+= -- 148
+> -- 68
+< -- 2
++ -- 26
+- -- 22
+* -- 107
+:= -- 250
+add.period$ -- 13
+call.type$ -- 4
+change.case$ -- 23
+chr.to.int$ -- 0
+cite$ -- 4
+duplicate$ -- 54
+empty$ -- 110
+format.name$ -- 22
+if$ -- 305
+int.to.chr$ -- 0
+int.to.str$ -- 4
+missing$ -- 3
+newline$ -- 23
+num.names$ -- 10
+pop$ -- 18
+preamble$ -- 1
+purify$ -- 18
+quote$ -- 0
+skip$ -- 39
+stack$ -- 0
+substring$ -- 96
+swap$ -- 15
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 16
+warning$ -- 0
+while$ -- 16
+width$ -- 5
+write$ -- 48

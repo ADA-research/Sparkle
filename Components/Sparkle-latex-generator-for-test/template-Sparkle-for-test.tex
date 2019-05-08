@@ -1,0 +1,190 @@
+\documentclass[british]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=3.5cm,bmargin=3.5cm,lmargin=3cm,rmargin=3cm}
+\usepackage{array}
+%\usepackage{multirow}
+\usepackage{amstext}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{caption}
+%\usepackage{subfigure}
+
+\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+
+\newcommand{\mytablefontsize}{7pt}
+\newcommand{\mytablebaselineskip}{0.7}
+\newcommand{\mytabcolsep}{3pt}
+
+\newcommand{\medianInterval}[1]{}
+@@customCommands@@
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+
+\title{Experimental Reports for @@sparkle@@ }
+\author{ @@sparkle@@ }
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+\maketitle %
+
+
+\section{Introduction}
+\label{sec:Introduction}
+
+@@sparkle@@ \cite{Hoos15} is a Programming by Optimisation (PbO) \cite{Hoos12} multi-agent problem-solving platform, and would provide many algorithm optimisation techniques (such as automated algorithm configuration, portfolio-based algorithm selection, etc) to light your solvers. 
+
+This is the automatically generated report by @@sparkle@@, and this report is to present experimental results for the current portfolio selector in @@sparkle@@ on solving the test instance class @@testInstanceClass@@.
+
+
+\section{Information about the Test Instance Class}
+\label{sec:Information_about_the_Test_Instance_Class}
+
+The test instance class is @@testInstanceClass@@, and there are @@numInstanceInTestInstanceClass@@ instances in this test instance class.
+
+
+\section{Information about Current @@sparkle@@}
+\label{sec:Information_about_Current_Sparkle}
+
+In this section, we present the experimental preliminaries, including the list of solvers, the list of feature extractors, the list of instance classes, information about experimental setup and the information about how to construct a portfolio-based algorithm selector in @@sparkle@@.
+
+\subsection{Solvers}
+\label{sec:Solvers}
+There are @@numSolvers@@ solver(s) submitted in @@sparkle@@, and the list of solvers are given as follows.
+
+
+\begin{enumerate} 
+@@solverList@@
+\end{enumerate}
+
+
+\subsection{Feature Extractors}
+\label{sec:Feature_Extractors}
+There are @@numFeatureExtractors@@ feature extractor(s) submitted in @@sparkle@@, and list of feature extractors are given as follow.
+
+\begin{enumerate}
+@@featureExtractorList@@
+\end{enumerate}
+
+\subsection{Train Instance Classes}
+\label{sec:Train_Instance_Classes}
+There are @@numInstanceClasses@@ instance class(es) submitted in @@sparkle@@, and the list of instance classes are given as follows.
+
+\begin{enumerate}
+@@instanceClassList@@
+\end{enumerate}
+
+\subsection{Experimental Setup for Training Phase}
+\label{sec:Experimental_Setup_for_Training_Phase}
+
+The experimental setup for training phase is described as follows.
+
+\textbf{Feature computation:} @@sparkle@@ uses all the feature extractors which are presented above to compute the feature vector for each train instance. Each feature extractor computes a feature vector for each train instance. The final feature vector is the combination of all computed feature vectors. The cutoff time for feature vector computation on each train instance is set to @@featureComputationCutoffTime@@ seconds.
+
+\textbf{Performance computation:} @@sparkle@@ runs each solver one time on each train instance. The cutoff time for each performance computation run is set to @@performanceComputationCutoffTime@@ seconds.
+
+\subsection{Constructing Portfolio-Based Algorithm Selector}
+\label{sec:Portfolio}
+
+@@sparkle@@ runs all the feature extractors to compute the feature vector for each train instance, and store the resulting the feature data in the system. Also, @@sparkle@@ runs all the solvers to solve each train instance, and store the resulting the performance data in the system. After the feature-related and the performance-related experiments done, by utilizing the computed feature data and performance data, @@sparkle@@ uses \emph{AutoFolio} \cite{LinEtAl15} to automatically construct a portfolio-based algorithm selector for @@sparkle@@.
+
+
+\section{Experimental Results}
+\label{sec:Experimental_Results}
+
+In this section, PAR10 for the current portfolio selector in @@sparkle@@ on solving the test instance class @@testInstanceClass@@ is reported as follows.
+
+\begin{itemize}
+\item \textbf{Actual Portfolio Selector in @@sparkle@@}, PAR10: @@testActualPAR10@@
+\end{itemize}
+
+
+\iffalse
+\subsection{PAR10 Ranking List}
+\label{sec:PAR10_Ranking}
+
+The ranking list with regards to the penalised average runtime (PAR10) for solvers is given as follows.
+
+\begin{enumerate}
+@@PAR10RankingList@@
+\end{enumerate}
+
+Also, PAR10 for the Virtual Best Solver \emph{VBS}, i.e., the perfect portfolio selector, and the actual portfolio selector in @@sparkle@@ is given as follows.
+
+\begin{itemize}
+\item \textbf{\emph{VBS}}, PAR10: @@VBSPAR10@@
+\item \textbf{Actual Portfolio Selector in @@sparkle@@}, PAR10: @@actualPAR10@@
+\end{itemize}
+
+\subsection{Marginal Contribution Ranking List}
+\label{sec:Marginal_Contribution_Ranking}
+
+@@sparkle@@ uses the concept of marginal contribution \cite{XuEtAl12} to measure each solver's contribution to the \textbf{\emph{VBS}} and to the \textbf{actual portfolio selector in @@sparkle@@}. In this report, we uses the approach described in the literature \cite{FreEtAl16} to each solver's marginal contribution.
+
+Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with regards to the \textbf{{\em VBS}} is given as follows.
+
+\begin{enumerate} 
+@@solverPerfectRankingList@@
+\end{enumerate}
+
+Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with regards to the \textbf{actual portfolio selector in @@sparkle@@} is given as follows.
+
+\begin{enumerate} 
+@@solverActualRankingList@@
+\end{enumerate}
+
+
+\subsection{Scatter Plot Analysis}
+
+The empirical comparison between the actual portfolio selector in @@sparkle@@ and single best solver (\emph{SBS}) is presented in Figure \ref{fig:sparkle_vs_sbs}
+The empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{VBS} is presented in Figure \ref{fig:sparkle_vs_vbs}.
+
+%\begin{figure}[htbp]
+%\begin{minipage}{0.5\linewidth}
+%\noindent \begin{centering}
+%@@figure-portfolio-selector-sparkle-vs-sbs@@
+%\par\end{centering}
+%\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{SBS}.}\label{fig:sparkle_vs_sbs}
+%\end{minipage}
+
+%\begin{minipage}{0.5\linewidth}
+%\noindent \begin{centering}
+%@@figure-portfolio-selector-sparkle-vs-vbs@@
+%\par\end{centering}
+%
+%\end{minipage}
+%\end{figure}
+
+\begin{figure}[htbp]
+\noindent \begin{centering}
+@@figure-portfolio-selector-sparkle-vs-sbs@@
+% \includegraphics[width=0.8\textwidth]{fittedModels}
+\par\end{centering}
+
+\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{SBS}.}\label{fig:sparkle_vs_sbs}
+\end{figure}
+
+\begin{figure}[htbp]
+\noindent \begin{centering}
+@@figure-portfolio-selector-sparkle-vs-vbs@@
+% \includegraphics[width=0.8\textwidth]{fittedModels}
+\par\end{centering}
+
+\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{VBS}.}\label{fig:sparkle_vs_vbs}
+\end{figure}
+\fi
+
+
+\bibliographystyle{plain}
+\bibliography{Sparkle_Report_for_Test}
+
+\end{document}

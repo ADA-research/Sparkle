@@ -1,0 +1,9 @@
+num_job_in_parallel = 1024
+cutoff_time_each_performance_computation = 5000
+memory_limit_each_performance_computation = 8192
+penalty_number = 2
+cutoff_time_each_feature_computation = 90
+memory_limit_each_feature_computation = 32768
+r_for_constructing_portfolio_selector = 100
+runcount_limit_for_autofolio = 100
+wallclock_limit_for_autofolio = 604800
