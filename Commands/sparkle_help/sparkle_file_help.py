@@ -40,13 +40,6 @@ def get_last_level_directory_name(filepath):
 	else: filepath = filepath[right_index+1:]
 	return filepath
 
-def get_all_level_directory(filepath):
-    all_level_directory = ''
-    pos = filepath.rfind('/')
-    if pos>=0:
-        all_level_directory = filepath[:pos+1]
-    return all_level_directory
-
 
 def get_file_name(filepath):
 	right_index = filepath.rfind(r'/')
@@ -55,6 +48,13 @@ def get_file_name(filepath):
 	else: filename = filepath[right_index+1:]
 	return filename
 
+def get_directory(filepath):
+	right_index = filepath.rfind(r'/')
+	if right_index<0:
+		directory = r'./'
+	else:
+		directory = filepath[:right_index+1]
+	return directory
 
 def get_file_full_extension(filepath):
 	filename = get_file_name(filepath)
@@ -75,27 +75,28 @@ def get_file_least_extension(filepath):
 
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
-    if os.path.isfile(path):
-        file_extension = get_file_least_extension(path)
-        if file_extension == 'cnf':
-            list_all_cnf_filename.append(path)
-        return
-    elif os.path.isdir(path):
-        if path[-1] != '/':
-            this_path = path + '/'
-        else:
-            this_path = path
-        list_all_items = os.listdir(this_path)
-        for item in list_all_items:
-            get_list_all_cnf_filename_recursive(this_path+item, list_all_cnf_filename)
-    return
+	if os.path.isfile(path):
+		file_extension = get_file_least_extension(path)
+		if file_extension == r'cnf':
+			filename = get_file_name(path)
+			list_all_cnf_filename.append(filename)
+		return
+	elif os.path.isdir(path):
+		if path[-1]!=r'/':
+			this_path = path + '/'
+		else:
+			this_path = path
+		list_all_items = os.listdir(this_path)
+		for item in list_all_items:
+			get_list_all_cnf_filename_recursive(this_path+item, list_all_cnf_filename)
+	return
 
-def get_list_all_cnf_filename(file_path):
-    list_all_cnf_filename = []
-    get_list_all_cnf_filename_recursive(file_path, list_all_cnf_filename)
-    return list_all_cnf_filename
+def get_list_all_cnf_filename(filepath):
+	list_all_cnf_filename = []
+	get_list_all_cnf_filename_recursive(filepath, list_all_cnf_filename)
+	return list_all_cnf_filename
 
-''''
+'''
 def get_list_all_cnf_filename(filepath):
 	if not os.path.exists(filepath):
 		print r'c Directory ' + filepath + r' does not exist!'
@@ -173,10 +174,10 @@ def add_new_instance_reference_into_file(filepath, status):
 	return
 
 
-def add_new_solver_into_file(filepath, solver_complete_type = 'complete'):
+def add_new_solver_into_file(filepath, deterministic='0'):
 	fo = open(sparkle_global_help.solver_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	fo.write(filepath + ' ' + solver_complete_type + '\n')
+	fo.write(filepath + r' ' + deterministic + '\n')
 	fo.close()
 	return
 
@@ -216,7 +217,7 @@ def write_solver_list():
 	fout = open(sparkle_global_help.solver_list_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 	for i in range(0, len(sparkle_global_help.solver_list)):
-		fout.write(sparkle_global_help.solver_list[i] + ' ' + sparkle_global_help.solver_complete_type_mapping[sparkle_global_help.solver_list[i]] + '\n')
+		fout.write(sparkle_global_help.solver_list[i] + '\n')
 	fout.close()
 	return
 
@@ -295,8 +296,8 @@ def append_string_to_file(file_path, string_value):
 	return
 
 def get_cutoff_time_information():
-	fin = open(sparkle_global_help.cutoff_time_information_txt_path, 'r')
-	#fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+	fin = open(sparkle_global_help.cutoff_time_information_txt_path, 'r+')
+	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 	myline = fin.readline().strip()
 	mylist = myline.split()
 	cutoff_time_each_run = float(mylist[2])

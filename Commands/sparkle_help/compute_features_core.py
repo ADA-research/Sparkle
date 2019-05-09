@@ -29,22 +29,12 @@ if __name__ == r'__main__':
 	extractor_path = sys.argv[2]
 	feature_data_csv_path = sys.argv[3]
 	
-	while True:
-		try:
-			feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
-			length = int(sparkle_global_help.extractor_feature_vector_size_mapping[extractor_path])
-			if feature_data_csv.get_column_size() != length:
-				time.sleep(random.randint(1, 5))
-				continue
-			break
-		except:
-			time.sleep(random.randint(1, 5))
+	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
 	
 	runsolver_path = sparkle_global_help.runsolver_path
 	if len(sparkle_global_help.extractor_list)==0: cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance + 1
 	else: cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance/len(sparkle_global_help.extractor_list) + 1
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
-	memory_limit_each_run_option = r'-M ' + str(ser.memory_limit_each_extractor_run)
 	
 	key_str = sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
 	result_path = r'Feature_Data/TMP/' + key_str + r'.csv'
@@ -53,9 +43,7 @@ if __name__ == r'__main__':
 	err_path = basic_part + r'.err'
 	runsolver_watch_data_path = basic_part + r'.log'
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
-	tmp_output = r'TMP/tmp/' + key_str
-	
-	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + memory_limit_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' ' + tmp_output + r' 2> ' + err_path
+	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
 	
 	try:
 		task_run_status_path = r'TMP/SBATCH_Extractor_Jobs/' + key_str + r'.statusinfo'
@@ -67,7 +55,6 @@ if __name__ == r'__main__':
 		cutoff_str = 'Cutoff Time: ' + str(cutoff_time_each_extractor_run) + ' second(s)' + '\n'
 		status_info_str += cutoff_str
 		sfh.write_string_to_file(task_run_status_path, status_info_str)
-		#print(command_line)
 		os.system(command_line)
 		end_time = time.time()
 		
@@ -83,14 +70,7 @@ if __name__ == r'__main__':
 		print 'c ****** WARNING: The feature vector of this instace consists of missing values ******'
 		command_line = r'rm -f ' + result_path
 		os.system(command_line)
-		
-		while True:
-			try:
-				tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path)
-				break
-			except:
-				time.sleep(random.randint(1, 5))
-				
+		tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path)
 		result_string = 'Failed -- using missing value instead'
 		
 	description_str = r'[Extractor: ' + sfh.get_last_level_directory_name(extractor_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path) + r']'
@@ -104,40 +84,15 @@ if __name__ == r'__main__':
 	time.sleep(random.randint(1, 5))
 	
 	sfh.append_string_to_file(sparkle_global_help.sparkle_system_log_path, log_str)
-	
-	while True:
-		try:
-			os.system('rm -f ' + task_run_status_path)
-			break
-		except:
-			time.sleep(random.randint(1, 5))
+	os.system('rm -f ' + task_run_status_path)
 	
 	#feature_data_csv.combine(tmp_fdcsv)
 	#feature_data_csv.update_csv()
+	feature_data_csv.reload_and_combine_and_update(tmp_fdcsv)
 	
-	#feature_data_csv.reload_and_combine_and_update(tmp_fdcsv)
+	#tmp_fdcsv.update_csv()
 	
-	while True:
-		try:
-			tmp_fdcsv.update_csv()
-			if os.path.exists(result_path):
-				break
-			else:
-				tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path)
-				continue
-		except:
-			time.sleep(random.randint(1, 5))
-			while True:
-				try:
-					tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path)
-					break
-				except:
-					time.sleep(random.randint(1, 5))
-			
-	
-	#command_line = r'rm -f ' + result_path
-	#os.system(command_line)
-	command_line = r'rm -f ' + tmp_output
+	command_line = r'rm -f ' + result_path
 	os.system(command_line)
 	command_line = r'rm -f ' + err_path
 	os.system(command_line)

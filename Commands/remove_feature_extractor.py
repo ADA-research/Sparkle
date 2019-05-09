@@ -83,8 +83,6 @@ if __name__ == r'__main__':
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path + '*'
-		os.system(command_line)
 		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
 	
 	if os.path.exists(sparkle_global_help.sparkle_report_path):

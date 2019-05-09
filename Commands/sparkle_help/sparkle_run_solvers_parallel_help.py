@@ -64,8 +64,7 @@ def generate_running_solvers_sbatch_shell_script(sbatch_shell_script_path, num_j
 	fout.write(r'#SBATCH --output=' + r'TMP/' + job_name + r'.txt' + '\n') # specify the file for normal output
 	fout.write(r'#SBATCH --error=' + r'TMP/' + job_name + r'.err' + '\n') # specify the file for error output
 	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --partition=grace30' + '\n')
-	fout.write('#SBATCH --mem-per-cpu=%d' % (ser.memory_limit_each_solver_run) + '\n') #assigned preset memory for each cpu
+	fout.write(r'#SBATCH --mem-per-cpu=5120' + '\n') #assigned 5GB memory for each cpu
 	fout.write(r'#SBATCH --array=0-' + str(num_job_total-1) + r'%' + str(num_job_in_parallel) + '\n') # using slurm job array and specify the number of jobs executing in parallel in this sbatch script
 	fout.write(r'###' + '\n')
 	####

@@ -46,9 +46,6 @@ if __name__ == r'__main__':
 	if not os.path.exists(r'TMP/SBATCH_Report_Jobs/'):
 		output = os.mkdir(r'TMP/SBATCH_Report_Jobs/')
 	
-	if not os.path.exists(r'TMP/tmp/'):
-		output = os.mkdir(r'TMP/tmp/')
-	
 	if not os.path.exists(r'LOG/'):
 		output = os.mkdir(r'LOG/')
 

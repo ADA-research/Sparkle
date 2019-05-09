@@ -1,0 +1,21 @@
+\begin{thebibliography}{1}
+
+\bibitem{Hoos12}
+Holger~H. Hoos.
+\newblock Programming by optimization.
+\newblock {\em Communications of the ACM}, 55(2):70--80, 2012.
+
+\bibitem{Hoos15}
+Holger~H. Hoos.
+\newblock {Sparkle}: A pbo-based multi-agent problem-solving platform.
+\newblock Technical report, Department of Computer Science, University of
+  British Columbia, 2015.
+
+\bibitem{HutEtAl11}
+Frank Hutter, Holger~H. Hoos, and Kevin Leyton-Brown.
+\newblock Sequential model-based optimization for general algorithm
+  configuration.
+\newblock In {\em Proceedings of the 5th International Conference on Learning
+  and Intelligent Optimization (LION 5)}, pages 507--523, 2011.
+
+\end{thebibliography}

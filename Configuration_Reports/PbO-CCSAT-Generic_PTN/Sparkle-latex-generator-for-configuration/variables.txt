@@ -1,0 +1,17 @@
+@@customCommands@@
+@@sparkle@@
+@@solver@@
+@@instanceSet@@
+@@sparkleVersion@@
+@@numInstanceInInstanceSet@@
+@@numInstanceInTrainingInstanceSet@@
+@@numInstanceInTestingInstanceSet@@
+@@numSmacRuns@@
+@@smacObjective@@
+@@smacWholeTimeBudget@@
+@@smacEachRunCutoffTime@@
+@@optimisedConfiguration@@
+@@optimisedConfigurationTrainingPerformancePAR10@@
+@@optimisedConfigurationTestingPerformancePAR10@@
+@@defaultConfigurationTestingPerformancePAR10@@
+

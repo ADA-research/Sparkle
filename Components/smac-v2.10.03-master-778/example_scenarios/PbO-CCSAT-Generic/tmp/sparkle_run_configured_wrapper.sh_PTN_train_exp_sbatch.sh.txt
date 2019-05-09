@@ -1,0 +1,1621 @@
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b04.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b04.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b20.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b20.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b21.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b21.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b12.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b12.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b03.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b03.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_bce7824.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/bce7824.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b11.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b11.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+Current StackSize limit: 8192 KiB
+
+Current StackSize limit: 8192 KiB
+
+Current StackSize limit: 8192 KiB
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b13.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b13.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 50/974 19718
+/proc/meminfo: memFree=96686732/98890500 swapFree=0/113636
+[pid=19714] ppid=19699 vsize=113132 CPUtime=0 cores=0-31
+/proc/19714/stat : 19714 (sparkle_run_con) S 19699 19714 19386 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140733903369648 140733903368296 140039073459644 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 36900864 140733903372135 140733903372218 140733903372218 140733903376340 0
+/proc/19714/statm: 28283 353 298 221 0 85 0
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96680248/98890500 swapFree=0/113636
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 37/950 19623
+/proc/meminfo: memFree=96743312/98890500 swapFree=0/113152
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 49/981 19725
+/proc/meminfo: memFree=96670728/98890500 swapFree=0/113636
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=5004 CPUtime=0.07 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) R 19713 19706 19344 0 -1 4202496 1207 0 0 0 7 0 0 0 20 0 1 0 72016849 5124096 791 3145728000 4194304 6209662 140732500746816 140732500746120 4238425 0 0 16781312 16390 0 0 0 17 8 0 0 0 0 0 8306888 8342792 34869248 140732500753994 140732500754386 140732500754386 140732500758507 0
+/proc/19722/statm: 1251 791 168 493 0 749 0
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96675248/98890500 swapFree=0/113636
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 48/980 19724
+/proc/meminfo: memFree=96672576/98890500 swapFree=0/113636
+[pid=19717] ppid=19693 vsize=113132 CPUtime=0 cores=0-31
+/proc/19717/stat : 19717 (sparkle_run_con) S 19693 19717 19445 0 -1 4202496 481 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140722663594048 140722663592696 140467357883836 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 8105984 140722663599975 140722663600058 140722663600058 140722663604180 0
+/proc/19717/statm: 28283 354 298 221 0 85 0
+[pid=19719] ppid=19717 vsize=123240 CPUtime=0 cores=0-31
+/proc/19719/stat : 19719 (sparkle_run_gen) S 19717 19717 19445 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1120 3145728000 4194304 4196756 140720914222640 140720914220840 139860562550204 0 65536 16781318 0 18446744071579430854 0 0 17 5 0 0 0 0 0 6294976 6295604 16613376 140720914226694 140720914227112 140720914227112 140720914231254 0
+/proc/19719/statm: 30810 1120 488 1 0 623 0
+[pid=19724] ppid=19719 vsize=5000 CPUtime=0.08 cores=0-31
+/proc/19724/stat : 19724 (PbO-CCSAT) R 19719 19717 19445 0 -1 4202496 1210 0 0 0 8 0 0 0 20 0 1 0 72016849 5120000 790 3145728000 4194304 6209662 140721894034912 140721894034216 4234992 0 0 16781312 16390 0 0 0 17 14 0 0 0 0 0 8306888 8342792 23519232 140721894039114 140721894039506 140721894039506 140721894043627 0
+/proc/19724/statm: 1250 790 168 493 0 748 0
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 42/962 19703
+/proc/meminfo: memFree=96688352/98890500 swapFree=0/113636
+[pid=19703] ppid=19671 vsize=113132 CPUtime=0 cores=0-31
+/proc/19703/stat : 19703 (sparkle_run_con) S 19671 19703 19372 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016847 115847168 353 3145728000 4194304 5098412 140724271053504 140724271052152 140331259047356 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 29601792 140724271054695 140724271054778 140724271054778 140724271058900 0
+/proc/19703/statm: 28283 353 298 221 0 85 0
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b10.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b10.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b16.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b16.cnf 
+
+
+[startup+0.13835 s]
+/proc/loadavg: 0.05 0.04 0.05 49/981 19725
+/proc/meminfo: memFree=96670728/98890500 swapFree=0/113636
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=5004 CPUtime=0.11 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) R 19713 19706 19344 0 -1 4202496 1207 0 0 0 11 0 0 0 20 0 1 0 72016849 5124096 791 3145728000 4194304 6209662 140732500746816 140732500746120 4233877 0 0 16781312 16390 0 0 0 17 8 0 0 0 0 0 8306888 8342792 34869248 140732500753994 140732500754386 140732500754386 140732500758507 0
+/proc/19722/statm: 1251 791 168 493 0 749 0
+Current children cumulated CPU time (s) 0.11
+Current children cumulated vsize (KiB) 241376
+
+[startup+0.141214 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96680248/98890500 swapFree=0/113636
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.14033 s]
+/proc/loadavg: 0.05 0.04 0.05 50/974 19718
+/proc/meminfo: memFree=96686732/98890500 swapFree=0/113636
+[pid=19714] ppid=19699 vsize=113132 CPUtime=0 cores=0-31
+/proc/19714/stat : 19714 (sparkle_run_con) S 19699 19714 19386 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140733903369648 140733903368296 140039073459644 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 36900864 140733903372135 140733903372218 140733903372218 140733903376340 0
+/proc/19714/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.141888 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96675248/98890500 swapFree=0/113636
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.141498 s]
+/proc/loadavg: 0.05 0.04 0.05 48/980 19724
+/proc/meminfo: memFree=96672576/98890500 swapFree=0/113636
+[pid=19717] ppid=19693 vsize=113132 CPUtime=0 cores=0-31
+/proc/19717/stat : 19717 (sparkle_run_con) S 19693 19717 19445 0 -1 4202496 481 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140722663594048 140722663592696 140467357883836 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 8105984 140722663599975 140722663600058 140722663600058 140722663604180 0
+/proc/19717/statm: 28283 354 298 221 0 85 0
+[pid=19719] ppid=19717 vsize=123240 CPUtime=0 cores=0-31
+/proc/19719/stat : 19719 (sparkle_run_gen) S 19717 19717 19445 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1120 3145728000 4194304 4196756 140720914222640 140720914220840 139860562550204 0 65536 16781318 0 18446744071579430854 0 0 17 5 0 0 0 0 0 6294976 6295604 16613376 140720914226694 140720914227112 140720914227112 140720914231254 0
+/proc/19719/statm: 30810 1120 488 1 0 623 0
+[pid=19724] ppid=19719 vsize=5000 CPUtime=0.11 cores=0-31
+/proc/19724/stat : 19724 (PbO-CCSAT) R 19719 19717 19445 0 -1 4202496 1210 0 0 0 11 0 0 0 20 0 1 0 72016849 5120000 790 3145728000 4194304 6209662 140721894034912 140721894034216 4235019 0 0 16781312 16390 0 0 0 17 14 0 0 0 0 0 8306888 8342792 23519232 140721894039114 140721894039506 140721894039506 140721894043627 0
+/proc/19724/statm: 1250 790 168 493 0 748 0
+Current children cumulated CPU time (s) 0.11
+Current children cumulated vsize (KiB) 241372
+
+[startup+0.144178 s]
+/proc/loadavg: 0.05 0.04 0.05 42/962 19703
+/proc/meminfo: memFree=96688352/98890500 swapFree=0/113636
+[pid=19703] ppid=19671 vsize=113132 CPUtime=0 cores=0-31
+/proc/19703/stat : 19703 (sparkle_run_con) S 19671 19703 19372 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016847 115847168 353 3145728000 4194304 5098412 140724271053504 140724271052152 140331259047356 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 29601792 140724271054695 140724271054778 140724271054778 140724271058900 0
+/proc/19703/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+runsolver Copyright (C) 2010-2013 Olivier ROUSSEL
+
+This is runsolver version 3.3.4 (svn: 1649)
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+command line: /home/luoc/projects/Sparkle/20180213/Sparkle_source_codes/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/./runsolver --timestamp --use-pty -C 60 -o results_train/sparkle_run_configured_wrapper.sh_PTN/sparkle_run_configured_wrapper.sh_Ptn-7824-b09.cnf_1.res ./sparkle_run_configured_wrapper.sh ./ ../instances/PTN/Ptn-7824-b09.cnf 
+
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 43/943 19669
+/proc/meminfo: memFree=96695044/98890500 swapFree=0/113636
+[pid=19654] ppid=19648 vsize=113132 CPUtime=0 cores=0-31
+/proc/19654/stat : 19654 (sparkle_run_con) S 19648 19654 19336 0 -1 4202496 481 0 0 0 0 0 0 0 20 0 1 0 72016838 115847168 354 3145728000 4194304 5098412 140735874684688 140735874683336 140551139048892 0 65536 4 65538 18446744071579430854 0 0 17 10 0 0 0 0 0 7196144 7232144 20987904 140735874690919 140735874691002 140735874691002 140735874695124 0
+/proc/19654/statm: 28283 354 298 221 0 85 0
+running on 32 cores: 0-31
+
+Enforcing CPUTime limit (soft limit, will send SIGTERM then SIGKILL): 60 seconds
+Enforcing CPUTime limit (hard limit, will send SIGXCPU): 90 seconds
+Using a pseudo terminal to collect output from the solver
+Current StackSize limit: 8192 KiB
+
+
+[startup+0.200847 s]
+/proc/loadavg: 0.05 0.04 0.05 42/962 19703
+/proc/meminfo: memFree=96688352/98890500 swapFree=0/113636
+[pid=19703] ppid=19671 vsize=113132 CPUtime=0 cores=0-31
+/proc/19703/stat : 19703 (sparkle_run_con) S 19671 19703 19372 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016847 115847168 353 3145728000 4194304 5098412 140724271053504 140724271052152 140331259047356 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 29601792 140724271054695 140724271054778 140724271054778 140724271058900 0
+/proc/19703/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.20025 s]
+/proc/loadavg: 0.05 0.04 0.05 49/981 19725
+/proc/meminfo: memFree=96670728/98890500 swapFree=0/113636
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=5004 CPUtime=0.18 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) R 19713 19706 19344 0 -1 4202496 1207 0 0 0 18 0 0 0 20 0 1 0 72016849 5124096 791 3145728000 4194304 6209662 140732500746816 140732500746120 4229289 0 0 16781312 16390 0 0 0 17 8 0 0 0 0 0 8306888 8342792 34869248 140732500753994 140732500754386 140732500754386 140732500758507 0
+/proc/19722/statm: 1251 791 168 493 0 749 0
+Current children cumulated CPU time (s) 0.18
+Current children cumulated vsize (KiB) 241376
+
+[startup+0.200193 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96680248/98890500 swapFree=0/113636
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.200184 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96675248/98890500 swapFree=0/113636
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.20016 s]
+/proc/loadavg: 0.05 0.04 0.05 50/974 19718
+/proc/meminfo: memFree=96686732/98890500 swapFree=0/113636
+[pid=19714] ppid=19699 vsize=113132 CPUtime=0 cores=0-31
+/proc/19714/stat : 19714 (sparkle_run_con) S 19699 19714 19386 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140733903369648 140733903368296 140039073459644 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 36900864 140733903372135 140733903372218 140733903372218 140733903376340 0
+/proc/19714/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.200214 s]
+/proc/loadavg: 0.05 0.04 0.05 48/980 19724
+/proc/meminfo: memFree=96672576/98890500 swapFree=0/113636
+[pid=19717] ppid=19693 vsize=113132 CPUtime=0 cores=0-31
+/proc/19717/stat : 19717 (sparkle_run_con) S 19693 19717 19445 0 -1 4202496 481 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140722663594048 140722663592696 140467357883836 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 8105984 140722663599975 140722663600058 140722663600058 140722663604180 0
+/proc/19717/statm: 28283 354 298 221 0 85 0
+[pid=19719] ppid=19717 vsize=123240 CPUtime=0 cores=0-31
+/proc/19719/stat : 19719 (sparkle_run_gen) S 19717 19717 19445 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1120 3145728000 4194304 4196756 140720914222640 140720914220840 139860562550204 0 65536 16781318 0 18446744071579430854 0 0 17 5 0 0 0 0 0 6294976 6295604 16613376 140720914226694 140720914227112 140720914227112 140720914231254 0
+/proc/19719/statm: 30810 1120 488 1 0 623 0
+[pid=19724] ppid=19719 vsize=5000 CPUtime=0.17 cores=0-31
+/proc/19724/stat : 19724 (PbO-CCSAT) R 19719 19717 19445 0 -1 4202496 1210 0 0 0 17 0 0 0 20 0 1 0 72016849 5120000 790 3145728000 4194304 6209662 140721894034912 140721894034216 4234931 0 0 16781312 16390 0 0 0 17 14 0 0 0 0 0 8306888 8342792 23519232 140721894039114 140721894039506 140721894039506 140721894043627 0
+/proc/19724/statm: 1250 790 168 493 0 748 0
+Current children cumulated CPU time (s) 0.17
+Current children cumulated vsize (KiB) 241372
+
+[startup+0.338362 s]
+/proc/loadavg: 0.05 0.04 0.05 37/950 19623
+/proc/meminfo: memFree=96743312/98890500 swapFree=0/113152
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 42/1033 19830
+/proc/meminfo: memFree=96609084/98890500 swapFree=0/115924
+[pid=19830] ppid=19773 vsize=113132 CPUtime=0 cores=0-31
+/proc/19830/stat : 19830 (sparkle_run_con) S 19773 19830 19500 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016864 115847168 353 3145728000 4194304 5098412 140725827024560 140725827023208 140606717296060 0 65536 4 65538 18446744071579430854 0 0 17 7 0 0 0 0 0 7196144 7232144 24502272 140725827026790 140725827026873 140725827026873 140725827030996 0
+/proc/19830/statm: 28283 353 298 221 0 85 0
+[pid=19658] ppid=19654 vsize=123240 CPUtime=0 cores=0-31
+/proc/19658/stat : 19658 (sparkle_run_gen) S 19654 19654 19336 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016838 126197760 1121 3145728000 4194304 4196756 140720626699168 140720626697368 140478513483196 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 7233536 140720626707974 140720626708392 140720626708392 140720626712534 0
+/proc/19658/statm: 30810 1121 488 1 0 623 0
+[pid=19666] ppid=19658 vsize=4972 CPUtime=0.23 cores=0-31
+/proc/19666/stat : 19666 (PbO-CCSAT) R 19658 19654 19336 0 -1 4202496 1185 0 0 0 23 0 0 0 20 0 1 0 72016839 5091328 791 3145728000 4194304 6209662 140724245769728 140724245769032 4232390 0 0 16781312 16390 0 0 0 17 1 0 0 0 0 0 8306888 8342792 34570240 140724245777994 140724245778386 140724245778386 140724245782507 0
+/proc/19666/statm: 1243 791 168 493 0 741 0
+
+Solver just ended. Dumping a history of the last processes samples
+
+Child status: 0
+Real time (s): 0.319023
+CPU time (s): 0.260912
+CPU user time (s): 0.25214
+CPU system time (s): 0.008772
+CPU usage (%): 81.7847
+Max. virtual memory (cumulated for all children) (KiB): 0
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 0.25214
+system time used= 0.008772
+maximum resident set size= 4504
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 3467
+page faults= 0
+swaps= 0
+block input operations= 448
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 19
+involuntary context switches= 109
+
+runsolver used 0.004055 second user time and 0.014587 second system time
+
+The end
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 57/1031 19788
+/proc/meminfo: memFree=96630960/98890500 swapFree=0/113636
+[pid=19782] ppid=19767 vsize=113132 CPUtime=0 cores=0-31
+/proc/19782/stat : 19782 (sparkle_run_con) S 19767 19782 19400 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016860 115847168 353 3145728000 4194304 5098412 140733595442272 140733595440920 139876446977468 0 65536 4 65538 18446744071579430854 0 0 17 25 0 0 0 0 0 7196144 7232144 27365376 140733595447143 140733595447226 140733595447226 140733595451348 0
+/proc/19782/statm: 28283 353 298 221 0 85 0
+[pid=19785] ppid=19782 vsize=123240 CPUtime=0.01 cores=0-31
+/proc/19785/stat : 19785 (sparkle_run_gen) S 19782 19782 19400 0 -1 4202496 1242 0 0 0 1 0 0 0 20 0 1 0 72016860 126197760 1120 3145728000 4194304 4196756 140735201252832 140735201251032 140064368569788 0 65536 16781318 0 18446744071579430854 0 0 17 30 0 0 0 0 0 6294976 6295604 9388032 140735201254918 140735201255336 140735201255336 140735201259478 0
+/proc/19785/statm: 30810 1120 488 1 0 623 0
+
+[startup+0 s]
+/proc/loadavg: 0.05 0.04 0.05 55/1014 19765
+/proc/meminfo: memFree=96644344/98890500 swapFree=0/113636
+[pid=19755] ppid=19738 vsize=113132 CPUtime=0 cores=0-31
+/proc/19755/stat : 19755 (sparkle_run_con) S 19738 19755 19409 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016858 115847168 353 3145728000 4194304 5098412 140732916379904 140732916378552 140674656910780 0 65536 4 65538 18446744071579430854 0 0 17 17 0 0 0 0 0 7196144 7232144 27602944 140732916383591 140732916383674 140732916383674 140732916387796 0
+/proc/19755/statm: 28283 353 298 221 0 85 0
+
+[startup+0.400255 s]
+/proc/loadavg: 0.05 0.04 0.05 37/950 19623
+/proc/meminfo: memFree=96743312/98890500 swapFree=0/113152
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.152959 s]
+/proc/loadavg: 0.05 0.04 0.05 57/1031 19788
+/proc/meminfo: memFree=96630960/98890500 swapFree=0/113636
+[pid=19782] ppid=19767 vsize=113132 CPUtime=0 cores=0-31
+/proc/19782/stat : 19782 (sparkle_run_con) S 19767 19782 19400 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016860 115847168 353 3145728000 4194304 5098412 140733595442272 140733595440920 139876446977468 0 65536 4 65538 18446744071579430854 0 0 17 25 0 0 0 0 0 7196144 7232144 27365376 140733595447143 140733595447226 140733595447226 140733595451348 0
+/proc/19782/statm: 28283 353 298 221 0 85 0
+[pid=19785] ppid=19782 vsize=123240 CPUtime=0.01 cores=0-31
+/proc/19785/stat : 19785 (sparkle_run_gen) S 19782 19782 19400 0 -1 4202496 1242 0 0 0 1 0 0 0 20 0 1 0 72016860 126197760 1120 3145728000 4194304 4196756 140735201252832 140735201251032 140064368569788 0 65536 16781318 0 18446744071579430854 0 0 17 30 0 0 0 0 0 6294976 6295604 9388032 140735201254918 140735201255336 140735201255336 140735201259478 0
+/proc/19785/statm: 30810 1120 488 1 0 623 0
+Current children cumulated CPU time (s) 0.01
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.158818 s]
+/proc/loadavg: 0.05 0.04 0.05 55/1014 19765
+/proc/meminfo: memFree=96644344/98890500 swapFree=0/113636
+[pid=19755] ppid=19738 vsize=113132 CPUtime=0 cores=0-31
+/proc/19755/stat : 19755 (sparkle_run_con) S 19738 19755 19409 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016858 115847168 353 3145728000 4194304 5098412 140732916379904 140732916378552 140674656910780 0 65536 4 65538 18446744071579430854 0 0 17 17 0 0 0 0 0 7196144 7232144 27602944 140732916383591 140732916383674 140732916383674 140732916387796 0
+/proc/19755/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.132877 s]
+/proc/loadavg: 0.05 0.04 0.05 42/1033 19830
+/proc/meminfo: memFree=96609084/98890500 swapFree=0/115924
+[pid=19830] ppid=19773 vsize=113132 CPUtime=0 cores=0-31
+/proc/19830/stat : 19830 (sparkle_run_con) S 19773 19830 19500 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016864 115847168 353 3145728000 4194304 5098412 140725827024560 140725827023208 140606717296060 0 65536 4 65538 18446744071579430854 0 0 17 7 0 0 0 0 0 7196144 7232144 24502272 140725827026790 140725827026873 140725827026873 140725827030996 0
+/proc/19830/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.300143 s]
+/proc/loadavg: 0.05 0.04 0.05 42/962 19703
+/proc/meminfo: memFree=96688352/98890500 swapFree=0/113636
+[pid=19703] ppid=19671 vsize=113132 CPUtime=0 cores=0-31
+/proc/19703/stat : 19703 (sparkle_run_con) S 19671 19703 19372 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016847 115847168 353 3145728000 4194304 5098412 140724271053504 140724271052152 140331259047356 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 29601792 140724271054695 140724271054778 140724271054778 140724271058900 0
+/proc/19703/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.300194 s]
+/proc/loadavg: 0.05 0.04 0.05 49/981 19725
+/proc/meminfo: memFree=96670728/98890500 swapFree=0/113636
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=5004 CPUtime=0.28 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) R 19713 19706 19344 0 -1 4202496 1207 0 0 0 28 0 0 0 20 0 1 0 72016849 5124096 791 3145728000 4194304 6209662 140732500746816 140732500746120 4234983 0 0 16781312 16390 0 0 0 17 8 0 0 0 0 0 8306888 8342792 34869248 140732500753994 140732500754386 140732500754386 140732500758507 0
+/proc/19722/statm: 1251 791 168 493 0 749 0
+Current children cumulated CPU time (s) 0.28
+Current children cumulated vsize (KiB) 241376
+
+[startup+0.300167 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96680248/98890500 swapFree=0/113636
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.300163 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96675248/98890500 swapFree=0/113636
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.300137 s]
+/proc/loadavg: 0.05 0.04 0.05 50/974 19718
+/proc/meminfo: memFree=96686732/98890500 swapFree=0/113636
+[pid=19714] ppid=19699 vsize=113132 CPUtime=0 cores=0-31
+/proc/19714/stat : 19714 (sparkle_run_con) S 19699 19714 19386 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140733903369648 140733903368296 140039073459644 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 36900864 140733903372135 140733903372218 140733903372218 140733903376340 0
+/proc/19714/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.30019 s]
+/proc/loadavg: 0.05 0.04 0.05 48/980 19724
+/proc/meminfo: memFree=96672576/98890500 swapFree=0/113636
+[pid=19717] ppid=19693 vsize=113132 CPUtime=0 cores=0-31
+/proc/19717/stat : 19717 (sparkle_run_con) S 19693 19717 19445 0 -1 4202496 481 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140722663594048 140722663592696 140467357883836 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 8105984 140722663599975 140722663600058 140722663600058 140722663604180 0
+/proc/19717/statm: 28283 354 298 221 0 85 0
+[pid=19719] ppid=19717 vsize=123240 CPUtime=0 cores=0-31
+/proc/19719/stat : 19719 (sparkle_run_gen) S 19717 19717 19445 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1120 3145728000 4194304 4196756 140720914222640 140720914220840 139860562550204 0 65536 16781318 0 18446744071579430854 0 0 17 5 0 0 0 0 0 6294976 6295604 16613376 140720914226694 140720914227112 140720914227112 140720914231254 0
+/proc/19719/statm: 30810 1120 488 1 0 623 0
+[pid=19724] ppid=19719 vsize=5000 CPUtime=0.27 cores=0-31
+/proc/19724/stat : 19724 (PbO-CCSAT) R 19719 19717 19445 0 -1 4202496 1210 0 0 0 27 0 0 0 20 0 1 0 72016849 5120000 790 3145728000 4194304 6209662 140721894034912 140721894034216 4229142 0 0 16781312 16390 0 0 0 17 14 0 0 0 0 0 8306888 8342792 23519232 140721894039114 140721894039506 140721894039506 140721894043627 0
+/proc/19724/statm: 1250 790 168 493 0 748 0
+Current children cumulated CPU time (s) 0.27
+Current children cumulated vsize (KiB) 241372
+
+[startup+0.200106 s]
+/proc/loadavg: 0.05 0.04 0.05 55/1014 19765
+/proc/meminfo: memFree=96644344/98890500 swapFree=0/113636
+[pid=19755] ppid=19738 vsize=113132 CPUtime=0 cores=0-31
+/proc/19755/stat : 19755 (sparkle_run_con) S 19738 19755 19409 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016858 115847168 353 3145728000 4194304 5098412 140732916379904 140732916378552 140674656910780 0 65536 4 65538 18446744071579430854 0 0 17 17 0 0 0 0 0 7196144 7232144 27602944 140732916383591 140732916383674 140732916383674 140732916387796 0
+/proc/19755/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+0.152959 s]
+/proc/loadavg: 0.05 0.04 0.05 57/1031 19788
+/proc/meminfo: memFree=96630960/98890500 swapFree=0/113636
+[pid=19782] ppid=19767 vsize=113132 CPUtime=0 cores=0-31
+/proc/19782/stat : 19782 (sparkle_run_con) S 19767 19782 19400 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016860 115847168 353 3145728000 4194304 5098412 140733595442272 140733595440920 139876446977468 0 65536 4 65538 18446744071579430854 0 0 17 25 0 0 0 0 0 7196144 7232144 27365376 140733595447143 140733595447226 140733595447226 140733595451348 0
+/proc/19782/statm: 28283 353 298 221 0 85 0
+[pid=19785] ppid=19782 vsize=123240 CPUtime=0.01 cores=0-31
+/proc/19785/stat : 19785 (sparkle_run_gen) S 19782 19782 19400 0 -1 4202496 1242 0 0 0 1 0 0 0 20 0 1 0 72016860 126197760 1120 3145728000 4194304 4196756 140735201252832 140735201251032 140064368569788 0 65536 16781318 0 18446744071579430854 0 0 17 30 0 0 0 0 0 6294976 6295604 9388032 140735201254918 140735201255336 140735201255336 140735201259478 0
+/proc/19785/statm: 30810 1120 488 1 0 623 0
+Current children cumulated CPU time (s) 0.01
+Current children cumulated vsize (KiB) 236372
+
+Child status: 0
+Real time (s): 0.187864
+CPU time (s): 0.185518
+CPU user time (s): 0.177162
+CPU system time (s): 0.008356
+CPU usage (%): 98.7513
+Max. virtual memory (cumulated for all children) (KiB): 236372
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 0.177162
+system time used= 0.008356
+maximum resident set size= 4500
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 3475
+page faults= 0
+swaps= 0
+block input operations= 464
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 19
+involuntary context switches= 103
+
+runsolver used 0.004377 second user time and 0.01532 second system time
+
+The end
+
+[startup+0.200166 s]
+/proc/loadavg: 0.05 0.04 0.05 42/1033 19830
+/proc/meminfo: memFree=96609084/98890500 swapFree=0/115924
+[pid=19830] ppid=19773 vsize=113132 CPUtime=0 cores=0-31
+/proc/19830/stat : 19830 (sparkle_run_con) S 19773 19830 19500 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016864 115847168 353 3145728000 4194304 5098412 140725827024560 140725827023208 140606717296060 0 65536 4 65538 18446744071579430854 0 0 17 7 0 0 0 0 0 7196144 7232144 24502272 140725827026790 140725827026873 140725827026873 140725827030996 0
+/proc/19830/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.500239 s]
+/proc/loadavg: 0.05 0.04 0.05 37/950 19623
+/proc/meminfo: memFree=96743312/98890500 swapFree=0/113152
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.300135 s]
+/proc/loadavg: 0.05 0.04 0.05 55/1014 19765
+/proc/meminfo: memFree=96644344/98890500 swapFree=0/113636
+[pid=19755] ppid=19738 vsize=113132 CPUtime=0 cores=0-31
+/proc/19755/stat : 19755 (sparkle_run_con) S 19738 19755 19409 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016858 115847168 353 3145728000 4194304 5098412 140732916379904 140732916378552 140674656910780 0 65536 4 65538 18446744071579430854 0 0 17 17 0 0 0 0 0 7196144 7232144 27602944 140732916383591 140732916383674 140732916383674 140732916387796 0
+/proc/19755/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+0.300131 s]
+/proc/loadavg: 0.05 0.04 0.05 42/1033 19830
+/proc/meminfo: memFree=96609084/98890500 swapFree=0/115924
+[pid=19830] ppid=19773 vsize=113132 CPUtime=0 cores=0-31
+/proc/19830/stat : 19830 (sparkle_run_con) S 19773 19830 19500 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016864 115847168 353 3145728000 4194304 5098412 140725827024560 140725827023208 140606717296060 0 65536 4 65538 18446744071579430854 0 0 17 7 0 0 0 0 0 7196144 7232144 24502272 140725827026790 140725827026873 140725827026873 140725827030996 0
+/proc/19830/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+0.400161 s]
+/proc/loadavg: 0.05 0.04 0.05 42/962 19703
+/proc/meminfo: memFree=96688352/98890500 swapFree=0/113636
+[pid=19703] ppid=19671 vsize=113132 CPUtime=0 cores=0-31
+/proc/19703/stat : 19703 (sparkle_run_con) S 19671 19703 19372 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016847 115847168 353 3145728000 4194304 5098412 140724271053504 140724271052152 140331259047356 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 29601792 140724271054695 140724271054778 140724271054778 140724271058900 0
+/proc/19703/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Child status: 0
+Real time (s): 0.402387
+CPU time (s): 0.348767
+CPU user time (s): 0.342725
+CPU system time (s): 0.006042
+CPU usage (%): 86.6745
+Max. virtual memory (cumulated for all children) (KiB): 113132
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 0.342725
+system time used= 0.006042
+maximum resident set size= 4500
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 3461
+page faults= 0
+swaps= 0
+block input operations= 448
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 17
+involuntary context switches= 200
+
+runsolver used 0.004232 second user time and 0.014813 second system time
+
+The end
+
+[startup+0.700191 s]
+/proc/loadavg: 0.05 0.04 0.05 37/950 19623
+/proc/meminfo: memFree=96743312/98890500 swapFree=0/113152
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+0.400187 s]
+/proc/loadavg: 0.05 0.04 0.05 48/980 19724
+/proc/meminfo: memFree=96672576/98890500 swapFree=0/113636
+[pid=19717] ppid=19693 vsize=113132 CPUtime=0 cores=0-31
+/proc/19717/stat : 19717 (sparkle_run_con) S 19693 19717 19445 0 -1 4202496 481 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140722663594048 140722663592696 140467357883836 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 8105984 140722663599975 140722663600058 140722663600058 140722663604180 0
+/proc/19717/statm: 28283 354 298 221 0 85 0
+[pid=19719] ppid=19717 vsize=123240 CPUtime=0 cores=0-31
+/proc/19719/stat : 19719 (sparkle_run_gen) S 19717 19717 19445 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1120 3145728000 4194304 4196756 140720914222640 140720914220840 139860562550204 0 65536 16781318 0 18446744071579430854 0 0 17 5 0 0 0 0 0 6294976 6295604 16613376 140720914226694 140720914227112 140720914227112 140720914231254 0
+/proc/19719/statm: 30810 1120 488 1 0 623 0
+[pid=19724] ppid=19719 vsize=5000 CPUtime=0.37 cores=0-31
+/proc/19724/stat : 19724 (PbO-CCSAT) R 19719 19717 19445 0 -1 4202496 1210 0 0 0 37 0 0 0 20 0 1 0 72016849 5120000 790 3145728000 4194304 6209662 140721894034912 140721894034216 4233712 0 0 16781312 16390 0 0 0 17 14 0 0 0 0 0 8306888 8342792 23519232 140721894039114 140721894039506 140721894039506 140721894043627 0
+/proc/19724/statm: 1250 790 168 493 0 748 0
+Current children cumulated CPU time (s) 0.37
+Current children cumulated vsize (KiB) 241372
+
+[startup+0.500182 s]
+/proc/loadavg: 0.05 0.04 0.05 48/980 19724
+/proc/meminfo: memFree=96672576/98890500 swapFree=0/113636
+[pid=19717] ppid=19693 vsize=113132 CPUtime=0 cores=0-31
+/proc/19717/stat : 19717 (sparkle_run_con) S 19693 19717 19445 0 -1 4202496 481 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140722663594048 140722663592696 140467357883836 0 65536 4 65538 18446744071579430854 0 0 17 5 0 0 0 0 0 7196144 7232144 8105984 140722663599975 140722663600058 140722663600058 140722663604180 0
+/proc/19717/statm: 28283 354 298 221 0 85 0
+[pid=19719] ppid=19717 vsize=123240 CPUtime=0 cores=0-31
+/proc/19719/stat : 19719 (sparkle_run_gen) S 19717 19717 19445 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1120 3145728000 4194304 4196756 140720914222640 140720914220840 139860562550204 0 65536 16781318 0 18446744071579430854 0 0 17 5 0 0 0 0 0 6294976 6295604 16613376 140720914226694 140720914227112 140720914227112 140720914231254 0
+/proc/19719/statm: 30810 1120 488 1 0 623 0
+[pid=19724] ppid=19719 vsize=5000 CPUtime=0.47 cores=0-31
+/proc/19724/stat : 19724 (PbO-CCSAT) R 19719 19717 19445 0 -1 4202496 1210 0 0 0 47 0 0 0 20 0 1 0 72016849 5120000 790 3145728000 4194304 6209662 140721894034912 140721894034216 4233121 0 0 16781312 16390 0 0 0 17 14 0 0 0 0 0 8306888 8342792 23519232 140721894039114 140721894039506 140721894039506 140721894043627 0
+/proc/19724/statm: 1250 790 168 493 0 748 0
+Current children cumulated CPU time (s) 0.47
+Current children cumulated vsize (KiB) 241372
+
+Child status: 0
+Real time (s): 0.515657
+CPU time (s): 0.502525
+CPU user time (s): 0.497718
+CPU system time (s): 0.004807
+CPU usage (%): 97.4534
+Max. virtual memory (cumulated for all children) (KiB): 241372
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 0.497718
+system time used= 0.004807
+maximum resident set size= 4500
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 3491
+page faults= 0
+swaps= 0
+block input operations= 472
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 17
+involuntary context switches= 125
+
+runsolver used 0.006961 second user time and 0.010938 second system time
+
+The end
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+0.400132 s]
+/proc/loadavg: 0.05 0.04 0.05 55/1014 19765
+/proc/meminfo: memFree=96644344/98890500 swapFree=0/113636
+[pid=19755] ppid=19738 vsize=113132 CPUtime=0 cores=0-31
+/proc/19755/stat : 19755 (sparkle_run_con) S 19738 19755 19409 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016858 115847168 353 3145728000 4194304 5098412 140732916379904 140732916378552 140674656910780 0 65536 4 65538 18446744071579430854 0 0 17 17 0 0 0 0 0 7196144 7232144 27602944 140732916383591 140732916383674 140732916383674 140732916387796 0
+/proc/19755/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Child status: 0
+Real time (s): 0.427473
+CPU time (s): 0.425445
+CPU user time (s): 0.412366
+CPU system time (s): 0.013079
+CPU usage (%): 99.5256
+Max. virtual memory (cumulated for all children) (KiB): 113132
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 0.412366
+system time used= 0.013079
+maximum resident set size= 4504
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 3491
+page faults= 0
+swaps= 0
+block input operations= 472
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 18
+involuntary context switches= 99
+
+runsolver used 0.00766 second user time and 0.013405 second system time
+
+The end
+
+[startup+0.700208 s]
+/proc/loadavg: 0.05 0.04 0.05 49/981 19725
+/proc/meminfo: memFree=96670728/98890500 swapFree=0/113636
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=5004 CPUtime=0.68 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) R 19713 19706 19344 0 -1 4202496 1207 0 0 0 68 0 0 0 20 0 1 0 72016849 5124096 791 3145728000 4194304 6209662 140732500746816 140732500746120 4231360 0 0 16781312 16390 0 0 0 17 8 0 0 0 0 0 8306888 8342792 34869248 140732500753994 140732500754386 140732500754386 140732500758507 0
+/proc/19722/statm: 1251 791 168 493 0 749 0
+Current children cumulated CPU time (s) 0.68
+Current children cumulated vsize (KiB) 241376
+
+[startup+0.70013 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96680248/98890500 swapFree=0/113636
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.700125 s]
+/proc/loadavg: 0.05 0.04 0.05 50/975 19719
+/proc/meminfo: memFree=96675248/98890500 swapFree=0/113636
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 236372
+
+[startup+0.700105 s]
+/proc/loadavg: 0.05 0.04 0.05 50/974 19718
+/proc/meminfo: memFree=96686732/98890500 swapFree=0/113636
+[pid=19714] ppid=19699 vsize=113132 CPUtime=0 cores=0-31
+/proc/19714/stat : 19714 (sparkle_run_con) S 19699 19714 19386 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140733903369648 140733903368296 140039073459644 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 36900864 140733903372135 140733903372218 140733903372218 140733903376340 0
+/proc/19714/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+0.700105 s]
+/proc/loadavg: 0.05 0.04 0.05 50/974 19718
+/proc/meminfo: memFree=96686732/98890500 swapFree=0/113636
+[pid=19714] ppid=19699 vsize=113132 CPUtime=0 cores=0-31
+/proc/19714/stat : 19714 (sparkle_run_con) S 19699 19714 19386 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140733903369648 140733903368296 140039073459644 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 36900864 140733903372135 140733903372218 140733903372218 140733903376340 0
+/proc/19714/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Child status: 0
+Real time (s): 0.735621
+CPU time (s): 0.65201
+CPU user time (s): 0.647206
+CPU system time (s): 0.004804
+CPU usage (%): 88.634
+Max. virtual memory (cumulated for all children) (KiB): 113132
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 0.647206
+system time used= 0.004804
+maximum resident set size= 4504
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 3486
+page faults= 0
+swaps= 0
+block input operations= 472
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 18
+involuntary context switches= 100
+
+runsolver used 0.006419 second user time and 0.011331 second system time
+
+The end
+
+[startup+0.700103 s]
+/proc/loadavg: 0.05 0.04 0.05 42/1033 19830
+/proc/meminfo: memFree=96609084/98890500 swapFree=0/115924
+[pid=19830] ppid=19773 vsize=113132 CPUtime=0 cores=0-31
+/proc/19830/stat : 19830 (sparkle_run_con) S 19773 19830 19500 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016864 115847168 353 3145728000 4194304 5098412 140725827024560 140725827023208 140606717296060 0 65536 4 65538 18446744071579430854 0 0 17 7 0 0 0 0 0 7196144 7232144 24502272 140725827026790 140725827026873 140725827026873 140725827030996 0
+/proc/19830/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+0.800122 s]
+/proc/loadavg: 0.05 0.04 0.05 42/1033 19830
+/proc/meminfo: memFree=96609084/98890500 swapFree=0/115924
+[pid=19830] ppid=19773 vsize=113132 CPUtime=0 cores=0-31
+/proc/19830/stat : 19830 (sparkle_run_con) S 19773 19830 19500 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016864 115847168 353 3145728000 4194304 5098412 140725827024560 140725827023208 140606717296060 0 65536 4 65538 18446744071579430854 0 0 17 7 0 0 0 0 0 7196144 7232144 24502272 140725827026790 140725827026873 140725827026873 140725827030996 0
+/proc/19830/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+1.0103 s]
+/proc/loadavg: 0.05 0.04 0.05 42/1033 19830
+/proc/meminfo: memFree=96609084/98890500 swapFree=0/115924
+[pid=19830] ppid=19773 vsize=113132 CPUtime=0 cores=0-31
+/proc/19830/stat : 19830 (sparkle_run_con) S 19773 19830 19500 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016864 115847168 353 3145728000 4194304 5098412 140725827024560 140725827023208 140606717296060 0 65536 4 65538 18446744071579430854 0 0 17 7 0 0 0 0 0 7196144 7232144 24502272 140725827026790 140725827026873 140725827026873 140725827030996 0
+/proc/19830/statm: 28283 353 298 221 0 85 0
+Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 113132
+
+[startup+1.10011 s]
+/proc/loadavg: 0.05 0.04 0.05 47/929 19894
+/proc/meminfo: memFree=96631768/98890500 swapFree=0/116740
+[pid=19830] ppid=-1 vsize=0 CPUtime=0 cores=
+/proc/19830/stat : -- couldn't open stat file --/proc/19830/statm: Current children cumulated CPU time (s) 0
+Current children cumulated vsize (KiB) 0
+
+Child status: 0
+Real time (s): 1.10964
+CPU time (s): 1.07129
+CPU user time (s): 1.06517
+CPU system time (s): 0.006115
+CPU usage (%): 96.544
+Max. virtual memory (cumulated for all children) (KiB): 113132
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 1.06517
+system time used= 0.006115
+maximum resident set size= 4504
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 3495
+page faults= 0
+swaps= 0
+block input operations= 480
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 19
+involuntary context switches= 162
+
+runsolver used 0.009453 second user time and 0.024802 second system time
+
+The end
+
+[startup+1.55258 s]
+/proc/loadavg: 0.05 0.04 0.05 38/932 19894
+/proc/meminfo: memFree=96635348/98890500 swapFree=0/116500
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+[pid=19626] ppid=19623 vsize=123240 CPUtime=0 cores=0-31
+/proc/19626/stat : 19626 (sparkle_run_gen) S 19623 19623 19291 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016834 126197760 1120 3145728000 4194304 4196756 140734425386448 140734425384648 140093112835516 0 65536 16781318 0 18446744071579430854 0 0 17 15 0 0 0 0 0 6294976 6295604 28647424 140734425390598 140734425391016 140734425391016 140734425395158 0
+/proc/19626/statm: 30810 1120 488 1 0 623 0
+[pid=19639] ppid=19626 vsize=5148 CPUtime=1.53 cores=0-31
+/proc/19639/stat : 19639 (PbO-CCSAT) R 19626 19623 19291 0 -1 4202496 1224 0 0 0 153 0 0 0 20 0 1 0 72016836 5271552 791 3145728000 4194304 6209662 140728918301408 140728918300712 4233273 0 0 16781312 16390 0 0 0 17 18 0 0 0 0 0 8306888 8342792 11096064 140728918306378 140728918306770 140728918306770 140728918310891 0
+/proc/19639/statm: 1287 791 167 493 0 785 0
+Current children cumulated CPU time (s) 1.53
+Current children cumulated vsize (KiB) 241520
+
+[startup+1.50038 s]
+/proc/loadavg: 0.05 0.04 0.05 26/932 19894
+/proc/meminfo: memFree=96639892/98890500 swapFree=0/117460
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=5004 CPUtime=1.48 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) R 19713 19706 19344 0 -1 4202496 1207 0 0 0 148 0 0 0 20 0 1 0 72016849 5124096 791 3145728000 4194304 6209662 140732500746816 140732500746120 4229251 0 0 16781312 16390 0 0 0 17 8 0 0 0 0 0 8306888 8342792 34869248 140732500753994 140732500754386 140732500754386 140732500758507 0
+/proc/19722/statm: 1251 791 168 493 0 749 0
+Current children cumulated CPU time (s) 1.48
+Current children cumulated vsize (KiB) 241376
+
+[startup+1.50036 s]
+/proc/loadavg: 0.05 0.04 0.05 28/932 19894
+/proc/meminfo: memFree=96639892/98890500 swapFree=0/117460
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=1.47 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 1226 0 0 0 147 0 0 0 20 0 1 0 72016849 5275648 791 3145728000 4194304 6209662 140733264521552 140733264520856 4229120 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 791 167 493 0 786 0
+Current children cumulated CPU time (s) 1.47
+Current children cumulated vsize (KiB) 241524
+
+[startup+1.50022 s]
+/proc/loadavg: 0.05 0.04 0.05 29/932 19894
+/proc/meminfo: memFree=96639892/98890500 swapFree=0/117460
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=1.47 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 1380 0 0 0 147 0 0 0 20 0 1 0 72016849 6029312 989 3145728000 4194304 6209662 140737447303648 140737447302952 4231007 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 989 168 493 0 970 0
+Current children cumulated CPU time (s) 1.47
+Current children cumulated vsize (KiB) 242260
+
+[startup+3.10034 s]
+/proc/loadavg: 0.05 0.04 0.05 22/878 19907
+/proc/meminfo: memFree=96656132/98890500 swapFree=0/116736
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+[pid=19626] ppid=19623 vsize=123240 CPUtime=0 cores=0-31
+/proc/19626/stat : 19626 (sparkle_run_gen) S 19623 19623 19291 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016834 126197760 1120 3145728000 4194304 4196756 140734425386448 140734425384648 140093112835516 0 65536 16781318 0 18446744071579430854 0 0 17 15 0 0 0 0 0 6294976 6295604 28647424 140734425390598 140734425391016 140734425391016 140734425395158 0
+/proc/19626/statm: 30810 1120 488 1 0 623 0
+[pid=19639] ppid=19626 vsize=5148 CPUtime=3.07 cores=0-31
+/proc/19639/stat : 19639 (PbO-CCSAT) R 19626 19623 19291 0 -1 4202496 1861 0 0 0 307 0 0 0 20 0 1 0 72016836 5271552 839 3145728000 4194304 6209662 140728918301408 140728918300712 4229251 0 0 16781312 16390 0 0 0 17 18 0 0 0 0 0 8306888 8342792 11096064 140728918306378 140728918306770 140728918306770 140728918310891 0
+/proc/19639/statm: 1287 839 169 493 0 785 0
+Current children cumulated CPU time (s) 3.07
+Current children cumulated vsize (KiB) 241520
+
+[startup+3.10037 s]
+/proc/loadavg: 0.05 0.04 0.05 21/878 19907
+/proc/meminfo: memFree=96656016/98890500 swapFree=0/116736
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=0 CPUtime=2.08 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) D 19713 19706 19344 0 -1 4202500 1840 0 0 0 208 0 0 0 20 0 1 0 72016849 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 8 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19722/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 2.08
+Current children cumulated vsize (KiB) 236372
+
+[startup+3.10775 s]
+/proc/loadavg: 0.05 0.04 0.05 21/878 19907
+/proc/meminfo: memFree=96656132/98890500 swapFree=0/116736
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=3.08 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 2150 0 0 0 308 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4229361 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 3.08
+Current children cumulated vsize (KiB) 242260
+
+[startup+3.10834 s]
+/proc/loadavg: 0.05 0.04 0.05 22/878 19907
+/proc/meminfo: memFree=96656500/98890500 swapFree=0/116736
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=3.08 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 1863 0 0 0 308 0 0 0 20 0 1 0 72016849 5275648 841 3145728000 4194304 6209662 140733264521552 140733264520856 4230136 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 841 169 493 0 786 0
+Current children cumulated CPU time (s) 3.08
+Current children cumulated vsize (KiB) 241524
+heavy processes:
+  %CPU=11 pid=19149 uid=0 cmd=
+  %CPU=10 pid=19154 uid=0 cmd=slurmstepd: [1776238.0]
+  %CPU=11 pid=19159 uid=0 cmd=slurmstepd: [1776260]
+  %CPU=10 pid=19164 uid=0 cmd=slurmstepd: [1776261]
+  %CPU=11 pid=19176 uid=0 cmd=slurmstepd: [1776263]
+  %CPU=10 pid=19184 uid=0 cmd=slurmstepd: [1776239.0]
+  %CPU=10 pid=19201 uid=0 cmd=slurmstepd: [1776240.0]
+  %CPU=11 pid=19218 uid=0 cmd=slurmstepd: [1776241.0]
+  %CPU=10 pid=19228 uid=0 cmd=slurmstepd: [1776242.0]
+  %CPU=11 pid=19233 uid=0 cmd=slurmstepd: [1776243.0]
+  %CPU=11 pid=19241 uid=0 cmd=slurmstepd: [1776245.0]
+  %CPU=10 pid=19249 uid=0 cmd=slurmstepd: [1776244.0]
+  %CPU=10 pid=19254 uid=0 cmd=slurmstepd: [1776247.0]
+  %CPU=10 pid=19259 uid=0 cmd=slurmstepd: [1776246.0]
+  %CPU=10 pid=19265 uid=0 cmd=slurmstepd: [1776248.0]
+  %CPU=65 pid=19632 uid=0 cmd=
+  %CPU=67 pid=19722 uid=0 cmd=
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+3.60016 s]
+/proc/loadavg: 0.05 0.04 0.05 22/878 19907
+/proc/meminfo: memFree=96656856/98890500 swapFree=0/116736
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=0 CPUtime=2.08 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) D 19713 19706 19344 0 -1 4202500 1840 0 0 0 208 0 0 0 20 0 1 0 72016849 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 8 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19722/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 2.08
+Current children cumulated vsize (KiB) 236372
+
+[startup+4.40019 s]
+/proc/loadavg: 0.05 0.04 0.05 40/878 19907
+/proc/meminfo: memFree=96662284/98890500 swapFree=0/116736
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=0 CPUtime=2.08 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) D 19713 19706 19344 0 -1 4202500 1840 0 0 0 208 0 0 0 20 0 1 0 72016849 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 8 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19722/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 2.08
+Current children cumulated vsize (KiB) 236372
+
+[startup+4.80016 s]
+/proc/loadavg: 0.05 0.04 0.05 26/878 19907
+/proc/meminfo: memFree=96662896/98890500 swapFree=0/116736
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=0 CPUtime=2.08 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) D 19713 19706 19344 0 -1 4202500 1840 0 0 0 208 0 0 0 20 0 1 0 72016849 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 8 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19722/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 2.08
+Current children cumulated vsize (KiB) 236372
+
+[startup+5.00018 s]
+/proc/loadavg: 0.05 0.04 0.05 26/878 19907
+/proc/meminfo: memFree=96662896/98890500 swapFree=0/116736
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=0 CPUtime=2.08 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) D 19713 19706 19344 0 -1 4202500 1840 0 0 0 208 0 0 0 20 0 1 0 72016849 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 8 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19722/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 2.08
+Current children cumulated vsize (KiB) 236372
+
+[startup+5.1002 s]
+/proc/loadavg: 0.05 0.04 0.05 26/878 19907
+/proc/meminfo: memFree=96662896/98890500 swapFree=0/116736
+[pid=19706] ppid=19676 vsize=113132 CPUtime=0 cores=0-31
+/proc/19706/stat : 19706 (sparkle_run_con) S 19676 19706 19344 0 -1 4202496 479 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 353 3145728000 4194304 5098412 140736637902688 140736637901336 139996530101692 0 65536 4 65538 18446744071579430854 0 0 17 6 0 0 0 0 0 7196144 7232144 9396224 140736637906791 140736637906874 140736637906874 140736637910996 0
+/proc/19706/statm: 28283 353 298 221 0 85 0
+[pid=19713] ppid=19706 vsize=123240 CPUtime=0 cores=0-31
+/proc/19713/stat : 19713 (sparkle_run_gen) S 19706 19706 19344 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140721941534192 140721941532392 140221289868732 0 65536 16781318 0 18446744071579430854 0 0 17 6 0 0 0 0 0 6294976 6295604 31158272 140721941540358 140721941540776 140721941540776 140721941544918 0
+/proc/19713/statm: 30810 1121 488 1 0 623 0
+[pid=19722] ppid=19713 vsize=0 CPUtime=2.08 cores=0-31
+/proc/19722/stat : 19722 (PbO-CCSAT) D 19713 19706 19344 0 -1 4202500 1840 0 0 0 208 0 0 0 20 0 1 0 72016849 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 8 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19722/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 2.08
+Current children cumulated vsize (KiB) 236372
+
+Child status: 0
+Real time (s): 5.10643
+CPU time (s): 2.10115
+CPU user time (s): 2.09418
+CPU system time (s): 0.006969
+CPU usage (%): 41.1471
+Max. virtual memory (cumulated for all children) (KiB): 241376
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 2.09418
+system time used= 0.006969
+maximum resident set size= 4504
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 4119
+page faults= 0
+swaps= 0
+block input operations= 472
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 18
+involuntary context switches= 148
+
+runsolver used 0.028077 second user time and 0.062992 second system time
+
+The end
+
+[startup+6.30024 s]
+/proc/loadavg: 1.64 0.37 0.15 24/830 19919
+/proc/meminfo: memFree=96684992/98890500 swapFree=0/116736
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+[pid=19626] ppid=19623 vsize=123240 CPUtime=0 cores=0-31
+/proc/19626/stat : 19626 (sparkle_run_gen) S 19623 19623 19291 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016834 126197760 1120 3145728000 4194304 4196756 140734425386448 140734425384648 140093112835516 0 65536 16781318 0 18446744071579430854 0 0 17 15 0 0 0 0 0 6294976 6295604 28647424 140734425390598 140734425391016 140734425391016 140734425395158 0
+/proc/19626/statm: 30810 1120 488 1 0 623 0
+[pid=19639] ppid=19626 vsize=5148 CPUtime=6.27 cores=0-31
+/proc/19639/stat : 19639 (PbO-CCSAT) R 19626 19623 19291 0 -1 4202496 2498 0 0 0 627 0 0 0 20 0 1 0 72016836 5271552 839 3145728000 4194304 6209662 140728918301408 140728918300712 4229251 0 0 16781312 16390 0 0 0 17 18 0 0 0 0 0 8306888 8342792 11096064 140728918306378 140728918306770 140728918306770 140728918310891 0
+/proc/19639/statm: 1287 839 169 493 0 785 0
+Current children cumulated CPU time (s) 6.27
+Current children cumulated vsize (KiB) 241520
+
+[startup+6.3002 s]
+/proc/loadavg: 1.64 0.37 0.15 21/830 19919
+/proc/meminfo: memFree=96684508/98890500 swapFree=0/116736
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=6.27 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 2500 0 0 0 627 0 0 0 20 0 1 0 72016849 5275648 841 3145728000 4194304 6209662 140733264521552 140733264520856 4231507 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 841 169 493 0 786 0
+Current children cumulated CPU time (s) 6.27
+Current children cumulated vsize (KiB) 241524
+
+[startup+6.30015 s]
+/proc/loadavg: 1.64 0.37 0.15 21/830 19919
+/proc/meminfo: memFree=96684508/98890500 swapFree=0/116736
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=6.27 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 2920 0 0 0 627 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4201731 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 6.27
+Current children cumulated vsize (KiB) 242260
+
+[startup+12.7397 s]
+/proc/loadavg: 2.95 0.66 0.25 21/789 19929
+/proc/meminfo: memFree=96712500/98890500 swapFree=0/116716
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+[pid=19626] ppid=19623 vsize=123240 CPUtime=0 cores=0-31
+/proc/19626/stat : 19626 (sparkle_run_gen) S 19623 19623 19291 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016834 126197760 1120 3145728000 4194304 4196756 140734425386448 140734425384648 140093112835516 0 65536 16781318 0 18446744071579430854 0 0 17 15 0 0 0 0 0 6294976 6295604 28647424 140734425390598 140734425391016 140734425391016 140734425395158 0
+/proc/19626/statm: 30810 1120 488 1 0 623 0
+[pid=19639] ppid=19626 vsize=5148 CPUtime=12.71 cores=0-31
+/proc/19639/stat : 19639 (PbO-CCSAT) R 19626 19623 19291 0 -1 4202496 3135 0 0 0 1271 0 0 0 20 0 1 0 72016836 5271552 839 3145728000 4194304 6209662 140728918301408 140728918300712 4229251 0 0 16781312 16390 0 0 0 17 18 0 0 0 0 0 8306888 8342792 11096064 140728918306378 140728918306770 140728918306770 140728918310891 0
+/proc/19639/statm: 1287 839 169 493 0 785 0
+Current children cumulated CPU time (s) 12.71
+Current children cumulated vsize (KiB) 241520
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+6.7002 s]
+/proc/loadavg: 1.64 0.37 0.15 21/830 19919
+/proc/meminfo: memFree=96684508/98890500 swapFree=0/116736
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=6.67 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 2500 0 0 0 667 0 0 0 20 0 1 0 72016849 5275648 841 3145728000 4194304 6209662 140733264521552 140733264520856 4233901 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 841 169 493 0 786 0
+Current children cumulated CPU time (s) 6.67
+Current children cumulated vsize (KiB) 241524
+
+[startup+9.9002 s]
+/proc/loadavg: 1.64 0.37 0.15 20/809 19924
+/proc/meminfo: memFree=96709920/98890500 swapFree=0/116736
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=9.87 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 3137 0 0 0 987 0 0 0 20 0 1 0 72016849 5275648 841 3145728000 4194304 6209662 140733264521552 140733264520856 4233818 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 841 169 493 0 786 0
+Current children cumulated CPU time (s) 9.87
+Current children cumulated vsize (KiB) 241524
+
+[startup+11.5036 s]
+/proc/loadavg: 2.95 0.66 0.25 19/789 19929
+/proc/meminfo: memFree=96694972/98890500 swapFree=0/116736
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=11.47 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 3137 0 0 0 1147 0 0 0 20 0 1 0 72016849 5275648 841 3145728000 4194304 6209662 140733264521552 140733264520856 4233252 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 841 169 493 0 786 0
+Current children cumulated CPU time (s) 11.47
+Current children cumulated vsize (KiB) 241524
+
+[startup+12.3002 s]
+/proc/loadavg: 2.95 0.66 0.25 19/789 19929
+/proc/meminfo: memFree=96694972/98890500 swapFree=0/116736
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=12.27 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 3137 0 0 0 1227 0 0 0 20 0 1 0 72016849 5275648 841 3145728000 4194304 6209662 140733264521552 140733264520856 4233851 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 841 169 493 0 786 0
+Current children cumulated CPU time (s) 12.27
+Current children cumulated vsize (KiB) 241524
+
+[startup+12.5248 s]
+/proc/loadavg: 2.95 0.66 0.25 19/789 19929
+/proc/meminfo: memFree=96711408/98890500 swapFree=0/116716
+[pid=19708] ppid=19678 vsize=113132 CPUtime=0 cores=0-31
+/proc/19708/stat : 19708 (sparkle_run_con) S 19678 19708 19302 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140728013018000 140728013016648 140391362219452 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 19537920 140728013025127 140728013025210 140728013025210 140728013029332 0
+/proc/19708/statm: 28283 354 298 221 0 85 0
+[pid=19716] ppid=19708 vsize=123240 CPUtime=0 cores=0-31
+/proc/19716/stat : 19716 (sparkle_run_gen) S 19708 19708 19302 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140723188933344 140723188931544 140620796325308 0 65536 16781318 0 18446744071579430854 0 0 17 8 0 0 0 0 0 6294976 6295604 11563008 140723188940294 140723188940712 140723188940712 140723188944854 0
+/proc/19716/statm: 30810 1121 488 1 0 623 0
+[pid=19721] ppid=19716 vsize=5152 CPUtime=12.5 cores=0-31
+/proc/19721/stat : 19721 (PbO-CCSAT) R 19716 19708 19302 0 -1 4202496 3137 0 0 0 1250 0 0 0 20 0 1 0 72016849 5275648 841 3145728000 4194304 6209662 140733264521552 140733264520856 4230848 0 0 16781312 16390 0 0 0 17 11 0 0 0 0 0 8306888 8342792 19800064 140733264526922 140733264527314 140733264527314 140733264531435 0
+/proc/19721/statm: 1288 841 169 493 0 786 0
+Current children cumulated CPU time (s) 12.5
+Current children cumulated vsize (KiB) 241524
+
+Child status: 0
+Real time (s): 12.5449
+CPU time (s): 12.5319
+CPU user time (s): 12.5221
+CPU system time (s): 0.009818
+CPU usage (%): 99.8961
+Max. virtual memory (cumulated for all children) (KiB): 241524
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 12.5221
+system time used= 0.009818
+maximum resident set size= 4504
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 5432
+page faults= 0
+swaps= 0
+block input operations= 488
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 19
+involuntary context switches= 130
+
+runsolver used 0.06038 second user time and 0.115543 second system time
+
+The end
+
+[startup+12.7002 s]
+/proc/loadavg: 2.95 0.66 0.25 19/789 19929
+/proc/meminfo: memFree=96705520/98890500 swapFree=0/116716
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=12.67 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 3690 0 0 0 1267 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4232932 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 12.67
+Current children cumulated vsize (KiB) 242260
+
+[startup+25.5002 s]
+/proc/loadavg: 4.88 1.15 0.41 19/748 19959
+/proc/meminfo: memFree=96743508/98890500 swapFree=0/116716
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+[pid=19626] ppid=19623 vsize=123240 CPUtime=0 cores=0-31
+/proc/19626/stat : 19626 (sparkle_run_gen) S 19623 19623 19291 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016834 126197760 1120 3145728000 4194304 4196756 140734425386448 140734425384648 140093112835516 0 65536 16781318 0 18446744071579430854 0 0 17 15 0 0 0 0 0 6294976 6295604 28647424 140734425390598 140734425391016 140734425391016 140734425395158 0
+/proc/19626/statm: 30810 1120 488 1 0 623 0
+[pid=19639] ppid=19626 vsize=5148 CPUtime=25.47 cores=0-31
+/proc/19639/stat : 19639 (PbO-CCSAT) R 19626 19623 19291 0 -1 4202496 4409 0 0 0 2547 0 0 0 20 0 1 0 72016836 5271552 839 3145728000 4194304 6209662 140728918301408 140728918300712 4233792 0 0 16781312 16390 0 0 0 17 10 0 0 0 0 0 8306888 8342792 11096064 140728918306378 140728918306770 140728918306770 140728918310891 0
+/proc/19639/statm: 1287 839 169 493 0 785 0
+Current children cumulated CPU time (s) 25.47
+Current children cumulated vsize (KiB) 241520
+
+[startup+25.5002 s]
+/proc/loadavg: 4.88 1.15 0.41 16/748 19959
+/proc/meminfo: memFree=96745928/98890500 swapFree=0/116716
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=25.48 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 5230 0 0 0 2548 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4230838 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 25.48
+Current children cumulated vsize (KiB) 242260
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+26.1002 s]
+/proc/loadavg: 6.65 1.58 0.56 18/748 19959
+/proc/meminfo: memFree=96745928/98890500 swapFree=0/116716
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+[pid=19626] ppid=19623 vsize=123240 CPUtime=0 cores=0-31
+/proc/19626/stat : 19626 (sparkle_run_gen) S 19623 19623 19291 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016834 126197760 1120 3145728000 4194304 4196756 140734425386448 140734425384648 140093112835516 0 65536 16781318 0 18446744071579430854 0 0 17 15 0 0 0 0 0 6294976 6295604 28647424 140734425390598 140734425391016 140734425391016 140734425395158 0
+/proc/19626/statm: 30810 1120 488 1 0 623 0
+[pid=19639] ppid=19626 vsize=0 CPUtime=25.55 cores=0-31
+/proc/19639/stat : 19639 (PbO-CCSAT) D 19626 19623 19291 0 -1 4202500 4425 0 0 0 2555 0 0 0 20 0 1 0 72016836 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 30 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19639/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 25.55
+Current children cumulated vsize (KiB) 236372
+
+[startup+26.5002 s]
+/proc/loadavg: 6.65 1.58 0.56 18/748 19959
+/proc/meminfo: memFree=96745928/98890500 swapFree=0/116716
+[pid=19623] ppid=19601 vsize=113132 CPUtime=0 cores=0-31
+/proc/19623/stat : 19623 (sparkle_run_con) S 19601 19623 19291 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016834 115847168 353 3145728000 4194304 5098412 140734967444736 140734967443384 140606322855356 0 65536 4 65538 18446744071579430854 0 0 17 4 0 0 0 0 0 7196144 7232144 17952768 140734967447399 140734967447482 140734967447482 140734967451604 0
+/proc/19623/statm: 28283 353 298 221 0 85 0
+[pid=19626] ppid=19623 vsize=123240 CPUtime=0 cores=0-31
+/proc/19626/stat : 19626 (sparkle_run_gen) S 19623 19623 19291 0 -1 4202496 1243 0 0 0 0 0 0 0 20 0 1 0 72016834 126197760 1120 3145728000 4194304 4196756 140734425386448 140734425384648 140093112835516 0 65536 16781318 0 18446744071579430854 0 0 17 15 0 0 0 0 0 6294976 6295604 28647424 140734425390598 140734425391016 140734425391016 140734425395158 0
+/proc/19626/statm: 30810 1120 488 1 0 623 0
+[pid=19639] ppid=19626 vsize=0 CPUtime=25.55 cores=0-31
+/proc/19639/stat : 19639 (PbO-CCSAT) D 19626 19623 19291 0 -1 4202500 4425 0 0 0 2555 0 0 0 20 0 1 0 72016836 0 0 3145728000 0 0 0 0 0 0 0 16781312 16390 18446744073709551615 0 0 17 30 0 0 0 0 0 0 0 0 0 0 0 0 0
+/proc/19639/statm: 0 0 0 0 0 0 0
+Current children cumulated CPU time (s) 25.55
+Current children cumulated vsize (KiB) 236372
+
+Child status: 0
+Real time (s): 26.5519
+CPU time (s): 25.5785
+CPU user time (s): 25.5703
+CPU system time (s): 0.00821
+CPU usage (%): 96.3338
+Max. virtual memory (cumulated for all children) (KiB): 241520
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 25.5703
+system time used= 0.00821
+maximum resident set size= 4500
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 6704
+page faults= 0
+swaps= 0
+block input operations= 488
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 22
+involuntary context switches= 133
+
+runsolver used 0.108606 second user time and 0.208637 second system time
+
+The end
+
+[startup+51.1008 s]
+/proc/loadavg: 9.50 2.66 0.94 16/727 19965
+/proc/meminfo: memFree=96764492/98890500 swapFree=0/116716
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=51.07 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 6000 0 0 0 5107 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4229261 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 51.07
+Current children cumulated vsize (KiB) 242260
+
+Solver just ended. Dumping a history of the last processes samples
+
+[startup+51.4002 s]
+/proc/loadavg: 9.50 2.66 0.94 16/727 19965
+/proc/meminfo: memFree=96764492/98890500 swapFree=0/116716
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=51.36 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 6000 0 0 0 5136 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4233161 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 51.36
+Current children cumulated vsize (KiB) 242260
+
+[startup+52.2002 s]
+/proc/loadavg: 9.50 2.66 0.94 16/727 19965
+/proc/meminfo: memFree=96765056/98890500 swapFree=0/116716
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=52.16 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 6000 0 0 0 5216 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4234741 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 52.16
+Current children cumulated vsize (KiB) 242260
+
+[startup+52.6002 s]
+/proc/loadavg: 9.50 2.66 0.94 16/727 19965
+/proc/meminfo: memFree=96765056/98890500 swapFree=0/116716
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=52.56 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 6000 0 0 0 5256 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4238016 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 52.56
+Current children cumulated vsize (KiB) 242260
+
+[startup+53.0002 s]
+/proc/loadavg: 9.50 2.66 0.94 16/727 19965
+/proc/meminfo: memFree=96765908/98890500 swapFree=0/116716
+[pid=19711] ppid=19684 vsize=113132 CPUtime=0 cores=0-31
+/proc/19711/stat : 19711 (sparkle_run_con) S 19684 19711 19423 0 -1 4202496 480 0 0 0 0 0 0 0 20 0 1 0 72016848 115847168 354 3145728000 4194304 5098412 140725384359808 140725384358456 140058155175356 0 65536 4 65538 18446744071579430854 0 0 17 14 0 0 0 0 0 7196144 7232144 17313792 140725384367980 140725384368058 140725384368058 140725384372180 0
+/proc/19711/statm: 28283 354 298 221 0 85 0
+[pid=19718] ppid=19711 vsize=123240 CPUtime=0 cores=0-31
+/proc/19718/stat : 19718 (sparkle_run_gen) S 19711 19711 19423 0 -1 4202496 1242 0 0 0 0 0 0 0 20 0 1 0 72016848 126197760 1121 3145728000 4194304 4196756 140727726612336 140727726610536 140649989262780 0 65536 16781318 0 18446744071579430854 0 0 17 14 0 0 0 0 0 6294976 6295604 28561408 140727726620171 140727726620584 140727726620584 140727726624726 0
+/proc/19718/statm: 30810 1121 488 1 0 623 0
+[pid=19723] ppid=19718 vsize=5888 CPUtime=52.97 cores=0-31
+/proc/19723/stat : 19723 (PbO-CCSAT) R 19718 19711 19423 0 -1 4202496 6000 0 0 0 5297 0 0 0 20 0 1 0 72016849 6029312 994 3145728000 4194304 6209662 140737447303648 140737447302952 4234744 0 0 16781312 16390 0 0 0 17 5 0 0 0 0 0 8306888 8342792 8884224 140737447312975 140737447313362 140737447313362 140737447317483 0
+/proc/19723/statm: 1472 994 169 493 0 970 0
+Current children cumulated CPU time (s) 52.97
+Current children cumulated vsize (KiB) 242260
+
+Child status: 0
+Real time (s): 53.0708
+CPU time (s): 53.0569
+CPU user time (s): 53.0469
+CPU system time (s): 0.010034
+CPU usage (%): 99.9739
+Max. virtual memory (cumulated for all children) (KiB): 242260
+
+getrusage(RUSAGE_CHILDREN,...) data:
+user time used= 53.0469
+system time used= 0.010034
+maximum resident set size= 4504
+integral shared memory size= 0
+integral unshared data size= 0
+integral unshared stack size= 0
+page reclaims= 8295
+page faults= 0
+swaps= 0
+block input operations= 512
+block output operations= 0
+messages sent= 0
+messages received= 0
+signals received= 0
+voluntary context switches= 20
+involuntary context switches= 195
+
+runsolver used 0.216871 second user time and 0.414225 second system time
+
+The end

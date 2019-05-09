@@ -30,36 +30,22 @@ def init():
 	global sleep_time_after_each_extractor_run
 	#global cutoff_time_each_extractor_run
 	global cutoff_time_total_extractor_run_on_one_instance
-	
-	global memory_limit_each_solver_run
-	global memory_limit_each_extractor_run
-	
-	global r_for_constructing_portfolio_selector
-	
-	global runcount_limit_for_autofolio
-	global wallclock_limit_for_autofolio
 
 	#default settings
 	num_job_in_parallel = 32
 	cutoff_time_each_run = 3600 #90
 	par_num = 10
 	cutoff_time_total_extractor_run_on_one_instance = 90 #as SATzilla does
-	memory_limit_each_solver_run = 3000
-	memory_limit_each_extractor_run = 3000
-	
-	r_for_constructing_portfolio_selector = 1
-	runcount_limit_for_autofolio = 42
-	wallclock_limit_for_autofolio = 300
+
 
 	sparkle_default_settings_path = sparkle_global_help.sparkle_default_settings_path
 	if os.path.exists(sparkle_default_settings_path):
-		fin = open(sparkle_default_settings_path, 'r')
-		#fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+		fin = open(sparkle_default_settings_path, 'r+')
+		fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 		while True:
-			myline = fin.readline()
+			myline = fin.readline().strip()
 			if not myline:
 				break
-			myline = myline.strip()
 			mylist = myline.split()
 			if mylist[0] == r'num_job_in_parallel':
 				num_job_in_parallel = int(mylist[2])
@@ -69,23 +55,13 @@ def init():
 				par_num = int(mylist[2])
 			elif mylist[0] == r'cutoff_time_each_feature_computation':
 				cutoff_time_total_extractor_run_on_one_instance = int(mylist[2])
-			elif mylist[0] == r'memory_limit_each_performance_computation':
-				memory_limit_each_solver_run = int(mylist[2])
-			elif mylist[0] == r'memory_limit_each_feature_computation':
-				memory_limit_each_extractor_run = int(mylist[2])
-			elif mylist[0] == r'r_for_constructing_portfolio_selector':
-				r_for_constructing_portfolio_selector = int(mylist[2])
-			elif mylist[0] == r'runcount_limit_for_autofolio':
-				runcount_limit_for_autofolio = int(mylist[2])
-			elif mylist[0] == r'wallclock_limit_for_autofolio':
-				wallclock_limit_for_autofolio = int(mylist[2])
 		fin.close()
 	
 	'''
 	cutoff_time_information_txt_path = sparkle_global_help.cutoff_time_information_txt_path
 	if os.path.exists(cutoff_time_information_txt_path):
-		fo = open(cutoff_time_information_txt_path, 'r')
-		#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+		fo = open(cutoff_time_information_txt_path, 'r+')
+		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 		myline = fo.readline().strip()
 		mylist = myline.split()
 		cutoff_time_each_run = int(mylist[2])

@@ -1,0 +1,11 @@
+../instances/ptn/bce7824.cnf
+../instances/ptn/Ptn-7824-b02.cnf
+../instances/ptn/Ptn-7824-b03.cnf
+../instances/ptn/Ptn-7824-b05.cnf
+../instances/ptn/Ptn-7824-b08.cnf
+../instances/ptn/Ptn-7824-b11.cnf
+../instances/ptn/Ptn-7824-b12.cnf
+../instances/ptn/Ptn-7824-b15.cnf
+../instances/ptn/Ptn-7824-b17.cnf
+../instances/ptn/Ptn-7824-b19.cnf
+../instances/ptn/Ptn-7824-b20.cnf

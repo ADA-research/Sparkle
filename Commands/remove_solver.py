@@ -70,13 +70,17 @@ if __name__ == r'__main__':
 				performance_data_csv.delete_column(column_name)
 		performance_data_csv.update_csv()
 	
-		command_line = r'rm -rf ' + solver_path
+	command_line = r'rm -rf ' + solver_path
+	os.system(command_line)
+	
+	solver_name = sfh.get_last_level_directory_name(solver_path)
+	smac_solver_path = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/' + solver_name + r'/'
+	if os.path.exists(smac_solver_path):
+		command_line = r'rm -rf ' + smac_solver_path
 		os.system(command_line)
 	
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
-		os.system(command_line)
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path + '*'
 		os.system(command_line)
 		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
 	

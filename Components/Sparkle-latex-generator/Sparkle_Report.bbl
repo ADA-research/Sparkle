@@ -1,5 +1,12 @@
 \begin{thebibliography}{1}
 
+\bibitem{FreEtAl16}
+Alexandre Fr{\'{e}}chette, Lars Kotthoff, Tomasz~P. Michalak, Talal Rahwan,
+  Holger~H. Hoos, and Kevin Leyton{-}Brown.
+\newblock Using the shapley value to analyze algorithm portfolios.
+\newblock In {\em Proceedings of the 30th {AAAI} Conference on Artificial
+  Intelligence (AAAI-16)}, pages 3397--3403. {AAAI} Press, 2016.
+
 \bibitem{Hoos12}
 Holger~H. Hoos.
 \newblock Programming by optimization.
@@ -7,7 +14,7 @@ Holger~H. Hoos.
 
 \bibitem{Hoos15}
 Holger~H. Hoos.
-\newblock {Sparkle}: A {PbO}-based multi-agent problem-solving platform.
+\newblock {Sparkle}: A pbo-based multi-agent problem-solving platform.
 \newblock Technical report, Department of Computer Science, University of
   British Columbia, 2015.
 

@@ -52,23 +52,35 @@ if __name__ == r'__main__':
 
 	print 'c Start removing all cnf instances in directory ' + instances_path + r' ...' 
 
-	list_all_cnf_path = sfh.get_list_all_cnf_filename(instances_path)
+	list_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_path)
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 
-	for i in range(0, len(list_all_cnf_path)):
-		intended_cnf_filename_path = list_all_cnf_path[i]
+	for i in range(0, len(list_all_cnf_filename)):
+		intended_cnf_filename = list_all_cnf_filename[i]
 		
+		intended_cnf_filename_path = instances_path + r'/' + intended_cnf_filename
 		sparkle_global_help.instance_list.remove(intended_cnf_filename_path)
 		output = sparkle_global_help.instance_reference_mapping.pop(intended_cnf_filename_path)
 		
 		feature_data_csv.delete_row(intended_cnf_filename_path)
 		performance_data_csv.delete_row(intended_cnf_filename_path)
-		os.system(r'rm -f ' + intended_cnf_filename_path)
-		print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename_path) + r' has been removed!'
+		os.system(r'rm -f ' + instances_path + r'/' + intended_cnf_filename)
+		print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' has been removed!'
 
 	os.system(r'rm -rf ' + instances_path)
+	
+	smac_train_instances_path = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_path)
+	file_smac_train_instances = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_path) + r'_train.txt'
+	#print(smac_train_instances_path, file_smac_train_instances)
+	os.system(r'rm -rf ' + smac_train_instances_path)
+	os.system(r'rm -f ' + file_smac_train_instances)
+	
+	smac_test_instances_path = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_path)
+	file_smac_test_instances = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_path) + r'_test.txt'
+	os.system(r'rm -rf ' + smac_test_instances_path)
+	os.system(r'rm -f ' + file_smac_test_instances)
 
 	sfh.write_instance_list()
 	sfh.write_instance_reference_mapping()
@@ -77,8 +89,6 @@ if __name__ == r'__main__':
 	
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
-		os.system(command_line)
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path + '*'
 		os.system(command_line)
 		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
 	

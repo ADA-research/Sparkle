@@ -1,46 +1,46 @@
-This is BibTeX, Version 0.99d (TeX Live 2013)
+This is BibTeX, Version 0.99d (TeX Live 2016)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: Sparkle_Report.aux
 The style file: plain.bst
 Database file #1: Sparkle_Report.bib
-You've used 4 entries,
+You've used 5 entries,
             2118 wiz_defined-function locations,
-            525 strings with 4806 characters,
-and the built_in function-call counts, 1472 in all, are:
-= -- 148
-> -- 68
-< -- 2
-+ -- 26
-- -- 22
-* -- 107
-:= -- 250
-add.period$ -- 13
-call.type$ -- 4
-change.case$ -- 23
+            533 strings with 5108 characters,
+and the built_in function-call counts, 2099 in all, are:
+= -- 213
+> -- 101
+< -- 3
++ -- 39
+- -- 34
+* -- 151
+:= -- 341
+add.period$ -- 17
+call.type$ -- 5
+change.case$ -- 32
 chr.to.int$ -- 0
-cite$ -- 4
-duplicate$ -- 54
-empty$ -- 110
-format.name$ -- 22
-if$ -- 305
+cite$ -- 5
+duplicate$ -- 79
+empty$ -- 154
+format.name$ -- 34
+if$ -- 446
 int.to.chr$ -- 0
-int.to.str$ -- 4
-missing$ -- 3
-newline$ -- 23
-num.names$ -- 10
-pop$ -- 18
+int.to.str$ -- 5
+missing$ -- 4
+newline$ -- 28
+num.names$ -- 12
+pop$ -- 29
 preamble$ -- 1
-purify$ -- 18
+purify$ -- 26
 quote$ -- 0
-skip$ -- 39
+skip$ -- 61
 stack$ -- 0
-substring$ -- 96
-swap$ -- 15
-text.length$ -- 2
+substring$ -- 141
+swap$ -- 28
+text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 16
+type$ -- 20
 warning$ -- 0
-while$ -- 16
-width$ -- 5
-write$ -- 48
+while$ -- 21
+width$ -- 6
+write$ -- 60

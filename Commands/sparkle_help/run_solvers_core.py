@@ -33,12 +33,7 @@ if __name__ == r'__main__':
 	solver_path = sys.argv[2]
 	performance_data_csv_path = sys.argv[3]
 	
-	while True:
-		try:
-			performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
-			break
-		except:
-			time.sleep(random.randint(1, 5))
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	
 	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
 	raw_result_path = r'TMP/' + key_str + r'.rawres'
@@ -53,18 +48,10 @@ if __name__ == r'__main__':
 	cutoff_str = 'Cutoff Time: ' + str(ser.cutoff_time_each_run) + ' second(s)' + '\n'
 	status_info_str += cutoff_str
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
+	srs.run_solver_on_instance(solver_path, solver_path+r'/'+sparkle_global_help.sparkle_run_default_wrapper, instance_path, raw_result_path, ser.cutoff_time_each_run)
+	end_time = time.time()
 	
-	if sparkle_global_help.solver_complete_type_mapping[solver_path] == 'incomplete' and sparkle_global_help.instance_reference_mapping[instance_path] == 'UNSAT':
-		end_time = time.time()
-		verify_string = r'UNKNOWN'
-	else:
-		try:
-			srs.run_solver_on_instance(solver_path, solver_path+r'/'+sparkle_global_help.sparkle_run_default_wrapper, instance_path, raw_result_path, ser.cutoff_time_each_run)
-			end_time = time.time()
-			verify_string = srs.judge_correctness_raw_result(instance_path, raw_result_path)
-		except:
-			end_time = time.time()
-			verify_string = 'UNKNOWN'
+	verify_string = srs.judge_correctness_raw_result(instance_path, raw_result_path)
 	
 	runtime = 0
 	
@@ -126,14 +113,7 @@ if __name__ == r'__main__':
 	time.sleep(random.randint(1, 5))
 	
 	sfh.append_string_to_file(sparkle_global_help.sparkle_system_log_path, log_str)
-	
-	while True:
-		try:
-			os.system('rm -f ' + task_run_status_path)
-			break
-		except:
-			time.sleep(random.randint(1, 5))
-	
+	os.system('rm -f ' + task_run_status_path)
 	
 	fout = open(processed_result_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)

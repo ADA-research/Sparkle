@@ -29,10 +29,9 @@ def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_t
 	err_path = result_path.replace(r'.rawres', r'.err')
 	runsolver_watch_data_path = result_path.replace(r'.rawres', r'.log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
-	tmp_output = r'TMP/tmp/' + sfh.get_file_name(result_path.replace(r'.rawres', r''))
 	
 	#command_line = extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path
-	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' ' + tmp_output + r' 2> ' + err_path
+	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
 	
 	try:
 		os.system(command_line)
@@ -97,7 +96,7 @@ def print_solution(raw_result_path):
 		myline = fin.readline().strip()
 		if not myline: break
 		mylist = myline.split()
-		if len(mylist)>=2 and (mylist[1] == r's' or mylist[1] == r'v'):
+		if mylist[1] == r's' or mylist[1] == r'v':
 			string_output = ' '.join(mylist[1:])
 			print string_output	
 	fin.close()
@@ -240,7 +239,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	
 	total_job_list = []
 	for cnf_filename in list_all_cnf_filename:
-		cnf_filepath = instance_directory_path + sfh.get_file_name(cnf_filename)
+		cnf_filepath = instance_directory_path + cnf_filename
 		test_performance_data_csv.add_row(cnf_filepath)
 		total_job_list.append([cnf_filepath])
 	

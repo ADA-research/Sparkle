@@ -26,11 +26,14 @@ global sparkle_missing_value
 sparkle_missing_value = -(sparkle_maximum_int-1)
 
 global python_executable
-python_executable = r'python3'
-#python_executable = r'~/usr/python/python3.5.4/bin/python3'
+#python_executable = r'python3'
+python_executable = r'~/usr/python/python3.5.4/bin/python3'
 
 global sparkle_default_settings_path
 sparkle_default_settings_path = r'Settings/sparkle_default_settings.txt'
+
+global sparkle_smac_settings_path
+sparkle_smac_settings_path = r'Settings/sparkle_smac_settings.txt'
 
 global sparkle_log_path
 sparkle_log_path = r'TMP/sparkle_log.txt'
@@ -51,8 +54,21 @@ runsolver_path = r'Components/runsolver/src/runsolver'
 SAT_verifier_path = r'Components/Sparkle-SAT-verifier/SAT'
 autofolio_path = r'Components/AutoFolio-master/scripts/autofolio'
 
+global smac_dir
+smac_dir = r'Components/smac-v2.10.03-master-778/'
+
 global sparkle_run_default_wrapper
 sparkle_run_default_wrapper = r'sparkle_run_default_wrapper.py'
+
+global sparkle_run_generic_wrapper
+sparkle_run_generic_wrapper = r'sparkle_run_generic_wrapper.py'
+
+global sparkle_run_configured_wrapper
+sparkle_run_configured_wrapper = r'sparkle_run_configured_wrapper.sh'
+
+global sparkle_smac_wrapper
+sparkle_smac_wrapper = r'sparkle_smac_wrapper.py'
+
 
 global feature_data_csv_path
 global performance_data_csv_path
@@ -88,7 +104,6 @@ global instance_reference_mapping
 
 solver_list = []
 solver_nickname_mapping = {}
-solver_complete_type_mapping = {}
 extractor_list = []
 extractor_nickname_mapping = {}
 extractor_feature_vector_size_mapping = {}
@@ -96,8 +111,8 @@ instance_list = []
 instance_reference_mapping = {}
 
 if os.path.exists(extractor_nickname_list_path):
-	fo = open(extractor_nickname_list_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(extractor_nickname_list_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline()
 		myline = myline.strip()
@@ -107,8 +122,8 @@ if os.path.exists(extractor_nickname_list_path):
 	fo.close()
 
 if os.path.exists(extractor_feature_vector_size_list_path):
-	fo = open(extractor_feature_vector_size_list_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(extractor_feature_vector_size_list_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline().strip()
 		if not myline: break
@@ -117,8 +132,8 @@ if os.path.exists(extractor_feature_vector_size_list_path):
 	fo.close()
 
 if os.path.exists(extractor_list_path):
-	fo = open(extractor_list_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(extractor_list_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline()
 		myline = myline.strip()
@@ -127,8 +142,8 @@ if os.path.exists(extractor_list_path):
 	fo.close()
 
 if os.path.exists(solver_nickname_list_path):
-	fo = open(solver_nickname_list_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(solver_nickname_list_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline()
 		myline = myline.strip()
@@ -138,22 +153,19 @@ if os.path.exists(solver_nickname_list_path):
 	fo.close()
 
 if os.path.exists(solver_list_path):
-	fo = open(solver_list_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(solver_list_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline()
 		if not myline: break
 		myline = myline.strip()
 		mylist = myline.split()
-		solver_path = mylist[0]
-		solver_complete_type = mylist[1]
-		solver_list.append(solver_path)
-		solver_complete_type_mapping[solver_path] = solver_complete_type
+		solver_list.append(mylist[0])
 	fo.close()
 
 if os.path.exists(instance_list_path):
-	fo = open(instance_list_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(instance_list_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline()
 		myline = myline.strip()
@@ -162,8 +174,8 @@ if os.path.exists(instance_list_path):
 	fo.close()
 
 if os.path.exists(instance_reference_list_path):
-	fo = open(instance_reference_list_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(instance_reference_list_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline()
 		myline = myline.strip()

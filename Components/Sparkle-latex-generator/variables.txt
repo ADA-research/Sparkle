@@ -4,7 +4,6 @@
 @@solverList@@
 @@numFeatureExtractors@@
 @@featureExtractorList@@
-@@numTotalInstances@@
 @@numInstanceClasses@@
 @@instanceClassList@@
 @@featureComputationCutoffTime@@
@@ -12,12 +11,3 @@
 @@solverPerfectRankingList@@
 @@solverActualRankingList@@
 @@figure-portfolio-selector-sparkle-vs-vbs@@
-@@parNum@@
-@@PenaltyTimeRankingList@@
-@@VBSPenaltyTime@@
-@@actualPenaltyTime@@
-@@sparkleVersion@@
-@@featureComputationMemoryLimit@@
-@@performanceComputationMemoryLimit@@
-@@perfectPortfolioPenaltyTimeList@@
-@@actualPortfolioPenaltyTimeList@@

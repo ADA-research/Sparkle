@@ -66,17 +66,15 @@ def computing_features(feature_data_csv_path, mode):
 		len_extractor_list = len(extractor_list)
 		for j in range(0, len_extractor_list):
 			extractor_path = extractor_list[j]
-			key_str = sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
-			basic_part = r'TMP/' + key_str 
+			basic_part = r'TMP/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() 
 			result_path = basic_part + r'.rawres'
 			err_path = basic_part + r'.err'
 			runsolver_watch_data_path = basic_part + r'.log'
 			runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
-			tmp_output = r'TMP/tmp/' + key_str
 			
 			#command_line = extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
 			
-			command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' ' + tmp_output + r' 2> ' + err_path
+			command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
 			
 			time.sleep(ser.sleep_time_after_each_extractor_run) #add at version 1.0.2
 			
@@ -104,8 +102,6 @@ def computing_features(feature_data_csv_path, mode):
 			feature_data_csv.combine(tmp_fdcsv)
 			#print feature_data_csv.dataframe
 		
-			command_line = r'rm -f ' + tmp_output
-			os.system(command_line)
 			command_line = r'rm -f ' + result_path
 			os.system(command_line)
 			command_line = r'rm -f ' + err_path

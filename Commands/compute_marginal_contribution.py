@@ -50,12 +50,12 @@ if __name__ == r'__main__':
 	
 		if flag_compute_perfect:
 			print r"c Start computing each solver's marginal contribution to perfect selector ..."
-			rank_list = scmc.compute_perfect_selector_marginal_contribution(performance_data_csv_path = sparkle_global_help.performance_data_csv_path + '_validate.csv', cutoff_time_each_run = cutoff_time_each_run)
+			rank_list = scmc.compute_perfect_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
 			scmc.print_rank_list(rank_list, 1)
 			print r'c Marginal contribution (perfect selector) computing done!'
 		elif flag_compute_actual:
 			print r"c Start computing each solver's marginal contribution to actual selector ..."
-			rank_list = scmc.compute_actual_selector_marginal_contribution(performance_data_csv_path = sparkle_global_help.performance_data_csv_path + '_validate.csv', feature_data_csv_path = sparkle_global_help.feature_data_csv_path + '_validate.csv', cutoff_time_each_run = cutoff_time_each_run)
+			rank_list = scmc.compute_actual_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
 			scmc.print_rank_list(rank_list, 2)
 			print r'c Marginal contribution (actual selector) computing done!'
 		else:

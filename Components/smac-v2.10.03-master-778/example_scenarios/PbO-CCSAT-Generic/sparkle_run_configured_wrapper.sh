@@ -1,0 +1,2 @@
+#!/bin/bash
+$1/sparkle_run_generic_wrapper.py $1 $2  -gamma_hscore2 '351' -init_solution '1' -p_swt '0.20423712003341465' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '0' -perform_first_div '0' -perform_pac '1' -prob_pac '0.005730374136488115' -q_swt '0.6807207179674418' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '4' -sel_var_div '2' -threshold_swt '32'

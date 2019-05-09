@@ -23,6 +23,7 @@ from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_job_parallel_help
+from sparkle_help import sparkle_add_configured_solver_help as sacsh
 
 if __name__ == r'__main__':
 
@@ -30,7 +31,8 @@ if __name__ == r'__main__':
 	my_flag_run_solver_later = False
 	my_flag_nickname = False
 	my_flag_parallel = False
-	my_flag_incomplete = False
+	my_flag_deterministic = False
+	deterministic = '0'
 	nickname_str = r''
 	solver_source = r''
 
@@ -45,15 +47,30 @@ if __name__ == r'__main__':
 			nickname_str = sys.argv[i]
 		elif sys.argv[i] == r'-parallel':
 			my_flag_parallel = True
-		elif sys.argv[i] == r'-incomplete':
-			my_flag_incomplete = True
+		elif sys.argv[i] == r'-deterministic':
+			i += 1
+			if sys.argv[i] == r'0':
+				my_flag_deterministic = True
+				deterministic = r'0'
+			elif sys.argv[i] == r'1':
+				my_flag_deterministic = True
+				deterministic = r'1'
+			else:
+				print(r'c Arguments Error!')
+				print(r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>')
+				sys.exit()
 		else:
 			solver_source = sys.argv[i]
 		i += 1
 
 	if not os.path.exists(solver_source):
 		print r'c Solver path ' + "\'" + solver_source + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname] [<nickname>] [-incomplete] [-parallel] <solver_source_directory>'
+		print r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>'
+		sys.exit()
+	
+	if not my_flag_deterministic:
+		print(r'c Please specify the deterministic property of the adding solver!')
+		print(r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>')
 		sys.exit()
 
 	last_level_directory = r''
@@ -73,19 +90,22 @@ if __name__ == r'__main__':
 	performance_data_csv.update_csv()
 
 	sparkle_global_help.solver_list.append(solver_diretory)
-	if my_flag_incomplete:
-		sfh.add_new_solver_into_file(solver_diretory, 'incomplete')
-		sparkle_global_help.solver_complete_type_mapping[solver_diretory] = 'incomplete'
-	else:
-		sfh.add_new_solver_into_file(solver_diretory)
-		sparkle_global_help.solver_complete_type_mapping[solver_diretory] = 'complete'
-		
+	sfh.add_new_solver_into_file(solver_diretory, deterministic)
+	
 	print 'c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!'
+	
+	if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
+		pcs_file_name = sacsh.get_pcs_file_from_solver_directory(solver_diretory)
+		smac_scenario_dir = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/'
+		command_line = r'cp -r ' + solver_diretory + r' ' + smac_scenario_dir
+		os.system(command_line)
+		smac_solver_dir = smac_scenario_dir + r'/' + sfh.get_last_level_directory_name(solver_source) + r'/'
+		sacsh.create_necessary_files_for_configured_solver(smac_solver_dir)
+		print('c pcs file detected, this is a configured solver')
+		print('c solver added to SMAC')
 	
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
-		os.system(command_line)
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path + '*'
 		os.system(command_line)
 		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
 	

@@ -133,7 +133,7 @@ def get_VBSPAR10():
 	str_value = r''
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	vbs_penalty_time = performance_data_csv.calc_vbs_penalty_time(cutoff_time_each_run, 10)
+	vbs_penalty_time = performance_data_csv.calc_vbs_penaltry_time(cutoff_time_each_run, 10)
 	
 	str_value = str(vbs_penalty_time)
 	return str_value

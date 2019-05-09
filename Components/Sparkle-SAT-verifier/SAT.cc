@@ -22,7 +22,6 @@ int main(int argc, char* argv[]) {
 
     map<int, int> variables;
     bool SAT_answer = false;
-    int variables_map_size = -1;
     while (getline(solver_output, line)) {
         istringstream lss(line);
         string timestamp, prefix;
@@ -51,27 +50,9 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-    variables_map_size = variables.size();
-    bool answer_unknown = false;
     if (SAT_answer) {
         while (getline(instance, line)) {
-            //if (line.substr(0, 1) == "c" || line.substr(0, 1) == "p") continue;
-            if (line.substr(0, 1) == "c") continue;
-            
-            if (line.substr(0, 1) == "p")
-            {
-            	istringstream lss_2(line);
-            	int num_vars_p, num_clauses_p;
-            	string tmp_str1, tmp_str2;
-            	lss_2 >> tmp_str1 >> tmp_str2 >> num_vars_p >> num_clauses_p;
-            	if (num_vars_p != variables_map_size)
-            	{
-            		answer_unknown = true;
-            		break;
-            	}
-            	else continue;
-            }
-            
+            if (line.substr(0, 1) == "c" || line.substr(0, 1) == "p") continue;
             istringstream lss(line);
             int v;
             bool sat_clause = false;
@@ -79,7 +60,6 @@ int main(int argc, char* argv[]) {
             string clause_str = line;
             //while (lss >> v && v != 0) {
             while (1==1) {
-            	if (line == "") break; //modified by luo
             	if (!(lss >> v)) 
             	{
             		getline(instance, line);
@@ -110,11 +90,8 @@ int main(int argc, char* argv[]) {
                 exit_verifier(0, 0);
             }
         }
-        if(!answer_unknown)
-        {
-		    cout << "Solution verified." << endl;
-		    exit_verifier(11, 0);
-        }
+        cout << "Solution verified." << endl;
+        exit_verifier(11, 0);
     }
     cout << "Didn't really find anything interesting in the output" << endl;
     exit_verifier(0, 0);

@@ -10,8 +10,6 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-from math import log
-
 import os
 import sys
 import fcntl
@@ -28,10 +26,6 @@ def get_customCommands():
 
 def get_sparkle():
 	str_value = r'\emph{Sparkle}'
-	return str_value
-
-def get_sparkleVersion():
-	str_value = r'Sparkle_SAT_Challenge_2018'
 	return str_value
 
 def get_numSolvers():
@@ -58,11 +52,6 @@ def get_featureExtractorList():
 	for extractor_path in extractor_list:
 		extractor_name = sfh.get_file_name(extractor_path)
 		str_value += r'\item \textbf{' + extractor_name + r'}' + '\n'
-	return str_value
-
-def get_numTotalInstances():
-	num_total_instances = len(sparkle_global_help.instance_list)
-	str_value = str(num_total_instances)
 	return str_value
 
 def get_numInstanceClasses():
@@ -97,19 +86,10 @@ def get_featureComputationCutoffTime():
 	str_value = str(sparkle_experiments_related_help.cutoff_time_total_extractor_run_on_one_instance)
 	return str_value
 
-def get_featureComputationMemoryLimit():
-	str_value = str(sparkle_experiments_related_help.memory_limit_each_extractor_run)
-	return str_value
-
 def get_performanceComputationCutoffTime():
 	str_value = str(sparkle_experiments_related_help.cutoff_time_each_run)
 	return str_value
 
-def get_performanceComputationMemoryLimit():
-	str_value = str(sparkle_experiments_related_help.memory_limit_each_solver_run)
-	return str_value
-
-'''
 def get_solverPerfectRankingList():
 	str_value = r''
 	command = r'Commands/compute_marginal_contribution.py -perfect'
@@ -117,14 +97,12 @@ def get_solverPerfectRankingList():
 	for myline in output:
 		mylist = myline.strip().split()
 		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Rel_Margi_Contr:':
+			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Margi_Contr:':
 				solver = mylist[2]
 				marginal_contribution = mylist[4]
-				str_value += r'\item \textbf{' + solver + r'}, relative marginal contribution: ' + marginal_contribution + '\n'
+				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
-'''
 
-'''
 def get_solverActualRankingList():
 	str_value = r''
 	command = r'Commands/compute_marginal_contribution.py -actual'
@@ -132,47 +110,36 @@ def get_solverActualRankingList():
 	for myline in output:
 		mylist = myline.strip().split()
 		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Rel_Margi_Contr:':
+			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Margi_Contr:':
 				solver = mylist[2]
 				marginal_contribution = mylist[4]
-				str_value += r'\item \textbf{' + solver + r'}, relative marginal contribution: ' + marginal_contribution + '\n'
-	return str_value
-'''
-
-def get_parNum():
-	par_num = sparkle_experiments_related_help.par_num
-	return str(par_num)
-
-def get_PenaltyTimeRankingList():
-	str_value = r''
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path + '_validate.csv')
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run, par_num)
-	
-	rank_num = 1
-	for solver, this_penalty_time in solver_penalty_time_ranking_list:
-		#str_value += r'\item \textbf{' + sfh.get_file_name(solver) + '}, PAR%d: ' % (par_num) + str(this_penalty_time) + '\n'
-		str_value += '%d & %s & %.6f' % (rank_num, sfh.get_file_name(solver), float(this_penalty_time)) + '\\\\' + '\n'
-		rank_num += 1
-	
+				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
-'''
-def get_VBSPenaltyTime():
+def get_PAR10RankingList():
 	str_value = r''
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	vbs_penalty_time = performance_data_csv.calc_vbs_penalty_time(cutoff_time_each_run, par_num)
+	
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
+	
+	for solver, this_penalty_time in solver_penalty_time_ranking_list:
+		str_value += r'\item \textbf{' + solver + r'}, PAR10: ' + str(this_penalty_time) + '\n'
+	
+	return str_value
+
+
+def get_VBSPAR10():
+	str_value = r''
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
+	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
+	vbs_penalty_time = performance_data_csv.calc_vbs_penaltry_time(cutoff_time_each_run, 10)
 	
 	str_value = str(vbs_penalty_time)
 	return str_value
-'''
 
-'''
-def get_actualPenaltyTime():
+
+def get_actualPAR10():
 	str_value = r''
 	actual_penalty_time = 0.0
 	actual_count = 0
@@ -181,12 +148,10 @@ def get_actualPenaltyTime():
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 	actual_portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
 	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	penalty_time_each_run = cutoff_time_each_run * par_num
+	penalty_time_each_run = sparkle_experiments_related_help.penalty_time
 	
 	for instance in performance_data_csv.list_rows():
 		list_predict_schedule = sparkle_compute_marginal_contribution_help.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
-		#print 'c instance = ' + instance + ', schedule: ' + str(list_predict_schedule)
 		used_time_for_this_instance = 0
 		flag_successfully_solving = False
 		for i in range(0, len(list_predict_schedule)):
@@ -214,16 +179,14 @@ def get_actualPenaltyTime():
 	actual_penalty_time = actual_penalty_time / actual_count
 	str_value = str(actual_penalty_time)
 	return str_value
-'''
+
 
 def get_dict_sbs_penalty_time_on_each_instance():
 	mydict = {}
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path + '_validate.csv')
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	penalty_time_each_run = cutoff_time_each_run * par_num
 	
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run, par_num)
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
 	
 	for instance in performance_data_csv.list_rows():
@@ -231,39 +194,21 @@ def get_dict_sbs_penalty_time_on_each_instance():
 		if this_run_time <= cutoff_time_each_run:
 			mydict[instance] = this_run_time
 		else:
-			mydict[instance] = penalty_time_each_run
+			mydict[instance] = sparkle_experiments_related_help.penalty_time
 	return mydict
 
 
 def get_dict_vbs_penalty_time_on_each_instance():
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path + '_validate.csv')
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 	mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
 	return mydict
 
-
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
-	portfolio_selector_penalty_time_on_each_instance_path = sparkle_global_help.sparkle_portfolio_selector_path + '_penalty_time_on_each_instance.txt'
-	if os.path.exists(portfolio_selector_penalty_time_on_each_instance_path) and os.path.isfile(portfolio_selector_penalty_time_on_each_instance_path):
-		mydict = {}
-		fin = open(portfolio_selector_penalty_time_on_each_instance_path, 'r')
-		while True:
-			myline = fin.readline()
-			if not myline: break
-			mylist = myline.strip().split()
-			instance = mylist[0]
-			runtime = float(mylist[1])
-			mydict[instance] = runtime
-		fin.close()
-		return mydict
-	
-	
 	mydict = {}
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path + '_validate.csv')
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 	actual_portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
 	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	penalty_time_each_run = cutoff_time_each_run * par_num
 	
 	for instance in performance_data_csv.list_rows():
 		list_predict_schedule = sparkle_compute_marginal_contribution_help.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
@@ -288,17 +233,13 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 		if flag_successfully_solving:
 			mydict[instance] = used_time_for_this_instance
 		else:
-			mydict[instance] = penalty_time_each_run
+			mydict[instance] = sparkle_experiments_related_help.penalty_time
 	return mydict
 
-
-def get_figure_portfolio_selector_sparkle_vs_sbs(dict_actual_portfolio_selector_penalty_time_on_each_instance):
+def get_figure_portfolio_selector_sparkle_vs_sbs():
 	str_value = r''
 	dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance()
-	#dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	penalty_time_each_run = cutoff_time_each_run * par_num
+	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 	
 	latex_directory_path = r'Components/Sparkle-latex-generator/'
 	figure_portfolio_selector_sparkle_vs_sbs_filename = r'figure_portfolio_selector_sparkle_vs_sbs'
@@ -312,12 +253,12 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(dict_actual_portfolio_selector_
 		fout.write(str(sbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
 	fout.close()
 	
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path + '_validate.csv')
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run, par_num)
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
 	
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + str(penalty_time_each_run) + r' ' + '\'SBS (' + sfh.get_file_name(sbs_solver) + ')\' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename + r' ' + str(par_num)
+	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + str(sparkle_experiments_related_help.penalty_time) + r' ' + '\'SBS (' + sbs_solver + ')\' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
 	
 	#print(gnuplot_command)
 	
@@ -327,13 +268,10 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(dict_actual_portfolio_selector_
 	return str_value
 
 
-def get_figure_portfolio_selector_sparkle_vs_vbs(dict_actual_portfolio_selector_penalty_time_on_each_instance):
+def get_figure_portfolio_selector_sparkle_vs_vbs():
 	str_value = r''
 	dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
-	#dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	penalty_time_each_run = cutoff_time_each_run * par_num
+	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 	
 	latex_directory_path = r'Components/Sparkle-latex-generator/'
 	figure_portfolio_selector_sparkle_vs_vbs_filename = r'figure_portfolio_selector_sparkle_vs_vbs'
@@ -347,227 +285,12 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(dict_actual_portfolio_selector_
 		fout.write(str(vbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
 	fout.close()
 	
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_vbs_filename + r' ' + str(penalty_time_each_run) + r' ' + r'VBS' + r' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_vbs_filename + r' ' + str(par_num)
+	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_vbs_filename + r' ' + str(sparkle_experiments_related_help.penalty_time) + r' ' + r'VBS' + r' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_vbs_filename
 	
 	os.system(gnuplot_command)
 	
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_vbs_filename)
 	return str_value
-
-
-def get_perfect_selector_related_information():
-	str_value_solverPerfectRankingList = ''
-	str_value_VBSPenaltyTime = ''
-	str_value_perfectPortfolioPenaltyTimeList = ''
-	
-	par_num = sparkle_experiments_related_help.par_num
-	par_num_str = 'PAR' + str(par_num)
-	
-	dict_amc = {}
-	
-	command = r'Commands/compute_marginal_contribution.py -perfect'
-	output = os.popen(command).readlines()
-	
-	solver_rank = 1
-	list_perfectPortfolioPenaltyTimeList = []
-	
-	for myline in output:
-		mylist = myline.strip().split()
-		
-		if len(mylist) == 12:
-			if mylist[0] == 'c' and mylist[1] == 'Perfect' and mylist[2] == par_num_str and mylist[3] == 'value' and mylist[4] == 'for' and mylist[5] == 'portfolio' and mylist[6] == 'selector' and mylist[7] == 'with' and mylist[8] == 'all' and mylist[9] == 'solvers' and mylist[10] == 'is':
-				str_value_VBSPenaltyTime = '%.6f' % (float(mylist[11]))
-				continue
-		
-		if len(mylist) == 12:
-			if mylist[0] == 'c' and mylist[1] == 'Perfect' and mylist[2] == par_num_str and mylist[3] == 'value' and mylist[4] == 'for' and mylist[5] == 'portfolio' and mylist[6] == 'selector' and mylist[7] == 'excluding' and mylist[8] == 'solver' and mylist[10] == 'is':
-				solver = mylist[9]
-				penalty_time = mylist[11]
-				#str_value_perfectPortfolioPenaltyTimeList += r'\item \textbf{Perfect Portfolio Selector excluding ' + solver + '}, ' + par_num_str + ': ' + penalty_time + '\n'
-				#str_value_perfectPortfolioPenaltyTimeList += 'Perfect Portfolio Selector excluding \\emph{%s} & %.6f \\\\ \n' % (solver, float(penalty_time))
-				list_perfectPortfolioPenaltyTimeList.append([solver, float(penalty_time)])
-				continue
-		
-		if len(mylist) == 12:
-			if mylist[0] == 'c' and mylist[1] == 'Absolute' and mylist[2] == 'marginal' and mylist[3] == 'contribution' and mylist[4] == '(to' and mylist[5] == 'Perfect' and mylist[6] == 'Selector)' and mylist[7] == 'for' and mylist[8] == 'solver' and mylist[10] == 'is':
-				solver = mylist[9]
-				solver_amc = mylist[11]
-				dict_amc[solver] = solver_amc
-				continue
-		
-		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Rel_Margi_Contr:':
-				solver = mylist[2]
-				solver_rmc = mylist[4]
-				#str_value_solverPerfectRankingList += r'\item \textbf{' + solver + r'}, Rel_Margi_Contr: ' + solver_rmc + ', Abs_Margi_Contr: ' + dict_amc[solver] + '\n'
-				str_value_solverPerfectRankingList += '%d & %s & %.6f & %.6f \\\\ \n' % (solver_rank, solver, float(solver_rmc), float(dict_amc[solver]))
-				solver_rank += 1
-	
-	list_perfectPortfolioPenaltyTimeList.sort(key=lambda item: item[1])
-	
-	for solver, penalty_time_value in list_perfectPortfolioPenaltyTimeList:
-		str_value_perfectPortfolioPenaltyTimeList += 'Perfect Portfolio Selector excluding \\emph{%s} & %.6f \\\\ \n' % (solver, penalty_time_value)
-	
-	return str_value_solverPerfectRankingList, str_value_VBSPenaltyTime, str_value_perfectPortfolioPenaltyTimeList
-
-
-def judge_complete_analysing_all_portfolio_selectors():
-	portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
-	portfolio_selector_penalty_time_on_each_instance_path = portfolio_selector_path + '_penalty_time_on_each_instance.txt'
-	if (not os.path.exists(portfolio_selector_penalty_time_on_each_instance_path)) or (not os.path.isfile(portfolio_selector_penalty_time_on_each_instance_path)):
-		return False
-	
-	performance_data_csv_path = sparkle_global_help.performance_data_csv_path + '_validate.csv'
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
-	
-	for excluded_solver in performance_data_csv.list_columns():	
-		portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path + '_excluding_' + sfh.get_last_level_directory_name(excluded_solver)
-		portfolio_selector_penalty_time_on_each_instance_path = portfolio_selector_path + '_penalty_time_on_each_instance.txt'
-		if (not os.path.exists(portfolio_selector_penalty_time_on_each_instance_path)) or (not os.path.isfile(portfolio_selector_penalty_time_on_each_instance_path)):
-			return False
-	
-	return True
-		
-def get_actualPenaltyTime_from_exisiting_analysis_file(portfolio_selector_penalty_time_on_each_instance_path):
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	par_num = sparkle_experiments_related_help.par_num
-	penalty_time_each_run = cutoff_time_each_run * par_num
-	
-	actualPenaltyTime = 0
-	instance_count = 0
-	
-	fin = open(portfolio_selector_penalty_time_on_each_instance_path, 'r')
-	while True:
-		myline = fin.readline()
-		if not myline: break
-		mylist = myline.strip().split()
-		instance = mylist[0]
-		runtime = float(mylist[1])
-		if runtime > cutoff_time_each_run:
-			runtime = penalty_time_each_run
-		actualPenaltyTime += runtime
-		instance_count += 1
-	fin.close()
-	
-	actualPenaltyTime = actualPenaltyTime / instance_count
-	return actualPenaltyTime
-
-
-def get_actual_selector_related_information_from_existing_analysis_files():
-	str_value_solverActualRankingList = ''
-	str_value_actualPenaltyTime = ''
-	str_value_actualPortfolioPenaltyTimeList = ''
-	
-	portfolio_selector_path_basis = sparkle_global_help.sparkle_portfolio_selector_path
-	portfolio_selector_path = portfolio_selector_path_basis
-	portfolio_selector_penalty_time_on_each_instance_path = portfolio_selector_path + '_penalty_time_on_each_instance.txt'
-	actual_portfolio_selector_penalty_time_value = get_actualPenaltyTime_from_exisiting_analysis_file(portfolio_selector_penalty_time_on_each_instance_path)
-	str_value_actualPenaltyTime = '%.6f' % (actual_portfolio_selector_penalty_time_value)
-	
-	list_actualPortfolioPenaltyTimeList = []
-	performance_data_csv_path = sparkle_global_help.performance_data_csv_path + '_validate.csv'
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
-	for excluded_solver in performance_data_csv.list_columns():	
-		portfolio_selector_path = portfolio_selector_path_basis + '_excluding_' + sfh.get_last_level_directory_name(excluded_solver)
-		portfolio_selector_penalty_time_on_each_instance_path = portfolio_selector_path + '_penalty_time_on_each_instance.txt'
-		solver = sfh.get_last_level_directory_name(excluded_solver)
-		penalty_time_value = get_actualPenaltyTime_from_exisiting_analysis_file(portfolio_selector_penalty_time_on_each_instance_path)
-		list_actualPortfolioPenaltyTimeList.append([solver, penalty_time_value])
-	
-	list_actualPortfolioPenaltyTimeList.sort(key=lambda item: item[1])
-	
-	for solver, penalty_time_value in list_actualPortfolioPenaltyTimeList:
-		str_value_actualPortfolioPenaltyTimeList += 'Actual Portfolio Selector excluding \\emph{%s} & %.6f \\\\ \n' % (solver, penalty_time_value)
-	
-	list_solverActualRankingList = []
-	amc_value_sum = 0
-	for solver, penalty_time_value in list_actualPortfolioPenaltyTimeList:
-		if penalty_time_value > actual_portfolio_selector_penalty_time_value:
-			solver_amc_value = log(penalty_time_value/actual_portfolio_selector_penalty_time_value, 10)
-		else:
-			solver_amc_value = 0
-		amc_value_sum += solver_amc_value
-		list_solverActualRankingList.append([solver, solver_amc_value])
-	
-	for i in range(0, len(list_solverActualRankingList)):
-		solver_amc_value = list_solverActualRankingList[i][1]
-		solver_rmc_value = 0
-		try:
-			solver_rmc_value = solver_amc_value/amc_value_sum
-		except:
-			solver_rmc_value = 0
-		list_solverActualRankingList[i].append(solver_rmc_value)
-	
-	list_solverActualRankingList.sort(key=lambda item: item[2], reverse=True)
-	solver_rank = 1
-	for i in range(0, len(list_solverActualRankingList)):
-		solver = list_solverActualRankingList[i][0]
-		solver_amc_value = list_solverActualRankingList[i][1]
-		solver_rmc_value = list_solverActualRankingList[i][2]
-		str_value_solverActualRankingList += '%d & %s & %.6f & %.6f \\\\ \n' % (solver_rank, solver, solver_rmc_value, solver_amc_value)
-		solver_rank += 1
-	
-	return str_value_solverActualRankingList, str_value_actualPenaltyTime, str_value_actualPortfolioPenaltyTimeList
-
-
-def get_actual_selector_related_information():
-	str_value_solverActualRankingList = ''
-	str_value_actualPenaltyTime = ''
-	str_value_actualPortfolioPenaltyTimeList = ''
-	
-	if judge_complete_analysing_all_portfolio_selectors():
-		str_value_solverActualRankingList, str_value_actualPenaltyTime, str_value_actualPortfolioPenaltyTimeList = get_actual_selector_related_information_from_existing_analysis_files()
-		return str_value_solverActualRankingList, str_value_actualPenaltyTime, str_value_actualPortfolioPenaltyTimeList
-	
-	par_num = sparkle_experiments_related_help.par_num
-	par_num_str = 'PAR' + str(par_num)
-	
-	dict_amc = {}
-	
-	command = r'Commands/compute_marginal_contribution.py -actual'
-	output = os.popen(command).readlines()
-	
-	solver_rank = 1
-	list_actualPortfolioPenaltyTimeList = []
-	
-	for myline in output:
-		mylist = myline.strip().split()
-		
-		if len(mylist) == 12:
-			if mylist[0] == 'c' and mylist[1] == 'Actual' and mylist[2] == par_num_str and mylist[3] == 'value' and mylist[4] == 'for' and mylist[5] == 'portfolio' and mylist[6] == 'selector' and mylist[7] == 'with' and mylist[8] == 'all' and mylist[9] == 'solvers' and mylist[10] == 'is':
-				str_value_actualPenaltyTime = '%.6f' % (float(mylist[11]))
-				continue
-		
-		if len(mylist) == 12:
-			if mylist[0] == 'c' and mylist[1] == 'Actual' and mylist[2] == par_num_str and mylist[3] == 'value' and mylist[4] == 'for' and mylist[5] == 'portfolio' and mylist[6] == 'selector' and mylist[7] == 'excluding' and mylist[8] == 'solver' and mylist[10] == 'is':
-				solver = mylist[9]
-				penalty_time = mylist[11]
-				#str_value_actualPortfolioPenaltyTimeList += r'\item \textbf{Actual Portfolio Selector excluding ' + solver + '}, ' + par_num_str + ': ' + penalty_time + '\n'
-				#str_value_actualPortfolioPenaltyTimeList += 'Actual Portfolio Selector excluding \\emph{%s} & %.6f \\\\ \n' % (solver, float(penalty_time))
-				list_actualPortfolioPenaltyTimeList.append([solver, float(penalty_time)])
-				continue
-		
-		if len(mylist) == 12:
-			if mylist[0] == 'c' and mylist[1] == 'Absolute' and mylist[2] == 'marginal' and mylist[3] == 'contribution' and mylist[4] == '(to' and mylist[5] == 'Actual' and mylist[6] == 'Selector)' and mylist[7] == 'for' and mylist[8] == 'solver' and mylist[10] == 'is':
-				solver = mylist[9]
-				solver_amc = mylist[11]
-				dict_amc[solver] = solver_amc
-				continue
-		
-		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Rel_Margi_Contr:':
-				solver = mylist[2]
-				solver_rmc = mylist[4]
-				#str_value_solverActualRankingList += r'\item \textbf{' + solver + r'}, Rel_Margi_Contr: ' + solver_rmc + ', Abs_Margi_Contr: ' + dict_amc[solver] + '\n'
-				str_value_solverActualRankingList += '%d & %s & %.6f & %.6f \\\\ \n' % (solver_rank, solver, float(solver_rmc), float(dict_amc[solver]))
-				solver_rank += 1
-				
-	list_actualPortfolioPenaltyTimeList.sort(key=lambda item: item[1])
-	
-	for solver, penalty_time_value in list_actualPortfolioPenaltyTimeList:
-		str_value_actualPortfolioPenaltyTimeList += 'Actual Portfolio Selector excluding \\emph{%s} & %.6f \\\\ \n' % (solver, penalty_time_value)
-				
-	return str_value_solverActualRankingList, str_value_actualPenaltyTime, str_value_actualPortfolioPenaltyTimeList
 
 
 
@@ -580,10 +303,6 @@ def get_dict_variable_to_value():
 	
 	variable = r'sparkle'
 	str_value = get_sparkle()
-	mydict[variable] = str_value
-	
-	variable = r'sparkleVersion'
-	str_value = get_sparkleVersion()
 	mydict[variable] = str_value
 	
 	variable = r'numSolvers'
@@ -602,10 +321,6 @@ def get_dict_variable_to_value():
 	str_value = get_featureExtractorList()
 	mydict[variable] = str_value
 	
-	variable = r'numTotalInstances'
-	str_value = get_numTotalInstances()
-	mydict[variable] = str_value
-	
 	variable = r'numInstanceClasses'
 	str_value = get_numInstanceClasses()
 	mydict[variable] = str_value
@@ -618,61 +333,37 @@ def get_dict_variable_to_value():
 	str_value = get_featureComputationCutoffTime()
 	mydict[variable] = str_value
 	
-	variable = r'featureComputationMemoryLimit'
-	str_value = get_featureComputationMemoryLimit()
-	mydict[variable] = str_value
-	
 	variable = r'performanceComputationCutoffTime'
 	str_value = get_performanceComputationCutoffTime()
 	mydict[variable] = str_value
 	
-	variable = r'performanceComputationMemoryLimit'
-	str_value = get_performanceComputationMemoryLimit()
+	variable = r'solverPerfectRankingList'
+	str_value = get_solverPerfectRankingList()
 	mydict[variable] = str_value
 	
-	#variable = r'solverPerfectRankingList'
-	#str_value = get_solverPerfectRankingList()
-	#mydict[variable] = str_value
-	
-	#variable = r'solverActualRankingList'
-	#str_value = get_solverActualRankingList()
-	#mydict[variable] = str_value
-	
-	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
+	variable = r'solverActualRankingList'
+	str_value = get_solverActualRankingList()
+	mydict[variable] = str_value
 	
 	variable = r'figure-portfolio-selector-sparkle-vs-sbs'
-	str_value = get_figure_portfolio_selector_sparkle_vs_sbs(dict_actual_portfolio_selector_penalty_time_on_each_instance)
+	str_value = get_figure_portfolio_selector_sparkle_vs_sbs()
 	mydict[variable] = str_value
 	
 	variable = r'figure-portfolio-selector-sparkle-vs-vbs'
-	str_value = get_figure_portfolio_selector_sparkle_vs_vbs(dict_actual_portfolio_selector_penalty_time_on_each_instance)
+	str_value = get_figure_portfolio_selector_sparkle_vs_vbs()
 	mydict[variable] = str_value
 	
-	variable = r'parNum'
-	str_value = get_parNum()
+	variable = r'PAR10RankingList'
+	str_value = get_PAR10RankingList()
 	mydict[variable] = str_value
 	
-	variable = r'PenaltyTimeRankingList'
-	str_value = get_PenaltyTimeRankingList()
+	variable = r'VBSPAR10'
+	str_value = get_VBSPAR10()
 	mydict[variable] = str_value
 	
-	#variable = r'VBSPenaltyTime'
-	#str_value = get_VBSPenaltyTime()
-	#mydict[variable] = str_value
-	
-	#variable = r'actualPenaltyTime'
-	#str_value = get_actualPenaltyTime()
-	#mydict[variable] = str_value
-	
-	str_value_solverPerfectRankingList, str_value_VBSPenaltyTime, str_value_perfectPortfolioPenaltyTimeList = get_perfect_selector_related_information()
-	mydict['solverPerfectRankingList'] = str_value_solverPerfectRankingList
-	mydict['VBSPenaltyTime'] = str_value_VBSPenaltyTime
-	mydict['perfectPortfolioPenaltyTimeList'] = str_value_perfectPortfolioPenaltyTimeList
-	
-	str_value_solverActualRankingList, str_value_actualPenaltyTime, str_value_actualPortfolioPenaltyTimeList = get_actual_selector_related_information()
-	mydict['solverActualRankingList'] = str_value_solverActualRankingList
-	mydict['actualPenaltyTime'] = str_value_actualPenaltyTime
-	mydict['actualPortfolioPenaltyTimeList'] = str_value_actualPortfolioPenaltyTimeList
+	variable = r'actualPAR10'
+	str_value = get_actualPAR10()
+	mydict[variable] = str_value
 	
 	return mydict
 	

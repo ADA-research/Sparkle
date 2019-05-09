@@ -28,8 +28,8 @@ def get_list_running_extractor_jobs():
 	for statusinfo_filename in list_all_statusinfo_filename:
 		statusinfo_filepath = tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename)
 		try:
-			fin = open(statusinfo_filepath, 'r')
-			#fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+			fin = open(statusinfo_filepath, 'r+')
+			fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 			mylist1 = fin.readline().strip().split()
 			status_str = mylist1[1]
 			if not status_str == r'Running':

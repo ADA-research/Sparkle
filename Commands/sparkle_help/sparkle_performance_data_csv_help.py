@@ -105,14 +105,10 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 			mydict[instance] = vbs_penalty_time
 		return mydict
 	
-	def calc_vbs_penalty_time(self, cutoff_time_each_run, par_num=10):
+	def calc_vbs_penaltry_time(self, cutoff_time_each_run, par_num=10):
 		penalty_time_each_run = cutoff_time_each_run * par_num
 		vbs_penalty_time = 0.0
 		vbs_count = 0
-		
-		if len(self.list_rows()) == 0 or len(self.list_columns()) == 0:
-			vbs_penalty_time = penalty_time_each_run
-			return vbs_penalty_time
 		
 		for instance in self.list_rows():
 			vbs_penalty_time_on_this_instance = -1

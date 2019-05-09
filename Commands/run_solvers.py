@@ -67,14 +67,13 @@ if __name__ == r'__main__':
 		dependency_jobid_list = []
 		if run_solvers_parallel_jobid:
 			dependency_jobid_list.append(run_solvers_parallel_jobid)
-		job_script = 'Commands/construct_sparkle_portfolio_selector.py -parallel'
+		job_script = 'Commands/construct_sparkle_portfolio_selector.py'
 		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
 		
-		'''
 		if run_job_parallel_jobid:
 			dependency_jobid_list.append(run_job_parallel_jobid)
 		job_script = 'Commands/generate_report.py'
 		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
-		'''
+		
 		
 

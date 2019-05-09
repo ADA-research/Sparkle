@@ -20,12 +20,11 @@ import sparkle_global_help
 import sparkle_feature_data_csv_help as sfdcsv
 import sparkle_performance_data_csv_help as spdcsv
 import sparkle_run_solvers_help as srs
-import sparkle_experiments_related_help as ser
 
 def get_cutoff_time_each_run_from_cutoff_time_information_txt_path(cutoff_time_information_txt_path = sparkle_global_help.cutoff_time_information_txt_path):
 	
-	fin = open(cutoff_time_information_txt_path, 'r')
-	#fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+	fin = open(cutoff_time_information_txt_path, 'r+')
+	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 	myline = fin.readline().strip()
 	mylist = myline.split()
 	cutoff_time_each_run = float(mylist[2])
@@ -52,19 +51,11 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, perfor
 	
 	#command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 2> ' + sparkle_global_help.sparkle_log_path
 	
-	#command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + '--runcount_limit 42 --wallclock_limit 604800' + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 2> ' + sparkle_global_help.sparkle_log_path
+	command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 2> ' + sparkle_global_help.sparkle_log_path
 	
-	this_sparkle_log_path = sparkle_global_help.sparkle_log_path + '_' + sparkle_basic_help.get_time_pid_random_string()
+	#print 'c ' + command_line
 	
-	command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + '--runcount_limit %d --wallclock_limit %d' % (ser.runcount_limit_for_autofolio, ser.wallclock_limit_for_autofolio) + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 2> ' + this_sparkle_log_path
-	
-	while True:	
-		os.system(command_line)
-		os.system('rm -f ' + this_sparkle_log_path)
-		if not os.path.exists(sparkle_portfolio_selector_path):
-			continue
-		else:
-			break
+	os.system(command_line)
 	
 	#if not os.path.exists(sparkle_portfolio_selector_path):
 	#	print 'c ' + sparkle_portfolio_selector_path + ' does not exist!'

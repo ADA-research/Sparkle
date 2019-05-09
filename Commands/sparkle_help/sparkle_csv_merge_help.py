@@ -23,8 +23,8 @@ import sparkle_experiments_related_help as ser
 
 '''
 def csv_load_combine_update(feature_data_csv_path, second_sfdcsv):
-	fo = open(feature_data_csv_path, 'r')
-	#fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo = open(feature_data_csv_path, 'r+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	try:
 		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
 		feature_data_csv.combine(second_sfdcsv)
@@ -71,8 +71,8 @@ def performance_data_csv_merge():
 		result_name = result_list[i]
 		result_path = tmp_performance_data_result_directory + result_name
 		try:
-			fin = open(result_path, 'r')
-			#fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+			fin = open(result_path, 'r+')
+			fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 			instance_path = fin.readline().strip()
 			if not instance_path: continue
 			solver_path = fin.readline().strip()
@@ -114,20 +114,11 @@ def performance_data_csv_merge():
 		wrong_solver_path = wrong_solver_list[i]
 		performance_data_csv.delete_column(wrong_solver_path)
 		performance_data_csv.update_csv()
-		
-		try:
-			sparkle_global_help.solver_list.remove(wrong_solver_path)
-			sfh.write_solver_list()
-		except:
-			pass
-		
-		try:
-			if os.path.exists(solver_nickname_list_path):
-				sparkle_global_help.solver_nickname_mapping.remove(wrong_solver_path)
-				sfh.write_solver_nickname_mapping()
-		except:
-			pass
-		
+		sparkle_global_help.solver_list.remove(wrong_solver_path)
+		output = sparkle_global_help.solver_nickname_mapping.pop(wrong_solver_path)
+		sfh.write_solver_list()
+		sfh.write_solver_nickname_mapping()
+	
 	return
 
 

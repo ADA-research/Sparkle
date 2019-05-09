@@ -38,7 +38,6 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 	runsolver_option = r'--timestamp --use-pty'
 	#cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_run)
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time)
-	memory_limit_each_run_option = r'-M ' + str(ser.memory_limit_each_solver_run)
 	runsolver_watch_data_path = raw_result_path.replace('.rawres', '.log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
 	raw_result_path_option = r'-o ' + raw_result_path
@@ -46,7 +45,7 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 	relative_path_option = relative_path
 	instance_path_option = instance_path
 	
-	command_line = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + memory_limit_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + raw_result_path_option + r' ' + solver_wrapper_path_option + r' ' + relative_path_option + r' ' + instance_path_option
+	command_line = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + raw_result_path_option + r' ' + solver_wrapper_path_option + r' ' + relative_path_option + r' ' + instance_path_option
 	
 	try:
 		os.system(command_line)
@@ -63,8 +62,8 @@ def get_runtime(raw_result_path):
 	# SATISFIABLE, UNSATISFIABLE
 	runtime = 0
 	
-	fin = open(raw_result_path, 'r')
-	#fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+	fin = open(raw_result_path, 'r+')
+	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fin.readline().strip()
 		if not myline: break
@@ -82,12 +81,12 @@ def get_runtime(raw_result_path):
 def get_verify_string(tmp_verify_result_path):
 	#4 return values: 'SAT', 'UNSAT', 'WRONG', 'UNKNOWN'
 	ret = 'UNKNOWN'
-	fin = open(tmp_verify_result_path, 'r')
-	#fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+	fin = open(tmp_verify_result_path, 'r+')
+	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fin.readline()
-		if not myline: break
 		myline = myline.strip()
+		if not myline: break
 		if myline == r'Solution verified.':
 			myline2 = fin.readline()
 			myline2 = fin.readline().strip()
@@ -116,9 +115,6 @@ def get_verify_string(tmp_verify_result_path):
 def judge_correctness_raw_result(instance_path, raw_result_path):
 	SAT_verifier_path = sparkle_global_help.SAT_verifier_path
 	tmp_verify_result_path = r'TMP/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.vryres'
-	#tmp_verify_result_path = r'TMP/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'.vryres'
-	if len(tmp_verify_result_path) > 250:
-		tmp_verify_result_path = r'TMP/' + sparkle_basic_help.get_time_pid_random_string() + r'.vryres'
 	command_line = SAT_verifier_path + r' ' + instance_path + r' ' + raw_result_path + r' > ' + tmp_verify_result_path
 	os.system(command_line)
 	
@@ -160,7 +156,7 @@ def running_solvers(performance_data_csv_path, mode):
 				current_job_num += 1
 				print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ignored!'
 				print r'c'
-				continue	
+				continue
 			
 			raw_result_path = r'TMP/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 			
@@ -169,12 +165,9 @@ def running_solvers(performance_data_csv_path, mode):
 			print r'c'
 			print 'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...'
 			
-			if sparkle_global_help.solver_complete_type_mapping[solver_path] == 'incomplete' and sparkle_global_help.instance_reference_mapping[instance_path] == 'UNSAT':
-				verify_string = r'UNKNOWN'
-				runtime = penalty_time
-			else:
-				run_solver_on_instance(solver_path, solver_path+r'/'+sparkle_global_help.sparkle_run_default_wrapper, instance_path, raw_result_path)
-				verify_string = judge_correctness_raw_result(instance_path, raw_result_path)
+			run_solver_on_instance(solver_path, solver_path+r'/'+sparkle_global_help.sparkle_run_default_wrapper, instance_path, raw_result_path)
+		
+			verify_string = judge_correctness_raw_result(instance_path, raw_result_path)
 		
 			runtime = 0
 		

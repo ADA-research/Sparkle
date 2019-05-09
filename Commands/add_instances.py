@@ -25,6 +25,7 @@ from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
+from sparkle_help import sparkle_add_train_instances_help as satih
 
 if __name__ == r'__main__':
 
@@ -33,7 +34,6 @@ if __name__ == r'__main__':
 	my_flag_run_solver_later = False
 	my_flag_nickname = False
 	my_flag_parallel = False
-	my_flag_all_unsat = False
 	nickname_str = r''
 	instances_source = r''
 
@@ -50,17 +50,13 @@ if __name__ == r'__main__':
 			nickname_str = sys.argv[i]
 		elif sys.argv[i] == r'-parallel':
 			my_flag_parallel = True
-		elif sys.argv[i] == r'-all-unsat':
-			my_flag_all_unsat = True
 		else:
 			instances_source = sys.argv[i]
-			if instances_source[-1]!= '/':
-				instances_source += '/'
 		i += 1
 
 	if not os.path.exists(instances_source):
 		print r'c Instances path ' + "\'" + instances_source + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname] [<nickname>] [-all-unsat] [-parallel] <instances_source_directory>'
+		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname] [<nickname>] [-parallel] <instances_source_directory>'
 		sys.exit()
 
 	print 'c Start adding all cnf instances in directory ' + instances_source + r' ...' 
@@ -69,15 +65,12 @@ if __name__ == r'__main__':
 	if my_flag_nickname: last_level_directory = nickname_str
 	else: last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
-	if last_level_directory[-1] != '/':
-		last_level_directory += '/'
+	instances_directory = r'Instances/' + last_level_directory
+	if not os.path.exists(instances_directory): os.mkdir(instances_directory)
 
-	instances_diretory = r'Instances/' + last_level_directory
-	if not os.path.exists(instances_diretory): os.mkdir(instances_diretory)
-
-	#os.system(r'cp ' + instances_source + r'/*.cnf ' + instances_diretory)
+	#os.system(r'cp ' + instances_source + r'/*.cnf ' + instances_directory)
 	list_source_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_source)
-	list_target_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_diretory)
+	list_target_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_directory)
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
@@ -87,45 +80,69 @@ if __name__ == r'__main__':
 	print 'c The number of intended adding instances: ' + str(num_cnf)
 
 	for i in range(0, len(list_source_all_cnf_filename)):
-		source_cnf_path = list_source_all_cnf_filename[i]
+		intended_cnf_filename = list_source_all_cnf_filename[i]
 		print r'c'
-		print r'c Adding ' + source_cnf_path + r' ...'
+		print r'c Adding ' + intended_cnf_filename + r' ...'
 		print 'c Executing Progress: ' + str(i+1) + ' out of ' + str(num_cnf)
 		
-		if 'Instances/' + source_cnf_path in list_target_all_cnf_filename:
-			print r'c Instance ' + sfh.get_last_level_directory_name(source_cnf_path) + r' already exists in Directory ' + instances_diretory
-			print r'c Ignore adding file ' + sfh.get_last_level_directory_name(source_cnf_path)
+		if intended_cnf_filename in list_target_all_cnf_filename:
+			print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' already exists in Directory ' + instances_directory
+			print r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_cnf_filename)
 			#continue
 		else:
-			target_cnf_path = source_cnf_path.replace(instances_source, instances_diretory)
-			if my_flag_all_unsat:
-				target_cnf_status = 'UNSAT'
-			else:
-				target_cnf_status = 'UNKNOWN'
-			sparkle_global_help.instance_list.append(target_cnf_path)
-			sparkle_global_help.instance_reference_mapping[target_cnf_path] = target_cnf_status
-			sfh.add_new_instance_into_file(target_cnf_path)
-			sfh.add_new_instance_reference_into_file(target_cnf_path, target_cnf_status)
-			feature_data_csv.add_row(target_cnf_path)
-			performance_data_csv.add_row(target_cnf_path)
+			intended_cnf_filename_path = instances_directory + r'/' + intended_cnf_filename
+			intended_cnf_status = r'UNKNOWN'
+			sparkle_global_help.instance_list.append(intended_cnf_filename_path)
+			sparkle_global_help.instance_reference_mapping[intended_cnf_filename_path] = intended_cnf_status
+			sfh.add_new_instance_into_file(intended_cnf_filename_path)
+			sfh.add_new_instance_reference_into_file(intended_cnf_filename_path, intended_cnf_status)
+			feature_data_csv.add_row(intended_cnf_filename_path)
+			performance_data_csv.add_row(intended_cnf_filename_path)
 			
-			if not os.path.exists(sfh.get_all_level_directory(target_cnf_path)):
-				os.system('mkdir -p ' + sfh.get_all_level_directory(target_cnf_path))
-			command = 'cp ' + source_cnf_path + ' ' + target_cnf_path
-			os.system(command)
-			
-			print r'c Instance ' + sfh.get_last_level_directory_name(source_cnf_path) + r' has been added!'
+			if instances_source[-1] == r'/': instances_source = instances_source[:-1]
+			os.system(r'cp ' + instances_source + r'/' + intended_cnf_filename + r' ' + instances_directory)
+			print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' has been added!'
 			print r'c'
+
+	print('c Selecting training instances ...')
+	list_cnf_path = satih.get_list_cnf_path(instances_directory)
+	list_train_cnf_index = satih.get_list_train_cnf_index(list_cnf_path)
+	cnf_dir_prefix = instances_directory
+	smac_cnf_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
+	satih.selecting_train_cnf(list_cnf_path, list_train_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix)
+	list_train_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix)
+	file_train_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory) + r'_train.txt'
+	
+	fout = open(file_train_cnf, 'w+')
+	for path in list_train_cnf_path:
+		fout.write(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
+		#print(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1))
+		#print(path, smac_cnf_dir_prefix)
+	fout.close()
+	print('c Selecting training instances done!')
+	
+	print('c Selecting testing instances ...')
+	list_cnf_path = satih.get_list_cnf_path(instances_directory)
+	list_test_cnf_index = satih.get_list_test_cnf_index(list_cnf_path, list_train_cnf_index)
+	cnf_dir_prefix = instances_directory
+	smac_cnf_dir_prefix_test = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory)
+	satih.selecting_test_cnf(list_cnf_path, list_test_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix_test)
+	list_test_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix_test)
+	file_test_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory) + r'_test.txt'
+	
+	fout = open(file_test_cnf, 'w+')
+	for path in list_test_cnf_path:
+		fout.write(path.replace(smac_cnf_dir_prefix_test, '../instances_test/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
+	fout.close()
+	print('c Selecting testing instances done!')
 
 	feature_data_csv.update_csv()
 	performance_data_csv.update_csv()
 	
-	print 'c Adding instances ' + sfh.get_last_level_directory_name(instances_diretory) + ' done!'
+	print 'c Adding instances ' + sfh.get_last_level_directory_name(instances_directory) + ' done!'
 
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
-		os.system(command_line)
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path + '*'
 		os.system(command_line)
 		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
 	

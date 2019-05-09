@@ -70,10 +70,8 @@ if __name__ == r'__main__':
 	##pre-run the feature extractor on a testing instance, to obtain the feature names
 	extractor_path = extractor_diretory
 	instance_path = extractor_path + r'/' + r'sparkle_test_instance.cnf'
-	key_str = sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
-	result_path = r'TMP/' + key_str + r'.rawres'
-	tmp_output = r'TMP/tmp/' + key_str
-	command_line = extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' ' + tmp_output
+	result_path = r'TMP/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+	command_line = extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path
 	os.system(command_line)
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
@@ -88,8 +86,6 @@ if __name__ == r'__main__':
 	sparkle_global_help.extractor_feature_vector_size_mapping[extractor_diretory] = len(list_columns)
 	sfh.add_new_extractor_feature_vector_size_into_file(extractor_diretory, len(list_columns))
 
-	command_line = r'rm -f ' + tmp_output
-	os.system(command_line)
 	command_line = r'rm -f ' + result_path
 	os.system(command_line)
 	
@@ -97,8 +93,6 @@ if __name__ == r'__main__':
 
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
-		os.system(command_line)
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path + '*'
 		os.system(command_line)
 		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
 
