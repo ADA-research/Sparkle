@@ -1,0 +1,13 @@
+*.pyc
+Components/smac-v2.10.03-master-778/*sbatch.sh
+Reference_Lists/*
+Solvers/*
+Extractors/*
+Instances/*
+Configuration_Reports/*
+Performance_Data/*
+Components/smac-v2.10.03-master-778/results/*
+Components/smac-v2.10.03-master-778/tmp/*
+Components/smac-v2.10.03-master-778/example_scenarios/instances/*
+Components/smac-v2.10.03-master-778/example_scenarios/instances_test/*
+Components/smac-v2.10.03-master-778/example_scenarios/*/
