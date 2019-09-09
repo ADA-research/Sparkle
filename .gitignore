@@ -11,3 +11,7 @@ Components/smac-v2.10.03-master-778/tmp/*
 Components/smac-v2.10.03-master-778/example_scenarios/instances/*
 Components/smac-v2.10.03-master-778/example_scenarios/instances_test/*
 Components/smac-v2.10.03-master-778/example_scenarios/*/
+
+# Exclude intermediate files generated when compiling latex
+*.aux
+*.log
