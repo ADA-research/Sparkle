@@ -1,0 +1,39 @@
+\documentclass{article}
+
+\title{Sparkle user guide}
+\author{Koen van der Blom}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Required packages}
+
+\subsection{On Grace}
+
+Grace is the computing cluster of the ADA group\footnote{\texttt{http://ada.liacs.nl/}} at LIACS, Leiden University. Since not all packages required by Sparkle are installed on the system, some have to be installed local to the user.
+
+Specifically, \texttt{epstopdf} is required for Sparkle's reporting component to work (e.g. \texttt{generate\_report, generate\_report\_for\_configuration}), it can be installed in your user directory as follows:
+
+\begin{enumerate}
+  \item Download \texttt{epstopdf}
+
+  \texttt{wget http://mirrors.ctan.org/support/epstopdf.zip}
+
+  \item Unzip the package
+
+  \texttt{unzip epstopdf.zip}
+
+  \item Rename \texttt{epstopdf.pl} (inside the directory you just unzipped)
+
+  \texttt{mv epstopdf.pl epstopdf}
+
+  \item Add this line to your \texttt{.bashrc} (open with e.g. \texttt{vim \~{}/.bashrc})
+
+  \texttt{export PATH="/<directory>/epstopdf:\$PATH"}
+
+  (replace "\texttt{<directory>}" with the path to the \texttt{epstopdf} directory)
+\end{enumerate}
+
+\end{document}
