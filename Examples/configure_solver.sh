@@ -33,8 +33,8 @@ Commands/add_instances.py -run-solver-later -run-extractor-later Examples/Resour
 # - A scenario file containing configuration settings (generated with defaults)
 Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/PbO-CSCCSAT-Generic/
 
-# Add a feature extractor, but do not run it yet
-Commands/add_feature_extractor.py -run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+# Configure a solver with a given instance set. The instance set is split into train and test automatically.
+Commands/configure_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instance_set Instances/PTN/
 
 # Compare the configured solver and the default solver to each other
 Commands/test_configured_solver_and_default_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instance_set Instances/PTN/
