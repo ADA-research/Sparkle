@@ -154,6 +154,7 @@ def construct_list_instance_and_par10_recursive(list_instance_and_par10, path, c
 	return 
 	
 
+# Return a dictionary of instance names and their par10 score
 def get_dict_instance_to_par10(results_dir, cutoff):
 	list_instance_and_par10 = []
 	construct_list_instance_and_par10_recursive(list_instance_and_par10, results_dir, cutoff)
@@ -209,6 +210,7 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	data_plot_configured_vs_default_on_train_instance_set_filename = 'data_' + solver_name + '_configured_vs_default_on_' + instance_set_name + '_train'
 	data_plot_configured_vs_default_on_train_instance_set_path = latex_directory_path + data_plot_configured_vs_default_on_train_instance_set_filename + '.dat'
 	fout = open(data_plot_configured_vs_default_on_train_instance_set_path, 'w+')
+	# Write PAR10 values for configured and default to file
 	for instance in dict_instance_to_par10_configured:
 		configured_par10_value = dict_instance_to_par10_configured[instance]
 		default_par10_value = dict_instance_to_par10_default[instance]
@@ -318,6 +320,7 @@ def generate_report_for_configuration(solver_name, instance_set_name):
 	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_name)
 	
 	
+	# Read in the report template from file
 	latex_template_filepath = latex_directory_path + latex_template_filename
 	report_content = r''
 	fin = open(latex_template_filepath, 'r')
@@ -327,6 +330,7 @@ def generate_report_for_configuration(solver_name, instance_set_name):
 		report_content += myline
 	fin.close()
 	
+	# Replace variables in the report template with their value
 	for variable_key, str_value in dict_variable_to_value.items():
 		 variable = r'@@' + variable_key + r'@@'
 		 if (variable_key != r'figure-configured-vs-default-test') and (variable_key != r'figure-configured-vs-default-train'):
@@ -336,11 +340,13 @@ def generate_report_for_configuration(solver_name, instance_set_name):
 	
 	#print(report_content)
 	
+	# Write the completed report to a tex file
 	latex_report_filepath = latex_directory_path + latex_report_filename + r'.tex'
 	fout = open(latex_report_filepath, 'w+')
 	fout.write(report_content)
 	fout.close()
 	
+	# Compile the report
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
