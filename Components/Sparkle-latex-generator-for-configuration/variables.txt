@@ -14,4 +14,9 @@
 @@optimisedConfigurationTrainingPerformancePAR10@@
 @@optimisedConfigurationTestingPerformancePAR10@@
 @@defaultConfigurationTestingPerformancePAR10@@
-
+@@timeoutsTrainDefault@@
+@@timeoutsTrainConfigured@@
+@@timeoutsTrainOverlap@@
+@@timeoutsTestDefault@@
+@@timeoutsTestConfigured@@
+@@timeoutsTestOverlap@@

@@ -225,6 +225,66 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	return str_value
 
 
+def get_timeouts_test(solver_name, instance_set_name, cutoff):
+	configured_timeouts = 0
+	default_timeouts = 0
+	overlapping_timeouts = 0
+
+	# Retrieve instances and PAR10 values
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	configured_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
+	default_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
+	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, cutoff)
+	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, cutoff)
+
+	# Count default timeouts, configured timeouts, and overlapping timeouts
+	timeout_value = cutoff * 10
+
+	for instance in dict_instance_to_par10_configured:
+		configured_par10_value = dict_instance_to_par10_configured[instance]
+		default_par10_value = dict_instance_to_par10_default[instance]
+		#print('%f %f %f' % (timeout_value, configured_par10_value, default_par10_value))
+		if configured_par10_value == timeout_value:
+			configured_timeouts += 1
+		if default_par10_value == timeout_value:
+			default_timeouts += 1
+		if configured_par10_value == timeout_value and default_par10_value == timeout_value:
+			overlapping_timeouts += 1
+
+	#print('%d %d %d' % (configured_timeouts, default_timeouts, overlapping_timeouts))
+	return configured_timeouts, default_timeouts, overlapping_timeouts
+
+
+def get_timeouts_train(solver_name, instance_set_name, cutoff):
+	configured_timeouts = 0
+	default_timeouts = 0
+	overlapping_timeouts = 0
+
+	# Retrieve instances and PAR10 values
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	configured_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
+	default_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
+	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, cutoff)
+	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, cutoff)
+
+	# Count default timeouts, configured timeouts, and overlapping timeouts
+	timeout_value = cutoff * 10
+
+	for instance in dict_instance_to_par10_configured:
+		configured_par10_value = dict_instance_to_par10_configured[instance]
+		default_par10_value = dict_instance_to_par10_default[instance]
+		#print('%f %f %f' % (timeout_value, configured_par10_value, default_par10_value))
+		if configured_par10_value == timeout_value:
+			configured_timeouts += 1
+		if default_par10_value == timeout_value:
+			default_timeouts += 1
+		if configured_par10_value == timeout_value and default_par10_value == timeout_value:
+			overlapping_timeouts += 1
+
+	#print('%d %d %d' % (configured_timeouts, default_timeouts, overlapping_timeouts))
+	return configured_timeouts, default_timeouts, overlapping_timeouts
+
+
 def get_dict_variable_to_value(solver_name, instance_set_name):
 	mydict = {}
 	
@@ -304,6 +364,31 @@ def get_dict_variable_to_value(solver_name, instance_set_name):
 	str_value = get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_name, float(smac_each_run_cutoff_time))
 	mydict[variable] = str_value
 	
+	# Retrieve timeout numbers for the training instances
+	configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = get_timeouts_train(solver_name, instance_set_name, float(smac_each_run_cutoff_time))
+
+	variable = r'timeoutsTrainDefault'
+	mydict[variable] = str(default_timeouts_train)
+
+	variable = r'timeoutsTrainConfigured'
+	mydict[variable] = str(configured_timeouts_train)
+
+	variable = r'timeoutsTrainOverlap'
+	mydict[variable] = str(overlapping_timeouts_train)
+
+	# Retrieve timeout numbers for the testing instances
+	configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = get_timeouts_test(solver_name, instance_set_name, float(smac_each_run_cutoff_time))
+
+	variable = r'timeoutsTestDefault'
+	mydict[variable] = str(default_timeouts_test)
+
+	variable = r'timeoutsTestConfigured'
+	mydict[variable] = str(configured_timeouts_test)
+
+	variable = r'timeoutsTestOverlap'
+	mydict[variable] = str(overlapping_timeouts_test)
+
+
 	return mydict
 	
 

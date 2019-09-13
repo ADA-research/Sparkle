@@ -94,6 +94,19 @@ The empirical comparison between the @@solver@@ (configured) and @@solver@@ (def
 \caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSet@@.}\label{fig:configured_vs_default_test}
 \end{figure}
 
+Table \ref{tbl:timeouts_test} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the testing set of @@instanceSet@@, as well as on how many instances both timed out.
+
+\begin{table}[htbp]
+\begin{center}
+\begin{tabular}{ccc}
+configured & default & overlap \\ \hline
+@@timeoutsTestConfigured@@ & @@timeoutsTestDefault@@ & @@timeoutsTestOverlap@@
+\end{tabular}
+\end{center}
+\caption{Number of time-outs for @@solver@@ (configured), @@solver@@ (default), and for how many instances both timed out on the testing set of @@instanceSet@@.}
+\label{tbl:timeouts_test}
+\end{table}
+
 
 \section{Comparison between Configured Version and Default Version on the Training Instance Set}
 In order to investigate the performance on the training instance set, @@sparkle@@ would run the configured version of @@solver@@ and the default version of @@solver@@ on the training instance set. During this phase, each version was performed one run per instance with a cutoff time of @@smacEachRunCutoffTime@@ seconds. The results are reported as follows.
@@ -113,6 +126,18 @@ The empirical comparison between the @@solver@@ (configured) and @@solver@@ (def
 
 \caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the training set of @@instanceSet@@.}\label{fig:configured_vs_default_train}
 \end{figure}
+
+Table \ref{tbl:timeouts_train} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the training set of @@instanceSet@@, as well as on how many instances both timed out.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{ccc}
+configured & default & overlap \\ \hline
+@@timeoutsTrainConfigured@@ & @@timeoutsTrainDefault@@ & @@timeoutsTrainOverlap@@
+\end{tabular}
+\caption{Number of time-outs for @@solver@@ (configured), @@solver@@ (default), and for how many instances both timed out on the training set of @@instanceSet@@.}
+\label{tbl:timeouts_train}
+\end{table}
 
 
 \bibliographystyle{plain}
