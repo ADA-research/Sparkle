@@ -37,6 +37,7 @@ if __name__ == r'__main__':
 	nickname_str = r''
 	instances_source = r''
 
+	# Process input options
 	len_argv = len(sys.argv)
 	i = 1
 	while i<len_argv:
@@ -54,6 +55,7 @@ if __name__ == r'__main__':
 			instances_source = sys.argv[i]
 		i += 1
 
+	# Verify path validity for the provided instance directory
 	if not os.path.exists(instances_source):
 		print r'c Instances path ' + "\'" + instances_source + "\'" + r' does not exist!'
 		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname] [<nickname>] [-parallel] <instances_source_directory>'
