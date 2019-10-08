@@ -106,37 +106,37 @@ if __name__ == r'__main__':
 			print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' has been added!'
 			print r'c'
 
-	print('c Selecting training instances ...')
-	list_cnf_path = satih.get_list_cnf_path(instances_directory)
-	list_train_cnf_index = satih.get_list_train_cnf_index(list_cnf_path)
-	cnf_dir_prefix = instances_directory
-	smac_cnf_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
-	satih.selecting_train_cnf(list_cnf_path, list_train_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix)
-	list_train_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix)
-	file_train_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory) + r'_train.txt'
-	
-	fout = open(file_train_cnf, 'w+')
-	for path in list_train_cnf_path:
-		fout.write(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
-		#print(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1))
-		#print(path, smac_cnf_dir_prefix)
-	fout.close()
-	print('c Selecting training instances done!')
-	
-	print('c Selecting testing instances ...')
-	list_cnf_path = satih.get_list_cnf_path(instances_directory)
-	list_test_cnf_index = satih.get_list_test_cnf_index(list_cnf_path, list_train_cnf_index)
-	cnf_dir_prefix = instances_directory
-	smac_cnf_dir_prefix_test = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory)
-	satih.selecting_test_cnf(list_cnf_path, list_test_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix_test)
-	list_test_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix_test)
-	file_test_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory) + r'_test.txt'
-	
-	fout = open(file_test_cnf, 'w+')
-	for path in list_test_cnf_path:
-		fout.write(path.replace(smac_cnf_dir_prefix_test, '../instances_test/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
-	fout.close()
-	print('c Selecting testing instances done!')
+#	print('c Selecting training instances ...')
+#	list_cnf_path = satih.get_list_cnf_path(instances_directory)
+#	list_train_cnf_index = satih.get_list_train_cnf_index(list_cnf_path)
+#	cnf_dir_prefix = instances_directory
+#	smac_cnf_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
+#	satih.selecting_train_cnf(list_cnf_path, list_train_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix)
+#	list_train_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix)
+#	file_train_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory) + r'_train.txt'
+#	
+#	fout = open(file_train_cnf, 'w+')
+#	for path in list_train_cnf_path:
+#		fout.write(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
+#		#print(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1))
+#		#print(path, smac_cnf_dir_prefix)
+#	fout.close()
+#	print('c Selecting training instances done!')
+#	
+#	print('c Selecting testing instances ...')
+#	list_cnf_path = satih.get_list_cnf_path(instances_directory)
+#	list_test_cnf_index = satih.get_list_test_cnf_index(list_cnf_path, list_train_cnf_index)
+#	cnf_dir_prefix = instances_directory
+#	smac_cnf_dir_prefix_test = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory)
+#	satih.selecting_test_cnf(list_cnf_path, list_test_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix_test)
+#	list_test_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix_test)
+#	file_test_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory) + r'_test.txt'
+#	
+#	fout = open(file_test_cnf, 'w+')
+#	for path in list_test_cnf_path:
+#		fout.write(path.replace(smac_cnf_dir_prefix_test, '../instances_test/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
+#	fout.close()
+#	print('c Selecting testing instances done!')
 
 	feature_data_csv.update_csv()
 	performance_data_csv.update_csv()
