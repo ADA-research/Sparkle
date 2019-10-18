@@ -132,6 +132,38 @@ def selecting_test_cnf(list_cnf_path, list_test_cnf_index, cnf_dir_prefix, smac_
 		os.system(command_line)
 	return
 
+def copy_instances_to_smac(list_cnf_path, cnf_dir_prefix, smac_cnf_dir_prefix, train_or_test):
+	file_suffix = r''
+	if train_or_test == r'train':
+		file_suffix = r'_train.txt'
+	elif train_or_test == r'test':
+		file_suffix = r'_test.txt'
+	else:
+		print r'c Invalid function call of \'copy_instances_to_smac\'; aborting execution'
+		sys.exit()
+	file_cnf = smac_cnf_dir_prefix + file_suffix
+
+	if cnf_dir_prefix[-1] == r'/':
+		cnf_dir_prefix = cnf_dir_prefix[:-1]
+	if smac_cnf_dir_prefix == r'/':
+		smac_cnf_dir_prefix = smac_cnf_dir_prefix[:-1]
+
+	fout = open(file_cnf, 'w+')
+	for i in range(0, len(list_cnf_path)):
+		ori_cnf_path = list_cnf_path[i]
+		target_cnf_path = ori_cnf_path.replace(cnf_dir_prefix, smac_cnf_dir_prefix, 1)
+		target_cnf_dir = sfh.get_directory(target_cnf_path)
+		#print(target_cnf_dir)
+		if not os.path.exists(target_cnf_dir):
+			os.system('mkdir -p ' + target_cnf_dir)
+		command_line = 'cp ' + ori_cnf_path + r' ' + target_cnf_path
+		#print(command_line)
+		os.system(command_line)
+
+		fout.write(target_cnf_path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(smac_cnf_dir_prefix), 1) + '\n')
+	fout.close()
+
+	return
 
 
 	

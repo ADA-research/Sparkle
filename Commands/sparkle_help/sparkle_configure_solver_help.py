@@ -163,7 +163,7 @@ def get_optimised_configuration(solver_name, instance_set_name):
 	
 	return optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed
 
-def generate_configure_solver_wrapper(solver_name, instance_set_name, optimised_configuration_str):
+def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
 	smac_solver_dir = sparkle_global_help.smac_dir + r'/example_scenarios/' + solver_name + r'/'
 	sparkle_run_configured_wrapper_path = smac_solver_dir + sparkle_global_help.sparkle_run_configured_wrapper
 	
