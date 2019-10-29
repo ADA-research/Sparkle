@@ -44,6 +44,9 @@ sparkle_system_log_path = r'LOG/sparkle_system_log_path.txt'
 global sparkle_portfolio_selector_path
 sparkle_portfolio_selector_path = r'Sparkle_Portfolio_Selector/sparkle_portfolio_selector' + sparkle_special_string
 
+global sparkle_last_test_file_name
+sparkle_last_test_file_name = r'last_test_configured_default.txt'
+
 global sparkle_report_path
 sparkle_report_path = r'Components/Sparkle-latex-generator/Sparkle_Report.pdf'
 

@@ -80,8 +80,6 @@ if __name__ == r'__main__':
 	
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
 
-	# TODO: Copy instance sets (train+test) to smac directory, if they do not exist there yet; Only test, since train should already be there as a result of configuring? ...in which case the configure command needs to be updated to copy the training instances
-
 	# Copy test instances to smac directory (train should already be there from configuration)
 	instances_directory_test = r'Instances/' + instance_set_test_name
 	list_cnf_path = satih.get_list_cnf_path(instances_directory_test)
@@ -118,5 +116,13 @@ if __name__ == r'__main__':
 	
 	command_line = 'cd ' + smac_solver_dir + ' ; ' + 'sbatch ' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_train_name + '_train_exp_sbatch.sh' + ' ; ' + 'cd ' + ori_path
 	os.system(command_line)
-	
+
+	# Write most recent run to file
+	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + sparkle_global_help.sparkle_last_test_file_name
+
+	fout = open(last_test_file_path, 'w+')
+	fout.write('solver ' + str(solver) + '\n')
+	fout.write('train ' + str(instance_set_train) + '\n')
+	fout.write('test ' + str(instance_set_test) + '\n')
+	fout.close()
 
