@@ -36,10 +36,10 @@ Commands/add_instances.py -run-solver-later -run-extractor-later Examples/Resour
 Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/PbO-CSCCSAT-Generic/
 
 # Configure a solver with a given instance set.
-Commands/configure_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instance-train Instances/PTN/
+Commands/configure_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instances-train Instances/PTN/
 
 # Compare the configured solver and the default solver to each other
-Commands/test_configured_solver_and_default_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instance-train Instances/PTN/ -instance-test Instances/PTN2/
+Commands/test_configured_solver_and_default_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instances-train Instances/PTN/ -instances-test Instances/PTN2/
 # Testing a single instance set is also possible
 
 
