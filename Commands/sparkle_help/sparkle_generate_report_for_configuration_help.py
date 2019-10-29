@@ -384,12 +384,30 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 
 	return mydict
 
-# TODO: Replace placeholder implementation with a real one
 def get_most_recent_test_run(solver_name):
-	instance_set_train = ""
-	instance_set_test = ""
+	instance_set_train = ''
+	instance_set_test = ''
 	flag_instance_set_train = False
 	flag_instance_set_test = False
+
+	# Read most recent run from file
+	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/' + sparkle_global_help.sparkle_last_test_file_name
+
+	fin = open(last_test_file_path, 'r')
+	while True:
+		myline = fin.readline()
+		if not myline: break
+		words = myline.split()
+
+		if words[0] == 'train':
+			instance_set_train = words[1]
+			if instance_set_train != '':
+				flag_instance_set_train = True
+		if words[0] == 'test':
+			instance_set_test = words[1]
+			if instance_set_test != '':
+				flag_instance_set_test = True
+	fin.close()
 
 	return instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test
 

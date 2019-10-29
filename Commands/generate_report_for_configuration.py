@@ -61,7 +61,6 @@ if __name__ == r'__main__':
 
 	# If no instance set(s) is/are given, try to retrieve them from the last run of test_configured_solver_and_default_solver
 	if not flag_instance_set_train and not flag_instance_set_test:
-		# TODO: Implement this function:
 		instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test = sparkle_generate_report_for_configuration_help.get_most_recent_test_run(solver_name)
 
 	# Generate a report depending on which instance sets are provided
