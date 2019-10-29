@@ -118,7 +118,7 @@ if __name__ == r'__main__':
 	os.system(command_line)
 
 	# Write most recent run to file
-	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + sparkle_global_help.sparkle_last_test_file_name
+	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/' + sparkle_global_help.sparkle_last_test_file_name
 
 	fout = open(last_test_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')
