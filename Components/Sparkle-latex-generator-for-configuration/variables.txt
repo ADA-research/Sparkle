@@ -1,9 +1,9 @@
 @@customCommands@@
 @@sparkle@@
 @@solver@@
-@@instanceSet@@
+@@instanceSetTrain@@
+@@instanceSetTest@@
 @@sparkleVersion@@
-@@numInstanceInInstanceSet@@
 @@numInstanceInTrainingInstanceSet@@
 @@numInstanceInTestingInstanceSet@@
 @@numSmacRuns@@
