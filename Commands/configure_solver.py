@@ -72,3 +72,11 @@ if __name__ == r'__main__':
 	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_name)
 	scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
 
+	# Write most recent run to file
+	last_configuration_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/' + sparkle_global_help.sparkle_last_configuration_file_name
+
+	fout = open(last_configuration_file_path, 'w+')
+	fout.write('solver ' + str(solver) + '\n')
+	fout.write('train ' + str(instance_set) + '\n')
+	fout.close()
+
