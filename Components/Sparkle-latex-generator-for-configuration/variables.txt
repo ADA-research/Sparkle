@@ -1,4 +1,5 @@
 @@customCommands@@
+@@testBool@@
 @@sparkle@@
 @@solver@@
 @@instanceSetTrain@@

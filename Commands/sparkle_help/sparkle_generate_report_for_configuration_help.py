@@ -190,7 +190,7 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	return str_value
 
 
-def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_train_name, instance_set_test_name, smac_each_run_cutoff_time):
+def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_train_name, configuration_reports_directory, smac_each_run_cutoff_time):
 	str_value = r''
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_train_name + '/'
@@ -198,7 +198,6 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, smac_each_run_cutoff_time)
 	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, smac_each_run_cutoff_time)
 	
-	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
 	latex_directory_path = configuration_reports_directory + r'Sparkle-latex-generator-for-configuration/'
 	data_plot_configured_vs_default_on_train_instance_set_filename = 'data_' + solver_name + '_configured_vs_default_on_' + instance_set_train_name + '_train'
 	data_plot_configured_vs_default_on_train_instance_set_path = latex_directory_path + data_plot_configured_vs_default_on_train_instance_set_filename + '.dat'
@@ -278,111 +277,145 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 	return configured_timeouts, default_timeouts, overlapping_timeouts
 
 
-def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name):
-	mydict = {}
+def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name=None):
+	full_dict = {}
+
+	if instance_set_test_name is not None:
+		configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
+	else:
+		configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '/'
+
+	common_dict = get_dict_variable_to_value_common(solver_name, instance_set_train_name, configuration_reports_directory)
+	full_dict.update(common_dict)
+
+	variable = r'testBool'
+
+	if instance_set_test_name is not None:
+		test_dict = get_dict_variable_to_value_test(solver_name, instance_set_train_name, instance_set_test_name)
+		full_dict.update(test_dict)
+		str_value = r'\testtrue'
+	else:
+		str_value = r'\testfalse'
+
+	full_dict[variable] = str_value
+
+	return full_dict
+
+
+# Retrieve variables relevant to all configuration reports
+def get_dict_variable_to_value_common(solver_name, instance_set_train_name, configuration_reports_directory):
+	common_dict = {}
 	
 	variable = r'customCommands'
 	str_value = get_customCommands()
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 	
 	variable = r'sparkle'
 	str_value = get_sparkle()
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 	
 	variable = r'solver'
 	str_value = solver_name
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 
 	variable = r'instanceSetTrain'
 	str_value = instance_set_train_name
-	mydict[variable] = str_value
-
-	variable = r'instanceSetTest'
-	str_value = instance_set_test_name
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 	
 	variable = r'sparkleVersion' 
 	str_value = get_sparkleVersion()
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 	
 	variable = r'numInstanceInTrainingInstanceSet'
 	str_value = get_numInstanceInInstanceSet_smacDir(instance_set_train_name)
-	mydict[variable] = str_value
-	
-	variable = r'numInstanceInTestingInstanceSet'
-	str_value = get_numInstanceInInstanceSet_smacDir(instance_set_test_name)
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 	
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
 	
 	variable = r'numSmacRuns'
-	mydict[variable] = str(num_of_smac_run_str)
+	common_dict[variable] = str(num_of_smac_run_str)
 	
 	variable = r'smacObjective'
-	mydict[variable] = str(smac_run_obj)
+	common_dict[variable] = str(smac_run_obj)
 	
 	variable = r'smacWholeTimeBudget'
-	mydict[variable] = str(smac_whole_time_budget)
+	common_dict[variable] = str(smac_whole_time_budget)
 	
 	variable = r'smacEachRunCutoffTime'
-	mydict[variable] = str(smac_each_run_cutoff_time)
+	common_dict[variable] = str(smac_each_run_cutoff_time)
 	
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
 	
 	variable = r'optimisedConfiguration'
-	mydict[variable] = str(optimised_configuration_str)
-	
-	variable = r'optimisedConfigurationTestingPerformancePAR10'
-	str_value = get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_test_name, smac_each_run_cutoff_time)
-	mydict[variable] = str_value
-	
-	variable = r'defaultConfigurationTestingPerformancePAR10'
-	str_value = get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_test_name, smac_each_run_cutoff_time)
-	mydict[variable] = str_value
-	
-	variable = r'figure-configured-vs-default-test'
-	str_value = get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, float(smac_each_run_cutoff_time))
-	mydict[variable] = str_value
-	
+	common_dict[variable] = str(optimised_configuration_str)
 	
 	variable = r'optimisedConfigurationTrainingPerformancePAR10'
 	str_value = get_optimisedConfigurationTrainingPerformancePAR10(solver_name, instance_set_train_name, smac_each_run_cutoff_time)
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 	
 	variable = r'defaultConfigurationTrainingPerformancePAR10'
 	str_value = get_defaultConfigurationTrainingPerformancePAR10(solver_name, instance_set_train_name, smac_each_run_cutoff_time)
-	mydict[variable] = str_value
+	common_dict[variable] = str_value
 	
 	variable = r'figure-configured-vs-default-train'
-	str_value = get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_train_name, instance_set_test_name, float(smac_each_run_cutoff_time))
-	mydict[variable] = str_value
+	str_value = get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_train_name, configuration_reports_directory, float(smac_each_run_cutoff_time))
+	common_dict[variable] = str_value
 	
 	# Retrieve timeout numbers for the training instances
 	configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = get_timeouts_train(solver_name, instance_set_train_name, float(smac_each_run_cutoff_time))
 
 	variable = r'timeoutsTrainDefault'
-	mydict[variable] = str(default_timeouts_train)
+	common_dict[variable] = str(default_timeouts_train)
 
 	variable = r'timeoutsTrainConfigured'
-	mydict[variable] = str(configured_timeouts_train)
+	common_dict[variable] = str(configured_timeouts_train)
 
 	variable = r'timeoutsTrainOverlap'
-	mydict[variable] = str(overlapping_timeouts_train)
+	common_dict[variable] = str(overlapping_timeouts_train)
+
+	return common_dict
+
+
+# Retrieve variables specific to the testing set
+def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instance_set_test_name):
+	test_dict = {}
+	
+	variable = r'instanceSetTest'
+	str_value = instance_set_test_name
+	test_dict[variable] = str_value
+	
+	variable = r'numInstanceInTestingInstanceSet'
+	str_value = get_numInstanceInInstanceSet_smacDir(instance_set_test_name)
+	test_dict[variable] = str_value
+	
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
+	
+	variable = r'optimisedConfigurationTestingPerformancePAR10'
+	str_value = get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_test_name, smac_each_run_cutoff_time)
+	test_dict[variable] = str_value
+	
+	variable = r'defaultConfigurationTestingPerformancePAR10'
+	str_value = get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_test_name, smac_each_run_cutoff_time)
+	test_dict[variable] = str_value
+	
+	variable = r'figure-configured-vs-default-test'
+	str_value = get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, float(smac_each_run_cutoff_time))
+	test_dict[variable] = str_value
 
 	# Retrieve timeout numbers for the testing instances
 	configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = get_timeouts_test(solver_name, instance_set_test_name, float(smac_each_run_cutoff_time))
 
 	variable = r'timeoutsTestDefault'
-	mydict[variable] = str(default_timeouts_test)
+	test_dict[variable] = str(default_timeouts_test)
 
 	variable = r'timeoutsTestConfigured'
-	mydict[variable] = str(configured_timeouts_test)
+	test_dict[variable] = str(configured_timeouts_test)
 
 	variable = r'timeoutsTestOverlap'
-	mydict[variable] = str(overlapping_timeouts_test)
+	test_dict[variable] = str(overlapping_timeouts_test)
 
+	return test_dict
 
-	return mydict
 
 def get_most_recent_test_run(solver_name):
 	instance_set_train = ''
@@ -411,10 +444,28 @@ def get_most_recent_test_run(solver_name):
 
 	return instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test
 
+
+def generate_report_for_configuration_train(solver_name, instance_set_train_name):
+	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '/'
+	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name)
+
+	generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value)
+
+	return
+
+
 def generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name):
+	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
+	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name)
+
+	generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value)
+
+	return
+
+
+def generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value):
 	print('c Generating report for configuration ...')
 
-	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
 	template_latex_directory_path = r'Components/Sparkle-latex-generator-for-configuration/'
 	if not os.path.exists(configuration_reports_directory):
 		os.system('mkdir -p ' + configuration_reports_directory)
@@ -423,7 +474,6 @@ def generate_report_for_configuration(solver_name, instance_set_train_name, inst
 	latex_directory_path = configuration_reports_directory + r'Sparkle-latex-generator-for-configuration/'
 	latex_template_filename = r'template-Sparkle-for-configuration.tex'
 	latex_report_filename = r'Sparkle_Report_for_Configuration'
-	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name)
 	
 	
 	# Read in the report template from file
@@ -469,7 +519,4 @@ def generate_report_for_configuration(solver_name, instance_set_train_name, inst
 	print('c Generating report for configuration done!')
 	
 	return
-	
-
-
 

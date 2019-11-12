@@ -38,11 +38,11 @@ if __name__ == r'__main__':
 			i += 1
 			solver = sys.argv[i]
 			flag_solver = True
-		elif sys.argv[i] == '-instances_train':
+		elif sys.argv[i] == '-instance_set_train':
 			i += 1
 			instance_set_train = sys.argv[i]
 			flag_instance_set_train = True
-		elif sys.argv[i] == '-instances_test':
+		elif sys.argv[i] == '-instance_set_test':
 			i += 1
 			instance_set_test = sys.argv[i]
 			flag_instance_set_test = True
@@ -62,6 +62,11 @@ if __name__ == r'__main__':
 	# If no instance set(s) is/are given, try to retrieve them from the last run of test_configured_solver_and_default_solver
 	if not flag_instance_set_train and not flag_instance_set_test:
 		instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test = sparkle_generate_report_for_configuration_help.get_most_recent_test_run(solver_name)
+	# If only the testing set is given return an error
+	elif not flag_instance_set_train and flag_instance_set_test:
+		print('c Argument Error! Only a testing set was provided, please also provide a training set')
+		print('c Usage: %s -solver <solver> [-instance_set_train] [<instance_set_train>] [-instance_set_test] [<instance_set_test>]' % sys.argv[0])
+		sys.exit(-1)
 
 	# Generate a report depending on which instance sets are provided
 	if (flag_instance_set_train and flag_instance_set_test):
@@ -70,12 +75,7 @@ if __name__ == r'__main__':
 		sparkle_generate_report_for_configuration_help.generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name)
 	elif flag_instance_set_train:
 		instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
-		# TODO: Implement this function:
 		sparkle_generate_report_for_configuration_help.generate_report_for_configuration_train(solver_name, instance_set_train_name)
-	elif flag_instance_set_test:
-		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
-		# TODO: Implement this function:
-		sparkle_generate_report_for_configuration_help.generate_report_for_configuration_test(solver_name, instance_set_test_name)
 	else:
 		print('c Error: No results from test_configured_solver_and_default_solver found that can be used in the report!')
 		sys.exit(-1)
