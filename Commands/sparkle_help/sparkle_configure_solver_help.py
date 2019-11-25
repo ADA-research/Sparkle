@@ -50,6 +50,7 @@ def get_smac_settings():
 	fin.close()
 	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
 
+# Copy file listing the training instances from the instance directory to the solver directory
 def handle_file_instance_train(solver_name, instance_set_name):
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_instance_set_dir = sparkle_global_help.smac_dir + '/example_scenarios/instances/' + instance_set_name + r'/'
@@ -78,6 +79,7 @@ def get_solver_deterministic(solver_name):
 			break
 	return deterministic
 
+# Create a file with the configuration scenario in the solver directory
 def create_file_scenario(solver_name, instance_set_name):
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario = smac_solver_dir + solver_name + r'_' + instance_set_name + r'_scenario.txt'
@@ -133,7 +135,8 @@ def get_optimised_configuration(solver_name, instance_set_name):
 	list_file_result_name = os.listdir(smac_results_dir)
 	
 	key_str_1 = 'Estimated mean quality of final incumbent config'
-	
+
+	# Compare results of each run on the training set to find the best configuration among them
 	for file_result_name in list_file_result_name:
 		file_result_path = smac_results_dir + file_result_name
 		fin = open(file_result_path, 'r+')
@@ -143,19 +146,23 @@ def get_optimised_configuration(solver_name, instance_set_name):
 			myline = myline.strip()
 			if myline.find(key_str_1) == 0:
 				mylist = myline.split()
+				# Skip 14 words leading up to the performance value
 				this_configuration_performance_par10 = float(mylist[14][:-1])
 				if optimised_configuration_performance_par10 < 0 or this_configuration_performance_par10 < optimised_configuration_performance_par10:
 					optimised_configuration_performance_par10 = this_configuration_performance_par10
-					
+
+					# Skip the line before the line with the optimised configuration
 					myline_2 = fin.readline()
 					myline_2 = fin.readline()
 					mylist_2 = myline_2.strip().split()
+					# Skip 8 words before the configured parameters
 					start_index = 8
 					end_index = len(mylist_2)
 					optimised_configuration_str = ''
 					for i in range(start_index, end_index):
 						optimised_configuration_str += ' ' + mylist_2[i]
-					
+
+					# Get seed used to call smac
 					myline_3 = fin.readline()
 					mylist_3 = myline_3.strip().split()
 					optimised_configuration_seed = mylist_3[4]

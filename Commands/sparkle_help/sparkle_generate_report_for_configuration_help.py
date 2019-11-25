@@ -120,6 +120,7 @@ def construct_list_instance_and_par10_recursive(list_instance_and_par10, path, c
 						continue
 					if mylist[1] == r's':
 						run_time = float(mylist[0].split(r'/')[0])
+						# Minimum runtime. Is lower than this not accurate?
 						if run_time < 0.01001:
 							run_time = 0.01001
 						if run_time > cutoff:
