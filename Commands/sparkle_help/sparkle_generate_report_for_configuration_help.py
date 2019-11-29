@@ -418,6 +418,43 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 	return test_dict
 
 
+def check_results_exist(solver_name, instance_set_train_name, instance_set_test_name=None):
+	all_good = True
+	# Check train instance dir exists
+	instance_train_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_train_name + '/'
+
+	if not os.path.exists(instance_train_dir):
+		all_good = False
+
+	# Check train results exist: configured+default
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	configured_results_train_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_train_name + '/'
+	default_results_train_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_train_name + '/'
+
+	if not (os.path.exists(configured_results_train_dir) and os.path.exists(default_results_train_dir)):
+		all_good = False
+
+	if instance_set_test_name is not None:
+		# Check test instance dir exists
+		instance_test_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_test_name + '/'
+		if not os.path.exists(instance_test_dir):
+			all_good = False
+
+		# Check test results exist: configured+default
+		smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+		configured_results_test_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_test_name + '/'
+		default_results_test_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_test_name + '/'
+
+		if not (os.path.exists(configured_results_test_dir) and os.path.exists(default_results_test_dir)):
+			all_good = False
+
+	if not all_good:
+		print('c Error: Results not found for the given solver and instance set(s) combination. Make sure the \'configure_solver\' and \'test_configured_solver_and_default_solver\' commands were correctly executed.')
+		sys.exit()
+
+	return
+
+
 def get_most_recent_test_run(solver_name):
 	instance_set_train = ''
 	instance_set_test = ''
@@ -427,7 +464,13 @@ def get_most_recent_test_run(solver_name):
 	# Read most recent run from file
 	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/' + sparkle_global_help.sparkle_last_test_file_name
 
-	fin = open(last_test_file_path, 'r')
+	try:
+		fin = open(last_test_file_path, 'r')
+	except IOError:
+		# Report error when file does not exist
+		print('c Error: The most recent results do not match the given solver. Please specify which instance sets you want a report for with this solver. Alternatively, make sure the \'test_configured_solver_and_default_solver\' command was executed for this solver.')
+		sys.exit()
+
 	while True:
 		myline = fin.readline()
 		if not myline: break
