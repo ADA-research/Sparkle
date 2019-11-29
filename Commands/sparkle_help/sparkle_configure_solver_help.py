@@ -126,6 +126,12 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
 	os.system(command_line)
 	return
 
+# Check the results directory for this solver and instance set combination exists, and contains .txt files (which should contain the results)
+def check_configuration_exists(solver_name, instance_set_name):
+	smac_results_dir = sparkle_global_help.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/'
+
+	return (os.path.exists(smac_results_dir) and os.path.exists(smac_results_dir + '*.txt'))
+
 def get_optimised_configuration(solver_name, instance_set_name):
 	optimised_configuration_str = ''
 	optimised_configuration_performance_par10 = -1

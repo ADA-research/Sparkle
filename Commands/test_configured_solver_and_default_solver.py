@@ -61,7 +61,12 @@ if __name__ == r'__main__':
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
-	
+
+	# Make sure configuration results exist before trying to work with them
+	if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
+		print('c Error: No configuration results found for the given solver and training instance set.')
+		sys.exit(-1)
+
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
 	#print(optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed)
 	
