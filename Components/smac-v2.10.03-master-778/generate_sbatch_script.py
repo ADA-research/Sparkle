@@ -3,8 +3,11 @@
 
 import os
 import sys
+sys.path.append('../../Commands')
+from sparkle_help import sparkle_slurm_help
 
-cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
+#cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
+cmd_srun_prefix = r'srun -N1 -n1 '
 cmd_smac_prefix = r'./each_smac_run_core.sh '
 
 
@@ -50,6 +53,9 @@ def get_file_least_extension(filepath):
 def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, num_of_smac_run, num_job_in_parallel):
 	job_name = sbatch_script_path
 	num_job_total = num_of_smac_run
+
+	path_modifier = '../../'
+	sbatch_options_list = sparkle_slurm_help.get_slurm_sbatch_options(path_modifier)
 	
 	if num_job_in_parallel>num_job_total:
 		num_job_in_parallel = num_job_total
@@ -71,11 +77,14 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 	fout.write(r'#SBATCH --error=' + r'tmp/' + job_name + r'.err' + '\n')
 	fout.write(r'###' + '\n')
 	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --partition=graceALL' + '\n')
 	fout.write(r'#SBATCH --mem-per-cpu=3000' + '\n')
 	fout.write(r'#SBATCH --array=0-' + str(num_job_total-1) + r'%' + str(num_job_in_parallel) + '\n')
 	fout.write(r'###' + '\n')
-	
+	# Options from the slurm/sbatch settings file
+	for i in sbatch_options_list:
+		fout.write(r'#SBATCH ' + str(i) + '\n')
+	fout.write(r'###' + '\n')
+
 	fout.write('params=( \\' + '\n')
 	
 	for i in range(0, num_job_total):

@@ -35,6 +35,9 @@ sparkle_default_settings_path = r'Settings/sparkle_default_settings.txt'
 global sparkle_smac_settings_path
 sparkle_smac_settings_path = r'Settings/sparkle_smac_settings.txt'
 
+global sparkle_slurm_settings_path
+sparkle_slurm_settings_path = r'Settings/sparkle_slurm_settings.txt'
+
 global sparkle_log_path
 sparkle_log_path = r'TMP/sparkle_log.txt'
 
