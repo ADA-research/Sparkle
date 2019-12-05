@@ -22,6 +22,7 @@ from sparkle_help import sparkle_generate_report_for_test_help
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_add_train_instances_help as satih
+from sparkle_help import sparkle_slurm_help
 
 if __name__ == r'__main__':
 	solver = ''
@@ -87,7 +88,10 @@ if __name__ == r'__main__':
 	n_cpus = 1
 	n_cores = 16 # Number of cores available on a Grace CPU
 	srun_prefix = 'srun -N1 -n1 --cpus-per-task ' + str(n_cpus)
-	srun_options = '-p graceBIS' # TODO: Get slurm options
+	srun_options_list = sparkle_slurm_help.get_slurm_srun_options()
+	srun_options = ''
+	for i in srun_options_list:
+		srun_options += i + ' '
 	smac_validate_prefix = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cores)
 
 	ori_path = os.getcwd()

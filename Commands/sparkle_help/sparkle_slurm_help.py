@@ -25,6 +25,7 @@ def get_slurm_options(path_modifier=None):
 		if not current_line:
 			break
 		if current_line[0] == '-':
+			current_line = current_line.strip()
 			slurm_options_list.append(current_line)
 	settings_file.close()
 
@@ -33,3 +34,6 @@ def get_slurm_options(path_modifier=None):
 # Get a list of options to be used with sbatch calls
 def get_slurm_sbatch_options(path_modifier=None):
 	return get_slurm_options(path_modifier)
+
+def get_slurm_srun_options():
+	return get_slurm_options()
