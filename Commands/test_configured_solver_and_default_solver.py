@@ -67,23 +67,11 @@ if __name__ == r'__main__':
 		print('c Error: No configuration results found for the given solver and training instance set.')
 		sys.exit(-1)
 
-	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
-	#print(optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed)
-	
-	scsh.generate_configure_solver_wrapper(solver_name, optimised_configuration_str)
-	
-	ori_smac_generate_sbatch_script_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'generate_sbatch_script.py'
+	# Copy runsolver to the solver directory
 	ori_smac_runsolver_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'runsolver'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-
-	# Copy sbatch generation script and runsolver to the solver directory
-	command_line = 'cp ' + ori_smac_generate_sbatch_script_path + ' ' + smac_solver_dir
-	os.system(command_line)
-	
 	command_line = 'cp ' + ori_smac_runsolver_path + ' ' + smac_solver_dir
 	os.system(command_line)
-	
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
 
 	# Copy test instances to smac directory (train should already be there from configuration)
 	instances_directory_test = r'Instances/' + instance_set_test_name
@@ -92,34 +80,45 @@ if __name__ == r'__main__':
 	smac_cnf_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
 	satih.copy_instances_to_smac(list_cnf_path, cnf_dir_prefix, smac_cnf_dir_prefix, r'test')
 
+	# Copy file listing test instances to smac solver directory
+	scsh.handle_file_instance_test(solver_name, instance_set_test_name)
+
+	# Set srun and smac-validate options
+	n_cpus = 1
+	n_cores = 16 # Number of cores available on a Grace CPU
+	srun_prefix = 'srun -N1 -n1 --cpus-per-task ' + str(n_cpus)
+	srun_options = '-p graceBIS' # TODO: Get slurm options
+	smac_validate_prefix = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cores)
 
 	ori_path = os.getcwd()
-	# Generate and run batch script for the configured solver with the test set
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + './generate_sbatch_script.py ' + sparkle_global_help.sparkle_run_configured_wrapper + ' ' + '../instances/' + instance_set_test_name + '/ ' + 'results/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_test_name + '/ ' + str(smac_each_run_cutoff_time) + ' ' +  str(num_of_smac_run_in_parallel_str) + ' test ; ' + 'cd ' + ori_path
-	os.system(command_line)
-	
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + 'sbatch ' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_test_name + '_test_exp_sbatch.sh' + ' ; ' + 'cd ' + ori_path
+	command_constant_prefix = 'cd ' + sparkle_global_help.smac_dir + ' ; ' + srun_prefix + ' ' + srun_options + ' ' + smac_validate_prefix
+
+	# Perform validation for the default parameters on the training set
+	default = True
+	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, scsh.InstanceType.TRAIN, default)
+	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
+	configuration_str = 'DEFAULT'
+	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
+	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
 	os.system(command_line)
 
-	# Generate and run batch script for the default solver with the test set
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + './generate_sbatch_script.py ' + sparkle_global_help.sparkle_run_default_wrapper + ' ' + '../instances/' + instance_set_test_name + '/ ' + 'results/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_test_name + '/ ' + str(smac_each_run_cutoff_time) + ' ' +  str(num_of_smac_run_in_parallel_str) + ' test ; ' + 'cd ' + ori_path
+	# Perform validation for the default parameters on the testing set
+	default = True
+	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
+	configuration_str = 'DEFAULT'
+	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
+	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
 	os.system(command_line)
-	
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + 'sbatch ' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_test_name + '_test_exp_sbatch.sh' + ' ; ' + 'cd ' + ori_path
-	os.system(command_line)
-	
-	# Generate and run batch script for the configured solver with the train set
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + './generate_sbatch_script.py ' + sparkle_global_help.sparkle_run_configured_wrapper + ' ' + '../instances/' + instance_set_train_name + '/ ' + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_train_name + '/ ' + str(smac_each_run_cutoff_time) + ' ' + str(num_of_smac_run_in_parallel_str) + ' train ; ' + 'cd ' + ori_path
-	os.system(command_line)
-	
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + 'sbatch ' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_train_name + '_train_exp_sbatch.sh' + ' ; ' + 'cd ' + ori_path
-	os.system(command_line)
-	
-	# Generate and run batch script for the default solver with the train set
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + './generate_sbatch_script.py ' + sparkle_global_help.sparkle_run_default_wrapper + ' ' + '../instances/' + instance_set_train_name + '/ ' + 'results_train/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_train_name + '/ ' + str(smac_each_run_cutoff_time) + ' ' + str(num_of_smac_run_in_parallel_str) + ' train ; ' + 'cd ' + ori_path
-	os.system(command_line)
-	
-	command_line = 'cd ' + smac_solver_dir + ' ; ' + 'sbatch ' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_train_name + '_train_exp_sbatch.sh' + ' ; ' + 'cd ' + ori_path
+
+	# Perform validation for the configured parameters on the testing set
+	default = False
+	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
+	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
+	configuration_str = '\"' + str(optimised_configuration_str) + '\"'
+	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
+	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
 	os.system(command_line)
 
 	# Write most recent run to file

@@ -47,6 +47,20 @@ def get_numInstanceInInstanceSet_smacDir(instance_set_name):
 	str_value = str(len(list_instance))
 	return str_value
 
+def get_PAR10_performance(results_file, cutoff):
+	list_instance_and_par10 = construct_list_instance_and_par10(results_file, cutoff)
+	
+	sum_par10 = 0.0
+	num_instances = 0
+	
+	for item in list_instance_and_par10:
+		num_instances += 1
+		sum_par10 += float(item[1])
+
+	mean_par10 = float(sum_par10 / num_instances)
+
+	return mean_par10
+
 def get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_name, smac_each_run_cutoff_time):
 	str_value = ''
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
@@ -146,17 +160,42 @@ def construct_list_instance_and_par10_recursive(list_instance_and_par10, path, c
 		for item in list_all_items:
 			construct_list_instance_and_par10_recursive(list_instance_and_par10, this_path + item, cutoff)
 	return 
-	
+
+# Retrieve instances and corresponding par10 values from smac validation objective matrix
+def construct_list_instance_and_par10(result_file, cutoff):
+	list_instance_and_par10 = []
+
+	fin = open(result_file, 'r')
+	fin.readline() # Skip column titles
+
+	while True:
+		myline = fin.readline()
+
+		if not myline.strip():
+			break
+
+		mylist = myline.split(r',')
+		instance_path = mylist[0].strip('\"')
+		instance = instance_path.split('/')[-1]
+		run_time = float(mylist[2].replace('"', ''))
+
+		if run_time < 0.01001: # Minimum runtime. Is lower than this not accurate?
+			run_time = 0.01001
+		elif run_time >= float(cutoff):
+			run_time = float(cutoff) * 10
+
+		list_instance_and_par10.append([instance, run_time])
+
+	return list_instance_and_par10
 
 # Return a dictionary of instance names and their par10 score
-def get_dict_instance_to_par10(results_dir, cutoff):
-	list_instance_and_par10 = []
-	construct_list_instance_and_par10_recursive(list_instance_and_par10, results_dir, cutoff)
+def get_dict_instance_to_par10(results_file, cutoff):
+	list_instance_and_par10 = construct_list_instance_and_par10(results_file, float(cutoff))
 	
 	dict_instance_to_par10 = {}
 	
 	for item in list_instance_and_par10:
-		instance = get_instance_path_from_path(results_dir, item[0])
+		instance = get_instance_path_from_path(results_file, item[0])
 		par10_value = item[1]
 		dict_instance_to_par10[instance] = par10_value
 		#print('%s %f' % (instance, par10_value))
@@ -166,9 +205,11 @@ def get_dict_instance_to_par10(results_dir, cutoff):
 
 def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, smac_each_run_cutoff_time):
 	str_value = r''
+	configured_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+	default_results_file = configured_results_file
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_test_name + '/'
-	default_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_test_name + '/'
+	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
+	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, smac_each_run_cutoff_time)
 	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, smac_each_run_cutoff_time)
 	
@@ -193,9 +234,12 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 
 def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_train_name, configuration_reports_directory, smac_each_run_cutoff_time):
 	str_value = r''
+	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
+	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
+	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_train_name + '/'
-	default_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_train_name + '/'
+	configured_results_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_file
+	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, smac_each_run_cutoff_time)
 	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, smac_each_run_cutoff_time)
 	
@@ -224,9 +268,11 @@ def get_timeouts_test(solver_name, instance_set_name, cutoff):
 	overlapping_timeouts = 0
 
 	# Retrieve instances and PAR10 values
+	configured_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+	default_results_file = configured_results_file
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
-	default_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
+	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
+	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, cutoff)
 	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, cutoff)
 
@@ -254,9 +300,12 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 	overlapping_timeouts = 0
 
 	# Retrieve instances and PAR10 values
+	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_name)
+	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
+	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
-	default_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
+	configured_results_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_name + '_scenario/' + configured_results_file
+	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, cutoff)
 	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, cutoff)
 
@@ -350,13 +399,20 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, conf
 	variable = r'optimisedConfiguration'
 	common_dict[variable] = str(optimised_configuration_str)
 	
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+
 	variable = r'optimisedConfigurationTrainingPerformancePAR10'
-	str_value = get_optimisedConfigurationTrainingPerformancePAR10(solver_name, instance_set_train_name, smac_each_run_cutoff_time)
-	common_dict[variable] = str_value
+	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
+	configured_results_train_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
+	configured_results_train_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_train_file
+	str_value = get_PAR10_performance(configured_results_train_dir, smac_each_run_cutoff_time)
+	common_dict[variable] = str(str_value)
 	
 	variable = r'defaultConfigurationTrainingPerformancePAR10'
-	str_value = get_defaultConfigurationTrainingPerformancePAR10(solver_name, instance_set_train_name, smac_each_run_cutoff_time)
-	common_dict[variable] = str_value
+	default_results_train_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+	default_results_train_dir = smac_solver_dir + 'outdir_train_default/' + default_results_train_file
+	str_value = get_PAR10_performance(default_results_train_dir, smac_each_run_cutoff_time)
+	common_dict[variable] = str(str_value)
 	
 	variable = r'figure-configured-vs-default-train'
 	str_value = get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_train_name, configuration_reports_directory, float(smac_each_run_cutoff_time))
@@ -390,14 +446,20 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 	test_dict[variable] = str_value
 	
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
-	
+
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+
 	variable = r'optimisedConfigurationTestingPerformancePAR10'
-	str_value = get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_test_name, smac_each_run_cutoff_time)
-	test_dict[variable] = str_value
+	configured_results_test_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+	configured_results_test_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_test_file
+	str_value = get_PAR10_performance(configured_results_test_dir, smac_each_run_cutoff_time)
+	test_dict[variable] = str(str_value)
 	
 	variable = r'defaultConfigurationTestingPerformancePAR10'
-	str_value = get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_test_name, smac_each_run_cutoff_time)
-	test_dict[variable] = str_value
+	default_results_test_file = configured_results_test_file
+	default_results_test_dir = smac_solver_dir + 'outdir_test_default/' + default_results_test_file
+	str_value = get_PAR10_performance(default_results_test_dir, smac_each_run_cutoff_time)
+	test_dict[variable] = str(str_value)
 	
 	variable = r'figure-configured-vs-default-test'
 	str_value = get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, float(smac_each_run_cutoff_time))
@@ -428,8 +490,8 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 
 	# Check train results exist: configured+default
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_train_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_train_name + '/'
-	default_results_train_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_train_name + '/'
+	configured_results_train_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_train_name + '_scenario/'
+	default_results_train_dir = smac_solver_dir + 'outdir_train_default/'
 
 	if not (os.path.exists(configured_results_train_dir) and os.path.exists(default_results_train_dir)):
 		all_good = False
@@ -442,8 +504,8 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 
 		# Check test results exist: configured+default
 		smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-		configured_results_test_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_test_name + '/'
-		default_results_test_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_test_name + '/'
+		configured_results_test_dir = smac_solver_dir + 'outdir_test_configured/'
+		default_results_test_dir = smac_solver_dir + 'outdir_test_default/'
 
 		if not (os.path.exists(configured_results_test_dir) and os.path.exists(default_results_test_dir)):
 			all_good = False

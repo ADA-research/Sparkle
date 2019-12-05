@@ -15,9 +15,14 @@ import time
 import random
 import sys
 import fcntl
+from enum import Enum
 import sparkle_file_help as sfh
 import sparkle_global_help
 import sparkle_add_configured_solver_help as sacsh
+
+class InstanceType(Enum):
+	TRAIN = 1
+	TEST = 2
 
 def get_smac_settings():
 	smac_run_obj = ''
@@ -52,13 +57,24 @@ def get_smac_settings():
 
 # Copy file listing the training instances from the instance directory to the solver directory
 def handle_file_instance_train(solver_name, instance_set_name):
+	file_postfix = r'_train.txt'
+	handle_file_instance(solver_name, instance_set_name, file_postfix)
+	return
+
+# Copy file listing the testing instances from the instance directory to the solver directory
+def handle_file_instance_test(solver_name, instance_set_name):
+	file_postfix = r'_test.txt'
+	handle_file_instance(solver_name, instance_set_name, file_postfix)
+	return
+
+# Copy file with the specified postfix listing instances from the instance directory to the solver directory
+def handle_file_instance(solver_name, instance_set_name, file_postfix):
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_instance_set_dir = sparkle_global_help.smac_dir + '/example_scenarios/instances/' + instance_set_name + r'/'
-	smac_file_instance_train_path_ori = sparkle_global_help.smac_dir + '/example_scenarios/instances/' + instance_set_name + r'_train.txt'
-	smac_file_instance_train_path_target = smac_solver_dir + instance_set_name + r'_train.txt'
-	#print(smac_file_instance_train_path_target)
+	smac_file_instance_path_ori = sparkle_global_help.smac_dir + '/example_scenarios/instances/' + instance_set_name + file_postfix
+	smac_file_instance_path_target = smac_solver_dir + instance_set_name + file_postfix
 	
-	command_line = r'cp ' + smac_file_instance_train_path_ori + r' ' + smac_file_instance_train_path_target
+	command_line = r'cp ' + smac_file_instance_path_ori + r' ' + smac_file_instance_path_target
 	os.system(command_line)
 	return
 
@@ -78,6 +94,44 @@ def get_solver_deterministic(solver_name):
 			deterministic = mylist[1]
 			break
 	return deterministic
+
+# Create a file with the configuration scenario to be used for smac validation in the solver directory
+def create_file_scenario_validate(solver_name, instance_set_name, instance_type, default):
+	if instance_type is InstanceType.TRAIN:
+		inst_type = 'train'
+	else:
+		inst_type = 'test'
+
+	if default is True:
+		config_type = 'default'
+	else:
+		config_type = 'configured'
+
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
+	scenario_file_name = instance_set_name + '_' + inst_type + '_' + config_type + r'_scenario.txt'
+	smac_file_scenario = smac_solver_dir + scenario_file_name
+	
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
+	
+	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
+	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
+	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
+	smac_test_instance_file = smac_instance_file
+	
+	fout = open(smac_file_scenario, 'w+')
+	fout.write('algo = ./' + sparkle_global_help.sparkle_smac_wrapper + '\n')
+	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
+	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
+	fout.write('run_obj = ' + smac_run_obj + '\n')
+	fout.write('wallclock-limit = ' + smac_whole_time_budget + '\n')
+	fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
+	fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
+	fout.write('paramfile = ' + smac_paramfile + '\n')
+	fout.write('outdir = ' + smac_outdir + '\n')
+	fout.write('instance_file = ' + smac_instance_file + '\n')
+	fout.write('test_instance_file = ' + smac_test_instance_file + '\n')
+	fout.close()
+	return scenario_file_name
 
 # Create a file with the configuration scenario in the solver directory
 def create_file_scenario(solver_name, instance_set_name):
