@@ -36,4 +36,38 @@ Specifically, \texttt{epstopdf} is required for Sparkle's reporting component to
   (replace "\texttt{<directory>}" with the path to the \texttt{epstopdf} directory)
 \end{enumerate}
 
+\subsection{Yahsp example}
+
+\begin{enumerate}
+
+  \item Install gmp on Grace
+
+  \texttt{wget https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz}
+
+  \texttt{tar -xf gmp-6.1.2.tar.xz}
+
+  Inside the \texttt{gmp-6.1.2} directory:
+
+  \texttt{./configure}
+
+  \texttt{make}
+
+  \texttt{make check}
+
+  \item Navigate to the \texttt{seq-agl-yahsp3} directory
+
+  \item Add the below after \texttt{-fpermissive} on line 24 of \texttt{cpt-yahsp/CMakeLists.txt}:
+
+  \texttt{ -I /home/blomkvander/lib/gmp-6.1.2/ -L /home/blomkvander/lib/gmp-6.1.2/.libs/}
+
+  (replace \texttt{/home/blomkvander/lib/} with the path where you installed gmp)
+
+  \item Compile yahsp with:
+
+  \texttt{./build}
+
+  \item In \texttt{yahsp/esegui.sh} the line \texttt{\#!/bin/bash} was added to the start of the file to allow Grace nodes to find the 'time' utility.
+
+\end{enumerate}
+
 \end{document}
