@@ -61,7 +61,7 @@ if __name__ == r'__main__':
 		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname] [<nickname>] [-parallel] <instances_source_directory>'
 		sys.exit()
 
-	print 'c Start adding all cnf instances in directory ' + instances_source + r' ...' 
+	print 'c Start adding all instances in directory ' + instances_source + r' ...' 
 
 	last_level_directory = r''
 	if my_flag_nickname: last_level_directory = nickname_str
@@ -71,39 +71,39 @@ if __name__ == r'__main__':
 	if not os.path.exists(instances_directory): os.mkdir(instances_directory)
 
 	#os.system(r'cp ' + instances_source + r'/*.cnf ' + instances_directory)
-	list_source_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_source)
-	list_target_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_directory)
+	list_source_all_filename = sfh.get_list_all_filename(instances_source)
+	list_target_all_filename = sfh.get_list_all_filename(instances_directory)
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 
-	num_cnf = len(list_source_all_cnf_filename)
+	num_inst = len(list_source_all_filename)
 	
-	print 'c The number of intended adding instances: ' + str(num_cnf)
+	print 'c The number of intended adding instances: ' + str(num_inst)
 
-	for i in range(0, len(list_source_all_cnf_filename)):
-		intended_cnf_filename = list_source_all_cnf_filename[i]
+	for i in range(0, len(list_source_all_filename)):
+		intended_filename = list_source_all_filename[i]
 		print r'c'
-		print r'c Adding ' + intended_cnf_filename + r' ...'
-		print 'c Executing Progress: ' + str(i+1) + ' out of ' + str(num_cnf)
+		print r'c Adding ' + intended_filename + r' ...'
+		print 'c Executing Progress: ' + str(i+1) + ' out of ' + str(num_inst)
 		
-		if intended_cnf_filename in list_target_all_cnf_filename:
-			print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' already exists in Directory ' + instances_directory
-			print r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_cnf_filename)
+		if intended_filename in list_target_all_filename:
+			print r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' already exists in Directory ' + instances_directory
+			print r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_filename)
 			#continue
 		else:
-			intended_cnf_filename_path = instances_directory + r'/' + intended_cnf_filename
-			intended_cnf_status = r'UNKNOWN'
-			sparkle_global_help.instance_list.append(intended_cnf_filename_path)
-			sparkle_global_help.instance_reference_mapping[intended_cnf_filename_path] = intended_cnf_status
-			sfh.add_new_instance_into_file(intended_cnf_filename_path)
-			sfh.add_new_instance_reference_into_file(intended_cnf_filename_path, intended_cnf_status)
-			feature_data_csv.add_row(intended_cnf_filename_path)
-			performance_data_csv.add_row(intended_cnf_filename_path)
+			intended_filename_path = instances_directory + r'/' + intended_filename
+			intended_status = r'UNKNOWN'
+			sparkle_global_help.instance_list.append(intended_filename_path)
+			sparkle_global_help.instance_reference_mapping[intended_filename_path] = intended_status
+			sfh.add_new_instance_into_file(intended_filename_path)
+			sfh.add_new_instance_reference_into_file(intended_filename_path, intended_status)
+			feature_data_csv.add_row(intended_filename_path)
+			performance_data_csv.add_row(intended_filename_path)
 			
 			if instances_source[-1] == r'/': instances_source = instances_source[:-1]
-			os.system(r'cp ' + instances_source + r'/' + intended_cnf_filename + r' ' + instances_directory)
-			print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' has been added!'
+			os.system(r'cp ' + instances_source + r'/' + intended_filename + r' ' + instances_directory)
+			print r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been added!'
 			print r'c'
 
 #	print('c Selecting training instances ...')
