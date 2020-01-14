@@ -37,6 +37,25 @@ def get_list_cnf_path(instances_directory):
 	get_list_cnf_path_recursive(instances_directory, list_cnf_path)
 	return list_cnf_path
 
+def get_list_all_path_recursive(path, list_all_path):
+	if os.path.isfile(path):
+		list_all_path.append(path)
+		return
+	elif os.path.isdir(path):
+		if path[-1]!=r'/':
+			this_path = path + '/'
+		else:
+			this_path = path
+		list_all_items = os.listdir(this_path)
+		for item in list_all_items:
+			get_list_all_path_recursive(this_path+item, list_all_path)
+	return
+
+def get_list_all_path(instances_directory):
+	list_all_path = []
+	get_list_all_path_recursive(instances_directory, list_all_path)
+	return list_all_path
+
 def get_list_train_cnf_index(list_cnf_path):
 	num_list_cnf = len(list_cnf_path)
 	num_list_train_cnf = num_list_cnf/2

@@ -62,10 +62,10 @@ if __name__ == r'__main__':
 
 	# Copy instances to smac directory
 	instances_directory = r'Instances/' + instance_set_name
-	list_cnf_path = satih.get_list_cnf_path(instances_directory)
-	cnf_dir_prefix = instances_directory
-	smac_cnf_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
-	satih.copy_instances_to_smac(list_cnf_path, cnf_dir_prefix, smac_cnf_dir_prefix, r'train')
+	list_all_path = satih.get_list_all_path(instances_directory)
+	inst_dir_prefix = instances_directory
+	smac_inst_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
+	satih.copy_instances_to_smac(list_all_path, inst_dir_prefix, smac_inst_dir_prefix, r'train')
 
 	scsh.handle_file_instance_train(solver_name, instance_set_name)
 	scsh.create_file_scenario(solver_name, instance_set_name)
