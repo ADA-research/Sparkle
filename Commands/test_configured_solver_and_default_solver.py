@@ -76,10 +76,10 @@ if __name__ == r'__main__':
 
 	# Copy test instances to smac directory (train should already be there from configuration)
 	instances_directory_test = r'Instances/' + instance_set_test_name
-	list_cnf_path = satih.get_list_cnf_path(instances_directory_test)
-	cnf_dir_prefix = instances_directory_test
-	smac_cnf_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
-	satih.copy_instances_to_smac(list_cnf_path, cnf_dir_prefix, smac_cnf_dir_prefix, r'test')
+	list_path = satih.get_list_all_path(instances_directory_test)
+	inst_dir_prefix = instances_directory_test
+	smac_inst_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
+	satih.copy_instances_to_smac(list_path, inst_dir_prefix, smac_inst_dir_prefix, r'test')
 
 	# Copy file listing test instances to smac solver directory
 	scsh.handle_file_instance_test(solver_name, instance_set_test_name)
