@@ -36,14 +36,14 @@ def get_sparkleVersion():
 def get_numInstanceInInstanceSet(instance_set_name):
 	str_value = ''
 	ori_instance_dir = 'Instances/' + instance_set_name + '/'
-	list_instance = sfh.get_list_all_cnf_filename(ori_instance_dir)
+	list_instance = sfh.get_list_all_filename(ori_instance_dir)
 	str_value = str(len(list_instance))
 	return str_value
 
 def get_numInstanceInInstanceSet_smacDir(instance_set_name):
 	str_value = ''
 	instance_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_name + '/'
-	list_instance = sfh.get_list_all_cnf_filename(instance_dir)
+	list_instance = sfh.get_list_all_filename(instance_dir)
 	str_value = str(len(list_instance))
 	return str_value
 
@@ -551,8 +551,20 @@ def get_most_recent_test_run(solver_name):
 	return instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test
 
 
+def generate_report_for_configuration_prep(configuration_reports_directory):
+	print('c Generating report for configuration ...')
+
+	template_latex_directory_path = r'Components/Sparkle-latex-generator-for-configuration/'
+	if not os.path.exists(configuration_reports_directory):
+		os.system('mkdir -p ' + configuration_reports_directory)
+	os.system(r'cp -r ' + template_latex_directory_path + r' ' + configuration_reports_directory)
+
+	return
+
+
 def generate_report_for_configuration_train(solver_name, instance_set_train_name):
 	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '/'
+	generate_report_for_configuration_prep(configuration_reports_directory)
 	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name)
 
 	generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value)
@@ -562,6 +574,7 @@ def generate_report_for_configuration_train(solver_name, instance_set_train_name
 
 def generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name):
 	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
+	generate_report_for_configuration_prep(configuration_reports_directory)
 	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name)
 
 	generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value)
@@ -570,13 +583,6 @@ def generate_report_for_configuration(solver_name, instance_set_train_name, inst
 
 
 def generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value):
-	print('c Generating report for configuration ...')
-
-	template_latex_directory_path = r'Components/Sparkle-latex-generator-for-configuration/'
-	if not os.path.exists(configuration_reports_directory):
-		os.system('mkdir -p ' + configuration_reports_directory)
-	os.system(r'cp -r ' + template_latex_directory_path + r' ' + configuration_reports_directory)
-	
 	latex_directory_path = configuration_reports_directory + r'Sparkle-latex-generator-for-configuration/'
 	latex_template_filename = r'template-Sparkle-for-configuration.tex'
 	latex_report_filename = r'Sparkle_Report_for_Configuration'
