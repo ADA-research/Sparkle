@@ -1,0 +1,10 @@
+(:action drive
+:parameters ( ?x ?y ?z)
+:precondition
+(truck ?x)
+(place ?y)
+(place ?z)
+(at ?x ?y)
+:effect
+(at ?x ?z)
+(not (at ?x ?y))

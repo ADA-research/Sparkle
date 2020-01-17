@@ -1,0 +1,19 @@
+(:action lift
+:parameters ( ?x ?y ?z ?p)
+:precondition
+(hoist ?x)
+(crate ?y)
+(surface ?z)
+(place ?p)
+(at ?x ?p)
+(available ?x)
+(at ?y ?p)
+(on ?y ?z)
+(clear ?y)
+:effect
+(lifting ?x ?y)
+(clear ?z)
+(not (at ?y ?p))
+(not (clear ?y))
+(not (available ?x))
+(not (on ?y ?z))

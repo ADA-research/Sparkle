@@ -1,0 +1,14 @@
+(:action load
+:parameters ( ?x ?y ?z ?p)
+:precondition
+(hoist ?x)
+(crate ?y)
+(truck ?z)
+(place ?p)
+(at ?x ?p)
+(at ?z ?p)
+(lifting ?x ?y)
+:effect
+(in ?y ?z)
+(available ?x)
+(not (lifting ?x ?y))
