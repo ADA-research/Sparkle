@@ -151,7 +151,7 @@ def selecting_test_cnf(list_cnf_path, list_test_cnf_index, cnf_dir_prefix, smac_
 		os.system(command_line)
 	return
 
-def copy_instances_to_smac(list_cnf_path, cnf_dir_prefix, smac_cnf_dir_prefix, train_or_test):
+def copy_instances_to_smac(list_instance_path, instance_dir_prefix, smac_instance_dir_prefix, train_or_test):
 	file_suffix = r''
 	if train_or_test == r'train':
 		file_suffix = r'_train.txt'
@@ -161,31 +161,31 @@ def copy_instances_to_smac(list_cnf_path, cnf_dir_prefix, smac_cnf_dir_prefix, t
 		print r'c Invalid function call of \'copy_instances_to_smac\'; aborting execution'
 		sys.exit()
 
-	file_cnf = smac_cnf_dir_prefix + file_suffix
+	file_instance = smac_instance_dir_prefix + file_suffix
 
-	# Make sure the path to file_cnf exists
-	smac_instance_dir = sfh.get_directory(smac_cnf_dir_prefix)
+	# Make sure the path to file_instance exists
+	smac_instance_dir = sfh.get_directory(smac_instance_dir_prefix)
 	if not os.path.exists(smac_instance_dir):
 		os.system('mkdir -p ' + smac_instance_dir)
 
-	if cnf_dir_prefix[-1] == r'/':
-		cnf_dir_prefix = cnf_dir_prefix[:-1]
-	if smac_cnf_dir_prefix == r'/':
-		smac_cnf_dir_prefix = smac_cnf_dir_prefix[:-1]
+	if instance_dir_prefix[-1] == r'/':
+		instance_dir_prefix = instance_dir_prefix[:-1]
+	if smac_instance_dir_prefix == r'/':
+		smac_instance_dir_prefix = smac_instance_dir_prefix[:-1]
 
-	fout = open(file_cnf, 'w+')
-	for i in range(0, len(list_cnf_path)):
-		ori_cnf_path = list_cnf_path[i]
-		target_cnf_path = ori_cnf_path.replace(cnf_dir_prefix, smac_cnf_dir_prefix, 1)
-		target_cnf_dir = sfh.get_directory(target_cnf_path)
-		#print(target_cnf_dir)
-		if not os.path.exists(target_cnf_dir):
-			os.system('mkdir -p ' + target_cnf_dir)
-		command_line = 'cp ' + ori_cnf_path + r' ' + target_cnf_path
+	fout = open(file_instance, 'w+')
+	for i in range(0, len(list_instance_path)):
+		ori_instance_path = list_instance_path[i]
+		target_instance_path = ori_instance_path.replace(instance_dir_prefix, smac_instance_dir_prefix, 1)
+		target_instance_dir = sfh.get_directory(target_instance_path)
+		#print(target_instance_dir)
+		if not os.path.exists(target_instance_dir):
+			os.system('mkdir -p ' + target_instance_dir)
+		command_line = 'cp ' + ori_instance_path + r' ' + target_instance_path
 		#print(command_line)
 		os.system(command_line)
 
-		fout.write(target_cnf_path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(smac_cnf_dir_prefix), 1) + '\n')
+		fout.write(target_instance_path.replace(smac_instance_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(smac_instance_dir_prefix), 1) + '\n')
 	fout.close()
 
 	return
