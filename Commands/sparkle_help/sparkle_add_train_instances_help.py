@@ -160,7 +160,13 @@ def copy_instances_to_smac(list_cnf_path, cnf_dir_prefix, smac_cnf_dir_prefix, t
 	else:
 		print r'c Invalid function call of \'copy_instances_to_smac\'; aborting execution'
 		sys.exit()
+
 	file_cnf = smac_cnf_dir_prefix + file_suffix
+
+	# Make sure the path to file_cnf exists
+	smac_instance_dir = sfh.get_directory(smac_cnf_dir_prefix)
+	if not os.path.exists(smac_instance_dir):
+		os.system('mkdir -p ' + smac_instance_dir)
 
 	if cnf_dir_prefix[-1] == r'/':
 		cnf_dir_prefix = cnf_dir_prefix[:-1]
