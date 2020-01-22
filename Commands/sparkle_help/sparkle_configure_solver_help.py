@@ -141,7 +141,7 @@ def create_file_scenario(solver_name, instance_set_name):
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
 	
 	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
-	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir/'
+	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_train_configuration/'
 	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_train.txt'
 	smac_test_instance_file = smac_instance_file
 	
