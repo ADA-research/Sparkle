@@ -6,10 +6,6 @@ import sys
 sys.path.append('../../Commands')
 from sparkle_help import sparkle_slurm_help
 
-#cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
-cmd_srun_prefix = r'srun -N1 -n1 '
-cmd_smac_prefix = r'./each_smac_run_core.sh '
-
 
 def get_last_level_directory_name(filepath):
 	filepath = get_file_directory(filepath)
@@ -93,7 +89,12 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 		fout.write('\'%s %d %s\' \\' % (scenario_file, seed, result_path) + '\n')
 		
 	fout.write(r')' + '\n')
-	
+
+	#cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
+	cmd_srun_prefix = r'srun -N1 -n1 '
+	cmd_srun_prefix += sparkle_slurm_help.get_slurm_srun_options_str(path_modifier)
+	cmd_smac_prefix = r'./each_smac_run_core.sh '
+
 	cmd = cmd_srun_prefix + r' ' + cmd_smac_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'
 	fout.write(cmd + '\n')
 	fout.close()

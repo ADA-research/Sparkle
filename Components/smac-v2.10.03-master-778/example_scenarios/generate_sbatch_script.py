@@ -87,6 +87,8 @@ def generate_sbatch_script(sbatch_script_path, executable_wrapper_name, cnf_dire
 	cmd_runsolver_prefix = runsolver_path + r' --timestamp --use-pty -C ' + str(cutoff_time_each_run) + r' -o '
 	#cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
 	cmd_srun_prefix = r'srun -N1 -n1 '
+	cmd_srun_prefix += sparkle_slurm_help.get_slurm_srun_options_str(path_modifier)
+
 	
 	seed = 1
 	
