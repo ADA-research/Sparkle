@@ -35,11 +35,11 @@ def get_slurm_options_list(path_modifier=None):
 def get_slurm_sbatch_options_list(path_modifier=None):
 	return get_slurm_options(path_modifier)
 
-def get_slurm_srun_options_list():
-	return get_slurm_options()
+def get_slurm_srun_options_list(path_modifier=None):
+	return get_slurm_options(path_modifier)
 
-def get_slurm_srun_options_str():
-	srun_options_list = get_slurm_srun_options_list()
+def get_slurm_srun_options_str(path_modifier=None):
+	srun_options_list = get_slurm_srun_options_list(path_modifier)
 	srun_options_str = ''
 
 	for i in srun_options_list:
