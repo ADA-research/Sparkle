@@ -1,5 +1,11 @@
 \documentclass{article}
 
+\usepackage{listings}
+
+\lstset{%
+  basicstyle=\ttfamily,
+}
+
 \title{Sparkle user guide}
 \author{Koen van der Blom}
 \date{\today}
@@ -7,6 +13,19 @@
 \begin{document}
 
 \maketitle
+
+\section{Settings}
+
+\subsection{Slurm (focused on Grace)}
+Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings.txt} file. Note that a number of Sparkle commands internally call the \texttt{srun} command, and for those commands the provided settings need to match the restrictions of your call to a Sparkle command. Take for instance the following command:
+
+\begin{lstlisting}[breaklines]
+srun -N1 -n1 -p graceTST Commands/configure_solver.py -solver Solvers/Yahsp3 -instances-train Instances/Depots_train_few/
+\end{lstlisting}
+
+This call restricts itself to the \texttt{graceTST} partition (the \texttt{graceTST} partition only consists of node 22). So if the settings file contains the setting \texttt{--exclude=ethnode22}, all available nodes are excluded, and the command cannot execute any internal \texttt{srun} commands it may have.
+
+Finally, Slurm ignores nested partition settings for \texttt{srun}, but not for \texttt{sbatch}. This means that if you specify the \texttt{graceTST} partition (as above) in your command, but the \texttt{graceADA} partition in the settings file, Slurm will still execute any nested \texttt{srun} commands on the \texttt{graceTST} partition only.
 
 \section{Required packages}
 
