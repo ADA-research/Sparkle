@@ -238,7 +238,7 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_file
+	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, smac_each_run_cutoff_time)
 	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, smac_each_run_cutoff_time)
@@ -304,7 +304,7 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_name + '_scenario/' + configured_results_file
+	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, cutoff)
 	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, cutoff)
@@ -404,7 +404,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, conf
 	variable = r'optimisedConfigurationTrainingPerformancePAR10'
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
 	configured_results_train_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
-	configured_results_train_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_train_file
+	configured_results_train_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_train_file
 	str_value = get_PAR10_performance(configured_results_train_dir, smac_each_run_cutoff_time)
 	common_dict[variable] = str(str_value)
 	
@@ -490,7 +490,7 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 
 	# Check train results exist: configured+default
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_train_dir = smac_solver_dir + 'outdir/' + solver_name + '_' + instance_set_train_name + '_scenario/'
+	configured_results_train_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/'
 	default_results_train_dir = smac_solver_dir + 'outdir_train_default/'
 
 	if not (os.path.exists(configured_results_train_dir) and os.path.exists(default_results_train_dir)):
