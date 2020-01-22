@@ -12,7 +12,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import sparkle_global_help
 
-def get_slurm_options(path_modifier=None):
+def get_slurm_options_list(path_modifier=None):
 	if path_modifier is None:
 		path_modifier = ''
 
@@ -32,8 +32,17 @@ def get_slurm_options(path_modifier=None):
 	return slurm_options_list
 
 # Get a list of options to be used with sbatch calls
-def get_slurm_sbatch_options(path_modifier=None):
+def get_slurm_sbatch_options_list(path_modifier=None):
 	return get_slurm_options(path_modifier)
 
-def get_slurm_srun_options():
+def get_slurm_srun_options_list():
 	return get_slurm_options()
+
+def get_slurm_srun_options_str():
+	srun_options_list = get_slurm_srun_options_list()
+	srun_options_str = ''
+
+	for i in srun_options_list:
+		srun_options_str += i + ' '
+
+	return srun_options_str

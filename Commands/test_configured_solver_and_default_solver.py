@@ -88,14 +88,11 @@ if __name__ == r'__main__':
 	n_cpus = 1
 	n_cores = 16 # Number of cores available on a Grace CPU
 	srun_prefix = 'srun -N1 -n1 --cpus-per-task ' + str(n_cpus)
-	srun_options_list = sparkle_slurm_help.get_slurm_srun_options()
-	srun_options = ''
-	for i in srun_options_list:
-		srun_options += i + ' '
+	srun_options_str = sparkle_slurm_help.get_slurm_srun_options_str()
 	smac_validate_prefix = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cores)
 
 	ori_path = os.getcwd()
-	command_constant_prefix = 'cd ' + sparkle_global_help.smac_dir + ' ; ' + srun_prefix + ' ' + srun_options + ' ' + smac_validate_prefix
+	command_constant_prefix = 'cd ' + sparkle_global_help.smac_dir + ' ; ' + srun_prefix + ' ' + srun_options_str + ' ' + smac_validate_prefix
 
 	# Perform validation for the default parameters on the training set
 	default = True

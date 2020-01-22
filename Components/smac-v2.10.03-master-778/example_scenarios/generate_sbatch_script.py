@@ -77,7 +77,7 @@ def generate_sbatch_script(sbatch_script_path, executable_wrapper_name, cnf_dire
 	num_job_total = len(list_all_cnf_files)
 
 	path_modifier = '../../../../'
-	sbatch_options_list = sparkle_slurm_help.get_slurm_sbatch_options(path_modifier)
+	sbatch_options_list = sparkle_slurm_help.get_slurm_sbatch_options_list(path_modifier)
 	
 	if num_job_in_parallel>num_job_total:
 		num_job_in_parallel = num_job_total

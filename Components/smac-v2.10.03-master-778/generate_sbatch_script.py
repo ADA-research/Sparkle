@@ -55,7 +55,7 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 	num_job_total = num_of_smac_run
 
 	path_modifier = '../../'
-	sbatch_options_list = sparkle_slurm_help.get_slurm_sbatch_options(path_modifier)
+	sbatch_options_list = sparkle_slurm_help.get_slurm_sbatch_options_list(path_modifier)
 	
 	if num_job_in_parallel>num_job_total:
 		num_job_in_parallel = num_job_total
