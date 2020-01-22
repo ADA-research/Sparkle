@@ -33,10 +33,10 @@ def get_slurm_options_list(path_modifier=None):
 
 # Get a list of options to be used with sbatch calls
 def get_slurm_sbatch_options_list(path_modifier=None):
-	return get_slurm_options(path_modifier)
+	return get_slurm_options_list(path_modifier)
 
 def get_slurm_srun_options_list(path_modifier=None):
-	return get_slurm_options(path_modifier)
+	return get_slurm_options_list(path_modifier)
 
 def get_slurm_srun_options_str(path_modifier=None):
 	srun_options_list = get_slurm_srun_options_list(path_modifier)
