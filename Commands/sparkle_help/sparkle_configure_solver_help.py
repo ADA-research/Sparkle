@@ -134,7 +134,7 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	return scenario_file_name
 
 # Create a file with the configuration scenario in the solver directory
-def create_file_scenario(solver_name, instance_set_name):
+def create_file_scenario_configuration(solver_name, instance_set_name):
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario = smac_solver_dir + solver_name + r'_' + instance_set_name + r'_scenario.txt'
 	
@@ -161,12 +161,67 @@ def create_file_scenario(solver_name, instance_set_name):
 	fout.close()
 	return
 
+def prepare_smac_execution_directories_configuration(solver_name):
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
+
+	for i in range(1, int(num_of_smac_run_str)+1):
+		# Create directories, -p makes sure any missing parents are also created
+		cmd = "mkdir -p " + smac_solver_dir + str(i) + '/tmp/'
+		os.system(cmd)
+
+		solver_diretory = r'Solvers/' + solver_name + r'/*'
+		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + str(i)
+		os.system(cmd)
+
+	return
+
+def prepare_smac_execution_directories_validation(solver_name):
+	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
+
+	for i in range(1, int(num_of_smac_run_str)+1):
+		solver_diretory = r'Solvers/' + solver_name + r'/*'
+
+		## Train default
+		execdir = "validate_train_default/"
+
+		# Create directories, -p makes sure any missing parents are also created
+		cmd = "mkdir -p " + smac_solver_dir + execdir + '/tmp/'
+		os.system(cmd)
+		# Copy solver to execution directory
+		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + execdir
+		os.system(cmd)
+
+		## Test default
+		execdir = "validate_test_default/"
+
+		# Create directories, -p makes sure any missing parents are also created
+		cmd = "mkdir -p " + smac_solver_dir + execdir + '/tmp/'
+		os.system(cmd)
+		# Copy solver to execution directory
+		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + execdir
+		os.system(cmd)
+
+		## Test configured
+		execdir = "validate_test_configured/"
+
+		# Create directories, -p makes sure any missing parents are also created
+		cmd = "mkdir -p " + smac_solver_dir + execdir + '/tmp/'
+		os.system(cmd)
+		# Copy solver to execution directory
+		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + execdir
+		os.system(cmd)
+
+	return
+
 def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + r'/'
+	execdir = '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario_name = solver_name + r'_' + instance_set_name + r'_scenario.txt'
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
 	
-	command_line = 'cd ' + sparkle_global_help.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + 'results/' + solver_name + '_' + instance_set_name + '/' + ' ' + num_of_smac_run_str + ' ' + num_of_smac_run_in_parallel_str + ' ; ' + 'cd ../../'
+	command_line = 'cd ' + sparkle_global_help.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + 'results/' + solver_name + '_' + instance_set_name + '/' + ' ' + num_of_smac_run_str + ' ' + num_of_smac_run_in_parallel_str + ' ' + execdir + ' ; ' + 'cd ../../'
 	
 	#print(command_line)
 	os.system(command_line)

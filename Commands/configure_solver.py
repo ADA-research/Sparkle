@@ -68,7 +68,8 @@ if __name__ == r'__main__':
 	satih.copy_instances_to_smac(list_all_path, inst_dir_prefix, smac_inst_dir_prefix, r'train')
 
 	scsh.handle_file_instance_train(solver_name, instance_set_name)
-	scsh.create_file_scenario(solver_name, instance_set_name)
+	scsh.create_file_scenario_configuration(solver_name, instance_set_name)
+	scsh.prepare_smac_execution_directories_configuration(solver_name)
 	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_name)
 	scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
 

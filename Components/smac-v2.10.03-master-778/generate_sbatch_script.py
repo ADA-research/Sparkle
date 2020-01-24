@@ -46,7 +46,7 @@ def get_file_least_extension(filepath):
 	return file_extension
 
 
-def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, num_of_smac_run, num_job_in_parallel):
+def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, num_of_smac_run, num_job_in_parallel, smac_execdir):
 	job_name = sbatch_script_path
 	num_job_total = num_of_smac_run
 
@@ -86,7 +86,8 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 	for i in range(0, num_job_total):
 		seed = i+1
 		result_path = result_directory + sbatch_script_path + r'_seed_' + str(seed) + r'_smac.txt'
-		fout.write('\'%s %d %s\' \\' % (scenario_file, seed, result_path) + '\n')
+		smac_execdir_i = smac_execdir + r'/' + str(seed)
+		fout.write('\'%s %d %s %s\' \\' % (scenario_file, seed, result_path, smac_execdir_i) + '\n')
 		
 	fout.write(r')' + '\n')
 
@@ -103,18 +104,19 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 
 if __name__ == r'__main__':
 
-	if len(sys.argv) != 5:
+	if len(sys.argv) != 6:
 		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0] + r' <scenario_file> <result_directory> <num_of_smac_run> <num_job_in_parallel>'
+		print r'c Usage: ' + sys.argv[0] + r' <scenario_file> <result_directory> <num_of_smac_run> <num_job_in_parallel> <smac_execdir>'
 		sys.exit()
 	
 	scenario_file = sys.argv[1]
 	res_directory_path = sys.argv[2]
 	num_of_smac_run = int(sys.argv[3])
 	num_job_in_parallel = int(sys.argv[4])
+	smac_execdir = sys.argv[5]
 	
 	sbatch_script_path = get_file_name(scenario_file) + r'_' + str(num_of_smac_run) + r'_exp_sbatch.sh'
-	generate_sbatch_script(sbatch_script_path, scenario_file, res_directory_path, num_of_smac_run, num_job_in_parallel)
+	generate_sbatch_script(sbatch_script_path, scenario_file, res_directory_path, num_of_smac_run, num_job_in_parallel, smac_execdir)
 	os.system(r'chmod a+x ' + sbatch_script_path)
 	
 	

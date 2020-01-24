@@ -185,7 +185,7 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix, smac_instanc
 		#print(command_line)
 		os.system(command_line)
 
-		fout.write(target_instance_path.replace(smac_instance_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(smac_instance_dir_prefix), 1) + '\n')
+		fout.write(target_instance_path.replace(smac_instance_dir_prefix, '../../instances/' + sfh.get_last_level_directory_name(smac_instance_dir_prefix), 1) + '\n')
 	fout.close()
 
 	return

@@ -83,6 +83,8 @@ if __name__ == r'__main__':
 
 	# Copy file listing test instances to smac solver directory
 	scsh.handle_file_instance_test(solver_name, instance_set_test_name)
+	# Create solver execution directories, and copy necessary files there
+	scsh.prepare_smac_execution_directories_validation(solver_name)
 
 	# Set srun and smac-validate options
 	n_cpus = 1
@@ -100,7 +102,8 @@ if __name__ == r'__main__':
 	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
 	configuration_str = 'DEFAULT'
 	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
-	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
+	execdir = 'example_scenarios/' + solver_name + '/validate_train_default/'
+	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --execdir ' + execdir + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
 	os.system(command_line)
 
 	# Perform validation for the default parameters on the testing set
@@ -109,7 +112,8 @@ if __name__ == r'__main__':
 	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
 	configuration_str = 'DEFAULT'
 	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
-	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
+	execdir = 'example_scenarios/' + solver_name + '/validate_test_default/'
+	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --execdir ' + execdir + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
 	os.system(command_line)
 
 	# Perform validation for the configured parameters on the testing set
@@ -119,7 +123,8 @@ if __name__ == r'__main__':
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
 	configuration_str = '\"' + str(optimised_configuration_str) + '\"'
 	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
-	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
+	execdir = 'example_scenarios/' + solver_name + '/validate_test_configured/'
+	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --execdir ' + execdir + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
 	os.system(command_line)
 
 	# Write most recent run to file
