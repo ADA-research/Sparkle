@@ -18,7 +18,6 @@
 Commands/initialise.py
 
 # Add instances from a given directory, without running solvers or feature extractors yet
-# (TODO: Check if this must be done before add_solver or if they can be in either order)
 Commands/add_instances.py -run-solver-later -run-extractor-later Examples/Resources/Instances/PTN/
 
 # Add solver with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
@@ -31,15 +30,15 @@ Commands/add_instances.py -run-solver-later -run-extractor-later Examples/Resour
 # - 'sprakle_smac_wrapper.py'
 # Not needed:
 # - A scenario file containing configuration settings (generated with defaults)
-Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/PbO-CSCCSAT-Generic/
+Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
 # Configure a solver with a given instance set. The instance set is split into train and test automatically.
-Commands/configure_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instance_set Instances/PTN/
+Commands/configure_solver.py -solver Solvers/PbO-CCSAT-Generic -instances-train Instances/PTN/
 
 # Compare the configured solver and the default solver to each other
-Commands/test_configured_solver_and_default_solver.py -solver Solvers/PbO-CSCCSAT-Generic -instance_set Instances/PTN/
+Commands/test_configured_solver_and_default_solver.py -solver Solvers/PbO-CCSAT-Generic -instance_set Instances/PTN/
 
 # Generate an experimental report. It will be located at:
 # Configuration_Reports/<solver_name>_<instance_set_name>/Sparkle-latex-generator-for-configuration/Sparkle_Report_for_Configuration.pdf.
-Commands/generate_report_for_configuration.py -solver Solvers/PbO-CSCCSAT-Generic -instance_set Instances/PTN/
+Commands/generate_report_for_configuration.py -solver Solvers/PbO-CCSAT-Generic -instance_set Instances/PTN/
 
