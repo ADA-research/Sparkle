@@ -1,7 +1,8 @@
 \documentclass{article}
 
-\usepackage{listings}
+\usepackage{todonotes}
 
+\usepackage{listings}
 \lstset{%
   basicstyle=\ttfamily,
 }
@@ -17,7 +18,38 @@
 \section{Settings}
 
 \subsection{Slurm (focused on Grace)}
-Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings.txt} file. Note that a number of Sparkle commands internally call the \texttt{srun} command, and for those commands the provided settings need to match the restrictions of your call to a Sparkle command. Take for instance the following command:
+Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings.txt} file. Currently these settings are inserted as is in any \texttt{srun} or \texttt{sbatch} calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see Subsubsection~\ref{slurm:disallowed}).
+
+\subsubsection{Tested options}
+Below a list of tested Slurm options for \texttt{srun} and \texttt{sbatch} is included. Most other options for these commands should also be safe to use (given they are valid), but have not been explicitly tested. Note that any options related to commands other than \texttt{srun} and \texttt{sbatch} should not be used with Sparkle, and should not be included in \texttt{Settings/sparkle\_slurm\_settings.txt}.
+
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item[] \texttt{--partition / -p}
+  \item[] \texttt{--exclude}
+  \item[] \texttt{--nodelist}
+\end{itemize}
+
+\subsubsection{Disallowed options}
+\label{slurm:disallowed}
+The options below are exclusive to \texttt{sbatch} and are thus disallowed:
+
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item[] \texttt{--array}
+  \item[] \texttt{--clusters}
+  \item[] \texttt{--wrap}
+\end{itemize}
+
+The options below are exclusive to \texttt{srun} and are thus disallowed:
+
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \item[] \texttt{--label}
+\end{itemize}
+
+\subsubsection{Nested \texttt{srun} calls}
+Since a number of Sparkle commands internally call the \texttt{srun} command, and for those commands the provided settings need to match the restrictions of your call to a Sparkle command. Take for instance the following command:
 
 \begin{lstlisting}[breaklines]
 srun -N1 -n1 -p graceTST Commands/configure_solver.py -solver Solvers/Yahsp3 -instances-train Instances/Depots_train_few/
@@ -29,11 +61,12 @@ Finally, Slurm ignores nested partition settings for \texttt{srun}, but not for 
 
 \section{Required packages}
 
-\subsection{On Grace}
+\subsection{Sparkle on Grace}
 
 Grace is the computing cluster of the ADA group\footnote{\texttt{http://ada.liacs.nl/}} at LIACS, Leiden University. Since not all packages required by Sparkle are installed on the system, some have to be installed local to the user.
 
-Specifically, \texttt{epstopdf} is required for Sparkle's reporting component to work (e.g. \texttt{generate\_report, generate\_report\_for\_configuration}), it can be installed in your user directory as follows:
+\subsubsection{\texttt{epstopdf}}
+The \texttt{epstopdf} package is required for Sparkle's reporting component to work (e.g. \texttt{generate\_report, generate\_report\_for\_configuration}), it can be installed in your user directory as follows:
 
 \begin{enumerate}
   \item Download \texttt{epstopdf}
