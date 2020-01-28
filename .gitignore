@@ -15,3 +15,4 @@ Components/smac-v2.10.03-master-778/example_scenarios/*/
 # Exclude intermediate files generated when compiling latex
 *.aux
 *.log
+*.out

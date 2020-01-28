@@ -1,6 +1,7 @@
 \documentclass{article}
 
 \usepackage{todonotes}
+\usepackage{hyperref}
 
 \usepackage{listings}
 \lstset{%
@@ -15,10 +16,39 @@
 
 \maketitle
 
+\section{Quick start}
+
+\subsection{Installing Sparkle}
+
+\begin{enumerate}
+  \item Copy the Sparkle files to your desired directory
+  \item Install \texttt{epstopdf} as described in Section~\ref{package:epstopdf}
+\end{enumerate}
+
+\subsection{Configuration}
+
+\begin{enumerate}
+  \item Make solver executable work on Grace
+  \item \texttt{sprakle\_smac\_wrapper.py}
+  \item Create and supply a PCS file
+\end{enumerate}
+
+\subsubsection{Making your algorithm run on Grace}
+\todo[inline]{Add helpful tips when available}
+Shell and Python scripts should work as is. If a compiled binary does not work, you may have to compile it on Grace and manually install packages on Grace that are needed by your algorithm.
+
+\subsubsection{Creating a wrapper for your algorithm}
+A template for the wrapper that connects your algorithm with Sparkle is available at \texttt{Examples/Resources/Solvers/template/sparkle\_smac\_wrapper.py}. Within this template a number of \texttt{TODO}s are indicated where you are likely to need to make changes for your specific algorithm. You can also compare the different example solvers to get an idea for what kind of changes are needed.
+
+\subsubsection{Parameter configuration space (PCS) file}
+The PCS (parameter configuration space) format\footnote{See: \url{http://aclib.net/cssc2014/pcs-format.pdf}} is used to pass the possible parameter ranges of an algorithm to Sparkle in a \texttt{.pcs} file. For an example see e.g. \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params\_test.pcs}.
+
+In this file you should enter all configurable parameters of your algorithm. Note that parameters such as the random seed used by the algorithm should not be configured and therefore should also not be included in the PCS file.
+
 \section{Settings}
 
 \subsection{Slurm (focused on Grace)}
-Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings.txt} file. Currently these settings are inserted as is in any \texttt{srun} or \texttt{sbatch} calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see Subsubsection~\ref{slurm:disallowed}).
+Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings.txt} file. Currently these settings are inserted as is in any \texttt{srun} or \texttt{sbatch} calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see Section~\ref{slurm:disallowed}).
 
 \subsubsection{Tested options}
 Below a list of tested Slurm options for \texttt{srun} and \texttt{sbatch} is included. Most other options for these commands should also be safe to use (given they are valid), but have not been explicitly tested. Note that any options related to commands other than \texttt{srun} and \texttt{sbatch} should not be used with Sparkle, and should not be included in \texttt{Settings/sparkle\_slurm\_settings.txt}.
@@ -49,7 +79,7 @@ The options below are exclusive to \texttt{srun} and are thus disallowed:
 \end{itemize}
 
 \subsubsection{Nested \texttt{srun} calls}
-Since a number of Sparkle commands internally call the \texttt{srun} command, and for those commands the provided settings need to match the restrictions of your call to a Sparkle command. Take for instance the following command:
+A number of Sparkle commands internally call the \texttt{srun} command, and for those commands the provided settings need to match the restrictions of your call to a Sparkle command. Take for instance the following command:
 
 \begin{lstlisting}[breaklines]
 srun -N1 -n1 -p graceTST Commands/configure_solver.py -solver Solvers/Yahsp3 -instances-train Instances/Depots_train_few/
@@ -63,9 +93,11 @@ Finally, Slurm ignores nested partition settings for \texttt{srun}, but not for 
 
 \subsection{Sparkle on Grace}
 
-Grace is the computing cluster of the ADA group\footnote{\texttt{http://ada.liacs.nl/}} at LIACS, Leiden University. Since not all packages required by Sparkle are installed on the system, some have to be installed local to the user.
+Grace is the computing cluster of the ADA group\footnote{\url{http://ada.liacs.nl/}} at LIACS, Leiden University. Since not all packages required by Sparkle are installed on the system, some have to be installed local to the user.
 
 \subsubsection{\texttt{epstopdf}}
+\label{package:epstopdf}
+
 The \texttt{epstopdf} package is required for Sparkle's reporting component to work (e.g. \texttt{generate\_report, generate\_report\_for\_configuration}), it can be installed in your user directory as follows:
 
 \begin{enumerate}
@@ -89,6 +121,10 @@ The \texttt{epstopdf} package is required for Sparkle's reporting component to w
 \end{enumerate}
 
 \subsection{Yahsp example}
+
+\subsubsection{Compiling Yahsp}
+
+\todo[inline]{Check what of the below is needed when the yahsp binary is provided}
 
 \begin{enumerate}
 
