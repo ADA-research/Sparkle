@@ -2,7 +2,7 @@
 
 \usepackage{todonotes}
 \usepackage{hyperref}
-
+\usepackage{enumitem}
 \usepackage{listings}
 \lstset{%
   basicstyle=\ttfamily,
@@ -73,6 +73,95 @@ A template for the wrapper that connects your algorithm with Sparkle is availabl
 The PCS (parameter configuration space) format\footnote{See: \url{http://aclib.net/cssc2014/pcs-format.pdf}} is used to pass the possible parameter ranges of an algorithm to Sparkle in a \texttt{.pcs} file. For an example see e.g. \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params\_test.pcs}.
 
 In this file you should enter all configurable parameters of your algorithm. Note that parameters such as the random seed used by the algorithm should not be configured and therefore should also not be included in the PCS file.
+
+\section{Commands}
+\todo[inline]{Add missing subsections with details of other commands}
+
+Currently the following commands are available in Sparkle (listed alphabetically):
+
+\begin{itemize}[noitemsep]
+  \item[] \texttt{add\_feature\_extractor.py}
+  \item[] \texttt{add\_instances.py}
+  \item[\ref{cmd:add_solver}] \texttt{add\_solver.py}
+  \item[] \texttt{cleanup\_current\_sparkle\_platform.py}
+  \item[] \texttt{cleanup\_temporary\_files.py}
+  \item[] \texttt{compute\_features\_parallel.py}
+  \item[] \texttt{compute\_features.py}
+  \item[] \texttt{compute\_marginal\_contribution.py}
+  \item[\ref{cmd:configure_solver}] \texttt{configure\_solver.py}
+  \item[] \texttt{construct\_sparkle\_portfolio\_selector.py}
+  \item[\ref{cmd:generate_report_for_configuration}] \texttt{generate\_report\_for\_configuration.py}
+  \item[] \texttt{generate\_report\_for\_test.py}
+  \item[] \texttt{generate\_report.py}
+  \item[\ref{cmd:initialise}] \texttt{initialise.py}
+  \item[] \texttt{load\_record.py}
+  \item[] \texttt{remove\_feature\_extractor.py}
+  \item[] \texttt{remove\_instances.py}
+  \item[] \texttt{remove\_record.py}
+  \item[] \texttt{remove\_solver.py}
+  \item[] \texttt{run\_solvers\_parallel.py}
+  \item[] \texttt{run\_solvers.py}
+  \item[] \texttt{run\_sparkle\_portfolio\_selector.py}
+  \item[] \texttt{run\_status.py}
+  \item[] \texttt{save\_record.py}
+  \item[] \texttt{sparkle\_help}
+  \item[] \texttt{system\_status.py}
+  \item[\ref{cmd:test_configured_solver_and_default_solver}] \texttt{test\_configured\_solver\_and\_default\_solver.py}
+\end{itemize}
+
+Arguments in [square brackets] are optional, arguments without brackets are mandatory. Input in \textless chevrons\textgreater~indicate required text input, \{curly brackets\} indicate a set of inputs to choose from.
+
+\subsection{\texttt{add\_solver.py}}
+\label{cmd:add_solver}
+Add a solver to the Sparkle platform.
+
+Arguments:
+\begin{itemize}[noitemsep]
+  \item[] \texttt{[-run-solver-later]}
+  \item[] \texttt{[-nickname <nickname>]}
+  \item[] \texttt{[-parallel]}
+  \item[] \texttt{-deterministic \{0, 1\}}
+  \item[] \texttt{<solver\_source\_directory>}
+\end{itemize}
+
+\subsection{\texttt{configure\_solver.py}}
+\label{cmd:configure_solver}
+Configure a solver in the Sparkle platform.
+
+Arguments:
+\begin{itemize}[noitemsep]
+  \item[] \texttt{-solver <solver>}
+  \item[] \texttt{-instance-set-train <instance-set-train>}
+\end{itemize}
+
+\subsection{\texttt{generate\_report\_for\_configuration.py}}
+\label{cmd:generate_report_for_configuration}
+Generate a report describing the configuration results for a solver and specific instance sets in the Sparkle platform.
+
+Arguments:
+\begin{itemize}[noitemsep]
+  \item[] \texttt{-solver <solver>}
+  \item[] \texttt{[-instance-set-train <instance-set-train>]}
+  \item[] \texttt{[-instance-set-test <instance-set-test>]}
+\end{itemize}
+
+Note that if a test instance set is give, the training instance set must also be given. When only a solver is given, Sparkle generates a report for the most recent configuration experiment with that solver.
+
+\subsection{\texttt{initialise.py}}
+\label{cmd:initialise}
+
+Initialise the Sparkle platform, this command does not have any arguments.
+
+\subsection{\texttt{test\_configured\_solver\_and\_default\_solver.py}}
+\label{cmd:test_configured_solver_and_default_solver}
+Test the performance of the configured solver and the default solver by doing validation experiments on the training and test sets.
+
+Arguments:
+\begin{itemize}[noitemsep]
+  \item[] \texttt{-solver <solver>}
+  \item[] \texttt{-instance-set-train <instance-set-train>}
+  \item[] \texttt{-instance-set-test <instance-set-test>}
+\end{itemize}
 
 \section{Settings}
 
