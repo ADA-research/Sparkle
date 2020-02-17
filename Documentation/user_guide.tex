@@ -16,6 +16,35 @@
 
 \maketitle
 
+\section{Stuff that needs a home}
+\subsection{A typical solver directory}
+
+A solver directory should look something like this:
+
+\begin{verbatim}
+Solver/
+  solver
+  sparkle_smac_wrapper.py
+  parameters.pcs
+  runsolver
+\end{verbatim}
+
+Here \texttt{solver} is a binary executable of the solver that is to be configured. The \texttt{sprakle\_smac\_wrapper.py} is a wrapper that Sparkle should call to run the solver with specific settings, and then returns a result for the configurator. In \texttt{parameters.pcs} the configurable parameters are described in the PCS format. Finally, \texttt{runsolver} is a binary executable of the runsolver tool. This allows Sparkle to make fair time measurements for all configuration experiments.
+
+\subsection{A typical instance directory}
+
+An instance directory should look something like this:
+
+\begin{verbatim}
+Instances/
+  instance_a.cnf
+  instance_b.cnf
+  ...        ...
+  instance_z.cnf
+\end{verbatim}
+
+This directory simply contains a collection of instances, as example here SAT instances in the CNF format are given.
+
 \section{Quick start}
 
 \subsection{Installing Sparkle}
