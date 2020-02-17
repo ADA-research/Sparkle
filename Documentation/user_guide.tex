@@ -216,14 +216,14 @@ Grace is the computing cluster of the ADA group\footnote{\url{http://ada.liacs.n
 \subsubsection{\texttt{epstopdf}}
 \label{package:epstopdf}
 
-The \texttt{epstopdf} package is required for Sparkle's reporting component to work (e.g. \texttt{generate\_report, generate\_report\_for\_configuration}), it can be installed in your user directory as follows:
+The \texttt{epstopdf} package (or a package containing it) is required for Sparkle's reporting component to work (e.g. \texttt{generate\_report, generate\_report\_for\_configuration}), it can be installed in your user directory as follows:
 
 \begin{enumerate}
   \item Download \texttt{epstopdf}
 
   \texttt{wget http://mirrors.ctan.org/support/epstopdf.zip}
 
-  \item Unzip the package
+  \item Unzip the package (ideally somewhere static, rather than a \texttt{/Downloads/} directory)
 
   \texttt{unzip epstopdf.zip}
 
@@ -235,7 +235,11 @@ The \texttt{epstopdf} package is required for Sparkle's reporting component to w
 
   \texttt{export PATH="/<directory>/epstopdf:\$PATH"}
 
-  (replace "\texttt{<directory>}" with the path to the \texttt{epstopdf} directory)
+  (replace "\texttt{<directory>}" with the path to the \texttt{epstopdf} directory, e.g.: \texttt{home/blomkvander/bin})
+
+  \item Reload \texttt{.bashrc} to make sure everything is updated
+
+  \texttt{source \textasciitilde/.bashrc}
 \end{enumerate}
 
 \subsubsection{General requirements}
