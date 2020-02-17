@@ -36,9 +36,9 @@ Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Sol
 Commands/configure_solver.py -solver Solvers/PbO-CCSAT-Generic -instances-train Instances/PTN/
 
 # Compare the configured solver and the default solver to each other
-Commands/test_configured_solver_and_default_solver.py -solver Solvers/PbO-CCSAT-Generic -instance_set Instances/PTN/
+Commands/test_configured_solver_and_default_solver.py -solver Solvers/PbO-CCSAT-Generic -instances-train Instances/PTN/ -instances-test Instances/PTN2/
 
 # Generate an experimental report. It will be located at:
 # Configuration_Reports/<solver_name>_<instance_set_name>/Sparkle-latex-generator-for-configuration/Sparkle_Report_for_Configuration.pdf.
-Commands/generate_report_for_configuration.py -solver Solvers/PbO-CCSAT-Generic -instance_set Instances/PTN/
+Commands/generate_report_for_configuration.py -solver Solvers/PbO-CCSAT-Generic
 
