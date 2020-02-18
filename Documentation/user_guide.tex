@@ -18,7 +18,16 @@
 
 \section{Quick start}
 
+Follow these steps:
+
+\begin{itemize}
+  \item[\ref{quick:install}] Install Sparkle
+  \item[\ref{quick:config_environment}] Prepare your configuration environment
+  \item[\ref{quick:execute_commands}] Execute commands
+\end{itemize}
+
 \subsection{Installing Sparkle}
+\label{quick:install}
 
 \begin{enumerate}
   \item Copy the Sparkle files to your desired directory
@@ -26,24 +35,53 @@
 \end{enumerate}
 
 \subsection{Configuration}
+\label{quick:config_environment}
 
-\begin{enumerate}
-  \item Make solver executable work on Grace
-  \item \texttt{sprakle\_smac\_wrapper.py}
-  \item Create and supply a PCS file
-\end{enumerate}
+Configuring an algorithm has the following minimal requirements for the algorithm (for an example of a solver directory see Section~\ref{dir:solvers}):
+
+\begin{itemize}
+  \item[\ref{quick:solver_grace}] Make the solver executable work on Grace
+  \item[\ref{quick:config_wrapper}] An algorithm wrapper called \texttt{sprakle\_smac\_wrapper.py}
+  \item[\ref{quick:pcs_file}] A PCS (parameter configuration space) file
+  \item The runsolver binary (e.g. from \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/})
+\end{itemize}
+
+Further, training and testing instance sets are needed (for an example of a solver directory see Section~\ref{dir:solvers}). For the purpose of testing whether your configuration setup works with Sparkle, it is advised to primarily use instances that are solved (relatively) quickly even with the default parameters.
 
 \subsubsection{Making your algorithm run on Grace}
+\label{quick:solver_grace}
+
 \todo[inline]{Add helpful tips when available}
 Shell and Python scripts should work as is. If a compiled binary does not work, you may have to compile it on Grace and manually install packages on Grace that are needed by your algorithm.
 
 \subsubsection{Creating a wrapper for your algorithm}
+\label{quick:config_wrapper}
+
 A template for the wrapper that connects your algorithm with Sparkle is available at \texttt{Examples/Resources/Solvers/template/sparkle\_smac\_wrapper.py}. Within this template a number of \texttt{TODO}s are indicated where you are likely to need to make changes for your specific algorithm. You can also compare the different example solvers to get an idea for what kind of changes are needed.
 
 \subsubsection{Parameter configuration space (PCS) file}
+\label{quick:pcs_file}
+
 The PCS (parameter configuration space) format\footnote{See: \url{http://aclib.net/cssc2014/pcs-format.pdf}} is used to pass the possible parameter ranges of an algorithm to Sparkle in a \texttt{.pcs} file. For an example see e.g. \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params\_test.pcs}.
 
 In this file you should enter all configurable parameters of your algorithm. Note that parameters such as the random seed used by the algorithm should not be configured and therefore should also not be included in the PCS file.
+
+\subsection{Executing commands}
+\label{quick:execute_commands}
+
+Executing commands in Sparkle is as simple as running them in the top directory of Sparkle, for example:
+
+\begin{verbatim}
+  Commands/initialise.py
+\end{verbatim}
+
+Do note that when running on a cluster additional arguments may be needed, for instance under Slurm the above command would change to:
+
+\begin{verbatim}
+  srun -N1 -n1 -p graceTST Commands/initialise.py
+\end{verbatim}
+
+In the \texttt{Examples/} directory a number of common command sequences are given. For instance, for configuration with specified training and testing sets see e.g. \texttt{Examples/configure\_solver\_two\_sets.sh} for an example of a sequence of commands to execute. Note that these example scripts should not be executed directly.
 
 \section{File structure}
 
