@@ -42,7 +42,7 @@ if __name__ == r'__main__':
 
 	if not os.path.exists(solver_path):
 		print r'c Feature solver path ' + "\'" + solver_path + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-nickname] <nickname>'
+		print r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]'
 		print r'c Or usage: ' + sys.argv[0] + r' <solver_directory>'
 		sys.exit()
 

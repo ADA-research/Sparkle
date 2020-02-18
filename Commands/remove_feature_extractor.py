@@ -42,7 +42,7 @@ if __name__ == r'__main__':
 
 	if not os.path.exists(extractor_path):
 		print r'c Feature extractor path ' + "\'" + extractor_path + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-nickname] <nickname>'
+		print r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]'
 		print r'c Or usage: ' + sys.argv[0] + r' <feature_extractor_directory>'
 		sys.exit()
 

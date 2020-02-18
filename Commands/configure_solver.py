@@ -41,19 +41,19 @@ if __name__ == r'__main__':
 			i += 1
 			solver = sys.argv[i]
 			flag_solver = True
-		elif sys.argv[i] == r'-instances-train':
+		elif sys.argv[i] == r'-instance-set-train':
 			i += 1
 			instance_set = sys.argv[i]
 			flag_instance_set = True
 		else:
 			print('c Argument Error!')
-			print('c Usage: %s -solver <solver> -instances-train <instances-train>' % sys.argv[0])
+			print('c Usage: %s -solver <solver> -instance-set-train <instance-set-train>' % sys.argv[0])
 			sys.exit(-1)
 		i += 1
 	
 	if not (flag_solver and flag_instance_set):
 		print('c Argument Error!')
-		print('c Usage: %s -solver <solver> -instances_train <instances_train>' % sys.argv[0])
+		print('c Usage: %s -solver <solver> -instance-set_train <instance-set_train>' % sys.argv[0])
 		sys.exit(-1)
 	
 	solver_name = sfh.get_last_level_directory_name(solver)

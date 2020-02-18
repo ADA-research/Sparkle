@@ -40,23 +40,23 @@ if __name__ == r'__main__':
 			i += 1
 			solver = sys.argv[i]
 			flag_solver = True
-		elif sys.argv[i] == '-instances-train':
+		elif sys.argv[i] == '-instance-set-train':
 			i += 1
 			instance_set_train = sys.argv[i]
 			flag_instance_set_train = True
-		elif sys.argv[i] == '-instances-test':
+		elif sys.argv[i] == '-instance-set-test':
 			i += 1
 			instance_set_test = sys.argv[i]
 			flag_instance_set_test = True
 		else:
 			print('c Argument Error: Unknown argument!')
-			print('c Usage: %s -solver <solver> -instances-train <instances-train> -instances-test <instances-test>' % sys.argv[0])
+			print('c Usage: %s -solver <solver> -instance-set-train <instance-set-train> -instance-set-test <instance-set-test>' % sys.argv[0])
 			sys.exit(-1)
 		i += 1
 	
 	if not (flag_solver and flag_instance_set_train and flag_instance_set_test):
 		print('c Argument Error!')
-		print('c Usage: %s -solver <solver> -instances-train <instances-train> -instances-test <instances-test>' % sys.argv[0])
+		print('c Usage: %s -solver <solver> -instance-set-train <instance-set-train> -instance-set-test <instance-set-test>' % sys.argv[0])
 		sys.exit(-1)
 	
 	solver_name = sfh.get_last_level_directory_name(solver)

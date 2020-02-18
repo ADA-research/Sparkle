@@ -44,7 +44,7 @@ if __name__ == r'__main__':
 
 	if not os.path.exists(instances_path):
 		print r'c Instances path ' + "\'" + instances_path + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-nickname] <nickname>'
+		print r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]'
 		print r'c Or usage: ' + sys.argv[0] + r' <instances_path_directory>'
 		sys.exit()
 	

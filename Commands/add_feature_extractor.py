@@ -49,7 +49,7 @@ if __name__ == r'__main__':
 
 	if not os.path.exists(extractor_source):
 		print r'c Feature extractor path ' + "\'" + extractor_source + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-nickname] [<nickname>] [-parallel] <feature_extractor_source_directory>'
+		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-nickname <nickname>] [-parallel] <feature_extractor_source_directory>'
 		sys.exit()
 
 	last_level_directory = r''

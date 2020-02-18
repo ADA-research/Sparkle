@@ -38,23 +38,23 @@ if __name__ == r'__main__':
 			i += 1
 			solver = sys.argv[i]
 			flag_solver = True
-		elif sys.argv[i] == '-instance_set_train':
+		elif sys.argv[i] == '-instance-set-train':
 			i += 1
 			instance_set_train = sys.argv[i]
 			flag_instance_set_train = True
-		elif sys.argv[i] == '-instance_set_test':
+		elif sys.argv[i] == '-instance-set-test':
 			i += 1
 			instance_set_test = sys.argv[i]
 			flag_instance_set_test = True
 		else:
 			print('c Argument Error!')
-			print('c Usage: %s -solver <solver> [-instance_set_train] [<instance_set_train>] [-instance_set_test] [<instance_set_test>]' % sys.argv[0])
+			print('c Usage: %s -solver <solver> [-instance-set-train <instance-set-train> [-instance-set-test <instance-set-test>]]' % sys.argv[0])
 			sys.exit(-1)
 		i += 1
 	
 	if not (flag_solver):
 		print('c Argument Error!')
-		print('c Usage: %s -solver <solver> [-instance_set_train] [<instance_set_train>] [-instance_set_test] [<instance_set_test>]' % sys.argv[0])
+		print('c Usage: %s -solver <solver> [-instance-set-train <instance-set-train>] [-instance-set-test <instance-set-test>]' % sys.argv[0])
 		sys.exit(-1)
 	
 	solver_name = sfh.get_last_level_directory_name(solver)
@@ -65,7 +65,7 @@ if __name__ == r'__main__':
 	# If only the testing set is given return an error
 	elif not flag_instance_set_train and flag_instance_set_test:
 		print('c Argument Error! Only a testing set was provided, please also provide a training set')
-		print('c Usage: %s -solver <solver> [-instance_set_train] [<instance_set_train>] [-instance_set_test] [<instance_set_test>]' % sys.argv[0])
+		print('c Usage: %s -solver <solver> [-instance-set-train <instance-set-train>] [-instance-set-test <instance-set-test>]' % sys.argv[0])
 		sys.exit(-1)
 
 	# Generate a report depending on which instance sets are provided

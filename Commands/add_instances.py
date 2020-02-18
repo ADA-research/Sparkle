@@ -58,7 +58,7 @@ if __name__ == r'__main__':
 	# Verify path validity for the provided instance directory
 	if not os.path.exists(instances_source):
 		print r'c Instances path ' + "\'" + instances_source + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname] [<nickname>] [-parallel] <instances_source_directory>'
+		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname <nickname>] [-parallel] <instances_source_directory>'
 		sys.exit()
 
 	print 'c Start adding all instances in directory ' + instances_source + r' ...' 
