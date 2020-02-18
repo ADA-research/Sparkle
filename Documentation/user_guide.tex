@@ -16,35 +16,6 @@
 
 \maketitle
 
-\section{Stuff that needs a home}
-\subsection{A typical solver directory}
-
-A solver directory should look something like this:
-
-\begin{verbatim}
-Solver/
-  solver
-  sparkle_smac_wrapper.py
-  parameters.pcs
-  runsolver
-\end{verbatim}
-
-Here \texttt{solver} is a binary executable of the solver that is to be configured. The \texttt{sprakle\_smac\_wrapper.py} is a wrapper that Sparkle should call to run the solver with specific settings, and then returns a result for the configurator. In \texttt{parameters.pcs} the configurable parameters are described in the PCS format. Finally, \texttt{runsolver} is a binary executable of the runsolver tool. This allows Sparkle to make fair time measurements for all configuration experiments.
-
-\subsection{A typical instance directory}
-
-An instance directory should look something like this:
-
-\begin{verbatim}
-Instances/
-  instance_a.cnf
-  instance_b.cnf
-  ...        ...
-  instance_z.cnf
-\end{verbatim}
-
-This directory simply contains a collection of instances, as example here SAT instances in the CNF format are given.
-
 \section{Quick start}
 
 \subsection{Installing Sparkle}
@@ -73,6 +44,70 @@ A template for the wrapper that connects your algorithm with Sparkle is availabl
 The PCS (parameter configuration space) format\footnote{See: \url{http://aclib.net/cssc2014/pcs-format.pdf}} is used to pass the possible parameter ranges of an algorithm to Sparkle in a \texttt{.pcs} file. For an example see e.g. \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params\_test.pcs}.
 
 In this file you should enter all configurable parameters of your algorithm. Note that parameters such as the random seed used by the algorithm should not be configured and therefore should also not be included in the PCS file.
+
+\section{File structure}
+
+\subsection{General}
+Before doing anything, the following subdirectories are present in the Sparkle directory:
+
+\begin{verbatim}
+Commands/
+Components/
+Documentation/
+Examples/
+Settings/
+Test_Cases/
+\end{verbatim}
+
+Based on various Sparkle commands, the following additional subdirectories may be generated:
+
+\begin{itemize}[noitemsep]
+  \item[] \texttt{Configuration\_Reports/}
+  \item[] \texttt{Extractors/}
+  \item[] \texttt{Feature\_Data/}
+  \item[\ref{dir:instances}] \texttt{Instances/}
+  \item[] \texttt{LOG/}
+  \item[] \texttt{Performance\_Data/}
+  \item[] \texttt{Records/}
+  \item[] \texttt{Reference\_Lists/}
+  \item[\ref{dir:solvers}] \texttt{Solvers/}
+  \item[] \texttt{Sparkle\_Portfolio\_Selector/}
+  \item[] \texttt{TMP/}
+\end{itemize}
+
+\subsection{A typical instance directory}
+\label{dir:instances}
+
+An instance directory should look something like this:
+
+\begin{verbatim}
+Instances/
+  Example_Instance_Set/
+    instance_a.cnf
+    instance_b.cnf
+    ...        ...
+    instance_z.cnf
+\end{verbatim}
+
+This directory simply contains a collection of instances, as example here SAT instances in the CNF format are given.
+
+\subsection{A typical solver directory}
+\label{dir:solvers}
+
+A solver directory should look something like this:
+
+\begin{verbatim}
+Solver/
+  Example_Solver/
+    solver
+    sparkle_smac_wrapper.py
+    parameters.pcs
+    runsolver
+\end{verbatim}
+
+Here \texttt{solver} is a binary executable of the solver that is to be configured. The \texttt{sprakle\_smac\_wrapper.py} is a wrapper that Sparkle should call to run the solver with specific settings, and then returns a result for the configurator. In \texttt{parameters.pcs} the configurable parameters are described in the PCS format. Finally, \texttt{runsolver} is a binary executable of the runsolver tool. This allows Sparkle to make fair time measurements for all configuration experiments.
+
+\textbf{Note}: Currently the runsolver binary has to be in every solver directory, it can be found in the \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/} directory. 
 
 \section{Commands}
 \todo[inline]{Add missing subsections with details of other commands}
