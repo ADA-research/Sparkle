@@ -243,8 +243,7 @@ Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings
 \subsubsection{Tested options}
 Below a list of tested Slurm options for \texttt{srun} and \texttt{sbatch} is included. Most other options for these commands should also be safe to use (given they are valid), but have not been explicitly tested. Note that any options related to commands other than \texttt{srun} and \texttt{sbatch} should not be used with Sparkle, and should not be included in \texttt{Settings/sparkle\_slurm\_settings.txt}.
 
-\begin{itemize}
-  \setlength{\itemsep}{0pt}
+\begin{itemize}[noitemsep]
   \item[] \texttt{--partition / -p}
   \item[] \texttt{--exclude}
   \item[] \texttt{--nodelist}
@@ -254,8 +253,7 @@ Below a list of tested Slurm options for \texttt{srun} and \texttt{sbatch} is in
 \label{slurm:disallowed}
 The options below are exclusive to \texttt{sbatch} and are thus disallowed:
 
-\begin{itemize}
-  \setlength{\itemsep}{0pt}
+\begin{itemize}[noitemsep]
   \item[] \texttt{--array}
   \item[] \texttt{--clusters}
   \item[] \texttt{--wrap}
@@ -263,8 +261,7 @@ The options below are exclusive to \texttt{sbatch} and are thus disallowed:
 
 The options below are exclusive to \texttt{srun} and are thus disallowed:
 
-\begin{itemize}
-  \setlength{\itemsep}{0pt}
+\begin{itemize}[noitemsep]
   \item[] \texttt{--label}
 \end{itemize}
 
