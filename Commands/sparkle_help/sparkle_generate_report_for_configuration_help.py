@@ -205,8 +205,8 @@ def get_dict_instance_to_par10(results_file, cutoff):
 
 def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, smac_each_run_cutoff_time):
 	str_value = r''
-	configured_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	default_results_file = configured_results_file
+	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
+	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
@@ -268,8 +268,8 @@ def get_timeouts_test(solver_name, instance_set_name, cutoff):
 	overlapping_timeouts = 0
 
 	# Retrieve instances and PAR10 values
-	configured_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	default_results_file = configured_results_file
+	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
+	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
@@ -450,13 +450,13 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 
 	variable = r'optimisedConfigurationTestingPerformancePAR10'
-	configured_results_test_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+	configured_results_test_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	configured_results_test_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_test_file
 	str_value = get_PAR10_performance(configured_results_test_dir, smac_each_run_cutoff_time)
 	test_dict[variable] = str(str_value)
 	
 	variable = r'defaultConfigurationTestingPerformancePAR10'
-	default_results_test_file = configured_results_test_file
+	default_results_test_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	default_results_test_dir = smac_solver_dir + 'outdir_test_default/' + default_results_test_file
 	str_value = get_PAR10_performance(default_results_test_dir, smac_each_run_cutoff_time)
 	test_dict[variable] = str(str_value)
