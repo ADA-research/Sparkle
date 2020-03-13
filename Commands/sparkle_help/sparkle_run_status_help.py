@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -13,11 +13,11 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
-import sparkle_global_help
-import sparkle_file_help as sfh
-import sparkle_feature_data_csv_help as sfdcsv
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_job_help
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_job_help
 
 
 def get_list_running_extractor_jobs():
@@ -55,8 +55,8 @@ def get_list_running_extractor_jobs():
 
 def print_running_extractor_jobs(mode = 1):
 	job_list = get_list_running_extractor_jobs()
-	print r'c'
-	print r'c Currently Sparkle has ' + str(len(job_list)) + r' running feature computation jobs:'
+	print(r'c')
+	print(r'c Currently Sparkle has ' + str(len(job_list)) + r' running feature computation jobs:')
 	
 	if mode == 2:
 		current_job_num = 1
@@ -66,10 +66,10 @@ def print_running_extractor_jobs(mode = 1):
 			extractor_name = job_list[i][2]
 			start_time_str = job_list[i][3]
 			cutoff_time_str = job_list[i][4]
-			print r'c [' + str(current_job_num) + r']: Extractor: ' + extractor_name + r', Instance: ' + instance_name + r', Start Time: ' + start_time_str + r', Cutoff Time: ' + cutoff_time_str + r' second(s)' + r', Status: ' + status_str
+			print(r'c [' + str(current_job_num) + r']: Extractor: ' + extractor_name + r', Instance: ' + instance_name + r', Start Time: ' + start_time_str + r', Cutoff Time: ' + cutoff_time_str + r' second(s)' + r', Status: ' + status_str)
 			current_job_num += 1
 		
-	print r'c'
+	print(r'c')
 	return
 
 
@@ -109,8 +109,8 @@ def get_list_running_solver_jobs():
 
 def print_running_solver_jobs(mode = 1):
 	job_list = get_list_running_solver_jobs()
-	print r'c'
-	print r'c Currently Sparkle has ' + str(len(job_list)) + r' running performance computation jobs:'
+	print(r'c')
+	print(r'c Currently Sparkle has ' + str(len(job_list)) + r' running performance computation jobs:')
 	
 	if mode == 2:
 		current_job_num = 1
@@ -120,10 +120,10 @@ def print_running_solver_jobs(mode = 1):
 			solver_name = job_list[i][2]
 			start_time_str = job_list[i][3]
 			cutoff_time_str = job_list[i][4]
-			print r'c [' + str(current_job_num) + r']: Solver: ' + solver_name + r', Instance: ' + instance_name + r', Start Time: ' + start_time_str + r', Cutoff Time: ' + cutoff_time_str + r' second(s)' + r', Status: ' + status_str
+			print(r'c [' + str(current_job_num) + r']: Solver: ' + solver_name + r', Instance: ' + instance_name + r', Start Time: ' + start_time_str + r', Cutoff Time: ' + cutoff_time_str + r' second(s)' + r', Status: ' + status_str)
 			current_job_num += 1
 		
-	print r'c'
+	print(r'c')
 	return
 
 

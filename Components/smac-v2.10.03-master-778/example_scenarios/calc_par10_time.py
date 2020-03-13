@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 import os
@@ -105,8 +105,8 @@ def get_key(item):
 if __name__ == r'__main__':
 
 	if len(sys.argv) != 3:
-		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0] + r' <path> <cutoff>'
+		print(r'c Command error!')
+		print(r'c Usage: ' + sys.argv[0] + r' <path> <cutoff>')
 		sys.exit()
 	
 	path = sys.argv[1]

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,7 +15,7 @@ import sys
 import time
 import random
 import fcntl
-import sparkle_global_help
+from sparkle_help import sparkle_global_help
 
 
 def create_new_empty_file(filepath):

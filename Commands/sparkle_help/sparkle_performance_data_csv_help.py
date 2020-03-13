@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,15 +15,15 @@ import sys
 import pandas as pd
 import numpy as np
 import fcntl
-import sparkle_global_help
-import sparkle_csv_help as scsv
-import sparkle_experiments_related_help
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_csv_help as scsv
+from sparkle_help import sparkle_experiments_related_help
 
 
 class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 	
 	def test(self):
-		print 'c just a test'
+		print('c just a test')
 		return
 	
 	def __init__(self, csv_filepath):

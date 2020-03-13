@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -12,8 +12,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import fcntl
 
-import sparkle_global_help as sgh
-import sparkle_configure_solver_help as scsh
+from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_configure_solver_help as scsh
 
 def get_slurm_options_list(path_modifier=None):
 	if path_modifier is None:

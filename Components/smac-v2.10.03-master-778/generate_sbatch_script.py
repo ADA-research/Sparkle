@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 import os
@@ -105,8 +105,8 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 if __name__ == r'__main__':
 
 	if len(sys.argv) != 6:
-		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0] + r' <scenario_file> <result_directory> <num_of_smac_run> <num_job_in_parallel> <smac_execdir>'
+		print(r'c Command error!')
+		print(r'c Usage: ' + sys.argv[0] + r' <scenario_file> <result_directory> <num_of_smac_run> <num_job_in_parallel> <smac_execdir>')
 		sys.exit()
 	
 	scenario_file = sys.argv[1]

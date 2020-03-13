@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -48,8 +48,8 @@ if __name__ == r'__main__':
 		i += 1
 
 	if not os.path.exists(extractor_source):
-		print r'c Feature extractor path ' + "\'" + extractor_source + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-nickname <nickname>] [-parallel] <feature_extractor_source_directory>'
+		print(r'c Feature extractor path ' + "\'" + extractor_source + "\'" + r' does not exist!')
+		print(r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-nickname <nickname>] [-parallel] <feature_extractor_source_directory>')
 		sys.exit()
 
 	last_level_directory = r''
@@ -58,8 +58,8 @@ if __name__ == r'__main__':
 	extractor_diretory = r'Extractors/' + last_level_directory
 	if not os.path.exists(extractor_diretory): os.mkdir(extractor_diretory)
 	else:
-		print r'c Feature extractor ' + sfh.get_last_level_directory_name(extractor_diretory) + r' already exists!'
-		print r'c Do not add feature extractor ' + sfh.get_last_level_directory_name(extractor_diretory)
+		print(r'c Feature extractor ' + sfh.get_last_level_directory_name(extractor_diretory) + r' already exists!')
+		print(r'c Do not add feature extractor ' + sfh.get_last_level_directory_name(extractor_diretory))
 		sys.exit()
 
 	os.system(r'cp -r ' + extractor_source + r'/* ' + extractor_diretory)
@@ -89,17 +89,17 @@ if __name__ == r'__main__':
 	command_line = r'rm -f ' + result_path
 	os.system(command_line)
 	
-	print 'c Adding feature extractor ' + sfh.get_last_level_directory_name(extractor_diretory) + ' done!'
+	print('c Adding feature extractor ' + sfh.get_last_level_directory_name(extractor_diretory) + ' done!')
 
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
+		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
 
 	if os.path.exists(sparkle_global_help.sparkle_report_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
 		os.system(command_line)
-		print 'c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!'
+		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 
 	if my_flag_nickname:
 		sparkle_global_help.extractor_nickname_mapping[nickname_str] = extractor_diretory
@@ -108,13 +108,13 @@ if __name__ == r'__main__':
 
 	if not my_flag_run_extractor_later:
 		if not my_flag_parallel:
-			print 'c Start computing features ...'
+			print('c Start computing features ...')
 			scf.computing_features(sparkle_global_help.feature_data_csv_path, 1)
-			print 'c Feature data file ' + sparkle_global_help.feature_data_csv_path + ' has been updated!'
-			print 'c Computing features done!'
+			print('c Feature data file ' + sparkle_global_help.feature_data_csv_path + ' has been updated!')
+			print('c Computing features done!')
 		else:
 			num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
 			scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, num_job_in_parallel, 1)
-			print 'c Computing features in parallel ...'
+			print('c Computing features in parallel ...')
 
 

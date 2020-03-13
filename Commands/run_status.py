@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -38,10 +38,10 @@ if __name__ == r'__main__':
 	if my_flag_verbose: mode = 2
 	else: mode = 1
 
-	print r'c Reporting current running status of Sparkle ...'
+	print(r'c Reporting current running status of Sparkle ...')
 	sparkle_run_status_help.print_running_extractor_jobs(mode)
 	sparkle_run_status_help.print_running_solver_jobs(mode)
 	sparkle_run_status_help.print_running_portfolio_selector_jobs()
 	sparkle_run_status_help.print_running_report_jobs()
-	print r'c Current running status of Sparkle reported!'
+	print(r'c Current running status of Sparkle reported!')
 

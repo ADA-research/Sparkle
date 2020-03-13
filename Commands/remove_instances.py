@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -43,14 +43,14 @@ if __name__ == r'__main__':
 	if my_flag_nickname: instances_path = r'Instances/' + nickname_str
 
 	if not os.path.exists(instances_path):
-		print r'c Instances path ' + "\'" + instances_path + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]'
-		print r'c Or usage: ' + sys.argv[0] + r' <instances_path_directory>'
+		print(r'c Instances path ' + "\'" + instances_path + "\'" + r' does not exist!')
+		print(r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]')
+		print(r'c Or usage: ' + sys.argv[0] + r' <instances_path_directory>')
 		sys.exit()
 	
 	if instances_path[-1] == r'/': instances_path = instances_path[:-1]
 
-	print 'c Start removing all cnf instances in directory ' + instances_path + r' ...' 
+	print('c Start removing all cnf instances in directory ' + instances_path + r' ...')
 
 	list_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_path)
 
@@ -67,7 +67,7 @@ if __name__ == r'__main__':
 		feature_data_csv.delete_row(intended_cnf_filename_path)
 		performance_data_csv.delete_row(intended_cnf_filename_path)
 		os.system(r'rm -f ' + instances_path + r'/' + intended_cnf_filename)
-		print r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' has been removed!'
+		print(r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' has been removed!')
 
 	os.system(r'rm -rf ' + instances_path)
 	
@@ -90,13 +90,13 @@ if __name__ == r'__main__':
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
+		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
 	
 	if os.path.exists(sparkle_global_help.sparkle_report_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
 		os.system(command_line)
-		print 'c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!'
+		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
-	print 'c Removing instances in directory ' + instances_path + ' done!'
+	print('c Removing instances in directory ' + instances_path + ' done!')
 
 

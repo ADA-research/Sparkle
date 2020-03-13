@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -32,7 +32,7 @@ if __name__ == r'__main__':
 	if my_flag_verbose: mode = 2
 	else: mode = 1
 	
-	print r'c Reporting current system status of Sparkle ...'
+	print(r'c Reporting current system status of Sparkle ...')
 	sparkle_system_status_help.print_solver_list(mode)
 	sparkle_system_status_help.print_extractor_list(mode)
 	sparkle_system_status_help.print_instance_list(mode)
@@ -40,5 +40,5 @@ if __name__ == r'__main__':
 	sparkle_system_status_help.print_list_remaining_performance_computation_job(sparkle_global_help.performance_data_csv_path, mode)
 	sparkle_system_status_help.print_portfolio_selector_info()
 	sparkle_system_status_help.print_report_info()
-	print r'c Current system status of Sparkle reported!'
+	print(r'c Current system status of Sparkle reported!')
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,13 +15,13 @@ import time
 import random
 import sys
 import fcntl
-import sparkle_global_help
-import sparkle_basic_help
-import sparkle_file_help as sfh
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_experiments_related_help as ser
-import sparkle_job_help
-import sparkle_run_solvers_help as srs
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_experiments_related_help as ser
+from sparkle_help import sparkle_job_help
+from sparkle_help import sparkle_run_solvers_help as srs
 
 def run_sparkle_portfolio_selector_on_instance(solver_wrapper_path, instance_path, raw_result_path, cutoff_time = ser.cutoff_time_each_run):
 	runsolver_path = sparkle_global_help.runsolver_path

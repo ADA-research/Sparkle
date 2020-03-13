@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,12 +15,12 @@ import time
 import random
 import sys
 import fcntl
-import sparkle_global_help
-import sparkle_basic_help
-import sparkle_file_help as sfh
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_experiments_related_help as ser
-import sparkle_job_help
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_experiments_related_help as ser
+from sparkle_help import sparkle_job_help
 
 
 global cutoff_time_each_run
@@ -130,15 +130,15 @@ def running_solvers(performance_data_csv_path, mode):
 	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job()
 	elif mode == 2: list_performance_computation_job = performance_data_csv.get_list_recompute_performance_computation_job()
 	else:
-		print 'c Running solvers mode error!'
-		print 'c Do not run solvers'
+		print('c Running solvers mode error!')
+		print('c Do not run solvers')
 		sys.exit()
 	
-	print 'c Cutoff time for each run on solving an instance is set to ' + str(cutoff_time_each_run) + ' seconds'
+	print('c Cutoff time for each run on solving an instance is set to ' + str(cutoff_time_each_run) + ' seconds')
 	
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
 	current_job_num = 1
-	print 'c The number of total running jobs: ' + str(total_job_num)
+	print('c The number of total running jobs: ' + str(total_job_num))
 	
 	wrong_solver_list = []
 	
@@ -150,20 +150,20 @@ def running_solvers(performance_data_csv_path, mode):
 			solver_path = solver_list[j]
 			
 			if solver_path in wrong_solver_list:
-				print r'c'
-				print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' is a wrong solver'
-				print r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num)
+				print(r'c')
+				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' is a wrong solver')
+				print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
 				current_job_num += 1
-				print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ignored!'
-				print r'c'
+				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ignored!')
+				print(r'c')
 				continue
 			
 			raw_result_path = r'TMP/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 			
 			time.sleep(sleep_time_after_each_solver_run) #add at version 1.0.2
 			
-			print r'c'
-			print 'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...'
+			print(r'c')
+			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 			
 			run_solver_on_instance(solver_path, solver_path+r'/'+sparkle_global_help.sparkle_run_default_wrapper, instance_path, raw_result_path)
 		
@@ -178,7 +178,7 @@ def running_solvers(performance_data_csv_path, mode):
 				if sparkle_global_help.instance_reference_mapping[instance_path] != r'SAT':
 					sparkle_global_help.instance_reference_mapping[instance_path] = r'SAT'
 					sfh.write_instance_reference_mapping()
-				print r'c Running Result: ' + verify_string + r' , Runtime: ' + str(runtime)
+				print(r'c Running Result: ' + verify_string + r' , Runtime: ' + str(runtime))
 			elif verify_string == r'UNSAT':
 				runtime = get_runtime(raw_result_path)
 				if runtime > cutoff_time_each_run: runtime = penalty_time
@@ -186,15 +186,15 @@ def running_solvers(performance_data_csv_path, mode):
 				if sparkle_global_help.instance_reference_mapping[instance_path] != r'UNSAT':
 					sparkle_global_help.instance_reference_mapping[instance_path] = r'UNSAT'
 					sfh.write_instance_reference_mapping()
-				print r'c Running Result: ' + verify_string + r' , Runtime: ' + str(runtime)
+				print(r'c Running Result: ' + verify_string + r' , Runtime: ' + str(runtime))
 			elif verify_string == r'UNKNOWN':
 				runtime = penalty_time
 				performance_data_csv.set_value(instance_path, solver_path, runtime)
-				print r'c Running Result: ' + verify_string + r' , Runtime (Penalized): ' + str(runtime)
+				print(r'c Running Result: ' + verify_string + r' , Runtime (Penalized): ' + str(runtime))
 			elif verify_string == r'WRONG':
 				wrong_solver_list.append(solver_path)
-				print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' reports wrong answer on instance ' + sfh.get_last_level_directory_name(instance_path) + r'!'
-				print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' will be removed!'
+				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' reports wrong answer on instance ' + sfh.get_last_level_directory_name(instance_path) + r'!')
+				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' will be removed!')
 			
 				performance_data_csv.delete_column(solver_path)
 				sparkle_global_help.solver_list.remove(solver_path)
@@ -202,11 +202,11 @@ def running_solvers(performance_data_csv_path, mode):
 				sfh.write_solver_list()
 				sfh.write_solver_nickname_mapping()
 				
-				print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' is a wrong solver'
-				print r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num)
+				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' is a wrong solver')
+				print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
 				current_job_num += 1
-				print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ignored!'
-				print r'c'
+				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ignored!')
+				print(r'c')
 				
 				continue
 			else:
@@ -214,17 +214,17 @@ def running_solvers(performance_data_csv_path, mode):
 				verify_string = r'UNKNOWN' #treated as unknown
 				runtime = penalty_time
 				performance_data_csv.set_value(instance_path, solver_path, runtime)
-				print r'c Running Result: ' + verify_string + r' , Runtime (Penalized): ' + str(runtime)
+				print(r'c Running Result: ' + verify_string + r' , Runtime (Penalized): ' + str(runtime))
 		
 			command_line = r'rm -f ' + raw_result_path
 			os.system(command_line)
 			
-			print r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num)
+			print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
 			current_job_num += 1
 			
 			performance_data_csv.update_csv()
-			print r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!'
-			print r'c'
+			print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!')
+			print(r'c')
 
 	#performance_data_csv.update_csv()
 	sfh.write_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(cutoff_time_each_run))

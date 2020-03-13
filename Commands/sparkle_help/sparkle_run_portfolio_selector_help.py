@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -13,14 +13,14 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
-import sparkle_basic_help
-import sparkle_record_help
-import sparkle_file_help as sfh
-import sparkle_global_help
-import sparkle_feature_data_csv_help as sfdcsv
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_run_solvers_help as srs
-import sparkle_experiments_related_help as ser
+from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_record_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_run_solvers_help as srs
+from sparkle_help import sparkle_experiments_related_help as ser
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
 	runsolver_path = sparkle_global_help.runsolver_path
@@ -42,9 +42,9 @@ def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_t
 	try:
 		tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
 	except:
-		print 'c ****** WARNING: Feature vector computing on instance ' + instance_path + ' failed! ******'
+		print('c ****** WARNING: Feature vector computing on instance ' + instance_path + ' failed! ******')
 		#print 'c ****** WARNING: Treat the feature vector of this instance as a vector whose all elements are 0 ! ******'
-		print r"c ****** WARNING: The feature vector of this instance will be imputed as the mean value of all other non-missing values! ******"
+		print(r"c ****** WARNING: The feature vector of this instance will be imputed as the mean value of all other non-missing values! ******")
 		#length = int(sparkle_global_help.extractor_feature_vector_size_mapping[extractor_path])
 		#list_feature_vector = [0]*length
 		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
@@ -71,7 +71,7 @@ def print_predict_schedule(predict_schedule_result_path):
 	fin = open(predict_schedule_result_path, 'r+')
 	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 	myline = fin.readline().strip()
-	print 'c ' + myline
+	print('c ' + myline)
 	fin.close()
 	return
 
@@ -98,7 +98,7 @@ def print_solution(raw_result_path):
 		mylist = myline.split()
 		if mylist[1] == r's' or mylist[1] == r'v':
 			string_output = ' '.join(mylist[1:])
-			print string_output	
+			print(string_output)
 	fin.close()
 	return
 
@@ -116,7 +116,7 @@ def call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_
 	else: flag_solved = False
 	
 	if flag_solved: 
-		print 'c instance solved by solver ' + solver_path
+		print('c instance solved by solver ' + solver_path)
 		print_solution(raw_result_path)
 	
 	os.system(r'rm -f ' + raw_result_path)
@@ -124,31 +124,31 @@ def call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_
 
 
 def call_sparkle_portfolio_selector_solve_instance(instance_path):
-	print 'c Start running Sparkle portfolio selector on solving instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...'
+	print('c Start running Sparkle portfolio selector on solving instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	python_executable = sparkle_global_help.python_executable
 	if not os.path.exists(r'TMP/'): os.mkdir(r'TMP/')
 	
-	print 'c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...'
+	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	list_feature_vector = []
 	
 	cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance/len(sparkle_global_help.extractor_list) + 1
 	
 	for extractor_path in sparkle_global_help.extractor_list:
-		print 'c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...'
+		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 		result_path = r'TMP/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 		
 		list_feature_vector = list_feature_vector + get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
-		print 'c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!'
-	print 'c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + r' done!'
+		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!')
+	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + r' done!')
 	
 	command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' --load ' + sparkle_global_help.sparkle_portfolio_selector_path + r' --feature_vec'
 	for value in list_feature_vector:
 		command_line = command_line + r' ' + str(value)
 	predict_schedule_result_path = r'TMP/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
 	command_line = command_line + r' 1> ' + predict_schedule_result_path + r' 2> ' + sparkle_global_help.sparkle_log_path
-	print 'c Sparkle portfolio selector predicting ...'
+	print('c Sparkle portfolio selector predicting ...')
 	os.system(command_line)
-	print 'c Predicting done!'
+	print('c Predicting done!')
 	
 	print_predict_schedule(predict_schedule_result_path)
 	list_predict_schedule = get_list_predict_schedule_from_file(predict_schedule_result_path)
@@ -162,13 +162,13 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path):
 			cutoff_time = list_predict_schedule[i][1]
 		else:
 			cutoff_time = sparkle_global_help.sparkle_maximum_int-1
-			print'c This is the last solver call, so time budget for this try changes from ' + str(list_predict_schedule[-1][1]) + ' to ' + str(cutoff_time)
-		print 'c Calling solver ' + sfh.get_last_level_directory_name(solver_path) + ' with time budget ' + str(cutoff_time) + ' for solving ...'
+			print('c This is the last solver call, so time budget for this try changes from ' + str(list_predict_schedule[-1][1]) + ' to ' + str(cutoff_time))
+		print('c Calling solver ' + sfh.get_last_level_directory_name(solver_path) + ' with time budget ' + str(cutoff_time) + ' for solving ...')
 		sys.stdout.flush()
 		flag_solved = call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time)
-		print 'c Calling solver ' + sfh.get_last_level_directory_name(solver_path) + ' done!'
+		print('c Calling solver ' + sfh.get_last_level_directory_name(solver_path) + ' done!')
 		if flag_solved: break
-		else: print 'c The instance is not solved in this call'
+		else: print('c The instance is not solved in this call')
 	return
 
 

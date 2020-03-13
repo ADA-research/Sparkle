@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -41,14 +41,14 @@ if __name__ == r'__main__':
 	if my_flag_nickname: extractor_path = sparkle_global_help.extractor_nickname_mapping[nickname_str]
 
 	if not os.path.exists(extractor_path):
-		print r'c Feature extractor path ' + "\'" + extractor_path + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]'
-		print r'c Or usage: ' + sys.argv[0] + r' <feature_extractor_directory>'
+		print(r'c Feature extractor path ' + "\'" + extractor_path + "\'" + r' does not exist!')
+		print(r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]')
+		print(r'c Or usage: ' + sys.argv[0] + r' <feature_extractor_directory>')
 		sys.exit()
 
 	if extractor_path[-1] == r'/': extractor_path = extractor_path[:-1]
 
-	print 'c Starting removing feature extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' ...'
+	print('c Starting removing feature extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' ...')
 
 	extractor_list = sparkle_global_help.extractor_list
 	if bool(extractor_list):
@@ -83,13 +83,13 @@ if __name__ == r'__main__':
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
+		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
 	
 	if os.path.exists(sparkle_global_help.sparkle_report_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
 		os.system(command_line)
-		print 'c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!'
+		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
-	print 'c Removing feature extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' done!'
+	print('c Removing feature extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' done!')
 
 

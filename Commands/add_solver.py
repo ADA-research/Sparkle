@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -64,8 +64,8 @@ if __name__ == r'__main__':
 		i += 1
 
 	if not os.path.exists(solver_source):
-		print r'c Solver path ' + "\'" + solver_source + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>'
+		print(r'c Solver path ' + "\'" + solver_source + "\'" + r' does not exist!')
+		print(r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>')
 		sys.exit()
 	
 	if not my_flag_deterministic:
@@ -79,8 +79,8 @@ if __name__ == r'__main__':
 	solver_diretory = r'Solvers/' + last_level_directory
 	if not os.path.exists(solver_diretory): os.mkdir(solver_diretory)
 	else:
-		print r'c Solver ' + sfh.get_last_level_directory_name(solver_diretory) + r' already exists!'
-		print r'c Do not add solver ' + sfh.get_last_level_directory_name(solver_diretory)
+		print(r'c Solver ' + sfh.get_last_level_directory_name(solver_diretory) + r' already exists!')
+		print(r'c Do not add solver ' + sfh.get_last_level_directory_name(solver_diretory))
 		sys.exit()
 
 	os.system(r'cp -r ' + solver_source + r'/* ' + solver_diretory)
@@ -92,7 +92,7 @@ if __name__ == r'__main__':
 	sparkle_global_help.solver_list.append(solver_diretory)
 	sfh.add_new_solver_into_file(solver_diretory, deterministic)
 	
-	print 'c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!'
+	print('c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!')
 	
 	if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
 		pcs_file_name = sacsh.get_pcs_file_from_solver_directory(solver_diretory)
@@ -107,12 +107,12 @@ if __name__ == r'__main__':
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
+		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
 	
 	if os.path.exists(sparkle_global_help.sparkle_report_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
 		os.system(command_line)
-		print 'c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!'
+		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
 	if my_flag_nickname:
 		sparkle_global_help.solver_nickname_mapping[nickname_str] = solver_diretory
@@ -121,14 +121,14 @@ if __name__ == r'__main__':
 
 	if not my_flag_run_solver_later:
 		if not my_flag_parallel:
-			print 'c Start running solvers ...'
+			print('c Start running solvers ...')
 			srs.running_solvers(sparkle_global_help.performance_data_csv_path, 1)
-			print 'c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!'
-			print 'c Running solvers done!'
+			print('c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!')
+			print('c Running solvers done!')
 		else:
 			num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
 			run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
-			print 'c Running solvers in parallel ...'
+			print('c Running solvers in parallel ...')
 			dependency_jobid_list = []
 			if run_solvers_parallel_jobid:
 				dependency_jobid_list.append(run_solvers_parallel_jobid)

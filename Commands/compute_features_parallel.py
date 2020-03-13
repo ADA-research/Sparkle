@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -26,7 +26,7 @@ from sparkle_help import sparkle_experiments_related_help
 if __name__ == r'__main__':
 
 	
-	print 'c Start computing features ...'
+	print('c Start computing features ...')
 
 	my_flag_recompute = False
 
@@ -46,7 +46,7 @@ if __name__ == r'__main__':
 	else: 
 		scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, num_job_in_parallel, 1)
 	
-	print 'c Computing features in parallel ...'
+	print('c Computing features in parallel ...')
 	#print 'c Feature data file ' + sparkle_global_help.feature_data_csv_path + ' has been updated!'
 	#print 'c Computing features done!'
 	

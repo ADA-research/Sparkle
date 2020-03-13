@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -13,7 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import random
-import sparkle_file_help as sfh
+from sparkle_help import sparkle_file_help as sfh
 
 
 def get_list_cnf_path_recursive(path, list_cnf_path):
@@ -158,7 +158,7 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix, smac_instanc
 	elif train_or_test == r'test':
 		file_suffix = r'_test.txt'
 	else:
-		print r'c Invalid function call of \'copy_instances_to_smac\'; aborting execution'
+		print(r'c Invalid function call of \'copy_instances_to_smac\'; aborting execution')
 		sys.exit()
 
 	file_instance = smac_instance_dir_prefix + file_suffix

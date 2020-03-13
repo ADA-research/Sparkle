@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,13 +15,13 @@ import time
 import random
 import sys
 import fcntl
-import sparkle_global_help
-import sparkle_basic_help
-import sparkle_file_help as sfh
-import sparkle_feature_data_csv_help as sfdcsv
-import sparkle_experiments_related_help as ser
-import sparkle_job_help
-import sparkle_compute_features_help as scf
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_experiments_related_help as ser
+from sparkle_help import sparkle_job_help
+from sparkle_help import sparkle_compute_features_help as scf
 
 
 if __name__ == r'__main__':
@@ -66,8 +66,8 @@ if __name__ == r'__main__':
 		tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
 		result_string = 'Successful'
 	except:
-		print 'c ****** WARNING: Feature vector computing on instance ' + instance_path + ' failed! ******'
-		print 'c ****** WARNING: The feature vector of this instace consists of missing values ******'
+		print('c ****** WARNING: Feature vector computing on instance ' + instance_path + ' failed! ******')
+		print('c ****** WARNING: The feature vector of this instace consists of missing values ******')
 		command_line = r'rm -f ' + result_path
 		os.system(command_line)
 		tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path)

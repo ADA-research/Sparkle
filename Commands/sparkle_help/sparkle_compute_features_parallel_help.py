@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,13 +15,13 @@ import time
 import random
 import sys
 import fcntl
-import sparkle_global_help
-import sparkle_basic_help
-import sparkle_file_help as sfh
-import sparkle_feature_data_csv_help as sfdcsv
-import sparkle_experiments_related_help as ser
-import sparkle_job_help
-import sparkle_compute_features_help as scf
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_experiments_related_help as ser
+from sparkle_help import sparkle_job_help
+from sparkle_help import sparkle_compute_features_help as scf
 
 def generate_computing_features_sbatch_shell_script(sbatch_shell_script_path, num_job_in_parallel, feature_data_csv_path, list_jobs, start_index, end_index):
 	####
@@ -87,8 +87,8 @@ def computing_features_parallel(feature_data_csv_path, num_job_in_parallel, mode
 	if mode == 1: list_feature_computation_job = feature_data_csv.get_list_remaining_feature_computation_job() # the value of mode is 1, so the list of computation jobs is the list of the remaining jobs
 	elif mode == 2: list_feature_computation_job = feature_data_csv.get_list_recompute_feature_computation_job() # the value of mode is 2, so the list of computation jobs is the list of all jobs (recomputing)
 	else: # the abnormal case, exit
-		print 'c Computing features mode error!'
-		print 'c Do not compute features'
+		print('c Computing features mode error!')
+		print('c Do not compute features')
 		sys.exit()
 	
 	####
@@ -97,13 +97,13 @@ def computing_features_parallel(feature_data_csv_path, num_job_in_parallel, mode
 	if len(sparkle_global_help.extractor_list)==0: cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance + 1
 	else: cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance/len(sparkle_global_help.extractor_list) + 1
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
-	print 'c Cutoff time for each run on computing features is set to ' + str(cutoff_time_each_extractor_run) + ' seconds' # print the information about the cutoff time
+	print('c Cutoff time for each run on computing features is set to ' + str(cutoff_time_each_extractor_run) + ' seconds') # print the information about the cutoff time
 	####
 	
 	####
 	# expand the job list
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)
-	print 'c The number of total running jobs: ' + str(total_job_num)
+	print('c The number of total running jobs: ' + str(total_job_num))
 	total_job_list = sparkle_job_help.expand_total_job_from_list(list_feature_computation_job)
 	####
 	

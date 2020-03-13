@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -19,11 +19,11 @@ from sparkle_help import sparkle_csv_merge_help
 if __name__ == r'__main__':
 
 	if len(sys.argv) != 1:
-		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0]
+		print(r'c Command error!')
+		print(r'c Usage: ' + sys.argv[0])
 		sys.exit()
 
-	print r'c Cleaning temporary files ...'
+	print(r'c Cleaning temporary files ...')
 	command_line = r'rm -rf Commands/sparkle_help/*.pyc'
 	os.system(command_line)
 	command_line = r'rm -rf TMP/*'
@@ -44,5 +44,5 @@ if __name__ == r'__main__':
 	os.system(command_line)
 	command_line = r'rm -f slurm-*'
 	os.system(command_line)
-	print r'c Temporary files cleaned!'
+	print(r'c Temporary files cleaned!')
 

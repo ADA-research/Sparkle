@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -41,23 +41,23 @@ if __name__ == r'__main__':
 	if flag_compute_perfect == flag_compute_actual: flag_argument_error = True
 	
 	if flag_argument_error:
-		print r'c Arguments error!'
-		print r'c Usage: ' + sys.argv[0] + r' -perfect'
-		print r'c Or usage: ' + sys.argv[0] + r' -actual'
+		print(r'c Arguments error!')
+		print(r'c Usage: ' + sys.argv[0] + r' -perfect')
+		print(r'c Or usage: ' + sys.argv[0] + r' -actual')
 		sys.exit()
 	else:
 		cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
 	
 		if flag_compute_perfect:
-			print r"c Start computing each solver's marginal contribution to perfect selector ..."
+			print(r"c Start computing each solver's marginal contribution to perfect selector ...")
 			rank_list = scmc.compute_perfect_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
 			scmc.print_rank_list(rank_list, 1)
-			print r'c Marginal contribution (perfect selector) computing done!'
+			print(r'c Marginal contribution (perfect selector) computing done!')
 		elif flag_compute_actual:
-			print r"c Start computing each solver's marginal contribution to actual selector ..."
+			print(r"c Start computing each solver's marginal contribution to actual selector ...")
 			rank_list = scmc.compute_actual_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
 			scmc.print_rank_list(rank_list, 2)
-			print r'c Marginal contribution (actual selector) computing done!'
+			print(r'c Marginal contribution (actual selector) computing done!')
 		else:
 			sys.exit()
 		

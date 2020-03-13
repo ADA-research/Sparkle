@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,11 +15,11 @@ import time
 import random
 import sys
 import fcntl
-import sparkle_global_help
-import sparkle_file_help as sfh
-import sparkle_feature_data_csv_help as sfdcsv
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_experiments_related_help as ser
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_experiments_related_help as ser
 
 '''
 def csv_load_combine_update(feature_data_csv_path, second_sfdcsv):

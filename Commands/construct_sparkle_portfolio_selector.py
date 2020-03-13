@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -58,20 +58,20 @@ def delete_task_run_status():
 if __name__ == r'__main__':
 	
 	if len(sys.argv) != 1:
-		print r'c Arguments error!'
-		print r'c Usage: ' + sys.argv[0]
+		print(r'c Arguments error!')
+		print(r'c Usage: ' + sys.argv[0])
 		sys.exit()
 	
-	print 'c Start constructing Sparkle portfolio selector ...'
+	print('c Start constructing Sparkle portfolio selector ...')
 	
 	generate_task_run_status()
 	
 	flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(sparkle_global_help.feature_data_csv_path, sparkle_global_help.performance_data_csv_path)
 	
 	if flag_judge_exist_remaining_jobs:
-		print r'c There remain unperformed feature computation jobs or performance computation jobs!'
-		print r'c Please first execute all unperformed jobs before constructing Sparkle portfolio selecotr'
-		print r'c Sparkle portfolio selector is not successfully constructed!'
+		print(r'c There remain unperformed feature computation jobs or performance computation jobs!')
+		print(r'c Please first execute all unperformed jobs before constructing Sparkle portfolio selecotr')
+		print(r'c Sparkle portfolio selector is not successfully constructed!')
 		delete_task_run_status()
 		sys.exit()
 	
@@ -80,23 +80,23 @@ if __name__ == r'__main__':
 	scps.construct_sparkle_portfolio_selector(sparkle_global_help.sparkle_portfolio_selector_path, sparkle_global_help.performance_data_csv_path, sparkle_global_help.feature_data_csv_path, cutoff_time_each_run)
 	
 	if not os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
-		print 'c Sparkle portfolio selector is not successfully constructed!'
-		print 'c There might be some errors!'
+		print('c Sparkle portfolio selector is not successfully constructed!')
+		print('c There might be some errors!')
 		delete_task_run_status()
 		sys.exit()
 	else:
-		print 'c Sparkle portfolio selector constructed!'
-		print 'c Sparkle portfolio selector located at ' + sparkle_global_help.sparkle_portfolio_selector_path
+		print('c Sparkle portfolio selector constructed!')
+		print('c Sparkle portfolio selector located at ' + sparkle_global_help.sparkle_portfolio_selector_path)
 		
-		print r"c Start computing each solver's marginal contribution to perfect selector ..."
+		print(r"c Start computing each solver's marginal contribution to perfect selector ...")
 		rank_list = scmc.compute_perfect_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
 		scmc.print_rank_list(rank_list, 1)
-		print r'c Marginal contribution (perfect selector) computing done!'
+		print(r'c Marginal contribution (perfect selector) computing done!')
 	
 		
-		print r"c Start computing each solver's marginal contribution to actual selector ..."
+		print(r"c Start computing each solver's marginal contribution to actual selector ...")
 		rank_list = scmc.compute_actual_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
 		scmc.print_rank_list(rank_list, 2)
-		print r'c Marginal contribution (actual selector) computing done!'
+		print(r'c Marginal contribution (actual selector) computing done!')
 		delete_task_run_status()
 		

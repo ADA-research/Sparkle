@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -57,11 +57,11 @@ if __name__ == r'__main__':
 
 	# Verify path validity for the provided instance directory
 	if not os.path.exists(instances_source):
-		print r'c Instances path ' + "\'" + instances_source + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname <nickname>] [-parallel] <instances_source_directory>'
+		print(r'c Instances path ' + "\'" + instances_source + "\'" + r' does not exist!')
+		print(r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname <nickname>] [-parallel] <instances_source_directory>')
 		sys.exit()
 
-	print 'c Start adding all instances in directory ' + instances_source + r' ...' 
+	print('c Start adding all instances in directory ' + instances_source + r' ...')
 
 	last_level_directory = r''
 	if my_flag_nickname: last_level_directory = nickname_str
@@ -79,17 +79,17 @@ if __name__ == r'__main__':
 
 	num_inst = len(list_source_all_filename)
 	
-	print 'c The number of intended adding instances: ' + str(num_inst)
+	print('c The number of intended adding instances: ' + str(num_inst))
 
 	for i in range(0, len(list_source_all_filename)):
 		intended_filename = list_source_all_filename[i]
-		print r'c'
-		print r'c Adding ' + intended_filename + r' ...'
-		print 'c Executing Progress: ' + str(i+1) + ' out of ' + str(num_inst)
+		print(r'c')
+		print(r'c Adding ' + intended_filename + r' ...')
+		print('c Executing Progress: ' + str(i+1) + ' out of ' + str(num_inst))
 		
 		if intended_filename in list_target_all_filename:
-			print r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' already exists in Directory ' + instances_directory
-			print r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_filename)
+			print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' already exists in Directory ' + instances_directory)
+			print(r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_filename))
 			#continue
 		else:
 			intended_filename_path = instances_directory + r'/' + intended_filename
@@ -103,8 +103,8 @@ if __name__ == r'__main__':
 			
 			if instances_source[-1] == r'/': instances_source = instances_source[:-1]
 			os.system(r'cp ' + instances_source + r'/' + intended_filename + r' ' + instances_directory)
-			print r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been added!'
-			print r'c'
+			print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been added!')
+			print(r'c')
 
 #	print('c Selecting training instances ...')
 #	list_cnf_path = satih.get_list_cnf_path(instances_directory)
@@ -141,38 +141,38 @@ if __name__ == r'__main__':
 	feature_data_csv.update_csv()
 	performance_data_csv.update_csv()
 	
-	print 'c Adding instances ' + sfh.get_last_level_directory_name(instances_directory) + ' done!'
+	print('c Adding instances ' + sfh.get_last_level_directory_name(instances_directory) + ' done!')
 
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
+		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
 	
 	if os.path.exists(sparkle_global_help.sparkle_report_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
 		os.system(command_line)
-		print 'c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!'
+		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
 	if not my_flag_run_extractor_later:
 		if not my_flag_parallel:
-			print 'c Start computing features ...'
+			print('c Start computing features ...')
 			scf.computing_features(sparkle_global_help.feature_data_csv_path, 1)
-			print 'c Feature data file ' + sparkle_global_help.feature_data_csv_path + ' has been updated!'
-			print 'c Computing features done!'
+			print('c Feature data file ' + sparkle_global_help.feature_data_csv_path + ' has been updated!')
+			print('c Computing features done!')
 		else:
 			num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
 			scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, num_job_in_parallel, 1)
-			print 'c Computing features in parallel ...'
+			print('c Computing features in parallel ...')
 
 	if not my_flag_run_solver_later:
 		if not my_flag_parallel:
-			print 'c Start running solvers ...'
+			print('c Start running solvers ...')
 			srs.running_solvers(sparkle_global_help.performance_data_csv_path, 1)
-			print 'c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!'
-			print 'c Running solvers done!'
+			print('c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!')
+			print('c Running solvers done!')
 		else:
 			num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
 			srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
-			print 'c Running solvers in parallel ...'
+			print('c Running solvers in parallel ...')
 			
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -23,14 +23,14 @@ from sparkle_help import sparkle_generate_report_for_test_help
 if __name__ == r'__main__':
 	
 	if len(sys.argv) != 2:
-		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0] + r' ' + r'<test_case_directory>'
+		print(r'c Command error!')
+		print(r'c Usage: ' + sys.argv[0] + r' ' + r'<test_case_directory>')
 		sys.exit()
 	
 	test_case_directory = sys.argv[1]
 	
-	print r'c Generating report for test ...'
+	print(r'c Generating report for test ...')
 	sparkle_generate_report_for_test_help.generate_report_for_test(test_case_directory)
-	print r'c Report for test generated ...'
+	print(r'c Report for test generated ...')
 	
 

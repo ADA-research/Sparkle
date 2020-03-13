@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,13 +15,13 @@ import time
 import random
 import sys
 import fcntl
-import sparkle_global_help
-import sparkle_basic_help
-import sparkle_file_help as sfh
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_experiments_related_help as ser
-import sparkle_job_help
-import sparkle_run_solvers_help as srs
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_experiments_related_help as ser
+from sparkle_help import sparkle_job_help
+from sparkle_help import sparkle_run_solvers_help as srs
 
 
 ####
@@ -100,16 +100,16 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job() # the value of mode is 1, so the list of computation jobs is the list of the remaining jobs
 	elif mode == 2: list_performance_computation_job = performance_data_csv.get_list_recompute_performance_computation_job() # the value of mode is 2, so the list of computation jobs is the list of all jobs (recomputing)
 	else: # the abnormal case, exit
-		print 'c Running solvers mode error!'
-		print 'c Do not run solvers'
+		print('c Running solvers mode error!')
+		print('c Do not run solvers')
 		sys.exit()
 	
-	print 'c Cutoff time for each run on solving an instance is set to ' + str(cutoff_time_each_run) + ' seconds' # print the information about the cutoff time
+	print('c Cutoff time for each run on solving an instance is set to ' + str(cutoff_time_each_run) + ' seconds') # print the information about the cutoff time
 	
 	####
 	# expand the job list
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
-	print 'c The number of total running jobs: ' + str(total_job_num)
+	print('c The number of total running jobs: ' + str(total_job_num))
 	total_job_list = sparkle_job_help.expand_total_job_from_list(list_performance_computation_job)
 	####
 	

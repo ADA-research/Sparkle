@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 import os
@@ -142,8 +142,8 @@ def generate_sbatch_script(sbatch_script_path, executable_wrapper_name, cnf_dire
 if __name__ == r'__main__':
 
 	if len(sys.argv) != 7:
-		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0] + r' <executable_wrapper_name> <cnf_directory> <result_directory> <cutoff_time_each_run> <num_job_in_parallel> <train_or_test>'
+		print(r'c Command error!')
+		print(r'c Usage: ' + sys.argv[0] + r' <executable_wrapper_name> <cnf_directory> <result_directory> <cutoff_time_each_run> <num_job_in_parallel> <train_or_test>')
 		sys.exit()
 	
 	executable_wrapper_name = sys.argv[1]

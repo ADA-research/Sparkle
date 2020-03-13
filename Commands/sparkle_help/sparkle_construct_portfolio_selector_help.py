@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -13,13 +13,13 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
-import sparkle_basic_help
-import sparkle_record_help
-import sparkle_file_help as sfh
-import sparkle_global_help
-import sparkle_feature_data_csv_help as sfdcsv
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_run_solvers_help as srs
+from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_record_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_run_solvers_help as srs
 
 def get_cutoff_time_each_run_from_cutoff_time_information_txt_path(cutoff_time_information_txt_path = sparkle_global_help.cutoff_time_information_txt_path):
 	
@@ -41,10 +41,10 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, perfor
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
 	bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()
 	if bool_exists_missing_value:
-		print 'c ****** WARNING: There exists missing value, and all missing values will be imputed as the mean value of all other non-missing values! ******'
-		print 'c Imputing all missing values starts ...'
+		print('c ****** WARNING: There exists missing value, and all missing values will be imputed as the mean value of all other non-missing values! ******')
+		print('c Imputing all missing values starts ...')
 		feature_data_csv.impute_missing_value_of_all_columns()
-		print 'c Imputing all missing values done!'
+		print('c Imputing all missing values done!')
 		impute_feature_data_csv_path = feature_data_csv_path + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'_impute.csv'
 		feature_data_csv.save_csv(impute_feature_data_csv_path)
 		feature_data_csv_path = impute_feature_data_csv_path

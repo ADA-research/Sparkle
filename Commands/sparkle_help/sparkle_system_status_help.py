@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -15,53 +15,53 @@ import sys
 import fcntl
 import time
 import datetime
-import sparkle_global_help
-import sparkle_file_help as sfh
-import sparkle_feature_data_csv_help as sfdcsv
-import sparkle_performance_data_csv_help as spdcsv
-import sparkle_job_help
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help import sparkle_job_help
 
 
 def print_solver_list(mode = 1):
 	solver_list = sparkle_global_help.solver_list
-	print r'c'
-	print r'c Currently Sparkle has ' + str(len(solver_list)) + r' solvers:'
+	print(r'c')
+	print(r'c Currently Sparkle has ' + str(len(solver_list)) + r' solvers:')
 	
 	if mode == 2:
 		i=1
 		for solver in solver_list:
-			print r'c [' + str(i) + r']: Solver: ' + sfh.get_last_level_directory_name(solver)
+			print(r'c [' + str(i) + r']: Solver: ' + sfh.get_last_level_directory_name(solver))
 			i+=1
 	
-	print r'c'
+	print(r'c')
 	return
 
 def print_extractor_list(mode = 1):
 	extractor_list = sparkle_global_help.extractor_list
-	print r'c'
-	print r'c Currently Sparkle has ' + str(len(extractor_list)) + r' feature extractors:'
+	print(r'c')
+	print(r'c Currently Sparkle has ' + str(len(extractor_list)) + r' feature extractors:')
 	
 	if mode == 2:
 		i=1
 		for extractor in extractor_list:
-			print r'c [' + str(i) + r']: Extractor: ' + sfh.get_last_level_directory_name(extractor)
+			print(r'c [' + str(i) + r']: Extractor: ' + sfh.get_last_level_directory_name(extractor))
 			i+=1
 	
-	print r'c'
+	print(r'c')
 	return
 
 def print_instance_list(mode = 1):
 	instance_list = sparkle_global_help.instance_list
-	print r'c'
-	print r'c Currently Sparkle has ' + str(len(instance_list)) + r' instances:'
+	print(r'c')
+	print(r'c Currently Sparkle has ' + str(len(instance_list)) + r' instances:')
 	
 	if mode == 2:
 		i=1
 		for instance in instance_list:
-			print r'c [' + str(i) + r']: Instance: ' + sfh.get_last_level_directory_name(instance)
+			print(r'c [' + str(i) + r']: Instance: ' + sfh.get_last_level_directory_name(instance))
 			i+=1
 	
-	print r'c'
+	print(r'c')
 	return
 
 def print_list_remaining_feature_computation_job(feature_data_csv_path, mode = 1):
@@ -72,8 +72,8 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode = 1
 		list_feature_computation_job = []
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)	
 	
-	print r'c'
-	print r'c Currently Sparkle has ' + str(total_job_num) + r' remaining feature computation jobs needed to be performed:'
+	print(r'c')
+	print(r'c Currently Sparkle has ' + str(total_job_num) + r' remaining feature computation jobs needed to be performed:')
 	
 	if mode == 2:
 		current_job_num = 1
@@ -83,10 +83,10 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode = 1
 			len_extractor_list = len(extractor_list)
 			for j in range(0, len_extractor_list):
 				extractor_path = extractor_list[j]
-				print r'c [' + str(current_job_num) + r']: Extractor: ' + sfh.get_last_level_directory_name(extractor_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path)
+				print(r'c [' + str(current_job_num) + r']: Extractor: ' + sfh.get_last_level_directory_name(extractor_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path))
 				current_job_num += 1
 	
-	print r'c'
+	print(r'c')
 	return
 
 def print_list_remaining_performance_computation_job(performance_data_csv_path, mode = 1):
@@ -97,8 +97,8 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path, 
 		list_performance_computation_job = []
 	total_job_num = total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
 	
-	print r'c'
-	print r'c Currently Sparkle has ' + str(total_job_num) + r' remaining performance computation jobs needed to be performed:'
+	print(r'c')
+	print(r'c Currently Sparkle has ' + str(total_job_num) + r' remaining performance computation jobs needed to be performed:')
 	
 	if mode == 2:
 		current_job_num = 1
@@ -108,10 +108,10 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path, 
 			len_solver_list = len(solver_list)
 			for j in range(0, len_solver_list):
 				solver_path = solver_list[j]
-				print r'c [' + str(current_job_num) + r']: Solver: ' + sfh.get_last_level_directory_name(solver_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path)
+				print(r'c [' + str(current_job_num) + r']: Solver: ' + sfh.get_last_level_directory_name(solver_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path))
 				current_job_num += 1
 	
-	print r'c'
+	print(r'c')
 	return
 
 def print_portfolio_selector_info():

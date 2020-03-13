@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -41,14 +41,14 @@ if __name__ == r'__main__':
 	if my_flag_nickname: solver_path = sparkle_global_help.solver_nickname_mapping[nickname_str]
 
 	if not os.path.exists(solver_path):
-		print r'c Feature solver path ' + "\'" + solver_path + "\'" + r' does not exist!'
-		print r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]'
-		print r'c Or usage: ' + sys.argv[0] + r' <solver_directory>'
+		print(r'c Feature solver path ' + "\'" + solver_path + "\'" + r' does not exist!')
+		print(r'c Usage: ' + sys.argv[0] + r' [-nickname <nickname>]')
+		print(r'c Or usage: ' + sys.argv[0] + r' <solver_directory>')
 		sys.exit()
 
 	if solver_path[-1] == r'/': solver_path = solver_path[:-1]
 
-	print 'c Starting removing solver ' + sfh.get_last_level_directory_name(solver_path) + ' ...'
+	print('c Starting removing solver ' + sfh.get_last_level_directory_name(solver_path) + ' ...')
 
 	solver_list = sparkle_global_help.solver_list
 	if bool(solver_list):
@@ -82,12 +82,12 @@ if __name__ == r'__main__':
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print 'c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!'
+		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
 	
 	if os.path.exists(sparkle_global_help.sparkle_report_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
 		os.system(command_line)
-		print 'c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!'
+		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
-	print 'c Removing solver ' + sfh.get_last_level_directory_name(solver_path) + ' done!'
+	print('c Removing solver ' + sfh.get_last_level_directory_name(solver_path) + ' done!')
 

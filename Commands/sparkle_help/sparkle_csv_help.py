@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -23,8 +23,8 @@ class Sparkle_CSV:
 	@staticmethod
 	def create_empty_csv(csv_filepath):
 		if os.path.exists(csv_filepath):
-			print r'c Path ' + csv_filepath + r'already exists!'
-			print r'c Nothing changed!'
+			print(r'c Path ' + csv_filepath + r'already exists!')
+			print(r'c Nothing changed!')
 			return
 		fo = open(csv_filepath, 'w+')
 		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
@@ -91,8 +91,8 @@ class Sparkle_CSV:
 	
 	def rename_column(self, ori_column_name, mod_column_name):
 		if not ori_column_name in self.list_columns():
-			print r'c Column ' + ori_column_name + r' does not exist!'
-			print r'c Nothing changed!'
+			print(r'c Column ' + ori_column_name + r' does not exist!')
+			print(r'c Nothing changed!')
 			return
 		self.dataframe.rename(columns = {ori_column_name:mod_column_name}, inplace=True)
 		return
@@ -102,8 +102,8 @@ class Sparkle_CSV:
 
 	def add_column(self, column_name, value_list=[]):
 		if column_name in self.list_columns():
-			print r'c Column ' + column_name + r' already exists!'
-			print r'c Nothing changed!'
+			print(r'c Column ' + column_name + r' already exists!')
+			print(r'c Nothing changed!')
 			return
 		if value_list == []: value_list = [None]*self.get_row_size()
 		self.dataframe[column_name] = value_list
@@ -116,8 +116,8 @@ class Sparkle_CSV:
 	def delete_column(self, column_name):
 		#pass
 		if not column_name in self.list_columns():
-			print r'c Column ' + column_name + r' does not exist!'
-			print r'c Nothing changed!'
+			print(r'c Column ' + column_name + r' does not exist!')
+			print(r'c Nothing changed!')
 			return
 		self.dataframe = self.dataframe.drop(column_name,axis=1)
 		return
@@ -150,8 +150,8 @@ class Sparkle_CSV:
 	
 	def rename_row(self, ori_row_name, mod_row_name):
 		if not ori_row_name in self.list_rows():
-			print r'c Row ' + ori_row_name + r' does not exist!'
-			print r'c Nothing changed!'
+			print(r'c Row ' + ori_row_name + r' does not exist!')
+			print(r'c Nothing changed!')
 			return
 		self.dataframe.rename(index = {ori_row_name:mod_row_name}, inplace=True)
 		return
@@ -163,8 +163,8 @@ class Sparkle_CSV:
 
 	def add_row(self, row_name, value_list=[]):
 		if row_name in self.list_rows():
-			print r'c Row ' + row_name + r' already exists!'
-			print r'c Nothing changed!'
+			print(r'c Row ' + row_name + r' already exists!')
+			print(r'c Nothing changed!')
 			return
 		
 		if value_list == []: value_list = [None]*self.get_column_size()
@@ -181,8 +181,8 @@ class Sparkle_CSV:
 	def delete_row(self, row_name):
 		#pass
 		if not row_name in self.list_rows():
-			print r'c Row ' + row_name + r' does not exist!'
-			print r'c Nothing changed!'
+			print(r'c Row ' + row_name + r' does not exist!')
+			print(r'c Nothing changed!')
 			return
 		self.dataframe = self.dataframe.drop(row_name,axis=0)
 		return

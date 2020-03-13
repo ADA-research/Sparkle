@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -22,11 +22,11 @@ from sparkle_help import sparkle_csv_merge_help
 if __name__ == r'__main__':
 
 	if len(sys.argv) != 1:
-		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0]
+		print(r'c Command error!')
+		print(r'c Usage: ' + sys.argv[0])
 		sys.exit()
 
-	print 'c Start initialising Sparkle platform ...'
+	print('c Start initialising Sparkle platform ...')
 
 	if not os.path.exists(r'Records/'):
 		output = os.mkdir(r'Records/')
@@ -63,7 +63,7 @@ if __name__ == r'__main__':
 		scsv.Sparkle_CSV.create_empty_csv(sparkle_global_help.performance_data_csv_path)
 		output = os.mkdir(r'Feature_Data/TMP/')
 		output = os.mkdir(r'Performance_Data/TMP/')
-		print 'c New Sparkle platform initialised!'
+		print('c New Sparkle platform initialised!')
 	else:
 		my_suffix = sparkle_basic_help.get_time_pid_random_string()
 		my_record_filename = "Records/My_Record_" + my_suffix + '.zip'
@@ -83,7 +83,7 @@ if __name__ == r'__main__':
 		output = os.mkdir(r'Feature_Data/TMP/')
 		output = os.mkdir(r'Performance_Data/TMP/')
 		
-		print 'c Current Sparkle platform found!'
-		print 'c Current Sparkle platform recorded!'
-		print 'c New Sparkle platform initialised!'
+		print('c Current Sparkle platform found!')
+		print('c Current Sparkle platform recorded!')
+		print('c New Sparkle platform initialised!')
 

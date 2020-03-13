@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -37,8 +37,8 @@ def delete_task_run_status():
 if __name__ == r'__main__':
 	
 	if len(sys.argv) != 1:
-		print r'c Command error!'
-		print r'c Usage: ' + sys.argv[0]
+		print(r'c Command error!')
+		print(r'c Usage: ' + sys.argv[0])
 		sys.exit()
 	
 	if not os.path.isfile(sparkle_global_help.sparkle_portfolio_selector_path):
@@ -46,10 +46,10 @@ if __name__ == r'__main__':
 		print(r'c Do not generate Sparkle report. Exit!')
 		sys.exit()
 	
-	print r'c Generating report ...'
+	print(r'c Generating report ...')
 	generate_task_run_status()
 	sparkle_generate_report_help.generate_report()
 	delete_task_run_status()
-	print r'c Report generated ...'
+	print(r'c Report generated ...')
 	
 

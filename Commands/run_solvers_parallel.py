@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -28,7 +28,7 @@ from sparkle_help import sparkle_job_parallel_help
 if __name__ == r'__main__':
 
 	
-	print 'c Start running solvers ...'
+	print('c Start running solvers ...')
 
 	my_flag_recompute = False
 
@@ -48,7 +48,7 @@ if __name__ == r'__main__':
 	else:
 		run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
 	
-	print 'c Running solvers in parallel ...'
+	print('c Running solvers in parallel ...')
 	
 	dependency_jobid_list = []
 	if run_solvers_parallel_jobid:

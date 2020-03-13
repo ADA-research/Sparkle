@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 '''
@@ -16,9 +16,9 @@ import random
 import sys
 import fcntl
 from enum import Enum
-import sparkle_file_help as sfh
-import sparkle_global_help
-import sparkle_add_configured_solver_help as sacsh
+from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_add_configured_solver_help as sacsh
 
 class InstanceType(Enum):
 	TRAIN = 1
