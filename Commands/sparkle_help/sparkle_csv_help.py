@@ -66,19 +66,19 @@ class Sparkle_CSV:
 		return
 		
 	def get_value_index(self, row_index, column_index):
-		ret = self.dataframe.get_value(self.dataframe.index[row_index], self.dataframe.columns[column_index])
+		ret = self.dataframe.at[self.dataframe.index[row_index], self.dataframe.columns[column_index]]
 		return ret
 
 	def set_value_index(self, row_index, column_index, value):
-		output = self.dataframe.set_value(self.dataframe.index[row_index], self.dataframe.columns[column_index], value)
+		output = self.dataframe.at[self.dataframe.index[row_index], self.dataframe.columns[column_index]] = value
 		return
 	
 	def get_value(self, row, column):
-		ret = self.dataframe.get_value(row, column)
+		ret = self.dataframe.at[row, column]
 		return ret
 	
 	def set_value(self, row, column, value):
-		output = self.dataframe.set_value(row, column, value)
+		output = self.dataframe.at[row, column] = value
 		return
 	
 	def list_columns(self):

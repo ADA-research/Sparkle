@@ -47,7 +47,7 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 		for row_name in self.list_rows():
 			current_solver_list = []
 			for column_name in self.list_columns():
-				flag_value_is_null = bool_array_isnull.get_value(row_name, column_name)
+				flag_value_is_null = bool_array_isnull.at[row_name, column_name]
 				if flag_value_is_null:
 					current_solver_list.append(column_name)
 			list_item = [row_name, current_solver_list]
@@ -60,7 +60,7 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 		for row_name in self.list_rows():
 			current_solver_list = []
 			for column_name in self.list_columns():
-				flag_value_is_null = bool_array_isnull.get_value(row_name, column_name)
+				flag_value_is_null = bool_array_isnull.at[row_name, column_name]
 				if not flag_value_is_null:
 					current_solver_list.append(column_name)
 			list_item = [row_name, current_solver_list]

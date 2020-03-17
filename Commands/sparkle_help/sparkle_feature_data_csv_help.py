@@ -45,7 +45,7 @@ class Sparkle_Feature_Data_CSV(scsv.Sparkle_CSV):
 		for row_name in self.list_rows():
 			current_extractor_list = []
 			for column_name in self.list_columns():
-				flag_value_is_null = bool_array_isnull.get_value(row_name, column_name)
+				flag_value_is_null = bool_array_isnull.at[row_name, column_name]
 				if flag_value_is_null:
 					extractor_path = self.get_extractor_path_from_feature(column_name)
 					if not extractor_path in current_extractor_list:
