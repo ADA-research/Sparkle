@@ -26,8 +26,8 @@ global sparkle_missing_value
 sparkle_missing_value = -(sparkle_maximum_int-1)
 
 global python_executable
-#python_executable = r'python3'
-python_executable = r'~/usr/python/python3.5.4/bin/python3'
+python_executable = r'python3'
+#python_executable = r'~/usr/python/python3.5.4/bin/python3'
 
 global sparkle_default_settings_path
 sparkle_default_settings_path = r'Settings/sparkle_default_settings.txt'
