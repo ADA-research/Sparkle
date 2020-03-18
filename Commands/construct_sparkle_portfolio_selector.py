@@ -87,7 +87,8 @@ if __name__ == r'__main__':
 		sys.exit()
 	
 	cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
-	
+
+	delete_log_files() # Make sure no old log files remain
 	scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path, cutoff_time_each_run)
 	
 	if not os.path.exists(sgh.sparkle_portfolio_selector_path):
