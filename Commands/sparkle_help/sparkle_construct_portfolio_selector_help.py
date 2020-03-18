@@ -51,7 +51,10 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, perfor
 	
 	#command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 2> ' + sparkle_global_help.sparkle_log_path
 	
-	command_line = python_executable + r' ' + sgh.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 1> ' + sgh.sparkle_log_path + r' 2> ' + sgh.sparkle_err_path
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 1>> ' + sgh.sparkle_log_path + r' 2>> ' + sgh.sparkle_err_path
+
+	# Write command line to log
+	print('Running command below:\n', command_line, file=open(sgh.sparkle_log_path, 'a+'))
 	
 	#print 'c ' + command_line
 	
