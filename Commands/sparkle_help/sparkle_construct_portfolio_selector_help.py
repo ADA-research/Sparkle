@@ -21,7 +21,7 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
 
-def get_cutoff_time_each_run_from_cutoff_time_information_txt_path(cutoff_time_information_txt_path = sparkle_global_help.cutoff_time_information_txt_path):
+def get_cutoff_time_each_run_from_cutoff_time_information_txt_path(cutoff_time_information_txt_path = sgh.cutoff_time_information_txt_path):
 	
 	fin = open(cutoff_time_information_txt_path, 'r+')
 	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
@@ -34,7 +34,7 @@ def get_cutoff_time_each_run_from_cutoff_time_information_txt_path(cutoff_time_i
 
 
 def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, cutoff_time_each_run):
-	python_executable = sparkle_global_help.python_executable
+	python_executable = sgh.python_executable
 	objective_function = r'--objective runtime'
 	if not os.path.exists(r'TMP/'): os.mkdir(r'TMP/')
 	
