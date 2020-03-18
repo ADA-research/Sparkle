@@ -16,7 +16,7 @@ import fcntl
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
@@ -24,7 +24,7 @@ from sparkle_help import sparkle_construct_portfolio_selector_help as scps ##
 from sparkle_help import sparkle_run_portfolio_selector_help as srps ##
 
 
-def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sparkle_global_help.performance_data_csv_path, cutoff_time_each_run = srs.cutoff_time_each_run):
+def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, cutoff_time_each_run = srs.cutoff_time_each_run):
 	print('c In this calculation, cutoff time for each run is ' + str(cutoff_time_each_run) + ' seconds')
 	
 	rank_list = []
@@ -55,12 +55,12 @@ def compute_perfect_selector_marginal_contribution(performance_data_csv_path = s
 
 def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance):
 	list_predict_schedule = []
-	python_executable = sparkle_global_help.python_executable
+	python_executable = sgh.python_executable
 	if not os.path.exists(r'TMP/'): os.mkdir(r'TMP/')
 	feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
 	predict_schedule_result_path = r'TMP/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
 	
-	command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' --load ' + actual_portfolio_selector_path + r' --feature_vec' + r' ' + feature_vector_string + r' 1> ' + predict_schedule_result_path + r' 2> ' + sparkle_global_help.sparkle_log_path
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + actual_portfolio_selector_path + r' --feature_vec' + r' ' + feature_vector_string + r' 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
 	
 	#print 'c ' + command_line
 	os.system(command_line)
@@ -70,7 +70,7 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, 
 	#print r'c for solving instance ' + instance + r', ' + r'list_predict_schedule = ' + str(list_predict_schedule)
 	
 	os.system(r'rm -f ' + predict_schedule_result_path)
-	os.system(r'rm -f ' + sparkle_global_help.sparkle_log_path)
+	os.system(r'rm -f ' + sgh.sparkle_err_path)
 	return list_predict_schedule
 
 
@@ -115,7 +115,7 @@ def compute_actual_selector_performance(actual_portfolio_selector_path, performa
 
 
 
-def compute_actual_selector_marginal_contribution(performance_data_csv_path = sparkle_global_help.performance_data_csv_path, feature_data_csv_path = sparkle_global_help.feature_data_csv_path, cutoff_time_each_run = srs.cutoff_time_each_run):
+def compute_actual_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, feature_data_csv_path = sgh.feature_data_csv_path, cutoff_time_each_run = srs.cutoff_time_each_run):
 	print('c In this calculation, cutoff time for each run is ' + str(cutoff_time_each_run) + ' seconds')
 
 	#print r'c performance_data_csv_path = ' + performance_data_csv_path

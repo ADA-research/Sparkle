@@ -17,11 +17,11 @@ import sys
 import shutil
 import fcntl
 from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 
 
 global record_log_file_path
-record_log_file_path = sparkle_global_help.sparkle_log_path
+record_log_file_path = sgh.sparkle_err_path
 
 def detect_current_sparkle_platform_exists():
 	my_flag_anyone = False

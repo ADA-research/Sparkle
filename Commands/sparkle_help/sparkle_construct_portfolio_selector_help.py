@@ -16,7 +16,7 @@ import fcntl
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
@@ -51,7 +51,7 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, perfor
 	
 	#command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 2> ' + sparkle_global_help.sparkle_log_path
 	
-	command_line = python_executable + r' ' + sparkle_global_help.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 2> ' + sparkle_global_help.sparkle_log_path
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + str(cutoff_time_each_run) + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 1 > ' + sgh.sparkle_log_path + r' 2> ' + sgh.sparkle_err_path
 	
 	#print 'c ' + command_line
 	
@@ -64,6 +64,6 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, perfor
 	if bool_exists_missing_value:
 		os.system(r'rm -f ' + impute_feature_data_csv_path)
 	
-	os.system(r'rm -f ' + sparkle_global_help.sparkle_log_path)
+	os.system(r'rm -f ' + sgh.sparkle_err_path)
 	return
 

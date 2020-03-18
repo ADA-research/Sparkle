@@ -39,7 +39,10 @@ global sparkle_slurm_settings_path
 sparkle_slurm_settings_path = r'Settings/sparkle_slurm_settings.txt'
 
 global sparkle_log_path
-sparkle_log_path = r'TMP/sparkle_log.txt'
+sparkle_log_path = r'TMP/sparkle_log.out'
+
+global sparkle_err_path
+sparkle_err_path = r'TMP/sparkle_log.err'
 
 global sparkle_system_log_path
 sparkle_system_log_path = r'LOG/sparkle_system_log_path.txt'
