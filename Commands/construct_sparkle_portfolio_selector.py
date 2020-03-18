@@ -60,9 +60,9 @@ def delete_log_files():
 	return
 
 def print_log_paths():
-		print('c Consider investigating the log files:')
-		print('c stdout: ' + sgh.sparkle_log_path)
-		print('c stderr: ' + sgh.sparkle_err_path)
+	print('c Consider investigating the log files:')
+	print('c stdout: ' + sgh.sparkle_log_path)
+	print('c stderr: ' + sgh.sparkle_err_path)
 	return
 
 
