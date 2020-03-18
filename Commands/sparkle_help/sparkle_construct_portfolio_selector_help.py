@@ -64,6 +64,5 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, perfor
 	if bool_exists_missing_value:
 		os.system(r'rm -f ' + impute_feature_data_csv_path)
 	
-	os.system(r'rm -f ' + sgh.sparkle_err_path)
 	return
 
