@@ -1,7 +1,6 @@
 alabaster==0.7.12
 git+https://github.com/mlindauer/ASlibScenario
 Babel==2.8.0
-certifi==2019.11.28
 chardet==3.0.4
 ConfigSpace==0.3.10
 docutils==0.16
