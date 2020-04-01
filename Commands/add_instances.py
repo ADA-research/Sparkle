@@ -72,6 +72,7 @@ if __name__ == r'__main__':
 
 	#os.system(r'cp ' + instances_source + r'/*.cnf ' + instances_directory)
 	list_source_all_filename = sfh.get_list_all_filename(instances_source)
+	list_source_all_directory = sfh.get_list_all_directory(instances_source)
 	list_target_all_filename = sfh.get_list_all_filename(instances_directory)
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
@@ -101,8 +102,8 @@ if __name__ == r'__main__':
 			feature_data_csv.add_row(intended_filename_path)
 			performance_data_csv.add_row(intended_filename_path)
 			
-			if instances_source[-1] == r'/': instances_source = instances_source[:-1]
-			os.system(r'cp ' + instances_source + r'/' + intended_filename + r' ' + instances_directory)
+			if list_source_all_directory[i][-1] == r'/': list_source_all_directory[i] = list_source_all_directory[i][:-1]
+			os.system(r'cp ' + list_source_all_directory[i] + r'/' + intended_filename + r' ' + instances_directory)
 			print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been added!')
 			print(r'c')
 

@@ -116,6 +116,26 @@ def get_list_all_filename(filepath):
 	get_list_all_filename_recursive(filepath, list_all_filename)
 	return list_all_filename
 
+def get_list_all_directory_recursive(path, list_all_directory):
+	if os.path.isfile(path):
+		directory = get_directory(path)
+		list_all_directory.append(directory)
+		return
+	elif os.path.isdir(path):
+		if path[-1]!=r'/':
+			this_path = path + '/'
+		else:
+			this_path = path
+		list_all_items = os.listdir(this_path)
+		for item in list_all_items:
+			get_list_all_directory_recursive(this_path+item, list_all_directory)
+	return
+
+def get_list_all_directory(filepath):
+	list_all_directory = []
+	get_list_all_directory_recursive(filepath, list_all_directory)
+	return list_all_directory
+
 '''
 def get_list_all_cnf_filename(filepath):
 	if not os.path.exists(filepath):
