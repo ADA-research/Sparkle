@@ -50,24 +50,24 @@ if __name__ == r'__main__':
 	
 	if instances_path[-1] == r'/': instances_path = instances_path[:-1]
 
-	print('c Start removing all cnf instances in directory ' + instances_path + r' ...')
+	print('c Start removing all instances in directory ' + instances_path + r' ...')
 
-	list_all_cnf_filename = sfh.get_list_all_cnf_filename(instances_path)
+	list_all_filename = sfh.get_list_all_filename(instances_path)
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 
-	for i in range(0, len(list_all_cnf_filename)):
-		intended_cnf_filename = list_all_cnf_filename[i]
+	for i in range(0, len(list_all_filename)):
+		intended_filename = list_all_filename[i]
 		
-		intended_cnf_filename_path = instances_path + r'/' + intended_cnf_filename
-		sparkle_global_help.instance_list.remove(intended_cnf_filename_path)
-		output = sparkle_global_help.instance_reference_mapping.pop(intended_cnf_filename_path)
+		intended_filename_path = instances_path + r'/' + intended_filename
+		sparkle_global_help.instance_list.remove(intended_filename_path)
+		output = sparkle_global_help.instance_reference_mapping.pop(intended_filename_path)
 		
-		feature_data_csv.delete_row(intended_cnf_filename_path)
-		performance_data_csv.delete_row(intended_cnf_filename_path)
-		os.system(r'rm -f ' + instances_path + r'/' + intended_cnf_filename)
-		print(r'c Instance ' + sfh.get_last_level_directory_name(intended_cnf_filename) + r' has been removed!')
+		feature_data_csv.delete_row(intended_filename_path)
+		performance_data_csv.delete_row(intended_filename_path)
+		os.system(r'rm -f ' + instances_path + r'/' + intended_filename)
+		print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been removed!')
 
 	os.system(r'rm -rf ' + instances_path)
 	
