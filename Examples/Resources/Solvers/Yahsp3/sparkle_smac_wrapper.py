@@ -7,6 +7,7 @@ import random
 import sys
 # DONE: Add imports required by your changes
 import re
+from subprocess import Popen, PIPE
 
 
 def get_time_pid_random_string():
@@ -64,7 +65,8 @@ while i<len_argv:
 # Generate domain file (problem specific)
 domain_file = 'domain_' + str(get_time_pid_random_string()) + '.pddl'
 command = 'python generate_domain_file.py 5 ' + param_str + ' > ' + domain_file
-os.popen(command)
+process = Popen(command, shell=True, stdout=PIPE)
+stdout = process.communicate()
 # Call solver
 command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' -W ' + str(cutoff_time) + r' ' + solver_binary + r' -y 1 -o ' + domain_file + ' -f ' + instance
 

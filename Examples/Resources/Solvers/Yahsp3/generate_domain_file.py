@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
 
 import string
 import re
@@ -30,8 +30,8 @@ number_op = int(sys.argv[1])
 
 name_operators=[]
 parameters=[]
-preconditions=[[] for x in xrange(number_op)]
-effects=[[] for x in xrange(number_op)]
+preconditions=[[] for x in range(number_op)]
+effects=[[] for x in range(number_op)]
 
 start=1
 while start <= number_op:	
@@ -64,7 +64,7 @@ while start <= number_op:
 ## first, predicates.
 
 for i in header:
-	print i
+	print(i)
 
 number_predicates=len(predicates)
 stamp_pred=[]
@@ -79,12 +79,12 @@ while number < number_predicates+1:
 		indice=indice+1
 	number=number+1
 
-print "\n(:predicates"
+print("\n(:predicates")
 for i in predicates:
 	position=stamp_pred.index(min(stamp_pred))
-	print predicates[position],
+	print(predicates[position],)
 	stamp_pred[position]=10000.0
-print ")"
+print(")")
 
 
 ## time for operators and their eff/ precond.
@@ -145,7 +145,7 @@ while i < len(name_operators):
 
 for i in name_operators:
 	position=stamp_op.index(min(stamp_op))
-	print to_stamp_op[position]
+	print(to_stamp_op[position])
 	stamp_op[position]=10000.0
-print ")"
+print(")")
 
