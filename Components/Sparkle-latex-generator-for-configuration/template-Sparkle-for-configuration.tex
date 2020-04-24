@@ -25,6 +25,9 @@
 \newif\iftest
 @@testBool@@
 
+\newif\ifruntime
+@@runtimeBool@@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
 %% Because html converters don't know tabularnewline
 \providecommand{\tabularnewline}{\\}
@@ -96,6 +99,8 @@ The empirical comparison between the @@solver@@ (configured) and @@solver@@ (def
 \caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSetTest@@.}\label{fig:configured_vs_default_test}
 \end{figure}
 
+\ifruntime
+
 Table \ref{tbl:timeouts_test} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the testing set of @@instanceSetTest@@, as well as on how many instances both timed out.
 
 \begin{table}[htbp]
@@ -109,7 +114,9 @@ configured & default & overlap \\ \hline
 \label{tbl:timeouts_test}
 \end{table}
 
-\fi
+\fi % End ifruntime
+
+\fi % End iftest
 
 \section{Comparison between Configured Version and Default Version on the Training Instance Set}
 In order to investigate the performance on the training instance set, @@sparkle@@ would run the configured version of @@solver@@ and the default version of @@solver@@ on the training instance set. During this phase, each version was performed one run per instance with a cutoff time of @@smacEachRunCutoffTime@@ seconds. The results are reported as follows.
@@ -130,6 +137,8 @@ The empirical comparison between the @@solver@@ (configured) and @@solver@@ (def
 \caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the training set of @@instanceSetTrain@@.}\label{fig:configured_vs_default_train}
 \end{figure}
 
+\ifruntime
+
 Table \ref{tbl:timeouts_train} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the training set of @@instanceSetTrain@@, as well as on how many instances both timed out.
 
 \begin{table}[htbp]
@@ -142,6 +151,7 @@ configured & default & overlap \\ \hline
 \label{tbl:timeouts_train}
 \end{table}
 
+\fi % End ifruntime
 
 \bibliographystyle{plain}
 \bibliography{Sparkle_Report_for_Configuration}

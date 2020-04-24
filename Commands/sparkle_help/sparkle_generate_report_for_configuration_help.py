@@ -219,6 +219,18 @@ def get_performance_measure():
 	return performance_measure
 
 
+def get_runtimeBool():
+	runtime_bool = ''
+
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
+
+	if smac_run_obj == 'RUNTIME':
+		runtime_bool = r'\runtimetrue'
+	elif smac_run_obj == r'QUALITY':
+		runtime_bool = r'\runtimefalse'
+
+	return runtime_bool
+
 def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, smac_each_run_cutoff_time):
 	str_value = r''
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
@@ -376,6 +388,10 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, conf
 
 	variable = r'performanceMeasure'
 	str_value = get_performance_measure()
+	common_dict[variable] = str_value
+
+	variable = r'runtimeBool'
+	str_value = get_runtimeBool()
 	common_dict[variable] = str_value
 
 	variable = r'customCommands'
