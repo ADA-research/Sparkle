@@ -23,6 +23,8 @@ Commands/add_instances.py -run-solver-later -run-extractor-later Examples/Resour
 Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/VRP_SISRs/
 
 # Configure a solver with a given instance set.
+# NOTE: Before running the next command, the option 'smac_run_obj = QUALITY'
+# must be set in 'Settings/sparkle_smac_settings.txt'
 Commands/configure_solver.py -solver Solvers/VRP_SISRs -instance-set-train Instances/X/
 
 # Compare the configured solver and the default solver to each other
