@@ -48,7 +48,7 @@ def get_numInstanceInInstanceSet_smacDir(instance_set_name):
 	return str_value
 
 def get_PAR10_performance(results_file, cutoff):
-	list_instance_and_par10 = construct_list_instance_and_par10(results_file, cutoff)
+	list_instance_and_par10 = construct_list_instance_and_performance(results_file, cutoff)
 	
 	sum_par10 = 0.0
 	num_instances = 0
@@ -161,9 +161,9 @@ def construct_list_instance_and_par10_recursive(list_instance_and_par10, path, c
 			construct_list_instance_and_par10_recursive(list_instance_and_par10, this_path + item, cutoff)
 	return 
 
-# Retrieve instances and corresponding par10 values from smac validation objective matrix
-def construct_list_instance_and_par10(result_file, cutoff):
-	list_instance_and_par10 = []
+# Retrieve instances and corresponding performance values from smac validation objective matrix
+def construct_list_instance_and_performance(result_file, cutoff):
+	list_instance_and_performance = []
 
 	fin = open(result_file, 'r')
 	fin.readline() # Skip column titles
@@ -177,30 +177,46 @@ def construct_list_instance_and_par10(result_file, cutoff):
 		mylist = myline.split(r',')
 		instance_path = mylist[0].strip('\"')
 		instance = instance_path.split('/')[-1]
-		run_time = float(mylist[2].replace('"', ''))
+		performance = float(mylist[2].replace('"', ''))
 
-		if run_time < 0.01001: # Minimum runtime. Is lower than this not accurate?
-			run_time = 0.01001
-		elif run_time >= float(cutoff):
-			run_time = float(cutoff) * 10
+		# If the objective is runtime, compute the PAR10 score; otherwise don't modify the value
+		smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
+		if smac_run_obj == 'RUNTIME':
+			if performance < 0.01001: # Minimum runtime. Is lower than this not accurate?
+				performance = 0.01001
+			elif performance >= float(cutoff):
+				performance = float(cutoff) * 10
 
-		list_instance_and_par10.append([instance, run_time])
+		list_instance_and_performance.append([instance, performance])
 
-	return list_instance_and_par10
+	return list_instance_and_performance
 
-# Return a dictionary of instance names and their par10 score
-def get_dict_instance_to_par10(results_file, cutoff):
-	list_instance_and_par10 = construct_list_instance_and_par10(results_file, float(cutoff))
+# Return a dictionary of instance names and their performance
+def get_dict_instance_to_performance(results_file, cutoff):
+	list_instance_and_performance = construct_list_instance_and_performance(results_file, float(cutoff))
 	
-	dict_instance_to_par10 = {}
+	dict_instance_to_performance = {}
 	
-	for item in list_instance_and_par10:
+	for item in list_instance_and_performance:
 		instance = get_instance_path_from_path(results_file, item[0])
-		par10_value = item[1]
-		dict_instance_to_par10[instance] = par10_value
-		#print('%s %f' % (instance, par10_value))
+		performance_value = item[1]
+		dict_instance_to_performance[instance] = performance_value
+		#print('%s %f' % (instance, performance_value))
 	
-	return dict_instance_to_par10
+	return dict_instance_to_performance
+
+
+def get_performance_measure():
+	performance_measure = ''
+
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
+
+	if smac_run_obj == 'RUNTIME':
+		performance_measure = 'PAR10'
+	elif smac_run_obj == 'QUALITY':
+		performance_measure = 'performance'
+
+	return performance_measure
 
 
 def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, smac_each_run_cutoff_time):
@@ -210,8 +226,8 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
-	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, smac_each_run_cutoff_time)
-	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, smac_each_run_cutoff_time)
+	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
+	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, smac_each_run_cutoff_time)
 	
 	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
 	latex_directory_path = configuration_reports_directory + r'Sparkle-latex-generator-for-configuration/'
@@ -224,7 +240,8 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 		fout.write(str(default_par10_value) + ' ' + str(configured_par10_value) + '\n')
 	fout.close()
 	
-	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_test_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_test_instance_set_filename) 
+	performance_measure = get_performance_measure()
+	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_test_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_test_instance_set_filename, performance_measure) 
 	
 	os.system(gnuplot_command)
 	
@@ -240,8 +257,8 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
-	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, smac_each_run_cutoff_time)
-	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, smac_each_run_cutoff_time)
+	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
+	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, smac_each_run_cutoff_time)
 	
 	latex_directory_path = configuration_reports_directory + r'Sparkle-latex-generator-for-configuration/'
 	data_plot_configured_vs_default_on_train_instance_set_filename = 'data_' + solver_name + '_configured_vs_default_on_' + instance_set_train_name + '_train'
@@ -254,7 +271,8 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 		fout.write(str(default_par10_value) + ' ' + str(configured_par10_value) + '\n')
 	fout.close()
 	
-	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_train_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_train_instance_set_filename) 
+	performance_measure = get_performance_measure()
+	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_train_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_train_instance_set_filename, performance_measure) 
 	
 	os.system(gnuplot_command)
 	
@@ -273,8 +291,8 @@ def get_timeouts_test(solver_name, instance_set_name, cutoff):
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
-	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, cutoff)
-	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, cutoff)
+	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, cutoff)
+	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, cutoff)
 
 	# Count default timeouts, configured timeouts, and overlapping timeouts
 	timeout_value = cutoff * 10
@@ -306,8 +324,8 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
-	dict_instance_to_par10_configured = get_dict_instance_to_par10(configured_results_dir, cutoff)
-	dict_instance_to_par10_default = get_dict_instance_to_par10(default_results_dir, cutoff)
+	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, cutoff)
+	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, cutoff)
 
 	# Count default timeouts, configured timeouts, and overlapping timeouts
 	timeout_value = cutoff * 10
@@ -355,7 +373,11 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 # Retrieve variables relevant to all configuration reports
 def get_dict_variable_to_value_common(solver_name, instance_set_train_name, configuration_reports_directory):
 	common_dict = {}
-	
+
+	variable = r'performanceMeasure'
+	str_value = get_performance_measure()
+	common_dict[variable] = str_value
+
 	variable = r'customCommands'
 	str_value = get_customCommands()
 	common_dict[variable] = str_value

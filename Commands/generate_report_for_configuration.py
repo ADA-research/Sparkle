@@ -21,7 +21,7 @@ from sparkle_help import sparkle_generate_report_help
 from sparkle_help import sparkle_generate_report_for_test_help
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_generate_report_for_configuration_help
+from sparkle_help import sparkle_generate_report_for_configuration_help as sgrfch
 
 if __name__ == r'__main__':
 	solver = ''
@@ -61,7 +61,7 @@ if __name__ == r'__main__':
 
 	# If no instance set(s) is/are given, try to retrieve them from the last run of test_configured_solver_and_default_solver
 	if not flag_instance_set_train and not flag_instance_set_test:
-		instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test = sparkle_generate_report_for_configuration_help.get_most_recent_test_run(solver_name)
+		instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test = sgrfch.get_most_recent_test_run(solver_name)
 	# If only the testing set is given return an error
 	elif not flag_instance_set_train and flag_instance_set_test:
 		print('c Argument Error! Only a testing set was provided, please also provide a training set')
@@ -72,12 +72,12 @@ if __name__ == r'__main__':
 	if (flag_instance_set_train and flag_instance_set_test):
 		instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
-		sparkle_generate_report_for_configuration_help.check_results_exist(solver_name, instance_set_train_name, instance_set_test_name)
-		sparkle_generate_report_for_configuration_help.generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name)
+		sgrfch.check_results_exist(solver_name, instance_set_train_name, instance_set_test_name)
+		sgrfch.generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name)
 	elif flag_instance_set_train:
 		instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
-		sparkle_generate_report_for_configuration_help.check_results_exist(solver_name, instance_set_train_name)
-		sparkle_generate_report_for_configuration_help.generate_report_for_configuration_train(solver_name, instance_set_train_name)
+		sgrfch.check_results_exist(solver_name, instance_set_train_name)
+		sgrfch.generate_report_for_configuration_train(solver_name, instance_set_train_name)
 	else:
 		print('c Error: No results from test_configured_solver_and_default_solver found that can be used in the report!')
 		sys.exit(-1)

@@ -236,6 +236,7 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
 	return
 
 # Check the results directory for this solver and instance set combination exists
+# NOTE: This function assumes SMAC output
 def check_configuration_exists(solver_name, instance_set_name):
 	smac_results_dir = sparkle_global_help.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/'
 
@@ -243,7 +244,7 @@ def check_configuration_exists(solver_name, instance_set_name):
 
 def get_optimised_configuration(solver_name, instance_set_name):
 	optimised_configuration_str = ''
-	optimised_configuration_performance_par10 = -1
+	optimised_configuration_performance = -1
 	optimised_configuration_seed = -1
 	
 	smac_results_dir = sparkle_global_help.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/'
@@ -262,9 +263,9 @@ def get_optimised_configuration(solver_name, instance_set_name):
 			if myline.find(key_str_1) == 0:
 				mylist = myline.split()
 				# Skip 14 words leading up to the performance value
-				this_configuration_performance_par10 = float(mylist[14][:-1])
-				if optimised_configuration_performance_par10 < 0 or this_configuration_performance_par10 < optimised_configuration_performance_par10:
-					optimised_configuration_performance_par10 = this_configuration_performance_par10
+				this_configuration_performance = float(mylist[14][:-1])
+				if optimised_configuration_performance < 0 or this_configuration_performance < optimised_configuration_performance:
+					optimised_configuration_performance = this_configuration_performance
 
 					# Skip the line before the line with the optimised configuration
 					myline_2 = fin.readline()
@@ -283,7 +284,7 @@ def get_optimised_configuration(solver_name, instance_set_name):
 					optimised_configuration_seed = mylist_3[4]
 		fin.close()
 	
-	return optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed
+	return optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed
 
 def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
 	smac_solver_dir = sparkle_global_help.smac_dir + r'/example_scenarios/' + solver_name + r'/'

@@ -21,3 +21,4 @@
 @@timeoutsTestDefault@@
 @@timeoutsTestConfigured@@
 @@timeoutsTestOverlap@@
+@@performanceMeasure@@
