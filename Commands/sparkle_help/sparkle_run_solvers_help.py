@@ -15,7 +15,8 @@ import time
 import random
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
+from pathlib import Path
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -34,7 +35,11 @@ sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #add at 
 
 
 def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, cutoff_time = cutoff_time_each_run):
-	runsolver_path = sparkle_global_help.runsolver_path
+	if not Path(solver_wrapper_path).is_file():
+		print('c Wrapper named \'' + sgh.sparkle_run_default_wrapper + '\' not found, stopping execution!')
+		sys.exit()
+
+	runsolver_path = sgh.runsolver_path
 	runsolver_option = r'--timestamp --use-pty'
 	#cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_run)
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time)
@@ -113,7 +118,7 @@ def get_verify_string(tmp_verify_result_path):
 
 
 def judge_correctness_raw_result(instance_path, raw_result_path):
-	SAT_verifier_path = sparkle_global_help.SAT_verifier_path
+	SAT_verifier_path = sgh.SAT_verifier_path
 	tmp_verify_result_path = r'TMP/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.vryres'
 	command_line = SAT_verifier_path + r' ' + instance_path + r' ' + raw_result_path + r' > ' + tmp_verify_result_path
 	os.system(command_line)
@@ -165,7 +170,7 @@ def running_solvers(performance_data_csv_path, mode):
 			print(r'c')
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 			
-			run_solver_on_instance(solver_path, solver_path+r'/'+sparkle_global_help.sparkle_run_default_wrapper, instance_path, raw_result_path)
+			run_solver_on_instance(solver_path, solver_path+r'/'+sgh.sparkle_run_default_wrapper, instance_path, raw_result_path)
 		
 			verify_string = judge_correctness_raw_result(instance_path, raw_result_path)
 		
@@ -175,16 +180,16 @@ def running_solvers(performance_data_csv_path, mode):
 				runtime = get_runtime(raw_result_path)
 				if runtime > cutoff_time_each_run: runtime = penalty_time
 				performance_data_csv.set_value(instance_path, solver_path, runtime)
-				if sparkle_global_help.instance_reference_mapping[instance_path] != r'SAT':
-					sparkle_global_help.instance_reference_mapping[instance_path] = r'SAT'
+				if sgh.instance_reference_mapping[instance_path] != r'SAT':
+					sgh.instance_reference_mapping[instance_path] = r'SAT'
 					sfh.write_instance_reference_mapping()
 				print(r'c Running Result: ' + verify_string + r' , Runtime: ' + str(runtime))
 			elif verify_string == r'UNSAT':
 				runtime = get_runtime(raw_result_path)
 				if runtime > cutoff_time_each_run: runtime = penalty_time
 				performance_data_csv.set_value(instance_path, solver_path, runtime)
-				if sparkle_global_help.instance_reference_mapping[instance_path] != r'UNSAT':
-					sparkle_global_help.instance_reference_mapping[instance_path] = r'UNSAT'
+				if sgh.instance_reference_mapping[instance_path] != r'UNSAT':
+					sgh.instance_reference_mapping[instance_path] = r'UNSAT'
 					sfh.write_instance_reference_mapping()
 				print(r'c Running Result: ' + verify_string + r' , Runtime: ' + str(runtime))
 			elif verify_string == r'UNKNOWN':
@@ -197,8 +202,8 @@ def running_solvers(performance_data_csv_path, mode):
 				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' will be removed!')
 			
 				performance_data_csv.delete_column(solver_path)
-				sparkle_global_help.solver_list.remove(solver_path)
-				output = sparkle_global_help.solver_nickname_mapping.pop(solver_path)
+				sgh.solver_list.remove(solver_path)
+				output = sgh.solver_nickname_mapping.pop(solver_path)
 				sfh.write_solver_list()
 				sfh.write_solver_nickname_mapping()
 				
@@ -227,8 +232,8 @@ def running_solvers(performance_data_csv_path, mode):
 			print(r'c')
 
 	#performance_data_csv.update_csv()
-	sfh.write_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(cutoff_time_each_run))
-	sfh.append_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "par_num = " + str(par_num))
+	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(cutoff_time_each_run))
+	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(par_num))
 	
 	return
 
