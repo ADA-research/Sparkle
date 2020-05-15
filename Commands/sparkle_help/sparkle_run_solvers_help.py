@@ -23,6 +23,8 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help as ser
 from sparkle_help import sparkle_job_help
 
+import functools
+print = functools.partial(print, flush=True)
 
 global cutoff_time_each_run
 global par_num
