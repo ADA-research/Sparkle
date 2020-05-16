@@ -123,7 +123,9 @@ def judge_correctness_raw_result(instance_path, raw_result_path):
 	SAT_verifier_path = sgh.SAT_verifier_path
 	tmp_verify_result_path = r'TMP/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.vryres'
 	command_line = SAT_verifier_path + r' ' + instance_path + r' ' + raw_result_path + r' > ' + tmp_verify_result_path
+	print('c Run SAT verifier')
 	os.system(command_line)
+	print('c SAT verifier done')
 	
 	ret = get_verify_string(tmp_verify_result_path)
 	

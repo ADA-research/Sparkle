@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
             while (1==1) {
             	if (!(lss >> v)) 
             	{
-            		getline(instance, line);
+            		if(!getline(instance, line)) break; // KvdB add if to break of getline fails
             		lss.clear();
             		lss.str(line);
             		lss.seekg(0, ios::beg);
