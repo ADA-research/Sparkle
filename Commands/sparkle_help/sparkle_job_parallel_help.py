@@ -22,6 +22,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help as ser
 from sparkle_help import sparkle_job_help
 from sparkle_help import sparkle_run_solvers_help as srs
+from sparkle_help import sparkle_slurm_help as ssh
 
 
 ####
@@ -44,29 +45,25 @@ def get_dependency_list_str(dependency_jobid_list):
 	return dependency_list_str
 
 def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, dependency_jobid_list):
-	job_name = sfh.get_file_name(sbatch_shell_script_path)
-	command_prefix = r'srun -N1 -n1 --exclusive python3 '
-	
-	fout = open(sbatch_shell_script_path, 'w+')
-	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	
-	fout.write(r'#!/bin/bash' + '\n')
-	fout.write(r'###' + '\n')
-	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --job-name=' + job_name + '\n') 
-	fout.write(r'#SBATCH --output=' + r'TMP/' + job_name + r'.txt' + '\n')
-	fout.write(r'#SBATCH --error=' + r'TMP/' + job_name + r'.err' + '\n')
-	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --mem-per-cpu=5120' + '\n')
+	sbatch_script_name = sfh.get_file_name(sbatch_shell_script_path)
+	sbatch_script_path = r'TMP/' + sbatch_script_name
+	job_name = '--job-name=' + sbatch_script_name
+	output = '--output=' + sbatch_script_path + '.txt'
+	error = '--error=' + sbatch_script_path + '.err'
+	dependency = '--dependency='
 	dependency_list_str = get_dependency_list_str(dependency_jobid_list)
 	if dependency_list_str.strip() != '':
-		fout.write(r'#SBATCH --dependency=' + dependency_list_str + '\n')
-	fout.write(r'###' + '\n')
-	
-	command_line = command_prefix + r' ' + job_script
-	fout.write(command_line + '\n')
-	
-	fout.close()
+		dependency += dependency_list_str
+	sbatch_options_list = [job_name, output, error, dependency]
+	sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
+	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
+	job_params_list = ['']
+
+	srun_options_str = '-N1 -n1'
+	srun_options_str = srun_options_str = ' ' + ssh.get_slurm_srun_user_options_str()
+	target_call_str = job_script
+
+	ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
 	
 	return
 
