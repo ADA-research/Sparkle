@@ -31,12 +31,15 @@ if __name__ == r'__main__':
 	print('c Start running solvers ...')
 
 	my_flag_recompute = False
+	my_flag_also_construct_selector_and_report = False
 
 	len_argv = len(sys.argv)
 	i = 1
 	while i<len_argv:
 		if sys.argv[i] == r'-recompute':
 			my_flag_recompute = True
+		elif sys.argv[i] == r'-also-construct-selector-and-report':
+			my_flag_also_construct_selector_and_report = True
 		i += 1
 
 	num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
@@ -49,15 +52,18 @@ if __name__ == r'__main__':
 		run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
 	
 	print('c Running solvers in parallel ...')
-	
-	dependency_jobid_list = []
-	if run_solvers_parallel_jobid:
-		dependency_jobid_list.append(run_solvers_parallel_jobid)
-	job_script = 'Commands/construct_sparkle_portfolio_selector.py'
-	run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
-	
-	if run_job_parallel_jobid:
-		dependency_jobid_list.append(run_job_parallel_jobid)
-	job_script = 'Commands/generate_report.py'
-	run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
+
+	# Only do selector construction and report generation if the flag is set;
+	# Default behaviour is not to run them, like the sequential run_solvers command
+	if my_flag_also_construct_selector_and_report:
+		dependency_jobid_list = []
+		if run_solvers_parallel_jobid:
+			dependency_jobid_list.append(run_solvers_parallel_jobid)
+		job_script = 'Commands/construct_sparkle_portfolio_selector.py'
+		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
+		
+		if run_job_parallel_jobid:
+			dependency_jobid_list.append(run_job_parallel_jobid)
+		job_script = 'Commands/generate_report.py'
+		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
 
