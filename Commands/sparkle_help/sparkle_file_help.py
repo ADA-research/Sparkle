@@ -15,7 +15,11 @@ import sys
 import time
 import random
 import fcntl
-from sparkle_help import sparkle_global_help
+
+try:
+	from sparkle_help import sparkle_global_help
+except ImportError:
+	import sparkle_global_help
 
 
 def create_new_empty_file(filepath):

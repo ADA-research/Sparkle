@@ -45,7 +45,7 @@ def get_dependency_list_str(dependency_jobid_list):
 
 def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, dependency_jobid_list):
 	job_name = sfh.get_file_name(sbatch_shell_script_path)
-	command_prefix = r'srun -N1 -n1 --exclusive python2 '
+	command_prefix = r'srun -N1 -n1 --exclusive python3 '
 	
 	fout = open(sbatch_shell_script_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)

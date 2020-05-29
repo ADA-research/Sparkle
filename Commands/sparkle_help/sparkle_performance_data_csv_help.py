@@ -15,9 +15,15 @@ import sys
 import pandas as pd
 import numpy as np
 import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_csv_help as scsv
-from sparkle_help import sparkle_experiments_related_help
+
+try:
+	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_csv_help as scsv
+	from sparkle_help import sparkle_experiments_related_help
+except ImportError:
+	import sparkle_global_help
+	import sparkle_csv_help as scsv
+	import sparkle_experiments_related_help
 
 
 class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):

@@ -15,13 +15,23 @@ import time
 import random
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_experiments_related_help as ser
-from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_run_solvers_help as srs
+
+try:
+	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+	from sparkle_help import sparkle_experiments_related_help as ser
+	from sparkle_help import sparkle_job_help
+	from sparkle_help import sparkle_run_solvers_help as srs
+except ImportError:
+	import sparkle_global_help
+	import sparkle_basic_help
+	import sparkle_file_help as sfh
+	import sparkle_performance_data_csv_help as spdcsv
+	import sparkle_experiments_related_help as ser
+	import sparkle_job_help
+	import sparkle_run_solvers_help as srs
 
 
 if __name__ == r'__main__':

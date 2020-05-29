@@ -15,10 +15,17 @@ import time
 import random
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+
+try:
+	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+except ImportError:
+	import sparkle_global_help
+	import sparkle_basic_help
+	import sparkle_file_help as sfh
+	import sparkle_performance_data_csv_help as spdcsv
 
 
 def init():
