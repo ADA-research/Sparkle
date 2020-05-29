@@ -20,7 +20,7 @@ from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
-from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_csv_merge_help as scmh
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_job_parallel_help
 
@@ -53,10 +53,10 @@ if __name__ == r'__main__':
 	
 	print('c Running solvers in parallel ...')
 
+	dependency_jobid_list = []
 	# Only do selector construction and report generation if the flag is set;
 	# Default behaviour is not to run them, like the sequential run_solvers command
 	if my_flag_also_construct_selector_and_report:
-		dependency_jobid_list = []
 		if run_solvers_parallel_jobid:
 			dependency_jobid_list.append(run_solvers_parallel_jobid)
 		job_script = 'Commands/construct_sparkle_portfolio_selector.py'
@@ -65,5 +65,12 @@ if __name__ == r'__main__':
 		if run_job_parallel_jobid:
 			dependency_jobid_list.append(run_job_parallel_jobid)
 		job_script = 'Commands/generate_report.py'
+		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
+	else:
+		# Update performance data csv after the last job is done
+		if run_solvers_parallel_jobid:
+			dependency_jobid_list.append(run_solvers_parallel_jobid)
+
+		job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
 		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
 

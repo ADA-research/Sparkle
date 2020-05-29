@@ -22,6 +22,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help as ser
 from sparkle_help import sparkle_job_help
 from sparkle_help import sparkle_run_solvers_help as srs
+from sparkle_help import sparkle_slurm_help as ssh
 
 
 ####
@@ -36,57 +37,30 @@ penalty_time = ser.penalty_time # the penalty time = cutoff time * penalty numbe
 sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #the sleep time for the system after each run (add at version 1.0.2)
 ####
 
-def generate_running_solvers_sbatch_shell_script(sbatch_shell_script_path, num_job_in_parallel, performance_data_csv_path, list_jobs, start_index, end_index):
-	####
-	# This function is used for generating sbatch script (slurm system required) for executing performance computation jobs in parallel.
-	# The 1st argument (sbatch_shell_script_path) specifies the path of the sbatch shell script to be grenerated.
-	# The 2nd argument (num_job_in_parallel) specifies the number of jobs that will be executing in parallel.
-	# The 3rd argument (performance_data_csv_path) specifies the path of the csv file where the resulting performance data would be placed.
-	# The 4th argument (list_jobs) specifies the list of jobs to be computed.
-	# The 5th argument (start_index) specifies the start index (included) of the job  list to be handled in this sbatch script.
-	# The 6th argument (end_index) specifies the end index (excluded) of the job list to be handled in this sbatch script.
-	####
-	job_name = sfh.get_file_name(sbatch_shell_script_path) # specify the name of this sbatch script
-	num_job_total = end_index - start_index # calculate the total number of jobs to be handled in this sbatch script
-	if num_job_in_parallel > num_job_total:
-		num_job_in_parallel = num_job_total # update the number of jobs in parallel accordingly if it is greater than the total number of jobs
-	command_prefix = r'srun -N1 -n1 --exclusive python2 Commands/sparkle_help/run_solvers_core.py ' # specify the prefix of the executing command
-	
-	fout = open(sbatch_shell_script_path, 'w+') # open the file of sbatch script
-	fcntl.flock(fout.fileno(), fcntl.LOCK_EX) # using the UNIX file lock to prevent other attempts to visit this sbatch script
-	
-	####
-	# specify the options of sbatch in the top of this sbatch script
-	fout.write(r'#!/bin/bash' + '\n') # use bash to execute this script
-	fout.write(r'###' + '\n')
-	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --job-name=' + job_name + '\n') # specify the job name in this sbatch script
-	fout.write(r'#SBATCH --output=' + r'TMP/' + job_name + r'.txt' + '\n') # specify the file for normal output
-	fout.write(r'#SBATCH --error=' + r'TMP/' + job_name + r'.err' + '\n') # specify the file for error output
-	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --mem-per-cpu=5120' + '\n') #assigned 5GB memory for each cpu
-	fout.write(r'#SBATCH --array=0-' + str(num_job_total-1) + r'%' + str(num_job_in_parallel) + '\n') # using slurm job array and specify the number of jobs executing in parallel in this sbatch script
-	fout.write(r'###' + '\n')
-	####
-	
-	####
-	# specify the array of parameters for each command
-	fout.write('params=( \\' + '\n')
-	
-	for i in range(start_index, end_index):
-		instance_path = list_jobs[i][0]
-		solver_path = list_jobs[i][1]
-		fout.write('\'%s %s\' \\' % (instance_path, solver_path) + '\n') # each parameter tuple contains instance path and extractor path
-	
-	fout.write(r')' + '\n')
-	####
-	
-	command_line = command_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}' + r' ' + performance_data_csv_path # specify the complete command
-	
-	fout.write(command_line + '\n') # write the complete command in this sbatch script
-	
-	fout.close() # close the file of the sbatch script
-	return
+def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, performance_data_csv_path, total_job_list):
+	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+	sbatch_script_path = r'TMP/' + sbatch_script_name
+	job_name = '--job-name=' + sbatch_script_name
+	output = '--output=' + sbatch_script_path + '.txt'
+	error = '--error=' + sbatch_script_path + '.err'
+	array = '--array=0-' + str(total_job_num-1) + '%' + str(num_job_in_parallel)
+	sbatch_options_list = [job_name, output, error, array]
+	sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
+	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
+	job_params_list = []
+
+	for job in total_job_list:
+		instance_path = job[0]
+		solver_path = job[1]
+		job_params_list.append(instance_path + ' ' + solver_path + ' ' + performance_data_csv_path)
+
+	srun_options_str = '-N1 -n1'
+	srun_options_str = srun_options_str = ' ' + ssh.get_slurm_srun_user_options_str()
+	target_call_str = 'Commands/sparkle_help/run_solvers_core.py'
+
+	ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
+
+	return sbatch_script_path
 
 
 def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mode):
@@ -115,15 +89,9 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	
 	if len(total_job_list) == 0:
 		return ''
-	
-	####
-	# generate the sbatch script
-	i = 0
-	j = len(total_job_list)
-	sbatch_shell_script_path = r'TMP/'+ r'running_solvers_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
-	generate_running_solvers_sbatch_shell_script(sbatch_shell_script_path, num_job_in_parallel, performance_data_csv_path, total_job_list, i, j)
-	os.system(r'chmod a+x ' + sbatch_shell_script_path)
-	command_line = r'sbatch ' + sbatch_shell_script_path
+
+	sbatch_script_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, performance_data_csv_path, total_job_list)
+	command_line = 'sbatch ' + sbatch_script_path
 	####
 	
 	#os.system(command_line) # execute the sbatch script via slurm
@@ -140,7 +108,3 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	####
 	return run_solvers_parallel_jobid
 
-
-
-
-	
