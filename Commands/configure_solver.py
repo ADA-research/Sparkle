@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -28,33 +29,41 @@ from sparkle_help import sparkle_add_train_instances_help as satih
 
 
 if __name__ == r'__main__':
-	solver = ''
-	instance_set = ''
-	
-	flag_solver = False
-	flag_instance_set = False
-	
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'-solver':
-			i += 1
-			solver = sys.argv[i]
-			flag_solver = True
-		elif sys.argv[i] == r'-instance-set-train':
-			i += 1
-			instance_set = sys.argv[i]
-			flag_instance_set = True
-		else:
-			print('c Argument Error!')
-			print('c Usage: %s -solver <solver> -instance-set-train <instance-set-train>' % sys.argv[0])
-			sys.exit(-1)
-		i += 1
-	
-	if not (flag_solver and flag_instance_set):
-		print('c Argument Error!')
-		print('c Usage: %s -solver <solver> -instance-set_train <instance-set_train>' % sys.argv[0])
-		sys.exit(-1)
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--solver', required=True, type=str, help='path to solver')
+	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
+	args = parser.parse_args()
+	solver = args.solver
+	instance_set = args.instance_set_train
+
+
+#	solver = ''
+#	instance_set = ''
+#	
+#	flag_solver = False
+#	flag_instance_set = False
+#	
+#	len_argv = len(sys.argv)
+#	i = 1
+#	while i<len_argv:
+#		if sys.argv[i] == r'-solver':
+#			i += 1
+#			solver = sys.argv[i]
+#			flag_solver = True
+#		elif sys.argv[i] == r'-instance-set-train':
+#			i += 1
+#			instance_set = sys.argv[i]
+#			flag_instance_set = True
+#		else:
+#			print('c Argument Error!')
+#			print('c Usage: %s -solver <solver> -instance-set-train <instance-set-train>' % sys.argv[0])
+#			sys.exit(-1)
+#		i += 1
+#	
+#	if not (flag_solver and flag_instance_set):
+#		print('c Argument Error!')
+#		print('c Usage: %s -solver <solver> -instance-set_train <instance-set_train>' % sys.argv[0])
+#		sys.exit(-1)
 	
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)

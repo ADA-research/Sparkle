@@ -205,8 +205,8 @@ Configure a solver in the Sparkle platform.
 
 Arguments:
 \begin{itemize}[noitemsep]
-  \item[] \texttt{-solver <solver>}
-  \item[] \texttt{-instance-set-train <instance-set-train>}
+  \item[] \texttt{--solver <solver>}
+  \item[] \texttt{--instance-set-train <instance-set-train>}
 \end{itemize}
 
 \subsection{\texttt{generate\_report\_for\_configuration.py}}
@@ -272,7 +272,7 @@ The options below are exclusive to \texttt{srun} and are thus disallowed:
 A number of Sparkle commands internally call the \texttt{srun} command, and for those commands the provided settings need to match the restrictions of your call to a Sparkle command. Take for instance the following command:
 
 \begin{lstlisting}[breaklines]
-srun -N1 -n1 -p graceTST Commands/configure_solver.py -solver Solvers/Yahsp3 -instances-train Instances/Depots_train_few/
+srun -N1 -n1 -p graceTST Commands/configure_solver.py --solver Solvers/Yahsp3 --instances-train Instances/Depots_train_few/
 \end{lstlisting}
 
 This call restricts itself to the \texttt{graceTST} partition (the \texttt{graceTST} partition only consists of node 22). So if the settings file contains the setting \texttt{--exclude=ethnode22}, all available nodes are excluded, and the command cannot execute any internal \texttt{srun} commands it may have.

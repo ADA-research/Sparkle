@@ -20,7 +20,7 @@ Commands/add_instances.py -run-solver-later -run-extractor-later Examples/Resour
 Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/Yahsp3/
 
 # Configure a solver with a given instance set.
-Commands/configure_solver.py -solver Solvers/Yahsp3 -instance-set-train Instances/Depots_train_few/
+Commands/configure_solver.py --solver Solvers/Yahsp3 --instance-set-train Instances/Depots_train_few/
 
 # Compare the configured solver and the default solver to each other
 Commands/test_configured_solver_and_default_solver.py -solver Solvers/Yahsp3 -instance-set-train Instances/Depots_train_few/ -instance-set-test Instances/Depots_test_few/
