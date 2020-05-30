@@ -53,27 +53,11 @@ if __name__ == r'__main__':
 		print('c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!')
 		print('c Running solvers done!')
 	else:
-		num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
-
-		if my_flag_recompute:
-			performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-			performance_data_csv.clean_csv()
-			run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 2)
-		else:
-			run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
-	
-		print('c Running solvers in parallel ...')
-	
-		dependency_jobid_list = []
-		if run_solvers_parallel_jobid:
-			dependency_jobid_list.append(run_solvers_parallel_jobid)
-		job_script = 'Commands/construct_sparkle_portfolio_selector.py'
-		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
-		
-		if run_job_parallel_jobid:
-			dependency_jobid_list.append(run_job_parallel_jobid)
-		job_script = 'Commands/generate_report.py'
-		run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
-		
-		
+		# Call the parallel version of this command
+		command = 'Commands/run_solvers_parallel.py'
+		i = 1
+		while i < len_argv:
+			command += ' ' + sys.argv[i]
+			i += 1
+		os.system(command)		
 
