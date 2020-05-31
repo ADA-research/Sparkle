@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
@@ -28,44 +29,33 @@ from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_add_train_instances_help as satih
 
 if __name__ == r'__main__':
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('instances_path', metavar='instances-path', type=str, help='path to the instance set')
+	parser.add_argument('--run-extractor-later', action='store_true', help='do not immediately run the feature extractor on the newly added instances')
+	parser.add_argument('--run-solver-later', action='store_true', help='do not immediately run the solver(s) on the newly added instances')
+	parser.add_argument('--nickname', type=str, help='set a nickname for the instnace set')
+	parser.add_argument('--parallel', action='store_true', help='run the solvers and feature extractor on multiple instances in parallel')
 
-
-	my_flag_run_extractor_later = False
-	my_flag_run_solver_later = False
-	my_flag_nickname = False
-	my_flag_parallel = False
-	nickname_str = r''
-	instances_source = r''
-
-	# Process input options
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'-run-extractor-later':
-			my_flag_run_extractor_later = True
-		elif sys.argv[i] == r'-run-solver-later':
-			my_flag_run_solver_later = True
-		elif sys.argv[i] == r'-nickname':
-			my_flag_nickname = True
-			i += 1
-			nickname_str = sys.argv[i]
-		elif sys.argv[i] == r'-parallel':
-			my_flag_parallel = True
-		else:
-			instances_source = sys.argv[i]
-		i += 1
-
-	# Verify path validity for the provided instance directory
+	# Process command line arguments
+	args = parser.parse_args()
+	instances_source = args.instances_path
 	if not os.path.exists(instances_source):
-		print(r'c Instances path ' + "\'" + instances_source + "\'" + r' does not exist!')
-		print(r'c Usage: ' + sys.argv[0] + r' [-run-extractor-later] [-run-solver-later] [-nickname <nickname>] [-parallel] <instances_source_directory>')
+		print(r'c Instance set path ' + "\'" + instances_source + "\'" + r' does not exist!')
 		sys.exit()
+
+	my_flag_run_extractor_later = args.run_extractor_later
+	my_flag_run_solver_later = args.run_solver_later
+	nickname_str = args.nickname
+	my_flag_parallel = args.parallel
 
 	print('c Start adding all instances in directory ' + instances_source + r' ...')
 
 	last_level_directory = r''
-	if my_flag_nickname: last_level_directory = nickname_str
-	else: last_level_directory = sfh.get_last_level_directory_name(instances_source)
+	if nickname_str is not None:
+		last_level_directory = nickname_str
+	else:
+		last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
 	instances_directory = r'Instances/' + last_level_directory
 	if not os.path.exists(instances_directory): os.mkdir(instances_directory)
