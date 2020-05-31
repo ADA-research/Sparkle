@@ -23,3 +23,12 @@ Commands/test/add_instances.sh
 # Test add solver
 Commands/test/add_solver.sh
 
+# Test cleanup current sparkle platform
+Commands/test/cleanup_current_sparkle_platform.sh
+
+# Test cleanup temporary files
+Commands/test/cleanup_temporary_files.sh
+
+# Test compute features
+Commands/test/compute_features.sh
+

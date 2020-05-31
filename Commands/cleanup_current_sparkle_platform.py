@@ -13,15 +13,16 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_merge_help
 
 if __name__ == r'__main__':
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
 
-	if len(sys.argv) != 1:
-		print(r'c Command error!')
-		print(r'c Usage: ' + sys.argv[0])
-		sys.exit()
+	# Process command line arguments
+	args = parser.parse_args()
 
 	print(r'c Cleaning existing Sparkle platform ...')
 	sparkle_record_help.cleanup_current_sparkle_platform()

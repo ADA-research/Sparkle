@@ -24,9 +24,9 @@ output=$(Commands/add_feature_extractor.py --run-extractor-later $extractor_path
 
 if [[ $output == $output_true ]];
 then
-	echo "add_feature_extractor test succeeded"
-else
-	echo "add_feature_extractor test failed with output:"
+	echo "[success] add_feature_extractor test succeeded"
+else              
+	echo "[failure] add_feature_extractor test failed with output:"
 	echo $output
 fi
 

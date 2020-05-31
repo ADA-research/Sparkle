@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -24,21 +25,30 @@ from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
 
 if __name__ == r'__main__':
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--recompute', action='store_true', help='re-run feature extractor for instances with previously computed features')
+	parser.add_argument('--parallel', action='store_true', help='run the feature extractor on multiple instances in parallel')
 
-	
+	# Process command line arguments
+	args = parser.parse_args()
+	my_flag_recompute = args.recompute
+	my_flag_parallel = args.parallel
+
+	# Start compute features
 	print('c Start computing features ...')
 
-	my_flag_recompute = False
-	my_flag_parallel = False
-
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'-recompute':
-			my_flag_recompute = True
-		elif sys.argv[i] == r'-parallel':
-			my_flag_parallel = True
-		i += 1
+#	my_flag_recompute = False
+#	my_flag_parallel = False
+#
+#	len_argv = len(sys.argv)
+#	i = 1
+#	while i<len_argv:
+#		if sys.argv[i] == r'-recompute':
+#			my_flag_recompute = True
+#		elif sys.argv[i] == r'-parallel':
+#			my_flag_parallel = True
+#		i += 1
 	
 	if not my_flag_parallel:
 		if my_flag_recompute:

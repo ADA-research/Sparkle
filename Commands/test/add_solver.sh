@@ -24,9 +24,9 @@ output=$(Commands/add_solver.py --run-solver-later --deterministic 0 $solver_pat
 
 if [[ $output == $output_true ]];
 then
-	echo "add_solver test succeeded"
-else
-	echo "add_solver test failed with output:"
+	echo "[success] add_solver test succeeded"
+else              
+	echo "[failure] add_solver test failed with output:"
 	echo $output
 fi
 
