@@ -12,12 +12,20 @@
 #SBATCH --nodes=1
 
 # Activate environment
-source activate sparkle_test
+source activate sparkle_test &> /dev/null
 
 # Initialise
-Commands/initialise.py
+Commands/initialise.py > /dev/null
 
 # Add feature extractor
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
-Commands/add_feature_extractor.py --run-extractor-later $extractor_path
+output_true="c Adding feature extractor SAT-features-competition2012_revised_without_SatELite_sparkle done!"
+output=$(Commands/add_feature_extractor.py --run-extractor-later $extractor_path | tail -1)
+
+if [[ $output == $output_true ]];
+then
+	echo "add_feature_extractor test succeeded"
+else
+	echo "add_feature_extractor test failed"
+fi
 

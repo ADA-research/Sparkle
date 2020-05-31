@@ -12,8 +12,10 @@
 #SBATCH --nodes=1
 
 # Activate environment
-source activate sparkle_test
+source activate sparkle_test &> /dev/null
 
 # Test add feature extractor
 Commands/test/add_feature_extractor.sh
 
+# Test add instances
+Commands/test/add_instances.sh
