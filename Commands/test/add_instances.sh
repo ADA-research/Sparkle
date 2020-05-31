@@ -26,6 +26,7 @@ if [[ $output == $output_true ]];
 then
 	echo "add_instances test succeeded"
 else
-	echo "add_instances test failed"
+	echo "add_instances test failed with output:"
+	echo $output
 fi
 

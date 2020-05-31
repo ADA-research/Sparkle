@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -26,53 +27,27 @@ from sparkle_help import sparkle_job_parallel_help
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 
 if __name__ == r'__main__':
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('solver_path', metavar='solver-path', type=str, help='path to the solver')
+	parser.add_argument('--deterministic', required=True, type=int, choices=range(0, 2), help='indicate whether the solver is deterministic or not')
+	parser.add_argument('--run-solver-later', action='store_true', help='do not immediately run the newly added solver')
+	parser.add_argument('--nickname', type=str, help='set a nickname for the solver')
+	parser.add_argument('--parallel', action='store_true', help='run the solver on multiple instances in parallel')
 
-	
-	my_flag_run_solver_later = False
-	my_flag_nickname = False
-	my_flag_parallel = False
-	my_flag_deterministic = False
-	deterministic = '0'
-	nickname_str = r''
-	solver_source = r''
-
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'-run-solver-later':
-			my_flag_run_solver_later = True
-		elif sys.argv[i] == r'-nickname':
-			my_flag_nickname = True
-			i += 1
-			nickname_str = sys.argv[i]
-		elif sys.argv[i] == r'-parallel':
-			my_flag_parallel = True
-		elif sys.argv[i] == r'-deterministic':
-			i += 1
-			if sys.argv[i] == r'0':
-				my_flag_deterministic = True
-				deterministic = r'0'
-			elif sys.argv[i] == r'1':
-				my_flag_deterministic = True
-				deterministic = r'1'
-			else:
-				print(r'c Arguments Error!')
-				print(r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>')
-				sys.exit()
-		else:
-			solver_source = sys.argv[i]
-		i += 1
-
+	# Process command line arguments
+	args = parser.parse_args()
+	solver_source = args.solver_path
 	if not os.path.exists(solver_source):
 		print(r'c Solver path ' + "\'" + solver_source + "\'" + r' does not exist!')
-		print(r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>')
-		sys.exit()
-	
-	if not my_flag_deterministic:
-		print(r'c Please specify the deterministic property of the adding solver!')
-		print(r'c Usage: ' + sys.argv[0] + r' [-run-solver-later] [-nickname <nickname>] [-parallel] -deterministic {0, 1} <solver_source_directory>')
 		sys.exit()
 
+	deterministic = str(args.deterministic)
+	my_flag_run_solver_later = args.run_solver_later
+	nickname_str = args.nickname
+	my_flag_parallel = args.parallel
+
+	# Start add solver
 	last_level_directory = r''
 	last_level_directory = sfh.get_last_level_directory_name(solver_source)
 
@@ -92,8 +67,6 @@ if __name__ == r'__main__':
 	sparkle_global_help.solver_list.append(solver_diretory)
 	sfh.add_new_solver_into_file(solver_diretory, deterministic)
 	
-	print('c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!')
-	
 	if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
 		pcs_file_name = sacsh.get_pcs_file_from_solver_directory(solver_diretory)
 		smac_scenario_dir = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/'
@@ -104,6 +77,8 @@ if __name__ == r'__main__':
 		print('c pcs file detected, this is a configured solver')
 		print('c solver added to SMAC')
 	
+	print('c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!')
+
 	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
 		os.system(command_line)
@@ -114,7 +89,7 @@ if __name__ == r'__main__':
 		os.system(command_line)
 		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
-	if my_flag_nickname:
+	if nickname_str is not None:
 		sparkle_global_help.solver_nickname_mapping[nickname_str] = solver_diretory
 		sfh.add_new_solver_nickname_into_file(nickname_str, solver_diretory)
 		pass

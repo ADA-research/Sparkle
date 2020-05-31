@@ -19,3 +19,7 @@ Commands/test/add_feature_extractor.sh
 
 # Test add instances
 Commands/test/add_instances.sh
+
+# Test add solver
+Commands/test/add_solver.sh
+

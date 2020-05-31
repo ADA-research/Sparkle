@@ -26,6 +26,7 @@ if [[ $output == $output_true ]];
 then
 	echo "add_feature_extractor test succeeded"
 else
-	echo "add_feature_extractor test failed"
+	echo "add_feature_extractor test failed with output:"
+	echo $output
 fi
 
