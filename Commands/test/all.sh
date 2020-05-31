@@ -35,3 +35,10 @@ Commands/test/compute_features.sh
 # Test compute features parallel
 Commands/test/compute_features_parallel.sh
 
+# TODO: Test compute marginal contribution
+
+# TODO: Test configure solver
+
+# Test construct sparkle portfolio selector
+Commands/test/construct_sparkle_portfolio_selector.sh
+

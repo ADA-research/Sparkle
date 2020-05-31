@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -67,12 +68,12 @@ def print_log_paths():
 
 
 if __name__ == r'__main__':
-	
-	if len(sys.argv) != 1:
-		print(r'c Arguments error!')
-		print(r'c Usage: ' + sys.argv[0])
-		sys.exit()
-	
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+
+	# Process command line arguments
+	args = parser.parse_args()
+
 	print('c Start constructing Sparkle portfolio selector ...')
 	
 	generate_task_run_status()
