@@ -34,7 +34,7 @@ if __name__ == r'__main__':
 	parser.add_argument('instances_path', metavar='instances-path', type=str, help='path to the instance set')
 	parser.add_argument('--run-extractor-later', action='store_true', help='do not immediately run the feature extractor on the newly added instances')
 	parser.add_argument('--run-solver-later', action='store_true', help='do not immediately run the solver(s) on the newly added instances')
-	parser.add_argument('--nickname', type=str, help='set a nickname for the instnace set')
+	parser.add_argument('--nickname', type=str, help='set a nickname for the instance set')
 	parser.add_argument('--parallel', action='store_true', help='run the solvers and feature extractor on multiple instances in parallel')
 
 	# Process command line arguments
