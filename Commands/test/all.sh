@@ -32,3 +32,6 @@ Commands/test/cleanup_temporary_files.sh
 # Test compute features
 Commands/test/compute_features.sh
 
+# Test compute features parallel
+Commands/test/compute_features_parallel.sh
+
