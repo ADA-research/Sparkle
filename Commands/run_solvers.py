@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import run_solvers_parallel as rsp
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -54,10 +55,5 @@ if __name__ == r'__main__':
 		print('c Running solvers done!')
 	else:
 		# Call the parallel version of this command
-		command = 'Commands/run_solvers_parallel.py'
-		i = 1
-		while i < len_argv:
-			command += ' ' + sys.argv[i]
-			i += 1
-		os.system(command)		
+		rsp.run_solvers_parallel(my_flag_recompute)
 
