@@ -39,7 +39,10 @@ if __name__ == r'__main__':
 	scsh.create_file_scenario_configuration(solver_name, instance_set_name)
 	scsh.prepare_smac_execution_directories_configuration(solver_name)
 	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_name)
-	scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
+	configure_jobid = scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
+
+	print("c Running configuration in parallel. Waiting for Slurm job with id:")
+	print(configure_jobid)
 
 	# Write most recent run to file
 	last_configuration_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_configuration_file_name
