@@ -26,9 +26,14 @@ Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/n
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
 Commands/compute_features.py > /dev/null
-Commands/run_solvers.py > /dev/null
+dependency=$(Commands/run_solvers.py -parallel | tail -1)
 
-# Add instances
+# Wait for the dependency to be done
+while [[ $(squeue -j $dependency) =~ [0-9] ]]; do
+	sleep 1
+done
+
+# Construct sparkle portfolio selector
 output_true="c Marginal contribution (actual selector) computing done!"
 output=$(Commands/construct_sparkle_portfolio_selector.py | tail -1)
 
