@@ -43,3 +43,6 @@ Commands/test/configure_solver.sh
 # Test construct sparkle portfolio selector
 Commands/test/construct_sparkle_portfolio_selector.sh
 
+# Test generate report
+Commands/test/generate_report.sh
+

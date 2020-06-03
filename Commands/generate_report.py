@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_csv_merge_help
@@ -35,11 +36,11 @@ def delete_task_run_status():
 
 
 if __name__ == r'__main__':
-	
-	if len(sys.argv) != 1:
-		print(r'c Command error!')
-		print(r'c Usage: ' + sys.argv[0])
-		sys.exit()
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+
+	# Process command line arguments
+	args = parser.parse_args()
 	
 	if not os.path.isfile(sparkle_global_help.sparkle_portfolio_selector_path):
 		print(r'c Before generating Sparkle report, please first construct Sparkle portfolio selector!')
@@ -51,5 +52,4 @@ if __name__ == r'__main__':
 	sparkle_generate_report_help.generate_report()
 	delete_task_run_status()
 	print(r'c Report generated ...')
-	
 
