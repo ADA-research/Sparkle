@@ -38,6 +38,7 @@ Commands/test/compute_features_parallel.sh
 # TODO: Test compute marginal contribution
 
 # TODO: Test configure solver
+Commands/test/configure_solver.sh
 
 # Test construct sparkle portfolio selector
 Commands/test/construct_sparkle_portfolio_selector.sh
