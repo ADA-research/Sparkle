@@ -55,7 +55,7 @@ def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_paral
 		job_params_list.append(instance_path + ' ' + solver_path + ' ' + performance_data_csv_path)
 
 	srun_options_str = '-N1 -n1'
-	srun_options_str = srun_options_str = ' ' + ssh.get_slurm_srun_user_options_str()
+	srun_options_str = srun_options_str + ' ' + ssh.get_slurm_srun_user_options_str()
 	target_call_str = 'Commands/sparkle_help/run_solvers_core.py'
 
 	ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)

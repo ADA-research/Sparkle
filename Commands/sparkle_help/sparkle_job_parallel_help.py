@@ -60,7 +60,7 @@ def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, depen
 	job_params_list = ['']
 
 	srun_options_str = '-N1 -n1'
-	srun_options_str = srun_options_str = ' ' + ssh.get_slurm_srun_user_options_str()
+	srun_options_str = srun_options_str + ' ' + ssh.get_slurm_srun_user_options_str()
 	target_call_str = job_script
 
 	ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
