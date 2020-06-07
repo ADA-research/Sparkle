@@ -10,6 +10,7 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
+import os
 import fcntl
 
 from sparkle_help import sparkle_global_help as sgh
@@ -173,3 +174,19 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str, job_output_list)
 
 	return sbatch_script_name
+
+def submit_sbatch_script(sbatch_script_name):
+	sbatch_script_path = sgh.smac_dir + sbatch_script_name
+	os.system(r'chmod a+x ' + sbatch_script_path)
+	ori_path = os.getcwd()
+	command = 'cd ' + sgh.smac_dir + ' ; sbatch ' + sbatch_script_name + ' ; cd ' + ori_path
+
+	output_list = os.popen(command).readlines()
+
+	if len(output_list) > 0 and len(output_list[0].strip().split())>0:
+		jobid = output_list[0].strip().split()[-1]
+	else:
+		jobid = ''
+
+	return jobid
+

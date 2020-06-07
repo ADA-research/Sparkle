@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_csv_merge_help
@@ -25,40 +26,15 @@ from sparkle_help import sparkle_add_train_instances_help as satih
 from sparkle_help import sparkle_slurm_help as ssh
 
 if __name__ == r'__main__':
-	solver = ''
-	instance_set_train = ''
-	instance_set_test = ''
-	
-	flag_solver = False
-	flag_instance_set_train = False
-	flag_instance_set_test = False
-	
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == '-solver':
-			i += 1
-			solver = sys.argv[i]
-			flag_solver = True
-		elif sys.argv[i] == '-instance-set-train':
-			i += 1
-			instance_set_train = sys.argv[i]
-			flag_instance_set_train = True
-		elif sys.argv[i] == '-instance-set-test':
-			i += 1
-			instance_set_test = sys.argv[i]
-			flag_instance_set_test = True
-		else:
-			print('c Argument Error: Unknown argument!')
-			print('c Usage: %s -solver <solver> -instance-set-train <instance-set-train> -instance-set-test <instance-set-test>' % sys.argv[0])
-			sys.exit(-1)
-		i += 1
-	
-	if not (flag_solver and flag_instance_set_train and flag_instance_set_test):
-		print('c Argument Error!')
-		print('c Usage: %s -solver <solver> -instance-set-train <instance-set-train> -instance-set-test <instance-set-test>' % sys.argv[0])
-		sys.exit(-1)
-	
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--solver', required=True, type=str, help='path to solver')
+	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
+	parser.add_argument('--instance-set-test', required=True, type=str, help='path to testing instance set')
+	args = parser.parse_args()
+	solver = args.solver
+	instance_set_train = args.instance_set_train
+	instance_set_test = args.instance_set_test
+
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
@@ -94,46 +70,10 @@ if __name__ == r'__main__':
 	os.system(r'chmod a+x ' + sbatch_script_path)
 	os.system(command)
 
-#	# Set srun and smac-validate options
-#	n_cpus = 1
-#	n_cores = 16 # Number of cores available on a Grace CPU
-#	srun_prefix = 'srun -N1 -n1 --cpus-per-task ' + str(n_cpus)
-#	srun_options_str = ssh.get_slurm_srun_user_options_str()
-#	smac_validate_prefix = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cores)
-#
-#	ori_path = os.getcwd()
-#	command_constant_prefix = 'cd ' + sparkle_global_help.smac_dir + ' ; ' + srun_prefix + ' ' + srun_options_str + ' ' + smac_validate_prefix
-#
-#	# Perform validation for the default parameters on the training set
-#	default = True
-#	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, scsh.InstanceType.TRAIN, default)
-#	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-#	configuration_str = 'DEFAULT'
-#	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
-#	execdir = 'example_scenarios/' + solver_name + '/validate_train_default/'
-#	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --execdir ' + execdir + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
-#	os.system(command_line)
-#
-#	# Perform validation for the default parameters on the testing set
-#	default = True
-#	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
-#	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-#	configuration_str = 'DEFAULT'
-#	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
-#	execdir = 'example_scenarios/' + solver_name + '/validate_test_default/'
-#	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --execdir ' + execdir + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
-#	os.system(command_line)
-#
-#	# Perform validation for the configured parameters on the testing set
-#	default = False
-#	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
-#	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-#	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
-#	configuration_str = '\"' + str(optimised_configuration_str) + '\"'
-#	smac_output_file = 'results/' + solver_name + '_validation_' + scenario_file_name
-#	execdir = 'example_scenarios/' + solver_name + '/validate_test_configured/'
-#	command_line = command_constant_prefix + ' --scenario-file ' + scenario_file_path + ' --execdir ' + execdir + ' --configuration ' + configuration_str + ' > ' + smac_output_file + ' ; ' + 'cd ' + ori_path
-#	os.system(command_line)
+	validate_jobid = ssh.submit_sbatch_script(sbatch_script_name)
+
+	print("c Running validation in parallel. Waiting for Slurm job with id:")
+	print(validate_jobid)
 
 	# Write most recent run to file
 	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/' + sparkle_global_help.sparkle_last_test_file_name
