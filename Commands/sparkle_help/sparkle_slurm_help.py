@@ -98,9 +98,13 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 
 	return
 
-def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name):
+def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name=None):
 	## Set script name and path
-	sbatch_script_name = solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '_validation_sbatch.sh'
+	if instance_set_test_name is not None:
+		sbatch_script_name = solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '_validation_sbatch.sh'
+	else:
+		sbatch_script_name = solver_name + '_' + instance_set_train_name + '_validation_sbatch.sh'
+
 	sbatch_script_path = sgh.smac_dir + sbatch_script_name
 
 	## Set sbatch options
@@ -127,37 +131,43 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 	train_default = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
 
-	# Test default
-	default = True
-	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
-	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-	exec_dir = 'example_scenarios/' + solver_name + '/validate_test_default/'
-	configuration_str = 'DEFAULT'
-	test_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
-
-	test_default = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
-
-	# Test configured
-	default = False
-	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
-	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
-	exec_dir = 'example_scenarios/' + solver_name + '/validate_test_configured/'
-	configuration_str = '\"' + str(optimised_configuration_str) + '\"'
-
-	# Write configuration to file to be used by smac-validate
-	config_file_path = 'example_scenarios/' + solver_name + '/configuration_for_validation.txt'
-	fout = open(sgh.smac_dir + config_file_path, 'w+') # open the file of sbatch script
-	fcntl.flock(fout.fileno(), fcntl.LOCK_EX) # using the UNIX file lock to prevent other attempts to visit this sbatch script
-	fout.write(optimised_configuration_str + '\n')
-
-	test_configured_out = 'results/' + solver_name + '_validation_' + scenario_file_name
-
-	test_configured = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration-list ' + config_file_path
-
 	# Create job list
-	job_params_list = [train_default, test_default, test_configured]
-	job_output_list = [train_default_out, test_default_out, test_configured_out]
+	job_params_list = [train_default]
+	job_output_list = [train_default_out]
+
+	# If given, also validate on the test set
+	if instance_set_test_name is not None:
+		# Test default
+		default = True
+		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
+		exec_dir = 'example_scenarios/' + solver_name + '/validate_test_default/'
+		configuration_str = 'DEFAULT'
+		test_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
+	
+		test_default = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
+	
+		# Test configured
+		default = False
+		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
+		optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
+		exec_dir = 'example_scenarios/' + solver_name + '/validate_test_configured/'
+		configuration_str = '\"' + str(optimised_configuration_str) + '\"'
+
+		# Write configuration to file to be used by smac-validate
+		config_file_path = 'example_scenarios/' + solver_name + '/configuration_for_validation.txt'
+		fout = open(sgh.smac_dir + config_file_path, 'w+') # open the file of sbatch script
+		fcntl.flock(fout.fileno(), fcntl.LOCK_EX) # using the UNIX file lock to prevent other attempts to visit this sbatch script
+		fout.write(optimised_configuration_str + '\n')
+	
+		test_configured_out = 'results/' + solver_name + '_validation_' + scenario_file_name
+	
+		test_configured = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration-list ' + config_file_path
+
+		# Extend job list
+		job_params_list.extend([test_default, test_configured])
+		job_output_list.extend([test_default_out, test_configured_out])
 
 	## Set srun options
 	n_cpus = 1

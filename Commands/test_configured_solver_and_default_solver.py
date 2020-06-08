@@ -29,7 +29,7 @@ if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
-	parser.add_argument('--instance-set-test', required=True, type=str, help='path to testing instance set')
+	parser.add_argument('--instance-set-test', required=False, type=str, help='path to testing instance set')
 	args = parser.parse_args()
 	solver = args.solver
 	instance_set_train = args.instance_set_train
@@ -37,7 +37,7 @@ if __name__ == r'__main__':
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
-	instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+	instance_set_test_name = None
 
 	# Make sure configuration results exist before trying to work with them
 	if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
@@ -50,15 +50,19 @@ if __name__ == r'__main__':
 	command_line = 'cp ' + ori_smac_runsolver_path + ' ' + smac_solver_dir
 	os.system(command_line)
 
-	# Copy test instances to smac directory (train should already be there from configuration)
-	instances_directory_test = r'Instances/' + instance_set_test_name
-	list_path = satih.get_list_all_path(instances_directory_test)
-	inst_dir_prefix = instances_directory_test
-	smac_inst_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
-	satih.copy_instances_to_smac(list_path, inst_dir_prefix, smac_inst_dir_prefix, r'test')
+	if instance_set_test is not None:
+		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
-	# Copy file listing test instances to smac solver directory
-	scsh.handle_file_instance_test(solver_name, instance_set_test_name)
+		# Copy test instances to smac directory (train should already be there from configuration)
+		instances_directory_test = r'Instances/' + instance_set_test_name
+		list_path = satih.get_list_all_path(instances_directory_test)
+		inst_dir_prefix = instances_directory_test
+		smac_inst_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
+		satih.copy_instances_to_smac(list_path, inst_dir_prefix, smac_inst_dir_prefix, r'test')
+	
+		# Copy file listing test instances to smac solver directory
+		scsh.handle_file_instance_test(solver_name, instance_set_test_name)
+
 	# Create solver execution directories, and copy necessary files there
 	scsh.prepare_smac_execution_directories_validation(solver_name)
 
@@ -81,6 +85,7 @@ if __name__ == r'__main__':
 	fout = open(last_test_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')
 	fout.write('train ' + str(instance_set_train) + '\n')
-	fout.write('test ' + str(instance_set_test) + '\n')
+	if instance_set_test is not None:
+		fout.write('test ' + str(instance_set_test) + '\n')
 	fout.close()
 

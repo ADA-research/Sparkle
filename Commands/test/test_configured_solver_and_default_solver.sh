@@ -58,14 +58,25 @@ while [[ $(squeue -j $dependency) =~ [0-9] ]]; do
 	sleep 1
 done
 
-# Test configured solver and default solver
+# Test configured solver and default solver with both train and test sets
 output=$(Commands/test_configured_solver_and_default_solver.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
-	echo "[success] test_configured_solver_and_default_solver test succeeded"
+	echo "[success] test_configured_solver_and_default_solver with both train and test sets test succeeded"
 else              
-	echo "[failure] test_configured_solver_and_default_solver test failed with output:"
+	echo "[failure] test_configured_solver_and_default_solver with both train and test sets test failed with output:"
+	echo $output
+fi
+
+# Test configured solver and default solver with just training set
+output=$(Commands/test_configured_solver_and_default_solver.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] test_configured_solver_and_default_solver with just training set test succeeded"
+else              
+	echo "[failure] test_configured_solver_and_default_solver with just training set test failed with output:"
 	echo $output
 fi
 
