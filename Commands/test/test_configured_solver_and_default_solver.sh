@@ -50,7 +50,6 @@ Commands/initialise.py > /dev/null
 Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_train > /dev/null
 Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_test > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
-#Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train > /dev/null
 dependency=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
 
 # Wait for the dependency to be done
