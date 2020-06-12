@@ -192,10 +192,10 @@ Add a solver to the Sparkle platform.
 
 Arguments:
 \begin{itemize}[noitemsep]
-  \item[] \texttt{[-run-solver-later]}
-  \item[] \texttt{[-nickname <nickname>]}
-  \item[] \texttt{[-parallel]}
-  \item[] \texttt{-deterministic \{0, 1\}}
+  \item[] \texttt{[--run-solver-later]}
+  \item[] \texttt{[--nickname <nickname>]}
+  \item[] \texttt{[--parallel]}
+  \item[] \texttt{--deterministic \{0, 1\}}
   \item[] \texttt{<solver\_source\_directory>}
 \end{itemize}
 
@@ -215,9 +215,9 @@ Generate a report describing the configuration results for a solver and specific
 
 Arguments:
 \begin{itemize}[noitemsep]
-  \item[] \texttt{-solver <solver>}
-  \item[] \texttt{[-instance-set-train <instance-set-train>]}
-  \item[] \texttt{[-instance-set-test <instance-set-test>]}
+  \item[] \texttt{--solver <solver>}
+  \item[] \texttt{[--instance-set-train <instance-set-train>]}
+  \item[] \texttt{[--instance-set-test <instance-set-test>]}
 \end{itemize}
 
 Note that if a test instance set is given, the training instance set must also be given. When only a solver is given, Sparkle generates a report for the most recent configuration experiment with that solver.
@@ -233,9 +233,9 @@ Test the performance of the configured solver and the default solver by doing va
 
 Arguments:
 \begin{itemize}[noitemsep]
-  \item[] \texttt{-solver <solver>}
-  \item[] \texttt{-instance-set-train <instance-set-train>}
-  \item[] \texttt{-instance-set-test <instance-set-test>}
+  \item[] \texttt{--solver <solver>}
+  \item[] \texttt{--instance-set-train <instance-set-train>}
+  \item[] \texttt{--instance-set-test <instance-set-test>}
 \end{itemize}
 
 \section{Settings}
