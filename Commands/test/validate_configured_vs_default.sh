@@ -2,9 +2,9 @@
 
 # Execute this script from the Sparkle directory
 
-#SBATCH --job-name=test/test_configured_solver_and_default_solver.sh
-#SBATCH --output=TMP/test_configured_solver_and_default_solver.sh.txt
-#SBATCH --error=TMP/test_configured_solver_and_default_solver.sh.err
+#SBATCH --job-name=test/validate_configured_vs_default.sh
+#SBATCH --output=TMP/validate_configured_vs_default.sh.txt
+#SBATCH --error=TMP/validate_configured_vs_default.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -58,24 +58,24 @@ while [[ $(squeue -j $dependency) =~ [0-9] ]]; do
 done
 
 # Test configured solver and default solver with both train and test sets
-output=$(Commands/test_configured_solver_and_default_solver.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test | tail -1)
+output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
-	echo "[success] test_configured_solver_and_default_solver with both train and test sets test succeeded"
+	echo "[success] validate_configured_vs_default with both train and test sets test succeeded"
 else              
-	echo "[failure] test_configured_solver_and_default_solver with both train and test sets test failed with output:"
+	echo "[failure] validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
 fi
 
 # Test configured solver and default solver with just training set
-output=$(Commands/test_configured_solver_and_default_solver.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
+output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
-	echo "[success] test_configured_solver_and_default_solver with just training set test succeeded"
+	echo "[success] validate_configured_vs_default with just training set test succeeded"
 else              
-	echo "[failure] test_configured_solver_and_default_solver with just training set test failed with output:"
+	echo "[failure] validate_configured_vs_default with just training set test failed with output:"
 	echo $output
 fi
 

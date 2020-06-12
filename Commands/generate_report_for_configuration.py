@@ -59,7 +59,7 @@ if __name__ == r'__main__':
 	
 	solver_name = sfh.get_last_level_directory_name(solver)
 
-	# If no instance set(s) is/are given, try to retrieve them from the last run of test_configured_solver_and_default_solver
+	# If no instance set(s) is/are given, try to retrieve them from the last run of validate_configured_vs_default
 	if not flag_instance_set_train and not flag_instance_set_test:
 		instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test = sgrfch.get_most_recent_test_run(solver_name)
 	# If only the testing set is given return an error
@@ -79,6 +79,6 @@ if __name__ == r'__main__':
 		sgrfch.check_results_exist(solver_name, instance_set_train_name)
 		sgrfch.generate_report_for_configuration_train(solver_name, instance_set_train_name)
 	else:
-		print('c Error: No results from test_configured_solver_and_default_solver found that can be used in the report!')
+		print('c Error: No results from validate_configured_vs_default found that can be used in the report!')
 		sys.exit(-1)
 
