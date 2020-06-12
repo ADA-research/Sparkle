@@ -34,16 +34,16 @@ if __name__ == r'__main__':
 	len_argv = len(sys.argv)
 	if len_argv != 2: flag_argument_error = True
 	else:
-		if sys.argv[1] == r'-perfect': flag_compute_perfect = True
-		elif sys.argv[1] == r'-actual': flag_compute_actual = True
+		if sys.argv[1] == r'--perfect': flag_compute_perfect = True
+		elif sys.argv[1] == r'--actual': flag_compute_actual = True
 		else: flag_argument_error = True	
 	
 	if flag_compute_perfect == flag_compute_actual: flag_argument_error = True
 	
 	if flag_argument_error:
 		print(r'c Arguments error!')
-		print(r'c Usage: ' + sys.argv[0] + r' -perfect')
-		print(r'c Or usage: ' + sys.argv[0] + r' -actual')
+		print(r'c Usage: ' + sys.argv[0] + r' --perfect')
+		print(r'c Or usage: ' + sys.argv[0] + r' --actual')
 		sys.exit()
 	else:
 		cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()

@@ -37,9 +37,9 @@ if __name__ == r'__main__':
 	len_argv = len(sys.argv)
 	i = 1
 	while i<len_argv:
-		if sys.argv[i] == r'-recompute':
+		if sys.argv[i] == r'--recompute':
 			my_flag_recompute = True
-		elif sys.argv[i] == r'-parallel':
+		elif sys.argv[i] == r'--parallel':
 			my_flag_parallel = True
 		i += 1
 

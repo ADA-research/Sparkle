@@ -17,17 +17,17 @@
 Commands/initialise.py
 
 # Add instances (in CNF format) in a given directory, without running solvers or feature extractors yet
-Commands/add_instances.py -run-solver-later -run-extractor-later Examples/Resources/Instances/SAT_test/
+Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/SAT_test/
 
 # Add solver with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
 # (the directory should contain both the executable and the wrapper)
-Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/CSCCSat/
+Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/CSCCSat/
 
-Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/Lingeling/
+Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/Lingeling/
 
-Commands/add_solver.py -run-solver-later -deterministic 0 Examples/Resources/Solvers/MiniSAT/
+Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/MiniSAT/
 
-Commands/add_feature_extractor.py -run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+Commands/add_feature_extractor.py --run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
 
 Commands/compute_features.py
 

@@ -73,9 +73,9 @@ if __name__ == r'__main__':
 	len_argv = len(sys.argv)
 	i = 1
 	while i<len_argv:
-		if sys.argv[i] == r'-recompute':
+		if sys.argv[i] == r'--recompute':
 			my_flag_recompute = True
-		elif sys.argv[i] == r'-also-construct-selector-and-report':
+		elif sys.argv[i] == r'--also-construct-selector-and-report':
 			my_flag_also_construct_selector_and_report = True
 		i += 1
 
