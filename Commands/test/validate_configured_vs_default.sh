@@ -17,29 +17,15 @@ source activate sparkle_test &> /dev/null
 # Settings
 slurm_settings_path="Settings/sparkle_slurm_settings.txt"
 slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
+slurm_settings_test="Commands/test/test_files/sparkle_slurm_settings.txt"
 mv $slurm_settings_path $slurm_settings_tmp # Save user settings
-partition="graceADA"
-exclude=""
-mem="3000"
-echo "--partition=$partition" > $slurm_settings_path
-echo "--exclude=$exclude" >> $slurm_settings_path
-echo "--mem-per-cpu=$mem" >> $slurm_settings_path
+cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
 smac_settings_path="Settings/sparkle_smac_settings.txt"
 smac_settings_tmp="Settings/sparkle_smac_settings.tmp"
+smac_settings_test="Commands/test/test_files/sparkle_smac_settings.txt"
 mv $smac_settings_path $smac_settings_tmp # Save user settings
-run_obj="RUNTIME"
-time_budget="30" # 30 seconds
-cutoff_time="5" # 5 seconds
-cutoff_length="max"
-runs="5"
-runs_parallel=$runs
-echo "smac_run_obj = $run_obj" > $smac_settings_path
-echo "smac_whole_time_budget = $time_budget" >> $smac_settings_path
-echo "smac_each_run_cutoff_time = $cutoff_time" >> $smac_settings_path
-echo "smac_each_run_cutoff_length = $cutoff_length" >> $smac_settings_path
-echo "num_of_smac_run = $runs" >> $smac_settings_path
-echo "num_of_smac_run_in_parallel = $runs_parallel" >> $smac_settings_path
+cp $smac_settings_test $smac_settings_path # Activate test settings
 
 # Prepare for test
 instances_path_train="Examples/Resources/Instances/PTN/"
