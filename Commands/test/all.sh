@@ -14,6 +14,9 @@
 # Activate environment
 source activate sparkle_test &> /dev/null
 
+# Test initialise
+Commands/test/initialise.sh
+
 # Test add feature extractor
 Commands/test/add_feature_extractor.sh
 
@@ -45,6 +48,12 @@ Commands/test/construct_sparkle_portfolio_selector.sh
 
 # Test generate report
 Commands/test/generate_report.sh
+
+# Test load record
+Commands/test/load_record.sh
+
+# Test remove record
+Commands/test/remove_record.sh
 
 # Test validate configured vs default
 Commands/test/validate_configured_vs_default.sh
