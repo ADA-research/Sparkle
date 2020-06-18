@@ -64,7 +64,7 @@ if __name__ == r'__main__':
 	# Set validation to wait until configuration is done
 	if(validate):
 		delayed_validation_file_name = "delayed_validation_" + solver + "_" + instance_set_train
-		if instance_set_test not None:
+		if 'instance_set_test' in vars(args):
 			delayed_validation_file_name += "_" + instance_set_test
 		delayed_validation_file_name += ".sh"
 
@@ -82,7 +82,7 @@ if __name__ == r'__main__':
 		command_line = 'srun -N1 -n1 /Commands/validate_configured_vs_default.py'
 		command_line += ' --solver ' + solver
 		command_line += ' --instance-set-train ' + instance_set_train
-		if instance_set_test not None:
+		if 'instance_set_test' in vars(args):
 			command_line += ' --instance-set-test ' + instance_set_test;
 
 		fout = open("TMP/"+delayed_validation_file_name, "w")
