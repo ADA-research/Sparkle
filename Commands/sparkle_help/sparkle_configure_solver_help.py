@@ -232,7 +232,7 @@ def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
 	ori_path = os.getcwd()
 	command_line = 'cd ' + sparkle_global_help.smac_dir + ' ; ' + 'sbatch ' + smac_configure_sbatch_script_name + ' ; ' + 'cd ' + ori_path
-	#os.system(command_line)
+	os.system(command_line)
 
 	output_list = os.popen(command_line).readlines()
 	if len(output_list) > 0 and len(output_list[0].strip().split())>0:

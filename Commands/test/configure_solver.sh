@@ -23,7 +23,7 @@ Commands/add_instances.py --run-solver-later --run-extractor-later $instances_pa
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
 
 # Configure solver
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path | tail -1)
+output=$(Commands/configure_solver.py --validate --solver $solver_path --instance-set-train $instances_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then

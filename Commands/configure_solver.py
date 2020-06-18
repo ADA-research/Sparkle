@@ -15,30 +15,39 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_add_train_instances_help as satih
-
+from sparkle_help import sparkle_slurm_help as ssh
+from validate_configured_vs_default import validate_configured_vs_default
 
 if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--validate', required=False, action="store_true", help='validate after configuration')
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
+	parser.add_argument('--instance-set-test', required=False, type=str, help='path to testing instance set (only for validating)')
 	args = parser.parse_args()
+
+	validate = args.validate
 	solver = args.solver
-	instance_set = args.instance_set_train
+	instance_set_train = args.instance_set_train
+
+	instance_set_test = False
+	if 'instance_set_test' in vars(args):
+		instance_set_test = args.instance_set_train
 
 	solver_name = sfh.get_last_level_directory_name(solver)
-	instance_set_name = sfh.get_last_level_directory_name(instance_set)
+	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 
 	# Copy instances to smac directory
-	instances_directory = r'Instances/' + instance_set_name
+	instances_directory = r'Instances/' + instance_set_train_name
 	list_all_path = satih.get_list_all_path(instances_directory)
 	inst_dir_prefix = instances_directory
 	smac_inst_dir_prefix = sgh.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
 	satih.copy_instances_to_smac(list_all_path, inst_dir_prefix, smac_inst_dir_prefix, r'train')
 
-	scsh.handle_file_instance_train(solver_name, instance_set_name)
-	scsh.create_file_scenario_configuration(solver_name, instance_set_name)
+	scsh.handle_file_instance_train(solver_name, instance_set_train_name)
+	scsh.create_file_scenario_configuration(solver_name, instance_set_train_name)
 	scsh.prepare_smac_execution_directories_configuration(solver_name)
-	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_name)
+	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_train_name)
 	configure_jobid = scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
 
 	print("c Running configuration in parallel. Waiting for Slurm job with id:")
@@ -49,6 +58,36 @@ if __name__ == r'__main__':
 
 	fout = open(last_configuration_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')
-	fout.write('train ' + str(instance_set) + '\n')
+	fout.write('train ' + str(instance_set_train) + '\n')
 	fout.close()
+
+	# Set validation to wait until configuration is done
+	if(validate):
+		delayed_validation_file_name = "delayed_validation_" + solver + "_" + instance_set_train
+		if instance_set_test not None:
+			delayed_validation_file_name += "_" + instance_set_test
+		delayed_validation_file_name += ".sh"
+
+		sbatch_options_list = ssh.get_sbatch_options_for_validation(delayed_validation_file_name)
+		sbatch_options_list.append("--dependency=afterany:{}".format(configure_jobid))
+		ori_path = os.getcwd()
+		command_line = 'sbatch /Commands/validate_configured_vs_default.py'
+		command_line += ' --solver ' + solver
+		command_line += ' --instance-set-train ' + instance_set_train
+		if instance_set_test:
+			command_line += ' --instance-set-test ' + instance_set_test;
+
+
+		fout = open("TMP/"+delayed_validation_file_name, "w")
+		fout.write(r'#!/bin/bash' + '\n')  # use bash to execute this script
+		fout.write(r'###' + '\n')
+		fout.write(r'###' + '\n')
+		for sbatch_option in sbatch_options_list:
+			fout.write(r'#SBATCH ' + str(sbatch_option) + '\n')
+		fout.write(r'###' + '\n')
+		fout.write(command_line + "\n")
+
+		os.system("TMP/"+delayed_validation_file_name)
+
+		print("c Once configuration is finished validation will start as a Slurm job.")
 
