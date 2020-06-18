@@ -98,24 +98,6 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 
 	return
 
-
-def get_sbatch_options_for_validation(sbatch_script_name):
-	## Set sbatch options
-	max_jobs = 50
-	num_jobs = 3
-	if num_jobs < max_jobs:
-		max_jobs = num_jobs
-	job_name = '--job-name=' + sbatch_script_name
-	output = '--output=tmp/' + sbatch_script_name + '.txt'
-	error = '--error=tmp/' + sbatch_script_name + '.err'
-	array = '--array=0-' + str(num_jobs - 1) + '%' + str(max_jobs)
-
-	sbatch_options_list = [job_name, output, error, array]
-	sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
-	sbatch_options_list.extend(get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
-
-	return sbatch_options_list
-
 def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name=None):
 	## Set script name and path
 	if instance_set_test_name is not None:
@@ -125,7 +107,19 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 	sbatch_script_path = sgh.smac_dir + sbatch_script_name
 
-	sbatch_options_list = get_sbatch_options_for_validation(sbatch_script_name)
+	## Set sbatch options
+	max_jobs = 50
+	num_jobs = 3
+	if num_jobs < max_jobs:
+		max_jobs = num_jobs
+	job_name = '--job-name=' + sbatch_script_name
+	output = '--output=tmp/' + sbatch_script_name + '.txt'
+	error = '--error=tmp/' + sbatch_script_name + '.err'
+	array = '--array=0-' + str(num_jobs-1) + '%' + str(max_jobs)
+
+	sbatch_options_list = [job_name, output, error, array]
+	sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
+	sbatch_options_list.extend(get_slurm_sbatch_user_options_list()) # Get user options second to overrule defaults
 
 	# Train default
 	default = True

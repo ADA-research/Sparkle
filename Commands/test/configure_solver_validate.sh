@@ -23,13 +23,13 @@ Commands/add_instances.py --run-solver-later --run-extractor-later $instances_pa
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
 
 # Configure solver
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path | tail -1)
+output=$(Commands/configure_solver.py --validate --solver $solver_path --instance-set-train $instances_path | tail -1)
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ \. ]];
 then
-	echo "[success] configure_solver test succeeded"
+	echo "[success] configure_solver_validation test succeeded"
 else              
-	echo "[failure] configure_solver test failed with output:"
+	echo "[failure] configure_solver_validation test failed with output:"
 	echo $output
 fi
 

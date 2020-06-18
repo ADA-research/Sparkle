@@ -30,7 +30,7 @@ if __name__ == r'__main__':
 	solver = args.solver
 	instance_set_train = args.instance_set_train
 
-	instance_set_test = False
+	instance_set_test = None
 	if 'instance_set_test' in vars(args):
 		instance_set_test = args.instance_set_train
 
@@ -68,15 +68,22 @@ if __name__ == r'__main__':
 			delayed_validation_file_name += "_" + instance_set_test
 		delayed_validation_file_name += ".sh"
 
-		sbatch_options_list = ssh.get_sbatch_options_for_validation(delayed_validation_file_name)
+		job_name = '--job-name=' + delayed_validation_file_name
+		output = '--output=TMP/' + delayed_validation_file_name + '.txt'
+		error = '--error=TMP/' + delayed_validation_file_name + '.err'
+
+		sbatch_options_list = [job_name, output, error]
+		sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
+		sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
 		sbatch_options_list.append("--dependency=afterany:{}".format(configure_jobid))
+
 		ori_path = os.getcwd()
-		command_line = 'sbatch /Commands/validate_configured_vs_default.py'
+
+		command_line = 'srun -N1 -n1 /Commands/validate_configured_vs_default.py'
 		command_line += ' --solver ' + solver
 		command_line += ' --instance-set-train ' + instance_set_train
-		if instance_set_test:
+		if instance_set_test not None:
 			command_line += ' --instance-set-test ' + instance_set_test;
-
 
 		fout = open("TMP/"+delayed_validation_file_name, "w")
 		fout.write(r'#!/bin/bash' + '\n')  # use bash to execute this script
@@ -87,7 +94,8 @@ if __name__ == r'__main__':
 		fout.write(r'###' + '\n')
 		fout.write(command_line + "\n")
 
-		os.system("TMP/"+delayed_validation_file_name)
+		#os.system("TMP/"+delayed_validation_file_name)
 
+		#TODO catch id and present to user with print
 		print("c Once configuration is finished validation will start as a Slurm job.")
 
