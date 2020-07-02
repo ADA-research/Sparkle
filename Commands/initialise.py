@@ -19,6 +19,7 @@ from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
 
 if __name__ == r'__main__':
 	# Define command line arguments
@@ -26,6 +27,9 @@ if __name__ == r'__main__':
 
 	# Process command line arguments
 	args = parser.parse_args()
+
+	# Log command call
+	sl.log_command(sys.argv)
 
 	print('c Start initialising Sparkle platform ...')
 
