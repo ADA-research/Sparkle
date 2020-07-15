@@ -11,12 +11,13 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import argparse
+import os
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_add_train_instances_help as satih
 from sparkle_help import sparkle_slurm_help as ssh
-from validate_configured_vs_default import validate_configured_vs_default
+#from validate_configured_vs_default import validate_configured_vs_default
 
 if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
@@ -29,10 +30,7 @@ if __name__ == r'__main__':
 	validate = args.validate
 	solver = args.solver
 	instance_set_train = args.instance_set_train
-
-	instance_set_test = None
-	if 'instance_set_test' in vars(args):
-		instance_set_test = args.instance_set_train
+	instance_set_test = args.instance_set_test
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
@@ -50,8 +48,7 @@ if __name__ == r'__main__':
 	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_train_name)
 	configure_jobid = scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
 
-	print("c Running configuration in parallel. Waiting for Slurm job with id:")
-	print(configure_jobid)
+	print("c Running configuration in parallel. Waiting for Slurm job with id: {}".format(configure_jobid))
 
 	# Write most recent run to file
 	last_configuration_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_configuration_file_name
@@ -63,29 +60,34 @@ if __name__ == r'__main__':
 
 	# Set validation to wait until configuration is done
 	if(validate):
-		delayed_validation_file_name = "delayed_validation_" + solver + "_" + instance_set_train
-		if 'instance_set_test' in vars(args):
-			delayed_validation_file_name += "_" + instance_set_test
-		delayed_validation_file_name += ".sh"
+		delayed_validation_file_name = "delayed_validation_{}_{}".format(solver_name, instance_set_train_name)
+		if instance_set_test is not None:
+			delayed_validation_file_name += "_{}".format(instance_set_test)
+		delayed_validation_file_name += "_script.sh"
+
+		delayed_validation_file_path = "TMP/"+delayed_validation_file_name
 
 		job_name = '--job-name=' + delayed_validation_file_name
-		output = '--output=TMP/' + delayed_validation_file_name + '.txt'
-		error = '--error=TMP/' + delayed_validation_file_name + '.err'
+		output = '--output=' + delayed_validation_file_name + '.txt'
+		error = '--error=' + delayed_validation_file_name + '.err'
 
 		sbatch_options_list = [job_name, output, error]
 		sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
 		sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
 		sbatch_options_list.append("--dependency=afterany:{}".format(configure_jobid))
+		sbatch_options_list.append("--nodes=1")
+		sbatch_options_list.append("--ntasks=1")
 
 		ori_path = os.getcwd()
 
-		command_line = 'srun -N1 -n1 /Commands/validate_configured_vs_default.py'
+		command_line = "cd .. \n"
+		command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py'
 		command_line += ' --solver ' + solver
 		command_line += ' --instance-set-train ' + instance_set_train
-		if 'instance_set_test' in vars(args):
-			command_line += ' --instance-set-test ' + instance_set_test;
+		if instance_set_test is not None:
+			command_line += ' --instance-set-test ' + instance_set_test
 
-		fout = open("TMP/"+delayed_validation_file_name, "w")
+		fout = open(delayed_validation_file_path, "w")
 		fout.write(r'#!/bin/bash' + '\n')  # use bash to execute this script
 		fout.write(r'###' + '\n')
 		fout.write(r'###' + '\n')
@@ -93,9 +95,10 @@ if __name__ == r'__main__':
 			fout.write(r'#SBATCH ' + str(sbatch_option) + '\n')
 		fout.write(r'###' + '\n')
 		fout.write(command_line + "\n")
+		fout.close()
 
-		#os.system("TMP/"+delayed_validation_file_name)
+		os.popen("chmod 755 "+delayed_validation_file_path)
+		os.popen("cd TMP/; sbatch ./"+delayed_validation_file_name)
 
-		#TODO catch id and present to user with print
-		print("c Once configuration is finished validation will start as a Slurm job.")
+		print("c Once configuration is finished validation will automaticaly start as a Slurm job.")
 
