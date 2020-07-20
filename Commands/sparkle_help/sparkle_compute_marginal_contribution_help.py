@@ -56,9 +56,9 @@ def compute_perfect_selector_marginal_contribution(performance_data_csv_path = s
 def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance):
 	list_predict_schedule = []
 	python_executable = sgh.python_executable
-	if not os.path.exists(r'TMP/'): os.mkdir(r'TMP/')
+	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 	feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
-	predict_schedule_result_path = r'TMP/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
+	predict_schedule_result_path = r'Tmp/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
 	
 	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + actual_portfolio_selector_path + r' --feature_vec' + r' ' + feature_vector_string + r' 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
 	
@@ -126,10 +126,10 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 	num_solvers = performance_data_csv.get_column_size()
 	
 	
-	if not os.path.exists(r'TMP/'): os.mkdir(r'TMP/')
+	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 	
 	print('c Computing actual performance for portfolio selector with all solvers ...')
-	actual_portfolio_selector_path = r'TMP/' + r'actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
+	actual_portfolio_selector_path = r'Tmp/' + r'actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
 	scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, cutoff_time_each_run)
 	
 	if not os.path.exists(actual_portfolio_selector_path):
@@ -149,9 +149,9 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		print('c Computing actual performance for portfolio selector excluding solver ' + sfh.get_last_level_directory_name(solver) + ' ...')
 		tmp_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 		tmp_performance_data_csv.delete_column(solver)
-		tmp_performance_data_csv_path = r'TMP/' + r'tmp_performance_data_csv_' + sparkle_basic_help.get_time_pid_random_string() + r'.csv'
+		tmp_performance_data_csv_path = r'Tmp/' + r'tmp_performance_data_csv_' + sparkle_basic_help.get_time_pid_random_string() + r'.csv'
 		tmp_performance_data_csv.save_csv(tmp_performance_data_csv_path)
-		tmp_actual_portfolio_selector_path = r'TMP/' + r'tmp_actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
+		tmp_actual_portfolio_selector_path = r'Tmp/' + r'tmp_actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
 		
 		if len(tmp_performance_data_csv.list_columns()) >= 1:
 			scps.construct_sparkle_portfolio_selector(tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path, feature_data_csv_path, cutoff_time_each_run)

@@ -120,7 +120,7 @@ def print_portfolio_selector_info():
 	print(r'c Status of portfolio selector in Sparkle:')
 	
 	key_str = 'construct_sparkle_portfolio_selector'
-	task_run_status_path = r'TMP/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
 	if os.path.isfile(task_run_status_path):
 		print(r'c Currently Sparkle portfolio selecotr is constructing ...')
 	elif os.path.isfile(sparkle_portfolio_selector_path):
@@ -137,7 +137,7 @@ def print_report_info():
 	print(r'c Status of report in Sparkle:')
 	
 	key_str = 'generate_report'
-	task_run_status_path = r'TMP/SBATCH_Report_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Report_Jobs/' + key_str + r'.statusinfo'
 	if os.path.isfile(task_run_status_path):
 		print(r'c Currently Sparkle report is generating ...')
 	elif os.path.isfile(sparkle_report_path):

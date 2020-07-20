@@ -47,8 +47,8 @@ def generate_computing_features_sbatch_shell_script(sbatch_shell_script_path, nu
 	fout.write(r'#!/bin/bash' + '\n') # use bash to execute this script
 	fout.write(r'###' + '\n')
 	fout.write(r'#SBATCH --job-name=' + job_name + '\n') # specify the job name in this sbatch script
-	fout.write(r'#SBATCH --output=' + r'TMP/' + job_name + r'.txt' + '\n') # specify the file for normal output
-	fout.write(r'#SBATCH --error=' + r'TMP/' + job_name + r'.err' + '\n') # specify the file for error output
+	fout.write(r'#SBATCH --output=' + r'Tmp/' + job_name + r'.txt' + '\n') # specify the file for normal output
+	fout.write(r'#SBATCH --error=' + r'Tmp/' + job_name + r'.err' + '\n') # specify the file for error output
 	fout.write(r'###' + '\n')
 	fout.write(r'###' + '\n')
 	fout.write(r'#SBATCH --mem-per-cpu=3072' + '\n') #assigned 3GB memory for each cpu
@@ -111,7 +111,7 @@ def computing_features_parallel(feature_data_csv_path, num_job_in_parallel, mode
 	# generate the sbatch script
 	i = 0
 	j = len(total_job_list)
-	sbatch_shell_script_path = r'TMP/' + r'computing_features_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+	sbatch_shell_script_path = r'Tmp/' + r'computing_features_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
 	generate_computing_features_sbatch_shell_script(sbatch_shell_script_path, num_job_in_parallel, feature_data_csv_path, total_job_list, i, j)
 	os.system(r'chmod a+x ' + sbatch_shell_script_path)
 	command_line = r'sbatch ' + sbatch_shell_script_path

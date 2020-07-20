@@ -61,7 +61,7 @@ if __name__ == r'__main__':
 	
 	##pre-run the feature extractor on a testing instance, to obtain the feature names
 	instance_path = extractor_directory + r'/' + r'sparkle_test_instance.cnf'
-	result_path = r'TMP/' + sfh.get_last_level_directory_name(extractor_directory) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+	result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_directory) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 	command_line = extractor_directory + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_directory + r'/' + r' ' + instance_path + r' ' + result_path
 	os.system(command_line)
 

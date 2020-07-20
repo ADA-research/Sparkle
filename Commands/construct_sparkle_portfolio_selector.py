@@ -44,14 +44,14 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
 
 def generate_task_run_status():
 	key_str = 'construct_sparkle_portfolio_selector'
-	task_run_status_path = r'TMP/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
 	status_info_str = 'Status: Running\n'
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
 	return
 
 def delete_task_run_status():
 	key_str = 'construct_sparkle_portfolio_selector'
-	task_run_status_path = r'TMP/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
 	os.system(r'rm -rf ' + task_run_status_path)
 	return
 

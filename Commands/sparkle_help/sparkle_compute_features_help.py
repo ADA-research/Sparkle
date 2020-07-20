@@ -66,7 +66,7 @@ def computing_features(feature_data_csv_path, mode):
 		len_extractor_list = len(extractor_list)
 		for j in range(0, len_extractor_list):
 			extractor_path = extractor_list[j]
-			basic_part = r'TMP/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() 
+			basic_part = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() 
 			result_path = basic_part + r'.rawres'
 			err_path = basic_part + r'.err'
 			runsolver_watch_data_path = basic_part + r'.log'
