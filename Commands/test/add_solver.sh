@@ -20,9 +20,10 @@ Commands/initialise.py > /dev/null
 # Add solver
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic"
 output_true="c Adding solver PbO-CCSAT-Generic done!"
+output_true_b="c Removing Sparkle report Components/Sparkle-latex-generator/Sparkle_Report.pdf done!"
 output=$(Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path | tail -1)
 
-if [[ $output == $output_true ]];
+if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];
 then
 	echo "[success] add_solver test succeeded"
 else              
