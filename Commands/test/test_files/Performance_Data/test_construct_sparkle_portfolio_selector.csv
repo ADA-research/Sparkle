@@ -1,0 +1,11 @@
+,Solvers/CSCCSat,Solvers/Lingeling
+Instances/SAT_test/logistics.d.cnf,4.41,4.72
+Instances/SAT_test/RTI_k3_n100_m429_1.cnf,4.41,4.44
+Instances/SAT_test/RTI_k3_n100_m429_0.cnf,4.44,4.42
+Instances/SAT_test/bw_large.d.cnf,4.74,4.83
+Instances/SAT_test/g125.17.cnf,7.63,500.0
+Instances/SAT_test/ii8a1.cnf,4.49,4.41
+Instances/SAT_test/ais12.cnf,4.43,4.44
+Instances/SAT_test/f600.cnf,4.47,500.0
+Instances/SAT_test/RTI_k3_n100_m429_2.cnf,4.43,4.46
+Instances/SAT_test/ssa7552-038.cnf,4.44,4.44
