@@ -18,17 +18,19 @@ source activate sparkle_test &> /dev/null
 feature_data_path="Feature_Data/sparkle_feature_data.csv"
 feature_data_tmp="Commands/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
 feature_data_test="Commands/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
-mv $feature_data_path $feature_data_tmp # Save user data
 
 performance_data_path="Performance_Data/sparkle_performance_data.csv"
 performance_data_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
 performance_data_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
-mv $performance_data_path $performance_data_tmp # Save user data
 
 cutoff_time_path="Performance_Data/sparkle_performance_data_cutoff_time_information.txt"
 cutoff_time_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data_cutoff_time_information.txt.tmp"
 cutoff_time_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector_cutoff_time.txt"
-mv $cutoff_time_path $cutoff_time_tmp # Save user data
+
+# Save user data if any
+mv $feature_data_path $feature_data_tmp 2> /dev/null
+mv $performance_data_path $performance_data_tmp 2> /dev/null
+mv $cutoff_time_path $cutoff_time_tmp 2> /dev/null
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/SAT_test"
@@ -42,10 +44,10 @@ Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/n
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
 
-# Put data in place to simulate the compute_features and run_solvers commands
-cp $feature_data_test $feature_data_path # Activate test data
-cp $performance_data_test $performance_data_path # Activate test data
-cp $cutoff_time_test $cutoff_time_path # Activate test data
+# Activate test data to simulate the compute_features and run_solvers commands
+cp $feature_data_test $feature_data_path
+cp $performance_data_test $performance_data_path
+cp $cutoff_time_test $cutoff_time_path
 
 # Construct sparkle portfolio selector
 output_true="c Marginal contribution (actual selector) computing done!"
@@ -59,8 +61,9 @@ else
 	echo $output
 fi
 
-# Restore original data
-mv $feature_data_tmp $feature_data_path
-mv $performance_data_tmp $performance_data_path
-mv $cutoff_time_tmp $cutoff_time_path
+# Restore original data if any
+mv $feature_data_tmp $feature_data_path 2> /dev/null
+mv $performance_data_tmp $performance_data_path 2> /dev/null
+# OR true to get success exit code even when no user data was stored in the tmp file
+mv $cutoff_time_tmp $cutoff_time_path || true 2> /dev/null
 
