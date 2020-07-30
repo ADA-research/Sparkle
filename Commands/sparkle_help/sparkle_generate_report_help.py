@@ -92,8 +92,14 @@ def get_performanceComputationCutoffTime():
 
 def get_solverPerfectRankingList():
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py -perfect'
+	command = r'Commands/compute_marginal_contribution.py --perfect'
 	output = os.popen(command).readlines()
+
+	if output[0] == 'c Arguments error!\n':
+		print('c Failed to generate report, computing marginal contribution for the perfect case gave the following output:')
+		print(output)
+		sys.exit(1)
+
 	for myline in output:
 		mylist = myline.strip().split()
 		if len(mylist) == 5:
@@ -105,8 +111,14 @@ def get_solverPerfectRankingList():
 
 def get_solverActualRankingList():
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py -actual'
+	command = r'Commands/compute_marginal_contribution.py --actual'
 	output = os.popen(command).readlines()
+
+	if output[0] == 'c Arguments error!\n':
+		print('c Failed to generate report, computing marginal contribution for the actual case gave the following output:')
+		print(output)
+		sys.exit(1)
+
 	for myline in output:
 		mylist = myline.strip().split()
 		if len(mylist) == 5:
@@ -374,7 +386,7 @@ def generate_report():
 	latex_report_filename = r'Sparkle_Report'
 	dict_variable_to_value = get_dict_variable_to_value()
 	#print(dict_variable_to_value)
-	
+
 	latex_template_filepath = latex_directory_path + latex_template_filename
 	report_content = r''
 	fin = open(latex_template_filepath, 'r')
@@ -383,30 +395,33 @@ def generate_report():
 		if not myline: break
 		report_content += myline
 	fin.close()
-	
+
 	for variable_key, str_value in dict_variable_to_value.items():
 		 variable = r'@@' + variable_key + r'@@'
 		 if variable_key != r'figure-portfolio-selector-sparkle-vs-sbs' and variable_key != r'figure-portfolio-selector-sparkle-vs-vbs':
 		 	str_value = str_value.replace(r'_', r'\textunderscore ')
 		 report_content = report_content.replace(variable, str_value)
-	
+
 	#print(report_content)
 	
 	latex_report_filepath = latex_directory_path + latex_report_filename + r'.tex'
 	fout = open(latex_report_filepath, 'w+')
 	fout.write(report_content)
 	fout.close()
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
+
 	os.system(compile_command)
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux 1> /dev/null 2>&1'
 	os.system(compile_command)
+
 	os.system(compile_command)
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
+
 	os.system(compile_command)
 	
 	print(r'Report is placed at: ' + latex_directory_path + latex_report_filename + r'.pdf')
