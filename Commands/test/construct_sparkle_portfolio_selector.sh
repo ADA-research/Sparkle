@@ -65,5 +65,5 @@ fi
 mv $feature_data_tmp $feature_data_path 2> /dev/null
 mv $performance_data_tmp $performance_data_path 2> /dev/null
 # OR true to get success exit code even when no user data was stored in the tmp file
-mv $cutoff_time_tmp $cutoff_time_path || true 2> /dev/null
+mv $cutoff_time_tmp $cutoff_time_path 2> /dev/null || true
 
