@@ -25,8 +25,12 @@ from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_job_parallel_help
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
+from sparkle_help import sparkle_logging as sl
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('solver_path', metavar='solver-path', type=str, help='path to the solver')
