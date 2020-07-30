@@ -20,3 +20,11 @@ Components/smac-v2.10.03-master-778/example_scenarios/*/
 *.aux
 *.log
 *.out
+*.blg
+*.eps
+Components/Sparkle-latex-generator/Sparkle_Report.pdf
+Components/Sparkle-latex-generator/Sparkle_Report.tex
+Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_sbs_filename.dat
+Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_vbs_filename.dat
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
