@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+from pathlib import Path
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -22,6 +23,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_construct_portfolio_selector_help as scps ##
 from sparkle_help import sparkle_run_portfolio_selector_help as srps ##
+from sparkle_help import sparkle_logging as sl
 
 
 def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, cutoff_time_each_run = srs.cutoff_time_each_run):
@@ -66,11 +68,17 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, 
 	os.system(command_line)
 	
 	list_predict_schedule = srps.get_list_predict_schedule_from_file(predict_schedule_result_path)
-	
+
 	#print r'c for solving instance ' + instance + r', ' + r'list_predict_schedule = ' + str(list_predict_schedule)
-	
-	os.system(r'rm -f ' + predict_schedule_result_path)
-	os.system(r'rm -f ' + sgh.sparkle_err_path)
+
+	# If there is no error output remove the temporary files, otherwise log them for analysis
+	if Path(sgh.sparkle_err_path).stat().st_size == 0:
+		os.system(r'rm -f ' + predict_schedule_result_path)
+		os.system(r'rm -f ' + sgh.sparkle_err_path)
+	else:
+		sl.add_output(predict_schedule_result_path, 'Predicted portfolio schedule')
+		sl.add_output(sgh.sparkle_err_path, 'Predicted portfolio schedule error output')
+
 	return list_predict_schedule
 
 

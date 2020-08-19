@@ -20,6 +20,7 @@ from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_run_status_help
 from sparkle_help import sparkle_generate_report_help
 from sparkle_help import sparkle_file_help as sfh
+from sparkle_help import sparkle_logging as sl
 
 def generate_task_run_status():
 	key_str = 'generate_report'
@@ -36,6 +37,9 @@ def delete_task_run_status():
 
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 
