@@ -13,7 +13,6 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
-from pathlib import Path
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -71,13 +70,15 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, 
 
 	#print r'c for solving instance ' + instance + r', ' + r'list_predict_schedule = ' + str(list_predict_schedule)
 
-	# If there is no error output remove the temporary files, otherwise log them for analysis
-	if Path(sgh.sparkle_err_path).stat().st_size == 0:
-		os.system(r'rm -f ' + predict_schedule_result_path)
-		os.system(r'rm -f ' + sgh.sparkle_err_path)
-	else:
+	# If there is error output log temporary files for analsysis, otherwise remove them
+	with open(sgh.sparkle_err_path) as file_content:
+		lines = file_content.read().splitlines()
+	if len(lines) > 1 or lines[0] != 'INFO:AutoFolio:Predict on Test':
 		sl.add_output(predict_schedule_result_path, 'Predicted portfolio schedule')
 		sl.add_output(sgh.sparkle_err_path, 'Predicted portfolio schedule error output')
+	else:
+		os.system(r'rm -f ' + predict_schedule_result_path)
+		os.system(r'rm -f ' + sgh.sparkle_err_path)
 
 	return list_predict_schedule
 
@@ -122,7 +123,6 @@ def compute_actual_selector_performance(actual_portfolio_selector_path, performa
 	return actual_selector_performance
 
 
-
 def compute_actual_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, feature_data_csv_path = sgh.feature_data_csv_path, cutoff_time_each_run = srs.cutoff_time_each_run):
 	print('c In this calculation, cutoff time for each run is ' + str(cutoff_time_each_run) + ' seconds')
 
@@ -132,7 +132,6 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	num_instances = performance_data_csv.get_row_size()
 	num_solvers = performance_data_csv.get_column_size()
-	
 	
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 	
@@ -187,11 +186,11 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		rank_list.append(solver_tuple)
 		print('c Marginal contribution (to Actual Selector) for solver ' + sfh.get_last_level_directory_name(solver) + ' is ' + str(marginal_contribution))
 		
-		
 	rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1], reverse=True)
 	
 	os.system(r'rm -f ' + actual_portfolio_selector_path)
 	return rank_list
+
 
 def print_rank_list(rank_list, mode):
 	my_string = r''
@@ -206,5 +205,4 @@ def print_rank_list(rank_list, mode):
 		print(r'c #' + str(i+1) + r': ' + sfh.get_last_level_directory_name(solver) + '\t Margi_Contr: ' + str(marginal_contribution))
 	print(r'c ******')
 	return
-
 
