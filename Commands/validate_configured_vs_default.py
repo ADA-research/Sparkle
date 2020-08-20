@@ -49,6 +49,9 @@ if __name__ == r'__main__':
 		print('c Error: No configuration results found for the given solver and training instance set.')
 		sys.exit(-1)
 
+	# Record optimised configuration
+	scsh.write_optimised_configuration(solver_name, instance_set_train_name)
+
 	# Copy runsolver to the solver directory
 	ori_smac_runsolver_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'runsolver'
 	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'

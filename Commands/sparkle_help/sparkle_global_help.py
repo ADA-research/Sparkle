@@ -48,11 +48,14 @@ sparkle_global_log_dir = 'Log/'
 global sparkle_global_log_path
 sparkle_global_log_path = sparkle_global_log_dir + sparkle_global_log_file
 
+global sparkle_tmp_path
+sparkle_tmp_path = 'Tmp/'
+
 global sparkle_log_path
-sparkle_log_path = r'Tmp/sparkle_log.out'
+sparkle_log_path = sparkle_tmp_path + r'sparkle_log.out'
 
 global sparkle_err_path
-sparkle_err_path = r'Tmp/sparkle_log.err'
+sparkle_err_path = sparkle_tmp_path + r'sparkle_log.err'
 
 global sparkle_system_log_path
 sparkle_system_log_path = r'Log/sparkle_system_log_path.txt'
