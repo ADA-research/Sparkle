@@ -16,8 +16,13 @@ import fcntl
 import argparse
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('record_file_path', metavar='record-file-path', type=str, help='path to the record file')
@@ -36,4 +41,4 @@ if __name__ == r'__main__':
 	print(r'c Loading record file ' + record_file_name + ' ...')
 	sparkle_record_help.extract_sparkle_record(record_file_name)
 	print(r'c Record file ' + record_file_name + r' loaded successfully!')
-	
+

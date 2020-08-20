@@ -22,12 +22,14 @@ from sparkle_help import sparkle_generate_report_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_logging as sl
 
+
 def generate_task_run_status():
 	key_str = 'generate_report'
 	task_run_status_path = r'Tmp/SBATCH_Report_Jobs/' + key_str + r'.statusinfo'
 	status_info_str = 'Status: Running\n'
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
 	return
+
 
 def delete_task_run_status():
 	key_str = 'generate_report'

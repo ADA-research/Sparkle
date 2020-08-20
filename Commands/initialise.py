@@ -21,6 +21,7 @@ from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
 
+
 if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)

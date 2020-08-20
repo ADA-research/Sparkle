@@ -23,8 +23,13 @@ from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('extractor_path', metavar='extractor-path', type=str, help='path to the feature extractor')

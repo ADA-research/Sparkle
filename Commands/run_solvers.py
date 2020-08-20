@@ -24,11 +24,13 @@ from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_job_parallel_help
+from sparkle_help import sparkle_logging as sl
 
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
 
-	
 	print('c Start running solvers ...')
 
 	my_flag_recompute = False

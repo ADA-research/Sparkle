@@ -22,9 +22,13 @@ from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_experiments_related_help as ser
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
-	
+	# Log command call
+	sl.log_command(sys.argv)
+
 	if len(sys.argv) != 2:
 		print(r'c Arguments error!')
 		print(r'c Usage: ' + sys.argv[0] + ' <instance or instance directory>')
@@ -41,5 +45,3 @@ if __name__ == r'__main__':
 	else:
 		print('c Input instance or instance directory error!')
 
-	
-	

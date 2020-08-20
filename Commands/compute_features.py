@@ -23,6 +23,8 @@ from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
+from sparkle_help import sparkle_logging as sl
+
 
 def compute_features_parallel(my_flag_recompute):
 	num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
@@ -38,7 +40,11 @@ def compute_features_parallel(my_flag_recompute):
 	
 	return
 
+
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--recompute', action='store_true', help='re-run feature extractor for instances with previously computed features')
