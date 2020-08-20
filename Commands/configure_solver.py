@@ -11,6 +11,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import argparse
+import sys
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
