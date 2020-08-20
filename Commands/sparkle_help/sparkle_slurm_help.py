@@ -185,11 +185,13 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 	return sbatch_script_name
 
-def submit_sbatch_script(sbatch_script_name):
-	sbatch_script_path = sgh.smac_dir + sbatch_script_name
+def submit_sbatch_script(sbatch_script_name,execdir=None):
+	if execdir is None:
+		execdir = sgh.smac_dir
+	sbatch_script_path = execdir + sbatch_script_name
 	os.system(r'chmod a+x ' + sbatch_script_path)
 	ori_path = os.getcwd()
-	command = 'cd ' + sgh.smac_dir + ' ; sbatch ' + sbatch_script_name + ' ; cd ' + ori_path
+	command = 'cd ' + execdir + ' ; sbatch ' + sbatch_script_name + ' ; cd ' + ori_path
 
 	output_list = os.popen(command).readlines()
 

@@ -38,6 +38,9 @@ sparkle_smac_settings_path = r'Settings/sparkle_smac_settings.txt'
 global sparkle_slurm_settings_path
 sparkle_slurm_settings_path = r'Settings/sparkle_slurm_settings.txt'
 
+global sparkle_ablation_settings_path
+sparkle_ablation_settings_path = r'Settings/sparkle_ablation_settings.txt'
+
 global sparkle_log_path
 sparkle_log_path = r'Tmp/sparkle_log.out'
 
@@ -81,6 +84,9 @@ sparkle_run_configured_wrapper = r'sparkle_run_configured_wrapper.sh'
 global sparkle_smac_wrapper
 sparkle_smac_wrapper = r'sparkle_smac_wrapper.py'
 
+
+global ablation_dir
+ablation_dir = r"Components/ablationAnalysis-0.9.3/"
 
 global feature_data_csv_path
 global performance_data_csv_path
