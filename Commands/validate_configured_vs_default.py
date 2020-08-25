@@ -50,7 +50,8 @@ if __name__ == r'__main__':
 		sys.exit(-1)
 
 	# Record optimised configuration
-	scsh.write_optimised_configuration(solver_name, instance_set_train_name)
+	scsh.write_optimised_configuration_str(solver_name, instance_set_train_name)
+	scsh.write_optimised_configuration_pcs(solver_name, instance_set_train_name)
 
 	# Copy runsolver to the solver directory
 	ori_smac_runsolver_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'runsolver'
