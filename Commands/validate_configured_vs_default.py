@@ -14,7 +14,7 @@ import os
 import sys
 import fcntl
 import argparse
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_run_status_help
@@ -54,8 +54,8 @@ if __name__ == r'__main__':
 	scsh.write_optimised_configuration_pcs(solver_name, instance_set_train_name)
 
 	# Copy runsolver to the solver directory
-	ori_smac_runsolver_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'runsolver'
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	ori_smac_runsolver_path = sgh.smac_dir + '/example_scenarios/' + 'runsolver'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 	command_line = 'cp ' + ori_smac_runsolver_path + ' ' + smac_solver_dir
 	os.system(command_line)
 
@@ -66,7 +66,7 @@ if __name__ == r'__main__':
 		instances_directory_test = r'Instances/' + instance_set_test_name
 		list_path = satih.get_list_all_path(instances_directory_test)
 		inst_dir_prefix = instances_directory_test
-		smac_inst_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
+		smac_inst_dir_prefix = sgh.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
 		satih.copy_instances_to_smac(list_path, inst_dir_prefix, smac_inst_dir_prefix, r'test')
 	
 		# Copy file listing test instances to smac solver directory
@@ -77,19 +77,20 @@ if __name__ == r'__main__':
 
 	# Generate and run sbatch script for validation runs
 	sbatch_script_name = ssh.generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name)
-	sbatch_script_path = sparkle_global_help.smac_dir + sbatch_script_name
-	ori_path = os.getcwd()
-	command = 'cd ' + sparkle_global_help.smac_dir + ' ; sbatch ' + sbatch_script_name + ' ; cd ' + ori_path
-	os.system(r'chmod a+x ' + sbatch_script_path)
-	os.system(command)
+	sbatch_script_dir = sgh.smac_dir
+	sbatch_script_path = sbatch_script_dir + sbatch_script_name
+	#ori_path = os.getcwd()
+	#command = 'cd ' + sgh.smac_dir + ' ; sbatch ' + sbatch_script_name + ' ; cd ' + ori_path
+	#os.system(r'chmod a+x ' + sbatch_script_path)
+	#os.system(command)
 
-	validate_jobid = ssh.submit_sbatch_script(sbatch_script_name)
+	validate_jobid = ssh.submit_sbatch_script(sbatch_script_name, sbatch_script_dir)
 
 	print("c Running validation in parallel. Waiting for Slurm job with id:")
 	print(validate_jobid)
 
 	# Write most recent run to file
-	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/' + sparkle_global_help.sparkle_last_test_file_name
+	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_test_file_name
 
 	fout = open(last_test_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')

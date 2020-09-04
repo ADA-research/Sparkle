@@ -15,12 +15,20 @@ import time
 import random
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_experiments_related_help as ser
-from sparkle_help import sparkle_job_help
+try:
+	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+	from sparkle_help import sparkle_experiments_related_help as ser
+	from sparkle_help import sparkle_job_help
+except ImportError:
+	import sparkle_global_help
+	import sparkle_basic_help
+	import sparkle_file_help as sfh
+	import sparkle_feature_data_csv_help as sfdcsv
+	import sparkle_experiments_related_help as ser
+	import sparkle_job_help
 
 
 def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path):
