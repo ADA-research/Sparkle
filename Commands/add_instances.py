@@ -26,7 +26,7 @@ from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
-from sparkle_help import sparkle_add_train_instances_help as satih
+# from sparkle_help import sparkle_add_train_instances_help as satih
 
 if __name__ == r'__main__':
 	# Define command line arguments

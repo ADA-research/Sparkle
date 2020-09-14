@@ -53,14 +53,13 @@ In this section, we present the experimental preliminaries, including the list o
 
 \subsection{Solvers}
 \label{sec:Solvers}
-There are 4 solver(s) submitted in \emph{Sparkle}, and the list of solvers are given as follows.
+There are 3 solver(s) submitted in \emph{Sparkle}, and the list of solvers are given as follows.
 
 
 \begin{enumerate} 
-\item \textbf{PbO-CCSAT-FAC}
-\item \textbf{PbO-CCSAT-SMT-QF-BV}
-\item \textbf{Lingeling\textunderscore wrapper\textunderscore sparkle}
-\item \textbf{PbO-CCSAT-PTN}
+\item \textbf{CSCCSat}
+\item \textbf{Lingeling}
+\item \textbf{MiniSAT}
 
 \end{enumerate}
 
@@ -70,7 +69,7 @@ There are 4 solver(s) submitted in \emph{Sparkle}, and the list of solvers are g
 There are 1 feature extractor(s) submitted in \emph{Sparkle}, and list of feature extractors are given as follow.
 
 \begin{enumerate}
-\item \textbf{SAT-features-competition2012\textunderscore sparkle}
+\item \textbf{SAT-features-competition2012\textunderscore revised\textunderscore without\textunderscore SatELite\textunderscore sparkle}
 
 \end{enumerate}
 
@@ -79,7 +78,7 @@ There are 1 feature extractor(s) submitted in \emph{Sparkle}, and list of featur
 There are 1 instance class(es) submitted in \emph{Sparkle}, and the list of instance classes are given as follows.
 
 \begin{enumerate}
-\item \textbf{PTN-7824\textunderscore Train}, number of instances: 11
+\item \textbf{SAT\textunderscore test}, number of instances: 10
 
 \end{enumerate}
 
@@ -106,18 +105,17 @@ In this section, the related experimental results in \emph{Sparkle} are presente
 The ranking list with regards to the penalised average runtime (PAR10) for solvers is given as follows.
 
 \begin{enumerate}
-\item \textbf{Solvers/PbO-CCSAT-PTN}, PAR10: 3.06272727273
-\item \textbf{Solvers/PbO-CCSAT-FAC}, PAR10: 93.27
-\item \textbf{Solvers/PbO-CCSAT-SMT-QF-BV}, PAR10: 139.378181818
-\item \textbf{Solvers/Lingeling\textunderscore wrapper\textunderscore sparkle}, PAR10: 500.0
+\item \textbf{Solvers/CSCCSat}, PAR10: 6.363
+\item \textbf{Solvers/MiniSAT}, PAR10: 104.906
+\item \textbf{Solvers/Lingeling}, PAR10: 105.559
 
 \end{enumerate}
 
 Also, PAR10 for the Virtual Best Solver \emph{VBS}, i.e., the perfect portfolio selector, and the actual portfolio selector in \emph{Sparkle} is given as follows.
 
 \begin{itemize}
-\item \textbf{\emph{VBS}}, PAR10: 3.04727272727
-\item \textbf{Actual Portfolio Selector in \emph{Sparkle}}, PAR10: 3.06272727273
+\item \textbf{\emph{VBS}}, PAR10: 5.64
+\item \textbf{Actual Portfolio Selector in \emph{Sparkle}}, PAR10: 6.363
 \end{itemize}
 
 \subsection{Marginal Contribution Ranking List}
@@ -128,20 +126,12 @@ Also, PAR10 for the Virtual Best Solver \emph{VBS}, i.e., the perfect portfolio 
 Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with regards to the \textbf{{\em VBS}} is given as follows.
 
 \begin{enumerate} 
-\item \textbf{PbO-CCSAT-PTN}, marginal contribution: 2.03823716493
-\item \textbf{PbO-CCSAT-SMT-QF-BV}, marginal contribution: 7.72376192639e-05
-\item \textbf{PbO-CCSAT-FAC}, marginal contribution: 0.0
-\item \textbf{Lingeling\textunderscore wrapper\textunderscore sparkle}, marginal contribution: 0.0
 
 \end{enumerate}
 
 Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with regards to the \textbf{actual portfolio selector in \emph{Sparkle}} is given as follows.
 
 \begin{enumerate} 
-\item \textbf{PbO-CCSAT-PTN}, marginal contribution: 2.04192639709
-\item \textbf{PbO-CCSAT-FAC}, marginal contribution: 0.0
-\item \textbf{PbO-CCSAT-SMT-QF-BV}, marginal contribution: 0.0
-\item \textbf{Lingeling\textunderscore wrapper\textunderscore sparkle}, marginal contribution: 0.0
 
 \end{enumerate}
 
