@@ -1,0 +1,5 @@
+Instances/MinVC_test/frb30-15-3.mis
+Instances/MinVC_test/frb30-15-1.mis
+Instances/MinVC_test/frb30-15-4.mis
+Instances/MinVC_test/frb30-15-2.mis
+Instances/MinVC_test/frb30-15-5.mis
