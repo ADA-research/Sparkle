@@ -23,7 +23,7 @@ Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/S
 Commands/configure_solver.py --solver Solvers/Yahsp3 --instance-set-train Instances/Depots_train_few/
 
 # Compare the configured solver and the default solver to each other
-Commands/test_configured_solver_and_default_solver.py --solver Solvers/Yahsp3 --instance-set-train Instances/Depots_train_few/ --instance-set-test Instances/Depots_test_few/
+Commands/validate_configured_vs_default.py --solver Solvers/Yahsp3 --instance-set-train Instances/Depots_train_few/ --instance-set-test Instances/Depots_test_few/
 
 # Generate an experimental report for the latest run of test_configured_solver_and_default_solver. It will be located at:
 # Configuration_Reports/<datetime>_<solver_name>Sparkle-latex-generator-for-configuration/Sparkle_Report_for_Configuration.pdf.

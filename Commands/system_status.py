@@ -17,9 +17,13 @@ from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_run_status_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
-	
+	# Log command call
+	sl.log_command(sys.argv)
+
 	my_flag_verbose = False
 	
 	len_argv = len(sys.argv)

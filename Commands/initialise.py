@@ -19,8 +19,13 @@ from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 
@@ -34,6 +39,7 @@ if __name__ == r'__main__':
 
 	if not os.path.exists(r'Tmp/'):
 		output = os.mkdir(r'Tmp/')
+		sl.add_output('Tmp/', 'Directory with temporary files')
 	
 	if not os.path.exists(r'Tmp/SBATCH_Extractor_Jobs/'):
 		output = os.mkdir(r'Tmp/SBATCH_Extractor_Jobs/')

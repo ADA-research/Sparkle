@@ -23,6 +23,8 @@ from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_csv_merge_help as scmh
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_job_parallel_help
+from sparkle_help import sparkle_logging as sl
+
 
 def run_solvers_parallel(my_flag_recompute, my_flag_also_construct_selector_and_report=False):
 	num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
@@ -62,9 +64,11 @@ def run_solvers_parallel(my_flag_recompute, my_flag_also_construct_selector_and_
 
 	return
 
-if __name__ == r'__main__':
 
-	
+if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	print('c Start running solvers ...')
 
 	my_flag_recompute = False

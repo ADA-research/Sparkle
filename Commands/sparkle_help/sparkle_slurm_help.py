@@ -14,7 +14,10 @@ import os
 import fcntl
 
 from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_configure_solver_help as scsh
+from sparkle_help import sparkle_experiments_related_help as serh
+
 
 def get_slurm_options_list(path_modifier=None):
 	if path_modifier is None:
@@ -111,7 +114,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	sbatch_script_path = sgh.smac_dir + sbatch_script_name
 
 	## Set sbatch options
-	max_jobs = 50
+	max_jobs = serh.num_job_in_parallel
 	num_jobs = 3
 	if num_jobs < max_jobs:
 		max_jobs = num_jobs
@@ -188,13 +191,55 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 	return sbatch_script_name
 
-def submit_sbatch_script(sbatch_script_name,execdir=None):
-	if execdir is None:
-		execdir = sgh.smac_dir
-	sbatch_script_path = execdir + sbatch_script_name
+def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path, list_jobs):
+	## Set script name and path
+	sbatch_script_name = 'computing_features_sbatch_shell_script_' + str(n_jobs) + '_' + sbh.get_time_pid_random_string() + r'.sh'
+	sbatch_script_dir = sgh.sparkle_tmp_path
+	sbatch_script_path = sbatch_script_dir + sbatch_script_name
+
+	## Set sbatch options
+	max_jobs = serh.num_job_in_parallel
+	num_jobs = n_jobs
+	if num_jobs < max_jobs:
+		max_jobs = num_jobs
+	job_name = '--job-name=' + sbatch_script_name
+	output = '--output=' + sbatch_script_path + '.txt'
+	error = '--error=' + sbatch_script_path + '.err'
+	array = '--array=0-' + str(num_jobs-1) + '%' + str(max_jobs)
+
+	sbatch_options_list = [job_name, output, error, array]
+	sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
+	sbatch_options_list.extend(get_slurm_sbatch_user_options_list()) # Get user options second to overrule defaults
+
+	# Create job list
+	job_params_list = []
+
+	for i in range(0, num_jobs):
+		instance_path = list_jobs[i][0]
+		extractor_path = list_jobs[i][1]
+		job_params = instance_path + ' ' + extractor_path + ' ' + feature_data_csv_path
+		job_params_list.append(job_params)
+
+	## Set srun options
+	srun_options_str = '-N1 -n1'
+	srun_options_str = srun_options_str + ' ' + get_slurm_srun_user_options_str()
+
+	## Create target call
+	target_call_str = 'Commands/sparkle_help/compute_features_core.py'
+
+	## Generate script
+	generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
+
+	return sbatch_script_name, sbatch_script_dir
+
+def submit_sbatch_script(sbatch_script_name,execution_dir=None):
+	if execution_dir is None:
+		execution_dir = sgh.smac_dir
+	sbatch_script_path = execution_dir + sbatch_script_name
 	os.system(r'chmod a+x ' + sbatch_script_path)
 	ori_path = os.getcwd()
-	command = 'cd ' + execdir + ' ; sbatch ' + sbatch_script_name + ' ; cd ' + ori_path
+	os.system('cd ' + execution_dir + ' ; chmod a+x ' + sbatch_script_path)
+	command = 'cd ' + execution_dir + ' ; sbatch ' + sbatch_script_path + ' ; cd ' + ori_path
 
 	output_list = os.popen(command).readlines()
 

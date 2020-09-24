@@ -19,6 +19,8 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_compute_marginal_contribution_help
+from sparkle_help import sparkle_logging as sl
+import compute_marginal_contribution as cmc
 
 def get_customCommands():
 	str_value = r''
@@ -91,41 +93,23 @@ def get_performanceComputationCutoffTime():
 	return str_value
 
 def get_solverPerfectRankingList():
+	rank_list = cmc.compute_perfect()
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py --perfect'
-	output = os.popen(command).readlines()
 
-	if output[0] == 'c Arguments error!\n':
-		print('c Failed to generate report, computing marginal contribution for the perfect case gave the following output:')
-		print(output)
-		sys.exit(1)
-
-	for myline in output:
-		mylist = myline.strip().split()
-		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Margi_Contr:':
-				solver = mylist[2]
-				marginal_contribution = mylist[4]
-				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
+	for i in range(0, len(rank_list)):
+		solver = rank_list[i][0]
+		marginal_contribution = str(rank_list[i][1])
+		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
 def get_solverActualRankingList():
+	rank_list = cmc.compute_actual()
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py --actual'
-	output = os.popen(command).readlines()
 
-	if output[0] == 'c Arguments error!\n':
-		print('c Failed to generate report, computing marginal contribution for the actual case gave the following output:')
-		print(output)
-		sys.exit(1)
-
-	for myline in output:
-		mylist = myline.strip().split()
-		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Margi_Contr:':
-				solver = mylist[2]
-				marginal_contribution = mylist[4]
-				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
+	for i in range(0, len(rank_list)):
+		solver = rank_list[i][0]
+		marginal_contribution = str(rank_list[i][1])
+		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
 def get_PAR10RankingList():
@@ -423,8 +407,10 @@ def generate_report():
 	os.system(compile_command)
 
 	os.system(compile_command)
-	
-	print(r'Report is placed at: ' + latex_directory_path + latex_report_filename + r'.pdf')
+
+	report_path = latex_directory_path + latex_report_filename + r'.pdf'
+	print(r'Report is placed at: ' + report_path)
+	sl.add_output(report_path, 'Sparkle portfolio selector report')
 	
 	return
 	

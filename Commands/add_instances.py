@@ -27,8 +27,13 @@ from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_add_train_instances_help as satih
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('instances_path', metavar='instances-path', type=str, help='path to the instance set')
