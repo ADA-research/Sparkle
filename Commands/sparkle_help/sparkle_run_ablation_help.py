@@ -27,7 +27,9 @@ from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_slurm_help as ssh
 
 def get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name):
-    ablation_scenario_dir = sgh.ablation_dir + "scenarios/{}_{}_{}/".format(solver_name,
+    instance_test_name = "_{}".format(instance_test_name) if instance_test_name is not None else ""
+
+    ablation_scenario_dir = sgh.ablation_dir + "scenarios/{}_{}{}/".format(solver_name,
                                                                             instance_train_name,
                                                                             instance_test_name)
     return ablation_scenario_dir
@@ -51,6 +53,7 @@ def print_ablation_help():
     print(os.system(call))
 
 def get_ablation_settings(path_modifier = None):
+    #TODO: Remove
     ablation_settings = {
         "deterministic": "0",
         "run_obj": "runtime",
@@ -82,7 +85,10 @@ def get_ablation_settings(path_modifier = None):
     return ablation_settings
 
 def generate_slurm_script(solver_name, instance_train_name, instance_test_name):
-    sbatch_script_name = "ablation_{}_{}_{}".format(solver_name, instance_train_name, instance_test_name)
+    if instance_test_name is not None:
+        sbatch_script_name = "ablation_{}_{}_{}".format(solver_name, instance_train_name, instance_test_name)
+    else:
+        sbatch_script_name = "ablation_{}_{}".format(solver_name, instance_train_name)
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name)
     sbatch_script_path = scenario_dir + sbatch_script_name + ".sh"
 
@@ -91,11 +97,11 @@ def generate_slurm_script(solver_name, instance_train_name, instance_test_name):
     error = '--error=' + scenario_dir + sbatch_script_name + '.err'
     cpus = '--cpus-per-task=' + get_ablation_settings()['cli-cores']
 
-    sbatch_options_list = [job_name, output, error,cpus]
+    sbatch_options_list = [job_name, output, error, cpus]
     sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
 
     srun_options_str = "-N1 -n1 -c{}".format(get_ablation_settings()['cli-cores'])
-    target_call_str = "{}/ablationAnalysis --optionFile {}ablation_config.txt".format(sgh.ablation_dir,scenario_dir)
+    target_call_str = "{}/ablationAnalysis --optionFile {}ablation_config.txt".format(sgh.ablation_dir, scenario_dir)
 
     job_params_list = []
     ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
@@ -108,6 +114,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
     (optimised_configuration_params, _, _) = scsh.get_optimised_configuration(solver_name, instance_train_name)
     ablation_settings = get_ablation_settings()
 
+    #TODO filter fixed params
 
     with open("{}/ablation_config.txt".format(ablation_scenario_dir), 'w') as fout:
         fout.write('algo = ./sparkle_smac_wrapper.py\n')
@@ -119,8 +126,8 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
             fout.write("{} = {}\n".format(variable,param))
 
         fout.write('paramfile = {}solver/PbO-CCSAT-params_test.pcs\n'.format(ablation_scenario_dir)) #Get from solver
-        fout.write('instance_file = instances_train.txt\n'.format(ablation_scenario_dir))
-        fout.write('test_instance_file = instances_test.txt\n'.format(ablation_scenario_dir))
+        fout.write('instance_file = instances_train.txt\n')
+        fout.write('test_instance_file = instances_test.txt\n')
         fout.write('sourceConfiguration=DEFAULT\n')
         fout.write('targetConfiguration="' + optimised_configuration_params + '"')
         fout.close()
@@ -128,7 +135,6 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
 
 
 def create_instance_file(instances_directory, ablation_scenario_dir, train_or_test):
-    file_suffix = r''
     if train_or_test == r'train':
         file_suffix = r'_train.txt'
     elif train_or_test == r'test':
