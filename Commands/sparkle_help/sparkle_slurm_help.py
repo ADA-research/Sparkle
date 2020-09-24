@@ -69,12 +69,13 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 	fout.write(r'###' + '\n')
 
 	# specify the array of parameters for each command
-	fout.write('params=( \\' + '\n')
+	if len(job_params_list) > 0:
+		fout.write('params=( \\' + '\n')
 
-	for i in range(0, len(job_params_list)):
-		fout.write('\'%s\' \\' % (job_params_list[i]) + '\n')
+		for i in range(0, len(job_params_list)):
+			fout.write('\'%s\' \\' % (job_params_list[i]) + '\n')
 
-	fout.write(r')' + '\n')
+		fout.write(r')' + '\n')
 
 	# if there is a list of output file paths, write the output parameter
 	if job_output_list is not None:
@@ -87,11 +88,13 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 
 	command_prefix = r'srun ' + srun_options_str + ' ' + target_call_str # specify the prefix of the executing command
 	# specify the complete command
-	command_line = command_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'
+	command_line = command_prefix
+	if len(job_params_list) > 0:
+		command_line += r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'
 
 	# add output file paths to the command if given
 	if job_output_list is not None:
-		command_line = command_line + r' > ${output[$SLURM_ARRAY_TASK_ID]}'
+		command_line += r' > ${output[$SLURM_ARRAY_TASK_ID]}'
 
 	fout.write(command_line + '\n') # write the complete command in this sbatch script
 	fout.close() # close the file of the sbatch script

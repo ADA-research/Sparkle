@@ -76,5 +76,18 @@ if __name__ == r'__main__':
     #Submit ablation run
     #TODO: Move to help
     sbatch_script_path = sah.generate_slurm_script(solver_name, instance_set_train_name, instance_set_test_name)
-    jobid =ssh.submit_sbatch_script(sbatch_script_path, "./")
+    jobid = ssh.submit_sbatch_script(sbatch_script_path, "./")
     print("Launched sbatch script '{}' with jobid {}".format(sbatch_script_path,jobid))
+
+    #Submit intermediate actions (copy path from log)
+    sbatch_script_path = sah.generate_callback_slurm_script(solver_name, instance_set_train_name, instance_set_test_name,
+                                                   dependency=jobid)
+    jobid = ssh.submit_sbatch_script(sbatch_script_path, "./")
+    print("Launched sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))
+
+    #Submit ablation validation run when nessesary
+    if instance_set_test is not None:
+        sbatch_script_path = sah.generate_validation_slurm_script(solver_name, instance_set_train_name, instance_set_test_name,
+                                                       dependency=jobid)
+        jobid = ssh.submit_sbatch_script(sbatch_script_path, "./")
+        print("Launched sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))
