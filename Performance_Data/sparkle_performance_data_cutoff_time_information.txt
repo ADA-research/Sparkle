@@ -1,2 +1,0 @@
-cutoff_time_each_run = 1
-par_num = 10

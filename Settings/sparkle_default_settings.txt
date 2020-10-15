@@ -1,4 +1,4 @@
 num_job_in_parallel = 1024
-cutoff_time_each_performance_computation = 1
+cutoff_time_each_performance_computation = 5
 penalty_number = 10
 cutoff_time_each_feature_computation = 90

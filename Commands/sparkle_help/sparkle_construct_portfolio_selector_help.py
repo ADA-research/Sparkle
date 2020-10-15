@@ -35,7 +35,8 @@ def get_cutoff_time_each_run_from_cutoff_time_information_txt_path(cutoff_time_i
 
 def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, cutoff_time_each_run):
 	python_executable = sgh.python_executable
-	objective_function = r'--objective runtime'
+	# objective_function = r'--objective runtime'
+	objective_function = r'--objective solution_quality'
 	if not os.path.exists(r'TMP/'): os.mkdir(r'TMP/')
 	
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)

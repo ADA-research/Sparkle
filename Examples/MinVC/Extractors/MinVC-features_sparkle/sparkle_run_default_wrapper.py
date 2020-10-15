@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import random
@@ -19,7 +21,6 @@ class MinVCInstanceFeature:
     def __init__(self, relative_path, minvc_instance_file_name):
         self.relative_path = relative_path
         self.minvc_instance_file_name = minvc_instance_file_name
-        self.minvc_instance_file_path = os.path.join(self.relative_path, self.minvc_instance_file_name)
         self.num_vertex, self.num_edge = self._get_num_vertex_and_num_edge()
         self.density = 2*self.num_edge / (self.num_vertex*(self.num_vertex-1))
         self.map_adj_matrix = self._get_map_adj_matrix()
@@ -48,7 +49,7 @@ class MinVCInstanceFeature:
     def _get_num_vertex_and_num_edge(self):
         num_vertex = 0
         num_edge = 0
-        fin = open(self.minvc_instance_file_path, 'r')
+        fin = open(self.minvc_instance_file_name, 'r')
         while True:
             myline = fin.readline()
             if not myline: break
@@ -62,7 +63,7 @@ class MinVCInstanceFeature:
     
     def _get_map_adj_matrix(self):
         map_adj_matrix = {}
-        fin = open(self.minvc_instance_file_path, 'r')
+        fin = open(self.minvc_instance_file_name, 'r')
         while True:
             myline = fin.readline()
             if not myline: break
