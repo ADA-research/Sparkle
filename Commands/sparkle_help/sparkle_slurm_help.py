@@ -235,10 +235,9 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
 def submit_sbatch_script(sbatch_script_name,execution_dir=None):
 	if execution_dir is None:
 		execution_dir = sgh.smac_dir
-	sbatch_script_path = execution_dir + sbatch_script_name
-	os.system(r'chmod a+x ' + sbatch_script_path)
+	sbatch_script_path = sbatch_script_name
 	ori_path = os.getcwd()
-	os.system('cd ' + execution_dir + ' ; chmod a+x ' + sbatch_script_path)
+	os.system('cd ' + execution_dir + ' ; chmod a+x ' + sbatch_script_path+ ' ; cd ' + ori_path)
 	command = 'cd ' + execution_dir + ' ; sbatch ' + sbatch_script_path + ' ; cd ' + ori_path
 
 	output_list = os.popen(command).readlines()
