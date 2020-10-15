@@ -16,8 +16,13 @@ import fcntl
 import argparse
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 
@@ -28,21 +33,21 @@ if __name__ == r'__main__':
 	sparkle_record_help.cleanup_current_sparkle_platform()
 	command_line = r'rm -rf Commands/sparkle_help/*.pyc'
 	os.system(command_line)
-	command_line = r'rm -rf TMP/*'
+	command_line = r'rm -rf Tmp/*'
 	os.system(command_line)
-	command_line = r'rm -rf TMP/SBATCH_Extractor_Jobs/*'
+	command_line = r'rm -rf Tmp/SBATCH_Extractor_Jobs/*'
 	os.system(command_line)
-	command_line = r'rm -rf TMP/SBATCH_Solver_Jobs/*'
+	command_line = r'rm -rf Tmp/SBATCH_Solver_Jobs/*'
 	os.system(command_line)
-	command_line = r'rm -rf TMP/SBATCH_Portfolio_Jobs/*'
+	command_line = r'rm -rf Tmp/SBATCH_Portfolio_Jobs/*'
 	os.system(command_line)
-	command_line = r'rm -rf TMP/SBATCH_Report_Jobs/*'
+	command_line = r'rm -rf Tmp/SBATCH_Report_Jobs/*'
 	os.system(command_line)
-	command_line = r'rm -rf Feature_Data/TMP/*'
+	command_line = r'rm -rf Feature_Data/Tmp/*'
 	os.system(command_line)
-	command_line = r'rm -rf Performance_Data/TMP/*'
+	command_line = r'rm -rf Performance_Data/Tmp/*'
 	os.system(command_line)
-	command_line = r'rm -rf LOG/*'
+	command_line = r'rm -rf Log/*'
 	os.system(command_line)
 	command_line = r'rm -f slurm-*'
 	os.system(command_line)

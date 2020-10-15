@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_csv_merge_help
@@ -22,41 +23,28 @@ from sparkle_help import sparkle_generate_report_for_test_help
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_generate_report_for_configuration_help as sgrfch
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
-	solver = ''
-	instance_set = ''
-	
-	flag_solver = False
-	flag_instance_set_train = False
-	flag_instance_set_test = False
-	
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == '--solver':
-			i += 1
-			solver = sys.argv[i]
-			flag_solver = True
-		elif sys.argv[i] == '--instance-set-train':
-			i += 1
-			instance_set_train = sys.argv[i]
-			flag_instance_set_train = True
-		elif sys.argv[i] == '--instance-set-test':
-			i += 1
-			instance_set_test = sys.argv[i]
-			flag_instance_set_test = True
-		else:
-			print('c Argument Error!')
-			print('c Usage: %s --solver <solver> [--instance-set-train <instance-set-train> [--instance-set-test <instance-set-test>]]' % sys.argv[0])
-			sys.exit(-1)
-		i += 1
-	
-	if not (flag_solver):
-		print('c Argument Error!')
-		print('c Usage: %s --solver <solver> [--instance-set-train <instance-set-train>] [--instance-set-test <instance-set-test>]' % sys.argv[0])
-		sys.exit(-1)
-	
+	# Log command call
+	sl.log_command(sys.argv)
+
+	# Load solver and test instances
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--solver', required=True, type=str, help='path to solver')
+	parser.add_argument('--instance-set-train', required=False, type=str, help='path to training instance set')
+	parser.add_argument('--instance-set-test', required=False, type=str, help='path to testing instance set')
+	parser.add_argument('--no-ablation', required=False, dest="flag_ablation", default=True, const=False, nargs="?", help='turn off reporting on ablation')
+	args = parser.parse_args()
+
+	solver = args.solver
+	instance_set_train = args.instance_set_train
+	instance_set_test = args.instance_set_test
+
+	flag_instance_set_train = False if instance_set_train == None else True
+	flag_instance_set_test = False if instance_set_test == None else True
+
 	solver_name = sfh.get_last_level_directory_name(solver)
 
 	# If no instance set(s) is/are given, try to retrieve them from the last run of validate_configured_vs_default
@@ -73,11 +61,11 @@ if __name__ == r'__main__':
 		instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 		sgrfch.check_results_exist(solver_name, instance_set_train_name, instance_set_test_name)
-		sgrfch.generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name)
+		sgrfch.generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name, ablation=args.flag_ablation)
 	elif flag_instance_set_train:
 		instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 		sgrfch.check_results_exist(solver_name, instance_set_train_name)
-		sgrfch.generate_report_for_configuration_train(solver_name, instance_set_train_name)
+		sgrfch.generate_report_for_configuration_train(solver_name, instance_set_train_name, ablation=args.flag_ablation)
 	else:
 		print('c Error: No results from validate_configured_vs_default found that can be used in the report!')
 		sys.exit(-1)

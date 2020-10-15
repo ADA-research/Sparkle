@@ -49,7 +49,7 @@ def csv_load_combine_update(feature_data_csv_path, second_sfdcsv):
 def feature_data_csv_merge():
 	try:
 		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
-		tmp_feature_data_csv_directory = r'Feature_Data/TMP/'
+		tmp_feature_data_csv_directory = r'Feature_Data/Tmp/'
 		csv_list = sfh.get_list_all_csv_filename(tmp_feature_data_csv_directory)
 	except:
 		return
@@ -70,7 +70,7 @@ def feature_data_csv_merge():
 def performance_data_csv_merge():
 	try:
 		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-		tmp_performance_data_result_directory = r'Performance_Data/TMP/'
+		tmp_performance_data_result_directory = r'Performance_Data/Tmp/'
 		result_list = sfh.get_list_all_result_filename(tmp_performance_data_result_directory)
 	except:
 		return

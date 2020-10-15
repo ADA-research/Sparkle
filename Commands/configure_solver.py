@@ -11,15 +11,21 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import argparse
+import sys
 import os
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_add_train_instances_help as satih
+from sparkle_help import sparkle_logging as sl
+
 from sparkle_help import sparkle_slurm_help as ssh
 #from validate_configured_vs_default import validate_configured_vs_default
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--validate', required=False, action="store_true", help='validate after configuration')
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')

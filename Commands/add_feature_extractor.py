@@ -23,8 +23,13 @@ from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('extractor_path', metavar='extractor-path', type=str, help='path to the feature extractor')
@@ -61,7 +66,7 @@ if __name__ == r'__main__':
 	
 	##pre-run the feature extractor on a testing instance, to obtain the feature names
 	instance_path = extractor_directory + r'/' + r'sparkle_test_instance.cnf'
-	result_path = r'TMP/' + sfh.get_last_level_directory_name(extractor_directory) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+	result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_directory) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 	command_line = extractor_directory + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_directory + r'/' + r' ' + instance_path + r' ' + result_path
 	os.system(command_line)
 

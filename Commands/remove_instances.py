@@ -22,8 +22,12 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
 
 	my_flag_nickname = False
 	nickname_str = r''
@@ -98,5 +102,4 @@ if __name__ == r'__main__':
 		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
 	print('c Removing instances in directory ' + instances_path + ' done!')
-
 

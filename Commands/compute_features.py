@@ -22,23 +22,26 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_csv_merge_help
-from sparkle_help import sparkle_experiments_related_help
+from sparkle_help import sparkle_logging as sl
+
 
 def compute_features_parallel(my_flag_recompute):
-	num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
-
 	if my_flag_recompute:
 		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 		feature_data_csv.clean_csv()
-		scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, num_job_in_parallel, 2)
+		scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, 2)
 	else: 
-		scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, num_job_in_parallel, 1)
+		scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, 1)
 
 	print('c Computing features in parallel ...')
 	
 	return
 
+
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--recompute', action='store_true', help='re-run feature extractor for instances with previously computed features')

@@ -62,7 +62,7 @@ if __name__ == r'__main__':
 	solver_name = r'Sparkle_Portfolio_Selector'
 	
 	key_str = solver_name + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
-	raw_result_path = test_case_directory_path + r'TMP/' + key_str + r'.rawres'
+	raw_result_path = test_case_directory_path + r'Tmp/' + key_str + r'.rawres'
 	
 	run_sparkle_portfolio_selector_on_instance(r'Commands/run_sparkle_portfolio_selector.py', instance_path, raw_result_path, ser.cutoff_time_each_run)
 	

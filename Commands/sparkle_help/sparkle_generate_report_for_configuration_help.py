@@ -20,6 +20,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_compute_marginal_contribution_help
 from sparkle_help import sparkle_configure_solver_help as scsh
+from sparkle_help import sparkle_run_ablation_help as sah
 
 def get_customCommands():
 	str_value = r''
@@ -231,6 +232,16 @@ def get_runtimeBool():
 
 	return runtime_bool
 
+def get_ablationBool(solver_name, instance_train_name, instance_test_name):
+	ablation_bool = ''
+
+	if sah.check_for_ablation(solver_name, instance_train_name, instance_test_name):
+		ablation_bool = r'\ablationtrue'
+	else:
+		ablation_bool = r'\ablationfalse'
+
+	return ablation_bool
+
 def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, smac_each_run_cutoff_time):
 	str_value = r''
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
@@ -356,8 +367,20 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 	#print('%d %d %d' % (configured_timeouts, default_timeouts, overlapping_timeouts))
 	return configured_timeouts, default_timeouts, overlapping_timeouts
 
+def get_ablation_table(solver_name, instance_set_train_name, instance_set_test_name=None):
+	results = sah.get_ablation_table(solver_name, instance_set_train_name, instance_set_test_name)
+	table_string = "\\begin{tabular}{rrrrr}"
+	for i,line in enumerate(results):
+		if i == 0:
+			line = ["\\textbf{{{0}}}".format(word) for word in line]
+		table_string += " & ".join(line) + " \\\\ "
+		if i == 0:
+			table_string += "\\hline "
+	table_string += "\\end{tabular}"
 
-def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name=None):
+	return table_string
+
+def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name=None, ablation=True):
 	full_dict = {}
 
 	if instance_set_test_name is not None:
@@ -376,8 +399,10 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 		str_value = r'\testtrue'
 	else:
 		str_value = r'\testfalse'
-
 	full_dict[variable] = str_value
+
+	if not ablation:
+		full_dict["ablationBool"] = r'\ablationfalse'
 
 	return full_dict
 
@@ -468,6 +493,12 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, conf
 	variable = r'timeoutsTrainOverlap'
 	common_dict[variable] = str(overlapping_timeouts_train)
 
+	variable = r'ablationBool'
+	common_dict[variable] = get_ablationBool(solver_name, instance_set_train_name,instance_set_train_name)
+
+	variable = r'ablationPath'
+	common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,instance_set_train_name)
+
 	return common_dict
 
 
@@ -514,6 +545,12 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 
 	variable = r'timeoutsTestOverlap'
 	test_dict[variable] = str(overlapping_timeouts_test)
+
+	variable = r'ablationBool'
+	test_dict[variable] = get_ablationBool(solver_name, instance_set_train_name, instance_set_test_name)
+
+	variable = r'ablationPath'
+	test_dict[variable] = get_ablation_table(solver_name, instance_set_train_name, instance_set_test_name)
 
 	return test_dict
 
@@ -600,20 +637,20 @@ def generate_report_for_configuration_prep(configuration_reports_directory):
 	return
 
 
-def generate_report_for_configuration_train(solver_name, instance_set_train_name):
+def generate_report_for_configuration_train(solver_name, instance_set_train_name, ablation=True):
 	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '/'
 	generate_report_for_configuration_prep(configuration_reports_directory)
-	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name)
+	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name, ablation=ablation)
 
 	generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value)
 
 	return
 
 
-def generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name):
+def generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name, ablation=True):
 	configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
 	generate_report_for_configuration_prep(configuration_reports_directory)
-	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name)
+	dict_variable_to_value = get_dict_variable_to_value(solver_name, instance_set_train_name, instance_set_test_name, ablation=ablation)
 
 	generate_report_for_configuration_common(configuration_reports_directory, dict_variable_to_value)
 

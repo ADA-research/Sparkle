@@ -46,10 +46,10 @@ if __name__ == r'__main__':
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	
 	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
-	raw_result_path = r'TMP/' + key_str + r'.rawres'
-	processed_result_path = r'Performance_Data/TMP/' + key_str + r'.result'
+	raw_result_path = r'Tmp/' + key_str + r'.rawres'
+	processed_result_path = r'Performance_Data/Tmp/' + key_str + r'.result'
 	
-	task_run_status_path = r'TMP/SBATCH_Solver_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Solver_Jobs/' + key_str + r'.statusinfo'
 	status_info_str = 'Status: Running\n' + 'Solver: %s\n' %(sfh.get_last_level_directory_name(solver_path)) + 'Instance: %s\n' % (sfh.get_last_level_directory_name(instance_path))
 	
 	start_time = time.time()

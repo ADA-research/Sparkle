@@ -103,9 +103,8 @@ def print_solution(raw_result_path):
 	return
 
 
-
 def call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time):
-	raw_result_path = r'TMP/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+	raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 	srs.run_solver_on_instance(solver_path, solver_path+r'/'+sgh.sparkle_run_default_wrapper, instance_path, raw_result_path, cutoff_time)
 	verify_string = srs.judge_correctness_raw_result(instance_path, raw_result_path)
 	
@@ -126,7 +125,7 @@ def call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_
 def call_sparkle_portfolio_selector_solve_instance(instance_path):
 	print('c Start running Sparkle portfolio selector on solving instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	python_executable = sgh.python_executable
-	if not os.path.exists(r'TMP/'): os.mkdir(r'TMP/')
+	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 	
 	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	list_feature_vector = []
@@ -135,7 +134,7 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path):
 	
 	for extractor_path in sgh.extractor_list:
 		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
-		result_path = r'TMP/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 		
 		list_feature_vector = list_feature_vector + get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
 		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!')
@@ -144,7 +143,7 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path):
 	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + sgh.sparkle_portfolio_selector_path + r' --feature_vec'
 	for value in list_feature_vector:
 		command_line = command_line + r' ' + str(value)
-	predict_schedule_result_path = r'TMP/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
+	predict_schedule_result_path = r'Tmp/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
 	command_line = command_line + r' 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
 	print('c Sparkle portfolio selector predicting ...')
 	os.system(command_line)
@@ -188,8 +187,8 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	fout.write(r'###' + '\n')
 	fout.write(r'###' + '\n')
 	fout.write(r'#SBATCH --job-name=' + job_name + '\n') # specify the job name in this sbatch script
-	fout.write(r'#SBATCH --output=' + test_case_directory_path + r'TMP/' + job_name + r'.txt' + '\n') # specify the file for normal output
-	fout.write(r'#SBATCH --error=' + test_case_directory_path + r'TMP/' + job_name + r'.err' + '\n') # specify the file for error output
+	fout.write(r'#SBATCH --output=' + test_case_directory_path + r'Tmp/' + job_name + r'.txt' + '\n') # specify the file for normal output
+	fout.write(r'#SBATCH --error=' + test_case_directory_path + r'Tmp/' + job_name + r'.err' + '\n') # specify the file for error output
 	fout.write(r'###' + '\n')
 	fout.write(r'#SBATCH --mem-per-cpu=3072' + '\n') #assigned 3GB memory for each cpu
 	fout.write(r'#SBATCH --array=0-' + str(num_job_total-1) + r'%' + str(num_job_in_parallel) + '\n') # using slurm job array and specify the number of jobs executing in parallel in this sbatch script
@@ -215,8 +214,6 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	return
 
 
-
-	
 def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_path):
 	if instance_directory_path[-1] != r'/':
 		instance_directory_path += r'/'
@@ -230,7 +227,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	if not os.path.exists(r'Test_Cases/'):
 		os.system(r'mkdir Test_Cases/')
 	os.system(r'mkdir -p ' + test_case_directory_path)
-	os.system(r'mkdir -p ' + test_case_directory_path + r'TMP/')
+	os.system(r'mkdir -p ' + test_case_directory_path + r'Tmp/')
 	
 	test_performance_data_csv_name = r'sparkle_performance_data.csv'
 	test_performance_data_csv_path = test_case_directory_path + test_performance_data_csv_name
@@ -250,7 +247,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	
 	i = 0
 	j = len(total_job_list)
-	sbatch_shell_script_path = test_case_directory_path + r'TMP/'+ r'running_sparkle_portfolio_selector_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+	sbatch_shell_script_path = test_case_directory_path + r'Tmp/'+ r'running_sparkle_portfolio_selector_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
 	generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell_script_path, ser.num_job_in_parallel, test_case_directory_path, test_performance_data_csv_path, total_job_list, i, j)
 	os.system(r'chmod a+x ' + sbatch_shell_script_path)
 	command_line = r'sbatch ' + sbatch_shell_script_path

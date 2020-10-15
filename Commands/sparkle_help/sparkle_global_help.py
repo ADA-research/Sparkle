@@ -38,14 +38,30 @@ sparkle_smac_settings_path = r'Settings/sparkle_smac_settings.txt'
 global sparkle_slurm_settings_path
 sparkle_slurm_settings_path = r'Settings/sparkle_slurm_settings.txt'
 
+# Log that keeps track of which commands were executed
+global sparkle_global_log_file
+sparkle_global_log_file = 'sparkle.log'
+
+global sparkle_global_log_dir
+sparkle_global_log_dir = 'Log/'
+
+global sparkle_global_log_path
+sparkle_global_log_path = sparkle_global_log_dir + sparkle_global_log_file
+
+global sparkle_tmp_path
+sparkle_tmp_path = 'Tmp/'
+
+global sparkle_ablation_settings_path
+sparkle_ablation_settings_path = r'Settings/sparkle_ablation_settings.txt'
+
 global sparkle_log_path
-sparkle_log_path = r'TMP/sparkle_log.out'
+sparkle_log_path = sparkle_tmp_path + r'sparkle_log.out'
 
 global sparkle_err_path
-sparkle_err_path = r'TMP/sparkle_log.err'
+sparkle_err_path = sparkle_tmp_path + r'sparkle_log.err'
 
 global sparkle_system_log_path
-sparkle_system_log_path = r'LOG/sparkle_system_log_path.txt'
+sparkle_system_log_path = r'Log/sparkle_system_log_path.txt'
 
 global sparkle_portfolio_selector_path
 sparkle_portfolio_selector_path = r'Sparkle_Portfolio_Selector/sparkle_portfolio_selector' + sparkle_special_string
@@ -81,6 +97,9 @@ sparkle_run_configured_wrapper = r'sparkle_run_configured_wrapper.sh'
 global sparkle_smac_wrapper
 sparkle_smac_wrapper = r'sparkle_smac_wrapper.py'
 
+
+global ablation_dir
+ablation_dir = r"Components/ablationAnalysis-0.9.3/"
 
 global feature_data_csv_path
 global performance_data_csv_path

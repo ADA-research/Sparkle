@@ -130,7 +130,7 @@ def get_verify_string(tmp_verify_result_path):
 
 def judge_correctness_raw_result(instance_path, raw_result_path):
 	SAT_verifier_path = sgh.SAT_verifier_path
-	tmp_verify_result_path = r'TMP/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.vryres'
+	tmp_verify_result_path = r'Tmp/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.vryres'
 	command_line = SAT_verifier_path + r' ' + instance_path + r' ' + raw_result_path + r' > ' + tmp_verify_result_path
 	print('c Run SAT verifier')
 	os.system(command_line)
@@ -176,7 +176,7 @@ def running_solvers(performance_data_csv_path, mode):
 				print(r'c')
 				continue
 			
-			raw_result_path = r'TMP/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+			raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 			
 			time.sleep(sleep_time_after_each_solver_run) #add at version 1.0.2
 			
