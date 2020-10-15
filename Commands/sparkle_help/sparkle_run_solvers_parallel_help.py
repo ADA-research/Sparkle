@@ -44,6 +44,7 @@ def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_paral
 	output = '--output=' + sbatch_script_path + '.txt'
 	error = '--error=' + sbatch_script_path + '.err'
 	array = '--array=0-' + str(total_job_num-1) + '%' + str(num_job_in_parallel)
+
 	sbatch_options_list = [job_name, output, error, array]
 	sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
 	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())

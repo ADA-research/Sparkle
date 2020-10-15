@@ -15,13 +15,22 @@ import time
 import random
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_experiments_related_help as ser
-from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_compute_features_help as scf
+try:
+	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+	from sparkle_help import sparkle_experiments_related_help as ser
+	from sparkle_help import sparkle_job_help
+	from sparkle_help import sparkle_compute_features_help as scf
+except ImportError:
+	import sparkle_global_help
+	import sparkle_basic_help
+	import sparkle_file_help as sfh
+	import sparkle_feature_data_csv_help as sfdcsv
+	import sparkle_experiments_related_help as ser
+	import sparkle_job_help
+	import sparkle_compute_features_help as scf
 
 def generate_computing_features_sbatch_shell_script(sbatch_shell_script_path, num_job_in_parallel, feature_data_csv_path, list_jobs, start_index, end_index):
 	####
