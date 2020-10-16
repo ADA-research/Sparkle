@@ -66,9 +66,9 @@ if __name__ == r'__main__':
 
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
-	group = parser.add_mutually_exclusive_group()
-	group.add_argument('perfect', action='store_true', help='compute the marginal contribution for the perfect selector')
-	group.add_argument('actual', action='store_true', help='compute the marginal contribution for the actual selector')
+	group = parser.add_mutually_exclusive_group(required=True)
+	group.add_argument('--perfect', action='store_true', help='compute the marginal contribution for the perfect selector')
+	group.add_argument('--actual', action='store_true', help='compute the marginal contribution for the actual selector')
 
 	# Process command line arguments
 	args = parser.parse_args()

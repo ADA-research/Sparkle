@@ -38,7 +38,8 @@ Commands/test/compute_features.sh
 # Test compute features parallel
 Commands/test/compute_features_parallel.sh
 
-# TODO: Test compute marginal contribution
+# Test compute marginal contribution
+Commands/test/compute_marginal_contribution.sh
 
 # Test configure solver
 Commands/test/configure_solver.sh
