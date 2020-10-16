@@ -1,5 +1,31 @@
-Licenses for components and examples packaged with Sparkle
+Sparkle
 =======
+
+
+# About
+Sparkle is a platform for the evaluation of empirical algorithms/solvers.
+
+
+# Version
+TBD
+
+
+# License
+TBD
+
+
+# Authors
+Chuan Luo
+Koen van der Blom
+Jeroen Rook
+Holger H. Hoos
+
+
+# Contact
+k.van.der.blom@liacs.leidenuniv.nl
+
+
+# Licenses for components and examples packaged with Sparkle
 
 
 AutoFolio license:
