@@ -37,14 +37,15 @@ runsolver license:
 smac license:
 	`Components/smac-v2.10.03-master-778/LICENSE-AGPLv3.txt`
 
+The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. It is located in:	`Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/` and license of components are available in:
+
+* `VARSAT/Main.C`
+* `lp_solve_4.0/LICENSE`
+
 
 Unclear:
 
 
-*	`Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
-	Component licenses below, but no general license statement?
-	`VARSAT/Main.C`
-	`lp_solve_4.0/LICENSE`
 * `Examples/Resources/Solvers/Lingeling/`
 * `Examples/Resources/Solvers/MiniSAT/`
 * `Examples/Resources/Solvers/VRP_SISRs/`
