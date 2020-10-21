@@ -15,9 +15,9 @@ TBD
 
 
 # Authors
-Chuan Luo
-Koen van der Blom
-Jeroen Rook
+Chuan Luo,
+Koen van der Blom,
+Jeroen Rook,
 Holger H. Hoos
 
 
