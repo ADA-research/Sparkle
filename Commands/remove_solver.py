@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -27,27 +28,19 @@ if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)
 
-	my_flag_nickname = False
-	nickname_str = r''
-	solver_path = r''
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('solver_path', metavar='solver-path', type=str, help='path to or nickname of the solver')
+	parser.add_argument('--nickname', action='store_true', help='if set to True solver_path is used as a nickname for the solver')
 
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'--nickname':
-			my_flag_nickname = True
-			i += 1
-			nickname_str = sys.argv[i]
-		else:
-			solver_path = sys.argv[i]
-		i += 1
+	# Process command line arguments
+	args = parser.parse_args()
+	solver_path = args.solver_path
 
-	if my_flag_nickname: solver_path = sparkle_global_help.solver_nickname_mapping[nickname_str]
-
+	if args.nickname:
+		solver_path = sparkle_global_help.solver_nickname_mapping[nickname_str]
 	if not os.path.exists(solver_path):
-		print(r'c Feature solver path ' + "\'" + solver_path + "\'" + r' does not exist!')
-		print(r'c Usage: ' + sys.argv[0] + r' [--nickname <nickname>]')
-		print(r'c Or usage: ' + sys.argv[0] + r' <solver_directory>')
+		print(r'c Solver path ' + "\'" + solver_path + "\'" + r' does not exist!')
 		sys.exit()
 
 	if solver_path[-1] == r'/': solver_path = solver_path[:-1]
