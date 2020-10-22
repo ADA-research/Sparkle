@@ -278,7 +278,6 @@ def remove_from_solver_list(filepath):
 	# Overwrite the file with stored lines
 	with open(sparkle_global_help.solver_list_path, 'w') as outfile:
 		for line in newlines:
-			print(line)
 			outfile.write(line)
 
 	# Remove solver from list

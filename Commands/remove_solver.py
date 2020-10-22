@@ -57,8 +57,6 @@ if __name__ == r'__main__':
 	solver_list = sparkle_global_help.solver_list
 	if bool(solver_list):
 		sfh.remove_from_solver_list(solver_path)
-		#solver_list.remove(solver_path)
-		#sfh.write_solver_list()
 	
 	solver_nickname_mapping = sparkle_global_help.solver_nickname_mapping
 	if bool(solver_nickname_mapping):
