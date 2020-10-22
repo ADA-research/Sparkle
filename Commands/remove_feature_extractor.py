@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -27,27 +28,19 @@ if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)
 
-	my_flag_nickname = False
-	nickname_str = r''
-	extractor_path = r''
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('extractor_path', metavar='extractor-path', type=str, help='path to or nickname of the feature extractor')
+	parser.add_argument('--nickname', action='store_true', help='if set to True extractor_path is used as a nickname for the feature extractor')
 
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'--nickname':
-			my_flag_nickname = True
-			i += 1
-			nickname_str = sys.argv[i]
-		else:
-			extractor_path = sys.argv[i]
-		i += 1
+	# Process command line arguments
+	args = parser.parse_args()
+	extractor_path = args.extractor_path
 
-	if my_flag_nickname: extractor_path = sparkle_global_help.extractor_nickname_mapping[nickname_str]
-
+	if args.nickname:
+		extractor_path = sparkle_global_help.extractor_nickname_mapping[extractor_path]
 	if not os.path.exists(extractor_path):
 		print(r'c Feature extractor path ' + "\'" + extractor_path + "\'" + r' does not exist!')
-		print(r'c Usage: ' + sys.argv[0] + r' [--nickname <nickname>]')
-		print(r'c Or usage: ' + sys.argv[0] + r' <feature_extractor_directory>')
 		sys.exit()
 
 	if extractor_path[-1] == r'/': extractor_path = extractor_path[:-1]
