@@ -56,6 +56,9 @@ Commands/test/load_record.sh
 # Test remove record
 Commands/test/remove_record.sh
 
+# Test remove feature extractor
+Commands/test/remove_feature_extractor.sh
+
 # Test validate configured vs default
 Commands/test/validate_configured_vs_default.sh
 
