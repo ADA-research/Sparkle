@@ -265,6 +265,28 @@ def write_solver_list():
 	fout.close()
 	return
 
+
+def remove_from_solver_list(filepath):
+	newlines = []
+
+	# Store lines that do not contain filepath
+	with open(sparkle_global_help.solver_list_path, 'r') as infile:
+		for line in infile:
+			if not filepath in line:
+				newlines.append(line)
+
+	# Overwrite the file with stored lines
+	with open(sparkle_global_help.solver_list_path, 'w') as outfile:
+		for line in newlines:
+			print(line)
+			outfile.write(line)
+
+	# Remove solver from list
+	sparkle_global_help.solver_list.remove(filepath)
+
+	return
+
+
 def write_solver_nickname_mapping():
 	fout = open(sparkle_global_help.solver_nickname_list_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
