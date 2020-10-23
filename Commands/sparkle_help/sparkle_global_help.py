@@ -25,6 +25,9 @@ sparkle_special_string = r'__@@SPARKLE@@__'
 global sparkle_missing_value
 sparkle_missing_value = -(sparkle_maximum_int-1)
 
+global sparkle_minimum_int
+sparkle_minimum_int = -(sparkle_maximum_int-2)
+
 global python_executable
 python_executable = r'python3'
 #python_executable = r'~/usr/python/python3.5.4/bin/python3'

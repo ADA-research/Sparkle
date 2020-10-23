@@ -13,7 +13,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
+import math
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -42,7 +43,7 @@ def get_numInstanceInInstanceSet(instance_set_name):
 
 def get_numInstanceInInstanceSet_smacDir(instance_set_name):
 	str_value = ''
-	instance_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_name + '/'
+	instance_dir = sgh.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_name + '/'
 	list_instance = sfh.get_list_all_filename(instance_dir)
 	str_value = str(len(list_instance))
 	return str_value
@@ -63,9 +64,9 @@ def get_PAR10_performance(results_file, cutoff):
 
 def get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_name, smac_each_run_cutoff_time):
 	str_value = ''
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
-	script_calc_par10_time_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	configured_results_dir = smac_solver_dir + 'results/' + sgh.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
+	script_calc_par10_time_path = sgh.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
 	command_line = script_calc_par10_time_path + ' ' + configured_results_dir + ' ' + str(smac_each_run_cutoff_time)
 	output = os.popen(command_line).readlines()
 	str_value = output[0].strip().split()[2]
@@ -73,9 +74,9 @@ def get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_
 
 def get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_name, smac_each_run_cutoff_time):
 	str_value = ''
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	default_results_dir = smac_solver_dir + 'results/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
-	script_calc_par10_time_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	default_results_dir = smac_solver_dir + 'results/' + sgh.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
+	script_calc_par10_time_path = sgh.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
 	command_line = script_calc_par10_time_path + ' ' + default_results_dir + ' ' + str(smac_each_run_cutoff_time)
 	output = os.popen(command_line).readlines()
 	str_value = output[0].strip().split()[2]
@@ -84,9 +85,9 @@ def get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_na
 
 def get_optimisedConfigurationTrainingPerformancePAR10(solver_name, instance_set_name, smac_each_run_cutoff_time):
 	str_value = ''
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
-	script_calc_par10_time_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	configured_results_dir = smac_solver_dir + 'results_train/' + sgh.sparkle_run_configured_wrapper + '_' + instance_set_name + '/'
+	script_calc_par10_time_path = sgh.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
 	command_line = script_calc_par10_time_path + ' ' + configured_results_dir + ' ' + str(smac_each_run_cutoff_time)
 	output = os.popen(command_line).readlines()
 	str_value = output[0].strip().split()[2]
@@ -94,9 +95,9 @@ def get_optimisedConfigurationTrainingPerformancePAR10(solver_name, instance_set
 
 def get_defaultConfigurationTrainingPerformancePAR10(solver_name, instance_set_name, smac_each_run_cutoff_time):
 	str_value = ''
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
-	default_results_dir = smac_solver_dir + 'results_train/' + sparkle_global_help.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
-	script_calc_par10_time_path = sparkle_global_help.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	default_results_dir = smac_solver_dir + 'results_train/' + sgh.sparkle_run_default_wrapper + '_' + instance_set_name + '/'
+	script_calc_par10_time_path = sgh.smac_dir + '/example_scenarios/' + 'calc_par10_time.py'
 	command_line = script_calc_par10_time_path + ' ' + default_results_dir + ' ' + str(smac_each_run_cutoff_time)
 	output = os.popen(command_line).readlines()
 	str_value = output[0].strip().split()[2]
@@ -235,7 +236,7 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	str_value = r''
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
@@ -246,17 +247,29 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	data_plot_configured_vs_default_on_test_instance_set_filename = 'data_' + solver_name + '_configured_vs_default_on_' + instance_set_test_name + '_test'
 	data_plot_configured_vs_default_on_test_instance_set_path = latex_directory_path + data_plot_configured_vs_default_on_test_instance_set_filename + '.dat'
 	fout = open(data_plot_configured_vs_default_on_test_instance_set_path, 'w+')
+	min_value = sgh.sparkle_maximum_int
+	max_value = sgh.sparkle_minimum_int
 	for instance in dict_instance_to_par10_configured:
 		configured_par10_value = dict_instance_to_par10_configured[instance]
 		default_par10_value = dict_instance_to_par10_default[instance]
 		fout.write(str(default_par10_value) + ' ' + str(configured_par10_value) + '\n')
+		if configured_par10_value < min_value: min_value = configured_par10_value
+		if default_par10_value < min_value: min_value = default_par10_value
+		if configured_par10_value > max_value: max_value = configured_par10_value
+		if default_par10_value > max_value: max_value = default_par10_value
 	fout.close()
 	
 	performance_measure = get_performance_measure()
-	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_test_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_test_instance_set_filename, performance_measure) 
-	
+	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_test_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_test_instance_set_filename, performance_measure)
+
+	# For QUALITY performance givethe desired bounds for the plot
+	if performance_measure != 'PAR10':
+		lower_bound = 10**math.floor(math.log10(min_value))
+		upper_bound = 10**math.ceil(math.log10(max_value))
+		gnuplot_command = gnuplot_command + ' %d %d' % (lower_bound, upper_bound)
+
 	os.system(gnuplot_command)
-	
+
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (data_plot_configured_vs_default_on_test_instance_set_filename)
 	return str_value
 
@@ -266,7 +279,7 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
 	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
@@ -277,15 +290,27 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	data_plot_configured_vs_default_on_train_instance_set_path = latex_directory_path + data_plot_configured_vs_default_on_train_instance_set_filename + '.dat'
 	fout = open(data_plot_configured_vs_default_on_train_instance_set_path, 'w+')
 	# Write PAR10 values for configured and default to file
+	min_value = sgh.sparkle_maximum_int
+	max_value = sgh.sparkle_minimum_int
 	for instance in dict_instance_to_par10_configured:
 		configured_par10_value = dict_instance_to_par10_configured[instance]
 		default_par10_value = dict_instance_to_par10_default[instance]
 		fout.write(str(default_par10_value) + ' ' + str(configured_par10_value) + '\n')
+		if configured_par10_value < min_value: min_value = configured_par10_value
+		if default_par10_value < min_value: min_value = default_par10_value
+		if configured_par10_value > max_value: max_value = configured_par10_value
+		if default_par10_value > max_value: max_value = default_par10_value
 	fout.close()
-	
+
 	performance_measure = get_performance_measure()
-	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_train_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_train_instance_set_filename, performance_measure) 
-	
+	gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_train_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_train_instance_set_filename, performance_measure)
+
+	# For QUALITY performance givethe desired bounds for the plot
+	if performance_measure != 'PAR10':
+		lower_bound = 10**math.floor(math.log10(min_value))
+		upper_bound = 10**math.ceil(math.log10(max_value))
+		gnuplot_command = gnuplot_command + ' %d %d' % (lower_bound, upper_bound)
+
 	os.system(gnuplot_command)
 	
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (data_plot_configured_vs_default_on_train_instance_set_filename)
@@ -300,7 +325,7 @@ def get_timeouts_test(solver_name, instance_set_name, cutoff):
 	# Retrieve instances and PAR10 values
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, cutoff)
@@ -333,7 +358,7 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_name)
 	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, cutoff)
@@ -437,7 +462,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, conf
 	variable = r'optimisedConfiguration'
 	common_dict[variable] = str(optimised_configuration_str)
 	
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 
 	variable = r'optimisedConfigurationTrainingPerformancePAR10'
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
@@ -485,7 +510,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 	
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
 
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 
 	variable = r'optimisedConfigurationTestingPerformancePAR10'
 	configured_results_test_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
@@ -521,13 +546,13 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 def check_results_exist(solver_name, instance_set_train_name, instance_set_test_name=None):
 	all_good = True
 	# Check train instance dir exists
-	instance_train_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_train_name + '/'
+	instance_train_dir = sgh.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_train_name + '/'
 
 	if not os.path.exists(instance_train_dir):
 		all_good = False
 
 	# Check train results exist: configured+default
-	smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 	configured_results_train_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/'
 	default_results_train_dir = smac_solver_dir + 'outdir_train_default/'
 
@@ -536,12 +561,12 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 
 	if instance_set_test_name is not None:
 		# Check test instance dir exists
-		instance_test_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_test_name + '/'
+		instance_test_dir = sgh.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_test_name + '/'
 		if not os.path.exists(instance_test_dir):
 			all_good = False
 
 		# Check test results exist: configured+default
-		smac_solver_dir = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/'
+		smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 		configured_results_test_dir = smac_solver_dir + 'outdir_test_configured/'
 		default_results_test_dir = smac_solver_dir + 'outdir_test_default/'
 
@@ -562,7 +587,7 @@ def get_most_recent_test_run(solver_name):
 	flag_instance_set_test = False
 
 	# Read most recent run from file
-	last_test_file_path = sparkle_global_help.smac_dir + '/example_scenarios/' + solver_name + '/' + sparkle_global_help.sparkle_last_test_file_name
+	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_test_file_name
 
 	try:
 		fin = open(last_test_file_path, 'r')
