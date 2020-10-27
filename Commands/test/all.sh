@@ -14,6 +14,9 @@
 # Activate environment
 source activate sparkle_test &> /dev/null
 
+# Test system status
+Commands/test/system_status.sh
+
 # Test initialise
 Commands/test/initialise.sh
 
