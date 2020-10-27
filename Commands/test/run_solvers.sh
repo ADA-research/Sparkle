@@ -34,3 +34,25 @@ else
 	echo $output
 fi
 
+# Run solvers parallel
+output=$(Commands/run_solvers.py --parallel | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] run_solvers --parallel test succeeded"
+else
+	echo "[failure] run_solvers --parallel test failed with output:"
+	echo $output
+fi
+
+# Run solvers recompute
+output=$(Commands/run_solvers.py --parallel --recompute | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] run_solvers --parallel --recompute test succeeded"
+else
+	echo "[failure] run_solvers --parallel --recompute test failed with output:"
+	echo $output
+fi
+
