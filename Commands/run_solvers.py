@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 import run_solvers_parallel as rsp
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help as srh
@@ -31,19 +32,17 @@ if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)
 
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--recompute', action='store_true', help='recompute the performance of all solvers on all instances')
+	parser.add_argument('--parallel', action='store_true', help='run the solver on multiple instances in parallel')
+
+	# Process command line arguments
+	args = parser.parse_args()
+	my_flag_recompute = args.recompute
+	my_flag_parallel = args.parallel
+
 	print('c Start running solvers ...')
-
-	my_flag_recompute = False
-	my_flag_parallel = False
-
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'--recompute':
-			my_flag_recompute = True
-		elif sys.argv[i] == r'--parallel':
-			my_flag_parallel = True
-		i += 1
 
 	if not srh.detect_current_sparkle_platform_exists():
 		print('c No Sparkle platform found; please first run the initialise command')
