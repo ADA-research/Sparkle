@@ -20,7 +20,7 @@ Commands/initialise.py > /dev/null
 # Save record
 output_true_partA="c Record file Records/My_Record"
 output_true_partB=".zip saved successfully!" # Somehow regex does not work when followed by this...
-output=$(Commands/save_record.py $record_file | tail -1)
+output=$(Commands/save_record.py | tail -1)
 
 if [[ $output =~ ['${output_true_partA}'a-z0-9:._-] ]];
 then
