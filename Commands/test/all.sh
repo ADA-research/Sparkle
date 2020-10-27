@@ -56,6 +56,9 @@ Commands/test/construct_sparkle_portfolio_selector.sh
 # Test generate report
 Commands/test/generate_report.sh
 
+# Test save record
+Commands/test/save_record.sh
+
 # Test load record
 Commands/test/load_record.sh
 
