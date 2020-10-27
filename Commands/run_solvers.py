@@ -15,7 +15,7 @@ import sys
 import fcntl
 import run_solvers_parallel as rsp
 from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
+from sparkle_help import sparkle_record_help as srh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -44,6 +44,10 @@ if __name__ == r'__main__':
 		elif sys.argv[i] == r'--parallel':
 			my_flag_parallel = True
 		i += 1
+
+	if not srh.detect_current_sparkle_platform_exists():
+		print('c No Sparkle platform found; please first run the initialise command')
+		exit()
 
 	if not my_flag_parallel:
 		if my_flag_recompute:
