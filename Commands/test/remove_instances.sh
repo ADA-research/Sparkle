@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Initialise
 Commands/initialise.py > /dev/null
 

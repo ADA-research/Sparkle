@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Prepare for test
 instances_path="Examples/Resources/Instances/SAT_test"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"

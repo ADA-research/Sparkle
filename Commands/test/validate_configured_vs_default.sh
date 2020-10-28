@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Settings
 slurm_settings_path="Settings/sparkle_slurm_settings.txt"
 slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"

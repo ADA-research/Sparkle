@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Initialise
 output_true="c New Sparkle platform initialised!"
 output=$(Commands/initialise.py | tail -1)

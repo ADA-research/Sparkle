@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Initialise
 record_file="Commands/test/test_files/test_record.zip"
 output_true="c Record file $record_file loaded successfully!"

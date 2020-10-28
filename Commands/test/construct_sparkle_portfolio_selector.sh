@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 ## Data
 feature_data_path="Feature_Data/sparkle_feature_data.csv"
 feature_data_tmp="Commands/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"

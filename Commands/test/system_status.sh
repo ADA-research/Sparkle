@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # System status
 output_true="c Current system status of Sparkle reported!"
 output=$(Commands/system_status.py | tail -1)

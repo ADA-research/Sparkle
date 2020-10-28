@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN/"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"

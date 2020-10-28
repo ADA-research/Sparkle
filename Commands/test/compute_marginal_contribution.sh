@@ -12,9 +12,6 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 ## Data
 performance_data_path="Performance_Data/sparkle_performance_data.csv"
 performance_data_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
