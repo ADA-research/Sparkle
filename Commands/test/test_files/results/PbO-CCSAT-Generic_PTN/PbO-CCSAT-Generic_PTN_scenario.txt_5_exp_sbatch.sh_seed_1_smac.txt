@@ -1,0 +1,32 @@
+[INFO ] Logging to: /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/log-run1.txt
+[INFO ] Version of SMAC is v2.10.03-master-778 (3ee628ef9bf2), running on OpenJDK 64-Bit Server VM (1.8.0_252) and Linux 3.10.0-1127.13.1.el7.x86_64 (amd64) 
+[INFO ] Call String: smac --scenario-file example_scenarios/PbO-CCSAT-Generic/PbO-CCSAT-Generic_PTN_scenario.txt --seed 1 --execdir /example_scenarios/PbO-CCSAT-Generic//1 
+[INFO ] Found previous run data in state output folder: /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario , renamed to: old-state-state-run1-1603898484145
+[INFO ] SMAC started at: Oct 28, 2020 4:21:24 PM. Minimizing penalized average runtime (PAR10).
+[INFO ] First incumbent: config 1 (internal ID: 0x000B), with penalized average runtime (PAR10): 10.0; estimate based on 1 runs.
+[INFO ] Sample call for new incumbent config 1 (internal ID: 0x000B): 
+cd /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/1; ./sparkle_smac_wrapper.py ../../instances/PTN/Ptn-7824-b11.cnf 0 1.0 2147483647 738507 -init_solution '1' -p_swt '0.3' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '0' -perform_pac '0' -q_swt '0.0' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '2' -sel_var_div '3' -threshold_swt '300'  
+[INFO ] 
+=======================================================================================
+SMAC has finished. Reason: wall-clock time limit (11.748 s) has been reached.   
+Total number of runs performed: 3, total configurations tried: 2.
+Total CPU time used: 7 s, total wallclock time used: 12 s.
+SMAC's final incumbent: config 1 (internal ID: 0x000B), with estimated penalized average runtime (PAR10): 10.0, based on 2 run(s) on 2 training instance(s).
+Sample call for this final incumbent:
+cd /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/1; ./sparkle_smac_wrapper.py ../../instances/PTN/Ptn-7824-b11.cnf 0 1.0 2147483647 738507 -init_solution '1' -p_swt '0.3' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '0' -perform_pac '0' -q_swt '0.0' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '2' -sel_var_div '3' -threshold_swt '300'
+=======================================================================================
+[INFO ] Now starting offline validation.
+[INFO ] Validation needs 12 algorithm runs to validate 1 configurations found, each on 12 problem instance seed pairs
+[INFO ] Validation start time: Oct 28, 2020 4:21:36 PM. Approximate worst-case end time: Oct 28, 2020 4:21:49 PM
+[INFO ] Validation Call Strings written to: /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/validationCallStrings-traj-run-1-walltime.csv
+[INFO ] Instance performance (for debug) written to: /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/validationPerformanceDebug-traj-run-1-walltime.csv
+[INFO ] Main validation results file written to: /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/validationResults-traj-run-1-walltime.csv
+[INFO ] Validation matrix of objectives for cross-product of configurations and (instance,seed) pairs written to: /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/validationObjectiveMatrix-traj-run-1-walltime.csv
+[INFO ] Validation matrix of complete run result line for cross-product of configurations and (instance,seed) pairs written to: /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/validationRunResultLineMatrix-traj-run-1-walltime.csv
+[INFO ] 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Estimated mean quality of final incumbent config 1 (internal ID: 0x000B) on test set: 10.0, based on 12 run(s) on 12 test instance(s).
+Sample call for the final incumbent:
+cd /home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/1; ./sparkle_smac_wrapper.py ../../instances/PTN/Ptn-7824-b11.cnf 0 1.0 2147483647 738507 -init_solution '1' -p_swt '0.3' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '0' -perform_pac '0' -q_swt '0.0' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '2' -sel_var_div '3' -threshold_swt '300' 
+Additional information about run 1 in:/home/blomkvander/git/sparkle/Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
