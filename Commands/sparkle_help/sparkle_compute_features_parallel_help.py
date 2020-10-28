@@ -102,6 +102,11 @@ def computing_features_parallel(feature_data_csv_path, mode):
 	####
 	# expand the job list
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)
+
+	if total_job_num < 1:
+		print('c No feature computation jobs to run; stopping execution! To recompute feature values use the --recompute flag.')
+		sys.exit()
+
 	print('c The number of total running jobs: ' + str(total_job_num))
 	total_job_list = sparkle_job_help.expand_total_job_from_list(list_feature_computation_job)
 	####
