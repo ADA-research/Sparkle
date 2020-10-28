@@ -466,7 +466,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, conf
 
 	variable = r'optimisedConfigurationTrainingPerformancePAR10'
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
-	configured_results_train_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
+	configured_results_train_file = 'validationObjectiveMatrix-traj-run-' + str(optimised_configuration_seed) + '-walltime.csv'
 	configured_results_train_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_train_file
 	str_value = get_PAR10_performance(configured_results_train_dir, smac_each_run_cutoff_time)
 	common_dict[variable] = str(str_value)
