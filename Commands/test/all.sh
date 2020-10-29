@@ -59,5 +59,5 @@ Commands/test/remove_record.sh
 Commands/test/validate_configured_vs_default.sh
 
 # Test ablation run configured vs default
-Commands/test/
+Commands/test/run_ablation.sh
 
