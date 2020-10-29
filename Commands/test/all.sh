@@ -80,3 +80,6 @@ Commands/test/remove_solver.sh
 # Test validate configured vs default
 Commands/test/validate_configured_vs_default.sh
 
+# Test ablation run configured vs default
+Commands/test/run_ablation.sh
+

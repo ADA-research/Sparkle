@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+MEMORY_INPUT=$ABLATION_MEMORY
+ABLATIONMEM=1024
+test "$MEMORY_INPUT" -ge 1 2>&- && ABLATIONMEM=$MEMORY_INPUT
+EXEC=ca.ubc.cs.beta.ablationanalysis.AblationAnalysisExecutor
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "Starting with $ABLATIONMEM MB of RAM"
+
+for f in $DIR/lib/*.jar
+do
+        jarconcat=$jarconcat:$f
+done
+for f in $DIR/*.jar
+do
+	jarconcat=$jarconcat:$f
+done
+
+jarconcat=${jarconcat:1}
+
+exec java -Xmx"$ABLATIONMEM"m -cp "$DIR/conf/:$jarconcat" $EXEC "$@"

@@ -28,6 +28,9 @@
 \newif\ifruntime
 @@runtimeBool@@
 
+\newif\ifablation
+@@ablationBool@@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
 %% Because html converters don't know tabularnewline
 \providecommand{\tabularnewline}{\\}
@@ -78,52 +81,12 @@ After the configuration process mentioned above, @@sparkle@@ obtained the optimi
 
 %The PAR10 value of the optimised configuration on the entire training set is @@optimisedConfigurationTrainingPerformancePAR10@@.
 
-\iftest
-\section{Comparison between Configured Version and Default Version on the Testing Instance Set}
-
-After specifying the optimised configuration, @@sparkle@@ would run the configured version of @@solver@@ and the default version of @@solver@@ on the testing instance set. During this phase, each version was performed one run per instance with a cutoff time of @@smacEachRunCutoffTime@@ seconds. The results are reported as follows.
-
-\begin{itemize}
-\item \textbf{@@solver@@ (configured)}, @@performanceMeasure@@: @@optimisedConfigurationTestingPerformancePAR10@@
-\item \textbf{@@solver@@ (default)}, @@performanceMeasure@@: @@defaultConfigurationTestingPerformancePAR10@@
-\end{itemize}
-
-The empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSetTest@@ is presented in Figure \ref{fig:configured_vs_default_test}.
-
-\begin{figure}[htbp]
-\noindent \begin{centering}
-@@figure-configured-vs-default-test@@
-% \includegraphics[width=0.8\textwidth]{fittedModels}
-\par\end{centering}
-
-\caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSetTest@@.}\label{fig:configured_vs_default_test}
-\end{figure}
-
-\ifruntime
-
-Table \ref{tbl:timeouts_test} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the testing set of @@instanceSetTest@@, as well as on how many instances both timed out.
-
-\begin{table}[htbp]
-\begin{center}
-\begin{tabular}{ccc}
-configured & default & overlap \\ \hline
-@@timeoutsTestConfigured@@ & @@timeoutsTestDefault@@ & @@timeoutsTestOverlap@@
-\end{tabular}
-\end{center}
-\caption{Number of time-outs for @@solver@@ (configured), @@solver@@ (default), and for how many instances both timed out on the testing set of @@instanceSetTest@@.}
-\label{tbl:timeouts_test}
-\end{table}
-
-\fi % End ifruntime
-
-\fi % End iftest
-
 \section{Comparison between Configured Version and Default Version on the Training Instance Set}
 In order to investigate the performance on the training instance set, @@sparkle@@ would run the configured version of @@solver@@ and the default version of @@solver@@ on the training instance set. During this phase, each version was performed one run per instance with a cutoff time of @@smacEachRunCutoffTime@@ seconds. The results are reported as follows.
 
 \begin{itemize}
-\item \textbf{@@solver@@ (configured)}, @@performanceMeasure@@: @@optimisedConfigurationTrainingPerformancePAR10@@
-\item \textbf{@@solver@@ (default)}, @@performanceMeasure@@: @@defaultConfigurationTrainingPerformancePAR10@@
+    \item \textbf{@@solver@@ (configured)}, @@performanceMeasure@@: @@optimisedConfigurationTrainingPerformancePAR10@@
+    \item \textbf{@@solver@@ (default)}, @@performanceMeasure@@: @@defaultConfigurationTrainingPerformancePAR10@@
 \end{itemize}
 
 The empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the training set of @@instanceSetTrain@@ is presented in Figure \ref{fig:configured_vs_default_train}.
@@ -152,6 +115,64 @@ configured & default & overlap \\ \hline
 \end{table}
 
 \fi % End ifruntime
+
+\iftest
+    \section{Comparison between Configured Version and Default Version on the Testing Instance Set}
+
+    After specifying the optimised configuration, @@sparkle@@ would run the configured version of @@solver@@ and the default version of @@solver@@ on the testing instance set. During this phase, each version was performed one run per instance with a cutoff time of @@smacEachRunCutoffTime@@ seconds. The results are reported as follows.
+
+    \begin{itemize}
+        \item \textbf{@@solver@@ (configured)}, @@performanceMeasure@@: @@optimisedConfigurationTestingPerformancePAR10@@
+        \item \textbf{@@solver@@ (default)}, @@performanceMeasure@@: @@defaultConfigurationTestingPerformancePAR10@@
+    \end{itemize}
+
+    The empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSetTest@@ is presented in Figure \ref{fig:configured_vs_default_test}.
+
+    \begin{figure}[htbp]
+        \noindent
+        \begin{centering}
+            @@figure-configured-vs-default-test@@
+            % \includegraphics[width=0.8\textwidth]{fittedModels}
+            \par
+        \end{centering}
+
+       \caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSetTest@@.}\label{fig:configured_vs_default_test}
+    \end{figure}
+
+    \ifruntime
+
+        Table \ref{tbl:timeouts_test} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the testing set of @@instanceSetTest@@, as well as on how many instances both timed out.
+
+        \begin{table}[htbp]
+            \begin{center}
+                \begin{tabular}{ccc}
+                    configured & default & overlap \\ \hline
+                    @@timeoutsTestConfigured@@ & @@timeoutsTestDefault@@ & @@timeoutsTestOverlap@@
+                \end{tabular}
+            \end{center}
+            \caption{Number of time-outs for @@solver@@ (configured), @@solver@@ (default), and for how many instances both timed out on the testing set of @@instanceSetTest@@.}
+            \label{tbl:timeouts_test}
+        \end{table}
+
+    \fi % End ifruntime
+
+\fi % End iftest
+
+\ifablation
+    \section{Parameter importance via Ablation}
+
+    Ablation analysis~\cite{FawcettHoos16} is performed between the @@solver@@ (configured) and @@solver@@ (default) to see which parameter changes between these two contributed most to the improved performance. The analysis resulted in the ablation path presented in Table~\ref{table:ablationpath}:
+
+    \begin{table}[htbp]
+        \begin{center}
+        \footnotesize
+            @@ablationPath@@
+        \end{center}
+        \caption{Ablation path from @@solver@@ (default) to @@solver@@ (configured) where parameters with higher importance are ranked higher.}
+        \label{table:ablationpath}
+    \end{table}
+
+\fi % End ablation
 
 \bibliographystyle{plain}
 \bibliography{Sparkle_Report_for_Configuration}

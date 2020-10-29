@@ -21,6 +21,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_slurm_help as ssh
 
 
 class InstanceType(Enum):
@@ -36,7 +37,7 @@ def get_smac_settings():
 	num_of_smac_run_str = ''
 	num_of_smac_run_in_parallel_str = ''
 	sparkle_smac_settings_path = sgh.sparkle_smac_settings_path
-	
+
 	fin = open(sparkle_smac_settings_path, 'r')
 	while True:
 		myline = fin.readline()
@@ -83,7 +84,7 @@ def handle_file_instance(solver_name, instance_set_name, file_postfix):
 	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + r'/'
 	smac_file_instance_path_ori = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + file_postfix
 	smac_file_instance_path_target = smac_solver_dir + instance_set_name + file_postfix
-	
+
 	command_line = r'cp ' + smac_file_instance_path_ori + r' ' + smac_file_instance_path_target
 	os.system(command_line)
 
@@ -94,7 +95,7 @@ def get_solver_deterministic(solver_name):
 	deterministic = ''
 	target_solver_path = 'Solvers/' + solver_name
 	solver_list_path = sgh.solver_list_path
-	
+
 	fin = open(solver_list_path, 'r+')
 	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 	while True:
@@ -124,14 +125,14 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	scenario_file_name = instance_set_name + '_' + inst_type + '_' + config_type + r'_scenario.txt'
 	smac_file_scenario = smac_solver_dir + scenario_file_name
-	
+
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
-	
+
 	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
 	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
 	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
 	smac_test_instance_file = smac_instance_file
-	
+
 	fout = open(smac_file_scenario, 'w+')
 	fout.write('algo = ./' + sgh.sparkle_smac_wrapper + '\n')
 	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
@@ -153,14 +154,14 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 def create_file_scenario_configuration(solver_name, instance_set_name):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario = smac_solver_dir + solver_name + r'_' + instance_set_name + r'_scenario.txt'
-	
+
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
-	
+
 	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
 	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_train_configuration/'
 	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_train.txt'
 	smac_test_instance_file = smac_instance_file
-	
+
 	fout = open(smac_file_scenario, 'w+')
 	fout.write('algo = ./' + sgh.sparkle_smac_wrapper + '\n')
 	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
@@ -247,10 +248,10 @@ def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 	[item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
 
 	command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + num_of_smac_run_str + ' ' + num_of_smac_run_in_parallel_str + ' ' + execdir + ' ; ' + 'cd ../../'
-	
+
 	#print(command_line)
 	os.system(command_line)
-	
+
 	smac_configure_sbatch_script_name = smac_file_scenario_name + '_' + num_of_smac_run_str + '_exp_sbatch.sh'
 
 	return smac_configure_sbatch_script_name
@@ -358,10 +359,10 @@ def get_optimised_configuration(solver_name, instance_set_name):
 	optimised_configuration_str = ''
 	optimised_configuration_performance = -1
 	optimised_configuration_seed = -1
-	
+
 	smac_results_dir = sgh.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/'
 	list_file_result_name = os.listdir(smac_results_dir)
-	
+
 	key_str_1 = 'Estimated mean quality of final incumbent config'
 
 	# Compare results of each run on the training set to find the best configuration among them
@@ -395,21 +396,86 @@ def get_optimised_configuration(solver_name, instance_set_name):
 					mylist_3 = myline_3.strip().split()
 					optimised_configuration_seed = mylist_3[4]
 		fin.close()
-	
+
 	return optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed
 
 
 def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
 	smac_solver_dir = sgh.smac_dir + r'/example_scenarios/' + solver_name + r'/'
 	sparkle_run_configured_wrapper_path = smac_solver_dir + sgh.sparkle_run_configured_wrapper
-	
+
 	fout = open(sparkle_run_configured_wrapper_path, 'w+')
 	fout.write(r'#!/bin/bash' + '\n')
 	fout.write(r'$1/' + sgh.sparkle_run_generic_wrapper + r' $1 $2 ' + optimised_configuration_str + '\n')
 	fout.close()
-	
+
 	command_line = 'chmod a+x ' + sparkle_run_configured_wrapper_path
 	os.system(command_line)
 
 	return
 
+def generate_validation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
+	command_line = 'echo $(pwd) $(date)\n'
+	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py'
+	command_line += ' --solver ' + solver
+	command_line += ' --instance-set-train ' + instance_set_train
+	if instance_set_test is not None:
+		command_line += ' --instance-set-test ' + instance_set_test
+
+	generate_generic_callback_slurm_script("validation", solver, instance_set_train, instance_set_test, dependency, command_line)
+
+def generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
+	command_line = 'echo $(pwd) $(date)\n'
+	command_line += 'srun -N1 -n1 ./Commands/run_ablation.py'
+	command_line += ' --solver ' + solver
+	command_line += ' --instance-set-train ' + instance_set_train
+	if instance_set_test is not None:
+		command_line += ' --instance-set-test ' + instance_set_test
+
+	generate_generic_callback_slurm_script("ablation", solver, instance_set_train, instance_set_test, dependency, command_line)
+
+
+def generate_generic_callback_slurm_script(name,solver, instance_set_train, instance_set_test, dependency, commands):
+	solver_name = sfh.get_last_level_directory_name(solver)
+	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
+	instance_set_test_name = None
+	if instance_set_test is not None:
+		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+
+	delayed_validation_file_name = "delayed_{}_{}_{}".format(name,solver_name, instance_set_train_name)
+	if instance_set_test is not None:
+		delayed_validation_file_name += "_{}".format(instance_set_test_name)
+	delayed_validation_file_name += "_script.sh"
+
+	sfh.checkout_directory(sgh.sparkle_tmp_path)
+	delayed_validation_file_path = sgh.sparkle_tmp_path + delayed_validation_file_name
+
+	job_name = '--job-name=' + delayed_validation_file_name
+	output = '--output=' + delayed_validation_file_path + '.txt'
+	error = '--error=' + delayed_validation_file_path + '.err'
+
+	sbatch_options_list = [job_name, output, error]
+	sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
+	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
+	sbatch_options_list.append("--dependency=afterany:{}".format(dependency))
+	sbatch_options_list.append("--nodes=1")
+	sbatch_options_list.append("--ntasks=1")
+
+	ori_path = os.getcwd()
+
+	command_line = commands
+
+	fout = open(delayed_validation_file_path, "w")
+	fout.write(r'#!/bin/bash' + '\n')  # use bash to execute this script
+	fout.write(r'###' + '\n')
+	fout.write(r'###' + '\n')
+	for sbatch_option in sbatch_options_list:
+		fout.write(r'#SBATCH ' + str(sbatch_option) + '\n')
+	fout.write(r'###' + '\n')
+	fout.write(command_line + "\n")
+	fout.close()
+
+	os.popen("chmod 755 " + delayed_validation_file_path)
+	os.popen("sbatch ./" + delayed_validation_file_path)
+	print("c Callback script to launch {} is placed at {}".format(name,delayed_validation_file_path))
+	print("c Once configuration is finished, {} will automatically start as a Slurm job.".format(name))

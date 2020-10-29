@@ -38,19 +38,15 @@ def get_slurm_options_list(path_modifier=None):
 
 	return slurm_options_list
 
-
 # Get a list of options to be used with sbatch calls
 def get_slurm_sbatch_user_options_list(path_modifier=None):
 	return get_slurm_options_list(path_modifier)
 
-
 def get_slurm_sbatch_default_options_list():
 	return ['--partition=graceADA']
 
-
 def get_slurm_srun_user_options_list(path_modifier=None):
 	return get_slurm_options_list(path_modifier)
-
 
 def get_slurm_srun_user_options_str(path_modifier=None):
 	srun_options_list = get_slurm_srun_user_options_list(path_modifier)
@@ -60,7 +56,6 @@ def get_slurm_srun_user_options_str(path_modifier=None):
 		srun_options_str += i + ' '
 
 	return srun_options_str
-
 
 def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str, job_output_list=None):
 	fout = open(sbatch_script_path, 'w+') # open the file of sbatch script
@@ -77,12 +72,13 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 	fout.write(r'###' + '\n')
 
 	# specify the array of parameters for each command
-	fout.write('params=( \\' + '\n')
+	if len(job_params_list) > 0:
+		fout.write('params=( \\' + '\n')
 
-	for i in range(0, len(job_params_list)):
-		fout.write('\'%s\' \\' % (job_params_list[i]) + '\n')
+		for i in range(0, len(job_params_list)):
+			fout.write('\'%s\' \\' % (job_params_list[i]) + '\n')
 
-	fout.write(r')' + '\n')
+		fout.write(r')' + '\n')
 
 	# if there is a list of output file paths, write the output parameter
 	if job_output_list is not None:
@@ -95,17 +91,18 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 
 	command_prefix = r'srun ' + srun_options_str + ' ' + target_call_str # specify the prefix of the executing command
 	# specify the complete command
-	command_line = command_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'
+	command_line = command_prefix
+	if len(job_params_list) > 0:
+		command_line += r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'
 
 	# add output file paths to the command if given
 	if job_output_list is not None:
-		command_line = command_line + r' > ${output[$SLURM_ARRAY_TASK_ID]}'
+		command_line += r' > ${output[$SLURM_ARRAY_TASK_ID]}'
 
 	fout.write(command_line + '\n') # write the complete command in this sbatch script
 	fout.close() # close the file of the sbatch script
 
 	return
-
 
 def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name=None):
 	## Set script name and path
@@ -194,7 +191,6 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 	return sbatch_script_name
 
-
 def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path, list_jobs):
 	## Set script name and path
 	sbatch_script_name = 'computing_features_sbatch_shell_script_' + str(n_jobs) + '_' + sbh.get_time_pid_random_string() + r'.sh'
@@ -236,12 +232,12 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
 
 	return sbatch_script_name, sbatch_script_dir
 
-
-def submit_sbatch_script(sbatch_script_path, execution_dir):
-	print('path', sbatch_script_path)
-	print('dir', execution_dir)
+def submit_sbatch_script(sbatch_script_name,execution_dir=None):
+	if execution_dir is None:
+		execution_dir = sgh.smac_dir
+	sbatch_script_path = sbatch_script_name
 	ori_path = os.getcwd()
-	os.system('cd ' + execution_dir + ' ; chmod a+x ' + sbatch_script_path)
+	os.system('cd ' + execution_dir + ' ; chmod a+x ' + sbatch_script_path+ ' ; cd ' + ori_path)
 	command = 'cd ' + execution_dir + ' ; sbatch ' + sbatch_script_path + ' ; cd ' + ori_path
 
 	output_list = os.popen(command).readlines()

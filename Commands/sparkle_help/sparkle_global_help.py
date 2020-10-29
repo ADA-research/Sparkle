@@ -54,6 +54,9 @@ sparkle_global_log_path = sparkle_global_log_dir + sparkle_global_log_file
 global sparkle_tmp_path
 sparkle_tmp_path = 'Tmp/'
 
+global sparkle_ablation_settings_path
+sparkle_ablation_settings_path = r'Settings/sparkle_ablation_settings.txt'
+
 global sparkle_log_path
 sparkle_log_path = sparkle_tmp_path + r'sparkle_log.out'
 
@@ -97,6 +100,9 @@ sparkle_run_configured_wrapper = r'sparkle_run_configured_wrapper.sh'
 global sparkle_smac_wrapper
 sparkle_smac_wrapper = r'sparkle_smac_wrapper.py'
 
+
+global ablation_dir
+ablation_dir = r"Components/ablationAnalysis-0.9.4/"
 
 global feature_data_csv_path
 global performance_data_csv_path
