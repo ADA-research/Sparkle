@@ -23,13 +23,17 @@ Commands/add_instances.py --run-solver-later --run-extractor-later $instances_pa
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
 
 # Configure solver
-output=$(Commands/configure_solver.py --validate --solver $solver_path --instance-set-train $instances_path | tail -1)
+output=$(Commands/configure_solver.py --validate --ablation --solver $solver_path --instance-set-train $instances_path | tail -1)
 
-if [[ $output =~ \. ]];
-then
-	echo "[success] configure_solver_validation test succeeded"
+validationcallbackfile=Tmp/delayed_validation_PbO-CCSAT-Generic_PTN_script.sh
+ablationcallbackfile=Tmp/delayed_ablation_PbO-CCSAT-Generic_PTN_script.sh
+
+
+if [ ! -f "$validationcallbackfile" ]; then
+    echo "[failure] $validationcallbackfile does not exist for configure_solver_validation."
+elif [ ! -f "$ablationcallbackfile" ]; then
+    echo "[failure] $ablationcallbackfile does not exist for configure_solver_validation."
 else              
 	echo "[failure] configure_solver_validation test failed with output:"
 	echo $output
 fi
-
