@@ -28,6 +28,7 @@ if __name__ == r'__main__':
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--validate', required=False, action="store_true", help='validate after configuration')
+	parser.add_argument('--ablation', required=False, action="store_true", help='run ablation after configuration')
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
 	parser.add_argument('--instance-set-test', required=False, type=str, help='path to testing instance set (only for validating)')
@@ -40,6 +41,10 @@ if __name__ == r'__main__':
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
+	instance_set_test_name = None
+	if instance_set_test is not None:
+		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+
 
 	# Copy instances to smac directory
 	instances_directory = r'Instances/' + instance_set_train_name
@@ -66,45 +71,7 @@ if __name__ == r'__main__':
 
 	# Set validation to wait until configuration is done
 	if(validate):
-		delayed_validation_file_name = "delayed_validation_{}_{}".format(solver_name, instance_set_train_name)
-		if instance_set_test is not None:
-			delayed_validation_file_name += "_{}".format(instance_set_test)
-		delayed_validation_file_name += "_script.sh"
+		scsh.generate_validation_callback_slurm_script(solver, instance_set_train, instance_set_test, configure_jobid)
 
-		delayed_validation_file_path = "TMP/"+delayed_validation_file_name
-
-		job_name = '--job-name=' + delayed_validation_file_name
-		output = '--output=' + delayed_validation_file_name + '.txt'
-		error = '--error=' + delayed_validation_file_name + '.err'
-
-		sbatch_options_list = [job_name, output, error]
-		sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
-		sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
-		sbatch_options_list.append("--dependency=afterany:{}".format(configure_jobid))
-		sbatch_options_list.append("--nodes=1")
-		sbatch_options_list.append("--ntasks=1")
-
-		ori_path = os.getcwd()
-
-		command_line = "cd .. \n"
-		command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py'
-		command_line += ' --solver ' + solver
-		command_line += ' --instance-set-train ' + instance_set_train
-		if instance_set_test is not None:
-			command_line += ' --instance-set-test ' + instance_set_test
-
-		fout = open(delayed_validation_file_path, "w")
-		fout.write(r'#!/bin/bash' + '\n')  # use bash to execute this script
-		fout.write(r'###' + '\n')
-		fout.write(r'###' + '\n')
-		for sbatch_option in sbatch_options_list:
-			fout.write(r'#SBATCH ' + str(sbatch_option) + '\n')
-		fout.write(r'###' + '\n')
-		fout.write(command_line + "\n")
-		fout.close()
-
-		os.popen("chmod 755 "+delayed_validation_file_path)
-		os.popen("cd TMP/; sbatch ./"+delayed_validation_file_name)
-
-		print("c Once configuration is finished validation will automaticaly start as a Slurm job.")
-
+	if(ablation):
+		scsh.generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, configure_jobid)
