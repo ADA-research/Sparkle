@@ -429,7 +429,7 @@ def generate_ablation_callback_slurm_script(solver, instance_set_train, instance
 	generate_generic_callback_slurm_script("ablation", solver, instance_set_train, instance_set_test, dependency, command_line)
 
 
-def generate_generic_callback_slurm_script(name,solver, instance_set_train, instance_set_test, dependency,commands):
+def generate_generic_callback_slurm_script(name,solver, instance_set_train, instance_set_test, dependency, commands):
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = None
