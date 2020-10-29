@@ -35,7 +35,7 @@ if __name__ == r'__main__':
 	args = parser.parse_args()
 
 	validate = args.validate
-	ablation = args.validate
+	ablation = args.ablation
 	solver = args.solver
 	instance_set_train = args.instance_set_train
 	instance_set_test = args.instance_set_test

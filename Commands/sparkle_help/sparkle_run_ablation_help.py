@@ -135,7 +135,7 @@ def generate_callback_slurm_script(solver_name, instance_train_name, instance_te
     sbatch_script_path = scenario_dir + sbatch_script_name + ".sh"
 
     callback_script_path = scenario_dir + "callback.sh"
-    log_path = "LOG/Ablation/" + sbatch_script_name + "/"
+    log_path = sgh.sparkle_global_log_dir + "Ablation/" + sbatch_script_name + "/"
 
     sfh.checkout_directory(log_path)
     with open(sgh.ablation_dir + callback_script_path, "w") as fh:
@@ -183,7 +183,7 @@ def generate_validation_callback_slurm_script(solver_name, instance_train_name, 
     sbatch_script_path = scenario_dir + sbatch_script_name + ".sh"
 
     callback_script_path = scenario_dir + "validation_callback.sh"
-    log_path = "LOG/Ablation/" + sbatch_script_name + "_validation/"
+    log_path = sgh.sparkle_global_log_dir + "Ablation/" + sbatch_script_name + "_validation/"
 
     sfh.checkout_directory(log_path)
     with open(sgh.ablation_dir + callback_script_path, "w") as fh:
@@ -261,7 +261,8 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
 
     with open(file_instance_path, "w") as fh:
         for instance in list_all_path:
-            fh.write("{}\n".format(os.path.join(relative_instance_directory,instance)))
+            instance_path = "{}{}\n".format(relative_instance_directory, instance)
+            fh.write(instance_path)
         fh.close()
 
 def check_for_ablation(solver_name, instance_train_name, instance_test_name):
@@ -292,5 +293,3 @@ def get_ablation_table(solver_name, instance_train_name, instance_test_name):
         fh.close()
 
     return results
-
-
