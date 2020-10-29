@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Settings
 slurm_settings_path="Settings/sparkle_slurm_settings.txt"
 slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
@@ -31,17 +28,16 @@ cp $smac_settings_test $smac_settings_path # Activate test settings
 instances_path_train="Examples/Resources/Instances/PTN/"
 instances_path_test="Examples/Resources/Instances/PTN2/"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
+configuration_results_path="Commands/test/test_files/results/"
+smac_path="Components/smac-v2.10.03-master-778/"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_train > /dev/null
 Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_test > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
-dependency=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
 
-# Wait for the dependency to be done
-while [[ $(squeue -j $dependency) =~ [0-9] ]]; do
-	sleep 1
-done
+# Copy configuration results to simulate the configuration command
+cp -r $configuration_results_path $smac_path
 
 # Test configured solver and default solver with both train and test sets
 output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test | tail -1)

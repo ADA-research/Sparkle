@@ -63,6 +63,11 @@ def computing_features(feature_data_csv_path, mode):
 	print('c Cutoff time for each run on computing features is set to ' + str(cutoff_time_each_extractor_run) + ' seconds')
 	
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)
+
+	if total_job_num < 1:
+		print('c No feature computation jobs to run; stopping execution! To recompute feature values use the --recompute flag.')
+		sys.exit()
+
 	current_job_num = 1
 	print('c The number of total running jobs: ' + str(total_job_num))
 	

@@ -15,6 +15,7 @@ import time
 import random
 import sys
 import fcntl
+from pathlib import Path
 from enum import Enum
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
@@ -241,7 +242,12 @@ def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 	smac_file_scenario_name = solver_name + r'_' + instance_set_name + r'_scenario.txt'
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
 
-	command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + 'results/' + solver_name + '_' + instance_set_name + '/' + ' ' + num_of_smac_run_str + ' ' + num_of_smac_run_in_parallel_str + ' ' + execdir + ' ; ' + 'cd ../../'
+	# Remove possible old results for this scenario
+	result_part = 'results/' + solver_name + '_' + instance_set_name + '/'
+	result_dir = sgh.smac_dir + result_part
+	[item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
+
+	command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + num_of_smac_run_str + ' ' + num_of_smac_run_in_parallel_str + ' ' + execdir + ' ; ' + 'cd ../../'
 
 	#print(command_line)
 	os.system(command_line)

@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -63,24 +64,16 @@ if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)
 
-	flag_argument_error = False
-	flag_compute_perfect = False
-	flag_compute_actual = False
-	
-	len_argv = len(sys.argv)
-	if len_argv != 2: flag_argument_error = True
-	else:
-		if sys.argv[1] == r'--perfect': flag_compute_perfect = True
-		elif sys.argv[1] == r'--actual': flag_compute_actual = True
-		else: flag_argument_error = True	
-	
-	if flag_compute_perfect == flag_compute_actual: flag_argument_error = True
-	
-	if flag_argument_error:
-		print(r'c Arguments error!')
-		print(r'c Usage: ' + sys.argv[0] + r' --perfect')
-		print(r'c Or usage: ' + sys.argv[0] + r' --actual')
-		sys.exit()
-	else:
-		compute_marginal_contribution(flag_compute_perfect, flag_compute_actual)
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	group = parser.add_mutually_exclusive_group(required=True)
+	group.add_argument('--perfect', action='store_true', help='compute the marginal contribution for the perfect selector')
+	group.add_argument('--actual', action='store_true', help='compute the marginal contribution for the actual selector')
+
+	# Process command line arguments
+	args = parser.parse_args()
+	flag_compute_perfect = args.perfect
+	flag_compute_actual = args.actual
+
+	compute_marginal_contribution(flag_compute_perfect, flag_compute_actual)
 
