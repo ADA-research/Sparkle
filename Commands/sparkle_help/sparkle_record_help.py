@@ -52,8 +52,8 @@ def save_current_sparkle_platform(my_record_filename):
 	if os.path.exists(r'Reference_Lists/'): my_flag_reference_lists = True
 	if os.path.exists(r'Sparkle_Portfolio_Selector/'): my_flag_sparkle_portfolio_selector = True
 	
-	if not os.path.exists(r'TMP/'):
-		output = os.mkdir(r'TMP/')
+	if not os.path.exists(r'Tmp/'):
+		output = os.mkdir(r'Tmp/')
 	
 	my_record_filename_exist = os.path.exists(my_record_filename)
 	if not my_record_filename_exist:
@@ -141,8 +141,8 @@ def extract_sparkle_record(my_record_filename):
 	my_suffix = sparkle_basic_help.get_time_pid_random_string()
 	my_tmp_directory = r'tmp_directory_' + my_suffix
 	
-	if not os.path.exists(r'TMP/'):
-		output = os.mkdir(r'TMP/')
+	if not os.path.exists(r'Tmp/'):
+		output = os.mkdir(r'Tmp/')
 	
 	os.system(r'unzip -o ' + my_record_filename + r' -d ' + my_tmp_directory + " >> " + record_log_file_path)
 	os.system(r'cp -r ' + my_tmp_directory + '/* ' + './')

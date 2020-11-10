@@ -11,8 +11,18 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
+# Settings
+slurm_settings_path="Settings/sparkle_slurm_settings.txt"
+slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
+slurm_settings_test="Commands/test/test_files/sparkle_slurm_settings.txt"
+mv $slurm_settings_path $slurm_settings_tmp # Save user settings
+cp $slurm_settings_test $slurm_settings_path # Activate test settings
+
+smac_settings_path="Settings/sparkle_smac_settings.txt"
+smac_settings_tmp="Settings/sparkle_smac_settings.tmp"
+smac_settings_test="Commands/test/test_files/sparkle_smac_settings.txt"
+mv $smac_settings_path $smac_settings_tmp # Save user settings
+cp $smac_settings_test $smac_settings_path # Activate test settings
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN/"
@@ -32,4 +42,8 @@ else
 	echo "[failure] configure_solver test failed with output:"
 	echo $output
 fi
+
+# Restore original settings
+mv $slurm_settings_tmp $slurm_settings_path
+mv $smac_settings_tmp $smac_settings_path
 

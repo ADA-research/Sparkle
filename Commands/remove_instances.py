@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
@@ -22,32 +23,28 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
 
-	my_flag_nickname = False
-	nickname_str = r''
-	instances_path = r''
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('instances_path', metavar='instances-path', type=str, help='path to or nickname of the instance set')
+	parser.add_argument('--nickname', action='store_true', help='if set to True instances_path is used as a nickname for the instance set')
 
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'--nickname':
-			my_flag_nickname = True
-			i += 1
-			nickname_str = sys.argv[i]
-		else:
-			instances_path = sys.argv[i]
-		i += 1
+	# Process command line arguments
+	args = parser.parse_args()
+	instances_path = args.instances_path
 
-	if my_flag_nickname: instances_path = r'Instances/' + nickname_str
-
+	if args.nickname:
+		instances_path = r'Instances/' + nickname_str
 	if not os.path.exists(instances_path):
 		print(r'c Instances path ' + "\'" + instances_path + "\'" + r' does not exist!')
-		print(r'c Usage: ' + sys.argv[0] + r' [--nickname <nickname>]')
-		print(r'c Or usage: ' + sys.argv[0] + r' <instances_path_directory>')
 		sys.exit()
-	
+
 	if instances_path[-1] == r'/': instances_path = instances_path[:-1]
 
 	print('c Start removing all instances in directory ' + instances_path + r' ...')
@@ -98,5 +95,4 @@ if __name__ == r'__main__':
 		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
 	
 	print('c Removing instances in directory ' + instances_path + ' done!')
-
 

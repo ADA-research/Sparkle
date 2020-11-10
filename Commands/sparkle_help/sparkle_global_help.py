@@ -25,6 +25,9 @@ sparkle_special_string = r'__@@SPARKLE@@__'
 global sparkle_missing_value
 sparkle_missing_value = -(sparkle_maximum_int-1)
 
+global sparkle_minimum_int
+sparkle_minimum_int = -(sparkle_maximum_int-2)
+
 global python_executable
 python_executable = r'python3'
 #python_executable = r'~/usr/python/python3.5.4/bin/python3'
@@ -38,14 +41,27 @@ sparkle_smac_settings_path = r'Settings/sparkle_smac_settings.txt'
 global sparkle_slurm_settings_path
 sparkle_slurm_settings_path = r'Settings/sparkle_slurm_settings.txt'
 
+# Log that keeps track of which commands were executed
+global sparkle_global_log_file
+sparkle_global_log_file = 'sparkle.log'
+
+global sparkle_global_log_dir
+sparkle_global_log_dir = 'Log/'
+
+global sparkle_global_log_path
+sparkle_global_log_path = sparkle_global_log_dir + sparkle_global_log_file
+
+global sparkle_tmp_path
+sparkle_tmp_path = 'Tmp/'
+
 global sparkle_log_path
-sparkle_log_path = r'TMP/sparkle_log.out'
+sparkle_log_path = sparkle_tmp_path + r'sparkle_log.out'
 
 global sparkle_err_path
-sparkle_err_path = r'TMP/sparkle_log.err'
+sparkle_err_path = sparkle_tmp_path + r'sparkle_log.err'
 
 global sparkle_system_log_path
-sparkle_system_log_path = r'LOG/sparkle_system_log_path.txt'
+sparkle_system_log_path = r'Log/sparkle_system_log_path.txt'
 
 global sparkle_portfolio_selector_path
 sparkle_portfolio_selector_path = r'Sparkle_Portfolio_Selector/sparkle_portfolio_selector' + sparkle_special_string

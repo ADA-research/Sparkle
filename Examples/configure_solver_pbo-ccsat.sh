@@ -26,7 +26,7 @@ Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/S
 Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instance-set-train Instances/PTN/
 
 # Compare the configured solver and the default solver to each other
-Commands/test_configured_solver_and_default_solver.py --solver Solvers/PbO-CCSAT-Generic --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/
+Commands/validate_configured_vs_default.py --solver Solvers/PbO-CCSAT-Generic --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/
 # Testing a single instance set is also possible
 
 

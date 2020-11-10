@@ -39,7 +39,7 @@ sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #the sle
 
 def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, performance_data_csv_path, total_job_list):
 	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
-	sbatch_script_path = r'TMP/' + sbatch_script_name
+	sbatch_script_path = r'Tmp/' + sbatch_script_name
 	job_name = '--job-name=' + sbatch_script_name
 	output = '--output=' + sbatch_script_path + '.txt'
 	error = '--error=' + sbatch_script_path + '.err'

@@ -23,7 +23,7 @@ from sparkle_help import sparkle_job_help
 def get_list_running_extractor_jobs():
 	list_running_extractor_jobs = []
 	
-	tmp_directory = r'TMP/SBATCH_Extractor_Jobs/'
+	tmp_directory = r'Tmp/SBATCH_Extractor_Jobs/'
 	list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
 	for statusinfo_filename in list_all_statusinfo_filename:
 		statusinfo_filepath = tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename)
@@ -77,7 +77,7 @@ def print_running_extractor_jobs(mode = 1):
 def get_list_running_solver_jobs():
 	list_running_solver_jobs = []
 	
-	tmp_directory = r'TMP/SBATCH_Solver_Jobs/'
+	tmp_directory = r'Tmp/SBATCH_Solver_Jobs/'
 	list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
 	for statusinfo_filename in list_all_statusinfo_filename:
 		statusinfo_filepath = tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename)
@@ -130,7 +130,7 @@ def print_running_solver_jobs(mode = 1):
 def print_running_portfolio_selector_jobs():
 	print(r'c')
 	key_str = 'construct_sparkle_portfolio_selector'
-	task_run_status_path = r'TMP/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
 	if os.path.isfile(task_run_status_path):
 		print(r'c Currently Sparkle portfolio selecotr is constructing ...')
 	else:
@@ -142,7 +142,7 @@ def print_running_portfolio_selector_jobs():
 def print_running_report_jobs():
 	print(r'c')
 	key_str = 'generate_report'
-	task_run_status_path = r'TMP/SBATCH_Report_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Report_Jobs/' + key_str + r'.statusinfo'
 	if os.path.isfile(task_run_status_path):
 		print(r'c Currently Sparkle report is generating ...')
 	else:

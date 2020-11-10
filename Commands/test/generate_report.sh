@@ -12,8 +12,28 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
+## Data
+feature_data_path="Feature_Data/sparkle_feature_data.csv"
+feature_data_tmp="Commands/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
+feature_data_test="Commands/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
+
+performance_data_path="Performance_Data/sparkle_performance_data.csv"
+performance_data_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
+performance_data_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
+
+cutoff_time_path="Performance_Data/sparkle_performance_data_cutoff_time_information.txt"
+cutoff_time_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data_cutoff_time_information.txt.tmp"
+cutoff_time_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector_cutoff_time.txt"
+
+selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
+selector_tmp="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
+selector_test="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
+
+# Save user data if any
+mv $feature_data_path $feature_data_tmp 2> /dev/null
+mv $performance_data_path $performance_data_tmp 2> /dev/null
+mv $cutoff_time_path $cutoff_time_tmp 2> /dev/null
+mv $selector_path $selector_tmp 2> /dev/null
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/SAT_test"
@@ -26,15 +46,12 @@ Commands/add_instances.py --run-solver-later --run-extractor-later $instances_pa
 Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
-Commands/compute_features.py > /dev/null
-dependency=$(Commands/run_solvers.py --parallel | tail -1)
 
-# Wait for the dependency to be done
-while [[ $(squeue -j $dependency) =~ [0-9] ]]; do
-	sleep 1
-done
-
-Commands/construct_sparkle_portfolio_selector.py > /dev/null
+# Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
+cp $feature_data_test $feature_data_path
+cp $performance_data_test $performance_data_path
+cp $cutoff_time_test $cutoff_time_path
+cp $selector_test $selector_path
 
 # Generate report
 output_true="c Report generated ..."
@@ -47,4 +64,11 @@ else
 	echo "[failure] generate_report test failed with output:"
 	echo $output
 fi
+
+# Restore original data if any
+mv $feature_data_tmp $feature_data_path 2> /dev/null
+mv $performance_data_tmp $performance_data_path 2> /dev/null
+mv $cutoff_time_tmp $cutoff_time_path 2> /dev/null
+# OR true to get success exit code even when no user data was stored in the tmp file
+mv $selector_tmp $selector_path 2> /dev/null || true
 

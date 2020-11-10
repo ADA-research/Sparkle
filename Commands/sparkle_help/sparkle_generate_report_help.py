@@ -19,6 +19,8 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_compute_marginal_contribution_help
+from sparkle_help import sparkle_logging as sl
+import compute_marginal_contribution as cmc
 
 def get_customCommands():
 	str_value = r''
@@ -91,29 +93,23 @@ def get_performanceComputationCutoffTime():
 	return str_value
 
 def get_solverPerfectRankingList():
+	rank_list = cmc.compute_perfect()
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py -perfect'
-	output = os.popen(command).readlines()
-	for myline in output:
-		mylist = myline.strip().split()
-		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Margi_Contr:':
-				solver = mylist[2]
-				marginal_contribution = mylist[4]
-				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
+
+	for i in range(0, len(rank_list)):
+		solver = rank_list[i][0]
+		marginal_contribution = str(rank_list[i][1])
+		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
 def get_solverActualRankingList():
+	rank_list = cmc.compute_actual()
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py -actual'
-	output = os.popen(command).readlines()
-	for myline in output:
-		mylist = myline.strip().split()
-		if len(mylist) == 5:
-			if mylist[0] == r'c' and mylist[1][0] == r'#' and mylist[3] == r'Margi_Contr:':
-				solver = mylist[2]
-				marginal_contribution = mylist[4]
-				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
+
+	for i in range(0, len(rank_list)):
+		solver = rank_list[i][0]
+		marginal_contribution = str(rank_list[i][1])
+		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
 def get_PAR10RankingList():
@@ -374,7 +370,7 @@ def generate_report():
 	latex_report_filename = r'Sparkle_Report'
 	dict_variable_to_value = get_dict_variable_to_value()
 	#print(dict_variable_to_value)
-	
+
 	latex_template_filepath = latex_directory_path + latex_template_filename
 	report_content = r''
 	fin = open(latex_template_filepath, 'r')
@@ -383,33 +379,38 @@ def generate_report():
 		if not myline: break
 		report_content += myline
 	fin.close()
-	
+
 	for variable_key, str_value in dict_variable_to_value.items():
 		 variable = r'@@' + variable_key + r'@@'
 		 if variable_key != r'figure-portfolio-selector-sparkle-vs-sbs' and variable_key != r'figure-portfolio-selector-sparkle-vs-vbs':
 		 	str_value = str_value.replace(r'_', r'\textunderscore ')
 		 report_content = report_content.replace(variable, str_value)
-	
+
 	#print(report_content)
 	
 	latex_report_filepath = latex_directory_path + latex_report_filename + r'.tex'
 	fout = open(latex_report_filepath, 'w+')
 	fout.write(report_content)
 	fout.close()
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
+
 	os.system(compile_command)
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux 1> /dev/null 2>&1'
 	os.system(compile_command)
+
 	os.system(compile_command)
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
+
 	os.system(compile_command)
-	
-	print(r'Report is placed at: ' + latex_directory_path + latex_report_filename + r'.pdf')
+
+	report_path = latex_directory_path + latex_report_filename + r'.pdf'
+	print(r'Report is placed at: ' + report_path)
+	sl.add_output(report_path, 'Sparkle portfolio selector report')
 	
 	return
 	

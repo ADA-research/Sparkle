@@ -19,9 +19,13 @@ from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_run_status_help
 from sparkle_help import sparkle_generate_report_help
 from sparkle_help import sparkle_generate_report_for_test_help 
+from sparkle_help import sparkle_logging as sl
+
 
 if __name__ == r'__main__':
-	
+	# Log command call
+	sl.log_command(sys.argv)
+
 	if len(sys.argv) != 2:
 		print(r'c Command error!')
 		print(r'c Usage: ' + sys.argv[0] + r' ' + r'<test_case_directory>')
@@ -32,5 +36,4 @@ if __name__ == r'__main__':
 	print(r'c Generating report for test ...')
 	sparkle_generate_report_for_test_help.generate_report_for_test(test_case_directory)
 	print(r'c Report for test generated ...')
-	
 

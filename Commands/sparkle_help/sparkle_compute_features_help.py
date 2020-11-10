@@ -62,6 +62,11 @@ def computing_features(feature_data_csv_path, mode):
 	print('c Cutoff time for each run on computing features is set to ' + str(cutoff_time_each_extractor_run) + ' seconds')
 	
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)
+
+	if total_job_num < 1:
+		print('c No feature computation jobs to run; stopping execution! To recompute feature values use the --recompute flag.')
+		sys.exit()
+
 	current_job_num = 1
 	print('c The number of total running jobs: ' + str(total_job_num))
 	
@@ -73,7 +78,7 @@ def computing_features(feature_data_csv_path, mode):
 		len_extractor_list = len(extractor_list)
 		for j in range(0, len_extractor_list):
 			extractor_path = extractor_list[j]
-			basic_part = r'TMP/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() 
+			basic_part = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() 
 			result_path = basic_part + r'.rawres'
 			err_path = basic_part + r'.err'
 			runsolver_watch_data_path = basic_part + r'.log'

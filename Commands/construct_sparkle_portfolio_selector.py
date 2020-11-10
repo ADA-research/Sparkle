@@ -25,6 +25,8 @@ from sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
 from sparkle_help import sparkle_job_help
 from sparkle_help import sparkle_csv_merge_help
+from sparkle_help import sparkle_logging as sl
+
 
 def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path):
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
@@ -44,21 +46,24 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
 
 def generate_task_run_status():
 	key_str = 'construct_sparkle_portfolio_selector'
-	task_run_status_path = r'TMP/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
 	status_info_str = 'Status: Running\n'
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
 	return
 
+
 def delete_task_run_status():
 	key_str = 'construct_sparkle_portfolio_selector'
-	task_run_status_path = r'TMP/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = r'Tmp/SBATCH_Portfolio_Jobs/' + key_str + r'.statusinfo'
 	os.system(r'rm -rf ' + task_run_status_path)
 	return
+
 
 def delete_log_files():
 	os.system(r'rm -f ' + sgh.sparkle_log_path)
 	os.system(r'rm -f ' + sgh.sparkle_err_path)
 	return
+
 
 def print_log_paths():
 	print('c Consider investigating the log files:')
@@ -68,6 +73,9 @@ def print_log_paths():
 
 
 if __name__ == r'__main__':
+	# Log command call
+	sl.log_command(sys.argv)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 
@@ -114,4 +122,4 @@ if __name__ == r'__main__':
 		print(r'c Marginal contribution (actual selector) computing done!')
 		delete_task_run_status()
 		delete_log_files()
-		
+

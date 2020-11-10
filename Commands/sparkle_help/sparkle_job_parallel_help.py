@@ -46,7 +46,7 @@ def get_dependency_list_str(dependency_jobid_list):
 
 def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, dependency_jobid_list):
 	sbatch_script_name = sfh.get_file_name(sbatch_shell_script_path)
-	sbatch_script_path = r'TMP/' + sbatch_script_name
+	sbatch_script_path = r'Tmp/' + sbatch_script_name
 	job_name = '--job-name=' + sbatch_script_name
 	output = '--output=' + sbatch_script_path + '.txt'
 	error = '--error=' + sbatch_script_path + '.err'
@@ -69,7 +69,7 @@ def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, depen
 
 
 def running_job_parallel(job_script, dependency_jobid_list):
-	sbatch_shell_script_path = r'TMP/' + r'running_job_parallel_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+	sbatch_shell_script_path = r'Tmp/' + r'running_job_parallel_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
 	generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, dependency_jobid_list)
 	os.system(r'chmod a+x ' + sbatch_shell_script_path)
 	command_line = r'sbatch ' + sbatch_shell_script_path

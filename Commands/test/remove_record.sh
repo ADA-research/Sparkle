@@ -11,9 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Activate environment
-source activate sparkle_test &> /dev/null
-
 # Remove record
 record_file_origin="Commands/test/test_files/test_record.zip"
 record_dir="Records/"
