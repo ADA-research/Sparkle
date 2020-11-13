@@ -460,6 +460,8 @@ def generate_generic_callback_slurm_script(name,solver, instance_set_train, inst
 	sbatch_options_list.append("--dependency=afterany:{}".format(dependency))
 	sbatch_options_list.append("--nodes=1")
 	sbatch_options_list.append("--ntasks=1")
+	sbatch_options_list.append("-c1")
+	sbatch_options_list.append("--mem-per-cpu=3000")
 
 	ori_path = os.getcwd()
 
