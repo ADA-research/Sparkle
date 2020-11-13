@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration debug="false">
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${OUTPUTDIR}/log-run${NUMRUN}.txt</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-WARN" class="ch.qos.logback.core.FileAppender">
+        <file>${OUTPUTDIR}/log-warn${NUMRUN}.txt</file>
+        <append>false</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-ERR" class="ch.qos.logback.core.FileAppender">
+        <file>${OUTPUTDIR}/log-err${NUMRUN}.txt</file>
+        <append>false</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="RUNHASHLOG" class="ch.qos.logback.core.FileAppender">
+        <filter class="ca.ubc.cs.beta.aeatk.misc.logback.RunHashMarkerFilter" />
+        <append>false</append>
+        <file>${OUTPUTDIR}/runhashes-run${NUMRUN}.txt</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ABLATIONLOG" class="ch.qos.logback.core.FileAppender">
+        <append>false</append>
+        <file>${OUTPUTDIR}/ablation-run${NUMRUN}.txt</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ABLATIONVALIDATIONLOG" class="ch.qos.logback.core.FileAppender">
+        <append>false</append>
+        <file>${OUTPUTDIR}/ablation-validation-run${NUMRUN}.txt</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="RACINGLOG" class="ch.qos.logback.core.FileAppender">
+        <append>false</append>
+        <file>${OUTPUTDIR}/racing-run${NUMRUN}.txt</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${STDOUT-LEVEL}</level>
+        </filter>
+        <encoder>
+            <pattern>[%-5level] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ca.ubc.cs.beta.ablationanalysis.AblationAnalysisExecutor" level="INFO">
+        <appender-ref ref="ABLATIONLOG" />
+    </logger>
+
+    <logger name="ca.ubc.cs.beta.ablationanalysis.AblationAnalysis" level="INFO">
+        <appender-ref ref="ABLATIONLOG" />
+    </logger>
+
+    <logger name="ca.ubc.cs.beta.ablationanalysis.AblationAnalysisValidatorExecutor" level="INFO">
+        <appender-ref ref="ABLATIONVALIDATIONLOG" />
+    </logger>
+
+    <logger name="ca.ubc.cs.beta.ablationanalysis.AblationAnalysisValidator" level="INFO">
+        <appender-ref ref="ABLATIONVALIDATIONLOG" />
+    </logger>
+
+    <logger name="ca.ubc.cs.beta.racing.FRace" level="INFO">
+        <appender-ref ref="RACINGLOG" />
+    </logger>
+
+    <root level="${ROOT-LEVEL}">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="FILE-WARN"/>
+        <appender-ref ref="RUNHASHLOG"/>
+        <appender-ref ref="FILE-ERR"/>
+    </root>
+</configuration>

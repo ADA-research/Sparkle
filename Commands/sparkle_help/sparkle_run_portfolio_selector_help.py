@@ -103,7 +103,6 @@ def print_solution(raw_result_path):
 	return
 
 
-
 def call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time):
 	raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 	srs.run_solver_on_instance(solver_path, solver_path+r'/'+sgh.sparkle_run_default_wrapper, instance_path, raw_result_path, cutoff_time)
@@ -220,8 +219,6 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	return
 
 
-
-	
 def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_path):
 	if instance_directory_path[-1] != r'/':
 		instance_directory_path += r'/'

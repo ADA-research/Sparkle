@@ -12,7 +12,6 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
-import fcntl
 import argparse
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_system_status_help
@@ -68,7 +67,7 @@ if __name__ == r'__main__':
 		inst_dir_prefix = instances_directory_test
 		smac_inst_dir_prefix = sgh.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory_test)
 		satih.copy_instances_to_smac(list_path, inst_dir_prefix, smac_inst_dir_prefix, r'test')
-	
+
 		# Copy file listing test instances to smac solver directory
 		scsh.handle_file_instance_test(solver_name, instance_set_test_name)
 

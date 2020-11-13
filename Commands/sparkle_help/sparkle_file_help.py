@@ -15,6 +15,7 @@ import sys
 import time
 import random
 import fcntl
+import pathlib
 
 try:
 	from sparkle_help import sparkle_global_help
@@ -29,6 +30,11 @@ def create_new_empty_file(filepath):
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.close()
 	return
+
+def checkout_directory(path, make_if_not_exist=True):
+	if (make_if_not_exist) and not os.path.exists(path):
+		pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+	return os.path.isdir(path)
 
 def get_current_directory_name(filepath):
 	if filepath[-1] == r'/': filepath = filepath[0:-1]

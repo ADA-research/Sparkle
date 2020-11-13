@@ -15,8 +15,8 @@
 Commands/initialise.py > /dev/null
 
 # Add instances
-instances_path="Examples/Resources/Instances/SAT_test"
-output_true="c Adding instances SAT_test done!"
+instances_path="Examples/Resources/Instances/PTN"
+output_true="c Adding instances PTN done!"
 output_true_b="c Removing Sparkle report Components/Sparkle-latex-generator/Sparkle_Report.pdf done!"
 output=$(Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path | tail -1)
 

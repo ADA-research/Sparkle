@@ -30,7 +30,7 @@ mv $performance_data_path $performance_data_tmp 2> /dev/null
 mv $cutoff_time_path $cutoff_time_tmp 2> /dev/null
 
 # Prepare for test
-instances_path="Examples/Resources/Instances/SAT_test"
+instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/Lingeling/"

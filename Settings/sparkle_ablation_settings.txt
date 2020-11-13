@@ -1,0 +1,9 @@
+--deterministic = 1
+--run_obj = runtime
+--overall_obj = mean10
+--cutoff_time = 600
+--cutoff_length = max
+--seed = 1234
+--cli-concurrent-execution = true
+--cli-cores = 32
+--useRacing = false

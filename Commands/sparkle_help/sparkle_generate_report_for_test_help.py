@@ -20,18 +20,22 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_compute_marginal_contribution_help
 
+
 def get_customCommands():
 	str_value = r''
 	return str_value
+
 
 def get_sparkle():
 	str_value = r'\emph{Sparkle}'
 	return str_value
 
+
 def get_numSolvers():
 	num_solvers = len(sparkle_global_help.solver_list)
 	str_value = str(num_solvers)
 	return str_value
+
 
 def get_solverList():
 	str_value = r''
@@ -41,10 +45,12 @@ def get_solverList():
 		str_value += r'\item \textbf{' + solver_name + r'}' + '\n'
 	return str_value
 
+
 def get_numFeatureExtractors():
 	num_feature_extractors = len(sparkle_global_help.extractor_list)
 	str_value = str(num_feature_extractors)
 	return str_value
+
 
 def get_featureExtractorList():
 	str_value = r''
@@ -53,6 +59,7 @@ def get_featureExtractorList():
 		extractor_name = sfh.get_file_name(extractor_path)
 		str_value += r'\item \textbf{' + extractor_name + r'}' + '\n'
 	return str_value
+
 
 def get_numInstanceClasses():
 	list_instance_class = []
@@ -63,6 +70,7 @@ def get_numInstanceClasses():
 			list_instance_class.append(instance_class)
 	str_value = str(len(list_instance_class))
 	return str_value
+
 
 def get_instanceClassList():
 	str_value = r''
@@ -82,17 +90,20 @@ def get_instanceClassList():
 	
 	return str_value
 
+
 def get_featureComputationCutoffTime():
 	str_value = str(sparkle_experiments_related_help.cutoff_time_total_extractor_run_on_one_instance)
 	return str_value
+
 
 def get_performanceComputationCutoffTime():
 	str_value = str(sparkle_experiments_related_help.cutoff_time_each_run)
 	return str_value
 
+
 def get_solverPerfectRankingList():
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py -perfect'
+	command = r'Commands/compute_marginal_contribution.py --perfect'
 	output = os.popen(command).readlines()
 	for myline in output:
 		mylist = myline.strip().split()
@@ -103,9 +114,10 @@ def get_solverPerfectRankingList():
 				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
+
 def get_solverActualRankingList():
 	str_value = r''
-	command = r'Commands/compute_marginal_contribution.py -actual'
+	command = r'Commands/compute_marginal_contribution.py --actual'
 	output = os.popen(command).readlines()
 	for myline in output:
 		mylist = myline.strip().split()
@@ -115,6 +127,7 @@ def get_solverActualRankingList():
 				marginal_contribution = mylist[4]
 				str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
+
 
 def get_PAR10RankingList():
 	str_value = r''
@@ -203,6 +216,7 @@ def get_dict_vbs_penalty_time_on_each_instance():
 	mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
 	return mydict
 
+
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 	mydict = {}
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
@@ -235,6 +249,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 		else:
 			mydict[instance] = sparkle_experiments_related_help.penalty_time
 	return mydict
+
 
 def get_figure_portfolio_selector_sparkle_vs_sbs():
 	str_value = r''
@@ -298,11 +313,13 @@ def get_testInstanceClass(test_case_directory):
 	str_value = r'\textbf{' + str_value + r'}'
 	return str_value
 
+
 def get_numInstanceInTestInstanceClass(test_case_directory):
 	str_value = r''
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(test_case_directory + r'sparkle_performance_data.csv')
 	str_value = str(len(performance_data_csv.list_rows()))
 	return str_value
+
 
 def get_testActualPAR10(test_case_directory):
 	str_value = r''
@@ -419,11 +436,12 @@ def generate_report_for_test(test_case_directory):
 	
 	template_latex_directory_path = r'Components/Sparkle-latex-generator-for-test/'
 	os.system(r'cp -r ' + template_latex_directory_path + r' ' + test_case_directory)
-	
+	print('copy latex temp done')
 	latex_directory_path = test_case_directory + r'Sparkle-latex-generator-for-test/'
 	latex_template_filename = r'template-Sparkle-for-test.tex'
 	latex_report_filename = r'Sparkle_Report_for_Test'
 	dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
+	print('after get dict')
 	#print(dict_variable_to_value)
 	
 	latex_template_filepath = latex_directory_path + latex_template_filename
@@ -440,18 +458,21 @@ def generate_report_for_test(test_case_directory):
 		 if variable_key != r'figure-portfolio-selector-sparkle-vs-sbs' and variable_key != r'figure-portfolio-selector-sparkle-vs-vbs':
 		 	str_value = str_value.replace(r'_', r'\textunderscore ')
 		 report_content = report_content.replace(variable, str_value)
-	
+
 	#print(report_content)
 	
 	latex_report_filepath = latex_directory_path + latex_report_filename + r'.tex'
 	fout = open(latex_report_filepath, 'w+')
 	fout.write(report_content)
 	fout.close()
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
+	print('command\n', compile_command)
+
+	sys.exit()
 	os.system(compile_command)
 	os.system(compile_command)
-	
+
 	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux 1> /dev/null 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
@@ -463,7 +484,4 @@ def generate_report_for_test(test_case_directory):
 	print(r'Report is placed at: ' + latex_directory_path + latex_report_filename + r'.pdf')
 	
 	return
-	
-
-
 

@@ -31,6 +31,9 @@ k.van.der.blom@liacs.leidenuniv.nl
 AutoFolio license:
 	`Components/AutoFolio-master/doc/license.rst`
 
+ablation analysis license:
+	`Components/ablationAnalysis-0.9.4/LICENSE.txt`
+
 runsolver license:
 	`Components/runsolver/src/LICENSE-GPL-3.0.txt`
 
