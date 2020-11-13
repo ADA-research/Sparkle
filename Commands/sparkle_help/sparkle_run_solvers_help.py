@@ -52,15 +52,50 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 		print('c Wrapper named \'' + sgh.sparkle_run_default_wrapper + '\' not found, stopping execution!')
 		sys.exit()
 
+	cmd_get_solver_call = solver_wrapper_path + ' --get-command ' + instance_path
+	cmd_solver_call = str(os.popen(cmd_get_solver_call))
+
 	runsolver_path = sgh.runsolver_path
-	runsolver_option = r'--use-pty'
-	runsolver_watch_data_path_option = '-w /dev/null'
+	runsolver_option = r'--timestamp --use-pty'
+	#cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_run)
+	cutoff_time_each_run_option = r'-C ' + str(cutoff_time)
+	runsolver_watch_data_path = raw_result_path.replace('.rawres', '.log')
+	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
 	raw_result_path_option = r'-o ' + raw_result_path
 
-	command_line = runsolver_path + ' ' + runsolver_option + ' ' + runsolver_watch_data_path_option + ' ' + raw_result_path_option + ' ' + solver_wrapper_path + ' ' + relative_path + ' ' + instance_path + ' ' + str(cutoff_time)
+	command_line = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + raw_result_path_option + r' ' + cmd_solver_call
 
+	print('cmdline: ', command_line)
+
+	try:
+		os.system(command_line)
+	except:
+		if not os.path.exists(raw_result_path):
+			sfh.create_new_empty_file(raw_result_path)
+
+	command_line = 'rm -f ' + runsolver_watch_data_path
 	os.system(command_line)
+	print('return')
 	return
+
+#def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, cutoff_time = cutoff_time_each_run):
+#	if not Path(solver_wrapper_path).is_file():
+#		print('c Wrapper named \'' + sgh.sparkle_run_default_wrapper + '\' not found, stopping execution!')
+#		sys.exit()
+#
+#	runsolver_path = sgh.runsolver_path
+#	runsolver_option = r'--use-pty'
+#	runsolver_watch_data_path_option = '-w /dev/null'
+#	raw_result_path_option = r'-o ' + raw_result_path
+#
+#	command_line = runsolver_path + ' ' + runsolver_option + ' ' + runsolver_watch_data_path_option + ' ' + raw_result_path_option + ' ' + solver_wrapper_path + ' ' + relative_path + ' ' + instance_path + ' ' + str(cutoff_time)
+#
+#	print('cmdline: ', command_line)
+#
+#	os.system(command_line)
+#	print('return')
+#	return
+
 
 def get_solution_quality_and_runtime(raw_result_path):
 	fin = open(raw_result_path)
@@ -95,7 +130,7 @@ def running_solvers(performance_data_csv_path, mode):
 		for j in range(0, len_solver_list):
 			solver_path = solver_list[j]
 			
-			raw_result_path = r'TMP/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+			raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 			
 			time.sleep(sleep_time_after_each_solver_run) #add at version 1.0.2
 			
@@ -323,5 +358,3 @@ def running_solvers(performance_data_csv_path, mode):
 	
 # 	return
 
-
-	
