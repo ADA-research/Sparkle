@@ -47,35 +47,46 @@ penalty_time = ser.penalty_time
 sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #add at version 1.0.2
 
 
-def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, cutoff_time = cutoff_time_each_run):
+def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_log_path, cutoff_time = cutoff_time_each_run):
 	if not Path(solver_wrapper_path).is_file():
-		print('c Wrapper named \'' + sgh.sparkle_run_default_wrapper + '\' not found, stopping execution!')
+		print('c ERROR: Wrapper named \'' + solver_wrapper_path + '\' not found, stopping execution!')
 		sys.exit()
 
-	cmd_get_solver_call = solver_wrapper_path + ' --get-command ' + instance_path
-	cmd_solver_call = str(os.popen(cmd_get_solver_call))
+	# Get the solver call command from the wrapper
+	cmd_solver_call = ''
+	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path
+	solver_call_rawresult = os.popen(cmd_get_solver_call)
+	solver_call_result = solver_call_rawresult.readlines()[0].strip()
 
+	if len(solver_call_result) > 0:
+		cmd_solver_call = solver_call_result
+	else:
+		# TODO: Add instructions for the user that might fix the issue?
+		print('c ERROR: Failed to get valid solver call command from wrapper at \'' + solver_wrapper_path + '\' stopping execution!')
+		sys.exit()
+
+	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
 	runsolver_option = r'--timestamp --use-pty'
-	#cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_run)
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time)
-	runsolver_watch_data_path = raw_result_path.replace('.rawres', '.log')
+	runsolver_watch_data_path = runsolver_log_path
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
 	raw_result_path_option = r'-o ' + raw_result_path
 
-	command_line = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + raw_result_path_option + r' ' + cmd_solver_call
+	# Finalise command
+	command_line = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + raw_result_path_option + r' ' + relative_path + '/' + cmd_solver_call
 
-	print('cmdline: ', command_line)
-
+	# Execute command
 	try:
 		os.system(command_line)
 	except:
+		# TODO: Replace by error? Why create an empty file if the command fails?
 		if not os.path.exists(raw_result_path):
 			sfh.create_new_empty_file(raw_result_path)
 
-	command_line = 'rm -f ' + runsolver_watch_data_path
+	#command_line = 'rm -f ' + runsolver_watch_data_path
 	os.system(command_line)
-	print('return')
+
 	return
 
 #def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, cutoff_time = cutoff_time_each_run):
@@ -131,15 +142,20 @@ def running_solvers(performance_data_csv_path, mode):
 			solver_path = solver_list[j]
 			
 			raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+			runsolver_log_path = raw_result_path.replace('.rawres', '.log')
 			
-			time.sleep(sleep_time_after_each_solver_run) #add at version 1.0.2
+			time.sleep(sleep_time_after_each_solver_run)
 			
-			print(r'c')
+			print('c')
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
-			
-			run_solver_on_instance(solver_path, solver_path+r'/'+sgh.sparkle_run_default_wrapper, instance_path, raw_result_path)
-		
-			solution_quality, runtime = get_solution_quality_and_runtime(raw_result_path)
+
+			solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
+			run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_log_path)
+
+			# TODO:
+			# 1) Get runtime from runsolver output
+			# 2) Get quality by calling the wrapper
+			runtime, quality, status = process_results(raw_result_path, solver_wrapper_path, runsolver_log_path)
 
 			if scch.objective_type == 'solution_quality':
 				performance_data_csv.set_value(instance_path, solver_path, solution_quality)
@@ -151,6 +167,112 @@ def running_solvers(performance_data_csv_path, mode):
 	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(par_num))
 	
 	return
+
+
+def process_results(raw_result_path, solver_wrapper_path, runsolver_log_path):
+	# Get results from the wrapper
+	cmd_get_results_from_wrapper = solver_wrapper_path + ' --print-output ' + raw_result_path
+	results = os.popen(cmd_get_results_from_wrapper)
+	result_lines = results.readlines()
+
+	if len(result_lines) <= 0:
+		# TODO: Add instructions for the user that might fix the issue?
+		print('c ERROR: Failed to get output from wrapper at \'' + solver_wrapper_path + '\' stopping execution!')
+		sys.exit()
+
+	# Check if Sparkle should use it's own parser
+	first_line = result_lines[0]
+	first_line_parts = first_line.strip().split()
+	if len(first_line_parts) == 4 and first_line_parts[0].lower() == 'use' and first_line_parts[1].lower == 'sparkle':
+		if first_line_parts[2].lower() == 'sat':
+			# TODO: Use Sparkle SAT parser
+			runtime, status = sparkle_sat_parser(raw_result_path, runsolver_log_path)
+		else:
+			parser_list = 'SAT'
+			print('c ERROR: Wrapper at \'' + solver_wrapper_path + '\' requested Sparkle to use an internal parser that does not exist\nc Possible internal parsers: ' + parser_list + '\nc If your problem domain is not in the list, please parse the output in the wrapper.\nc Stopping execution!')
+			sys.exit()
+	else:
+		# Read output
+		runtime = get_runtime_from_runsolver(runsolver_log_path)
+		quality = []
+		status = 'SUCCESS'
+		for line in result_lines:
+			parts = line.strip().split()
+			# Skip empty lines
+			if len(parts) <= 0:
+				continue
+			# Handle lines that are too short
+			if len(parts) <= 1:
+				print('c Warning: The line \'' + line.strip() + '\' contains no result information or is not formatted correctly: <quality/status/runtime> VALUE')
+			if parts[0].lower() == 'quality':
+				quality = get_quality_from_wrapper(parts)
+			elif parts[0].lower() == 'status':
+				status = get_status_from_wrapper(parts)
+			elif parts[0].lower() == 'runtime':
+				runtime = get_runtime_from_wrapper(parts)
+
+	return runtime, quality, status
+
+
+# quality -- comma separated list of quality measurements; [required when one or more quality objectives are used, optional otherwise]
+# In: List of words
+# Out: List of floats
+def get_quality_from_wrapper(result_list):
+	quality = []
+
+	for i in range(1, len(result_list)):
+		quality.append(float(result_list[i]))
+	
+	return quality
+
+
+# status  -- <SUCCESS/TIMEOUT/CRASHED/SAT/UNSAT> [optional, SUCCESS assumed]
+# In: List of words
+# Out: String
+def get_status_from_wrapper(result_list):
+	status_list = '<SUCCESS/TIMEOUT/CRASHED/SAT/UNSAT>'
+	status = 'SUCCESS'
+
+	if result_list[1].upper() == 'SUCCESS':
+		status = 'SUCCESS'
+	elif result_list[1].upper() == 'TIMEOUT':
+		status = 'TIMEOUT'
+	elif result_list[1].upper() == 'CRASHED':
+		status = 'CRASHED'
+	elif result_list[1].upper() == 'SAT':
+		status = 'SAT'
+	elif result_list[1].upper() == 'UNSAT':
+		status = 'UNSAT'
+	else:
+		print('c ERROR: Invalid status \'' + result_list[1] + '\' given, possible statuses are: ' + status_list + '\nc Stopping execution!')
+		sys.exit()
+
+	return status
+
+
+# runtime -- in seconds, will overwrite Sparkle's own measurement (through runsolver) if given [optional]
+# In: List of words
+# Out: Float
+def get_runtime_from_wrapper(result_list):
+
+	runtime = float(result_list[1])
+
+	return runtime
+
+
+# TODO: Implement
+def get_runtime_from_runsolver(runsolver_log_path):
+	runtime = -1
+
+	return runtime
+
+
+# TODO: Implement
+def sparkle_sat_parser(raw_result_path):
+	runtime = -1
+	status = 'SUCCESS'
+
+	return runtime, status
 
 
 # def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, cutoff_time = cutoff_time_each_run):
@@ -317,7 +439,7 @@ def running_solvers(performance_data_csv_path, mode):
 # 				runtime = penalty_time
 # 				performance_data_csv.set_value(instance_path, solver_path, runtime)
 # 				print(r'c Running Result: ' + verify_string + r' , Runtime (Penalized): ' + str(runtime))
-# 			elif verify_string == r'WRONG':
+# 			elif verify_uutring == r'WRONG':
 # 				wrong_solver_list.append(solver_path)
 # 				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' reports wrong answer on instance ' + sfh.get_last_level_directory_name(instance_path) + r'!')
 # 				print(r'c Solver ' + sfh.get_last_level_directory_name(solver_path) + r' will be removed!')
