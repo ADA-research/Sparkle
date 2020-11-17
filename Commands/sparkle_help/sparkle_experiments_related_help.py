@@ -44,7 +44,7 @@ def init():
 	par_num = 10
 	cutoff_time_total_extractor_run_on_one_instance = 5 #90 #as SATzilla does
 
-
+	# Read user settings from file
 	sparkle_default_settings_path = sparkle_global_help.sparkle_default_settings_path
 	if os.path.exists(sparkle_default_settings_path):
 		fin = open(sparkle_default_settings_path, 'r+')
