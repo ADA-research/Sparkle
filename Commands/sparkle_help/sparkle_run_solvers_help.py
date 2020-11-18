@@ -90,7 +90,7 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 
 # performance_measure can be: runtime or quality_absolute
 # verifier can be: NONE, SAT
-def running_solvers(performance_data_csv_path, mode, performance_measure = 'runtime', verifier = Verifier.NONE):
+def running_solvers(performance_data_csv_path, mode, performance_measure, verifier = Verifier.NONE):
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job()
 	elif mode == 2: list_performance_computation_job = performance_data_csv.get_list_recompute_performance_computation_job()
@@ -103,7 +103,10 @@ def running_solvers(performance_data_csv_path, mode, performance_measure = 'runt
 	
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
 	current_job_num = 1
-	print('c The number of total running jobs: ' + str(total_job_num))
+	print('c The total number of jobs to run is: ' + str(total_job_num))
+
+	if total_job_num < 1:
+		return
 	
 	for i in range(0, len(list_performance_computation_job)):
 		instance_path = list_performance_computation_job[i][0]
@@ -136,20 +139,25 @@ def running_solvers(performance_data_csv_path, mode, performance_measure = 'runt
 				current_job_num += 1
 
 				continue
+			elif status == 'CRASHED':
+				print('c Warning: Solver ' + solver_path + ' appears to have crashed on instance ' + instance_path + ' for details see the solver log file at ' + raw_result_path)
 
 			# Handle timeouts
 			penalised_str = ''
-			if runtime > ser.cutoff_time_each_run or status == 'TIMEOUT' or status == 'UNKNOWN':
+			if runtime > ser.cutoff_time_each_run:
+				status = 'TIMEOUT' # Overwrites possible user status...
+			if status == 'TIMEOUT' or status == 'UNKNOWN':
 				runtime = ser.penalty_time
-				penalised_str = ' (penalised)'
+				if performance_measure == sgh.PerformanceMeasures.RUNTIME:
+					penalised_str = ' (penalised)'
 
-			if performance_measure == 'quality_absolute':
+			if performance_measure == sgh.PerformanceMeasures.QUALITY_ABSOLUTE:
 				# TODO: Handle the multi-objective case for quality
 				performance_data_csv.set_value(instance_path, solver_path, quality[0])
-				print('c Running Result: ' + status + ', Quality' + penalised_str + ': ' + str(quality[0]))
+				print('c Running Result: Status: ' + status + ', Quality' + penalised_str + ': ' + str(quality[0]))
 			else:
 				performance_data_csv.set_value(instance_path, solver_path, runtime)
-				print('c Running Result: ' + status + ', Runtime' + penalised_str + ': ' + str(runtime))
+				print('c Running Result: Status ' + status + ', Runtime' + penalised_str + ': ' + str(runtime))
 
 		print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
 		current_job_num += 1
@@ -157,6 +165,7 @@ def running_solvers(performance_data_csv_path, mode, performance_measure = 'runt
 	performance_data_csv.update_csv()
 	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(ser.cutoff_time_each_run))
 	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(ser.par_num))
+	print('c Performance data file ' + performance_data_csv_path + ' has been updated!')
 	
 	return
 
@@ -190,7 +199,7 @@ def process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 	else:
 		# Read output
 		quality = []
-		status = 'SUCCESS'
+		status = 'UNKNOWN'
 		for line in result_lines:
 			parts = line.strip().split()
 			# Skip empty lines

@@ -13,11 +13,10 @@ def print_command(instance_file):
 	executable_name = 'fastvc2+p'
 	param_str = "-cand_count '198'"
 
-	# TODO: Add optional seed and cutoff time to print_command function?
-	#seed_str = '1'
-	#cutoff_time_str = sys.argv[3]
-	#command_line = executable_name + ' -inst ' + instance_file + ' -seed ' + seed_str + ' -cutoff_time ' + cutoff_time_str + ' -opt 0 ' + param_str
-	command_line = executable_name + ' -inst ' + instance_file + ' -opt 0 ' + param_str
+	# TODO: Add optional seed and cutoff time to print_command function/the wrapper?
+	seed_str = '1'
+	cutoff_time_str = '1000'
+	command_line = executable_name + ' -inst ' + instance_file + ' -seed ' + seed_str + ' -cutoff_time ' + cutoff_time_str + ' -opt 0 ' + param_str
 
 	print(command_line)
 
@@ -29,21 +28,28 @@ def print_output(output_file):
 	fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
 	solution_quality = sys.maxsize
+	status = 'UNKNOWN'
 	lines = infile.readlines()
 
 	for line in lines:
 		words = line.strip().split()
 		if len(words) <= 0:
 			continue
+		if len(words) >=4 and words[1] == 'c' and words[2] == 'Arguments' and words[3] == 'Error!':
+			status = 'CRASHED'
+			break
 		if len(words) >=4 and words[1] == 'c' and words[2] == 'vertex_cover:':
 			temp_solution_quality = int(words[3])
 			if solution_quality < 0 or temp_solution_quality < solution_quality:
 				solution_quality = temp_solution_quality
+				status = 'SUCCESS'
 
 	infile.close()
 
-	# Print keyword 'quality' followed by a space and the solution quality
+	# [required for quality objective] Print keyword 'quality' followed by a space and the solution quality
 	print('quality ' + str(solution_quality))
+	# [optional] Print keyword 'status' followed by a space and the run status
+	print('status ' + status)
 
 
 ### No editing needed for your own wrapper below this line ###

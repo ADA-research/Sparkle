@@ -18,7 +18,7 @@ import run_solvers_parallel as rsp
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help as srh
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
@@ -36,11 +36,13 @@ if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--recompute', action='store_true', help='recompute the performance of all solvers on all instances')
 	parser.add_argument('--parallel', action='store_true', help='run the solver on multiple instances in parallel')
+	parser.add_argument('--objective', choices=sgh.PerformanceMeasures.__members__, default=sgh.PerformanceMeasures.RUNTIME, help='the objective to measure, e.g. runtime')
 
 	# Process command line arguments
 	args = parser.parse_args()
 	my_flag_recompute = args.recompute
 	my_flag_parallel = args.parallel
+	objective = sgh.parse_arg_performance(args.objective)
 
 	print('c Start running solvers ...')
 
@@ -50,13 +52,12 @@ if __name__ == r'__main__':
 
 	if not my_flag_parallel:
 		if my_flag_recompute:
-			performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
+			performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 			performance_data_csv.clean_csv()
-			srs.running_solvers(sparkle_global_help.performance_data_csv_path, 2)
+			srs.running_solvers(sgh.performance_data_csv_path, 2, objective)
 		else:
-			srs.running_solvers(sparkle_global_help.performance_data_csv_path, 1)
+			srs.running_solvers(sgh.performance_data_csv_path, 1, objective)
 	
-		print('c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!')
 		print('c Running solvers done!')
 	else:
 		# Call the parallel version of this command
