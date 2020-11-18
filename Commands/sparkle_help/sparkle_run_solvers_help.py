@@ -162,6 +162,9 @@ def running_solvers(performance_data_csv_path, mode, performance_measure = 'runt
 
 
 def process_results(raw_result_path, solver_wrapper_path, runsolver_values_path):
+	# By default runtime comes from runsolver, may be overwritten by user wrapper
+	runtime = get_runtime_from_runsolver(runsolver_values_path)
+
 	# Get results from the wrapper
 	cmd_get_results_from_wrapper = solver_wrapper_path + ' --print-output ' + raw_result_path
 	results = os.popen(cmd_get_results_from_wrapper)
@@ -179,14 +182,13 @@ def process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 	if len(first_line_parts) == 4 and first_line_parts[0].lower() == 'use' and first_line_parts[1].lower() == 'sparkle':
 		if first_line_parts[2].lower() == 'sat':
 			quality = [] # Not defined for SAT
-			runtime, status = sparkle_sat_parser(raw_result_path, runsolver_values_path)
+			status = sparkle_sat_parser(raw_result_path, runtime)
 		else:
 			parser_list = 'SAT'
 			print('c ERROR: Wrapper at \'' + solver_wrapper_path + '\' requested Sparkle to use an internal parser that does not exist\nc Possible internal parsers: ' + parser_list + '\nc If your problem domain is not in the list, please parse the output in the wrapper.\nc Stopping execution!')
 			sys.exit()
 	else:
 		# Read output
-		runtime = get_runtime_from_runsolver(runsolver_values_path)
 		quality = []
 		status = 'SUCCESS'
 		for line in result_lines:
@@ -282,16 +284,15 @@ def get_runtime_from_runsolver(runsolver_values_path):
 	return runtime
 
 
-# In: Paths to raw result and runsolver values
-# Out: Runtime float, status string
-def sparkle_sat_parser(raw_result_path, runsolver_values_path):
-	runtime = get_runtime_from_runsolver(runsolver_values_path)
+# In: Path to raw result, runtime
+# Out: Status string
+def sparkle_sat_parser(raw_result_path, runtime):
 	if runtime > ser.cutoff_time_each_run:
 		status = 'TIMEOUT'
 	else: 
 		status = sat_get_result(raw_result_path)
 
-	return runtime, status
+	return status
 
 
 # In: Path to solver, path to instance it failed on
