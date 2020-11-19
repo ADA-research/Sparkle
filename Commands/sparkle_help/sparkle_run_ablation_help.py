@@ -55,7 +55,7 @@ def print_ablation_help():
     call = "./{}/ablationAnalysis -h".format(sgh.ablation_dir)
     print(os.system(call))
 
-''' DEPRICATED '''
+''' DEPRICATED
 def get_ablation_settings(path_modifier = None):
     #TODO: Remove
     ablation_settings = {
@@ -87,7 +87,7 @@ def get_ablation_settings(path_modifier = None):
     settings_file.close()
 
     return ablation_settings
-
+'''
 
 def get_slurm_params(solver_name, instance_train_name, instance_test_name, postfix="",dependency=None):
     if instance_test_name is not None:

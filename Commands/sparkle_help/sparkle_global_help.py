@@ -54,9 +54,6 @@ sparkle_global_log_path = sparkle_global_log_dir + sparkle_global_log_file
 global sparkle_tmp_path
 sparkle_tmp_path = 'Tmp/'
 
-global sparkle_ablation_settings_path
-sparkle_ablation_settings_path = r'Settings/sparkle_ablation_settings.txt'
-
 global sparkle_log_path
 sparkle_log_path = sparkle_tmp_path + r'sparkle_log.out'
 
