@@ -29,6 +29,11 @@ def parse_arg_performance(objective):
 	return objective
 
 
+# TODO: Handle different seed requirements; for the moment this is a dummy function
+def get_seed():
+	return 1
+
+
 flag_first_call = True
 
 global sparkle_maximum_int

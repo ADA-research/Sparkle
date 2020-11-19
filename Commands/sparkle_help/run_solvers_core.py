@@ -17,7 +17,7 @@ import sys
 import fcntl
 
 try:
-	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_global_help as sgh
 	from sparkle_help import sparkle_basic_help
 	from sparkle_help import sparkle_file_help as sfh
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -26,7 +26,7 @@ try:
 	from sparkle_help import sparkle_run_solvers_help as srs
 	from sparkle_help import sparkle_customized_config_help as scch
 except ImportError:
-	import sparkle_global_help
+	import sparkle_global_help as sgh
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
 	import sparkle_performance_data_csv_help as spdcsv
@@ -35,21 +35,8 @@ except ImportError:
 	import sparkle_run_solvers_help as srs
 	import sparkle_customized_config_help as scch
 
-def get_solution_quality_and_runtime(raw_result_path):
-	fin = open(raw_result_path)
-	myline = fin.readline()
-	mylist = myline.strip().split()
-	solution_quality = float(mylist[0])
-	runtime = float(mylist[1])
-	fin.close()
-	print(solution_quality, runtime)
-	return solution_quality, runtime
 
 if __name__ == r'__main__':
-	cutoff_time_each_run = ser.cutoff_time_each_run
-	par_num = ser.par_num
-	penalty_time = ser.penalty_time
-	
 	instance_path = sys.argv[1]
 	solver_path = sys.argv[2]
 	performance_data_csv_path = sys.argv[3]
@@ -69,10 +56,13 @@ if __name__ == r'__main__':
 	cutoff_str = 'Cutoff Time: ' + str(ser.cutoff_time_each_run) + ' second(s)' + '\n'
 	status_info_str += cutoff_str
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
-	srs.run_solver_on_instance(solver_path, solver_path+r'/'+sparkle_global_help.sparkle_run_default_wrapper, instance_path, raw_result_path, ser.cutoff_time_each_run)
+	solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
+	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
+	seed = sgh.get_seed()
+	srs.run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed)
 	end_time = time.time()
 
-	solution_quality, runtime = get_solution_quality_and_runtime(raw_result_path)
+	runtime, quality, status = srs.process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 		
 	description_str = r'[Solver: ' + sfh.get_last_level_directory_name(solver_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path) + r']'
 	start_time_str = r'[Start Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time)) + r']'
@@ -81,13 +71,13 @@ if __name__ == r'__main__':
 	recorded_run_time_str = r'[Recorded Run Time: ' + str(runtime) + r' second(s)]'
 		
 	log_str = description_str + r', ' + start_time_str + r', ' + end_time_str + r', ' + run_time_str + r', ' + recorded_run_time_str
-	time.sleep(random.randint(1, 5))
+	time.sleep(random.randint(1, 5)) # TODO: Find out why this is here...
 	
-	sfh.append_string_to_file(sparkle_global_help.sparkle_system_log_path, log_str)
+	sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
 	os.system('rm -f ' + task_run_status_path)
 
 	if scch.objective_type == 'solution_quality':
-		obj_str = str(solution_quality)
+		obj_str = str(quality)
 	else:
 		obj_str = str(runtime)
 	

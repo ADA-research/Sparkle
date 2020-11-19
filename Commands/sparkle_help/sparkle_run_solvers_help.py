@@ -124,7 +124,7 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 
 			solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
-			seed = 1 # TODO: Handle different seed requirements
+			seed = sgh.get_seed()
 			run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed)
 
 			runtime, quality, status = process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
