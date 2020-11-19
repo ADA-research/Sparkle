@@ -12,7 +12,7 @@
 #SBATCH --nodes=1
 
 # Prepare for test
-instances_path="Examples/Resources/Instances/SAT_test"
+instances_path="Examples/Resources/Instances/PTN"
 solver_path="Examples/Resources/Solvers/CSCCSat/"
 
 Commands/initialise.py > /dev/null
