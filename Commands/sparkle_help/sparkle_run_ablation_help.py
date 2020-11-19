@@ -55,6 +55,7 @@ def print_ablation_help():
     call = "./{}/ablationAnalysis -h".format(sgh.ablation_dir)
     print(os.system(call))
 
+''' DEPRICATED '''
 def get_ablation_settings(path_modifier = None):
     #TODO: Remove
     ablation_settings = {
@@ -86,6 +87,7 @@ def get_ablation_settings(path_modifier = None):
     settings_file.close()
 
     return ablation_settings
+
 
 def get_slurm_params(solver_name, instance_train_name, instance_test_name, postfix="",dependency=None):
     if instance_test_name is not None:
@@ -218,7 +220,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
     (optimised_configuration_params, _, _) = scsh.get_optimised_configuration(solver_name, instance_train_name)
     ablation_settings = get_ablation_settings()
 
-    #TODO filter fixed params
+    smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
 
     with open("{}/ablation_config.txt".format(ablation_scenario_dir), 'w') as fout:
         fout.write('algo = ./sparkle_smac_wrapper.py\n')
@@ -226,9 +228,17 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         fout.write('experimentDir = ./{}\n'.format(ablation_scenario_dir_exec))
 
         #FROM SETTINGS FILE
-        for variable, param in ablation_settings.items():
-            fout.write("{} = {}\n".format(variable,param))
+        #for variable, param in ablation_settings.items():
+        #    fout.write("{} = {}\n".format(variable,param))
 
+        #USER SETTINGS
+        fout.write('deterministic = ' + scsh.get_solver_deterministic(solver_name) + '\n')
+        fout.write('run_obj = ' + smac_run_obj + '\n')
+        fout.write('overall_obj = {}\n'.format("MEAN10"  if smac_run_obj == "RUNTIME" else "MEAN"))
+        fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
+        fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
+
+        fout.write('seed = 1234\n')
         fout.write('paramfile = {}solver/PbO-CCSAT-params_test.pcs\n'.format(ablation_scenario_dir_exec)) #Get from solver
         fout.write('instance_file = instances_train.txt\n')
         fout.write('test_instance_file = instances_test.txt\n')
