@@ -218,7 +218,6 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
                                                                  exec_path=True)
 
     (optimised_configuration_params, _, _) = scsh.get_optimised_configuration(solver_name, instance_train_name)
-    ablation_settings = get_ablation_settings()
 
     smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
 
@@ -271,7 +270,7 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
 
     with open(file_instance_path, "w") as fh:
         for instance in list_all_path:
-            instance_path = "{}{}\n".format(relative_instance_directory, instance)
+            instance_path = "{}\n".format(os.path.join(relative_instance_directory, instance))
             fh.write(instance_path)
         fh.close()
 

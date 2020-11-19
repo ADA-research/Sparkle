@@ -76,7 +76,6 @@ if __name__ == r'__main__':
     print("c Create config file")
     #Configurations
     sah.create_configuration_file(solver_name, instance_set_train_name, instance_set_test_name)
-    #Add instances
 
     print("c Submit ablation run")
     #Submit ablation run
