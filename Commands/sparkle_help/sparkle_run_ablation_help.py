@@ -260,6 +260,8 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
         print(r'c Invalid function call of \'copy_instances_to_ablation\'; aborting execution')
         sys.exit()
 
+    if instances_directory[-1] != "/":
+        instances_directory += "/"
     print("create_instance_file ({}, {}, {})".format(instances_directory, ablation_scenario_dir, train_or_test))
     list_all_path = satih.get_list_all_path(instances_directory)
     print(list_all_path)
