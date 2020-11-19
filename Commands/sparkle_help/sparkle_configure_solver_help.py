@@ -29,7 +29,7 @@ class InstanceType(Enum):
 	TEST = 2
 
 
-def get_smac_settings():
+def get_smac_settings(with_ablation=False):
 	smac_run_obj = ''
 	smac_whole_time_budget = ''
 	smac_each_run_cutoff_time = ''
@@ -37,6 +37,7 @@ def get_smac_settings():
 	num_of_smac_run_str = ''
 	num_of_smac_run_in_parallel_str = ''
 	sparkle_smac_settings_path = sgh.sparkle_smac_settings_path
+	ablation_concurrent_clis = ''
 
 	fin = open(sparkle_smac_settings_path, 'r')
 	while True:
@@ -57,9 +58,18 @@ def get_smac_settings():
 			num_of_smac_run_str = mylist[2]
 		elif mylist[0] == 'num_of_smac_run_in_parallel':
 			num_of_smac_run_in_parallel_str = mylist[2]
+		elif mylist[0] == 'ablation_concurrent_clis':
+			ablation_concurrent_clis = mylist[2]
+		elif mylist[0] == 'ablation_racing':
+			ablation_racing = mylist[2].lower() in ['true', '1']
 	fin.close()
 
-	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
+	return_list = [smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str]
+	if with_ablation:
+		return_list.append(ablation_concurrent_clis)
+		return_list.append(ablation_racing)
+
+	return tuple(return_list)
 
 
 # Copy file listing the training instances from the instance directory to the solver directory

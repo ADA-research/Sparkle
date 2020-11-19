@@ -97,11 +97,12 @@ def get_slurm_params(solver_name, instance_train_name, instance_test_name, postf
     sbatch_script_name += "{}".format(postfix)
 
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name, exec_path=True)
+    _, _, _, _, _, _, ablation_concurrent_clis, _ = scsh.get_smac_settings(with_ablation=True)
 
     job_name = '--job-name=' + sbatch_script_name
     output = '--output=' + scenario_dir + sbatch_script_name + '.txt'
     error = '--error=' + scenario_dir + sbatch_script_name + '.err'
-    cpus = '--cpus-per-task=' + get_ablation_settings()['cli-cores']
+    cpus = '--cpus-per-task={}'.format(ablation_concurrent_clis)
 
     sbatch_options_list = [job_name, output, error, cpus]
 
@@ -120,7 +121,8 @@ def generate_slurm_script(solver_name, instance_train_name, instance_test_name, 
                                                                              dependency=dependency)
     sbatch_script_path = scenario_dir + sbatch_script_name + ".sh"
 
-    srun_options_str = "-N1 -n1 -c{}".format(get_ablation_settings()['cli-cores'])
+    _, _, _, _, _, _, ablation_concurrent_clis, _ = scsh.get_smac_settings(with_ablation=True)
+    srun_options_str = "-N1 -n1 -c{}".format(ablation_concurrent_clis)
     target_call_str = "./ablationAnalysis --optionFile {1}ablation_config.txt".format(sgh.ablation_dir, scenario_dir)
 
     job_params_list = []
@@ -168,7 +170,8 @@ def generate_validation_slurm_script(solver_name, instance_train_name, instance_
                                                                              dependency=dependency)
     sbatch_script_path = scenario_dir + sbatch_script_name + ".sh"
 
-    srun_options_str = "-N1 -n1 -c{}".format(get_ablation_settings()['cli-cores'])
+    _, _, _, _, _, _, ablation_concurrent_clis,_ = scsh.get_smac_settings(with_ablation=True)
+    srun_options_str = "-N1 -n1 -c{}".format(ablation_concurrent_clis)
     target_call_str = "./ablationValidation --optionFile {1}ablation_config.txt --ablationLogFile {1}ablationPath.txt".format(sgh.ablation_dir, scenario_dir)
 
     job_params_list = []
@@ -219,7 +222,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
 
     (optimised_configuration_params, _, _) = scsh.get_optimised_configuration(solver_name, instance_train_name)
 
-    smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
+    smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str, ablation_concurrent_clis, ablation_racing = scsh.get_smac_settings(with_ablation=True)
 
     with open("{}/ablation_config.txt".format(ablation_scenario_dir), 'w') as fout:
         fout.write('algo = ./sparkle_smac_wrapper.py\n')
@@ -236,6 +239,8 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         fout.write('overall_obj = {}\n'.format("MEAN10"  if smac_run_obj == "RUNTIME" else "MEAN"))
         fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
         fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
+        fout.write('cli-cores = {}\n'.format(ablation_concurrent_clis))
+        fout.write('useRacing = {}\n'.format(ablation_racing))
 
         fout.write('seed = 1234\n')
         fout.write('paramfile = {}solver/PbO-CCSAT-params_test.pcs\n'.format(ablation_scenario_dir_exec)) #Get from solver
