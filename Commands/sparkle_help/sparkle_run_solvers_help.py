@@ -44,14 +44,14 @@ class Verifier(Enum):
 	SAT = 2
 
 
-def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, cutoff_time = ser.cutoff_time_each_run):
+def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed, cutoff_time = ser.cutoff_time_each_run):
 	if not Path(solver_wrapper_path).is_file():
 		print('c ERROR: Wrapper named \'' + solver_wrapper_path + '\' not found, stopping execution!')
 		sys.exit()
 
 	# Get the solver call command from the wrapper
 	cmd_solver_call = ''
-	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path
+	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + str(seed) + ' --cutoff-time ' + str(cutoff_time)
 	solver_call_rawresult = os.popen(cmd_get_solver_call)
 	solver_call_result = solver_call_rawresult.readlines()[0].strip()
 
@@ -124,7 +124,8 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 
 			solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
-			run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path)
+			seed = 1 # TODO: Handle different seed requirements
+			run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed)
 
 			runtime, quality, status = process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 
