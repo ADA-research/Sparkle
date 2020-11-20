@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
@@ -26,15 +27,15 @@ from sparkle_help import sparkle_job_parallel_help
 from sparkle_help import sparkle_logging as sl
 
 
-def run_solvers_parallel(my_flag_recompute, my_flag_also_construct_selector_and_report=False):
+def run_solvers_parallel(my_flag_recompute, objective, my_flag_also_construct_selector_and_report=False):
 	num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
-	
+
 	if my_flag_recompute:
 		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
 		performance_data_csv.clean_csv()
-		run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 2)
+		run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 2, objective)
 	else:
-		run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
+		run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1, objective)
 
 	dependency_jobid_list = []
 	# Only do selector construction and report generation if the flag is set;
@@ -69,19 +70,19 @@ if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)
 
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--recompute', action='store_true', help='recompute the performance of all solvers on all instances')
+	parser.add_argument('--objective', choices=sgh.PerformanceMeasures.__members__, default=sgh.PerformanceMeasures.RUNTIME, help='the objective to measure, e.g. runtime')
+	parser.add_argument('--also-construct-selector-and-report', action='store_true', help='after running the solvers also construct the selector and generate the report')
+
+	# Process command line arguments
+	args = parser.parse_args()
+	my_flag_recompute = args.recompute
+	objective = sgh.parse_arg_performance(args.objective)
+	my_flag_also_construct_selector_and_report = args.also_construct_selector_and_report
+
 	print('c Start running solvers ...')
 
-	my_flag_recompute = False
-	my_flag_also_construct_selector_and_report = False
-
-	len_argv = len(sys.argv)
-	i = 1
-	while i<len_argv:
-		if sys.argv[i] == r'--recompute':
-			my_flag_recompute = True
-		elif sys.argv[i] == r'--also-construct-selector-and-report':
-			my_flag_also_construct_selector_and_report = True
-		i += 1
-
-	run_solvers_parallel(my_flag_recompute, my_flag_also_construct_selector_and_report)
+	run_solvers_parallel(my_flag_recompute, objective, my_flag_also_construct_selector_and_report)
 

@@ -25,19 +25,7 @@ from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_slurm_help as ssh
 
 
-####
-# settings of experimental configurations
-global cutoff_time_each_run
-global par_num
-global penalty_time
-
-cutoff_time_each_run = ser.cutoff_time_each_run # cutoff time for each run (a solver tries to solve an instance)
-par_num = ser.par_num # the penalty number related to the penalty time
-penalty_time = ser.penalty_time # the penalty time = cutoff time * penalty number
-sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #the sleep time for the system after each run (add at version 1.0.2)
-####
-
-def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, performance_data_csv_path, total_job_list):
+def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, total_job_list, objective):
 	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
 	sbatch_script_path = r'Tmp/' + sbatch_script_name
 	job_name = '--job-name=' + sbatch_script_name
@@ -53,7 +41,7 @@ def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_paral
 	for job in total_job_list:
 		instance_path = job[0]
 		solver_path = job[1]
-		job_params_list.append(instance_path + ' ' + solver_path + ' ' + performance_data_csv_path)
+		job_params_list.append('--instance ' + instance_path + ' --solver ' + solver_path + ' --objective ' + objective.name)
 
 	srun_options_str = '-N1 -n1'
 	srun_options_str = srun_options_str + ' ' + ssh.get_slurm_srun_user_options_str()
@@ -64,12 +52,13 @@ def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_paral
 	return sbatch_script_path
 
 
-def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mode):
+def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mode, objective):
 	####
 	# This function is used for running solvers in parallel.
 	# The 1st argument (performance_data_csv_path) specifies the path of the csv file where the resulting performance data would be placed.
 	# The 2nd argument (num_job_in_parallel) specifies the number of jobs that will be executing in parallel.
 	# The 3nd argument (mode) specifies the mode of computation. It has 2 possible values (1 or 2). If this value is 1, it means that this function will compute the remaining jobs for performance computation. Otherwise (if this value is 2), it means that this function will re-compute all jobs for performance computation.
+	# objective determines the performance measure that is used
 	####
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path) # open the csv file in terms of performance data
 	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job() # the value of mode is 1, so the list of computation jobs is the list of the remaining jobs
@@ -79,7 +68,7 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 		print('c Do not run solvers')
 		sys.exit()
 	
-	print('c Cutoff time for each run on solving an instance is set to ' + str(cutoff_time_each_run) + ' seconds') # print the information about the cutoff time
+	print('c Cutoff time for each run on solving an instance is set to ' + str(ser.cutoff_time_each_run) + ' seconds') # print the information about the cutoff time
 	
 	####
 	# expand the job list
@@ -91,7 +80,7 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	if len(total_job_list) == 0:
 		return ''
 
-	sbatch_script_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, performance_data_csv_path, total_job_list)
+	sbatch_script_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, total_job_list, objective)
 	command_line = 'sbatch ' + sbatch_script_path
 	####
 	
@@ -104,8 +93,8 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	
 	####
 	# record the experimental settings 
-	sfh.write_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(cutoff_time_each_run))
-	sfh.append_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "par_num = " + str(par_num))
+	sfh.write_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(ser.cutoff_time_each_run))
+	sfh.append_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "par_num = " + str(ser.par_num))
 	####
 	return run_solvers_parallel_jobid
 

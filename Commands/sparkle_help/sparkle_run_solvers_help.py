@@ -129,29 +129,26 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 
 			runtime, quality, status = process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 
-			# Use verifier if one is given and the solver did not time out
-			if verifier == Verifier.SAT and status != 'TIMEOUT':
-				status = sat_verify(instance_path, raw_result_path, solver_path)
+			if status == 'CRASHED':
+				print('c Warning: Solver ' + solver_path + ' appears to have crashed on instance ' + instance_path + ' for details see the solver log file at ' + raw_result_path)
 
-			# If status == 'WRONG' remove solver and use continue to skip to the next job
+			# Handle timeouts
+			penalised_str = ''
+			runtime, status = handle_timeouts(runtime, status)
+			if performance_measure == sgh.PerformanceMeasures.RUNTIME and (status == 'TIMEOUT' or status == 'UNKNOWN'):
+				penalised_str = ' (penalised)'
+
+			status = verify(instance_path, raw_result_path, solver_path, verifier, status)
+
+			# If status == 'WRONG' after verification remove solver
 			# TODO: Check whether things break when a solver is removed which still has instances left in the job list
 			if status == 'WRONG':
 				remove_faulty_solver(solver_path, instance_path)
 				current_job_num += 1
 
-				continue
-			elif status == 'CRASHED':
-				print('c Warning: Solver ' + solver_path + ' appears to have crashed on instance ' + instance_path + ' for details see the solver log file at ' + raw_result_path)
+				continue # Skip to the next job
 
-			# Handle timeouts
-			penalised_str = ''
-			if runtime > ser.cutoff_time_each_run:
-				status = 'TIMEOUT' # Overwrites possible user status...
-			if status == 'TIMEOUT' or status == 'UNKNOWN':
-				runtime = ser.penalty_time
-				if performance_measure == sgh.PerformanceMeasures.RUNTIME:
-					penalised_str = ' (penalised)'
-
+			# Update performance CSV
 			if performance_measure == sgh.PerformanceMeasures.QUALITY_ABSOLUTE:
 				# TODO: Handle the multi-objective case for quality
 				performance_data_csv.set_value(instance_path, solver_path, quality[0])
@@ -169,6 +166,23 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 	print('c Performance data file ' + performance_data_csv_path + ' has been updated!')
 	
 	return
+
+
+def handle_timeouts(runtime, status):
+	if runtime > ser.cutoff_time_each_run:
+		status = 'TIMEOUT' # Overwrites possible user status...
+	if status == 'TIMEOUT' or status == 'UNKNOWN':
+		runtime = ser.penalty_time
+
+	return runtime, status
+
+
+def verify(instance_path, raw_result_path, solver, verifier, status):
+	# Use verifier if one is given and the solver did not time out
+	if verifier == Verifier.SAT and status != 'TIMEOUT' and status != 'UNKNOWN':
+		status = sat_verify(instance_path, raw_result_path, solver_path)
+
+	return status
 
 
 def process_results(raw_result_path, solver_wrapper_path, runsolver_values_path):

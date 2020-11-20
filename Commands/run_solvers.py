@@ -61,5 +61,5 @@ if __name__ == r'__main__':
 		print('c Running solvers done!')
 	else:
 		# Call the parallel version of this command
-		rsp.run_solvers_parallel(my_flag_recompute)
+		rsp.run_solvers_parallel(my_flag_recompute, objective)
 
