@@ -71,8 +71,7 @@ if __name__ == r'__main__':
 	recorded_run_time_str = r'[Recorded Run Time: ' + str(runtime) + r' second(s)]'
 		
 	log_str = description_str + r', ' + start_time_str + r', ' + end_time_str + r', ' + run_time_str + r', ' + recorded_run_time_str
-	time.sleep(random.randint(1, 5)) # TODO: Find out why this is here...
-	
+
 	sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
 	os.system('rm -f ' + task_run_status_path)
 
