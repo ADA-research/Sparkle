@@ -17,6 +17,8 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_add_train_instances_help as satih
 from sparkle_help import sparkle_logging as sl
+from sparkle_help.sparkle_settings import PerformanceMeasures
+from sparkle_help.sparkle_settings import SettingState
 
 
 if __name__ == r'__main__':
@@ -26,13 +28,14 @@ if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
-	parser.add_argument('--objective', choices=sgh.PerformanceMeasures.__members__, default=sgh.PerformanceMeasures.RUNTIME, help='the objective to measure, e.g. runtime')
+	parser.add_argument('--performance-measure', choices=PerformanceMeasures.__members__, default=PerformanceMeasures.RUNTIME, help='the performance measure, e.g. runtime')
 
 	# Process command line arguments
 	args = parser.parse_args()
 	solver = args.solver
 	instance_set = args.instance_set_train
-	objective = sgh.parse_arg_performance(args.objective)
+	args.performance_measure = PerformanceMeasures.from_str(args.performance_measure)
+	sgh.settings.set_performance_measure(args.performance_measure, SettingState.CMD_LINE)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)
