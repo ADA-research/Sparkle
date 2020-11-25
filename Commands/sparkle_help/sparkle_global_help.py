@@ -12,6 +12,21 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import fcntl
+from enum import Enum
+
+
+class PerformanceMeasures(Enum):
+	RUNTIME = 0
+	QUALITY_ABSOLUTE = 1
+
+
+def parse_arg_performance(objective):
+	if objective == 'RUNTIME':
+		objective = PerformanceMeasures.RUNTIME
+	if objective == 'QUALITY_ABSOLUTE':
+		objective = PerformanceMeasures.QUALITY_ABSOLUTE
+
+	return objective
 
 
 flag_first_call = True

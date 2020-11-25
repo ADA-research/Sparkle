@@ -26,9 +26,13 @@ if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
+	parser.add_argument('--objective', choices=sgh.PerformanceMeasures.__members__, default=sgh.PerformanceMeasures.RUNTIME, help='the objective to measure, e.g. runtime')
+
+	# Process command line arguments
 	args = parser.parse_args()
 	solver = args.solver
 	instance_set = args.instance_set_train
+	objective = sgh.parse_arg_performance(args.objective)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)
