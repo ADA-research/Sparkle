@@ -43,6 +43,30 @@ else
 	echo $output
 fi
 
+# Configure solver with performance measure option RUNTIME
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] configure_solver performance measure RUNTIME option test succeeded"
+else              
+	echo "[failure] configure_solver performance measure RUNTIME option test failed with output:"
+	echo $output
+fi
+
+# TODO: Add test: Configure solver with performance measure option QUALITY (needs a quality configuration solver+instances)
+
+# Configure solver with cutoff time option
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --cutoff-time 3 | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] configure_solver cutoff time option test succeeded"
+else              
+	echo "[failure] configure_solver cutoff time option test failed with output:"
+	echo $output
+fi
+
 # Restore original settings
 mv $slurm_settings_tmp $slurm_settings_path
 mv $smac_settings_tmp $smac_settings_path

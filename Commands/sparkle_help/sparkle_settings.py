@@ -2,16 +2,17 @@ import configparser
 from enum import Enum
 
 
-class PerformanceMeasures(Enum):
+class PerformanceMeasure(Enum):
 	RUNTIME = 0
 	QUALITY_ABSOLUTE = 1
+	#QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
 
 
 	def from_str(performance_measure):
 		if performance_measure == 'RUNTIME':
-			performance_measure = PerformanceMeasures.RUNTIME
+			performance_measure = PerformanceMeasure.RUNTIME
 		elif performance_measure == 'QUALITY_ABSOLUTE':
-			performance_measure = PerformanceMeasures.QUALITY_ABSOLUTE
+			performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
 	
 		return performance_measure
 
@@ -27,6 +28,7 @@ class Settings:
 	def __init__(self):
 		self.__settings = configparser.ConfigParser()
 		self.__performance_measure_set = SettingState.NOT_SET
+		self.__config_target_cutoff_time_set = SettingState.NOT_SET
 
 		return
 
@@ -44,7 +46,7 @@ class Settings:
 		return
 
 
-	def __init_section(self, section):
+	def __init_section(self, section: str):
 		if section not in self.__settings:
 			self.__settings[section] = {}
 
@@ -62,7 +64,7 @@ class Settings:
 		return
 
 
-	def set_performance_measure(self, value = PerformanceMeasures.RUNTIME, origin = SettingState.DEFAULT):
+	def set_performance_measure(self, value: PerformanceMeasure = PerformanceMeasure.RUNTIME, origin: SettingState = SettingState.DEFAULT):
 		section = 'general'
 		name = 'performance_measure'
 
@@ -74,9 +76,29 @@ class Settings:
 		return
 
 
-	def get_performance_measure(self):
+	def get_performance_measure(self) -> PerformanceMeasure:
 		if self.__performance_measure_set == SettingState.NOT_SET:
 			self.set_performance_measure()
 
 		return self.__settings['general']['performance_measure']
+
+
+	# TODO: Decide whether configuration and selection cutoff times should be separate or not
+	def set_config_target_cutoff_time(self, value: str = '60', origin: SettingState = SettingState.DEFAULT):
+		section = 'configuration'
+		name = 'config_target_cutoff_time'
+
+		self.__init_section(section)
+		self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name)
+		self.__performance_measure_set = origin
+		self.__settings[section][name] = value
+
+		return
+
+
+	def get_config_target_cutoff_time(self) -> int:
+		if self.__config_target_cutoff_time_set == SettingState.NOT_SET:
+			self.set_config_target_cutoff_time()
+
+		return self.__settings['configuration']['config_target_cutoff_time']
 

@@ -21,7 +21,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
-from sparkle_help.sparkle_settings import PerformanceMeasures
+from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 
 
@@ -46,12 +46,12 @@ def read_smac_settings():
 		if mylist[0] == 'smac_run_obj':
 			smac_run_obj = mylist[2]
 			if smac_run_obj == 'RUNTIME':
-				smac_run_obj = PerformanceMeasures.from_str(smac_run_obj)
+				smac_run_obj = PerformanceMeasure.from_str(smac_run_obj)
 			# NOTE: In the future Sparkle should also handle QUALITY_RELATIVE, not
 			# yet sure how to deal with that for SMAC, but likely both will convert
 			# back to 'QUALITY' when used with SMAC
 			elif smac_run_obj == 'QUALITY':
-				smac_run_obj = PerformanceMeasures.QUALITY_ABSOLUTE
+				smac_run_obj = PerformanceMeasure.QUALITY_ABSOLUTE
 			else:
 				print('c ERROR: Invalid smac_run_obj', smac_run_obj, 'in', sgh.sparkle_smac_settings_path, 'Stopping execution!')
 				sys.exit(-1)
@@ -59,7 +59,7 @@ def read_smac_settings():
 		elif mylist[0] == 'smac_whole_time_budget':
 			smac_whole_time_budget = mylist[2]
 		elif mylist[0] == 'smac_each_run_cutoff_time':
-			smac_each_run_cutoff_time = mylist[2]
+			sgh.settings.set_config_target_cutoff_time(smac_each_run_cutoff_time, SettingState.FILE)
 		elif mylist[0] == 'smac_each_run_cutoff_length':
 			smac_each_run_cutoff_length = mylist[2]
 		elif mylist[0] == 'num_of_smac_run':
@@ -68,20 +68,26 @@ def read_smac_settings():
 			num_of_smac_run_in_parallel_str = mylist[2]
 	fin.close()
 
-	return smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
+	return smac_whole_time_budget, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
 
 
-def get_smac_settings():
-	smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = read_smac_settings()
-
+def get_smac_run_obj() -> str:
 	# Get smac_run_obj from general settings
 	smac_run_obj = sgh.settings.get_performance_measure()
 
 	# Convert to SMAC format
-	if smac_run_obj == PerformanceMeasures.RUNTIME:
+	if smac_run_obj == PerformanceMeasure.RUNTIME:
 		smac_run_obj = smac_run_obj.name
-	elif smac_run_obj == PerformanceMeasures.QUALITY_ABSOLUTE:
+	elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE:
 		smac_run_obj = 'QUALITY'
+
+	return smac_run_obj
+
+
+def get_smac_settings():
+	smac_whole_time_budget, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = read_smac_settings()
+	smac_run_obj = get_smac_run_obj()
+	smac_each_run_cutoff_time = sgh.settings.get_config_target_cutoff_time()
 
 	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
 

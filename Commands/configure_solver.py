@@ -17,7 +17,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_add_train_instances_help as satih
 from sparkle_help import sparkle_logging as sl
-from sparkle_help.sparkle_settings import PerformanceMeasures
+from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 
 
@@ -28,14 +28,16 @@ if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
-	parser.add_argument('--performance-measure', choices=PerformanceMeasures.__members__, default=PerformanceMeasures.RUNTIME, help='the performance measure, e.g. runtime')
+	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=PerformanceMeasure.RUNTIME, help='the performance measure, e.g. runtime')
+	parser.add_argument('--cutoff-time', type=int, help='cutoff time per target algorithm run in seconds')
 
 	# Process command line arguments
 	args = parser.parse_args()
 	solver = args.solver
 	instance_set = args.instance_set_train
-	args.performance_measure = PerformanceMeasures.from_str(args.performance_measure)
+	args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 	sgh.settings.set_performance_measure(args.performance_measure, SettingState.CMD_LINE)
+	sgh.settings.set_config_target_cutoff_time(str(args.cutoff_time))
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)
