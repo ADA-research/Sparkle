@@ -31,9 +31,6 @@ class InstanceType(Enum):
 
 
 def read_smac_settings():
-	smac_run_obj = ''
-	smac_whole_time_budget = ''
-	smac_each_run_cutoff_time = ''
 	smac_each_run_cutoff_length = ''
 	num_of_smac_run_str = ''
 	num_of_smac_run_in_parallel_str = ''
@@ -57,9 +54,9 @@ def read_smac_settings():
 				sys.exit(-1)
 			sgh.settings.set_performance_measure(smac_run_obj, SettingState.FILE)
 		elif mylist[0] == 'smac_whole_time_budget':
-			smac_whole_time_budget = mylist[2]
+			sgh.settings.set_config_run_budget(int(mylist[2]), SettingState.FILE)
 		elif mylist[0] == 'smac_each_run_cutoff_time':
-			sgh.settings.set_config_target_cutoff_time(smac_each_run_cutoff_time, SettingState.FILE)
+			sgh.settings.set_config_target_cutoff_time(int(mylist[2]), SettingState.FILE)
 		elif mylist[0] == 'smac_each_run_cutoff_length':
 			smac_each_run_cutoff_length = mylist[2]
 		elif mylist[0] == 'num_of_smac_run':
@@ -68,7 +65,7 @@ def read_smac_settings():
 			num_of_smac_run_in_parallel_str = mylist[2]
 	fin.close()
 
-	return smac_whole_time_budget, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
+	return smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
 
 
 def get_smac_run_obj() -> str:
@@ -80,13 +77,16 @@ def get_smac_run_obj() -> str:
 		smac_run_obj = smac_run_obj.name
 	elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE:
 		smac_run_obj = 'QUALITY'
+	else:
+		print('c Warning: Unknown performance measure', smac_run_obj, '! This is a bug in Sparkle.')
 
 	return smac_run_obj
 
 
 def get_smac_settings():
-	smac_whole_time_budget, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = read_smac_settings()
+	smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = read_smac_settings()
 	smac_run_obj = get_smac_run_obj()
+	smac_whole_time_budget = sgh.settings.get_config_run_budget()
 	smac_each_run_cutoff_time = sgh.settings.get_config_target_cutoff_time()
 
 	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
@@ -168,8 +168,8 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
 	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
 	fout.write('run_obj = ' + smac_run_obj + '\n')
-	fout.write('wallclock-limit = ' + smac_whole_time_budget + '\n')
-	fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
+	fout.write('wallclock-limit = ' + str(smac_whole_time_budget) + '\n')
+	fout.write('cutoffTime = ' + str(smac_each_run_cutoff_time) + '\n')
 	fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
 	fout.write('paramfile = ' + smac_paramfile + '\n')
 	fout.write('outdir = ' + smac_outdir + '\n')
@@ -197,8 +197,8 @@ def create_file_scenario_configuration(solver_name, instance_set_name):
 	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
 	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
 	fout.write('run_obj = ' + smac_run_obj + '\n')
-	fout.write('wallclock-limit = ' + smac_whole_time_budget + '\n')
-	fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
+	fout.write('wallclock-limit = ' + str(smac_whole_time_budget) + '\n')
+	fout.write('cutoffTime = ' + str(smac_each_run_cutoff_time) + '\n')
 	fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
 	fout.write('paramfile = ' + smac_paramfile + '\n')
 	fout.write('outdir = ' + smac_outdir + '\n')

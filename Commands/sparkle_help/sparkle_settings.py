@@ -29,6 +29,7 @@ class Settings:
 		self.__settings = configparser.ConfigParser()
 		self.__performance_measure_set = SettingState.NOT_SET
 		self.__config_target_cutoff_time_set = SettingState.NOT_SET
+		self.__config_run_budget_set = SettingState.NOT_SET
 
 		return
 
@@ -80,18 +81,18 @@ class Settings:
 		if self.__performance_measure_set == SettingState.NOT_SET:
 			self.set_performance_measure()
 
-		return self.__settings['general']['performance_measure']
+		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
 
 
 	# TODO: Decide whether configuration and selection cutoff times should be separate or not
-	def set_config_target_cutoff_time(self, value: str = '60', origin: SettingState = SettingState.DEFAULT):
+	def set_config_target_cutoff_time(self, value: int = 60, origin: SettingState = SettingState.DEFAULT):
 		section = 'configuration'
 		name = 'config_target_cutoff_time'
 
 		self.__init_section(section)
 		self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name)
 		self.__performance_measure_set = origin
-		self.__settings[section][name] = value
+		self.__settings[section][name] = str(value)
 
 		return
 
@@ -100,5 +101,24 @@ class Settings:
 		if self.__config_target_cutoff_time_set == SettingState.NOT_SET:
 			self.set_config_target_cutoff_time()
 
-		return self.__settings['configuration']['config_target_cutoff_time']
+		return int(self.__settings['configuration']['config_target_cutoff_time'])
+
+
+	def set_config_run_budget(self, value: int = 600, origin: SettingState = SettingState.DEFAULT):
+		section = 'configuration'
+		name = 'config_run_budget'
+
+		self.__init_section(section)
+		self.__check_setting_state(self.__config_run_budget_set, origin, name)
+		self.__performance_measure_set = origin
+		self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_config_run_budget(self) -> int:
+		if self.__config_run_budget_set == SettingState.NOT_SET:
+			self.set_config_run_budget()
+
+		return int(self.__settings['configuration']['config_run_budget'])
 

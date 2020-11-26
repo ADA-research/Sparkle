@@ -67,6 +67,17 @@ else
 	echo $output
 fi
 
+# Configure solver with budget option
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget 10 | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] configure_solver budget option test succeeded"
+else              
+	echo "[failure] configure_solver budget option test failed with output:"
+	echo $output
+fi
+
 # Restore original settings
 mv $slurm_settings_tmp $slurm_settings_path
 mv $smac_settings_tmp $smac_settings_path
