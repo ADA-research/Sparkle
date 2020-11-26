@@ -67,14 +67,25 @@ else
 	echo $output
 fi
 
-# Configure solver with budget option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget 10 | tail -1)
+# Configure solver with budget per run option
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
-	echo "[success] configure_solver budget option test succeeded"
+	echo "[success] configure_solver budget per run option test succeeded"
 else              
-	echo "[failure] configure_solver budget option test failed with output:"
+	echo "[failure] configure_solver budget per run option test failed with output:"
+	echo $output
+fi
+
+# Configure solver with number of runs option
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] configure_solver number of runs option test succeeded"
+else              
+	echo "[failure] configure_solver number of runs option test failed with output:"
 	echo $output
 fi
 

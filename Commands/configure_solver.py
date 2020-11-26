@@ -30,7 +30,8 @@ if __name__ == r'__main__':
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
 	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=PerformanceMeasure.RUNTIME, help='the performance measure, e.g. runtime')
 	parser.add_argument('--cutoff-time', type=int, help='cutoff time per target algorithm run in seconds')
-	parser.add_argument('--budget', type=int, help='configuration budget per configurator run in seconds')
+	parser.add_argument('--budget-per-run', type=int, help='configuration budget per configurator run in seconds')
+	parser.add_argument('--number-of-runs', type=int, help='number of configuration runs to execute')
 
 	# Process command line arguments
 	args = parser.parse_args()
@@ -39,7 +40,8 @@ if __name__ == r'__main__':
 	args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 	sgh.settings.set_performance_measure(args.performance_measure, SettingState.CMD_LINE)
 	sgh.settings.set_config_target_cutoff_time(args.cutoff_time)
-	sgh.settings.set_config_run_budget(args.budget)
+	sgh.settings.set_config_budget_per_run(args.budget_per_run)
+	sgh.settings.set_config_number_of_runs(args.number_of_runs)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)

@@ -29,7 +29,8 @@ class Settings:
 		self.__settings = configparser.ConfigParser()
 		self.__performance_measure_set = SettingState.NOT_SET
 		self.__config_target_cutoff_time_set = SettingState.NOT_SET
-		self.__config_run_budget_set = SettingState.NOT_SET
+		self.__config_budget_per_run_set = SettingState.NOT_SET
+		self.__config_number_of_runs_set = SettingState.NOT_SET
 
 		return
 
@@ -87,7 +88,7 @@ class Settings:
 	# TODO: Decide whether configuration and selection cutoff times should be separate or not
 	def set_config_target_cutoff_time(self, value: int = 60, origin: SettingState = SettingState.DEFAULT):
 		section = 'configuration'
-		name = 'config_target_cutoff_time'
+		name = 'target_cutoff_time'
 
 		self.__init_section(section)
 		self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name)
@@ -101,24 +102,43 @@ class Settings:
 		if self.__config_target_cutoff_time_set == SettingState.NOT_SET:
 			self.set_config_target_cutoff_time()
 
-		return int(self.__settings['configuration']['config_target_cutoff_time'])
+		return int(self.__settings['configuration']['target_cutoff_time'])
 
 
-	def set_config_run_budget(self, value: int = 600, origin: SettingState = SettingState.DEFAULT):
+	def set_config_budget_per_run(self, value: int = 600, origin: SettingState = SettingState.DEFAULT):
 		section = 'configuration'
-		name = 'config_run_budget'
+		name = 'budget_per_run'
 
 		self.__init_section(section)
-		self.__check_setting_state(self.__config_run_budget_set, origin, name)
+		self.__check_setting_state(self.__config_budget_per_run_set, origin, name)
 		self.__performance_measure_set = origin
 		self.__settings[section][name] = str(value)
 
 		return
 
 
-	def get_config_run_budget(self) -> int:
-		if self.__config_run_budget_set == SettingState.NOT_SET:
-			self.set_config_run_budget()
+	def get_config_budget_per_run(self) -> int:
+		if self.__config_budget_per_run_set == SettingState.NOT_SET:
+			self.set_config_budget_per_run()
 
-		return int(self.__settings['configuration']['config_run_budget'])
+		return int(self.__settings['configuration']['budget_per_run'])
+
+
+	def set_config_number_of_runs(self, value: int = 25, origin: SettingState = SettingState.DEFAULT):
+		section = 'configuration'
+		name = 'number_of_runs'
+
+		self.__init_section(section)
+		self.__check_setting_state(self.__config_number_of_runs_set, origin, name)
+		self.__performance_measure_set = origin
+		self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_config_number_of_runs(self) -> int:
+		if self.__config_number_of_runs_set == SettingState.NOT_SET:
+			self.set_config_number_of_runs()
+
+		return int(self.__settings['configuration']['number_of_runs'])
 
