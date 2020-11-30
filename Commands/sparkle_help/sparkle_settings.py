@@ -1,5 +1,10 @@
 import configparser
 from enum import Enum
+from pathlib import Path
+from pathlib import PurePath
+
+from sparkle_help import sparkle_logging as slog
+from sparkle_help import sparkle_global_help as sgh
 
 
 class PerformanceMeasure(Enum):
@@ -26,7 +31,13 @@ class SettingState(Enum):
 
 class Settings:
 	def __init__(self):
+		# Settings 'dictionary' in configparser format
 		self.__settings = configparser.ConfigParser()
+
+		# Settinsg directory name
+		self.__settings_dir = 'Setting'
+
+		# Setting flags
 		self.__performance_measure_set = SettingState.NOT_SET
 		self.__config_target_cutoff_time_set = SettingState.NOT_SET
 		self.__config_budget_per_run_set = SettingState.NOT_SET
@@ -40,9 +51,15 @@ class Settings:
 		return
 
 
-	# TODO: Decide on a sensible path to write to (maybe Log or Tmp)
-	def write_settings_ini(file_path = 'sparkle_settings.ini'):
-		with open (file_path, 'w') as settings_file:
+	def write_settings_ini(self, file_name: Path = Path('sparkle_settings.ini')):
+		file_path = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / self.__settings_dir / file_name)
+
+		# Create needed directories if they don't exist
+		file_dir = Path(file_path).parents[0]
+		file_dir.mkdir(parents=True, exist_ok=True)
+
+		# Write the settings to file
+		with open(str(file_path), 'w') as settings_file:
 			self.__settings.write(settings_file)
 
 		return
@@ -72,8 +89,10 @@ class Settings:
 
 		self.__init_section(section)
 		self.__check_setting_state(self.__performance_measure_set, origin, name)
-		self.__performance_measure_set = origin
-		self.__settings[section][name] = value.name
+
+		if value != None:
+			self.__performance_measure_set = origin
+			self.__settings[section][name] = value.name
 
 		return
 
@@ -92,8 +111,10 @@ class Settings:
 
 		self.__init_section(section)
 		self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name)
-		self.__performance_measure_set = origin
-		self.__settings[section][name] = str(value)
+
+		if value != None:
+			self.__config_target_cutoff_time_set = origin
+			self.__settings[section][name] = str(value)
 
 		return
 
@@ -111,8 +132,10 @@ class Settings:
 
 		self.__init_section(section)
 		self.__check_setting_state(self.__config_budget_per_run_set, origin, name)
-		self.__performance_measure_set = origin
-		self.__settings[section][name] = str(value)
+
+		if value != None:
+			self.__config_budget_per_run_set = origin
+			self.__settings[section][name] = str(value)
 
 		return
 
@@ -125,13 +148,16 @@ class Settings:
 
 
 	def set_config_number_of_runs(self, value: int = 25, origin: SettingState = SettingState.DEFAULT):
+		print('debug: setting n_runs to', value, 'form', origin.name)
 		section = 'configuration'
 		name = 'number_of_runs'
 
 		self.__init_section(section)
 		self.__check_setting_state(self.__config_number_of_runs_set, origin, name)
-		self.__performance_measure_set = origin
-		self.__settings[section][name] = str(value)
+
+		if value != None:
+			self.__config_number_of_runs_set = origin
+			self.__settings[section][name] = str(value)
 
 		return
 

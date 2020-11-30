@@ -39,9 +39,9 @@ if __name__ == r'__main__':
 	instance_set = args.instance_set_train
 	args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 	sgh.settings.set_performance_measure(args.performance_measure, SettingState.CMD_LINE)
-	sgh.settings.set_config_target_cutoff_time(args.cutoff_time)
-	sgh.settings.set_config_budget_per_run(args.budget_per_run)
-	sgh.settings.set_config_number_of_runs(args.number_of_runs)
+	sgh.settings.set_config_target_cutoff_time(args.cutoff_time, SettingState.CMD_LINE)
+	sgh.settings.set_config_budget_per_run(args.budget_per_run, SettingState.CMD_LINE)
+	sgh.settings.set_config_number_of_runs(args.number_of_runs, SettingState.CMD_LINE)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)
@@ -69,4 +69,7 @@ if __name__ == r'__main__':
 	fout.write('solver ' + str(solver) + '\n')
 	fout.write('train ' + str(instance_set) + '\n')
 	fout.close()
+
+	# Write used settings to file
+	sgh.settings.write_settings_ini()
 

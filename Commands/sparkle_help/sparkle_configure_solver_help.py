@@ -231,7 +231,7 @@ def prepare_smac_execution_directories_validation(solver_name):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel_str = get_smac_settings()
 
-	for i in range(1, num_of_smac_run_str+1):
+	for i in range(1, num_of_smac_run+1):
 		solver_diretory = r'Solvers/' + solver_name + r'/*'
 
 		## Train default
