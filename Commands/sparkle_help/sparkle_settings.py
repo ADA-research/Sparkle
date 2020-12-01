@@ -30,12 +30,13 @@ class SettingState(Enum):
 
 
 class Settings:
+	# Settings path names
+	__settings_file = Path('sparkle_settings.ini')
+	__settings_dir = Path('Settings')
+
 	def __init__(self):
 		# Settings 'dictionary' in configparser format
 		self.__settings = configparser.ConfigParser()
-
-		# Settinsg directory name
-		self.__settings_dir = 'Setting'
 
 		# Setting flags
 		self.__performance_measure_set = SettingState.NOT_SET
@@ -46,7 +47,7 @@ class Settings:
 		return
 
 
-	def read_settings_ini(self):
+	def read_settings_ini(self, infile: PurePath = PurePath(__settings_dir / __settings_file)):
 		# TODO: Implement
 		return
 
