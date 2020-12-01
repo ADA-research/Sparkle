@@ -52,7 +52,7 @@ def read_smac_settings():
 			else:
 				print('c ERROR: Invalid smac_run_obj', smac_run_obj, 'in', sgh.sparkle_smac_settings_path, 'Stopping execution!')
 				sys.exit(-1)
-			sgh.settings.set_performance_measure(smac_run_obj, SettingState.FILE)
+			sgh.settings.set_general_performance_measure(smac_run_obj, SettingState.FILE)
 		elif mylist[0] == 'smac_whole_time_budget':
 			sgh.settings.set_config_budget_per_run(int(mylist[2]), SettingState.FILE)
 		elif mylist[0] == 'smac_each_run_cutoff_time':
@@ -70,7 +70,7 @@ def read_smac_settings():
 
 def get_smac_run_obj() -> str:
 	# Get smac_run_obj from general settings
-	smac_run_obj = sgh.settings.get_performance_measure()
+	smac_run_obj = sgh.settings.get_general_performance_measure()
 
 	# Convert to SMAC format
 	if smac_run_obj == PerformanceMeasure.RUNTIME:

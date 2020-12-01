@@ -20,6 +20,7 @@ from sparkle_help import sparkle_settings
 
 global settings
 settings = sparkle_settings.Settings()
+settings.read_settings_ini() # Read settings from default location
 
 flag_first_call = True
 

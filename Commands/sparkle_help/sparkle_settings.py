@@ -34,12 +34,18 @@ class Settings:
 	__settings_file = Path('sparkle_settings.ini')
 	__settings_dir = Path('Settings')
 
+	# Constant default values
+	DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME
+	DEFAULT_config_target_cutoff_time = 60
+	DEFAULT_config_budget_per_run = 600
+	DEFAULT_config_number_of_runs = 25
+
 	def __init__(self):
 		# Settings 'dictionary' in configparser format
 		self.__settings = configparser.ConfigParser()
 
 		# Setting flags
-		self.__performance_measure_set = SettingState.NOT_SET
+		self.__general_performance_measure_set = SettingState.NOT_SET
 		self.__config_target_cutoff_time_set = SettingState.NOT_SET
 		self.__config_budget_per_run_set = SettingState.NOT_SET
 		self.__config_number_of_runs_set = SettingState.NOT_SET
@@ -48,7 +54,49 @@ class Settings:
 
 
 	def read_settings_ini(self, infile: PurePath = PurePath(__settings_dir / __settings_file)):
-		# TODO: Implement
+		# Read file
+		file_settings = configparser.ConfigParser()
+		file_settings.read(str(infile))
+
+		# Set internal settings based on data read from FILE if they were read succesfully
+		if file_settings.sections() != []:
+			section = 'general'
+			option = 'performance_measure'
+			if file_settings.has_option(section, option):
+				value = PerformanceMeasure.from_str(file_settings.get(section, option))
+				self.set_general_performance_measure(value, SettingState.FILE)
+				file_settings.remove_option(section, option)
+
+			section = 'configuration'
+			option = 'target_cutoff_time'
+			if file_settings.has_option(section, option):
+				value = file_settings.getint(section, option)
+				self.set_config_target_cutoff_time(value, SettingState.FILE)
+				file_settings.remove_option(section, option)
+
+			option = 'budget_per_run'
+			if file_settings.has_option(section, option):
+				value = file_settings.getint(section, option)
+				self.set_config_budget_per_run(value, SettingState.FILE)
+				file_settings.remove_option(section, option)
+
+			option = 'number_of_runs'
+			if file_settings.has_option(section, option):
+				value = file_settings.getint(section, option)
+				self.set_config_number_of_runs(value, SettingState.FILE)
+				file_settings.remove_option(section, option)
+
+			# TODO: Report on any unknown settings that were read
+			sections = file_settings.sections()
+
+			for section in sections:
+				for option in file_settings[section]:
+					print('Unrecognised section - option combination:\'', section, option, '\'in file', str(infile), 'ignored') 
+
+		# Print error if unable to read the settings
+		else:
+			print('ERROR: Failed to read settings from', str(infile), 'The file may have been empty, locatd in a different path, or be in another format than INI. Settings from different sources will be used (e.g. default values).')
+
 		return
 
 
@@ -84,36 +132,37 @@ class Settings:
 		return
 
 
-	def set_performance_measure(self, value: PerformanceMeasure = PerformanceMeasure.RUNTIME, origin: SettingState = SettingState.DEFAULT):
+	def set_general_performance_measure(self, value: PerformanceMeasure = DEFAULT_general_performance_measure, origin: SettingState = SettingState.DEFAULT):
+		print('debug: in set_perf_measure')
 		section = 'general'
 		name = 'performance_measure'
 
-		self.__init_section(section)
-		self.__check_setting_state(self.__performance_measure_set, origin, name)
-
 		if value != None:
-			self.__performance_measure_set = origin
+			print('debug: setting perf_measure to', value, 'form', origin.name)
+
+			self.__init_section(section)
+			self.__check_setting_state(self.__general_performance_measure_set, origin, name)
+			self.__general_performance_measure_set = origin
 			self.__settings[section][name] = value.name
 
 		return
 
 
-	def get_performance_measure(self) -> PerformanceMeasure:
-		if self.__performance_measure_set == SettingState.NOT_SET:
-			self.set_performance_measure()
+	def get_general_performance_measure(self) -> PerformanceMeasure:
+		if self.__general_performance_measure_set == SettingState.NOT_SET:
+			self.set_general_performance_measure()
 
 		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
 
 
 	# TODO: Decide whether configuration and selection cutoff times should be separate or not
-	def set_config_target_cutoff_time(self, value: int = 60, origin: SettingState = SettingState.DEFAULT):
+	def set_config_target_cutoff_time(self, value: int = DEFAULT_config_target_cutoff_time, origin: SettingState = SettingState.DEFAULT):
 		section = 'configuration'
 		name = 'target_cutoff_time'
 
-		self.__init_section(section)
-		self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name)
-
 		if value != None:
+			self.__init_section(section)
+			self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name)
 			self.__config_target_cutoff_time_set = origin
 			self.__settings[section][name] = str(value)
 
@@ -127,14 +176,13 @@ class Settings:
 		return int(self.__settings['configuration']['target_cutoff_time'])
 
 
-	def set_config_budget_per_run(self, value: int = 600, origin: SettingState = SettingState.DEFAULT):
+	def set_config_budget_per_run(self, value: int = DEFAULT_config_budget_per_run, origin: SettingState = SettingState.DEFAULT):
 		section = 'configuration'
 		name = 'budget_per_run'
 
-		self.__init_section(section)
-		self.__check_setting_state(self.__config_budget_per_run_set, origin, name)
-
 		if value != None:
+			self.__init_section(section)
+			self.__check_setting_state(self.__config_budget_per_run_set, origin, name)
 			self.__config_budget_per_run_set = origin
 			self.__settings[section][name] = str(value)
 
@@ -148,15 +196,15 @@ class Settings:
 		return int(self.__settings['configuration']['budget_per_run'])
 
 
-	def set_config_number_of_runs(self, value: int = 25, origin: SettingState = SettingState.DEFAULT):
-		print('debug: setting n_runs to', value, 'form', origin.name)
+	def set_config_number_of_runs(self, value: int = DEFAULT_config_number_of_runs, origin: SettingState = SettingState.DEFAULT):
+		print('debug: in set config num of runs')
 		section = 'configuration'
 		name = 'number_of_runs'
 
-		self.__init_section(section)
-		self.__check_setting_state(self.__config_number_of_runs_set, origin, name)
-
 		if value != None:
+			print('debug: setting n_runs to', value, 'form', origin.name)
+			self.__init_section(section)
+			self.__check_setting_state(self.__config_number_of_runs_set, origin, name)
 			self.__config_number_of_runs_set = origin
 			self.__settings[section][name] = str(value)
 
