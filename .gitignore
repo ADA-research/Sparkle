@@ -15,6 +15,7 @@ Tmp/*
 Log/*
 Output/*
 Records/*
+Settings/latest.ini
 Components/smac-v2.10.03-master-778/results/*
 Components/smac-v2.10.03-master-778/tmp/*
 Components/smac-v2.10.03-master-778/example_scenarios/instances/*

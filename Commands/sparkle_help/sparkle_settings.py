@@ -110,11 +110,21 @@ class Settings:
 		return
 
 
-	def write_settings_ini(self, file_name: Path = Path('sparkle_settings.ini')):
-		file_path = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / self.__settings_dir / file_name)
+	def write_used_settings(self):
+		# Write to general output directory
+		file_path_output = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / self.__settings_dir / self.__settings_file)
+		self.write_settings_ini(Path(file_path_output))
 
+		# Write to latest settings file
+		file_path_latest = PurePath(self.__settings_dir / 'latest.ini')
+		self.write_settings_ini(Path(file_path_latest))
+
+		return
+
+
+	def write_settings_ini(self, file_path: Path):
 		# Create needed directories if they don't exist
-		file_dir = Path(file_path).parents[0]
+		file_dir = file_path.parents[0]
 		file_dir.mkdir(parents=True, exist_ok=True)
 
 		# Write the settings to file

@@ -82,5 +82,5 @@ if __name__ == r'__main__':
 	fout.close()
 
 	# Write used settings to file
-	sgh.settings.write_settings_ini()
+	sgh.settings.write_used_settings()
 
