@@ -53,16 +53,13 @@ class Settings:
 		self.__config_budget_per_run_set = SettingState.NOT_SET
 		self.__config_number_of_runs_set = SettingState.NOT_SET
 
+		# Initialise settings from default file path
+		self.read_settings_ini()
+
 		return
 
 
-	def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path, custom_state: SettingState = None):
-		# Decide state settings should be set with
-		if custom_state == None:
-			state = SettingState.FILE
-		else:
-			state = custom_state
-
+	def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path, state: SettingState = SettingState.FILE):
 		# Read file
 		file_settings = configparser.ConfigParser()
 		file_settings.read(str(file_path))
@@ -108,7 +105,7 @@ class Settings:
 
 		# Print error if unable to read the settings
 		else:
-			print('ERROR: Failed to read settings from', str(file_path), 'The file may have been empty, locatd in a different path, or be in another format than INI. Settings from different sources will be used (e.g. default values).')
+			print('ERROR: Failed to read settings from', str(file_path), 'The file may have been empty, located in a different path, or be in another format than INI. Settings from different sources will be used (e.g. default values).')
 
 		return
 
@@ -134,15 +131,20 @@ class Settings:
 		return
 
 
-	def __check_setting_state(self, current_state: SettingState, new_state: SettingState, name: str):
-		if current_state == SettingState.FILE and new_state == SettingState.DEFAULT:
-			print('Warning: Setting from file for', name, 'is being overwritten by default values!')
-		if current_state == SettingState.CMD_LINE and new_state == SettingState.DEFAULT:
-			print('Warning: Setting from command line argument for', name, 'is being overwritten by default values!')
-		if current_state == SettingState.CMD_LINE and new_state == SettingState.FILE:
-			print('Warning: Setting from command line argument for', name, 'is being overwritten by setting from file!')
+	def __check_setting_state(self, current_state: SettingState, new_state: SettingState, name: str) -> bool:
+		change_setting_ok = True
 
-		return
+		if current_state == SettingState.FILE and new_state == SettingState.DEFAULT:
+			change_setting_ok = False
+			print('Warning: Atempting to overwrite setting for', name, 'with default value; keeping the value read from file!')
+		elif current_state == SettingState.CMD_LINE and new_state == SettingState.DEFAULT:
+			change_setting_ok = False
+			print('Warning: Atempting to overwrite setting for', name, 'with default value; keeping the value read from command line!')
+		elif current_state == SettingState.CMD_LINE and new_state == SettingState.FILE:
+			change_setting_ok = False
+			print('Warning: Atempting to overwrite setting for', name, 'with value from file; keeping the value read from command line!')
+
+		return change_setting_ok
 
 
 	def set_general_performance_measure(self, value: PerformanceMeasure = DEFAULT_general_performance_measure, origin: SettingState = SettingState.DEFAULT):
@@ -150,11 +152,10 @@ class Settings:
 		section = 'general'
 		name = 'performance_measure'
 
-		if value != None:
+		if value != None and self.__check_setting_state(self.__general_performance_measure_set, origin, name):
 			print('debug: setting perf_measure to', value, 'form', origin.name)
 
 			self.__init_section(section)
-			self.__check_setting_state(self.__general_performance_measure_set, origin, name)
 			self.__general_performance_measure_set = origin
 			self.__settings[section][name] = value.name
 
@@ -173,9 +174,8 @@ class Settings:
 		section = 'configuration'
 		name = 'target_cutoff_time'
 
-		if value != None:
+		if value != None and self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name):
 			self.__init_section(section)
-			self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name)
 			self.__config_target_cutoff_time_set = origin
 			self.__settings[section][name] = str(value)
 
@@ -193,9 +193,8 @@ class Settings:
 		section = 'configuration'
 		name = 'budget_per_run'
 
-		if value != None:
+		if value != None and self.__check_setting_state(self.__config_budget_per_run_set, origin, name):
 			self.__init_section(section)
-			self.__check_setting_state(self.__config_budget_per_run_set, origin, name)
 			self.__config_budget_per_run_set = origin
 			self.__settings[section][name] = str(value)
 
@@ -214,10 +213,9 @@ class Settings:
 		section = 'configuration'
 		name = 'number_of_runs'
 
-		if value != None:
+		if value != None and self.__check_setting_state(self.__config_number_of_runs_set, origin, name):
 			print('debug: setting n_runs to', value, 'form', origin.name)
 			self.__init_section(section)
-			self.__check_setting_state(self.__config_number_of_runs_set, origin, name)
 			self.__config_number_of_runs_set = origin
 			self.__settings[section][name] = str(value)
 
