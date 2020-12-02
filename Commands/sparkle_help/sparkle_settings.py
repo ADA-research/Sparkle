@@ -10,6 +10,7 @@ from sparkle_help import sparkle_global_help as sgh
 class PerformanceMeasure(Enum):
 	RUNTIME = 0
 	QUALITY_ABSOLUTE = 1
+	QUALITY = 1 # If not specified, assume ABSOLTUE QUALITY
 	#QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
 
 
@@ -41,6 +42,7 @@ class Settings:
 	DEFAULT_config_budget_per_run = 600
 	DEFAULT_config_number_of_runs = 25
 
+
 	def __init__(self):
 		# Settings 'dictionary' in configparser format
 		self.__settings = configparser.ConfigParser()
@@ -62,30 +64,34 @@ class Settings:
 		# Set internal settings based on data read from FILE if they were read succesfully
 		if file_settings.sections() != []:
 			section = 'general'
-			option = 'performance_measure'
-			if file_settings.has_option(section, option):
-				value = PerformanceMeasure.from_str(file_settings.get(section, option))
-				self.set_general_performance_measure(value, SettingState.FILE)
-				file_settings.remove_option(section, option)
+			option_names = ('performance_measure', 'smac_run_obj')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = PerformanceMeasure.from_str(file_settings.get(section, option))
+					self.set_general_performance_measure(value, SettingState.FILE)
+					file_settings.remove_option(section, option)
 
 			section = 'configuration'
-			option = 'target_cutoff_time'
-			if file_settings.has_option(section, option):
-				value = file_settings.getint(section, option)
-				self.set_config_target_cutoff_time(value, SettingState.FILE)
-				file_settings.remove_option(section, option)
+			option_names = ('target_cutoff_time', 'smac_each_run_cutoff_time')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_config_target_cutoff_time(value, SettingState.FILE)
+					file_settings.remove_option(section, option)
 
-			option = 'budget_per_run'
-			if file_settings.has_option(section, option):
-				value = file_settings.getint(section, option)
-				self.set_config_budget_per_run(value, SettingState.FILE)
-				file_settings.remove_option(section, option)
+			option_names = ('budget_per_run', 'smac_whole_time_budget')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_config_budget_per_run(value, SettingState.FILE)
+					file_settings.remove_option(section, option)
 
-			option = 'number_of_runs'
-			if file_settings.has_option(section, option):
-				value = file_settings.getint(section, option)
-				self.set_config_number_of_runs(value, SettingState.FILE)
-				file_settings.remove_option(section, option)
+			option_names = ('number_of_runs', 'num_of_smac_runs')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_config_number_of_runs(value, SettingState.FILE)
+					file_settings.remove_option(section, option)
 
 			# TODO: Report on any unknown settings that were read
 			sections = file_settings.sections()
