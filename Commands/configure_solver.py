@@ -47,7 +47,7 @@ if __name__ == r'__main__':
 	sgh.settings.set_config_target_cutoff_time(args.target_cutoff_time, ac.user_set_state(args, 'target_cutoff_time'))
 	sgh.settings.set_config_budget_per_run(args.budget_per_run, ac.user_set_state(args, 'budget_per_run'))
 	sgh.settings.set_config_number_of_runs(args.number_of_runs, ac.user_set_state(args, 'number_of_runs'))
-	if ac.user_set_bool(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file)
+	if ac.user_set_bool(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)

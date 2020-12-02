@@ -56,7 +56,13 @@ class Settings:
 		return
 
 
-	def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path):
+	def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path, custom_state: SettingState = None):
+		# Decide state settings should be set with
+		if custom_state == None:
+			state = SettingState.FILE
+		else:
+			state = custom_state
+
 		# Read file
 		file_settings = configparser.ConfigParser()
 		file_settings.read(str(file_path))
@@ -68,7 +74,7 @@ class Settings:
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = PerformanceMeasure.from_str(file_settings.get(section, option))
-					self.set_general_performance_measure(value, SettingState.FILE)
+					self.set_general_performance_measure(value, state)
 					file_settings.remove_option(section, option)
 
 			section = 'configuration'
@@ -76,21 +82,21 @@ class Settings:
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
-					self.set_config_target_cutoff_time(value, SettingState.FILE)
+					self.set_config_target_cutoff_time(value, state)
 					file_settings.remove_option(section, option)
 
 			option_names = ('budget_per_run', 'smac_whole_time_budget')
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
-					self.set_config_budget_per_run(value, SettingState.FILE)
+					self.set_config_budget_per_run(value, state)
 					file_settings.remove_option(section, option)
 
 			option_names = ('number_of_runs', 'num_of_smac_runs')
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
-					self.set_config_number_of_runs(value, SettingState.FILE)
+					self.set_config_number_of_runs(value, state)
 					file_settings.remove_option(section, option)
 
 			# TODO: Report on any unknown settings that were read
