@@ -19,12 +19,17 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_add_train_instances_help as satih
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
