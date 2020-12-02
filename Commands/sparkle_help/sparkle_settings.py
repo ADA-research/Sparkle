@@ -41,6 +41,7 @@ class Settings:
 	DEFAULT_config_target_cutoff_time = 60
 	DEFAULT_config_budget_per_run = 600
 	DEFAULT_config_number_of_runs = 25
+	DEFAULT_config_number_of_runs_in_parallel = 25
 
 
 	def __init__(self):
@@ -52,6 +53,7 @@ class Settings:
 		self.__config_target_cutoff_time_set = SettingState.NOT_SET
 		self.__config_budget_per_run_set = SettingState.NOT_SET
 		self.__config_number_of_runs_set = SettingState.NOT_SET
+		self.__config_number_of_runs_in_parallel_set = SettingState.NOT_SET
 
 		# Initialise settings from default file path
 		self.read_settings_ini()
@@ -94,6 +96,13 @@ class Settings:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
 					self.set_config_number_of_runs(value, state)
+					file_settings.remove_option(section, option)
+
+			option_names = ('number_of_runs_in_parallel', 'num_of_smac_runs_in_parallel')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_config_number_of_runs_in_parallel(value, state)
 					file_settings.remove_option(section, option)
 
 			# TODO: Report on any unknown settings that were read
@@ -237,4 +246,23 @@ class Settings:
 			self.set_config_number_of_runs()
 
 		return int(self.__settings['configuration']['number_of_runs'])
+
+
+	def set_config_number_of_runs_in_parallel(self, value: int = DEFAULT_config_number_of_runs_in_parallel, origin: SettingState = SettingState.DEFAULT):
+		section = 'configuration'
+		name = 'number_of_runs_in_parallel'
+
+		if value != None and self.__check_setting_state(self.__config_number_of_runs_in_parallel_set, origin, name):
+			self.__init_section(section)
+			self.__config_number_of_runs_in_parallel_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_config_number_of_runs_in_parallel(self) -> int:
+		if self.__config_number_of_runs_in_parallel_set == SettingState.NOT_SET:
+			self.set_config_number_of_runs_in_parallel()
+
+		return int(self.__settings['configuration']['number_of_runs_in_parallel'])
 
