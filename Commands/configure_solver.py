@@ -12,6 +12,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import argparse
 import sys
+from pathlib import Path
+
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
@@ -33,6 +35,7 @@ if __name__ == r'__main__':
 	parser.add_argument('--target-cutoff-time', type=int, default=sgh.settings.DEFAULT_config_target_cutoff_time, action=ac.SetByUser, help='cutoff time per target algorithm run in seconds')
 	parser.add_argument('--budget-per-run', type=int, default=sgh.settings.DEFAULT_config_budget_per_run, action=ac.SetByUser, help='configuration budget per configurator run in seconds')
 	parser.add_argument('--number-of-runs', type=int, default=sgh.settings.DEFAULT_config_number_of_runs, action=ac.SetByUser, help='number of configuration runs to execute')
+	parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 
 	# Process command line arguments
 	args = parser.parse_args()
@@ -40,10 +43,11 @@ if __name__ == r'__main__':
 	instance_set = args.instance_set_train
 
 	args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
-	sgh.settings.set_general_performance_measure(args.performance_measure, ac.user_set(args, 'performance_measure'))
-	sgh.settings.set_config_target_cutoff_time(args.target_cutoff_time, ac.user_set(args, 'target_cutoff_time'))
-	sgh.settings.set_config_budget_per_run(args.budget_per_run, ac.user_set(args, 'budget_per_run'))
-	sgh.settings.set_config_number_of_runs(args.number_of_runs, ac.user_set(args, 'number_of_runs'))
+	sgh.settings.set_general_performance_measure(args.performance_measure, ac.user_set_state(args, 'performance_measure'))
+	sgh.settings.set_config_target_cutoff_time(args.target_cutoff_time, ac.user_set_state(args, 'target_cutoff_time'))
+	sgh.settings.set_config_budget_per_run(args.budget_per_run, ac.user_set_state(args, 'budget_per_run'))
+	sgh.settings.set_config_number_of_runs(args.number_of_runs, ac.user_set_state(args, 'number_of_runs'))
+	if ac.user_set_bool(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_name = sfh.get_last_level_directory_name(instance_set)

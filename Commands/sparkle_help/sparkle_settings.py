@@ -30,9 +30,10 @@ class SettingState(Enum):
 
 
 class Settings:
-	# Settings path names
+	# Settings path names and default
 	__settings_file = Path('sparkle_settings.ini')
 	__settings_dir = Path('Settings')
+	DEFAULT_settings_path = PurePath(__settings_dir / __settings_file)
 
 	# Constant default values
 	DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME
@@ -53,10 +54,10 @@ class Settings:
 		return
 
 
-	def read_settings_ini(self, infile: PurePath = PurePath(__settings_dir / __settings_file)):
+	def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path):
 		# Read file
 		file_settings = configparser.ConfigParser()
-		file_settings.read(str(infile))
+		file_settings.read(str(file_path))
 
 		# Set internal settings based on data read from FILE if they were read succesfully
 		if file_settings.sections() != []:
@@ -91,11 +92,11 @@ class Settings:
 
 			for section in sections:
 				for option in file_settings[section]:
-					print('Unrecognised section - option combination:\'', section, option, '\'in file', str(infile), 'ignored') 
+					print('Unrecognised section - option combination:\'', section, option, '\'in file', str(file_path), 'ignored') 
 
 		# Print error if unable to read the settings
 		else:
-			print('ERROR: Failed to read settings from', str(infile), 'The file may have been empty, locatd in a different path, or be in another format than INI. Settings from different sources will be used (e.g. default values).')
+			print('ERROR: Failed to read settings from', str(file_path), 'The file may have been empty, locatd in a different path, or be in another format than INI. Settings from different sources will be used (e.g. default values).')
 
 		return
 
