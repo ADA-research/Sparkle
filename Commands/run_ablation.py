@@ -48,6 +48,9 @@ if __name__ == r'__main__':
     instance_set_test_name = None
     if instance_set_test is not None:
         instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+    else:
+        instance_set_test = instance_set_train
+        instance_set_test_name = instance_set_train_name
     print(solver_name, instance_set_train_name, instance_set_test_name)
 
     #DEVELOP: REMOVE SCENARIO

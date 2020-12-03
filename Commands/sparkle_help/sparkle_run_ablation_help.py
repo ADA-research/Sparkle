@@ -112,8 +112,8 @@ def get_slurm_params(solver_name, instance_train_name, instance_test_name, postf
     _, _, _, _, _, _, ablation_concurrent_clis, _ = scsh.get_smac_settings(with_ablation=True)
 
     job_name = '--job-name=' + sbatch_script_name
-    output = '--output=' + scenario_dir + sbatch_script_name + '.txt'
-    error = '--error=' + scenario_dir + sbatch_script_name + '.err'
+    output = '--output=' + sbatch_script_name + '.txt'
+    error = '--error=' + sbatch_script_name + '.err'
     cpus = '--cpus-per-task={}'.format(ablation_concurrent_clis)
 
     sbatch_options_list = [job_name, output, error, cpus]
@@ -152,7 +152,7 @@ def generate_callback_slurm_script(solver_name, instance_train_name, instance_te
     sbatch_script_name = sbatch_script_name + ".sh"
     sbatch_script_path = scenario_dir + sbatch_script_name
 
-    callback_script_path = scenario_dir + "callback.sh"
+    callback_script_path = "callback.sh"
     log_path = sgh.sparkle_global_log_dir + "Ablation/" + sbatch_script_name + "/"
 
     sfh.checkout_directory(log_path)

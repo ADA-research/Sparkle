@@ -413,7 +413,7 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 	else:
 		configuration_reports_directory = r'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '/'
 
-	common_dict = get_dict_variable_to_value_common(solver_name, instance_set_train_name, configuration_reports_directory)
+	common_dict = get_dict_variable_to_value_common(solver_name, instance_set_train_name, instance_set_test_name, configuration_reports_directory)
 	full_dict.update(common_dict)
 
 	variable = r'testBool'
@@ -433,7 +433,7 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 
 
 # Retrieve variables relevant to all configuration reports
-def get_dict_variable_to_value_common(solver_name, instance_set_train_name, configuration_reports_directory):
+def get_dict_variable_to_value_common(solver_name, instance_set_train_name, instance_set_train_name, configuration_reports_directory):
 	common_dict = {}
 
 	variable = r'performanceMeasure'
@@ -519,10 +519,11 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, conf
 	common_dict[variable] = str(overlapping_timeouts_train)
 
 	variable = r'ablationBool'
-	common_dict[variable] = get_ablationBool(solver_name, instance_set_train_name,instance_set_train_name)
+	ablation_validation_name = instance_set_test_name if instance_set_test_name is not None else instance_set_train_name
+	common_dict[variable] = get_ablationBool(solver_name, instance_set_train_name,ablation_validation_name )
 
 	variable = r'ablationPath'
-	common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,instance_set_train_name)
+	common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,ablation_validation_name)
 
 	return common_dict
 
