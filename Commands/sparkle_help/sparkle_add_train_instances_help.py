@@ -13,10 +13,15 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import random
+import pathlib
 from sparkle_help import sparkle_file_help as sfh
 
-
+#DEPRICATED
+'''
 def get_list_cnf_path_recursive(path, list_cnf_path):
+	p = pathlib.Path(path)
+	return [f for f in p.rglob("*.cnf") if f.is_file()]
+
 	if os.path.isfile(path):
 		file_extension = sfh.get_file_least_extension(path)
 		if file_extension == r'cnf':
@@ -31,12 +36,18 @@ def get_list_cnf_path_recursive(path, list_cnf_path):
 		for item in list_all_items:
 			get_list_cnf_path_recursive(this_path+item, list_cnf_path)
 	return
+'''
 
 def get_list_cnf_path(instances_directory):
-	list_cnf_path = []
-	get_list_cnf_path_recursive(instances_directory, list_cnf_path)
-	return list_cnf_path
+	path = pathlib.Path(instances_directory)
+	return [str(f) for f in path.rglob("*.cnf") if f.is_file()]
 
+	#list_cnf_path = []
+	#get_list_cnf_path_recursive(instances_directory, list_cnf_path)
+	#return list_cnf_path
+
+#DEPRICATED
+'''
 def get_list_all_path_recursive(path, list_all_path):
 	if os.path.isfile(path):
 		list_all_path.append(path)
@@ -50,11 +61,14 @@ def get_list_all_path_recursive(path, list_all_path):
 		for item in list_all_items:
 			get_list_all_path_recursive(this_path+item, list_all_path)
 	return
-
+'''
 def get_list_all_path(instances_directory):
-	list_all_path = []
-	get_list_all_path_recursive(instances_directory, list_all_path)
-	return list_all_path
+	p = pathlib.Path(instances_directory)
+	return [str(f) for f in p.rglob("*") if f.is_file()]
+
+	#list_all_path = []
+	#get_list_all_path_recursive(instances_directory, list_all_path)
+	#return list_all_path
 
 def get_list_train_cnf_index(list_cnf_path):
 	num_list_cnf = len(list_cnf_path)
