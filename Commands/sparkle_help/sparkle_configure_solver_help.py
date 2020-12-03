@@ -467,6 +467,8 @@ def generate_generic_callback_slurm_script(name,solver, instance_set_train, inst
 	sbatch_options_list = [job_name, output, error]
 	sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
 	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
+
+	#Only overwrite task specific arguments
 	sbatch_options_list.append("--dependency=afterany:{}".format(dependency))
 	sbatch_options_list.append("--nodes=1")
 	sbatch_options_list.append("--ntasks=1")

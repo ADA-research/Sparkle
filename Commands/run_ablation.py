@@ -11,14 +11,6 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-#TODO: Read settingsfile
-#TODO: Dedicated ablations settings file or copy from settings?
-#TODO: Check for conflicts between settings (slurm vs ablation, smac vs ablation)
-#TODO: SLURM and ABLATION run over multiple nodes (-n64 -c1 for example) -> srun in wrapper
-#TODO: Move log files to dedicated directories
-#TODO: Handle tmp files
-#TODO: Add to logger made by Koen
-
 import argparse
 import os
 import sys
@@ -64,42 +56,43 @@ if __name__ == r'__main__':
 
     #Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(solver_name, instance_set_train_name, instance_set_test_name)
-    print(ablation_scenario_dir)
+    print("Scenario dir: {}".format(ablation_scenario_dir))
 
     #Instances
     sah.create_instance_file(instance_set_train, ablation_scenario_dir, "train")
     if instance_set_test_name is not None:
         sah.create_instance_file(instance_set_test, ablation_scenario_dir, "test")
     else:
+        #TODO: check if needed
         sah.create_instance_file(instance_set_train, ablation_scenario_dir, "test")
 
     print("c Create config file")
     #Configurations
     sah.create_configuration_file(solver_name, instance_set_train_name, instance_set_test_name)
-
     print("c Submit ablation run")
     #Submit ablation run
     #TODO: Move to help
     sbatch_script_path = sah.generate_slurm_script(solver_name, instance_set_train_name, instance_set_test_name)
     print("c Created {}".format(sbatch_script_path))
-    jobid = ssh.submit_sbatch_script(sbatch_script_path, sgh.ablation_dir)
+
+    jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
     print("c Launched sbatch script '{}' with jobid {}".format(sbatch_script_path,jobid))
 
     #Submit intermediate actions (copy path from log)
     sbatch_script_path = sah.generate_callback_slurm_script(solver_name, instance_set_train_name, instance_set_test_name,
                                                    dependency=jobid)
-    jobid = ssh.submit_sbatch_script(sbatch_script_path, sgh.ablation_dir)
+    jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
     print("c Launched callback sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))
 
     #Submit ablation validation run when nessesary
     if instance_set_test is not None:
         sbatch_script_path = sah.generate_validation_slurm_script(solver_name, instance_set_train_name, instance_set_test_name,
                                                        dependency=jobid)
-        jobid = ssh.submit_sbatch_script(sbatch_script_path, sgh.ablation_dir)
+        jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
         print("c Launched validation sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))
 
         # Submit intermediate actions (copy validation table from log)
         sbatch_script_path = sah.generate_validation_callback_slurm_script(solver_name, instance_set_train_name,
                                                                 instance_set_test_name, dependency=jobid)
-        jobid = ssh.submit_sbatch_script(sbatch_script_path, sgh.ablation_dir)
+        jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
         print("c Launched validation callback sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))
