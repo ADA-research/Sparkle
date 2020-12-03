@@ -433,7 +433,7 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 
 
 # Retrieve variables relevant to all configuration reports
-def get_dict_variable_to_value_common(solver_name, instance_set_train_name, instance_set_train_name, configuration_reports_directory):
+def get_dict_variable_to_value_common(solver_name, instance_set_train_name, instance_set_test_name, configuration_reports_directory):
 	common_dict = {}
 
 	variable = r'performanceMeasure'

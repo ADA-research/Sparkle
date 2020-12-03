@@ -314,7 +314,9 @@ def get_ablation_table(solver_name, instance_train_name, instance_test_name):
 
     with open(table_file, "r") as fh:
         for line in fh.readlines():
-            values = re.sub("\s+"," ",line.strip()).split(' ')
+            values = re.sub("\s+"," ",line.strip())
+            values = re.sub(", ",",",values)
+            values = [val.replace(",",", ") for val in values.split(' ')]
             if len(values) == 5:
                results.append(values)
 
