@@ -300,7 +300,6 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
 def check_for_ablation(solver_name, instance_train_name, instance_test_name):
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name, exec_path=False)
     table_file = pathlib.Path(scenario_dir, "ablationValidation.txt")
-    print(str(table_file))
     return table_file.is_file()
 
 def get_ablation_table(solver_name, instance_train_name, instance_test_name):
