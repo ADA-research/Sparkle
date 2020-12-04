@@ -1,6 +1,0 @@
-smac_run_obj = RUNTIME
-smac_whole_time_budget = 300
-smac_each_run_cutoff_time = 60
-smac_each_run_cutoff_length = max
-num_of_smac_run = 25
-num_of_smac_run_in_parallel = 25

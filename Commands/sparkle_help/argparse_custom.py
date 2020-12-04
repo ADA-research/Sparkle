@@ -16,7 +16,7 @@ def user_set_state(args, arg_name: str) -> SettingState:
 		return SettingState.DEFAULT
 
 
-def user_set_bool(args, arg_name: str) -> bool:
+def set_by_user(args, arg_name: str) -> bool:
 	if hasattr(args, arg_name + '_nondefault'):
 		return True
 	else:

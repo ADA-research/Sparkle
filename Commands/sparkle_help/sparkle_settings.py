@@ -45,6 +45,8 @@ class Settings:
 
 	DEFAULT_slurm_number_of_runs_in_parallel = 25
 
+	DEFAULT_smac_target_cutoff_length = 'max'
+
 
 	def __init__(self):
 		# Settings 'dictionary' in configparser format
@@ -58,6 +60,8 @@ class Settings:
 		self.__config_number_of_runs_set = SettingState.NOT_SET
 
 		self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
+
+		self.__smac_target_cutoff_length_set = SettingState.NOT_SET
 
 		# Initialise settings from default file path
 		self.read_settings_ini()
@@ -108,6 +112,14 @@ class Settings:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
 					self.set_slurm_number_of_runs_in_parallel(value, state)
+					file_settings.remove_option(section, option)
+
+			section = 'smac'
+			option_names = ('target_cutoff_length', 'smac_each_run_cutoff_length')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.get(section, option)
+					self.set_smac_target_cutoff_length(value, state)
 					file_settings.remove_option(section, option)
 
 			# TODO: Report on any unknown settings that were read
@@ -171,14 +183,14 @@ class Settings:
 		return change_setting_ok
 
 
+	### General settings ###
+
+
 	def set_general_performance_measure(self, value: PerformanceMeasure = DEFAULT_general_performance_measure, origin: SettingState = SettingState.DEFAULT):
-		print('debug: in set_perf_measure')
 		section = 'general'
 		name = 'performance_measure'
 
 		if value != None and self.__check_setting_state(self.__general_performance_measure_set, origin, name):
-			print('debug: setting perf_measure to', value, 'form', origin.name)
-
 			self.__init_section(section)
 			self.__general_performance_measure_set = origin
 			self.__settings[section][name] = value.name
@@ -191,6 +203,9 @@ class Settings:
 			self.set_general_performance_measure()
 
 		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
+
+
+	### Configuration settings ###
 
 
 	# TODO: Decide whether configuration and selection cutoff times should be separate or not
@@ -233,12 +248,10 @@ class Settings:
 
 
 	def set_config_number_of_runs(self, value: int = DEFAULT_config_number_of_runs, origin: SettingState = SettingState.DEFAULT):
-		print('debug: in set config num of runs')
 		section = 'configuration'
 		name = 'number_of_runs'
 
 		if value != None and self.__check_setting_state(self.__config_number_of_runs_set, origin, name):
-			print('debug: setting n_runs to', value, 'form', origin.name)
 			self.__init_section(section)
 			self.__config_number_of_runs_set = origin
 			self.__settings[section][name] = str(value)
@@ -251,6 +264,31 @@ class Settings:
 			self.set_config_number_of_runs()
 
 		return int(self.__settings['configuration']['number_of_runs'])
+
+
+	### Configuration: SMAC specific settings ###
+
+
+	def set_smac_target_cutoff_length(self, value: str = DEFAULT_smac_target_cutoff_length, origin: SettingState = SettingState.DEFAULT):
+		section = 'smac'
+		name = 'target_cutoff_length'
+
+		if value != None and self.__check_setting_state(self.__smac_target_cutoff_length_set, origin, name):
+			self.__init_section(section)
+			self.__smac_target_cutoff_length_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_smac_target_cutoff_length(self) -> str:
+		if self.__smac_target_cutoff_length_set == SettingState.NOT_SET:
+			self.set_smac_target_cutoff_length()
+
+		return self.__settings['smac']['target_cutoff_length']
+
+
+	### Slurm settings ###
 
 
 	def set_slurm_number_of_runs_in_parallel(self, value: int = DEFAULT_slurm_number_of_runs_in_parallel, origin: SettingState = SettingState.DEFAULT):
