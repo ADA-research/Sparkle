@@ -61,7 +61,7 @@ def read_smac_settings():
 		elif mylist[0] == 'num_of_smac_run':
 			sgh.settings.set_config_number_of_runs(int(mylist[2]), SettingState.FILE)
 		elif mylist[0] == 'num_of_smac_run_in_parallel':
-			sgh.settings.set_config_number_of_runs_in_parallel(int(mylist[2]), SettingState.FILE)
+			sgh.settings.set_slurm_number_of_runs_in_parallel(int(mylist[2]), SettingState.FILE)
 	fin.close()
 
 	return smac_each_run_cutoff_length
@@ -88,7 +88,7 @@ def get_smac_settings():
 	smac_whole_time_budget = sgh.settings.get_config_budget_per_run()
 	smac_each_run_cutoff_time = sgh.settings.get_config_target_cutoff_time()
 	num_of_smac_run = sgh.settings.get_config_number_of_runs()
-	num_of_smac_run_in_parallel = sgh.settings.get_config_number_of_runs_in_parallel()
+	num_of_smac_run_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
 
 	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel
 
