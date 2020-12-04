@@ -55,10 +55,10 @@ if __name__ == r'__main__':
 	instance_set_train = args.instance_set_train
 	instance_set_test = args.instance_set_test
 
+	if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
 	args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 	if ac.set_by_user(args, 'performance_measure'): sgh.settings.set_general_performance_measure(args.performance_measure, SettingState.CMD_LINE)
 	if ac.set_by_user(args, 'target_cutoff_time'): sgh.settings.set_config_target_cutoff_time(args.target_cutoff_time, SettingState.CMD_LINE)
-	if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
