@@ -106,17 +106,21 @@ def print_solution(raw_result_path):
 def call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time):
 	raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 	srs.run_solver_on_instance(solver_path, solver_path+r'/'+sgh.sparkle_run_default_wrapper, instance_path, raw_result_path, cutoff_time)
-	verify_string = srs.judge_correctness_raw_result(instance_path, raw_result_path)
+	# verify_string = srs.judge_correctness_raw_result(instance_path, raw_result_path)
 	
-	if verify_string == r'SAT': flag_solved = True
-	elif verify_string == r'UNSAT': flag_solved = True
-	elif verify_string == r'UNKNOWN': flag_solved = False
-	elif verify_string == r'WRONG': flag_solved = False
-	else: flag_solved = False
+	# if verify_string == r'SAT': flag_solved = True
+	# elif verify_string == r'UNSAT': flag_solved = True
+	# elif verify_string == r'UNKNOWN': flag_solved = False
+	# elif verify_string == r'WRONG': flag_solved = False
+	# else: flag_solved = False
+
+	flag_solved = True
 	
 	if flag_solved: 
 		print('c instance solved by solver ' + solver_path)
-		print_solution(raw_result_path)
+		# print_solution(raw_result_path)
+		# print(raw_result_path)
+		os.system('cat %s' % (raw_result_path))
 	
 	os.system(r'rm -f ' + raw_result_path)
 	return flag_solved
@@ -160,8 +164,9 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path):
 		if i+1 < len(list_predict_schedule):
 			cutoff_time = list_predict_schedule[i][1]
 		else:
-			cutoff_time = sgh.sparkle_maximum_int-1
-			print('c This is the last solver call, so time budget for this try changes from ' + str(list_predict_schedule[-1][1]) + ' to ' + str(cutoff_time))
+			# cutoff_time = sgh.sparkle_maximum_int-1
+			# print('c This is the last solver call, so time budget for this try changes from ' + str(list_predict_schedule[-1][1]) + ' to ' + str(cutoff_time))
+			cutoff_time = list_predict_schedule[i][1]
 		print('c Calling solver ' + sfh.get_last_level_directory_name(solver_path) + ' with time budget ' + str(cutoff_time) + ' for solving ...')
 		sys.stdout.flush()
 		flag_solved = call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time)

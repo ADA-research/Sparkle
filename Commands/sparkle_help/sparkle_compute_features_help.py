@@ -30,7 +30,6 @@ except ImportError:
 	import sparkle_experiments_related_help as ser
 	import sparkle_job_help
 
-
 def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path):
 	sfdcsv.Sparkle_Feature_Data_CSV.create_empty_csv(result_path)
 	zero_value_csv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)

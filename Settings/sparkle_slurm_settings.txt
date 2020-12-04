@@ -1,3 +1,4 @@
---partition=graceTST
---exclude=
+--mem-per-cpu=3000
+--partition=graceADA
+--exclude=ethnode[23]
 --nodelist=

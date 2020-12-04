@@ -15,14 +15,24 @@ import time
 import random
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_experiments_related_help as ser
-from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_slurm_help as ssh
-
+try:
+	from sparkle_help import sparkle_global_help as sgh
+	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+	from sparkle_help import sparkle_experiments_related_help as ser
+	from sparkle_help import sparkle_job_help
+	from sparkle_help import sparkle_compute_features_help as scf
+	from sparkle_help import sparkle_slurm_help as ssh
+except ImportError:
+	import sparkle_global_help as sgh
+	import sparkle_basic_help
+	import sparkle_file_help as sfh
+	import sparkle_feature_data_csv_help as sfdcsv
+	import sparkle_experiments_related_help as ser
+	import sparkle_job_help
+	import sparkle_compute_features_help as scf
+	import sparkle_slurm_help as ssh
 
 def generate_computing_features_sbatch_shell_script(sbatch_shell_script_path, feature_data_csv_path, list_jobs, start_index, end_index):
 	####
@@ -37,7 +47,7 @@ def generate_computing_features_sbatch_shell_script(sbatch_shell_script_path, fe
 	num_job_total = end_index - start_index # calculate the total number of jobs to be handled in this sbatch script
 	if num_job_in_parallel > num_job_total:
 		num_job_in_parallel = num_job_total # update the number of jobs in parallel accordingly if it is greater than the total number of jobs
-	command_prefix = r'srun -N1 -n1 --exclusive python2 Commands/sparkle_help/compute_features_core.py ' # specify the prefix of the executing command
+	command_prefix = r'srun -N1 -n1 --exclusive python3 Commands/sparkle_help/compute_features_core.py ' # specify the prefix of the executing command
 	
 	fout = open(sbatch_shell_script_path, 'w+') # open the file of sbatch script
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX) # using the UNIX file lock to prevent other attempts to visit this sbatch script
