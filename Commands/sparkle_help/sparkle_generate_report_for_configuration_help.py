@@ -14,6 +14,8 @@ import os
 import sys
 import fcntl
 import math
+from pathlib import Path
+
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -106,22 +108,25 @@ def get_defaultConfigurationTrainingPerformancePAR10(solver_name, instance_set_n
 
 
 def get_instance_path_from_path(results_dir, path):
-	if results_dir[-1] != r'/':
-		results_dir += r'/'
-	instance_path = path.replace(results_dir, r'')
-	pos_right_slash = instance_path.rfind(r'/')
-	instance_path_1 = instance_path[:pos_right_slash+1]
-	instance_path_2 = instance_path[pos_right_slash+1:]
-	
-	key_str_wrapper = r'wrapper'
-	pos_wrapper = instance_path_2.find(key_str_wrapper)
-	instance_path_2 = instance_path_2[pos_wrapper+1:]
-	pos_underscore_first = instance_path_2.find('_')
-	instance_path_2 = instance_path_2[pos_underscore_first+1:]
-	pos_underscore_last = instance_path_2.rfind('_')
-	instance_path_2 = instance_path_2[:pos_underscore_last]
-	instance_path = instance_path_1 + instance_path_2
-	return instance_path
+	instance_path = Path(path)
+	instance_name = instance_path.name
+	# TODO: Check what this was supposed to do, or whehter it can be deleted:
+#	if results_dir[-1] != r'/':
+#		results_dir += r'/'
+#	instance_path = path.replace(results_dir, r'')
+#	pos_right_slash = instance_path.rfind(r'/')
+#	instance_path_1 = instance_path[:pos_right_slash+1]
+#	instance_path_2 = instance_path[pos_right_slash+1:]
+#	
+#	key_str_wrapper = r'wrapper'
+#	pos_wrapper = instance_path_2.find(key_str_wrapper)
+#	instance_path_2 = instance_path_2[pos_wrapper+1:]
+#	pos_underscore_first = instance_path_2.find('_')
+#	instance_path_2 = instance_path_2[pos_underscore_first+1:]
+#	pos_underscore_last = instance_path_2.rfind('_')
+#	instance_path_2 = instance_path_2[:pos_underscore_last]
+#	instance_path = instance_path_1 + instance_path_2
+	return instance_name
 
 def construct_list_instance_and_par10_recursive(list_instance_and_par10, path, cutoff):
 	if os.path.isfile(path):

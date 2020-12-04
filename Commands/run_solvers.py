@@ -26,9 +26,17 @@ from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_job_parallel_help
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
+from sparkle_help.sparkle_settings import PerformanceMeasure
+from sparkle_help.sparkle_settings import SettingState
+from sparkle_help import argparse_custom as ac
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -36,13 +44,14 @@ if __name__ == r'__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--recompute', action='store_true', help='recompute the performance of all solvers on all instances')
 	parser.add_argument('--parallel', action='store_true', help='run the solver on multiple instances in parallel')
-	parser.add_argument('--objective', choices=sgh.PerformanceMeasures.__members__, default=sgh.PerformanceMeasures.RUNTIME, help='the objective to measure, e.g. runtime')
+	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, action=ac.SetByUser, help='the performance measure, e.g. runtime')
 
 	# Process command line arguments
 	args = parser.parse_args()
 	my_flag_recompute = args.recompute
 	my_flag_parallel = args.parallel
-	objective = sgh.parse_arg_performance(args.objective)
+
+	if ac.set_by_user(args, 'performance_measure'): sgh.settings.set_general_performance_measure(args.performance_measure, SettingState.CMD_LINE)
 
 	print('c Start running solvers ...')
 
@@ -54,12 +63,12 @@ if __name__ == r'__main__':
 		if my_flag_recompute:
 			performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 			performance_data_csv.clean_csv()
-			srs.running_solvers(sgh.performance_data_csv_path, 2, objective)
+			srs.running_solvers(sgh.performance_data_csv_path, 2)
 		else:
-			srs.running_solvers(sgh.performance_data_csv_path, 1, objective)
+			srs.running_solvers(sgh.performance_data_csv_path, 1)
 	
 		print('c Running solvers done!')
 	else:
 		# Call the parallel version of this command
-		rsp.run_solvers_parallel(my_flag_recompute, objective)
+		rsp.run_solvers_parallel(my_flag_recompute)
 

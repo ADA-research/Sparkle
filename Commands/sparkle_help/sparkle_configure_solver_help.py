@@ -22,6 +22,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_slurm_help as ssh
+from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 class InstanceType(Enum):
@@ -29,37 +30,30 @@ class InstanceType(Enum):
 	TEST = 2
 
 
+def get_smac_run_obj() -> str:
+	# Get smac_run_obj from general settings
+	smac_run_obj = sgh.settings.get_general_performance_measure()
+
+	# Convert to SMAC format
+	if smac_run_obj == PerformanceMeasure.RUNTIME:
+		smac_run_obj = smac_run_obj.name
+	elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE:
+		smac_run_obj = 'QUALITY'
+	else:
+		print('c Warning: Unknown performance measure', smac_run_obj, '! This is a bug in Sparkle.')
+
+	return smac_run_obj
+
+
 def get_smac_settings():
-	smac_run_obj = ''
-	smac_whole_time_budget = ''
-	smac_each_run_cutoff_time = ''
-	smac_each_run_cutoff_length = ''
-	num_of_smac_run_str = ''
-	num_of_smac_run_in_parallel_str = ''
-	sparkle_smac_settings_path = sgh.sparkle_smac_settings_path
+	smac_each_run_cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+	smac_run_obj = get_smac_run_obj()
+	smac_whole_time_budget = sgh.settings.get_config_budget_per_run()
+	smac_each_run_cutoff_time = sgh.settings.get_config_target_cutoff_time()
+	num_of_smac_run = sgh.settings.get_config_number_of_runs()
+	num_of_smac_run_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
 
-	fin = open(sparkle_smac_settings_path, 'r')
-	while True:
-		myline = fin.readline()
-		if not myline: break
-		mylist = myline.strip().split()
-		if mylist[0] == 'smac_run_obj':
-			smac_run_obj = mylist[2]
-			if not (smac_run_obj == 'RUNTIME' or smac_run_obj == 'QUALITY'):
-				sys.exit(-1)
-		elif mylist[0] == 'smac_whole_time_budget':
-			smac_whole_time_budget = mylist[2]
-		elif mylist[0] == 'smac_each_run_cutoff_time':
-			smac_each_run_cutoff_time = mylist[2]
-		elif mylist[0] == 'smac_each_run_cutoff_length':
-			smac_each_run_cutoff_length = mylist[2]
-		elif mylist[0] == 'num_of_smac_run':
-			num_of_smac_run_str = mylist[2]
-		elif mylist[0] == 'num_of_smac_run_in_parallel':
-			num_of_smac_run_in_parallel_str = mylist[2]
-	fin.close()
-
-	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
+	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel
 
 
 # Copy file listing the training instances from the instance directory to the solver directory
@@ -125,9 +119,9 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	scenario_file_name = instance_set_name + '_' + inst_type + '_' + config_type + r'_scenario.txt'
 	smac_file_scenario = smac_solver_dir + scenario_file_name
-
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
-
+	
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
+	
 	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
 	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
 	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
@@ -138,8 +132,8 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
 	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
 	fout.write('run_obj = ' + smac_run_obj + '\n')
-	fout.write('wallclock-limit = ' + smac_whole_time_budget + '\n')
-	fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
+	fout.write('wallclock-limit = ' + str(smac_whole_time_budget) + '\n')
+	fout.write('cutoffTime = ' + str(smac_each_run_cutoff_time) + '\n')
 	fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
 	fout.write('paramfile = ' + smac_paramfile + '\n')
 	fout.write('outdir = ' + smac_outdir + '\n')
@@ -155,7 +149,7 @@ def create_file_scenario_configuration(solver_name, instance_set_name):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario = smac_solver_dir + solver_name + r'_' + instance_set_name + r'_scenario.txt'
 
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
 	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
 	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_train_configuration/'
@@ -167,8 +161,8 @@ def create_file_scenario_configuration(solver_name, instance_set_name):
 	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
 	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
 	fout.write('run_obj = ' + smac_run_obj + '\n')
-	fout.write('wallclock-limit = ' + smac_whole_time_budget + '\n')
-	fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
+	fout.write('wallclock-limit = ' + str(smac_whole_time_budget) + '\n')
+	fout.write('cutoffTime = ' + str(smac_each_run_cutoff_time) + '\n')
 	fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
 	fout.write('paramfile = ' + smac_paramfile + '\n')
 	fout.write('outdir = ' + smac_outdir + '\n')
@@ -182,9 +176,9 @@ def create_file_scenario_configuration(solver_name, instance_set_name):
 
 def prepare_smac_execution_directories_configuration(solver_name):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
-	for i in range(1, int(num_of_smac_run_str)+1):
+	for i in range(1, num_of_smac_run+1):
 		# Create directories, -p makes sure any missing parents are also created
 		cmd = "mkdir -p " + smac_solver_dir + str(i) + '/tmp/'
 		os.system(cmd)
@@ -198,9 +192,9 @@ def prepare_smac_execution_directories_configuration(solver_name):
 
 def prepare_smac_execution_directories_validation(solver_name):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
-	for i in range(1, int(num_of_smac_run_str)+1):
+	for i in range(1, num_of_smac_run+1):
 		solver_diretory = r'Solvers/' + solver_name + r'/*'
 
 		## Train default
@@ -240,19 +234,19 @@ def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	execdir = '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario_name = solver_name + r'_' + instance_set_name + r'_scenario.txt'
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = get_smac_settings()
+	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
 	# Remove possible old results for this scenario
 	result_part = 'results/' + solver_name + '_' + instance_set_name + '/'
 	result_dir = sgh.smac_dir + result_part
 	[item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
 
-	command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + num_of_smac_run_str + ' ' + num_of_smac_run_in_parallel_str + ' ' + execdir + ' ; ' + 'cd ../../'
-
+	command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + str(num_of_smac_run) + ' ' + str(num_of_smac_run_in_parallel) + ' ' + execdir + ' ; ' + 'cd ../../'
+	
 	#print(command_line)
 	os.system(command_line)
-
-	smac_configure_sbatch_script_name = smac_file_scenario_name + '_' + num_of_smac_run_str + '_exp_sbatch.sh'
+	
+	smac_configure_sbatch_script_name = smac_file_scenario_name + '_' + str(num_of_smac_run) + '_exp_sbatch.sh'
 
 	return smac_configure_sbatch_script_name
 

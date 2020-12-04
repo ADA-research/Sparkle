@@ -26,6 +26,7 @@ try:
 	from sparkle_help import sparkle_experiments_related_help as ser
 	from sparkle_help import sparkle_job_help
 	from sparkle_help import sparkle_customized_config_help as scch
+	from sparkle_help.sparkle_settings import PerformanceMeasure
 except ImportError:
 	import sparkle_global_help as sgh
 	import sparkle_basic_help
@@ -34,6 +35,7 @@ except ImportError:
 	import sparkle_experiments_related_help as ser
 	import sparkle_job_help
 	import sparkle_customized_config_help as scch
+	from sparkle_settings import PerformanceMeasure
 
 import functools
 print = functools.partial(print, flush=True)
@@ -88,9 +90,9 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 	return
 
 
-# performance_measure can be: runtime or quality_absolute
 # verifier can be: NONE, SAT
-def running_solvers(performance_data_csv_path, mode, performance_measure, verifier = Verifier.NONE):
+def running_solvers(performance_data_csv_path, mode, verifier = Verifier.NONE):
+	performance_measure = sgh.settings.get_general_performance_measure()
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job()
 	elif mode == 2: list_performance_computation_job = performance_data_csv.get_list_recompute_performance_computation_job()
@@ -99,7 +101,7 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 		print('c Do not run solvers')
 		sys.exit()
 	
-	print('c Cutoff time for each run on solving an instance is set to ' + str(ser.cutoff_time_each_run) + ' seconds')
+	print('c The cutoff time per algorithm run to solve an instance is set to ' + str(ser.cutoff_time_each_run) + ' seconds')
 	
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
 	current_job_num = 1
@@ -126,7 +128,6 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 			solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
 			seed = sgh.get_seed()
 			run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed)
-
 			runtime, quality, status = process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 
 			if status == 'CRASHED':
@@ -135,7 +136,7 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 			# Handle timeouts
 			penalised_str = ''
 			runtime, status = handle_timeouts(runtime, status)
-			if performance_measure == sgh.PerformanceMeasures.RUNTIME and (status == 'TIMEOUT' or status == 'UNKNOWN'):
+			if performance_measure == PerformanceMeasure.RUNTIME and (status == 'TIMEOUT' or status == 'UNKNOWN'):
 				penalised_str = ' (penalised)'
 
 			status = verify(instance_path, raw_result_path, solver_path, verifier, status)
@@ -149,7 +150,7 @@ def running_solvers(performance_data_csv_path, mode, performance_measure, verifi
 				continue # Skip to the next job
 
 			# Update performance CSV
-			if performance_measure == sgh.PerformanceMeasures.QUALITY_ABSOLUTE:
+			if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
 				# TODO: Handle the multi-objective case for quality
 				performance_data_csv.set_value(instance_path, solver_path, quality[0])
 				print('c Running Result: Status: ' + status + ', Quality' + penalised_str + ': ' + str(quality[0]))
