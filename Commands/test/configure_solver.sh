@@ -18,11 +18,7 @@ slurm_settings_test="Commands/test/test_files/sparkle_slurm_settings.txt"
 mv $slurm_settings_path $slurm_settings_tmp # Save user settings
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
-smac_settings_path="Settings/sparkle_smac_settings.txt"
-smac_settings_tmp="Settings/sparkle_smac_settings.tmp"
-smac_settings_test="Commands/test/test_files/sparkle_smac_settings.txt"
-mv $smac_settings_path $smac_settings_tmp # Save user settings
-cp $smac_settings_test $smac_settings_path # Activate test settings
+sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN/"
@@ -33,7 +29,7 @@ Commands/add_instances.py --run-solver-later --run-extractor-later $instances_pa
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
 
 # Configure solver
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -44,7 +40,7 @@ else
 fi
 
 # Configure solver with performance measure option RUNTIME
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -57,7 +53,7 @@ fi
 # TODO: Add test: Configure solver with performance measure option QUALITY (needs a quality configuration solver+instances)
 
 # Configure solver with cutoff time option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --cutoff-time 3 | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --target-cutoff-time 3 --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -68,7 +64,7 @@ else
 fi
 
 # Configure solver with budget per run option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -79,7 +75,7 @@ else
 fi
 
 # Configure solver with number of runs option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -91,5 +87,4 @@ fi
 
 # Restore original settings
 mv $slurm_settings_tmp $slurm_settings_path
-mv $smac_settings_tmp $smac_settings_path
 
