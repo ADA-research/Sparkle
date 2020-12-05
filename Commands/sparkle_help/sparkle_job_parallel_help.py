@@ -37,12 +37,14 @@ penalty_time = ser.penalty_time # the penalty time = cutoff time * penalty numbe
 sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #the sleep time for the system after each run (add at version 1.0.2)
 ####
 
+
 def get_dependency_list_str(dependency_jobid_list):
 	dependency_list_str = ''
 	for dependency_jobid in dependency_jobid_list:
 		dependency_list_str += r'afterany:' + dependency_jobid + r','
 	dependency_list_str = dependency_list_str[:-1]
 	return dependency_list_str
+
 
 def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, dependency_jobid_list):
 	sbatch_script_name = sfh.get_file_name(sbatch_shell_script_path)
@@ -80,4 +82,3 @@ def running_job_parallel(job_script, dependency_jobid_list):
 		run_job_parallel_jobid = ''
 	return run_job_parallel_jobid
 
-	
