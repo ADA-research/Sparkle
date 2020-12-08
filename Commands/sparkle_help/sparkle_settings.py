@@ -38,8 +38,8 @@ class Settings:
 
 	# Constant default values
 	DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME
+	DEFAULT_general_target_cutoff_time = 60
 
-	DEFAULT_config_target_cutoff_time = 60
 	DEFAULT_config_budget_per_run = 600
 	DEFAULT_config_number_of_runs = 25
 
@@ -54,8 +54,8 @@ class Settings:
 
 		# Setting flags
 		self.__general_performance_measure_set = SettingState.NOT_SET
+		self.__general_target_cutoff_time_set = SettingState.NOT_SET
 
-		self.__config_target_cutoff_time_set = SettingState.NOT_SET
 		self.__config_budget_per_run_set = SettingState.NOT_SET
 		self.__config_number_of_runs_set = SettingState.NOT_SET
 
@@ -84,7 +84,7 @@ class Settings:
 					self.set_general_performance_measure(value, state)
 					file_settings.remove_option(section, option)
 
-			section = 'configuration'
+			section = 'general'
 			option_names = ('target_cutoff_time', 'smac_each_run_cutoff_time')
 			for option in option_names:
 				if file_settings.has_option(section, option):
@@ -205,27 +205,26 @@ class Settings:
 		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
 
 
-	### Configuration settings ###
-
-
-	# TODO: Decide whether configuration and selection cutoff times should be separate or not
-	def set_config_target_cutoff_time(self, value: int = DEFAULT_config_target_cutoff_time, origin: SettingState = SettingState.DEFAULT):
-		section = 'configuration'
+	def set_general_target_cutoff_time(self, value: int = DEFAULT_general_target_cutoff_time, origin: SettingState = SettingState.DEFAULT):
+		section = 'general'
 		name = 'target_cutoff_time'
 
-		if value != None and self.__check_setting_state(self.__config_target_cutoff_time_set, origin, name):
+		if value != None and self.__check_setting_state(self.__general_target_cutoff_time_set, origin, name):
 			self.__init_section(section)
-			self.__config_target_cutoff_time_set = origin
+			self.__general_target_cutoff_time_set = origin
 			self.__settings[section][name] = str(value)
 
 		return
 
 
-	def get_config_target_cutoff_time(self) -> int:
-		if self.__config_target_cutoff_time_set == SettingState.NOT_SET:
-			self.set_config_target_cutoff_time()
+	def get_general_target_cutoff_time(self) -> int:
+		if self.__general_target_cutoff_time_set == SettingState.NOT_SET:
+			self.set_general_target_cutoff_time()
 
-		return int(self.__settings['configuration']['target_cutoff_time'])
+		return int(self.__settings['general']['target_cutoff_time'])
+
+
+	### Configuration settings ###
 
 
 	def set_config_budget_per_run(self, value: int = DEFAULT_config_budget_per_run, origin: SettingState = SettingState.DEFAULT):
