@@ -45,7 +45,7 @@ if __name__ == r'__main__':
 	parser.add_argument('--instance-set-train', required=True, type=str, help='path to training instance set')
 	parser.add_argument('--instance-set-test', required=False, type=str, help='path to testing instance set')
 	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, action=ac.SetByUser, help='the performance measure, e.g. runtime')
-	parser.add_argument('--target-cutoff-time', type=int, default=sgh.settings.DEFAULT_config_target_cutoff_time, action=ac.SetByUser, help='cutoff time per target algorithm run in seconds')
+	parser.add_argument('--target-cutoff-time', type=int, default=sgh.settings.DEFAULT_general_target_cutoff_time, action=ac.SetByUser, help='cutoff time per target algorithm run in seconds')
 	parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 
 	# Process command line arguments
@@ -57,7 +57,7 @@ if __name__ == r'__main__':
 	if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
 	args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 	if ac.set_by_user(args, 'performance_measure'): sgh.settings.set_general_performance_measure(args.performance_measure, SettingState.CMD_LINE)
-	if ac.set_by_user(args, 'target_cutoff_time'): sgh.settings.set_config_target_cutoff_time(args.target_cutoff_time, SettingState.CMD_LINE)
+	if ac.set_by_user(args, 'target_cutoff_time'): sgh.settings.set_general_target_cutoff_time(args.target_cutoff_time, SettingState.CMD_LINE)
 
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
