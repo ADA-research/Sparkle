@@ -23,6 +23,20 @@ class PerformanceMeasure(Enum):
 		return performance_measure
 
 
+class SolutionVerifier(Enum):
+	NONE = 0
+	SAT = 1
+
+
+	def from_str(verifier):
+		if verifier == 'NONE':
+			verifier = SolutionVerifier.NONE
+		elif verifier == 'SAT':
+			verifier = SolutionVerifier.SAT
+
+		return verifier
+
+
 class SettingState(Enum):
 	NOT_SET = 0
 	DEFAULT = 1
@@ -38,6 +52,7 @@ class Settings:
 
 	# Constant default values
 	DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME
+	DEFAULT_general_solution_verifier = SolutionVerifier.NONE
 	DEFAULT_general_target_cutoff_time = 60
 
 	DEFAULT_config_budget_per_run = 600
@@ -54,6 +69,7 @@ class Settings:
 
 		# Setting flags
 		self.__general_performance_measure_set = SettingState.NOT_SET
+		self.__general_solution_verifier_set = SettingState.NOT_SET
 		self.__general_target_cutoff_time_set = SettingState.NOT_SET
 
 		self.__config_budget_per_run_set = SettingState.NOT_SET
@@ -85,11 +101,19 @@ class Settings:
 					file_settings.remove_option(section, option)
 
 			section = 'general'
+			option_names = ('solution_verifier')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_general_solution_verifier(value, state)
+					file_settings.remove_option(section, option)
+
+			section = 'general'
 			option_names = ('target_cutoff_time', 'smac_each_run_cutoff_time')
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
-					self.set_config_target_cutoff_time(value, state)
+					self.set_general_target_cutoff_time(value, state)
 					file_settings.remove_option(section, option)
 
 			option_names = ('budget_per_run', 'smac_whole_time_budget')
@@ -203,6 +227,25 @@ class Settings:
 			self.set_general_performance_measure()
 
 		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
+
+
+	def set_general_solution_verifier(self, value: SolutionVerifier = DEFAULT_general_solution_verifier, origin: SettingState = SettingState.DEFAULT):
+		section = 'general'
+		name = 'solution_verifier'
+
+		if value != None and self.__check_setting_state(self.__general_solution_verifier_set, origin, name):
+			self.__init_section(section)
+			self.__general_solution_verifier_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_general_solution_verifier(self) -> SolutionVerifier:
+		if self.__general_solution_verifier_set == SettingState.NOT_SET:
+			self.set_general_solution_verifier()
+
+		return SolutionVerifier.from_str(self.__settings['general']['solution_verifier'])
 
 
 	def set_general_target_cutoff_time(self, value: int = DEFAULT_general_target_cutoff_time, origin: SettingState = SettingState.DEFAULT):

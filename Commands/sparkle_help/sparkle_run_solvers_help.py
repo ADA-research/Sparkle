@@ -27,6 +27,7 @@ try:
 	from sparkle_help import sparkle_job_help
 	from sparkle_help import sparkle_customized_config_help as scch
 	from sparkle_help.sparkle_settings import PerformanceMeasure
+	from sparkle_help.sparkle_settings import SolutionVerifier
 except ImportError:
 	import sparkle_global_help as sgh
 	import sparkle_basic_help
@@ -36,14 +37,10 @@ except ImportError:
 	import sparkle_job_help
 	import sparkle_customized_config_help as scch
 	from sparkle_settings import PerformanceMeasure
+	from sparkle_settings import SolutionVerifier
 
 import functools
 print = functools.partial(print, flush=True)
-
-
-class Verifier(Enum):
-	NONE = 1
-	SAT = 2
 
 
 def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed, cutoff_time = ser.cutoff_time_each_run):
@@ -90,8 +87,7 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 	return
 
 
-# verifier can be: NONE, SAT
-def running_solvers(performance_data_csv_path, mode, verifier = Verifier.NONE):
+def running_solvers(performance_data_csv_path, mode):
 	performance_measure = sgh.settings.get_general_performance_measure()
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job()
@@ -139,7 +135,7 @@ def running_solvers(performance_data_csv_path, mode, verifier = Verifier.NONE):
 			if performance_measure == PerformanceMeasure.RUNTIME and (status == 'TIMEOUT' or status == 'UNKNOWN'):
 				penalised_str = ' (penalised)'
 
-			status = verify(instance_path, raw_result_path, solver_path, verifier, status)
+			status = verify(instance_path, raw_result_path, solver_path, status)
 
 			# If status == 'WRONG' after verification remove solver
 			# TODO: Check whether things break when a solver is removed which still has instances left in the job list
@@ -178,9 +174,11 @@ def handle_timeouts(runtime, status):
 	return runtime, status
 
 
-def verify(instance_path, raw_result_path, solver, verifier, status):
+def verify(instance_path, raw_result_path, solver, status):
+	verifier = sgh.settings.get_general_solution_verifier()
+
 	# Use verifier if one is given and the solver did not time out
-	if verifier == Verifier.SAT and status != 'TIMEOUT' and status != 'UNKNOWN':
+	if verifier == SolutionVerifier.SAT and status != 'TIMEOUT' and status != 'UNKNOWN':
 		status = sat_verify(instance_path, raw_result_path, solver_path)
 
 	return status

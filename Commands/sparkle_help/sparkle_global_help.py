@@ -17,20 +17,6 @@ from pathlib import Path
 from pathlib import PurePath
 
 
-class SolutionVerifiers(Enum):
-	NONE = 0
-	SAT = 1
-
-
-def parse_arg_verifier(verifier):
-	if verifier == 'NONE':
-		verifier = SolutionVerifiers.NONE
-	if verifier == 'SAT':
-		verifier = SolutionVerifiers.SAT
-
-	return verifier
-
-
 # TODO: Handle different seed requirements; for the moment this is a dummy function
 def get_seed():
 	return 1

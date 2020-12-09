@@ -37,14 +37,12 @@ if __name__ == r'__main__':
 	parser.add_argument('--instance', required=False, type=str, help='path to instance to run on')
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--objective', choices=sgh.PerformanceMeasures.__members__, default=sgh.PerformanceMeasures.RUNTIME, help='the objective to measure, e.g. runtime')
-	parser.add_argument('--verifier', choices=sgh.SolutionVerifiers.__members__, default=sgh.SolutionVerifiers.NONE, help='use a domain specific verifier to check solutions found by solvers are correct')
 	args = parser.parse_args()
 
 	# Process command line arguments
 	instance_path = args.instance
 	solver_path = args.solver
 	objective = sgh.parse_arg_performance(args.objective)
-	verifier = sgh.parse_arg_verifier(args.verifier)
 
 	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
 	raw_result_path = r'Tmp/' + key_str + r'.rawres'
@@ -67,7 +65,7 @@ if __name__ == r'__main__':
 
 	runtime, quality, status = srs.process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 	runtime, status = srs.handle_timeouts(runtime, status)
-	status = srs.verify(instance_path, raw_result_path, solver_path, verifier, status)
+	status = srs.verify(instance_path, raw_result_path, solver_path, status)
 		
 	description_str = r'[Solver: ' + sfh.get_last_level_directory_name(solver_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path) + r']'
 	start_time_str = r'[Start Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time)) + r']'

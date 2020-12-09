@@ -60,6 +60,17 @@ else
 	echo $output
 fi
 
+# Run solvers with verifier
+output=$(Commands/run_solvers.py --parallel --recompute --verifier SAT | tail -1)
+
+if [[ $output =~ [0-9] ]];
+then
+	echo "[success] run_solvers --parallel --recompute --verifier SAT test succeeded"
+else
+	echo "[failure] run_solvers --parallel --recompute --verifier SAT test failed with output:"
+	echo $output
+fi
+
 # Restore original settings
 mv $default_settings_tmp $default_settings_path
 
