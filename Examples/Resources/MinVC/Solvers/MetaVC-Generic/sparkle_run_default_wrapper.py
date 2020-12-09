@@ -1,41 +1,78 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-import os
+import argparse
+
+# Problem specific imports
+import fcntl
 import sys
 
-relative_path = sys.argv[1]
-minvc_instance_file = sys.argv[2]
-cutoff_time_str = sys.argv[3]
 
-executable_name = r'MetaVC'
-runsolver_name = 'runsolver'
-runsolver_option = r'--timestamp --use-pty'
-cutoff_time_each_run_option = r'-C ' + cutoff_time_str
-runsolver_watch_data_path_option = '-w /dev/null'
+# Print a command line call for the target algorithm with a given instance file
+def print_command(instance_file, seed_str: str, cutoff_time_str: str):
+	executable_name = 'MetaVC'
+	param_str = "-opt '0' -print_sol '1' -edge_weight_p_scale '0.5214052710418935' -edge_weight_threshold_scale '0.414990365260387' -init_sol '1' -perform_adding_random_walk '0' -perform_bms '0' -perform_cc_adding '1' -perform_edge_weight_scheme '1' -perform_preprocess '1' -perform_removing_random_walk '0' -perform_ruin_and_reconstruct '0' -sel_adding_v '4' -sel_edge_weight_scheme '1' -sel_removing_v '2' -sel_uncov_e '1' -tabu_tenure '5'"
 
-seed_str = r'1'
-para_str = r"-opt '0' -print_sol '1' -edge_weight_p_scale '0.5214052710418935' -edge_weight_threshold_scale '0.414990365260387' -init_sol '1' -perform_adding_random_walk '0' -perform_bms '0' -perform_cc_adding '1' -perform_edge_weight_scheme '1' -perform_preprocess '1' -perform_removing_random_walk '0' -perform_ruin_and_reconstruct '0' -sel_adding_v '4' -sel_edge_weight_scheme '1' -sel_removing_v '2' -sel_uncov_e '1' -tabu_tenure '5'"
+	command_line = executable_name + ' -inst ' + instance_file + ' -seed ' + seed_str + ' ' + param_str
 
-command_line = os.path.join(relative_path, executable_name) + r' -inst ' + minvc_instance_file + r' -seed ' + seed_str + r' ' + para_str
+	print(command_line)
 
-command_line = os.path.join(relative_path, runsolver_name) + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + command_line
 
-res = os.popen(command_line)
-info = res.readlines()
+# Parse problem specific output and print it for Sparkle; or ask Sparkle to use it's own parser (SAT only)
+def print_output(output_file):
+	# Read solution quality from file
+	infile = open(output_file, 'r')
+	fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
-my_runtime = 0
-my_solution_quality = sys.maxsize
+	solution_quality = sys.maxsize
+	status = 'UNKNOWN'
+	lines = infile.readlines()
 
-for myline in info:
-    mylist = myline.strip().split()
-    if len(mylist) <= 0:
-        continue
-    temp_runtime = float(mylist[0].split('/')[0])
-    if len(mylist) >=4 and mylist[1] == 'c' and mylist[2] == 'vertex_cover:':
-        temp_solution_quality = int(mylist[3])
-        if my_solution_quality < 0 or temp_solution_quality < my_solution_quality:
-            my_solution_quality = temp_solution_quality
-            my_runtime = temp_runtime
+	for line in lines:
+		words = line.strip().split()
+		if len(words) <= 0:
+			continue
+#		if len(words) >=4 and words[1] == 'c' and words[2] == 'Arguments' and words[3] == 'Error!':
+#			status = 'CRASHED'
+#			break
+		if len(words) >=4 and words[1] == 'c' and words[2] == 'vertex_cover:':
+			temp_solution_quality = int(words[3])
+			if solution_quality < 0 or temp_solution_quality < solution_quality:
+				solution_quality = temp_solution_quality
+				status = 'SUCCESS'
 
-print(my_solution_quality, my_runtime)
+	infile.close()
+
+	# [required for quality objective] Print keyword 'quality' followed by a space and the solution quality
+	print('quality ' + str(solution_quality))
+	# [optional] Print keyword 'status' followed by a space and the run status
+	print('status ' + status)
+
+
+### No editing needed for your own wrapper below this line ###
+
+
+if __name__ == '__main__':
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	group = parser.add_mutually_exclusive_group(required=True)
+	group.add_argument('--print-command', metavar='INSTANCE_FILE', type=str, help='print command line call to the target algorithm to stdout given an instance file')
+	group.add_argument('--print-output', metavar='OUTPUT_FILE', type=str, help='print target algorithm output in Sparkle format given an output file')
+	parser.add_argument('--seed', metavar='VALUE', type=str, help='required with --print-command; seed for the target algorithm to use')
+	parser.add_argument('--cutoff-time', metavar='VALUE', type=str, help='optional with --print-command; cutoff time in seconds for the target algorithm')
+
+	# Process command line arguments
+	args = parser.parse_args()
+	if args.print_command and args.seed is None:
+		parser.error('--print-command requires --seed')
+	instance_file = args.print_command
+	output_file = args.print_output
+	seed_str = args.seed
+	cutoff_time_str = args.cutoff_time
+
+	# Call function based on arguments
+	if(instance_file is not None):
+		print_command(instance_file, seed_str, cutoff_time_str)
+	elif(output_file is not None):
+		print_output(output_file)
+
