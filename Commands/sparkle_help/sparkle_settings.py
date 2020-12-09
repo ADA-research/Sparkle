@@ -89,7 +89,7 @@ class Settings:
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
-					self.set_config_target_cutoff_time(value, state)
+					self.set_general_target_cutoff_time(value, state)
 					file_settings.remove_option(section, option)
 
 			option_names = ('budget_per_run', 'smac_whole_time_budget')
