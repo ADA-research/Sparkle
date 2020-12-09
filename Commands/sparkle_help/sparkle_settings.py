@@ -110,7 +110,7 @@ class Settings:
 					self.set_general_performance_measure(value, state)
 					file_settings.remove_option(section, option)
 
-			option_names = ('solution_verifier')
+			option_names = ('solution_verifier',) # Comma so python understands it's a tuple...
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = SolutionVerifier.from_str(file_settings.get(section, option))

@@ -177,7 +177,7 @@ def handle_timeouts(runtime, status):
 	return runtime, status
 
 
-def verify(instance_path, raw_result_path, solver, status):
+def verify(instance_path, raw_result_path, solver_path, status):
 	verifier = sgh.settings.get_general_solution_verifier()
 
 	# Use verifier if one is given and the solver did not time out

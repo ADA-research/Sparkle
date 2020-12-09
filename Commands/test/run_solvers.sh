@@ -30,8 +30,7 @@ Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/
 
 # Run solvers
 output_true="c Running solvers done!"
-output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path | tail -1)
-
+output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path | tail -1)
 if [[ $output == $output_true ]];
 then
 	echo "[success] run_solvers test succeeded"
@@ -41,7 +40,7 @@ else
 fi
 
 # Run solvers parallel
-output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path --parallel | tail -1)
+output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -52,7 +51,7 @@ else
 fi
 
 # Run solvers recompute
-output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path --parallel --recompute | tail -1)
+output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -63,7 +62,7 @@ else
 fi
 
 # Run solvers with verifier
-output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
+output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
