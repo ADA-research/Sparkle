@@ -15,27 +15,9 @@ import time
 import random
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_experiments_related_help as ser
-from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_slurm_help as ssh
-
-
-####
-# settings of experimental configurations
-global cutoff_time_each_run
-global par_num
-global penalty_time
-
-cutoff_time_each_run = ser.cutoff_time_each_run # cutoff time for each run (a solver tries to solve an instance)
-par_num = ser.par_num # the penalty number related to the penalty time
-penalty_time = ser.penalty_time # the penalty time = cutoff time * penalty number
-sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #the sleep time for the system after each run (add at version 1.0.2)
-####
 
 
 def get_dependency_list_str(dependency_jobid_list):
@@ -71,7 +53,7 @@ def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, depen
 
 
 def running_job_parallel(job_script, dependency_jobid_list):
-	sbatch_shell_script_path = r'Tmp/' + r'running_job_parallel_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+	sbatch_shell_script_path = r'Tmp/' + r'running_job_parallel_' + sbh.get_time_pid_random_string() + r'.sh'
 	generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, dependency_jobid_list)
 	os.system(r'chmod a+x ' + sbatch_shell_script_path)
 	command_line = r'sbatch ' + sbatch_shell_script_path

@@ -18,6 +18,8 @@ default_settings_test="Commands/test/test_files/sparkle_default_settings.txt"
 mv $default_settings_path $default_settings_tmp # Save user settings
 cp $default_settings_test $default_settings_path # Activate test settings
 
+sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN"
 solver_path="Examples/Resources/Solvers/CSCCSat/"
@@ -28,7 +30,7 @@ Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/
 
 # Run solvers
 output_true="c Running solvers done!"
-output=$(Commands/run_solvers.py | tail -1)
+output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -39,7 +41,7 @@ else
 fi
 
 # Run solvers parallel
-output=$(Commands/run_solvers.py --parallel | tail -1)
+output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path --parallel | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -50,7 +52,7 @@ else
 fi
 
 # Run solvers recompute
-output=$(Commands/run_solvers.py --parallel --recompute | tail -1)
+output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -61,7 +63,7 @@ else
 fi
 
 # Run solvers with verifier
-output=$(Commands/run_solvers.py --parallel --recompute --verifier SAT | tail -1)
+output=$(Commands/run_solvers.py --settings-file sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then

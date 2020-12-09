@@ -16,33 +16,43 @@ import random
 import sys
 import fcntl
 import argparse
+from pathlib import Path
+from pathlib import PurePath
 
 try:
 	from sparkle_help import sparkle_global_help as sgh
 	from sparkle_help import sparkle_basic_help
 	from sparkle_help import sparkle_file_help as sfh
-	from sparkle_help import sparkle_experiments_related_help as ser
 	from sparkle_help import sparkle_run_solvers_help as srs
+	from sparkle_help.sparkle_settings import PerformanceMeasure
+	from sparkle_help import sparkle_settings
 except ImportError:
 	import sparkle_global_help as sgh
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
-	import sparkle_experiments_related_help as ser
 	import sparkle_run_solvers_help as srs
+	from sparkle_settings import PerformanceMeasure
+	import sparkle_settings
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	settings_dir = Path('Settings')
+	file_path_latest = PurePath(settings_dir / 'latest.ini')
+	sgh.settings = sparkle_settings.Settings(file_path_latest)
+
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--instance', required=False, type=str, help='path to instance to run on')
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
-	parser.add_argument('--objective', choices=sgh.PerformanceMeasures.__members__, default=sgh.PerformanceMeasures.RUNTIME, help='the objective to measure, e.g. runtime')
+	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, help='the performance measure, e.g. runtime')
 	args = parser.parse_args()
 
 	# Process command line arguments
 	instance_path = args.instance
 	solver_path = args.solver
-	objective = sgh.parse_arg_performance(args.objective)
+	performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 
 	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
 	raw_result_path = r'Tmp/' + key_str + r'.rawres'
@@ -54,7 +64,7 @@ if __name__ == r'__main__':
 	start_time = time.time()
 	status_info_str += 'Start Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time)) + '\n'
 	status_info_str += 'Start Timestamp: ' + str(start_time) + '\n'
-	cutoff_str = 'Cutoff Time: ' + str(ser.cutoff_time_each_run) + ' second(s)' + '\n'
+	cutoff_str = 'Cutoff Time: ' + str(sgh.settings.get_general_target_cutoff_time()) + ' second(s)' + '\n'
 	status_info_str += cutoff_str
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
 	solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
@@ -79,7 +89,7 @@ if __name__ == r'__main__':
 	sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
 	os.system('rm -f ' + task_run_status_path)
 
-	if objective == sgh.PerformanceMeasures.QUALITY_ABSOLUTE:
+	if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
 		obj_str = str(quality[0]) # TODO: Handle the multi-objective case
 	else:
 		obj_str = str(runtime)

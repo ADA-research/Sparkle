@@ -17,13 +17,11 @@ import numpy as np
 import fcntl
 
 try:
-	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_global_help as sgh
 	from sparkle_help import sparkle_csv_help as scsv
-	from sparkle_help import sparkle_experiments_related_help
 except ImportError:
-	import sparkle_global_help
+	import sparkle_global_help as sgh
 	import sparkle_csv_help as scsv
-	import sparkle_experiments_related_help
 
 
 class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
@@ -34,7 +32,7 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 	
 	def __init__(self, csv_filepath):
 		scsv.Sparkle_CSV.__init__(self, csv_filepath)
-		self.solver_list = sparkle_global_help.solver_list
+		self.solver_list = sgh.solver_list
 		return
 	
 	def get_list_recompute_performance_computation_job(self):
@@ -103,7 +101,7 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 	def get_dict_vbs_penalty_time_on_each_instance(self):
 		mydict = {}
 		for instance in self.list_rows():
-			vbs_penalty_time = sparkle_experiments_related_help.penalty_time
+			vbs_penalty_time = sgh.settings.get_penalised_time()
 			for solver in self.list_columns():
 				runtime = self.get_value(instance, solver)
 				if runtime < vbs_penalty_time:

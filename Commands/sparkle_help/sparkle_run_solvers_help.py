@@ -20,21 +20,21 @@ from enum import Enum
 
 try:
 	from sparkle_help import sparkle_global_help as sgh
-	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_basic_help as sbh
 	from sparkle_help import sparkle_file_help as sfh
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 	from sparkle_help import sparkle_experiments_related_help as ser
-	from sparkle_help import sparkle_job_help
+	from sparkle_help import sparkle_job_help as sjh
 	from sparkle_help import sparkle_customized_config_help as scch
 	from sparkle_help.sparkle_settings import PerformanceMeasure
 	from sparkle_help.sparkle_settings import SolutionVerifier
 except ImportError:
 	import sparkle_global_help as sgh
-	import sparkle_basic_help
+	import sparkle_basic_help as sbh
 	import sparkle_file_help as sfh
 	import sparkle_performance_data_csv_help as spdcsv
 	import sparkle_experiments_related_help as ser
-	import sparkle_job_help
+	import sparkle_job_help as sjh
 	import sparkle_customized_config_help as scch
 	from sparkle_settings import PerformanceMeasure
 	from sparkle_settings import SolutionVerifier
@@ -43,14 +43,16 @@ import functools
 print = functools.partial(print, flush=True)
 
 
-def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed, cutoff_time = ser.cutoff_time_each_run):
+def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed):
+	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+
 	if not Path(solver_wrapper_path).is_file():
 		print('c ERROR: Wrapper named \'' + solver_wrapper_path + '\' not found, stopping execution!')
 		sys.exit()
 
 	# Get the solver call command from the wrapper
 	cmd_solver_call = ''
-	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + str(seed) + ' --cutoff-time ' + str(cutoff_time)
+	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + str(seed) + ' --cutoff-time ' + cutoff_time_str
 	solver_call_rawresult = os.popen(cmd_get_solver_call)
 	solver_call_result = solver_call_rawresult.readlines()[0].strip()
 
@@ -64,7 +66,7 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
 	runsolver_option = r'--timestamp --use-pty'
-	cutoff_time_each_run_option = r'-C ' + str(cutoff_time)
+	cutoff_time_each_run_option = r'-C ' + cutoff_time_str
 	runsolver_values_log = '-v ' + runsolver_values_path
 	runsolver_watch_data_path = runsolver_values_path.replace('val', 'log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
@@ -88,6 +90,7 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 
 
 def running_solvers(performance_data_csv_path, mode):
+	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	performance_measure = sgh.settings.get_general_performance_measure()
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job()
@@ -97,9 +100,9 @@ def running_solvers(performance_data_csv_path, mode):
 		print('c Do not run solvers')
 		sys.exit()
 	
-	print('c The cutoff time per algorithm run to solve an instance is set to ' + str(ser.cutoff_time_each_run) + ' seconds')
+	print('c The cutoff time per algorithm run to solve an instance is set to ' + cutoff_time_str + ' seconds')
 	
-	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
+	total_job_num = sjh.get_num_of_total_job_from_list(list_performance_computation_job)
 	current_job_num = 1
 	print('c The total number of jobs to run is: ' + str(total_job_num))
 
@@ -113,7 +116,7 @@ def running_solvers(performance_data_csv_path, mode):
 		for j in range(0, len_solver_list):
 			solver_path = solver_list[j]
 			
-			raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+			raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sbh.get_time_pid_random_string() + r'.rawres'
 			runsolver_values_path = raw_result_path.replace('.rawres', '.val')
 			
 			time.sleep(ser.sleep_time_after_each_solver_run)
@@ -158,18 +161,18 @@ def running_solvers(performance_data_csv_path, mode):
 		current_job_num += 1
 
 	performance_data_csv.update_csv()
-	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(ser.cutoff_time_each_run))
-	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(ser.par_num))
+	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + cutoff_time_str)
+	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(sgh.settings.get_general_penalty_multiplier()))
 	print('c Performance data file ' + performance_data_csv_path + ' has been updated!')
 	
 	return
 
 
 def handle_timeouts(runtime, status):
-	if runtime > ser.cutoff_time_each_run:
+	if runtime > sgh.settings.get_general_target_cutoff_time():
 		status = 'TIMEOUT' # Overwrites possible user status...
 	if status == 'TIMEOUT' or status == 'UNKNOWN':
-		runtime = ser.penalty_time
+		runtime = sgh.settings.get_penalised_time()
 
 	return runtime, status
 
@@ -310,7 +313,7 @@ def get_runtime_from_runsolver(runsolver_values_path):
 # In: Path to raw result, runtime
 # Out: Status string
 def sparkle_sat_parser(raw_result_path, runtime):
-	if runtime > ser.cutoff_time_each_run:
+	if runtime > sgh.settings.get_general_target_cutoff_time():
 		status = 'TIMEOUT'
 	else: 
 		status = sat_get_result(raw_result_path)
@@ -431,7 +434,7 @@ def sat_get_verify_string(tmp_verify_result_path):
 
 def sat_judge_correctness_raw_result(instance_path, raw_result_path):
 	SAT_verifier_path = sgh.SAT_verifier_path
-	tmp_verify_result_path = r'Tmp/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.vryres'
+	tmp_verify_result_path = r'Tmp/'+ sfh.get_last_level_directory_name(SAT_verifier_path) + r'_' + sfh.get_last_level_directory_name(raw_result_path) + r'_' + sbh.get_time_pid_random_string() + r'.vryres'
 	# TODO: Log output file
 	command_line = SAT_verifier_path + r' ' + instance_path + r' ' + raw_result_path + r' > ' + tmp_verify_result_path
 	print('c Run SAT verifier')

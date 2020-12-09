@@ -118,3 +118,6 @@ if __name__ == r'__main__':
 		fout.write('test ' + str(instance_set_test) + '\n')
 	fout.close()
 
+	# Write used settings to file
+	sgh.settings.write_used_settings()
+

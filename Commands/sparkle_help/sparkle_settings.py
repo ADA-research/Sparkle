@@ -3,8 +3,12 @@ from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
 
-from sparkle_help import sparkle_logging as slog
-from sparkle_help import sparkle_global_help as sgh
+try:
+	from sparkle_help import sparkle_logging as slog
+	from sparkle_help import sparkle_global_help as sgh
+except ImportError:
+	import sparkle_logging as slog
+	import sparkle_global_help as sgh
 
 
 class PerformanceMeasure(Enum):
@@ -54,6 +58,7 @@ class Settings:
 	DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME
 	DEFAULT_general_solution_verifier = SolutionVerifier.NONE
 	DEFAULT_general_target_cutoff_time = 60
+	DEFAULT_general_penalty_multiplier = 10
 
 	DEFAULT_config_budget_per_run = 600
 	DEFAULT_config_number_of_runs = 25
@@ -63,7 +68,7 @@ class Settings:
 	DEFAULT_smac_target_cutoff_length = 'max'
 
 
-	def __init__(self):
+	def __init__(self, file_path: PurePath = None):
 		# Settings 'dictionary' in configparser format
 		self.__settings = configparser.ConfigParser()
 
@@ -71,6 +76,7 @@ class Settings:
 		self.__general_performance_measure_set = SettingState.NOT_SET
 		self.__general_solution_verifier_set = SettingState.NOT_SET
 		self.__general_target_cutoff_time_set = SettingState.NOT_SET
+		self.__general_penalty_multiplier_set = SettingState.NOT_SET
 
 		self.__config_budget_per_run_set = SettingState.NOT_SET
 		self.__config_number_of_runs_set = SettingState.NOT_SET
@@ -79,8 +85,12 @@ class Settings:
 
 		self.__smac_target_cutoff_length_set = SettingState.NOT_SET
 
-		# Initialise settings from default file path
-		self.read_settings_ini()
+		if file_path == None:
+			# Initialise settings from default file path
+			self.read_settings_ini()
+		else:
+			# Initialise settings from a given file path
+			self.read_settings_ini(file_path)
 
 		return
 
@@ -100,22 +110,28 @@ class Settings:
 					self.set_general_performance_measure(value, state)
 					file_settings.remove_option(section, option)
 
-			section = 'general'
 			option_names = ('solution_verifier')
 			for option in option_names:
 				if file_settings.has_option(section, option):
-					value = file_settings.getint(section, option)
+					value = SolutionVerifier.from_str(file_settings.get(section, option))
 					self.set_general_solution_verifier(value, state)
 					file_settings.remove_option(section, option)
 
-			section = 'general'
-			option_names = ('target_cutoff_time', 'smac_each_run_cutoff_time')
+			option_names = ('target_cutoff_time', 'smac_each_run_cutoff_time', 'cutoff_time_each_performance_computation')
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
 					self.set_general_target_cutoff_time(value, state)
 					file_settings.remove_option(section, option)
 
+			option_names = ('penalty_multiplier', 'penalty_number')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_general_penalty_multiplier(value, state)
+					file_settings.remove_option(section, option)
+
+			section = 'configuration'
 			option_names = ('budget_per_run', 'smac_whole_time_budget')
 			for option in option_names:
 				if file_settings.has_option(section, option):
@@ -131,7 +147,7 @@ class Settings:
 					file_settings.remove_option(section, option)
 
 			section = 'slurm'
-			option_names = ('number_of_runs_in_parallel', 'num_of_smac_runs_in_parallel')
+			option_names = ('number_of_runs_in_parallel', 'num_of_smac_runs_in_parallel', 'num_job_in_parallel')
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
@@ -229,6 +245,33 @@ class Settings:
 		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
 
 
+	def set_general_penalty_multiplier(self, value: int = DEFAULT_general_penalty_multiplier, origin: SettingState = SettingState.DEFAULT):
+		section = 'general'
+		name = 'penalty_multiplier'
+
+		if value != None and self.__check_setting_state(self.__general_penalty_multiplier_set, origin, name):
+			self.__init_section(section)
+			self.__general_penalty_multiplier_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_general_penalty_multiplier(self) -> int:
+		if self.__general_penalty_multiplier_set == SettingState.NOT_SET:
+			self.set_general_penalty_multiplier()
+
+		return int(self.__settings['general']['penalty_multiplier'])
+
+
+	def get_penalised_time(self) -> int:
+		penalty_multiplier = self.get_general_penalty_multiplier()
+		cutoff_time = self.get_general_target_cutoff_time()
+		penalised_time = cutoff_time * penalty_multiplier
+
+		return penalised_time
+
+
 	def set_general_solution_verifier(self, value: SolutionVerifier = DEFAULT_general_solution_verifier, origin: SettingState = SettingState.DEFAULT):
 		section = 'general'
 		name = 'solution_verifier'
@@ -236,7 +279,7 @@ class Settings:
 		if value != None and self.__check_setting_state(self.__general_solution_verifier_set, origin, name):
 			self.__init_section(section)
 			self.__general_solution_verifier_set = origin
-			self.__settings[section][name] = str(value)
+			self.__settings[section][name] = value.name
 
 		return
 
