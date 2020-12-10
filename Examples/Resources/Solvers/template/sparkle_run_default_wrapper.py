@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+### Sparkle default wrapper template; used for algorithm selection ###
+
 import argparse
 
 # Problem specific imports
@@ -10,33 +12,42 @@ import sys
 
 # Print a command line call for the target algorithm with a given instance file
 def print_command(instance_file, seed_str: str, cutoff_time_str: str):
+	# TODO: Change executable_name to the name of your solver executable
 	executable_name = 'MetaVC'
-	param_str = "-opt '0' -print_sol '1' -edge_weight_p_scale '0.5214052710418935' -edge_weight_threshold_scale '0.414990365260387' -init_sol '1' -perform_adding_random_walk '0' -perform_bms '0' -perform_cc_adding '1' -perform_edge_weight_scheme '1' -perform_preprocess '1' -perform_removing_random_walk '0' -perform_ruin_and_reconstruct '0' -sel_adding_v '4' -sel_edge_weight_scheme '1' -sel_removing_v '2' -sel_uncov_e '1' -tabu_tenure '5'"
+	# TODO: Change param_str to the static parameters for your solver (can be empty)
+	param_str = "-opt '0' -print_sol '1' -edge_weight_p_scale '0.5214052710418935' -edge_weight_thresh    old_scale '0.414990365260387' -init_sol '1' -perform_adding_random_walk '0' -perform_bms '0' -perfor    m_cc_adding '1' -perform_edge_weight_scheme '1' -perform_preprocess '1' -perform_removing_random_wal    k '0' -perform_ruin_and_reconstruct '0' -sel_adding_v '4' -sel_edge_weight_scheme '1' -sel_removing_    v '2' -sel_uncov_e '1' -tabu_tenure '5'"
 
+	# TODO: Change command_line to use the appropriate option names for your solver
 	command_line = executable_name + ' -inst ' + instance_file + ' -seed ' + seed_str + ' ' + param_str
 
 	print(command_line)
 
 
 # Parse problem specific output and print it for Sparkle; or ask Sparkle to use it's own parser (SAT only)
+# TODO: [if optimising for quality] Process algorithm output to determine the performance
+# TODO: [if optimising for runtime] This function can just print status UNKNOWN
+# TODO: [optional] Determine algorithm run status based on output
 def print_output(output_file):
 	# Read solution quality from file
 	infile = open(output_file, 'r')
 	fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
 	solution_quality = sys.maxsize
-	status = 'UNKNOWN'
+	status = 'UNKNOWN' # Assign default status
 	lines = infile.readlines()
 
 	for line in lines:
 		words = line.strip().split()
 		if len(words) <= 0:
 			continue
+		if len(words) >=4 and words[1] == 'c' and words[2] == 'Arguments' and words[3] == 'Error!':
+			status = 'CRASHED' # Update status based on output
+			break
 		if len(words) >=4 and words[1] == 'c' and words[2] == 'vertex_cover:':
 			temp_solution_quality = int(words[3])
 			if solution_quality < 0 or temp_solution_quality < solution_quality:
-				solution_quality = temp_solution_quality
-				status = 'SUCCESS'
+				solution_quality = temp_solution_quality # Assign solution quality 
+				status = 'SUCCESS' # Update status based on output
 
 	infile.close()
 
