@@ -76,7 +76,7 @@ if __name__ == r'__main__':
     else:
         instance_set_test = instance_set_train
         instance_set_test_name = instance_set_train_name
-    print(solver_name, instance_set_train_name, instance_set_test_name)
+    #print(solver_name, instance_set_train_name, instance_set_test_name)
 
     #DEVELOP: REMOVE SCENARIO
     ablation_scenario_dir = sah.get_ablation_scenario_directory(solver_name, instance_set_train_name, instance_set_test_name)
@@ -84,7 +84,7 @@ if __name__ == r'__main__':
 
     #Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(solver_name, instance_set_train_name, instance_set_test_name)
-    print("Scenario dir: {}".format(ablation_scenario_dir))
+    print("c Scenario dir: {}".format(ablation_scenario_dir))
 
     #Instances
     sah.create_instance_file(instance_set_train, ablation_scenario_dir, "train")
