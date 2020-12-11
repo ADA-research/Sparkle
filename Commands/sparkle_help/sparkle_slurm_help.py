@@ -182,7 +182,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	srun_options_str = srun_options_str + ' ' + get_slurm_srun_user_options_str()
 
 	## Create target call
-	n_cores = 16 # Number of cores available on a Grace GPU
+	n_cores = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace GPU
 
 	target_call_str = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cores)
 

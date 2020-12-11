@@ -134,8 +134,8 @@ def generate_slurm_script(solver_name, instance_train_name, instance_test_name, 
     sbatch_script_name = sbatch_script_name + ".sh"
     sbatch_script_path = scenario_dir + sbatch_script_name
 
-    _, _, _, _, _, _, ablation_concurrent_clis, _ = scsh.get_smac_settings(with_ablation=True)
-    srun_options_str = "-N1 -n1 -c{}".format(ablation_concurrent_clis)
+    concurrent_clis = sgh.settings.get_slurm_clis_per_node()
+    srun_options_str = "-N1 -n1 -c{}".format(concurrent_clis)
     target_call_str = "./ablationAnalysis --optionFile ablation_config.txt".format(sgh.ablation_dir, scenario_dir)
 
     job_params_list = []
@@ -238,7 +238,9 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
 
     (optimised_configuration_params, _, _) = scsh.get_optimised_configuration(solver_name, instance_train_name)
 
-    smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str, ablation_concurrent_clis, ablation_racing = scsh.get_smac_settings(with_ablation=True)
+    smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
+    concurrent_clis = sgh.settings.get_slurm_clis_per_node()
+    ablation_racing = sgh.settings.get_ablation_racing_flag()
 
     with open("{}/ablation_config.txt".format(ablation_scenario_dir), 'w') as fout:
         fout.write('algo = ./sparkle_smac_wrapper.py\n')
@@ -255,7 +257,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         fout.write('overall_obj = {}\n'.format("MEAN10"  if smac_run_obj == "RUNTIME" else "MEAN"))
         fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
         fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
-        fout.write('cli-cores = {}\n'.format(ablation_concurrent_clis))
+        fout.write('cli-cores = {}\n'.format(concurrent_clis))
         fout.write('useRacing = {}\n'.format(ablation_racing))
 
         fout.write('seed = 1234\n')
