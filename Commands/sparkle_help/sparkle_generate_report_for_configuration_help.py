@@ -399,7 +399,7 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 
 def get_ablation_table(solver_name, instance_set_train_name, instance_set_test_name=None):
 	results = sah.get_ablation_table(solver_name, instance_set_train_name, instance_set_test_name)
-	table_string = "\\begin{tabular}{rrrrr}"
+	table_string = "\\begin{tabular}{rp{0.3\linewidth}rrr}"
 	for i,line in enumerate(results):
 		if i == 0:
 			line = ["\\textbf{{{0}}}".format(word) for word in line]

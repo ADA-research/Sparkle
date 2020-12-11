@@ -161,7 +161,15 @@ configured & default & overlap \\ \hline
 \ifablation
     \section{Parameter importance via Ablation}
 
-    Ablation analysis~\cite{FawcettHoos16} is performed between the @@solver@@ (configured) and @@solver@@ (default) to see which parameter changes between these two contributed most to the improved performance. The ablation path is computed by using the training set @@instanceSetTrain@@ and validated on the test set @@instanceSetTest@@. The analysis resulted in the ablation path presented in Table~\ref{table:ablationpath}:
+    Ablation analysis~\cite{FawcettHoos16} is performed from the @@solver@@ (default) to @@solver@@ (configured) to see which parameter changes between them contribute most to the improved performance.
+    The ablation path uses the training set @@instanceSetTrain@@ and is validated on the test set @@instanceSetTest@@.
+    The set of parameters that differ in the two configurations will form the ablation path.
+    Starting from the default configuration, the path is computed by performing a sequence of rounds.
+    In a round, each available parameter is flipped in the configuration and is validated on its performance.
+    The flipped parameter with the best performance in that round, is added to the configuration and the next round starts with the remaining parameters.
+    This repeats until all parameters are flipped, which is the best found configuration.
+    The analysis resulted in the ablation path presented in Table~\ref{table:ablationpath}.
+
 
     \begin{table}[htbp]
         \caption{Ablation path from @@solver@@ (default) to @@solver@@ (configured) where parameters with higher importance are ranked higher.}
