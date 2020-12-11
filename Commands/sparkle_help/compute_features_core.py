@@ -15,6 +15,7 @@ import time
 import random
 import sys
 import fcntl
+
 try:
 	from sparkle_help import sparkle_global_help
 	from sparkle_help import sparkle_basic_help
@@ -31,7 +32,6 @@ except ImportError:
 	import sparkle_experiments_related_help as ser
 	import sparkle_job_help
 	import sparkle_compute_features_help as scf
-
 
 if __name__ == r'__main__':
 	instance_path = sys.argv[1]
@@ -53,7 +53,7 @@ if __name__ == r'__main__':
 	runsolver_watch_data_path = basic_part + r'.log'
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
 	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
-	
+
 	try:
 		task_run_status_path = r'Tmp/SBATCH_Extractor_Jobs/' + key_str + r'.statusinfo'
 		status_info_str = 'Status: Running\n' + 'Extractor: %s\n' %(sfh.get_last_level_directory_name(extractor_path)) + 'Instance: %s\n' % (sfh.get_last_level_directory_name(instance_path))

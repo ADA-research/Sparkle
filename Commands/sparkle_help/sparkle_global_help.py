@@ -12,7 +12,11 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import fcntl
+from pathlib import Path
+from pathlib import PurePath
 
+
+global settings
 
 flag_first_call = True
 
@@ -41,7 +45,10 @@ sparkle_smac_settings_path = r'Settings/sparkle_smac_settings.txt'
 global sparkle_slurm_settings_path
 sparkle_slurm_settings_path = r'Settings/sparkle_slurm_settings.txt'
 
-# Log that keeps track of which commands were executed
+global sparkle_global_output_dir
+sparkle_global_output_dir = Path('Output')
+
+# Log that keeps track of which commands were executed and where output details can be found
 global sparkle_global_log_file
 sparkle_global_log_file = 'sparkle.log'
 
@@ -49,7 +56,7 @@ global sparkle_global_log_dir
 sparkle_global_log_dir = 'Log/'
 
 global sparkle_global_log_path
-sparkle_global_log_path = sparkle_global_log_dir + sparkle_global_log_file
+sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_log_file)
 
 global sparkle_tmp_path
 sparkle_tmp_path = 'Tmp/'
@@ -214,10 +221,4 @@ if os.path.exists(instance_reference_list_path):
 		mylist = myline.split()
 		instance_reference_mapping[mylist[0]] = mylist[1]
 	fo.close()	
-
-#print 'c this is sparkle_global.py' + r' ' + __name__
-
-
-
-
 

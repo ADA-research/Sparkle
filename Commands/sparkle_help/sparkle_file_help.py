@@ -19,8 +19,10 @@ import pathlib
 
 try:
 	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_customized_config_help as scch
 except ImportError:
 	import sparkle_global_help
+	import sparkle_customized_config_help as scch
 
 
 def create_new_empty_file(filepath):
@@ -87,7 +89,7 @@ def get_file_least_extension(filepath):
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
 	if os.path.isfile(path):
 		file_extension = get_file_least_extension(path)
-		if file_extension == r'cnf':
+		if file_extension == scch.file_extension:
 			filename = get_file_name(path)
 			list_all_cnf_filename.append(filename)
 		return

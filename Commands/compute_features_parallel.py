@@ -32,7 +32,7 @@ if __name__ == r'__main__':
 	sl.log_command(sys.argv)
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--recompute', action='store_true', help='re-run feature extractor for instanc    es with previously computed features')
+	parser.add_argument('--recompute', action='store_true', help='re-run feature extractor for instances with previously computed features')
 
 	# Process command line arguments
 	args = parser.parse_args()

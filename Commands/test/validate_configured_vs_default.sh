@@ -18,11 +18,7 @@ slurm_settings_test="Commands/test/test_files/sparkle_slurm_settings.txt"
 mv $slurm_settings_path $slurm_settings_tmp # Save user settings
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
-smac_settings_path="Settings/sparkle_smac_settings.txt"
-smac_settings_tmp="Settings/sparkle_smac_settings.tmp"
-smac_settings_test="Commands/test/test_files/sparkle_smac_settings.txt"
-mv $smac_settings_path $smac_settings_tmp # Save user settings
-cp $smac_settings_test $smac_settings_path # Activate test settings
+sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
 instances_path_train="Examples/Resources/Instances/PTN/"
@@ -40,7 +36,7 @@ Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/
 cp -r $configuration_results_path $smac_path
 
 # Test configured solver and default solver with both train and test sets
-output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test | tail -1)
+output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -51,7 +47,7 @@ else
 fi
 
 # Test configured solver and default solver with just training set
-output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
+output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -63,5 +59,4 @@ fi
 
 # Restore original settings
 mv $slurm_settings_tmp $slurm_settings_path
-mv $smac_settings_tmp $smac_settings_path
 

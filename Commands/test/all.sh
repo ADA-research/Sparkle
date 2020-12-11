@@ -44,9 +44,6 @@ Commands/test/cleanup_temporary_files.sh
 # Test compute features
 Commands/test/compute_features.sh
 
-# Test compute features parallel
-Commands/test/compute_features_parallel.sh
-
 # Test compute marginal contribution
 Commands/test/compute_marginal_contribution.sh
 

@@ -40,9 +40,9 @@ def init():
 
 	#default settings
 	num_job_in_parallel = 32
-	cutoff_time_each_run = 3600 #90
+	cutoff_time_each_run = 5 #3600 #90
 	par_num = 10
-	cutoff_time_total_extractor_run_on_one_instance = 90 #as SATzilla does
+	cutoff_time_total_extractor_run_on_one_instance = 5 #90 #as SATzilla does
 
 
 	sparkle_default_settings_path = sparkle_global_help.sparkle_default_settings_path
@@ -84,8 +84,8 @@ def init():
 	'''
 	
 	penalty_time = cutoff_time_each_run * par_num
-	sleep_time_after_each_solver_run = 1 #add at version 1.0.2
-	sleep_time_after_each_extractor_run = 1 #add at version 1.0.2
+	sleep_time_after_each_solver_run = 0 #1 #add at version 1.0.2
+	sleep_time_after_each_extractor_run = 0 #1 #add at version 1.0.2
 	
 	#cutoff_time_each_extractor_run = 90 #as SATzilla does
 	#cutoff_time_total_extractor_run_on_one_instance = 90 #as SATzilla does
