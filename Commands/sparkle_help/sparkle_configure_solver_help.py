@@ -22,6 +22,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_slurm_help as ssh
+from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 class InstanceType(Enum):

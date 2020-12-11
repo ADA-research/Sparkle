@@ -109,12 +109,12 @@ def get_slurm_params(solver_name, instance_train_name, instance_test_name, postf
     sbatch_script_name += "{}".format(postfix)
 
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name, exec_path=True)
-    _, _, _, _, _, _, ablation_concurrent_clis, _ = scsh.get_smac_settings(with_ablation=True)
+    concurrent_clis = sgh.settings.get_slurm_clis_per_node()
 
     job_name = '--job-name=' + sbatch_script_name
     output = '--output=' + sbatch_script_name + '.txt'
     error = '--error=' + sbatch_script_name + '.err'
-    cpus = '--cpus-per-task={}'.format(ablation_concurrent_clis)
+    cpus = '--cpus-per-task={}'.format(concurrent_clis)
 
     sbatch_options_list = [job_name, output, error, cpus]
 

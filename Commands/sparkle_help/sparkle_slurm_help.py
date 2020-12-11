@@ -23,7 +23,10 @@ def get_slurm_options_list(path_modifier=None):
 	if path_modifier is None:
 		path_modifier = ''
 
+	#slurm_options = settings.get_slurm_extra_options()
+	#slurm_options_list = ["--{}={}".format(k, v) for k, v in slurm_options.items()]
 	slurm_options_list = []
+
 	sparkle_slurm_settings_path = str(path_modifier) + sgh.sparkle_slurm_settings_path
 	
 	settings_file = open(sparkle_slurm_settings_path, 'r')

@@ -64,6 +64,7 @@ class Settings:
 
 		self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
 		self.__slurm_clis_per_node_set = SettingState.NOT_SET
+		self.__slurm_extra_options_set = dict()
 
 		self.__smac_target_cutoff_length_set = SettingState.NOT_SET
 
@@ -94,9 +95,10 @@ class Settings:
 			for option in option_names:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
-					self.set_config_target_cutoff_time(value, state)
+					self.set_general_target_cutoff_time(value, state)
 					file_settings.remove_option(section, option)
 
+			section = 'configuration'
 			option_names = ('budget_per_run', 'smac_whole_time_budget')
 			for option in option_names:
 				if file_settings.has_option(section, option):
@@ -104,6 +106,8 @@ class Settings:
 					self.set_config_budget_per_run(value, state)
 					file_settings.remove_option(section, option)
 
+
+			section = 'configuration'
 			option_names = ('number_of_runs', 'num_of_smac_runs')
 			for option in option_names:
 				if file_settings.has_option(section, option):
@@ -119,6 +123,7 @@ class Settings:
 					self.set_slurm_number_of_runs_in_parallel(value, state)
 					file_settings.remove_option(section, option)
 
+			section = 'slurm'
 			option_names = ('clis_per_node', )
 			for option in option_names:
 				if file_settings.has_option(section, option):
@@ -147,7 +152,15 @@ class Settings:
 
 			for section in sections:
 				for option in file_settings[section]:
-					print('Unrecognised section - option combination:\'', section, option, '\'in file', str(file_path), 'ignored') 
+					# TODO: Quick fix to support partitions and excludes, but should not allow any option
+					if section == "slurm":
+						print("Unrecognised SLURM option '{option}' found in {file}. Option is added to any SLURM batches".format(
+							option=option,
+							file=str(file_path)))
+						value = file_settings.get(section, option)
+						self.add_slurm_extra_option(option, value, state)
+					else:
+						print('Unrecognised section - option combination:\'', section, option, '\'in file', str(file_path), 'ignored')
 
 		# Print error if unable to read the settings
 		else:
@@ -348,9 +361,31 @@ class Settings:
 		return int(self.__settings['slurm']['clis_per_node'])
 
 
+	### SLURM extra options
+
+	def add_slurm_extra_option(self, name: str, value: str, origin: SettingState = SettingState.DEFAULT):
+		section = "slurm_extra"
+
+		current_state = self.__slurm_extra_options_set[name] if name in self.__slurm_extra_options_set else SettingState.NOT_SET
+
+		if value != None and self.__check_setting_state(current_state, origin, name):
+			self.__init_section(section)
+			self.__slurm_extra_options_set[name] = origin
+			self.__settings[section][name] = str(value)
+
+	def get_slurm_extra_options(self) -> dict:
+		section = "slurm_extra"
+		options = dict()
+
+		if "slurm_extra" in self.__settings.sections():
+			for option in self.__settings["slurm_extra"]:
+				options[option] = self.__settings.get(section, option)
+
+		return options
+
+
 
 	### Ablation settings ###
-
 
 	def set_ablation_racing_flag(self, value: bool = DEFAULT_ablation_racing, origin: SettingState = SettingState.DEFAULT):
 		section = 'ablation'
