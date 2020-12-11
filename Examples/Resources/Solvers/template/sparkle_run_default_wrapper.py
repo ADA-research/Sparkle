@@ -25,7 +25,7 @@ def print_command(instance_file, seed_str: str, cutoff_time_str: str):
 
 # Parse problem specific output and print it for Sparkle; or ask Sparkle to use it's own parser (SAT only)
 # TODO: [if optimising for quality] Process algorithm output to determine the performance
-# TODO: [if optimising for runtime] This function can just print status UNKNOWN
+# TODO: [if optimising for runtime] This function can just print status SUCCESS, but preferably results are parsed to detect and report e.g. CRASHED
 # TODO: [optional] Determine algorithm run status based on output
 def print_output(output_file):
 	# Read solution quality from file
