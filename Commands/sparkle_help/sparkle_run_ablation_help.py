@@ -185,8 +185,8 @@ def generate_validation_slurm_script(solver_name, instance_train_name, instance_
     sbatch_script_name = sbatch_script_name + ".sh"
     sbatch_script_path = scenario_dir + sbatch_script_name
 
-    _, _, _, _, _, _, ablation_concurrent_clis,_ = scsh.get_smac_settings(with_ablation=True)
-    srun_options_str = "-N1 -n1 -c{}".format(ablation_concurrent_clis)
+    concurrent_clis = sgh.settings.get_slurm_clis_per_node()
+    srun_options_str = "-N1 -n1 -c{}".format(concurrent_clis)
     target_call_str = "./ablationValidation --optionFile ablation_config.txt --ablationLogFile ablationPath.txt".format(sgh.ablation_dir, scenario_dir)
 
     job_params_list = []
@@ -255,8 +255,8 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         fout.write('deterministic = ' + scsh.get_solver_deterministic(solver_name) + '\n')
         fout.write('run_obj = ' + smac_run_obj + '\n')
         fout.write('overall_obj = {}\n'.format("MEAN10"  if smac_run_obj == "RUNTIME" else "MEAN"))
-        fout.write('cutoffTime = ' + smac_each_run_cutoff_time + '\n')
-        fout.write('cutoff_length = ' + smac_each_run_cutoff_length + '\n')
+        fout.write('cutoffTime = ' + str(smac_each_run_cutoff_time) + '\n')
+        fout.write('cutoff_length = ' + str(smac_each_run_cutoff_length) + '\n')
         fout.write('cli-cores = {}\n'.format(concurrent_clis))
         fout.write('useRacing = {}\n'.format(ablation_racing))
 

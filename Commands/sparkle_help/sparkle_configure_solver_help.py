@@ -423,7 +423,7 @@ def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
 
 def generate_validation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
 	command_line = 'echo $(pwd) $(date)\n'
-	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py'
+	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py  --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
 	command_line += ' --instance-set-train ' + instance_set_train
 	if instance_set_test is not None:
@@ -433,7 +433,7 @@ def generate_validation_callback_slurm_script(solver, instance_set_train, instan
 
 def generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
 	command_line = 'echo $(pwd) $(date)\n'
-	command_line += 'srun -N1 -n1 ./Commands/run_ablation.py'
+	command_line += 'srun -N1 -n1 ./Commands/run_ablation.py --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
 	command_line += ' --instance-set-train ' + instance_set_train
 	if instance_set_test is not None:
