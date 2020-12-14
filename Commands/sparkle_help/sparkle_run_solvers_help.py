@@ -43,7 +43,7 @@ import functools
 print = functools.partial(print, flush=True)
 
 
-def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed):
+def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path):
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 
 	if not Path(solver_wrapper_path).is_file():
@@ -52,6 +52,7 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 
 	# Get the solver call command from the wrapper
 	cmd_solver_call = ''
+	seed = sgh.get_seed()
 	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + str(seed) + ' --cutoff-time ' + cutoff_time_str
 	solver_call_rawresult = os.popen(cmd_get_solver_call)
 	solver_call_result = solver_call_rawresult.readlines()[0].strip()
@@ -73,18 +74,18 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 	raw_result_path_option = r'-o ' + raw_result_path
 
 	# Finalise command
-	command_line = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + runsolver_values_log + r' ' + raw_result_path_option + r' ' + relative_path + '/' + cmd_solver_call
+	command_line_run_solver = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + runsolver_values_log + r' ' + raw_result_path_option + r' ' + relative_path + '/' + cmd_solver_call
 
 	# Execute command
 	try:
-		os.system(command_line)
+		os.system(command_line_run_solver)
 	except:
 		# TODO: Replace by error? Why create an empty file if the command fails?
 		if not os.path.exists(raw_result_path):
 			sfh.create_new_empty_file(raw_result_path)
 
 	#command_line = 'rm -f ' + runsolver_watch_data_path
-	os.system(command_line)
+	#os.system(command_line)
 
 	return
 
@@ -125,8 +126,7 @@ def running_solvers(performance_data_csv_path, mode):
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 
 			solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
-			seed = sgh.get_seed()
-			run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed)
+			run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path)
 			runtime, quality, status = process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
 
 			if status == 'CRASHED':
@@ -289,7 +289,7 @@ def get_runtime_from_wrapper(result_list):
 # Read runtime as CPU time from runsolver values file '-v'
 # In: Path to runsolver values file
 # Out: Float
-def get_runtime_from_runsolver(runsolver_values_path):
+def get_runtime_from_runsolver(runsolver_values_path) -> float:
 	runtime = float(-1)
 
 	infile = open(runsolver_values_path, 'r+')
@@ -365,8 +365,9 @@ def sat_verify(instance_path, raw_result_path, solver_path):
 		status = 'UNKNOWN'
 		print('c Warning: Verification result was UNKNOWN for solver ' + sfh.get_last_level_directory_name(solver_path) + ' on instance ' + sfh.get_last_level_directory_name(instance_path) + '!')
 
-	command_line = r'rm -f ' + raw_result_path
-	os.system(command_line)
+	# TODO: Make removal conditional on a success status (SAT or UNSAT)
+	#command_line = r'rm -f ' + raw_result_path
+	#os.system(command_line)
 
 	return status
 

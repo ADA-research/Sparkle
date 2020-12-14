@@ -69,8 +69,7 @@ if __name__ == r'__main__':
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
 	solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
 	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
-	seed = sgh.get_seed()
-	srs.run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, seed)
+	srs.run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path)
 	end_time = time.time()
 
 	runtime, quality, status = srs.process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
@@ -80,7 +79,7 @@ if __name__ == r'__main__':
 	description_str = r'[Solver: ' + sfh.get_last_level_directory_name(solver_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path) + r']'
 	start_time_str = r'[Start Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time)) + r']'
 	end_time_str = r'[End Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(end_time)) + r']'
-	run_time_str = r'[Actual Run Time: ' + str(end_time-start_time) + r' second(s)]'
+	run_time_str = r'[Actual Run Time (wall clock): ' + str(end_time-start_time) + r' second(s)]'
 	recorded_run_time_str = r'[Recorded Run Time: ' + str(runtime) + r' second(s)]'
 	status_str = '[Run Status: ' + status + ']'
 		
@@ -100,7 +99,8 @@ if __name__ == r'__main__':
 	fout.write(solver_path + '\n')
 	fout.write(obj_str + '\n')
 	fout.close()
-	
-	command_line = r'rm -f ' + raw_result_path
-	os.system(command_line)
+
+	# TODO: Make removal conditional on a success status (SUCCESS, SAT or UNSAT)
+	#command_line = r'rm -f ' + raw_result_path
+	#os.system(command_line)
 

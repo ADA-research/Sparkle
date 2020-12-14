@@ -14,7 +14,7 @@ def print_command(instance_file, seed_str: str, cutoff_time_str: str):
 
 
 # Parse problem specific output and print it for Sparkle; or ask Sparkle to use it's own parser (SAT only)
-def print_output(output_file):
+def print_output(terminal_output_file):
 	print('Use Sparkle SAT parser')
 
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	group = parser.add_mutually_exclusive_group(required=True)
 	group.add_argument('--print-command', metavar='INSTANCE_FILE', type=str, help='print command line call to the target algorithm to stdout given an instance file')
-	group.add_argument('--print-output', metavar='OUTPUT_FILE', type=str, help='print target algorithm output in Sparkle format given an output file')
+	group.add_argument('--print-output', metavar='TERMINAL_OUTPUT_FILE', type=str, help='print target algorithm output in Sparkle format given an output file containing what the algorithm wrote to the terminal')
 	parser.add_argument('--seed', metavar='VALUE', type=str, help='required with --print-command; seed for the target algorithm to use')
 	parser.add_argument('--cutoff-time', metavar='VALUE', type=str, help='optional with --print-command; cutoff time in seconds for the target algorithm')
 
@@ -35,13 +35,13 @@ if __name__ == '__main__':
 	if args.print_command and args.seed is None:
 		parser.error('--print-command requires --seed')
 	instance_file = args.print_command
-	output_file = args.print_output
+	terminal_output_file = args.print_output
 	seed_str = args.seed
 	cutoff_time_str = args.cutoff_time
 
 	# Call function based on arguments
 	if(instance_file is not None):
 		print_command(instance_file, seed_str, cutoff_time_str)
-	elif(output_file is not None):
-		print_output(output_file)
+	elif(terminal_output_file is not None):
+		print_output(terminal_output_file)
 
