@@ -84,7 +84,7 @@ Do note that when running on a cluster additional arguments may be needed, for i
   srun -N1 -n1 -p graceTST Commands/initialise.py
 \end{verbatim}
 
-In the \texttt{Examples/} directory a number of common command sequences are given. For instance, for configuration with specified training and testing sets see e.g. \texttt{Examples/configure\_solver\_pbo-ccsat.sh} for an example of a sequence of commands to execute. Note that these example scripts should not be executed directly.
+In the \texttt{Examples/} directory a number of common command sequences are given. For instance, for configuration with specified training and testing sets see e.g. \texttt{Examples/configure\_solver\_pbo-ccsat.sh} for an example of a sequence of commands to execute. Note that these example scripts should not be executed directly, but one command at a time, to give each command time to complete before starting the next one.
 
 \section{File structure}
 
@@ -150,6 +150,38 @@ Here \texttt{solver} is a binary executable of the solver that is to be configur
 
 \textbf{Note}: Currently the runsolver binary has to be in every solver directory, it can be found in the \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/} directory. 
 
+\section{Selection}
+
+\subsection{Requirements}
+
+\subsubsection{Solver directory}
+An example solver directory, in this case for the SAT solver CSCCSat.
+\begin{verbatim}
+Solver/
+  CSCCSat/
+    CSCCSat
+    sparkle_run_default_wrapper.py
+\end{verbatim}
+
+\subsubsection{\texttt{sparkle\_run\_default\_wrapper.py}}
+The \texttt{sparkle\_run\_default\_wrapper.py} has two functions that need to be implemented for each algorithm:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{print\_command(instance\_file, seed\_str: str, cutoff\_time\_str: str)}
+  \item \texttt{print\_output(terminal\_output\_file)}
+\end{itemize}
+
+\texttt{print\_command(...)} should print a command line call that Sparkle can use to run the algorithm on a given instance file. Ideally, for reproducibility purposes, the seed provided by Sparkle should also be passed to the algorithm. If the algorithm requires this, the cutoff time can also be passed to the algorithm. However, in this case the cutoff time should be made very large. For instance by multiplying by ten with: \texttt{cutoff\_time\_str = str(int(cutoff\_time\_str) * 10)}. This is necessary to ensure Sparkle stops the algorithm after the cutoff time, rather than the algorithm itself. By doing this it is ensured runtime measurements are always done by Sparkle, and thus consistent between algorithms that might measure time differently.
+
+\texttt{print\_output(...)} should process the algorithm output. If the performance measure is \texttt{RUNTIME}, this function only needs to output the algorithm status. For all \texttt{QUALITY} performance measures both the algorithm status and the solution quality have to be given. Run time is measured by Sparkle internally, but can be overwritten by the user if desired. They should be printed in formatted as in the example below:
+\begin{verbatim}
+quality = 8734
+status = SUCCESS
+\end{verbatim}
+
+\subsection{Run solvers}
+The \texttt{run\_solvers} command runs each solver on every instance (set) currently in the Sparkle platform for which there are no performance values yet.
+
 \section{Commands}
 \todo[inline]{Add missing subsections with details of other commands}
 
@@ -175,7 +207,6 @@ Currently the following commands are available in Sparkle (listed alphabetically
   \item[] \texttt{remove\_instances.py}
   \item[] \texttt{remove\_record.py}
   \item[] \texttt{remove\_solver.py}
-  \item[] \texttt{run\_solvers\_parallel.py}
   \item[] \texttt{run\_solvers.py}
   \item[] \texttt{run\_sparkle\_portfolio\_selector.py}
   \item[] \texttt{run\_status.py}
