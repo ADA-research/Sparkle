@@ -21,7 +21,7 @@ class PerformanceMeasure(Enum):
 	def from_str(performance_measure):
 		if performance_measure == 'RUNTIME':
 			performance_measure = PerformanceMeasure.RUNTIME
-		elif performance_measure == 'QUALITY_ABSOLUTE':
+		elif performance_measure == 'QUALITY_ABSOLUTE' or performance_measure == 'QUALITY':
 			performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
 	
 		return performance_measure

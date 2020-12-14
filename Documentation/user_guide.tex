@@ -271,6 +271,102 @@ Arguments:
 
 \section{Settings}
 
+\subsection{Sparkle settings}
+Most settings can be controlled through \texttt{Settings/sparkle\_settings.ini}. Possible settings are summarised per category in Sect.~\ref{sect:settings_details}. For any settings that are not provided the defaults will be used. Meaning, in the extreme case, that if the settings file is empty (and nothing is set through the command line) everything will run with default values.
+
+For convenience after every command \texttt{Settings/latest.ini} is written with the used settings. This can, for instance, be used to provide the same settings to the next command in a chain. E.g. for \texttt{validate\_configured\_vs\_default} after \texttt{configure\_solver}. The used settings are also recorded in the relevant \texttt{Output/} subdirectory. Note that when writing settings Sparkle always uses the name, and not an alias.
+
+\subsubsection{Example \texttt{sparkle\_settings.ini}}
+This is a short example to show the format, see the settings file in \texttt{Settings/sparkle\_settings.ini} for more.
+
+\begin{verbatim}
+  [general]
+  performance_measure = RUNTIME
+  target_cutoff_time = 60
+
+  [configuration]
+  number_of_runs = 25
+
+  [slurm]
+  number_of_runs_in_parallel = 25
+\end{verbatim}
+
+\subsubsection{Names and possible values}
+\label{sect:settings_details}
+\begin{itemize}[noitemsep]
+  \item[] \textbf{[general]}\\
+  \item[] \texttt{performance\_measure}
+
+          aliases: \texttt{smac\_run\_obj}
+
+          values: \texttt{\{RUNTIME, QUALITY\_ABSOLUTE} (also: \texttt{QUALITY\}})\texttt{\}}\\
+  \item[] \texttt{target\_cutoff\_time}
+
+          aliases: \texttt{smac\_each\_run\_cutoff\_time, cutoff\_time\_each\_performance\_computation}
+
+          values: integer\\
+  \item[] \texttt{penalty\_multiplier}
+
+          aliases: \texttt{penalty\_number}
+
+          values: integer\\
+  \item[] \texttt{solution\_verifier}
+
+          aliases: N/A
+
+          values: \texttt{\{NONE, SAT\}}
+
+          note: Only available for SAT solving.\\
+  \item[] \textbf{[configuration]}\\
+  \item[] \texttt{budget\_per\_run}
+
+          aliases: \texttt{smac\_whole\_time\_budget}
+
+          values: integer\\
+  \item[] \texttt{number\_of\_runs}
+
+          aliases: \texttt{num\_of\_smac\_runs}
+
+          values: integer\\
+  \item[] \textbf{[smac]}
+  \item[] \texttt{target\_cutoff\_length}
+
+          aliases: \texttt{smac\_each\_run\_cutoff\_length}
+
+          values: \texttt{\{max\}} (other values: whatever is allowed by SMAC)\\
+  \item[] \textbf{[ablation]}\\
+  \item[] \texttt{racing}
+
+          aliases: \texttt{ablation\_racing}
+
+          values: boolean\\
+  \item[] \textbf{[slurm]}\\
+  \item[] \texttt{number\_of\_runs\_in\_parallel}
+
+          aliases: \texttt{smac\_run\_obj}
+
+          values: integer\\
+  \item[] \texttt{clis\_per\_node}
+
+          aliases: N/A
+
+          values: integer
+
+          note: Not really a Slurm option, will likely be moved to another section.\\
+\end{itemize}
+
+
+\subsection{Priorities}
+Settings provided through different channels have different priorities as follows:
+
+\begin{itemize}[noitemsep]
+  \item[low] Default -- Default values will be overwritten if a value is given through any other mechanism;
+  \item[medium] File -- Settings form the \texttt{Settings/sparkle\_settings.ini} overwrite default values, but are overwritten by settings given through the command line; 
+  \item[high-1] Command line file -- Settings files provided through the command line, overwrite default values and other settings files.
+  \item[high-2] Command line -- Settings given through the command line overwrite all other settings, including settings files provided through the command line.
+
+\end{itemize}
+
 \subsection{Slurm (focused on Grace)}
 Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings.txt} file. Currently these settings are inserted as is in any \texttt{srun} or \texttt{sbatch} calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see Section~\ref{slurm:disallowed}).
 
