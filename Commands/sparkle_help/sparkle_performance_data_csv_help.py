@@ -71,29 +71,30 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 			list_processed_performance_computation_job.append(list_item)
 		return list_processed_performance_computation_job
 
-	def calc_score_of_solver_on_instance(self, solver, instance, captime, num_instances, num_solvers):
+	def calc_score_of_solver_on_instance(self, solver, instance, num_instances, num_solvers):
+		captime = sgh.settings.get_general_target_cutoff_time()
 		score = -1
 		runtime = self.get_value(instance, solver)
-		if runtime<captime:
-			inc_score = (captime - runtime)/(num_instances*num_solvers*captime +1)
+		if runtime < captime:
+			inc_score = (captime - runtime) / (num_instances * num_solvers * captime + 1)
 			score = 1 + inc_score
 		else:
 			score = 0
 		return score
 	
-	def calc_virtual_best_score_of_portfolio_on_instance(self, instance, captime, num_instances, num_solvers):
+	def calc_virtual_best_score_of_portfolio_on_instance(self, instance, num_instances, num_solvers):
 		virtual_best_score = -1
 		for solver in self.list_columns():
-			score_solver = self.calc_score_of_solver_on_instance(solver, instance, captime, num_instances, num_solvers)
+			score_solver = self.calc_score_of_solver_on_instance(solver, instance, num_instances, num_solvers)
 			if virtual_best_score == -1 or virtual_best_score < score_solver: virtual_best_score = score_solver
 		if virtual_best_score == -1 and len(self.list_columns()) == 0:
 			virtual_best_score = 0
 		return virtual_best_score
 
-	def calc_virtual_best_performance_of_portfolio(self, captime, num_instances, num_solvers):
+	def calc_virtual_best_performance_of_portfolio(self, num_instances, num_solvers):
 		virtual_best_performance = 0
 		for instance in self.list_rows():
-			virtual_best_score = self.calc_virtual_best_score_of_portfolio_on_instance(instance, captime, num_instances, num_solvers)
+			virtual_best_score = self.calc_virtual_best_score_of_portfolio_on_instance(instance, num_instances, num_solvers)
 			#print 'c ' + instance + ' ' + str(virtual_best_score)
 			virtual_best_performance = virtual_best_performance + virtual_best_score
 		return virtual_best_performance
@@ -109,8 +110,11 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 			mydict[instance] = vbs_penalty_time
 		return mydict
 	
-	def calc_vbs_penaltry_time(self, cutoff_time_each_run, par_num=10):
-		penalty_time_each_run = cutoff_time_each_run * par_num
+	def calc_vbs_penalty_time(self):
+		cutoff_time = sgh.settings.get_general_target_cutoff_time()
+		penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
+
+		penalty_time_each_run = cutoff_time * penalty_multiplier
 		vbs_penalty_time = 0.0
 		vbs_count = 0
 		
@@ -121,16 +125,19 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 				this_run_time = self.get_value(instance, solver)
 				if vbs_penalty_time_on_this_instance < 0 or vbs_penalty_time_on_this_instance > this_run_time:
 					vbs_penalty_time_on_this_instance = this_run_time
-			if vbs_penalty_time_on_this_instance > cutoff_time_each_run:
+			if vbs_penalty_time_on_this_instance > cutoff_time:
 				vbs_penalty_time_on_this_instance = penalty_time_each_run
 			vbs_penalty_time += vbs_penalty_time_on_this_instance
 		
 		vbs_penalty_time = vbs_penalty_time / vbs_count
 		return vbs_penalty_time
 
-	def get_solver_penalty_time_ranking_list(self, cutoff_time_each_run, par_num=10):
+	def get_solver_penalty_time_ranking_list(self):
+		cutoff_time = sgh.settings.get_general_target_cutoff_time()
+		penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
+
 		solver_penalty_time_ranking_list = []
-		penalty_time_each_run = cutoff_time_each_run * par_num
+		penalty_time_each_run = cutoff_time * penalty_multiplier
 		
 		for solver in self.list_columns():
 			this_penalty_time = 0.0
@@ -138,7 +145,7 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 			for instance in self.list_rows():
 				this_run_time = self.get_value(instance, solver)
 				this_count += 1
-				if this_run_time <= cutoff_time_each_run:
+				if this_run_time <= cutoff_time:
 					this_penalty_time += this_run_time
 				else:
 					this_penalty_time += penalty_time_each_run

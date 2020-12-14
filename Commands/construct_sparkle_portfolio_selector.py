@@ -26,6 +26,7 @@ from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
 from sparkle_help import sparkle_job_help
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 
 
 def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path):
@@ -73,6 +74,10 @@ def print_log_paths():
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -94,11 +99,9 @@ if __name__ == r'__main__':
 		print(r'c Sparkle portfolio selector is not successfully constructed!')
 		delete_task_run_status()
 		sys.exit()
-	
-	cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
 
 	delete_log_files() # Make sure no old log files remain
-	scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path, cutoff_time_each_run)
+	scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path)
 	
 	if not os.path.exists(sgh.sparkle_portfolio_selector_path):
 		print('c Sparkle portfolio selector is not successfully constructed!')
@@ -111,13 +114,13 @@ if __name__ == r'__main__':
 		print('c Sparkle portfolio selector located at ' + sgh.sparkle_portfolio_selector_path)
 		
 		print(r"c Start computing each solver's marginal contribution to perfect selector ...")
-		rank_list = scmc.compute_perfect_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
+		rank_list = scmc.compute_perfect_selector_marginal_contribution()
 		scmc.print_rank_list(rank_list, 1)
 		print(r'c Marginal contribution (perfect selector) computing done!')
 	
 		
 		print(r"c Start computing each solver's marginal contribution to actual selector ...")
-		rank_list = scmc.compute_actual_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
+		rank_list = scmc.compute_actual_selector_marginal_contribution()
 		scmc.print_rank_list(rank_list, 2)
 		print(r'c Marginal contribution (actual selector) computing done!')
 		delete_task_run_status()

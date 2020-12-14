@@ -17,7 +17,7 @@ import argparse
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
@@ -26,13 +26,12 @@ from sparkle_help import sparkle_run_portfolio_selector_help as srps ##
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 
 
 def compute_perfect():
-	cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
-
 	print(r"c Start computing each solver's marginal contribution to perfect selector ...")
-	rank_list = scmc.compute_perfect_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
+	rank_list = scmc.compute_perfect_selector_marginal_contribution()
 	scmc.print_rank_list(rank_list, 1)
 	print(r'c Marginal contribution (perfect selector) computing done!')
 
@@ -40,10 +39,8 @@ def compute_perfect():
 
 
 def compute_actual():
-	cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
-
 	print(r"c Start computing each solver's marginal contribution to actual selector ...")
-	rank_list = scmc.compute_actual_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
+	rank_list = scmc.compute_actual_selector_marginal_contribution()
 	scmc.print_rank_list(rank_list, 2)
 	print(r'c Marginal contribution (actual selector) computing done!')
 
@@ -61,6 +58,10 @@ def compute_marginal_contribution(flag_compute_perfect, flag_compute_actual):
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 

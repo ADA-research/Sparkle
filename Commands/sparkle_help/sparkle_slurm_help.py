@@ -16,7 +16,6 @@ import fcntl
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_experiments_related_help as serh
 
 
 def get_slurm_options_list(path_modifier=None):
@@ -117,7 +116,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	sbatch_script_path = sgh.smac_dir + sbatch_script_name
 
 	## Set sbatch options
-	max_jobs = serh.num_job_in_parallel
+	max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
 	num_jobs = 3
 	if num_jobs < max_jobs:
 		max_jobs = num_jobs
@@ -201,7 +200,7 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
 	sbatch_script_path = sbatch_script_dir + sbatch_script_name
 
 	## Set sbatch options
-	max_jobs = serh.num_job_in_parallel
+	max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
 	num_jobs = n_jobs
 	if num_jobs < max_jobs:
 		max_jobs = num_jobs

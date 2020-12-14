@@ -14,13 +14,14 @@ import os
 import sys
 import fcntl
 import argparse
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_run_status_help
 from sparkle_help import sparkle_generate_report_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 
 
 def generate_task_run_status():
@@ -39,6 +40,10 @@ def delete_task_run_status():
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -48,7 +53,7 @@ if __name__ == r'__main__':
 	# Process command line arguments
 	args = parser.parse_args()
 	
-	if not os.path.isfile(sparkle_global_help.sparkle_portfolio_selector_path):
+	if not os.path.isfile(sgh.sparkle_portfolio_selector_path):
 		print(r'c Before generating Sparkle report, please first construct Sparkle portfolio selector!')
 		print(r'c Do not generate Sparkle report. Exit!')
 		sys.exit()

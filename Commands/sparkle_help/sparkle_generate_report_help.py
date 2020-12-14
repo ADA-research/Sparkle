@@ -13,7 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -22,43 +22,50 @@ from sparkle_help import sparkle_compute_marginal_contribution_help
 from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
 
+
 def get_customCommands():
 	str_value = r''
 	return str_value
+
 
 def get_sparkle():
 	str_value = r'\emph{Sparkle}'
 	return str_value
 
+
 def get_numSolvers():
-	num_solvers = len(sparkle_global_help.solver_list)
+	num_solvers = len(sgh.solver_list)
 	str_value = str(num_solvers)
 	return str_value
 
+
 def get_solverList():
 	str_value = r''
-	solver_list = sparkle_global_help.solver_list
+	solver_list = sgh.solver_list
 	for solver_path in solver_list:
 		solver_name = sfh.get_file_name(solver_path)
 		str_value += r'\item \textbf{' + solver_name + r'}' + '\n'
 	return str_value
 
+
 def get_numFeatureExtractors():
-	num_feature_extractors = len(sparkle_global_help.extractor_list)
+	num_feature_extractors = len(sgh.extractor_list)
 	str_value = str(num_feature_extractors)
 	return str_value
 
+
 def get_featureExtractorList():
 	str_value = r''
-	extractor_list = sparkle_global_help.extractor_list
+	extractor_list = sgh.extractor_list
 	for extractor_path in extractor_list:
 		extractor_name = sfh.get_file_name(extractor_path)
 		str_value += r'\item \textbf{' + extractor_name + r'}' + '\n'
 	return str_value
 
+
 def get_numInstanceClasses():
 	list_instance_class = []
-	instance_list = sparkle_global_help.instance_list
+	instance_list = sgh.instance_list
 	for instance_path in instance_list:
 		instance_class = sfh.get_current_directory_name(instance_path)
 		if not (instance_class in list_instance_class):
@@ -66,11 +73,12 @@ def get_numInstanceClasses():
 	str_value = str(len(list_instance_class))
 	return str_value
 
+
 def get_instanceClassList():
 	str_value = r''
 	list_instance_class = []
 	dict_number_of_instances_in_instance_class = {}
-	instance_list = sparkle_global_help.instance_list
+	instance_list = sgh.instance_list
 	for instance_path in instance_list:
 		instance_class = sfh.get_current_directory_name(instance_path)
 		if not (instance_class in list_instance_class):
@@ -84,13 +92,16 @@ def get_instanceClassList():
 	
 	return str_value
 
+
 def get_featureComputationCutoffTime():
 	str_value = str(sparkle_experiments_related_help.cutoff_time_total_extractor_run_on_one_instance)
 	return str_value
 
+
 def get_performanceComputationCutoffTime():
-	str_value = str(sparkle_experiments_related_help.cutoff_time_each_run)
+	str_value = str(sgh.settings.get_general_target_cutoff_time())
 	return str_value
+
 
 def get_solverPerfectRankingList():
 	rank_list = cmc.compute_perfect()
@@ -102,6 +113,7 @@ def get_solverPerfectRankingList():
 		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
+
 def get_solverActualRankingList():
 	rank_list = cmc.compute_actual()
 	str_value = r''
@@ -112,12 +124,12 @@ def get_solverActualRankingList():
 		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
 
+
 def get_PAR10RankingList():
 	str_value = r''
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	
 	for solver, this_penalty_time in solver_penalty_time_ranking_list:
 		str_value += r'\item \textbf{' + solver + r'}, PAR10: ' + str(this_penalty_time) + '\n'
@@ -127,9 +139,8 @@ def get_PAR10RankingList():
 
 def get_VBSPAR10():
 	str_value = r''
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	vbs_penalty_time = performance_data_csv.calc_vbs_penaltry_time(cutoff_time_each_run, 10)
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+	vbs_penalty_time = performance_data_csv.calc_vbs_penalty_time()
 	
 	str_value = str(vbs_penalty_time)
 	return str_value
@@ -140,18 +151,18 @@ def get_actualPAR10():
 	actual_penalty_time = 0.0
 	actual_count = 0
 	
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
-	actual_portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	penalty_time_each_run = sparkle_experiments_related_help.penalty_time
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+	actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+	cutoff_time = sgh.settings.get_general_target_cutoff_time()
+	penalty_time_each_run = sgh.settings.get_penalised_time()
 	
 	for instance in performance_data_csv.list_rows():
 		list_predict_schedule = sparkle_compute_marginal_contribution_help.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
 		used_time_for_this_instance = 0
 		flag_successfully_solving = False
 		for i in range(0, len(list_predict_schedule)):
-			if used_time_for_this_instance >= cutoff_time_each_run:
+			if used_time_for_this_instance >= cutoff_time:
 				flag_successfully_solving = False
 				break
 			solver = list_predict_schedule[i][0]
@@ -159,7 +170,7 @@ def get_actualPAR10():
 			required_time_this_run = performance_data_csv.get_value(instance, solver)
 			if required_time_this_run <= scheduled_cutoff_time_this_run:
 				used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
-				if used_time_for_this_instance > cutoff_time_each_run:
+				if used_time_for_this_instance > cutoff_time:
 					flag_successfully_solving = False
 				else: flag_successfully_solving = True
 				break
@@ -179,39 +190,39 @@ def get_actualPAR10():
 
 def get_dict_sbs_penalty_time_on_each_instance():
 	mydict = {}
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+	cutoff_time = sgh.settings.get_general_target_cutoff_time()
 	
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
 	
 	for instance in performance_data_csv.list_rows():
 		this_run_time = performance_data_csv.get_value(instance, sbs_solver)
-		if this_run_time <= cutoff_time_each_run:
+		if this_run_time <= cutoff_time:
 			mydict[instance] = this_run_time
 		else:
-			mydict[instance] = sparkle_experiments_related_help.penalty_time
+			mydict[instance] = sgh.settings.get_penalised_time()
 	return mydict
 
 
 def get_dict_vbs_penalty_time_on_each_instance():
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 	mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
 	return mydict
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 	mydict = {}
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
-	actual_portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+	actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+	cutoff_time = sgh.settings.get_general_target_cutoff_time()
 	
 	for instance in performance_data_csv.list_rows():
 		list_predict_schedule = sparkle_compute_marginal_contribution_help.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
 		used_time_for_this_instance = 0
 		flag_successfully_solving = False
 		for i in range(0, len(list_predict_schedule)):
-			if used_time_for_this_instance >= cutoff_time_each_run:
+			if used_time_for_this_instance >= cutoff_time:
 				flag_successfully_solving = False
 				break
 			solver = list_predict_schedule[i][0]
@@ -219,7 +230,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 			required_time_this_run = performance_data_csv.get_value(instance, solver)
 			if required_time_this_run <= scheduled_cutoff_time_this_run:
 				used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
-				if used_time_for_this_instance > cutoff_time_each_run:
+				if used_time_for_this_instance > cutoff_time:
 					flag_successfully_solving = False
 				else: flag_successfully_solving = True
 				break
@@ -229,8 +240,9 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 		if flag_successfully_solving:
 			mydict[instance] = used_time_for_this_instance
 		else:
-			mydict[instance] = sparkle_experiments_related_help.penalty_time
+			mydict[instance] = sgh.settings.get_penalised_time()
 	return mydict
+
 
 def get_figure_portfolio_selector_sparkle_vs_sbs():
 	str_value = r''
@@ -249,12 +261,12 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 		fout.write(str(sbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
 	fout.close()
 	
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
-	cutoff_time_each_run = sparkle_experiments_related_help.cutoff_time_each_run
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
+	penalised_time_str = str(sgh.settings.get_penalised_time())
 	
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + str(sparkle_experiments_related_help.penalty_time) + r' ' + '\'SBS (' + sbs_solver + ')\' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
+	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sbs_solver + ')\' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
 	
 	#print(gnuplot_command)
 	
@@ -280,14 +292,14 @@ def get_figure_portfolio_selector_sparkle_vs_vbs():
 		sparkle_penalty_time = dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]
 		fout.write(str(vbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
 	fout.close()
-	
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_vbs_filename + r' ' + str(sparkle_experiments_related_help.penalty_time) + r' ' + r'VBS' + r' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_vbs_filename
+
+	penalised_time_str = str(sgh.settings.get_penalised_time())
+	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_vbs_filename + r' ' + penalised_time_str + r' ' + r'VBS' + r' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_vbs_filename
 	
 	os.system(gnuplot_command)
 	
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_vbs_filename)
 	return str_value
-
 
 
 def get_dict_variable_to_value():
@@ -413,7 +425,4 @@ def generate_report():
 	sl.add_output(report_path, 'Sparkle portfolio selector report')
 	
 	return
-	
-
-
 
