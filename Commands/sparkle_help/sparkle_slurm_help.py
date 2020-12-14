@@ -23,7 +23,10 @@ def get_slurm_options_list(path_modifier=None):
 	if path_modifier is None:
 		path_modifier = ''
 
+	#slurm_options = settings.get_slurm_extra_options()
+	#slurm_options_list = ["--{}={}".format(k, v) for k, v in slurm_options.items()]
 	slurm_options_list = []
+
 	sparkle_slurm_settings_path = str(path_modifier) + sgh.sparkle_slurm_settings_path
 	
 	settings_file = open(sparkle_slurm_settings_path, 'r')
@@ -182,7 +185,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	srun_options_str = srun_options_str + ' ' + get_slurm_srun_user_options_str()
 
 	## Create target call
-	n_cores = 16 # Number of cores available on a Grace GPU
+	n_cores = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace GPU
 
 	target_call_str = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cores)
 

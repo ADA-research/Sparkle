@@ -51,7 +51,7 @@ if __name__ == r'__main__':
 	args = parser.parse_args()
 
 	validate = args.validate
-	ablation = args.validate
+	ablation = args.ablation
 	solver = args.solver
 	instance_set_train = args.instance_set_train
 	instance_set_test = args.instance_set_test
@@ -68,6 +68,8 @@ if __name__ == r'__main__':
 	if instance_set_test is not None:
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
+	# Write used settings to file
+	sgh.settings.write_used_settings()
 
 	# Copy instances to smac directory
 	instances_directory = r'Instances/' + instance_set_train_name
@@ -98,7 +100,4 @@ if __name__ == r'__main__':
 
 	if(ablation):
 		scsh.generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, configure_jobid)
-
-	# Write used settings to file
-	sgh.settings.write_used_settings()
 

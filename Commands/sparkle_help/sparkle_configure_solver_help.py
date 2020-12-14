@@ -44,7 +44,6 @@ def get_smac_run_obj() -> str:
 
 	return smac_run_obj
 
-
 def get_smac_settings():
 	smac_each_run_cutoff_length = sgh.settings.get_smac_target_cutoff_length()
 	smac_run_obj = get_smac_run_obj()
@@ -54,6 +53,20 @@ def get_smac_settings():
 	num_of_smac_run_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
 
 	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel
+
+'''
+TODO: fix ablation settings
+		elif mylist[0] == 'ablation_concurrent_clis':
+			ablation_concurrent_clis = mylist[2]
+		elif mylist[0] == 'ablation_racing':
+			ablation_racing = mylist[2].lower() in ['true', '1']
+	fin.close()
+
+	return_list = [smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str]
+	if with_ablation:
+		return_list.append(ablation_concurrent_clis)
+		return_list.append(ablation_racing)
+'''
 
 
 # Copy file listing the training instances from the instance directory to the solver directory
@@ -119,9 +132,9 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	scenario_file_name = instance_set_name + '_' + inst_type + '_' + config_type + r'_scenario.txt'
 	smac_file_scenario = smac_solver_dir + scenario_file_name
-	
+
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
-	
+
 	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
 	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
 	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
@@ -242,10 +255,10 @@ def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 	[item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
 
 	command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + str(num_of_smac_run) + ' ' + str(num_of_smac_run_in_parallel) + ' ' + execdir + ' ; ' + 'cd ../../'
-	
+
 	#print(command_line)
 	os.system(command_line)
-	
+
 	smac_configure_sbatch_script_name = smac_file_scenario_name + '_' + str(num_of_smac_run) + '_exp_sbatch.sh'
 
 	return smac_configure_sbatch_script_name
@@ -410,7 +423,7 @@ def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
 
 def generate_validation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
 	command_line = 'echo $(pwd) $(date)\n'
-	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py'
+	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py  --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
 	command_line += ' --instance-set-train ' + instance_set_train
 	if instance_set_test is not None:
@@ -420,7 +433,7 @@ def generate_validation_callback_slurm_script(solver, instance_set_train, instan
 
 def generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
 	command_line = 'echo $(pwd) $(date)\n'
-	command_line += 'srun -N1 -n1 ./Commands/run_ablation.py'
+	command_line += 'srun -N1 -n1 ./Commands/run_ablation.py --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
 	command_line += ' --instance-set-train ' + instance_set_train
 	if instance_set_test is not None:
@@ -451,9 +464,13 @@ def generate_generic_callback_slurm_script(name,solver, instance_set_train, inst
 	sbatch_options_list = [job_name, output, error]
 	sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
 	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
+
+	#Only overwrite task specific arguments
 	sbatch_options_list.append("--dependency=afterany:{}".format(dependency))
 	sbatch_options_list.append("--nodes=1")
 	sbatch_options_list.append("--ntasks=1")
+	sbatch_options_list.append("-c1")
+	sbatch_options_list.append("--mem-per-cpu=3000")
 
 	ori_path = os.getcwd()
 

@@ -64,8 +64,11 @@ class Settings:
 	DEFAULT_config_number_of_runs = 25
 
 	DEFAULT_slurm_number_of_runs_in_parallel = 25
+	DEFAULT_slurm_clis_per_node = 32
 
 	DEFAULT_smac_target_cutoff_length = 'max'
+
+	DEFAULT_ablation_racing = False
 
 
 	def __init__(self, file_path: PurePath = None):
@@ -82,8 +85,12 @@ class Settings:
 		self.__config_number_of_runs_set = SettingState.NOT_SET
 
 		self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
+		self.__slurm_clis_per_node_set = SettingState.NOT_SET
+		self.__slurm_extra_options_set = dict()
 
 		self.__smac_target_cutoff_length_set = SettingState.NOT_SET
+
+		self.__ablation_racing_flag_set = SettingState.NOT_SET
 
 		if file_path == None:
 			# Initialise settings from default file path
@@ -93,7 +100,6 @@ class Settings:
 			self.read_settings_ini(file_path)
 
 		return
-
 
 	def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path, state: SettingState = SettingState.FILE):
 		# Read file
@@ -139,6 +145,7 @@ class Settings:
 					self.set_config_budget_per_run(value, state)
 					file_settings.remove_option(section, option)
 
+			section = 'configuration'
 			option_names = ('number_of_runs', 'num_of_smac_runs')
 			for option in option_names:
 				if file_settings.has_option(section, option):
@@ -154,6 +161,14 @@ class Settings:
 					self.set_slurm_number_of_runs_in_parallel(value, state)
 					file_settings.remove_option(section, option)
 
+			section = 'slurm'
+			option_names = ('clis_per_node', )
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_slurm_clis_per_node(value, state)
+					file_settings.remove_option(section, option)
+
 			section = 'smac'
 			option_names = ('target_cutoff_length', 'smac_each_run_cutoff_length')
 			for option in option_names:
@@ -162,12 +177,28 @@ class Settings:
 					self.set_smac_target_cutoff_length(value, state)
 					file_settings.remove_option(section, option)
 
+			section = 'ablation'
+			option_names = ('racing', 'ablation_racing')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getboolean(section, option)
+					self.set_ablation_racing_flag(value, state)
+					file_settings.remove_option(section, option)
+
 			# TODO: Report on any unknown settings that were read
 			sections = file_settings.sections()
 
 			for section in sections:
 				for option in file_settings[section]:
-					print('Unrecognised section - option combination:\'', section, option, '\'in file', str(file_path), 'ignored') 
+					# TODO: Quick fix to support partitions and excludes, but should not allow any option
+					if section == "slurm":
+						print("Unrecognised SLURM option '{option}' found in {file}. Option is added to any SLURM batches".format(
+							option=option,
+							file=str(file_path)))
+						value = file_settings.get(section, option)
+						self.add_slurm_extra_option(option, value, state)
+					else:
+						print('Unrecognised section - option combination:\'', section, option, '\'in file', str(file_path), 'ignored')
 
 		# Print error if unable to read the settings
 		else:
@@ -393,4 +424,67 @@ class Settings:
 			self.set_slurm_number_of_runs_in_parallel()
 
 		return int(self.__settings['slurm']['number_of_runs_in_parallel'])
+
+
+	def set_slurm_clis_per_node(self, value: int = DEFAULT_slurm_clis_per_node, origin: SettingState = SettingState.DEFAULT):
+		section = 'slurm'
+		name = 'clis_per_node'
+
+		if value != None and self.__check_setting_state(self.__slurm_number_of_runs_in_parallel_set, origin, name):
+			self.__init_section(section)
+			self.__slurm_clis_per_node_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_slurm_clis_per_node(self) -> int:
+		if self.__slurm_clis_per_node_set == SettingState.NOT_SET:
+			self.set_slurm_clis_per_node()
+
+		return int(self.__settings['slurm']['clis_per_node'])
+
+
+	### SLURM extra options
+
+	def add_slurm_extra_option(self, name: str, value: str, origin: SettingState = SettingState.DEFAULT):
+		section = "slurm_extra"
+
+		current_state = self.__slurm_extra_options_set[name] if name in self.__slurm_extra_options_set else SettingState.NOT_SET
+
+		if value != None and self.__check_setting_state(current_state, origin, name):
+			self.__init_section(section)
+			self.__slurm_extra_options_set[name] = origin
+			self.__settings[section][name] = str(value)
+
+	def get_slurm_extra_options(self) -> dict:
+		section = "slurm_extra"
+		options = dict()
+
+		if "slurm_extra" in self.__settings.sections():
+			for option in self.__settings["slurm_extra"]:
+				options[option] = self.__settings.get(section, option)
+
+		return options
+
+
+
+	### Ablation settings ###
+
+	def set_ablation_racing_flag(self, value: bool = DEFAULT_ablation_racing, origin: SettingState = SettingState.DEFAULT):
+		section = 'ablation'
+		name = 'racing'
+
+		if value != None and self.__check_setting_state(self.__ablation_racing_flag_set, origin, name):
+			self.__init_section(section)
+			self.__ablation_racing_flag_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+	def get_ablation_racing_flag(self) -> bool:
+		if self.__ablation_racing_flag_set == SettingState.NOT_SET:
+			self.set_ablation_racing_flag()
+
+		return bool(self.__settings['ablation']['racing'])
 
