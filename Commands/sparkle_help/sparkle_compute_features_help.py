@@ -30,6 +30,7 @@ except ImportError:
 	import sparkle_experiments_related_help as ser
 	import sparkle_job_help
 
+
 def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path):
 	sfdcsv.Sparkle_Feature_Data_CSV.create_empty_csv(result_path)
 	zero_value_csv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
@@ -38,7 +39,6 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_
 		zero_value_csv.add_column(column_name)
 	
 	length = int(sparkle_global_help.extractor_feature_vector_size_mapping[extractor_path])
-	#value_list = [0] * length
 	value_list = [sparkle_global_help.sparkle_missing_value] * length
 	
 	zero_value_csv.add_row(instance_path, value_list)
@@ -69,9 +69,7 @@ def computing_features(feature_data_csv_path, mode):
 
 	current_job_num = 1
 	print('c The number of total running jobs: ' + str(total_job_num))
-	
-	#flag_exists_missing_value = False
-	
+
 	for i in range(0, len(list_feature_computation_job)):
 		instance_path = list_feature_computation_job[i][0]
 		extractor_list = list_feature_computation_job[i][1]
@@ -83,9 +81,7 @@ def computing_features(feature_data_csv_path, mode):
 			err_path = basic_part + r'.err'
 			runsolver_watch_data_path = basic_part + r'.log'
 			runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
-			
-			#command_line = extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
-			
+
 			command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
 			
 			time.sleep(ser.sleep_time_after_each_extractor_run) #add at version 1.0.2
@@ -103,14 +99,11 @@ def computing_features(feature_data_csv_path, mode):
 				tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
 			except:
 				print('c ****** WARNING: Feature vector computing on instance ' + instance_path + ' failed! ******')
-				#print 'c ****** WARNING: Treat the feature vector of this instance as a vector whose all elements are 0 ! ******'
-				#print r"c ****** WARNING: The feature vector of this instance will be imputed as the mean value of all other non-missing values after all instances' feature computation done! ******"
 				print('c ****** WARNING: The feature vector of this instace consists of missing values ******')
 				command_line = r'rm -f ' + result_path
 				os.system(command_line)
 				tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path)
-				#flag_exists_missing_value = True
-			
+
 			feature_data_csv.combine(tmp_fdcsv)
 			#print feature_data_csv.dataframe
 		
@@ -133,11 +126,3 @@ def computing_features(feature_data_csv_path, mode):
 	
 	return
 
-	
-
-
-
-
-
-
-	

@@ -43,17 +43,12 @@ import functools
 print = functools.partial(print, flush=True)
 
 
-def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path):
-	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-
-	if not Path(solver_wrapper_path).is_file():
-		print('c ERROR: Wrapper named \'' + solver_wrapper_path + '\' not found, stopping execution!')
-		sys.exit()
-
-	# Get the solver call command from the wrapper
+def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str) -> str:
 	cmd_solver_call = ''
-	seed = sgh.get_seed()
-	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + str(seed) + ' --cutoff-time ' + cutoff_time_str
+
+	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+	seed_str = str(sgh.get_seed())
+	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + seed_str + ' --cutoff-time ' + cutoff_time_str
 	solver_call_rawresult = os.popen(cmd_get_solver_call)
 	solver_call_result = solver_call_rawresult.readlines()[0].strip()
 
@@ -63,6 +58,19 @@ def run_solver_on_instance(relative_path, solver_wrapper_path, instance_path, ra
 		# TODO: Add instructions for the user that might fix the issue?
 		print('c ERROR: Failed to get valid solver call command from wrapper at \'' + solver_wrapper_path + '\' stopping execution!')
 		sys.exit()
+
+	return cmd_solver_call
+
+
+def run_solver_on_instance(relative_path, solver_wrapper_path: str, instance_path: str, raw_result_path, runsolver_values_path):
+	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+
+	if not Path(solver_wrapper_path).is_file():
+		print('c ERROR: Wrapper named \'' + solver_wrapper_path + '\' not found, stopping execution!')
+		sys.exit()
+
+	# Get the solver call command from the wrapper
+	cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path)
 
 	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
