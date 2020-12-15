@@ -14,6 +14,7 @@ import os
 import sys
 import fcntl
 import argparse
+from pathlib import Path
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_csv_merge_help
@@ -44,7 +45,12 @@ if __name__ == r'__main__':
 	parser.add_argument('--instance-set-train', required=False, type=str, help='path to training instance set')
 	parser.add_argument('--instance-set-test', required=False, type=str, help='path to testing instance set')
 	parser.add_argument('--no-ablation', required=False, dest="flag_ablation", default=True, const=False, nargs="?", help='turn off reporting on ablation')
+	parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
+
+	# Process command line arguments
 	args = parser.parse_args()
+
+	if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
 
 	solver = args.solver
 	instance_set_train = args.instance_set_train

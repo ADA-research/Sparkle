@@ -16,6 +16,7 @@ import random
 import sys
 import fcntl
 from pathlib import Path
+from pathlib import PurePath
 from enum import Enum
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
@@ -280,10 +281,38 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
 
 # Check the results directory for this solver and instance set combination exists
 # NOTE: This function assumes SMAC output
-def check_configuration_exists(solver_name, instance_set_name):
-	smac_results_dir = sgh.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/'
+def check_configuration_exists(solver_name: str, instance_set_name: str):
+	# Check the results directory exists
+	smac_results_dir = Path(sgh.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/')
 
-	return (os.path.exists(smac_results_dir))
+	all_good = smac_results_dir.is_dir()
+
+	if not all_good:
+		print('c ERROR: No configuration results found for the given solver and training instance set.')
+		sys.exit(-1)
+
+	return
+
+
+def check_instance_list_file_exist(solver_name: str, instance_set_name: str):
+	# Check the instance list file exists
+	file_name = Path(instance_set_name + '_train.txt')
+	instance_list_file_path = Path(PurePath(Path(sgh.smac_dir) / Path('example_scenarios') / Path(solver_name) / file_name))
+
+	all_good = instance_list_file_path.is_file()
+
+	if not all_good:
+		print('c ERROR: Instance list file not found, make sure configuration was completed correctly for this solver and instance set combination.')
+		sys.exit(-1)
+
+	return
+
+
+def check_validation_prerequisites(solver_name: str, instance_set_name: str):
+	check_configuration_exists(solver_name, instance_set_name)
+	check_instance_list_file_exist(solver_name, instance_set_name)
+
+	return
 
 
 # Write optimised configuration string to file

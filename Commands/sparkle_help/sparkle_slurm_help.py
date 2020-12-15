@@ -137,7 +137,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	configuration_str = 'DEFAULT'
 	train_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 
-	train_default = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
+	train_default = '--scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
 
 	# Create job list
 	job_params_list = [train_default]
@@ -153,7 +153,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 		configuration_str = 'DEFAULT'
 		test_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 	
-		test_default = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
+		test_default = '--scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
 	
 		# Test configured
 		default = False
@@ -171,7 +171,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	
 		test_configured_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 	
-		test_configured = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration-list ' + config_file_path
+		test_configured = '--scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration-list ' + config_file_path
 
 		# Extend job list
 		job_params_list.extend([test_default, test_configured])

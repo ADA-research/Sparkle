@@ -64,9 +64,7 @@ if __name__ == r'__main__':
 	instance_set_test_name = None
 
 	# Make sure configuration results exist before trying to work with them
-	if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
-		print('c Error: No configuration results found for the given solver and training instance set.')
-		sys.exit(-1)
+	scsh.check_validation_prerequisites(solver_name, instance_set_train_name)
 
 	# Record optimised configuration
 	scsh.write_optimised_configuration_str(solver_name, instance_set_train_name)
@@ -98,10 +96,6 @@ if __name__ == r'__main__':
 	sbatch_script_name = ssh.generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name)
 	sbatch_script_dir = sgh.smac_dir
 	sbatch_script_path = sbatch_script_dir + sbatch_script_name
-	#ori_path = os.getcwd()
-	#command = 'cd ' + sgh.smac_dir + ' ; sbatch ' + sbatch_script_name + ' ; cd ' + ori_path
-	#os.system(r'chmod a+x ' + sbatch_script_path)
-	#os.system(command)
 
 	validate_jobid = ssh.submit_sbatch_script(sbatch_script_name, sbatch_script_dir)
 

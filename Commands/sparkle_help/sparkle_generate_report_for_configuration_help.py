@@ -617,7 +617,7 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 			all_good = False
 
 	if not all_good:
-		print('c Error: Results not found for the given solver and instance set(s) combination. Make sure the \'configure_solver\' and \'test_configured_solver_and_default_solver\' commands were correctly executed.')
+		print('c Error: Results not found for the given solver and instance set(s) combination. Make sure the \'configure_solver\' and \'validate_configured_vs_default\' commands were correctly executed.')
 		sys.exit()
 
 	return
