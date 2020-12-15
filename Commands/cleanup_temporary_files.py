@@ -50,13 +50,13 @@ if __name__ == r'__main__':
 	os.system(command_line)
 	command_line = r'rm -f slurm-*'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Extractor_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Extractor_Jobs/'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Solver_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Solver_Jobs/'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Portfolio_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Portfolio_Jobs/'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Report_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Report_Jobs/'
 	os.system(command_line)
 	print(r'c Temporary files cleaned!')
 
