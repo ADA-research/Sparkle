@@ -141,7 +141,7 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 	print('c Computing actual performance for portfolio selector with all solvers ...')
 	actual_portfolio_selector_path = r'Tmp/' + r'actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
 	scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path)
-	
+
 	if not os.path.exists(actual_portfolio_selector_path):
 		print(r'c ****** WARNING: ' + actual_portfolio_selector_path + r' does not exist! ******')
 		print(r'c ****** WARNING: ' + r'AutoFolio constructing the actual portfolio selector with all solvers failed! ******')
@@ -188,7 +188,7 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		solver_tuple = (solver, marginal_contribution)
 		rank_list.append(solver_tuple)
 		print('c Marginal contribution (to Actual Selector) for solver ' + sfh.get_last_level_directory_name(solver) + ' is ' + str(marginal_contribution))
-		
+
 	rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1], reverse=True)
 	
 	os.system(r'rm -f ' + actual_portfolio_selector_path)
