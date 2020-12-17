@@ -16,16 +16,21 @@ import fcntl
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_experiments_related_help as ser
 from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -44,4 +49,7 @@ if __name__ == r'__main__':
 		print('c Sparkle portfolio selector is running ...')
 	else:
 		print('c Input instance or instance directory error!')
+
+	# Write used settings to file
+	sgh.settings.write_used_settings()
 

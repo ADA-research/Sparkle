@@ -19,10 +19,8 @@ import pathlib
 
 try:
 	from sparkle_help import sparkle_global_help
-	from sparkle_help import sparkle_customized_config_help as scch
 except ImportError:
 	import sparkle_global_help
-	import sparkle_customized_config_help as scch
 
 
 def create_new_empty_file(filepath):
@@ -88,10 +86,11 @@ def get_file_least_extension(filepath):
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
 	if os.path.isfile(path):
-		file_extension = get_file_least_extension(path)
-		if file_extension == scch.file_extension:
-			filename = get_file_name(path)
-			list_all_cnf_filename.append(filename)
+		# TODO: Possibly add extension check back when we get this information from the user
+#		file_extension = get_file_least_extension(path)
+#		if file_extension == scch.file_extension:
+		filename = get_file_name(path)
+		list_all_cnf_filename.append(filename)
 		return
 	elif os.path.isdir(path):
 		if path[-1]!=r'/':
@@ -147,20 +146,6 @@ def get_list_all_directory(filepath):
 	list_all_directory = []
 	get_list_all_directory_recursive(filepath, list_all_directory)
 	return list_all_directory
-
-'''
-def get_list_all_cnf_filename(filepath):
-	if not os.path.exists(filepath):
-		print r'c Directory ' + filepath + r' does not exist!'
-		sys.exit()
-	list_all_items = os.listdir(filepath)
-	list_all_cnf_filename = []
-	for i in range(0, len(list_all_items)):
-		file_extension = get_file_least_extension(list_all_items[i])
-		if file_extension == r'cnf':
-			list_all_cnf_filename.append(list_all_items[i])
-	return list_all_cnf_filename
-'''
 
 def get_list_all_csv_filename(filepath):
 	csv_list = []

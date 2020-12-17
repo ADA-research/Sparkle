@@ -103,30 +103,40 @@ def print_solution(raw_result_path):
 	return
 
 
-def call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time):
+def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: str, cutoff_time: int):
 	raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
-	srs.run_solver_on_instance(solver_path, solver_path+r'/'+sgh.sparkle_run_default_wrapper, instance_path, raw_result_path, cutoff_time)
+	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
+	solver_wrapper_path = solver_path+r'/'+sgh.sparkle_run_default_wrapper
+	srs.run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, cutoff_time)
 	# verify_string = srs.judge_correctness_raw_result(instance_path, raw_result_path)
-	
+
 	# if verify_string == r'SAT': flag_solved = True
 	# elif verify_string == r'UNSAT': flag_solved = True
 	# elif verify_string == r'UNKNOWN': flag_solved = False
 	# elif verify_string == r'WRONG': flag_solved = False
 	# else: flag_solved = False
 
-	flag_solved = True
-	
+	flag_solved = False
+	runtime, quality, status = srs.process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
+	_, status = srs.handle_timeouts(runtime, status, cutoff_time)
+	status = verify(instance_path, raw_result_path, solver_path, status)
+
+	if status == 'SUCCESS' or status == 'SAT' or status == 'UNSAT':
+		flag_solved = True
+
 	if flag_solved: 
 		print('c instance solved by solver ' + solver_path)
 		# print_solution(raw_result_path)
 		# print(raw_result_path)
 		os.system('cat %s' % (raw_result_path))
-	
+	else:
+		print('c solver', solver_path, 'failed to solve the instance with status', status)
+
 	os.system(r'rm -f ' + raw_result_path)
 	return flag_solved
 
 
-def call_sparkle_portfolio_selector_solve_instance(instance_path):
+def call_sparkle_portfolio_selector_solve_instance(instance_path: str):
 	print('c Start running Sparkle portfolio selector on solving instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	python_executable = sgh.python_executable
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
@@ -176,7 +186,8 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path):
 	return
 
 
-def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell_script_path, num_job_in_parallel, test_case_directory_path, performance_data_csv_path, list_jobs, start_index, end_index):
+def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell_script_path, test_case_directory_path, performance_data_csv_path, list_jobs, start_index, end_index):
+	num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
 	job_name = sfh.get_file_name(sbatch_shell_script_path) # specify the name of this sbatch script
 	num_job_total = end_index - start_index # calculate the total number of jobs to be handled in this sbatch script
 	if num_job_in_parallel > num_job_total:
@@ -253,7 +264,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	i = 0
 	j = len(total_job_list)
 	sbatch_shell_script_path = test_case_directory_path + r'Tmp/'+ r'running_sparkle_portfolio_selector_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
-	generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell_script_path, ser.num_job_in_parallel, test_case_directory_path, test_performance_data_csv_path, total_job_list, i, j)
+	generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell_script_path, test_case_directory_path, test_performance_data_csv_path, total_job_list, i, j)
 	os.system(r'chmod a+x ' + sbatch_shell_script_path)
 	command_line = r'sbatch ' + sbatch_shell_script_path
 	
@@ -261,10 +272,4 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	#print(command_line)
 	
 	return
-
-
-
-
-
-
 

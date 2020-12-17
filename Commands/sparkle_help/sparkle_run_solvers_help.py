@@ -25,7 +25,6 @@ try:
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 	from sparkle_help import sparkle_experiments_related_help as ser
 	from sparkle_help import sparkle_job_help as sjh
-	from sparkle_help import sparkle_customized_config_help as scch
 	from sparkle_help.sparkle_settings import PerformanceMeasure
 	from sparkle_help.sparkle_settings import SolutionVerifier
 except ImportError:
@@ -35,7 +34,6 @@ except ImportError:
 	import sparkle_performance_data_csv_help as spdcsv
 	import sparkle_experiments_related_help as ser
 	import sparkle_job_help as sjh
-	import sparkle_customized_config_help as scch
 	from sparkle_settings import PerformanceMeasure
 	from sparkle_settings import SolutionVerifier
 
@@ -62,8 +60,11 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str) -
 	return cmd_solver_call
 
 
-def run_solver_on_instance(relative_path, solver_wrapper_path: str, instance_path: str, raw_result_path, runsolver_values_path):
-	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+def run_solver_on_instance(relative_path, solver_wrapper_path: str, instance_path: str, raw_result_path, runsolver_values_path, custom_cutoff: int = None):
+	if custom_cutoff is None:
+		cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+	else:
+		cutoff_time_str = str(custom_cutoff)
 
 	if not Path(solver_wrapper_path).is_file():
 		print('c ERROR: Wrapper named \'' + solver_wrapper_path + '\' not found, stopping execution!')
@@ -108,28 +109,28 @@ def running_solvers(performance_data_csv_path, mode):
 		print('c Running solvers mode error!')
 		print('c Do not run solvers')
 		sys.exit()
-	
+
 	print('c The cutoff time per algorithm run to solve an instance is set to ' + cutoff_time_str + ' seconds')
-	
+
 	total_job_num = sjh.get_num_of_total_job_from_list(list_performance_computation_job)
 	current_job_num = 1
 	print('c The total number of jobs to run is: ' + str(total_job_num))
 
 	if total_job_num < 1:
 		return
-	
+
 	for i in range(0, len(list_performance_computation_job)):
 		instance_path = list_performance_computation_job[i][0]
 		solver_list = list_performance_computation_job[i][1]
 		len_solver_list = len(solver_list)
 		for j in range(0, len_solver_list):
 			solver_path = solver_list[j]
-			
+
 			raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sbh.get_time_pid_random_string() + r'.rawres'
 			runsolver_values_path = raw_result_path.replace('.rawres', '.val')
-			
+
 			time.sleep(ser.sleep_time_after_each_solver_run)
-			
+
 			print('c')
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 
@@ -176,8 +177,13 @@ def running_solvers(performance_data_csv_path, mode):
 	return
 
 
-def handle_timeouts(runtime, status):
-	if runtime > sgh.settings.get_general_target_cutoff_time():
+def handle_timeouts(runtime: float, status: str, custom_cutoff: int = None) -> (float, str):
+	if custom_cutoff is None:
+		cutoff_time = sgh.settings.get_general_target_cutoff_time()
+	else:
+		cutoff_time = custom_cutoff
+
+	if runtime > cutoff_time:
 		status = 'TIMEOUT' # Overwrites possible user status...
 	if status == 'TIMEOUT' or status == 'UNKNOWN':
 		runtime = sgh.settings.get_penalised_time()
