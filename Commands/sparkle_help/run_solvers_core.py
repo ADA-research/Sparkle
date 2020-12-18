@@ -12,8 +12,6 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import time
-import random
-import sys
 import fcntl
 import argparse
 from pathlib import Path
@@ -21,14 +19,14 @@ from pathlib import PurePath
 
 try:
 	from sparkle_help import sparkle_global_help as sgh
-	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_basic_help as sbh
 	from sparkle_help import sparkle_file_help as sfh
 	from sparkle_help import sparkle_run_solvers_help as srs
 	from sparkle_help.sparkle_settings import PerformanceMeasure
 	from sparkle_help import sparkle_settings
 except ImportError:
 	import sparkle_global_help as sgh
-	import sparkle_basic_help
+	import sparkle_basic_help as sbh
 	import sparkle_file_help as sfh
 	import sparkle_run_solvers_help as srs
 	from sparkle_settings import PerformanceMeasure
@@ -54,7 +52,7 @@ if __name__ == r'__main__':
 	solver_path = args.solver
 	performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 
-	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
+	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sbh.get_time_pid_random_string()
 	raw_result_path = r'Tmp/' + key_str + r'.rawres'
 	processed_result_path = r'Performance_Data/Tmp/' + key_str + r'.result'
 	
@@ -67,20 +65,14 @@ if __name__ == r'__main__':
 	cutoff_str = 'Cutoff Time: ' + str(sgh.settings.get_general_target_cutoff_time()) + ' second(s)' + '\n'
 	status_info_str += cutoff_str
 	sfh.write_string_to_file(task_run_status_path, status_info_str)
-	solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
-	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
-	srs.run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path)
-	end_time = time.time()
 
-	runtime, quality, status = srs.process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
-	runtime, status = srs.handle_timeouts(runtime, status)
-	status = srs.verify(instance_path, raw_result_path, solver_path, status)
-		
+	cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = srs.run_solver_on_instance_and_process_results(solver_path, instance_path)
+
 	description_str = r'[Solver: ' + sfh.get_last_level_directory_name(solver_path) + r', Instance: ' + sfh.get_last_level_directory_name(instance_path) + r']'
-	start_time_str = r'[Start Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time)) + r']'
-	end_time_str = r'[End Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(end_time)) + r']'
-	run_time_str = r'[Actual Run Time (wall clock): ' + str(end_time-start_time) + r' second(s)]'
-	recorded_run_time_str = r'[Recorded Run Time: ' + str(runtime) + r' second(s)]'
+	start_time_str = '[Start Time: ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time)) + ']'
+	end_time_str = r'[End Time (after completing run time + processing time): ' + time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + r']'
+	run_time_str = r'[Actual Run Time (wall clock): ' + str(wc_time) + r' second(s)]'
+	recorded_run_time_str = r'[Recorded Run Time (CPU PAR' + str(sgh.settings.get_general_penalty_multiplier()) + '): ' + str(cpu_time_penalised) + r' second(s)]'
 	status_str = '[Run Status: ' + status + ']'
 		
 	log_str = description_str + r', ' + start_time_str + r', ' + end_time_str + r', ' + run_time_str + r', ' + recorded_run_time_str + ', ' + status_str
@@ -91,7 +83,7 @@ if __name__ == r'__main__':
 	if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
 		obj_str = str(quality[0]) # TODO: Handle the multi-objective case
 	else:
-		obj_str = str(runtime)
+		obj_str = str(cpu_time)
 	
 	fout = open(processed_result_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)

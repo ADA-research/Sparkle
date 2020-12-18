@@ -13,14 +13,23 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_run_solvers_help as srs
-from sparkle_help import sparkle_experiments_related_help as ser
+try:
+	from sparkle_help import sparkle_basic_help
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help import sparkle_global_help as sgh
+	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+	from sparkle_help import sparkle_run_solvers_help as srs
+	from sparkle_help import sparkle_experiments_related_help as ser
+except ImportError:
+	import sparkle_basic_help
+	import sparkle_file_help as sfh
+	import sparkle_global_help as sgh
+	import sparkle_feature_data_csv_help as sfdcsv
+	import sparkle_performance_data_csv_help as spdcsv
+	import sparkle_run_solvers_help as srs
+	import sparkle_experiments_related_help as ser
+
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
 	runsolver_path = sgh.runsolver_path
@@ -30,7 +39,6 @@ def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_t
 	runsolver_watch_data_path = result_path.replace(r'.rawres', r'.log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
 	
-	#command_line = extractor_path + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path
 	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sgh.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
 	
 	try:
@@ -43,10 +51,7 @@ def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_t
 		tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
 	except:
 		print('c ****** WARNING: Feature vector computing on instance ' + instance_path + ' failed! ******')
-		#print 'c ****** WARNING: Treat the feature vector of this instance as a vector whose all elements are 0 ! ******'
 		print(r"c ****** WARNING: The feature vector of this instance will be imputed as the mean value of all other non-missing values! ******")
-		#length = int(sparkle_global_help.extractor_feature_vector_size_mapping[extractor_path])
-		#list_feature_vector = [0]*length
 		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
 		list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
 	else:
@@ -103,57 +108,52 @@ def print_solution(raw_result_path):
 	return
 
 
-def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: str, cutoff_time: int):
-	raw_result_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
-	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
-	solver_wrapper_path = solver_path+r'/'+sgh.sparkle_run_default_wrapper
-	srs.run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, cutoff_time)
-	# verify_string = srs.judge_correctness_raw_result(instance_path, raw_result_path)
-
-	# if verify_string == r'SAT': flag_solved = True
-	# elif verify_string == r'UNSAT': flag_solved = True
-	# elif verify_string == r'UNKNOWN': flag_solved = False
-	# elif verify_string == r'WRONG': flag_solved = False
-	# else: flag_solved = False
+def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: str, cutoff_time: int, performance_data_csv_path: str = None):
+	_, _, cpu_time_penalised, _, status, raw_result_path = srs.run_solver_on_instance_and_process_results(solver_path, instance_path, cutoff_time)
 
 	flag_solved = False
-	runtime, quality, status = srs.process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)
-	_, status = srs.handle_timeouts(runtime, status, cutoff_time)
-	status = verify(instance_path, raw_result_path, solver_path, status)
 
 	if status == 'SUCCESS' or status == 'SAT' or status == 'UNSAT':
 		flag_solved = True
 
-	if flag_solved: 
-		print('c instance solved by solver ' + solver_path)
-		# print_solution(raw_result_path)
-		# print(raw_result_path)
-		os.system('cat %s' % (raw_result_path))
+	if performance_data_csv_path is not None:
+		solver_name = 'Sparkle_Portfolio_Selector'
+		fo = open(performance_data_csv_path, 'r+')
+		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+		performance_data_csv.set_value(instance_path, solver_name, cpu_time_penalised)
+		performance_data_csv.dataframe.to_csv(performance_data_csv_path)
+		fo.close()
 	else:
-		print('c solver', solver_path, 'failed to solve the instance with status', status)
+		if flag_solved: 
+			print('c instance solved by solver ' + solver_path)
+			os.system('cat %s' % (raw_result_path))
+		else:
+			print('c solver', solver_path, 'failed to solve the instance with status', status)
 
 	os.system(r'rm -f ' + raw_result_path)
+
 	return flag_solved
 
 
-def call_sparkle_portfolio_selector_solve_instance(instance_path: str):
+def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performance_data_csv_path: str = None):
 	print('c Start running Sparkle portfolio selector on solving instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	python_executable = sgh.python_executable
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
-	
+
 	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	list_feature_vector = []
-	
+
 	cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance/len(sgh.extractor_list) + 1
-	
+
 	for extractor_path in sgh.extractor_list:
 		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
-		
+
 		list_feature_vector = list_feature_vector + get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
 		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!')
 	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + r' done!')
-	
+
 	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + sgh.sparkle_portfolio_selector_path + r' --feature_vec'
 	for value in list_feature_vector:
 		command_line = command_line + r' ' + str(value)
@@ -162,10 +162,10 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path: str):
 	print('c Sparkle portfolio selector predicting ...')
 	os.system(command_line)
 	print('c Predicting done!')
-	
+
 	print_predict_schedule(predict_schedule_result_path)
 	list_predict_schedule = get_list_predict_schedule_from_file(predict_schedule_result_path)
-	
+
 	os.system('rm -f ' + predict_schedule_result_path)
 	os.system('rm -f ' + sgh.sparkle_err_path)
 
@@ -174,15 +174,14 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path: str):
 		if i+1 < len(list_predict_schedule):
 			cutoff_time = list_predict_schedule[i][1]
 		else:
-			# cutoff_time = sgh.sparkle_maximum_int-1
-			# print('c This is the last solver call, so time budget for this try changes from ' + str(list_predict_schedule[-1][1]) + ' to ' + str(cutoff_time))
 			cutoff_time = list_predict_schedule[i][1]
 		print('c Calling solver ' + sfh.get_last_level_directory_name(solver_path) + ' with time budget ' + str(cutoff_time) + ' for solving ...')
 		sys.stdout.flush()
-		flag_solved = call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time)
+		flag_solved = call_solver_solve_instance_within_cutoff(solver_path, instance_path, cutoff_time, performance_data_csv_path)
 		print('c Calling solver ' + sfh.get_last_level_directory_name(solver_path) + ' done!')
 		if flag_solved: break
 		else: print('c The instance is not solved in this call')
+
 	return
 
 
@@ -193,10 +192,11 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	if num_job_in_parallel > num_job_total:
 		num_job_in_parallel = num_job_total # update the number of jobs in parallel accordingly if it is greater than the total number of jobs
 	command_prefix = r'srun -N1 -n1 --exclusive python Commands/sparkle_help/run_sparkle_portfolio_core.py ' # specify the prefix of the executing command
-	
+
 	fout = open(sbatch_shell_script_path, 'w+') # open the file of sbatch script
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX) # using the UNIX file lock to prevent other attempts to visit this sbatch script
-	
+
+	# TODO: Use generic slurm batch generator
 	####
 	# specify the options of sbatch in the top of this sbatch script
 	fout.write(r'#!/bin/bash' + '\n') # use bash to execute this script
@@ -210,19 +210,19 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	fout.write(r'#SBATCH --array=0-' + str(num_job_total-1) + r'%' + str(num_job_in_parallel) + '\n') # using slurm job array and specify the number of jobs executing in parallel in this sbatch script
 	fout.write(r'###' + '\n')
 	####
-	
+
 	####
 	# specify the array of parameters for each command
 	fout.write('params=( \\' + '\n')
-	
+
 	for i in range(start_index, end_index):
 		instance_path = list_jobs[i][0]
-		fout.write('\'%s %s\' \\' % (instance_path, test_case_directory_path) + '\n') # each parameter tuple contains instance path and extractor path
+		fout.write('\' --instance %s\' \\' % (instance_path) + '\n')
 	
 	fout.write(r')' + '\n')
 	####
 	
-	command_line = command_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}' + r' ' + performance_data_csv_path # specify the complete command
+	command_line = command_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}' + r' --performance-data-csv ' + performance_data_csv_path # specify the complete command
 	
 	fout.write(command_line + '\n') # write the complete command in this sbatch script
 	
