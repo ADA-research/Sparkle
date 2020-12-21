@@ -12,6 +12,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
+import argparse
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_logging as sl
@@ -26,18 +27,19 @@ if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)
 
-	if len(sys.argv) != 2:
-		print(r'c Arguments error!')
-		print(r'c Usage: ' + sys.argv[0] + ' <instance or instance directory>')
-		sys.exit()
-	
-	input_path = sys.argv[1]
-	
-	if os.path.isfile(input_path):
-		srps.call_sparkle_portfolio_selector_solve_instance(input_path)
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('instance_path', type=str, help='Path to instance or instance directory')
+
+	# Process command line arguments
+	args = parser.parse_args()
+	instance_path = args.instance_path
+
+	if os.path.isfile(instance_path):
+		srps.call_sparkle_portfolio_selector_solve_instance(instance_path)
 		print('c Running Sparkle portfolio selector done!')
-	elif os.path.isdir(input_path):
-		srps.call_sparkle_portfolio_selector_solve_instance_directory(input_path)
+	elif os.path.isdir(instance_path):
+		srps.call_sparkle_portfolio_selector_solve_instance_directory(instance_path)
 		print('c Sparkle portfolio selector is running ...')
 	else:
 		print('c Input instance or instance directory error!')
