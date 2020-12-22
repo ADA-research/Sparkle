@@ -194,7 +194,7 @@ def handle_timeouts(runtime: float, status: str, custom_cutoff: int = None) -> (
 	if runtime > cutoff_time:
 		status = 'TIMEOUT' # Overwrites possible user status...
 	if status == 'TIMEOUT' or status == 'UNKNOWN':
-		runtime_penalised = sgh.settings.get_penalised_time()
+		runtime_penalised = sgh.settings.get_penalised_time(cutoff_time)
 	else:
 		runtime_penalised = runtime
 

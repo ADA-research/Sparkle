@@ -445,9 +445,13 @@ def get_dict_variable_to_value(test_case_directory):
 
 
 def generate_report_for_test(test_case_directory):
+	if not os.path.exists(test_case_directory):
+		print('ERROR: The given directory', test_case_directory, 'does not exist!')
+		sys.exit(-1)
+
 	if test_case_directory[-1] != r'/':
 		test_case_directory += r'/'
-	
+
 	template_latex_directory_path = r'Components/Sparkle-latex-generator-for-test/'
 	os.system(r'cp -r ' + template_latex_directory_path + r' ' + test_case_directory)
 
