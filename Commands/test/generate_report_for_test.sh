@@ -53,9 +53,9 @@ output=$(Commands/generate_report_for_test.py $test_results_dir | tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] generate_report_for_test on single instance test succeeded"
+	echo "[success] generate_report_for_test test succeeded"
 else
-	echo "[failure] generate_report_for_test on single instance test failed with output:"
+	echo "[failure] generate_report_for_test test failed with output:"
 	echo $output
 fi
 
