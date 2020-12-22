@@ -363,24 +363,23 @@ def remove_faulty_solver(solver_path, instance_path):
 
 
 def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:
-	verify_string = sat_judge_correctness_raw_result(instance_path, raw_result_path)
+	status = sat_judge_correctness_raw_result(instance_path, raw_result_path)
 
-	runtime = -1
-	status = 'UNKNOWN'
-
-	if verify_string == 'SAT':
-		status = 'SAT'
-		if sgh.instance_reference_mapping[instance_path] != r'SAT':
-			sgh.instance_reference_mapping[instance_path] = r'SAT'
-			sfh.write_instance_reference_mapping()
-	elif verify_string == 'UNSAT':
-		status = 'UNSAT'
-		if sgh.instance_reference_mapping[instance_path] != r'UNSAT':
-			sgh.instance_reference_mapping[instance_path] = r'UNSAT'
-			sfh.write_instance_reference_mapping()
-	elif verify_string == 'WRONG':
-		status = 'WRONG'
-	else:
+	# TODO: Check if instance_reference_mapping is still useful to do or should be removed entirely
+#	if verify_string == 'SAT':
+#		status = 'SAT'
+#		if sgh.instance_reference_mapping[instance_path] != r'SAT':
+#			sgh.instance_reference_mapping[instance_path] = r'SAT'
+#			sfh.write_instance_reference_mapping()
+#	elif verify_string == 'UNSAT':
+#		status = 'UNSAT'
+#		if sgh.instance_reference_mapping[instance_path] != r'UNSAT':
+#			sgh.instance_reference_mapping[instance_path] = r'UNSAT'
+#			sfh.write_instance_reference_mapping()
+#	elif verify_string == 'WRONG':
+#		status = 'WRONG'
+#	else:
+	if status != 'SAT' and status != 'UNSAT' and status != 'WRONG':
 		status = 'UNKNOWN'
 		print('c Warning: Verification result was UNKNOWN for solver ' + sfh.get_last_level_directory_name(solver_path) + ' on instance ' + sfh.get_last_level_directory_name(instance_path) + '!')
 

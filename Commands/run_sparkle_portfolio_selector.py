@@ -13,10 +13,13 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import argparse
+from pathlib import Path
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
+from sparkle_help.sparkle_settings import SettingState
+from sparkle_help import argparse_custom as ac
 
 
 if __name__ == r'__main__':
@@ -30,10 +33,13 @@ if __name__ == r'__main__':
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('instance_path', type=str, help='Path to instance or instance directory')
+	parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 
 	# Process command line arguments
 	args = parser.parse_args()
 	instance_path = args.instance_path
+
+	if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
 
 	if os.path.isfile(instance_path):
 		srps.call_sparkle_portfolio_selector_solve_instance(instance_path)
