@@ -19,6 +19,9 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_compute_marginal_contribution_help
 
+import functools
+print = functools.partial(print, flush=True)
+
 
 def get_customCommands():
 	str_value = r''
@@ -146,9 +149,8 @@ def get_solverActualRankingList():
 def get_PAR10RankingList():
 	str_value = r''
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
-	cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
-	
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
+
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	
 	for solver, this_penalty_time in solver_penalty_time_ranking_list:
 		str_value += r'\item \textbf{' + solver + r'}, PAR10: ' + str(this_penalty_time) + '\n'
@@ -159,8 +161,7 @@ def get_PAR10RankingList():
 def get_VBSPAR10():
 	str_value = r''
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
-	cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
-	vbs_penalty_time = performance_data_csv.calc_vbs_penaltry_time(cutoff_time_each_run, 10)
+	vbs_penalty_time = performance_data_csv.calc_vbs_penalty_time()
 	
 	str_value = str(vbs_penalty_time)
 	return str_value
@@ -213,7 +214,7 @@ def get_dict_sbs_penalty_time_on_each_instance():
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 	cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
 	
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
 	
 	for instance in performance_data_csv.list_rows():
@@ -265,12 +266,12 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 	return mydict
 
 
-def get_figure_portfolio_selector_sparkle_vs_sbs():
+def get_figure_portfolio_selector_sparkle_vs_sbs(test_case_directory: str):
 	str_value = r''
 	dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 	
-	latex_directory_path = r'Components/Sparkle-latex-generator/'
+	latex_directory_path = test_case_directory + 'Sparkle-latex-generator-for-test/'
 	figure_portfolio_selector_sparkle_vs_sbs_filename = r'figure_portfolio_selector_sparkle_vs_sbs'
 	data_portfolio_selector_sparkle_vs_sbs_filename = r'data_portfolio_selector_sparkle_vs_sbs_filename.dat'
 	data_portfolio_selector_sparkle_vs_sbs_filepath = latex_directory_path + data_portfolio_selector_sparkle_vs_sbs_filename
@@ -283,8 +284,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 	fout.close()
 	
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
-	cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
-	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time_each_run)
+	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
 	
 	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + str(sgh.settings.get_penalised_time()) + r' ' + '\'SBS\ (' + sbs_solver + ')\' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
@@ -297,12 +297,12 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 	return str_value
 
 
-def get_figure_portfolio_selector_sparkle_vs_vbs():
+def get_figure_portfolio_selector_sparkle_vs_vbs(test_case_directory: str):
 	str_value = r''
 	dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 	
-	latex_directory_path = r'Components/Sparkle-latex-generator/'
+	latex_directory_path = test_case_directory + 'Sparkle-latex-generator-for-test/'
 	figure_portfolio_selector_sparkle_vs_vbs_filename = r'figure_portfolio_selector_sparkle_vs_vbs'
 	data_portfolio_selector_sparkle_vs_vbs_filename = r'data_portfolio_selector_sparkle_vs_vbs_filename.dat'
 	data_portfolio_selector_sparkle_vs_vbs_filepath = latex_directory_path + data_portfolio_selector_sparkle_vs_vbs_filename
@@ -413,33 +413,33 @@ def get_dict_variable_to_value(test_case_directory):
 	str_value = get_testActualPAR10(test_case_directory)
 	mydict[variable] = str_value
 
-	#variable = r'solverPerfectRankingList'
-	#str_value = get_solverPerfectRankingList()
-	#mydict[variable] = str_value
+	variable = r'solverPerfectRankingList'
+	str_value = get_solverPerfectRankingList()
+	mydict[variable] = str_value
 
-	#variable = r'solverActualRankingList'
-	#str_value = get_solverActualRankingList()
-	#mydict[variable] = str_value
+	variable = r'solverActualRankingList'
+	str_value = get_solverActualRankingList()
+	mydict[variable] = str_value
 
-	#variable = r'figure-portfolio-selector-sparkle-vs-sbs'
-	#str_value = get_figure_portfolio_selector_sparkle_vs_sbs()
-	#mydict[variable] = str_value
+	variable = r'figure-portfolio-selector-sparkle-vs-sbs'
+	str_value = get_figure_portfolio_selector_sparkle_vs_sbs(test_case_directory)
+	mydict[variable] = str_value
 
-	#variable = r'figure-portfolio-selector-sparkle-vs-vbs'
-	#str_value = get_figure_portfolio_selector_sparkle_vs_vbs()
-	#mydict[variable] = str_value
+	variable = r'figure-portfolio-selector-sparkle-vs-vbs'
+	str_value = get_figure_portfolio_selector_sparkle_vs_vbs(test_case_directory)
+	mydict[variable] = str_value
 
-	#variable = r'PAR10RankingList'
-	#str_value = get_PAR10RankingList()
-	#mydict[variable] = str_value
+	variable = r'PAR10RankingList'
+	str_value = get_PAR10RankingList()
+	mydict[variable] = str_value
 
-	#variable = r'VBSPAR10'
-	#str_value = get_VBSPAR10()
-	#mydict[variable] = str_value
+	variable = r'VBSPAR10'
+	str_value = get_VBSPAR10()
+	mydict[variable] = str_value
 
-	#variable = r'actualPAR10'
-	#str_value = get_actualPAR10()
-	#mydict[variable] = str_value
+	variable = r'actualPAR10'
+	str_value = get_actualPAR10()
+	mydict[variable] = str_value
 
 	return mydict
 
@@ -475,7 +475,7 @@ def generate_report_for_test(test_case_directory):
 		variable = r'@@' + variable_key + r'@@'
 		if variable_key != r'figure-portfolio-selector-sparkle-vs-sbs' and variable_key != r'figure-portfolio-selector-sparkle-vs-vbs':
 			str_value = str_value.replace(r'_', r'\textunderscore ')
-			report_content = report_content.replace(variable, str_value)
+		report_content = report_content.replace(variable, str_value)
 
 	#print(report_content)
 	

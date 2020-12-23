@@ -4,12 +4,10 @@
 \usepackage{geometry}
 \geometry{verbose,tmargin=3.5cm,bmargin=3.5cm,lmargin=3cm,rmargin=3cm}
 \usepackage{array}
-%\usepackage{multirow}
 \usepackage{amstext}
 \usepackage{graphicx}
 \usepackage{color}
 \usepackage{caption}
-%\usepackage{subfigure}
 
 \newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 
@@ -108,7 +106,6 @@ In this section, the PAR10 results for the current portfolio selector in @@spark
 \end{itemize}
 
 
-\iffalse
 \subsection{PAR10 Ranking List}
 \label{sec:PAR10_Ranking}
 
@@ -148,26 +145,9 @@ Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with r
 The empirical comparison between the actual portfolio selector in @@sparkle@@ and single best solver (\emph{SBS}) is presented in Figure \ref{fig:sparkle_vs_sbs}
 The empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{VBS} is presented in Figure \ref{fig:sparkle_vs_vbs}.
 
-%\begin{figure}[htbp]
-%\begin{minipage}{0.5\linewidth}
-%\noindent \begin{centering}
-%@@figure-portfolio-selector-sparkle-vs-sbs@@
-%\par\end{centering}
-%\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{SBS}.}\label{fig:sparkle_vs_sbs}
-%\end{minipage}
-
-%\begin{minipage}{0.5\linewidth}
-%\noindent \begin{centering}
-%@@figure-portfolio-selector-sparkle-vs-vbs@@
-%\par\end{centering}
-%
-%\end{minipage}
-%\end{figure}
-
 \begin{figure}[htbp]
 \noindent \begin{centering}
 @@figure-portfolio-selector-sparkle-vs-sbs@@
-% \includegraphics[width=0.8\textwidth]{fittedModels}
 \par\end{centering}
 
 \caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{SBS}.}\label{fig:sparkle_vs_sbs}
@@ -176,12 +156,10 @@ The empirical comparison between the actual portfolio selector in @@sparkle@@ an
 \begin{figure}[htbp]
 \noindent \begin{centering}
 @@figure-portfolio-selector-sparkle-vs-vbs@@
-% \includegraphics[width=0.8\textwidth]{fittedModels}
 \par\end{centering}
 
 \caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{VBS}.}\label{fig:sparkle_vs_vbs}
 \end{figure}
-\fi
 
 
 \bibliographystyle{plain}

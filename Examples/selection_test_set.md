@@ -42,10 +42,9 @@ Commands/generate_report.py
 # Run the portfolio selector on a testing instance set
 Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/
 
-# TODO: Test this
 # Or run the portfolio selector on a single testing instance
 Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/
 
 # Generate a report with results on the test set
-Commands/generate_report_for_test.py
+Commands/generate_report_for_test.py Test_Cases/PTN2/
 
