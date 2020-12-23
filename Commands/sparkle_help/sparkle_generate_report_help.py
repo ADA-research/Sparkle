@@ -12,7 +12,6 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
-import fcntl
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -36,6 +35,11 @@ def get_sparkle():
 def get_numSolvers():
 	num_solvers = len(sgh.solver_list)
 	str_value = str(num_solvers)
+
+	if int(str_value) < 1:
+		print('ERROR: No solvers found, report generation failed!')
+		sys.exit()
+
 	return str_value
 
 
@@ -51,6 +55,11 @@ def get_solverList():
 def get_numFeatureExtractors():
 	num_feature_extractors = len(sgh.extractor_list)
 	str_value = str(num_feature_extractors)
+
+	if int(str_value) < 1:
+		print('ERROR: No feature extractors found, report generation failed!')
+		sys.exit()
+
 	return str_value
 
 
@@ -71,6 +80,11 @@ def get_numInstanceClasses():
 		if not (instance_class in list_instance_class):
 			list_instance_class.append(instance_class)
 	str_value = str(len(list_instance_class))
+
+	if int(str_value) < 1:
+		print('ERROR: No instance sets found, report generation failed!')
+		sys.exit()
+
 	return str_value
 
 
@@ -86,10 +100,10 @@ def get_instanceClassList():
 			dict_number_of_instances_in_instance_class[instance_class] = 1
 		else:
 			dict_number_of_instances_in_instance_class[instance_class] += 1
-			
+
 	for instance_class in list_instance_class:
 		str_value += r'\item \textbf{' + instance_class + r'}, number of instances: ' + str(dict_number_of_instances_in_instance_class[instance_class]) + '\n'
-	
+
 	return str_value
 
 
@@ -210,6 +224,7 @@ def get_dict_vbs_penalty_time_on_each_instance():
 	mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
 	return mydict
 
+
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 	mydict = {}
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
@@ -302,85 +317,156 @@ def get_figure_portfolio_selector_sparkle_vs_vbs():
 	return str_value
 
 
-def get_dict_variable_to_value():
-	mydict = {}
+def get_testInstanceClass(test_case_directory: str):
+	str_value = sfh.get_last_level_directory_name(test_case_directory)
+	str_value = r'\textbf{' + str_value + r'}'
+	return str_value
+
+
+def get_numInstanceInTestInstanceClass(test_case_directory: str):
+	str_value = r''
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(test_case_directory + r'sparkle_performance_data.csv')
+	str_value = str(len(performance_data_csv.list_rows()))
+	return str_value
+
+
+def get_testActualPAR10(test_case_directory: str):
+	str_value = r''
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(test_case_directory + r'sparkle_performance_data.csv')
+	solver = performance_data_csv.list_columns()[0]
 	
+	cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
+	
+	sparkle_penalty_time = 0.0
+	sparkle_penalty_time_count = 0
+	
+	for instance in performance_data_csv.list_rows():
+		this_run_time = performance_data_csv.get_value(instance, solver)
+		sparkle_penalty_time_count += 1
+		if this_run_time <= cutoff_time_each_run:
+			sparkle_penalty_time += this_run_time
+		else:
+			sparkle_penalty_time += sgh.settings.get_penalised_time()
+	
+	sparkle_penalty_time = sparkle_penalty_time / sparkle_penalty_time_count
+	str_value = str(sparkle_penalty_time)
+	return str_value
+
+
+def get_dict_variable_to_value(test_case_directory: str = None):
+	mydict = {}
+
 	variable = r'customCommands'
 	str_value = get_customCommands()
 	mydict[variable] = str_value
-	
+
 	variable = r'sparkle'
 	str_value = get_sparkle()
 	mydict[variable] = str_value
-	
+
 	variable = r'numSolvers'
 	str_value = get_numSolvers()
 	mydict[variable] = str_value
-	
+
 	variable = r'solverList'
 	str_value = get_solverList()
 	mydict[variable] = str_value
-	
+
 	variable = r'numFeatureExtractors'
 	str_value = get_numFeatureExtractors()
 	mydict[variable] = str_value
-	
+
 	variable = r'featureExtractorList'
 	str_value = get_featureExtractorList()
 	mydict[variable] = str_value
-	
+
 	variable = r'numInstanceClasses'
 	str_value = get_numInstanceClasses()
 	mydict[variable] = str_value
-	
+
 	variable = r'instanceClassList'
 	str_value = get_instanceClassList()
 	mydict[variable] = str_value
-	
+
 	variable = r'featureComputationCutoffTime'
 	str_value = get_featureComputationCutoffTime()
 	mydict[variable] = str_value
-	
+
 	variable = r'performanceComputationCutoffTime'
 	str_value = get_performanceComputationCutoffTime()
 	mydict[variable] = str_value
-	
+
 	variable = r'solverPerfectRankingList'
 	str_value = get_solverPerfectRankingList()
 	mydict[variable] = str_value
-	
+
 	variable = r'solverActualRankingList'
 	str_value = get_solverActualRankingList()
 	mydict[variable] = str_value
-	
-	variable = r'figure-portfolio-selector-sparkle-vs-sbs'
-	str_value = get_figure_portfolio_selector_sparkle_vs_sbs()
-	mydict[variable] = str_value
-	
-	variable = r'figure-portfolio-selector-sparkle-vs-vbs'
-	str_value = get_figure_portfolio_selector_sparkle_vs_vbs()
-	mydict[variable] = str_value
-	
+
 	variable = r'PAR10RankingList'
 	str_value = get_PAR10RankingList()
 	mydict[variable] = str_value
-	
+
 	variable = r'VBSPAR10'
 	str_value = get_VBSPAR10()
 	mydict[variable] = str_value
-	
+
 	variable = r'actualPAR10'
 	str_value = get_actualPAR10()
 	mydict[variable] = str_value
-	
-	return mydict
-	
 
-def generate_report():
+	variable = r'figure-portfolio-selector-sparkle-vs-sbs'
+	str_value = get_figure_portfolio_selector_sparkle_vs_sbs()
+	mydict[variable] = str_value
+
+	variable = r'figure-portfolio-selector-sparkle-vs-vbs'
+	str_value = get_figure_portfolio_selector_sparkle_vs_vbs()
+	mydict[variable] = str_value
+
+	variable = r'testBool'
+	str_value = r'\testfalse'
+	mydict[variable] = str_value
+
+	# Train and test
+	if test_case_directory is not None:
+		variable = r'testInstanceClass'
+		str_value = get_testInstanceClass(test_case_directory)
+		mydict[variable] = str_value
+	
+		variable = r'numInstanceInTestInstanceClass'
+		str_value = get_numInstanceInTestInstanceClass(test_case_directory)
+		mydict[variable] = str_value
+	
+		variable = r'testActualPAR10'
+		str_value = get_testActualPAR10(test_case_directory)
+		mydict[variable] = str_value
+
+		variable = r'testBool'
+		str_value = r'\testtrue'
+		mydict[variable] = str_value
+
+	return mydict
+
+
+def generate_report(test_case_directory: str = None):
+	if test_case_directory is not None:
+		if not os.path.exists(test_case_directory):
+			print('ERROR: The given directory', test_case_directory, 'does not exist!')
+			sys.exit(-1)
+
+		if test_case_directory[-1] != r'/':
+			test_case_directory += r'/'
+
+		latex_report_filename = r'Sparkle_Report_for_Test'
+		dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
+	else:
+		latex_report_filename = r'Sparkle_Report'
+		dict_variable_to_value = get_dict_variable_to_value()
+
 	latex_directory_path = r'Components/Sparkle-latex-generator/'
 	latex_template_filename = r'template-Sparkle.tex'
-	latex_report_filename = r'Sparkle_Report'
-	dict_variable_to_value = get_dict_variable_to_value()
+
 	#print(dict_variable_to_value)
 
 	latex_template_filepath = latex_directory_path + latex_template_filename
@@ -393,10 +479,10 @@ def generate_report():
 	fin.close()
 
 	for variable_key, str_value in dict_variable_to_value.items():
-		 variable = r'@@' + variable_key + r'@@'
-		 if variable_key != r'figure-portfolio-selector-sparkle-vs-sbs' and variable_key != r'figure-portfolio-selector-sparkle-vs-vbs':
-		 	str_value = str_value.replace(r'_', r'\textunderscore ')
-		 report_content = report_content.replace(variable, str_value)
+		variable = r'@@' + variable_key + r'@@'
+		if variable_key != r'figure-portfolio-selector-sparkle-vs-sbs' and variable_key != r'figure-portfolio-selector-sparkle-vs-vbs':
+			str_value = str_value.replace(r'_', r'\textunderscore ')
+		report_content = report_content.replace(variable, str_value)
 
 	#print(report_content)
 	
@@ -407,22 +493,19 @@ def generate_report():
 
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
-
 	os.system(compile_command)
 
 	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux 1> /dev/null 2>&1'
 	os.system(compile_command)
-
 	os.system(compile_command)
 
 	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
-
 	os.system(compile_command)
 
 	report_path = latex_directory_path + latex_report_filename + r'.pdf'
 	print(r'Report is placed at: ' + report_path)
 	sl.add_output(report_path, 'Sparkle portfolio selector report')
-	
+
 	return
 

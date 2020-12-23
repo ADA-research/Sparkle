@@ -14,7 +14,7 @@ import sys
 import argparse
 from pathlib import Path
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_generate_report_for_test_help 
+from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help import argparse_custom as ac
@@ -38,7 +38,7 @@ if __name__ == r'__main__':
 	test_case_directory = args.test_case_directory
 
 	print(r'c Generating report for test ...')
-	sparkle_generate_report_for_test_help.generate_report_for_test(test_case_directory)
+	sgrh.generate_report(test_case_directory)
 	print(r'c Report for test generated ...')
 
 	# Write used settings to file
