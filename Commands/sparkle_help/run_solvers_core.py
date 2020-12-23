@@ -83,7 +83,7 @@ if __name__ == r'__main__':
 	if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
 		obj_str = str(quality[0]) # TODO: Handle the multi-objective case
 	else:
-		obj_str = str(cpu_time)
+		obj_str = str(cpu_time_penalised)
 	
 	fout = open(processed_result_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
