@@ -73,7 +73,7 @@ There are @@numFeatureExtractors@@ feature extractor(s) included in @@sparkle@@,
 @@featureExtractorList@@
 \end{enumerate}
 
-\subsection{Train Instance Classes}
+\subsection{Training Instance Set(s)}
 \label{sec:Train_Instance_Classes}
 There are @@numInstanceClasses@@ instance class(es) included in @@sparkle@@, as listed below.
 
@@ -96,26 +96,21 @@ The experimental setup for the training phase is described below.
 @@sparkle@@ saves the results of feature extraction and performance computation described above. This data is then utilized by @@sparkle@@ to run \emph{AutoFolio} \cite{LinEtAl15} to automatically construct a portfolio-based algorithm selector for @@sparkle@@.
 
 
-\section{Experimental Results}
+\section{Experimental Results on the Training Set(s)}
 \label{sec:Experimental_Results}
 
-In this section, the PAR10 results for the current portfolio selector in @@sparkle@@ on solving the test instance set @@testInstanceClass@@ is reported.
-
-\begin{itemize}
-\item \textbf{Actual Portfolio Selector in @@sparkle@@}, PAR10: @@testActualPAR10@@
-\end{itemize}
-
+In this section, the PAR10 results for the current portfolio selector in @@sparkle@@ on solving the training instance set(s) listed in Section~\ref{sec:Train_Instance_Classes} is reported.
 
 \subsection{PAR10 Ranking List}
 \label{sec:PAR10_Ranking}
 
-The ranking list with regards to the penalised average runtime (PAR10) for solvers is given as follows.
+Below, the solvers are ranked based on the penalised average runtime (PAR10).
 
 \begin{enumerate}
 @@PAR10RankingList@@
 \end{enumerate}
 
-Also, PAR10 for the Virtual Best Solver \emph{VBS}, i.e., the perfect portfolio selector, and the actual portfolio selector in @@sparkle@@ is given as follows.
+Next, the PAR10 values for the Virtual Best Solver \emph{VBS}, i.e., the perfect portfolio selector, and the actual portfolio selector in @@sparkle@@ are given.
 
 \begin{itemize}
 \item \textbf{\emph{VBS}}, PAR10: @@VBSPAR10@@
@@ -125,15 +120,15 @@ Also, PAR10 for the Virtual Best Solver \emph{VBS}, i.e., the perfect portfolio 
 \subsection{Marginal Contribution Ranking List}
 \label{sec:Marginal_Contribution_Ranking}
 
-@@sparkle@@ uses the concept of marginal contribution \cite{XuEtAl12} to measure each solver's contribution to the \textbf{\emph{VBS}} and to the \textbf{actual portfolio selector in @@sparkle@@}. In this report, we uses the approach described in the literature \cite{FreEtAl16} to each solver's marginal contribution.
+@@sparkle@@ uses the concept of marginal contribution \cite{XuEtAl12} to measure each solver's contribution to the \textbf{\emph{VBS}} and to the \textbf{actual portfolio selector in @@sparkle@@}. In this report, we uses the approach described in the literature \cite{FreEtAl16} to compute each solver's marginal contribution.
 
-Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with regards to the \textbf{{\em VBS}} is given as follows.
+This resulted in the following ranking of solvers for the \textbf{{\em VBS}}:
 
 \begin{enumerate} 
 @@solverPerfectRankingList@@
 \end{enumerate}
 
-Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with regards to the \textbf{actual portfolio selector in @@sparkle@@} is given as follows.
+And the following ranking for the \textbf{actual portfolio selector in @@sparkle@@}:
 
 \begin{enumerate} 
 @@solverActualRankingList@@
@@ -142,15 +137,15 @@ Solver ranking list via marginal contribution \cite{XuEtAl12} for solvers with r
 
 \subsection{Scatter Plot Analysis}
 
-The empirical comparison between the actual portfolio selector in @@sparkle@@ and single best solver (\emph{SBS}) is presented in Figure \ref{fig:sparkle_vs_sbs}
-The empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{VBS} is presented in Figure \ref{fig:sparkle_vs_vbs}.
+Figure~\ref{fig:sparkle_vs_sbs} shows the empirical comparison between the actual portfolio selector in @@sparkle@@ and the single best solver (\emph{SBS}).
+Figure \ref{fig:sparkle_vs_vbs} shows the empirical comparison between the actual portfolio selector in @@sparkle@@ and the virtual best solver (\emph{VBS}).
 
 \begin{figure}[htbp]
 \noindent \begin{centering}
 @@figure-portfolio-selector-sparkle-vs-sbs@@
 \par\end{centering}
 
-\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{SBS}.}\label{fig:sparkle_vs_sbs}
+\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and the \emph{SBS}.}\label{fig:sparkle_vs_sbs}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -158,8 +153,18 @@ The empirical comparison between the actual portfolio selector in @@sparkle@@ an
 @@figure-portfolio-selector-sparkle-vs-vbs@@
 \par\end{centering}
 
-\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and \emph{VBS}.}\label{fig:sparkle_vs_vbs}
+\caption{Empirical comparison between the actual portfolio selector in @@sparkle@@ and the \emph{VBS}.}\label{fig:sparkle_vs_vbs}
 \end{figure}
+
+
+\section{Experimental Results on the Test Set}
+\label{sec:Experimental_Results}
+
+In this section, the PAR10 results for the current portfolio selector in @@sparkle@@ on solving the test instance set @@testInstanceClass@@ is reported.
+
+\begin{itemize}
+\item \textbf{Actual Portfolio Selector in @@sparkle@@}, PAR10: @@testActualPAR10@@
+\end{itemize}
 
 
 \bibliographystyle{plain}
