@@ -17,6 +17,7 @@ from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_job_help as sjh
+from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_slurm_help as ssh
 
 
@@ -72,9 +73,13 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	print('c The number of total running jobs: ' + str(total_job_num))
 	total_job_list = sjh.expand_total_job_from_list(list_performance_computation_job)
 	####
-	
+
+	# If there are no jobs, stop
 	if len(total_job_list) == 0:
 		return ''
+	# If there are jobs update performance data ID
+	else:
+		srs.update_performance_data_id()
 
 	sbatch_script_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, total_job_list)
 	command_line = 'sbatch ' + sbatch_script_path

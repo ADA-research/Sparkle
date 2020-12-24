@@ -11,12 +11,9 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
-import time
-import random
 import sys
 import fcntl
 from pathlib import Path
-from enum import Enum
 from typing import List
 
 try:
@@ -24,7 +21,6 @@ try:
 	from sparkle_help import sparkle_basic_help as sbh
 	from sparkle_help import sparkle_file_help as sfh
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-	from sparkle_help import sparkle_experiments_related_help as ser
 	from sparkle_help import sparkle_job_help as sjh
 	from sparkle_help.sparkle_settings import PerformanceMeasure
 	from sparkle_help.sparkle_settings import SolutionVerifier
@@ -134,8 +130,12 @@ def running_solvers(performance_data_csv_path, mode):
 	current_job_num = 1
 	print('c The total number of jobs to run is: ' + str(total_job_num))
 
+	# If there are no jobs, stop
 	if total_job_num < 1:
 		return
+	# If there are jobs update performance data ID
+	else:
+		update_performance_data_id()
 
 	for i in range(0, len(list_performance_computation_job)):
 		instance_path = list_performance_computation_job[i][0]
@@ -466,4 +466,33 @@ def sat_judge_correctness_raw_result(instance_path, raw_result_path):
 	command_line = 'rm -f ' + tmp_verify_result_path
 	os.system(command_line)
 	return ret
+
+
+def update_performance_data_id():
+	# Get current pd_id
+	pd_id = get_performance_data_id()
+
+	# Increment pd_id
+	pd_id = pd_id + 1
+
+	# Write new pd_id
+	pd_id_path = sgh.performance_data_id_path
+
+	with open(pd_id_path, 'w') as pd_id_file:
+		pd_id_file.write(str(pd_id))
+
+	return
+
+
+def get_performance_data_id() -> int:
+	pd_id = -1
+	pd_id_path = sgh.performance_data_id_path
+
+	try:
+		with open(pd_id_path, 'r') as pd_id_file:
+			pd_id = int(pd_id_file.readline())
+	except FileNotFoundError:
+		pd_id = 0
+
+	return pd_id
 

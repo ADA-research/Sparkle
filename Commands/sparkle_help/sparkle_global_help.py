@@ -116,10 +116,13 @@ ablation_dir = r"Components/ablationAnalysis-0.9.4/"
 
 global feature_data_csv_path
 global performance_data_csv_path
+global performance_data_id_path
 global cutoff_time_information_txt_path
 
 feature_data_csv_path = r'Feature_Data/sparkle_feature_data.csv'
+feature_data_id_path = 'Feature_Data/sparkle_feature_data.id'
 performance_data_csv_path = r'Performance_Data/sparkle_performance_data.csv'
+performance_data_id_path = 'Performance_Data/sparkle_performance_data.id'
 cutoff_time_information_txt_path = r'Performance_Data/sparkle_performance_data_cutoff_time_information.txt'
 
 global extractor_nickname_list_path
