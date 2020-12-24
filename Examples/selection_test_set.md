@@ -1,17 +1,25 @@
+### Installation
+
 Before starting Sparkle, please install the following packages with the specific versions:
 1. Install Python 3.5 -- other 3.x versions may work, but were not tested
-with anaconda:
-`conda create -n <env_name> python=3.5`
-`conda activate <env_name>`
-2. Install swig version 3.0
-or with anaconda:
-`conda install swig=3.0`
-3. Install required python packages:
-`pip install -r requirements.txt`
-or with anaconda:
-`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements.txt`
+	* with anaconda:
 
-`conda install pandas`
+		`conda create -n <env_name> python=3.5`
+
+		`conda activate <env_name>`
+
+2. Install swig version 3.0
+	* with anaconda:
+
+		`conda install swig=3.0`
+
+3. Install required python packages:
+	* `pip install -r requirements.txt`
+	* or with anaconda:
+
+		`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements.txt`
+
+### Use Sparkle for algorithm selection
 
 Initialise the Sparkle platform
 
@@ -35,11 +43,11 @@ Similarly, add a feature extractor, without immediately running it on the instan
 
 `Commands/add_feature_extractor.py --run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
 
-Compute features for all the instances
+Compute features for all the instances; add the `--parallel` option to run in parallel
 
 `Commands/compute_features.py`
 
-Run the solvers on all instances
+Run the solvers on all instances; add the `--parallel` option to run in parallel
 
 `Commands/run_solvers.py`
 
@@ -50,6 +58,8 @@ Construct a portfolio selector, using the previously computed features and the r
 Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report.pdf`
 
 `Commands/generate_report.py`
+
+### Run on the test set
 
 Run the portfolio selector on a single testing instance; the result will be printed to the command line
 
