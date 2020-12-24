@@ -1,6 +1,7 @@
 ### Installation
 
 Before starting Sparkle, please install the following packages with the specific versions:
+
 1. Install Python 3.5 -- other 3.x versions may work, but were not tested
 	* with anaconda:
 
