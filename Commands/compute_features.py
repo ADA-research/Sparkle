@@ -10,18 +10,12 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-import os
 import sys
-import fcntl
 import argparse
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
-from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_compute_features_parallel_help as scfp
-from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 
@@ -30,10 +24,23 @@ def compute_features_parallel(my_flag_recompute):
 	if my_flag_recompute:
 		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
 		feature_data_csv.clean_csv()
-		scfp.computing_features_parallel(sgh.feature_data_csv_path, 2)
+		compute_features_parallel_jobid = scfp.computing_features_parallel(sgh.feature_data_csv_path, 2)
 	else: 
-		scfp.computing_features_parallel(sgh.feature_data_csv_path, 1)
+		compute_features_parallel_jobid = scfp.computing_features_parallel(sgh.feature_data_csv_path, 1)
 
+	dependency_jobid_list = []
+
+	if compute_features_parallel_jobid:
+		dependency_jobid_list.append(compute_features_parallel_jobid)
+
+	# Update performance data csv after the last job is done
+	job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
+	compute_features_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
+
+	last_job_id = compute_features_parallel_jobid
+
+	print("c Waiting for Slurm job with id:")
+	print(last_job_id)
 	print('c Computing features in parallel ...')
 	
 	return

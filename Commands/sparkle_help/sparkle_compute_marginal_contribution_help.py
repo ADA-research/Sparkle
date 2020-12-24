@@ -135,9 +135,10 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	num_instances = performance_data_csv.get_row_size()
 	num_solvers = performance_data_csv.get_column_size()
-	
+
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
-	
+
+	# Compute performance of actual selector
 	print('c Computing actual performance for portfolio selector with all solvers ...')
 	actual_portfolio_selector_path = r'Tmp/' + r'actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
 	scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path)
@@ -150,11 +151,12 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		actual_selector_performance = virtual_best_performance
 	else:
 		actual_selector_performance = compute_actual_selector_performance(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, num_instances, num_solvers)
-	
+
 	print('c Actual performance for portfolio selector with all solvers is ' + str(actual_selector_performance))
 	#print 'c actual_selector_performance with all solvers = ' + str(actual_selector_performance)
 	print('c Computing done!')
-	
+
+	# Compute contribution per solver
 	for solver in performance_data_csv.list_columns():
 		print('c Computing actual performance for portfolio selector excluding solver ' + sfh.get_last_level_directory_name(solver) + ' ...')
 		tmp_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)

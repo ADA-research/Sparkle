@@ -12,13 +12,11 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
-import fcntl
 import argparse
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_help as scsv
-from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
 
 

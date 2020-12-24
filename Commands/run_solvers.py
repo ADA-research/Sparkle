@@ -10,9 +10,7 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-import os
 import sys
-import fcntl
 import argparse
 from typing import List
 from pathlib import Path
@@ -46,14 +44,15 @@ def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report
 	if run_solvers_parallel_jobid:
 		dependency_jobid_list.append(run_solvers_parallel_jobid)
 
+	# Update performance data csv after the last job is done
+	job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
+	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
+	dependency_jobid_list.append(run_job_parallel_jobid)
+
 	# Only do selector construction and report generation if the flag is set;
 	# Default behaviour is not to run them, like the sequential run_solvers command
 	if flag_also_construct_selector_and_report:
-		construct_selector_and_report(dependency_jobid_list)
-	else:
-		# Update performance data csv after the last job is done
-		job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
-		run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
+		run_job_parallel_jobid = construct_selector_and_report(dependency_jobid_list)
 
 	last_job_id = run_job_parallel_jobid
 
@@ -72,7 +71,7 @@ def construct_selector_and_report(dependency_jobid_list: List[str] = []):
 	job_script = 'Commands/generate_report.py'
 	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
 
-	return
+	return run_job_parallel_jobid
 
 
 if __name__ == r'__main__':

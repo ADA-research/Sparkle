@@ -17,7 +17,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_experiments_related_help
-from sparkle_help import sparkle_compute_marginal_contribution_help
+from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
 
@@ -172,7 +172,7 @@ def get_actualPAR10():
 	penalty_time_each_run = sgh.settings.get_penalised_time()
 	
 	for instance in performance_data_csv.list_rows():
-		list_predict_schedule = sparkle_compute_marginal_contribution_help.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
+		list_predict_schedule = scmch.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
 		used_time_for_this_instance = 0
 		flag_successfully_solving = False
 		for i in range(0, len(list_predict_schedule)):
@@ -233,7 +233,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
 	
 	for instance in performance_data_csv.list_rows():
-		list_predict_schedule = sparkle_compute_marginal_contribution_help.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
+		list_predict_schedule = scmch.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
 		used_time_for_this_instance = 0
 		flag_successfully_solving = False
 		for i in range(0, len(list_predict_schedule)):
