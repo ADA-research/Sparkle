@@ -1,50 +1,65 @@
-#!/bin/bash
+Before starting Sparkle, please install the following packages with the specific versions:
+1. Install Python 3.5 -- other 3.x versions may work, but were not tested
+with anaconda:
+`conda create -n <env_name> python=3.5`
+`conda activate <env_name>`
+2. Install swig version 3.0
+or with anaconda:
+`conda install swig=3.0`
+3. Install required python packages:
+`pip install -r requirements.txt`
+or with anaconda:
+`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements.txt`
 
-# Before starting Sparkle, please install the following packages with the specific versions:
-# (0) Install Python 3.5 -- other 3.x versions may work, but were not tested
-# with anaconda:
-# conda create -n <env_name> python=3.5
-# conda activate <env_name>
-# (1) Install swig version 3.0
-# or with anaconda:
-# conda install swig=3.0
-# (2) Install required python packages:
-# pip install -r requirements.txt
-# or with anaconda:
-# /home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements.txt
+`conda install pandas`
 
-## conda install pandas
-Commands/initialise.py
+Initialise the Sparkle platform
 
-# Add instances (in CNF format) in a given directory, without running solvers or feature extractors yet
-Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN/
+`Commands/initialise.py`
 
-# Add solver with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
-# (the directory should contain both the executable and the wrapper)
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/CSCCSat/
+Add instances (in CNF format) in a given directory, without running solvers or feature extractors yet
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/Lingeling/
+`Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN/`
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/MiniSAT/
+Add solvers with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solvers yet
 
-Commands/add_feature_extractor.py --run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+(the directory should contain both the executable and the wrapper)
 
-Commands/compute_features.py
+`Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/CSCCSat/`
 
-Commands/run_solvers.py
+`Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/Lingeling/`
 
-Commands/construct_sparkle_portfolio_selector.py
+`Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/MiniSAT/`
 
-Commands/generate_report.py
+Similarly, add a feature extractor, without immediately running it on the instances
 
-# After executing the above commands, an experimental report will be generated and located at Components/Sparkle-latex-generator/Sparkle_Report.pdf.
+`Commands/add_feature_extractor.py --run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
 
-# Run the portfolio selector on a testing instance set
-Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/
+Compute features for all the instances
 
-# Or run the portfolio selector on a single testing instance
-Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/
+`Commands/compute_features.py`
 
-# Generate a report with results on the test set
-Commands/generate_report_for_test.py Test_Cases/PTN2/
+Run the solvers on all instances
+
+`Commands/run_solvers.py`
+
+Construct a portfolio selector, using the previously computed features and the results of running the solvers
+
+`Commands/construct_sparkle_portfolio_selector.py`
+
+Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report.pdf`
+
+`Commands/generate_report.py`
+
+Run the portfolio selector on a single testing instance; the result will be printed to the command line
+
+`Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/`
+
+Run the portfolio selector on a testing instance *set*
+
+`Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/`
+
+Generate an experimental report detailing the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`
+
+`Commands/generate_report_for_test.py Test_Cases/PTN2/`
 
