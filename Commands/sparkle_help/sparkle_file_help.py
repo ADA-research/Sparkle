@@ -353,17 +353,3 @@ def append_string_to_file(file_path, string_value):
 	'''
 	return
 
-def get_cutoff_time_information():
-	fin = open(sparkle_global_help.cutoff_time_information_txt_path, 'r+')
-	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-	myline = fin.readline().strip()
-	mylist = myline.split()
-	cutoff_time_each_run = float(mylist[2])
-	myline = fin.readline().strip()
-	mylist = myline.split()
-	par_num = float(mylist[2])
-	penalty_time = cutoff_time_each_run * par_num
-	fin.close()
-	return [cutoff_time_each_run, par_num, penalty_time]
-
-

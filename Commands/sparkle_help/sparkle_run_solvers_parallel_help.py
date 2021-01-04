@@ -91,11 +91,6 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 		run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
 	else:
 		run_solvers_parallel_jobid = ''
-	
-	####
-	# record the experimental settings 
-	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + cutoff_time_str)
-	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(sgh.settings.get_general_penalty_multiplier()))
-	####
+
 	return run_solvers_parallel_jobid
 

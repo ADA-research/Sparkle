@@ -16,6 +16,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_compute_features_parallel_help as scfp
+from sparkle_help import sparkle_job_parallel_help as sjph
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 

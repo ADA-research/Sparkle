@@ -178,10 +178,8 @@ def running_solvers(performance_data_csv_path, mode):
 		current_job_num += 1
 
 	performance_data_csv.update_csv()
-	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + cutoff_time_str)
-	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(sgh.settings.get_general_penalty_multiplier()))
 	print('c Performance data file ' + performance_data_csv_path + ' has been updated!')
-	
+
 	return
 
 

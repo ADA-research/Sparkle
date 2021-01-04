@@ -83,11 +83,11 @@ if __name__ == r'__main__':
 	args = parser.parse_args()
 
 	print('c Start constructing Sparkle portfolio selector ...')
-	
+
 	generate_task_run_status()
-	
+
 	flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(sgh.feature_data_csv_path, sgh.performance_data_csv_path)
-	
+
 	if flag_judge_exist_remaining_jobs:
 		print(r'c There remain unperformed feature computation jobs or performance computation jobs!')
 		print(r'c Please first execute all unperformed jobs before constructing Sparkle portfolio selecotr')
@@ -97,7 +97,7 @@ if __name__ == r'__main__':
 
 	delete_log_files() # Make sure no old log files remain
 	scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path)
-	
+
 	if not os.path.exists(sgh.sparkle_portfolio_selector_path):
 		print('c Sparkle portfolio selector is not successfully constructed!')
 		print('c There might be some errors!')
@@ -107,13 +107,12 @@ if __name__ == r'__main__':
 	else:
 		print('c Sparkle portfolio selector constructed!')
 		print('c Sparkle portfolio selector located at ' + sgh.sparkle_portfolio_selector_path)
-		
+
 		print(r"c Start computing each solver's marginal contribution to perfect selector ...")
 		rank_list = scmc.compute_perfect_selector_marginal_contribution()
 		scmc.print_rank_list(rank_list, 1)
 		print(r'c Marginal contribution (perfect selector) computing done!')
-	
-		
+
 		print(r"c Start computing each solver's marginal contribution to actual selector ...")
 		rank_list = scmc.compute_actual_selector_marginal_contribution()
 		scmc.print_rank_list(rank_list, 2)
