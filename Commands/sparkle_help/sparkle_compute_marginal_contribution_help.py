@@ -45,6 +45,16 @@ def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]
 
 
 def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path):
+	perfect_margi_cont_path = sgh.sparkle_marginal_contribution_perfect_path
+
+	# If the marginal contribution already exists in file, read it and return
+	if perfect_margi_cont_path.is_file():
+		# TODO: Add note to use --recompute to force recomputation once the option is added
+		print('c Marginal contribution for the perfect selector already computed, reading from file instead!')
+		rank_list = read_marginal_contribution_csv(perfect_margi_cont_path)
+
+		return rank_list
+
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	print('c In this calculation, cutoff time for each run is ' + cutoff_time_str + ' seconds')
 
@@ -73,9 +83,7 @@ def compute_perfect_selector_marginal_contribution(performance_data_csv_path = s
 	rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1], reverse=True)
 
 	# Write perfect selector contributions to file
-	perfect_margi_cont_path = Path(sgh.sparkle_portfolio_selector_dir + 'margi_contr_perfect.csv')
 	write_marginal_contribution_csv(perfect_margi_cont_path, rank_list)
-	rank_list = read_marginal_contribution_csv(perfect_margi_cont_path)
 
 	return rank_list
 
@@ -151,6 +159,16 @@ def compute_actual_selector_performance(actual_portfolio_selector_path, performa
 
 
 def compute_actual_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, feature_data_csv_path = sgh.feature_data_csv_path):
+	actual_margi_cont_path = sgh.sparkle_marginal_contribution_actual_path
+
+	# If the marginal contribution already exists in file, read it and return
+	if actual_margi_cont_path.is_file():
+		# TODO: Add note to use --recompute to force recomputation once the option is added
+		print('c Marginal contribution for the actual selector already computed, reading from file instead!')
+		rank_list = read_marginal_contribution_csv(actual_margi_cont_path)
+
+		return rank_list
+
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	print('c In this calculation, cutoff time for each run is ' + cutoff_time_str + ' seconds')
 
@@ -221,9 +239,7 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 	rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1], reverse=True)
 
 	# Write actual selector contributions to file
-	actual_margi_cont_path = Path(sgh.sparkle_portfolio_selector_dir + 'margi_contr_actual.csv')
 	write_marginal_contribution_csv(actual_margi_cont_path, rank_list)
-	rank_list = read_marginal_contribution_csv(actual_margi_cont_path)
 
 #	os.system(r'rm -f ' + actual_portfolio_selector_path)
 	return rank_list

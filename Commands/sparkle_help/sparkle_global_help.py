@@ -85,6 +85,12 @@ sparkle_portfolio_selector_name = 'sparkle_portfolio_selector' + sparkle_special
 global sparkle_portfolio_selector_path
 sparkle_portfolio_selector_path = sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name
 
+global sparkle_marginal_contribution_perfect_path
+sparkle_marginal_contribution_perfect_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_perfect.csv')
+
+global sparkle_marginal_contribution_actual_path
+sparkle_marginal_contribution_actual_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_actual.csv')
+
 global sparkle_last_test_file_name
 sparkle_last_test_file_name = r'last_test_configured_default.txt'
 

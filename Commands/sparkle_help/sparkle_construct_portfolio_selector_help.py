@@ -106,6 +106,10 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 
 		return
 
+	# Remove possible old marginal contribution files to ensure they will be computed for the new selector when required
+	sgh.sparkle_marginal_contribution_perfect_path.unlink(missing_ok=True)
+	sgh.sparkle_marginal_contribution_actual_path.unlink(missing_ok=True)
+
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	python_executable = sgh.python_executable
 	objective_function = r'--objective runtime'
