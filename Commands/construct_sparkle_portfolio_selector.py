@@ -18,7 +18,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_construct_portfolio_selector_help as scps
-from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
+import compute_marginal_contribution as cmc
 from sparkle_help import sparkle_job_help
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
@@ -108,15 +108,10 @@ if __name__ == r'__main__':
 		print('c Sparkle portfolio selector constructed!')
 		print('c Sparkle portfolio selector located at ' + sgh.sparkle_portfolio_selector_path)
 
-		print(r"c Start computing each solver's marginal contribution to perfect selector ...")
-		rank_list = scmc.compute_perfect_selector_marginal_contribution()
-		scmc.print_rank_list(rank_list, 1)
-		print(r'c Marginal contribution (perfect selector) computing done!')
+		# Compute and print marginal contributions of the perfect and actual portfolio selectors
+		cmc.compute_perfect()
+		cmc.compute_actual()
 
-		print(r"c Start computing each solver's marginal contribution to actual selector ...")
-		rank_list = scmc.compute_actual_selector_marginal_contribution()
-		scmc.print_rank_list(rank_list, 2)
-		print(r'c Marginal contribution (actual selector) computing done!')
 		delete_task_run_status()
 		delete_log_files()
 

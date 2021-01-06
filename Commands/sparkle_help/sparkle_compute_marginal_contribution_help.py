@@ -11,6 +11,11 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
+import csv
+from pathlib import Path
+from typing import List
+from typing import Tuple
+
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
@@ -21,20 +26,38 @@ from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_logging as sl
 
 
+def read_marginal_contribution_csv(path: Path) -> List[Tuple[str, float]]:
+	content = []
+
+	with path.open('r') as input_file:
+		reader = csv.reader(input_file)
+		for row in reader:
+			# 0 is the solver, 1 the marginal contribution
+			content.append((row[0], row[1]))
+
+	return content
+
+
+def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]):
+	with path.open('w') as output_file:
+		writer = csv.writer(output_file)
+		writer.writerows(content)
+
+
 def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path):
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	print('c In this calculation, cutoff time for each run is ' + cutoff_time_str + ' seconds')
-	
+
 	rank_list = []
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	num_instances = performance_data_csv.get_row_size()
 	num_solvers = performance_data_csv.get_column_size()
-	
+
 	print('c Computing virtual best performance for portfolio selector with all solvers ...')
 	virtual_best_performance = performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers)
 	print('c Virtual best performance for portfolio selector with all solvers is ' + str(virtual_best_performance))
 	print('c Computing done!')
-	
+
 	for solver in performance_data_csv.list_columns():
 		print('c Computing virtual best performance for portfolio selector excluding solver ' + sfh.get_last_level_directory_name(solver) + ' ...')
 		tmp_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
@@ -46,8 +69,14 @@ def compute_perfect_selector_marginal_contribution(performance_data_csv_path = s
 		solver_tuple = (solver, marginal_contribution)
 		rank_list.append(solver_tuple)
 		print('c Marginal contribution (to Perfect Selector) for solver ' + sfh.get_last_level_directory_name(solver) + ' is ' + str(marginal_contribution))
-		
+
 	rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1], reverse=True)
+
+	# Write perfect selector contributions to file
+	perfect_margi_cont_path = Path(sgh.sparkle_portfolio_selector_dir + 'margi_contr_perfect.csv')
+	write_marginal_contribution_csv(perfect_margi_cont_path, rank_list)
+	rank_list = read_marginal_contribution_csv(perfect_margi_cont_path)
+
 	return rank_list
 
 
@@ -115,9 +144,9 @@ def compute_actual_selector_performance(actual_portfolio_selector_path, performa
 		else:
 			score_this_instance = 0
 		#print('c instance = ' + instance + ', score_this_instance = ' + str(score_this_instance))
-		
+
 		actual_selector_performance = actual_selector_performance + score_this_instance
-			
+
 	return actual_selector_performance
 
 
@@ -190,7 +219,12 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		print('c Marginal contribution (to Actual Selector) for solver ' + solver_name + ' is ' + str(marginal_contribution))
 
 	rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1], reverse=True)
-	
+
+	# Write actual selector contributions to file
+	actual_margi_cont_path = Path(sgh.sparkle_portfolio_selector_dir + 'margi_contr_actual.csv')
+	write_marginal_contribution_csv(actual_margi_cont_path, rank_list)
+	rank_list = read_marginal_contribution_csv(actual_margi_cont_path)
+
 #	os.system(r'rm -f ' + actual_portfolio_selector_path)
 	return rank_list
 
