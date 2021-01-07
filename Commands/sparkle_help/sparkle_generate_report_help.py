@@ -228,34 +228,16 @@ def get_dict_vbs_penalty_time_on_each_instance():
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 	mydict = {}
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
-	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
 	actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
-	cutoff_time = sgh.settings.get_general_target_cutoff_time()
-	
+
 	for instance in performance_data_csv.list_rows():
-		list_predict_schedule = scmch.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
-		used_time_for_this_instance = 0
-		flag_successfully_solving = False
-		for i in range(0, len(list_predict_schedule)):
-			if used_time_for_this_instance >= cutoff_time:
-				flag_successfully_solving = False
-				break
-			solver = list_predict_schedule[i][0]
-			scheduled_cutoff_time_this_run = list_predict_schedule[i][1]
-			required_time_this_run = performance_data_csv.get_value(instance, solver)
-			if required_time_this_run <= scheduled_cutoff_time_this_run:
-				used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
-				if used_time_for_this_instance > cutoff_time:
-					flag_successfully_solving = False
-				else: flag_successfully_solving = True
-				break
-			else:
-				used_time_for_this_instance = used_time_for_this_instance + scheduled_cutoff_time_this_run
-				continue
+		used_time_for_this_instance, flag_successfully_solving = scmch.compute_actual_used_time_for_instance(actual_portfolio_selector_path, instance, sgh.feature_data_csv_path, performance_data_csv)
+
 		if flag_successfully_solving:
 			mydict[instance] = used_time_for_this_instance
 		else:
 			mydict[instance] = sgh.settings.get_penalised_time()
+
 	return mydict
 
 
@@ -450,6 +432,7 @@ def get_dict_variable_to_value(test_case_directory: str = None):
 
 
 def generate_report(test_case_directory: str = None):
+	# Include results on the test set if a test case directory is given
 	if test_case_directory is not None:
 		if not os.path.exists(test_case_directory):
 			print('ERROR: The given directory', test_case_directory, 'does not exist!')
@@ -460,6 +443,7 @@ def generate_report(test_case_directory: str = None):
 
 		latex_report_filename = r'Sparkle_Report_for_Test'
 		dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
+	# Only look at the training instance set(s)
 	else:
 		latex_report_filename = r'Sparkle_Report'
 		dict_variable_to_value = get_dict_variable_to_value()

@@ -21,6 +21,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from sparkle_help.sparkle_performance_data_csv_help import Sparkle_Performance_Data_CSV
 from sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_logging as sl
@@ -120,33 +121,11 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, 
 def compute_actual_selector_performance(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, num_instances, num_solvers):
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
-	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
 	
 	actual_selector_performance = 0
 	
 	for instance in performance_data_csv.list_rows():
-		list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
-		#print('c instance = ' + instance + ', schedule: ' + str(list_predict_schedule))
-		used_time_for_this_instance = 0
-		flag_successfully_solving = False
-		for i in range(0, len(list_predict_schedule)):
-			if used_time_for_this_instance >= cutoff_time:
-				flag_successfully_solving = False
-				break
-			solver = list_predict_schedule[i][0]
-			scheduled_cutoff_time_this_run = list_predict_schedule[i][1]
-			required_time_this_run = performance_data_csv.get_value(instance, solver)
-			#print('c required_time_this_run = ' + str(required_time_this_run))
-			if required_time_this_run <= scheduled_cutoff_time_this_run:
-				used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
-				if used_time_for_this_instance > cutoff_time:
-					flag_successfully_solving = False
-				else: flag_successfully_solving = True
-				break
-			else:
-				used_time_for_this_instance = used_time_for_this_instance + scheduled_cutoff_time_this_run
-				continue
-		#print('c instace = ' + instance + ', used_time_for_this_instance =' + str(used_time_for_this_instance) + ', flag_successfully_solving = ' + str(flag_successfully_solving))
+		used_time_for_this_instance, flag_successfully_solving = compute_actual_used_time_for_instance(actual_portfolio_selector_path, instance, feature_data_csv_path, performance_data_csv)
 		if flag_successfully_solving:
 			score_this_instance = 1 + (cutoff_time - used_time_for_this_instance) / (num_instances * cutoff_time * num_solvers + 1)
 		else:
@@ -156,6 +135,39 @@ def compute_actual_selector_performance(actual_portfolio_selector_path, performa
 		actual_selector_performance = actual_selector_performance + score_this_instance
 
 	return actual_selector_performance
+
+
+def compute_actual_used_time_for_instance(actual_portfolio_selector_path: str, instance: str, feature_data_csv_path: str, performance_data_csv: Sparkle_Performance_Data_CSV) -> Tuple[float, bool]:
+	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+	list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
+	cutoff_time = sgh.settings.get_general_target_cutoff_time()
+	#print('c instance = ' + instance + ', schedule: ' + str(list_predict_schedule))
+	used_time_for_this_instance = 0
+	flag_successfully_solving = False
+
+	for i in range(0, len(list_predict_schedule)):
+		if used_time_for_this_instance >= cutoff_time:
+			flag_successfully_solving = False
+			break
+
+		solver = list_predict_schedule[i][0]
+		scheduled_cutoff_time_this_run = list_predict_schedule[i][1]
+		required_time_this_run = performance_data_csv.get_value(instance, solver)
+		#print('c required_time_this_run = ' + str(required_time_this_run))
+
+		if required_time_this_run <= scheduled_cutoff_time_this_run:
+			used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
+			if used_time_for_this_instance > cutoff_time:
+				flag_successfully_solving = False
+			else:
+				flag_successfully_solving = True
+			break
+		else:
+			used_time_for_this_instance = used_time_for_this_instance + scheduled_cutoff_time_this_run
+			continue
+	#print('c instace = ' + instance + ', used_time_for_this_instance =' + str(used_time_for_this_instance) + ', flag_successfully_solving = ' + str(flag_successfully_solving))
+
+	return used_time_for_this_instance, flag_successfully_solving
 
 
 def compute_actual_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, feature_data_csv_path = sgh.feature_data_csv_path):
