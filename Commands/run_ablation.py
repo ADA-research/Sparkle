@@ -67,7 +67,6 @@ if __name__ == r'__main__':
     if ac.set_by_user(args, 'number_of_runs'): sgh.settings.set_config_number_of_runs(args.number_of_runs, SettingState.CMD_LINE)
     if ac.set_by_user(args, 'racing'): sgh.settings.set_ablation_racing_flag(args.number_of_runs, SettingState.CMD_LINE)
 
-
     solver_name = sfh.get_last_level_directory_name(solver)
     instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
     instance_set_test_name = None
@@ -77,6 +76,12 @@ if __name__ == r'__main__':
         instance_set_test = instance_set_train
         instance_set_test_name = instance_set_train_name
     #print(solver_name, instance_set_train_name, instance_set_test_name)
+
+    if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
+        print('c Error: No configuration results found for the given solver and training instance set. Ablation needs to have a target configuration. Please run configuration first')
+        sys.exit(-1)
+    else:
+        print("c Configuration exists!")
 
     #DEVELOP: REMOVE SCENARIO
     ablation_scenario_dir = sah.get_ablation_scenario_directory(solver_name, instance_set_train_name, instance_set_test_name)
