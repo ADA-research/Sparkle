@@ -45,13 +45,12 @@ def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]
 		writer.writerows(content)
 
 
-def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path):
+def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, flag_recompute: bool = False) -> List[Tuple[str, float]]:
 	perfect_margi_cont_path = sgh.sparkle_marginal_contribution_perfect_path
 
 	# If the marginal contribution already exists in file, read it and return
-	if perfect_margi_cont_path.is_file():
-		# TODO: Add note to use --recompute to force recomputation once the option is added
-		print('c Marginal contribution for the perfect selector already computed, reading from file instead!')
+	if not flag_recompute and perfect_margi_cont_path.is_file():
+		print('c Marginal contribution for the perfect selector already computed, reading from file instead! Use --recompute to force recomputation.')
 		rank_list = read_marginal_contribution_csv(perfect_margi_cont_path)
 
 		return rank_list
@@ -170,13 +169,12 @@ def compute_actual_used_time_for_instance(actual_portfolio_selector_path: str, i
 	return used_time_for_this_instance, flag_successfully_solving
 
 
-def compute_actual_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, feature_data_csv_path = sgh.feature_data_csv_path):
+def compute_actual_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, feature_data_csv_path = sgh.feature_data_csv_path, flag_recompute: bool = False) -> List[Tuple[str, float]]:
 	actual_margi_cont_path = sgh.sparkle_marginal_contribution_actual_path
 
 	# If the marginal contribution already exists in file, read it and return
-	if actual_margi_cont_path.is_file():
-		# TODO: Add note to use --recompute to force recomputation once the option is added
-		print('c Marginal contribution for the actual selector already computed, reading from file instead!')
+	if not flag_recompute and actual_margi_cont_path.is_file():
+		print('c Marginal contribution for the actual selector already computed, reading from file instead! Use --recompute to force recomputation.')
 		rank_list = read_marginal_contribution_csv(actual_margi_cont_path)
 
 		return rank_list
