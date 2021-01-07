@@ -32,6 +32,7 @@ solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
+Commands/add_instances.py --run-solver-later --run-extractor-later $instances_test_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
 
 # Configure solver
