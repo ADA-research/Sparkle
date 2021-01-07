@@ -175,6 +175,7 @@ Currently the following commands are available in Sparkle (listed alphabetically
   \item[] \texttt{remove\_instances.py}
   \item[] \texttt{remove\_record.py}
   \item[] \texttt{remove\_solver.py}
+  \item[] \texttt{run\_ablation.py}
   \item[] \texttt{run\_solvers\_parallel.py}
   \item[] \texttt{run\_solvers.py}
   \item[] \texttt{run\_sparkle\_portfolio\_selector.py}
@@ -207,7 +208,12 @@ Arguments:
 \begin{itemize}[noitemsep]
   \item[] \texttt{--solver <solver>}
   \item[] \texttt{--instance-set-train <instance-set-train>}
+  \item[] [\texttt{--instance-set-test <instance-set-test>]}
+  \item[] \texttt{--validate}
+  \item[] \texttt{--ablation}
 \end{itemize}
+
+Note that the test instance set is only used if the \texttt{--ablation} or \texttt{--validation} flags are given.
 
 \subsection{\texttt{generate\_report\_for\_configuration.py}}
 \label{cmd:generate_report_for_configuration}
@@ -226,6 +232,20 @@ Note that if a test instance set is given, the training instance set must also b
 \label{cmd:initialise}
 
 Initialise the Sparkle platform, this command does not have any arguments.
+
+\subsection{\texttt{run\_ablation.py}}
+\label{cmd:run_ablation}
+Runs parameter importance between the default and configured parameters with ablation. This command requires a finished configuration for the solver instance pair.
+
+Arguments:
+\begin{itemize}[noitemsep]
+  \item[] \texttt{--solver <solver>}
+  \item[] \texttt{[--instance-set-train <instance-set-train>]}
+  \item[] \texttt{[--instance-set-test <instance-set-test>]}
+\end{itemize}
+
+Note that if no test instance set is given, the validation is performed on the training set.
+
 
 \subsection{\texttt{validate\_configured\_vs\_default.py}}
 \label{cmd:validate_configured_vs_default}
