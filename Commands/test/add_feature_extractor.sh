@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/add_feature_extractor.sh
-#SBATCH --output=TMP/add_feature_extractor.sh.txt
-#SBATCH --error=TMP/add_feature_extractor.sh.err
+#SBATCH --output=Tmp/add_feature_extractor.sh.txt
+#SBATCH --error=Tmp/add_feature_extractor.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

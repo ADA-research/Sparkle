@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/compute_features.sh
-#SBATCH --output=TMP/compute_features.sh.txt
-#SBATCH --error=TMP/compute_features.sh.err
+#SBATCH --output=Tmp/compute_features.sh.txt
+#SBATCH --error=Tmp/compute_features.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

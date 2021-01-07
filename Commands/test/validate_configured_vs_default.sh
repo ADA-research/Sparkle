@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/validate_configured_vs_default.sh
-#SBATCH --output=TMP/validate_configured_vs_default.sh.txt
-#SBATCH --error=TMP/validate_configured_vs_default.sh.err
+#SBATCH --output=Tmp/validate_configured_vs_default.sh.txt
+#SBATCH --error=Tmp/validate_configured_vs_default.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

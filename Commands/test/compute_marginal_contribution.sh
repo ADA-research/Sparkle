@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/compute_marginal_contribution.sh
-#SBATCH --output=TMP/compute_marginal_contribution.sh.txt
-#SBATCH --error=TMP/compute_marginal_contribution.sh.err
+#SBATCH --output=Tmp/compute_marginal_contribution.sh.txt
+#SBATCH --error=Tmp/compute_marginal_contribution.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

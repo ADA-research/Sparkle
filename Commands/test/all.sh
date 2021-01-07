@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/all.sh
-#SBATCH --output=TMP/all.sh.txt
-#SBATCH --error=TMP/all.sh.err
+#SBATCH --output=Tmp/all.sh.txt
+#SBATCH --error=Tmp/all.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

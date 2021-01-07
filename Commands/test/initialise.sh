@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/initialise.sh
-#SBATCH --output=TMP/initialise.sh.txt
-#SBATCH --error=TMP/initialise.sh.err
+#SBATCH --output=Tmp/initialise.sh.txt
+#SBATCH --error=Tmp/initialise.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

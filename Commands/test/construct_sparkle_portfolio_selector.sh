@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/construct_sparkle_portfolio_selector.sh
-#SBATCH --output=TMP/construct_sparkle_portfolio_selector.sh.txt
-#SBATCH --error=TMP/construct_sparkle_portfolio_selector.sh.err
+#SBATCH --output=Tmp/construct_sparkle_portfolio_selector.sh.txt
+#SBATCH --error=Tmp/construct_sparkle_portfolio_selector.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

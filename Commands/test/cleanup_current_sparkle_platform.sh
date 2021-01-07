@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/cleanup_current_sparkle_platform.sh
-#SBATCH --output=TMP/cleanup_current_sparkle_platform.sh.txt
-#SBATCH --error=TMP/cleanup_current_sparkle_platform.sh.err
+#SBATCH --output=Tmp/cleanup_current_sparkle_platform.sh.txt
+#SBATCH --error=Tmp/cleanup_current_sparkle_platform.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
