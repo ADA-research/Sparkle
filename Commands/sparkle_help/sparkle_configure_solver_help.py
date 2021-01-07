@@ -487,6 +487,13 @@ def generate_generic_callback_slurm_script(name,solver, instance_set_train, inst
 	fout.close()
 
 	os.popen("chmod 755 " + delayed_validation_file_path)
-	os.popen("sbatch ./" + delayed_validation_file_path)
+
+	output_list = os.popen("sbatch ./" + delayed_validation_file_path).readlines()
+	if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
+		jobid = output_list[0].strip().split()[-1]
+	else:
+		jobid = ''
+	#os.popen("sbatch ./" + delayed_validation_file_path)
 	print("c Callback script to launch {} is placed at {}".format(name,delayed_validation_file_path))
-	print("c Once configuration is finished, {} will automatically start as a Slurm job.".format(name))
+	print("c Once configuration is finished, {name} will automatically start as a Slurm job: {jobid}".format(name=name,
+																											 jobid=jobid))
