@@ -228,6 +228,9 @@ class Settings:
 		with open(str(file_path), 'w') as settings_file:
 			self.__settings.write(settings_file)
 
+			# Log the settings file location
+			slog.add_output(str(file_path), 'Settings used by Sparkle for this command')
+
 		return
 
 

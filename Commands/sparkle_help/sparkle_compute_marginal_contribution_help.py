@@ -44,6 +44,9 @@ def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]
 		writer = csv.writer(output_file)
 		writer.writerows(content)
 
+		# Add file to log
+		sl.add_output(str(path), 'Marginal contributions to the portfolio selector per solver.')
+
 
 def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, flag_recompute: bool = False) -> List[Tuple[str, float]]:
 	perfect_margi_cont_path = sgh.sparkle_marginal_contribution_perfect_path

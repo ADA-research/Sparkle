@@ -19,6 +19,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_run_solvers_help as srsh
 from sparkle_help import sparkle_compute_features_help as scfh
+from sparkle_help import sparkle_logging as sl
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
@@ -45,6 +46,9 @@ def write_selector_pd_id(sparkle_portfolio_selector_path: Path):
 	with pd_id_path.open('w') as pd_id_file:
 		pd_id_file.write(str(pd_id))
 
+		# Add file to log
+		sl.add_output(str(pd_id_path), 'ID of the performance data used to construct the portfolio selector.')
+
 	return
 
 
@@ -70,6 +74,9 @@ def write_selector_fd_id(sparkle_portfolio_selector_path: Path):
 
 	with fd_id_path.open('w') as fd_id_file:
 		fd_id_file.write(str(fd_id))
+
+		# Add file to log
+		sl.add_output(str(fd_id_path), 'ID of the feature data used to construct the portfolio selector.')
 
 	return
 
@@ -135,7 +142,9 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 	command_line = python_executable + r' ' + sgh.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + cutoff_time_str + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 1>> ' + sgh.sparkle_log_path + r' 2>> ' + sgh.sparkle_err_path
 
 	# Write command line to log
+	# TODO: Move output to Log/ or Output/<command>_<timestamp>/Log/
 	print('Running command below:\n', command_line, file=open(sgh.sparkle_log_path, 'a+'))
+	sl.add_output(sgh.sparkle_log_path, 'Command line used to construct portfolio through AutoFolio')
 
 	#print 'c ' + command_line
 	os.system(command_line)

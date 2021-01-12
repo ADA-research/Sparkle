@@ -56,7 +56,7 @@ def update_caller_file_path(timestamp: str):
 
 	return
 
-def add_output(output_path, description):
+def add_output(output_path: str, description: str):
 	# Prepare logging information
 	timestamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
 	output_str = timestamp + '   ' + output_path + '   ' + description + '\n'

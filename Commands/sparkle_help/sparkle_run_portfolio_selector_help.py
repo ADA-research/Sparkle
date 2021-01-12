@@ -203,8 +203,10 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	fout.write(r'###' + '\n')
 	fout.write(r'###' + '\n')
 	fout.write(r'#SBATCH --job-name=' + job_name + '\n') # specify the job name in this sbatch script
-	fout.write(r'#SBATCH --output=' + test_case_directory_path + r'Tmp/' + job_name + r'.txt' + '\n') # specify the file for normal output
-	fout.write(r'#SBATCH --error=' + test_case_directory_path + r'Tmp/' + job_name + r'.err' + '\n') # specify the file for error output
+	std_out_path = test_case_directory_path + r'Tmp/' + job_name + r'.txt'
+	fout.write(r'#SBATCH --output=' + std_out_path + '\n') # specify the file for normal output
+	std_err_path = test_case_directory_path + r'Tmp/' + job_name + r'.err'
+	fout.write(r'#SBATCH --error=' + std_err_path + '\n') # specify the file for error output
 	fout.write(r'###' + '\n')
 	fout.write(r'#SBATCH --mem-per-cpu=3072' + '\n') #assigned 3GB memory for each cpu
 	fout.write(r'#SBATCH --array=0-' + str(num_job_total-1) + r'%' + str(num_job_in_parallel) + '\n') # using slurm job array and specify the number of jobs executing in parallel in this sbatch script
@@ -227,6 +229,12 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	fout.write(command_line + '\n') # write the complete command in this sbatch script
 	
 	fout.close() # close the file of the sbatch script
+
+	# Log the sbatch file and (error) output locations
+	sl.add_output(sbatch_shell_script_path, 'Slurm batch script to run the portfolio selector')
+	sl.add_output(std_out_path, 'Slurm batch script to run the portfolio selector output')
+	sl.add_output(std_err_path, 'Slurm batch script to run the portfolio selector error output')
+
 	return
 
 
