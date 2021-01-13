@@ -111,7 +111,7 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 
 		return
 
-	# Remove contents of the selector path to ensure everything is (re)computed for the new selector when required
+	# Remove contents of- and the selector path to ensure everything is (re)computed for the new selector when required
 	sfh.rmtree(selector_path.parent)
 
 	# (Re)create the path to the selector
@@ -133,12 +133,14 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 		feature_data_csv.save_csv(impute_feature_data_csv_path)
 		feature_data_csv_path = impute_feature_data_csv_path
 
-	command_line = python_executable + r' ' + sgh.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + cutoff_time_str + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 1>> ' + sgh.sparkle_log_path + r' 2>> ' + sgh.sparkle_err_path
+	log_path_str = str(Path(sl.caller_log_dir / 'autofolio.out'))
+	err_path_str = str(Path(sl.caller_log_dir / 'autofolio.err'))
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + cutoff_time_str + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 1>> ' + log_path_str + r' 2>> ' + err_path_str
 
 	# Write command line to log
-	# TODO: Move output to Log/ or Output/<command>_<timestamp>/Log/
-	print('Running command below:\n', command_line, file=open(sgh.sparkle_log_path, 'a+'))
-	sl.add_output(sgh.sparkle_log_path, 'Command line used to construct portfolio through AutoFolio')
+	print('Running command below:\n', command_line, file=open(log_path_str, 'a+'))
+	sl.add_output(log_path_str, 'Command line used to construct portfolio through AutoFolio and associated output')
+	sl.add_output(err_path_str, 'Error output from constructing portfolio through AutoFolio')
 
 	#print 'c ' + command_line
 	os.system(command_line)
