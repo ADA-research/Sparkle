@@ -133,8 +133,10 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 		feature_data_csv.save_csv(impute_feature_data_csv_path)
 		feature_data_csv_path = impute_feature_data_csv_path
 
-	log_path_str = str(Path(sl.caller_log_dir / 'autofolio.out'))
-	err_path_str = str(Path(sl.caller_log_dir / 'autofolio.err'))
+	log_file = selector_path.parent.name + '_autofolio.out'
+	err_file = selector_path.parent.name + '_autofolio.err'
+	log_path_str = str(Path(sl.caller_log_dir / log_file))
+	err_path_str = str(Path(sl.caller_log_dir / err_file))
 	command_line = python_executable + r' ' + sgh.autofolio_path + r' ' + r'--performance_csv' + r' ' + performance_data_csv_path + r' ' + r'--feature_csv' + r' ' + feature_data_csv_path + r' ' + objective_function + r' ' + r'--runtime_cutoff' + r' ' + cutoff_time_str + r' ' + r'--tune' + r' ' + r'--save' + r' ' + sparkle_portfolio_selector_path + r' 1>> ' + log_path_str + r' 2>> ' + err_path_str
 
 	# Write command line to log
