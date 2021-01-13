@@ -16,6 +16,7 @@ from pathlib import PurePath
 
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_run_solvers_help as srsh
 from sparkle_help import sparkle_compute_features_help as scfh
@@ -100,28 +101,21 @@ def selector_exists(sparkle_portfolio_selector_path: Path) -> bool:
 	return exists
 
 
-def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, performance_data_csv_path, feature_data_csv_path):
+def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, performance_data_csv_path: str, feature_data_csv_path: str, flag_recompute: bool = False):
 	# Convert to pathlib Path (remove when everything is pathlib compliant)
 	selector_path = Path(sparkle_portfolio_selector_path)
 
-	# Make sure the path to the selector exists
-	selector_path.parent.mkdir(parents=True, exist_ok=True)
-
-	# If the selector exists and the data didn't change, do nothing
-	if selector_exists(selector_path) and data_unchanged(selector_path):
+	# If the selector exists and the data didn't change, do nothing; unless the recompute flag is set
+	if selector_exists(selector_path) and data_unchanged(selector_path) and not flag_recompute:
 		print('c Portfolio selector already exists for the current feature and performance data.')
 
 		return
 
-	# Remove possible old marginal contribution files to ensure they will be computed for the new selector when required
-	try:
-		sgh.sparkle_marginal_contribution_perfect_path.unlink()#TODO: Use in new python version instead of catching the exception: missing_ok=True)
-	except FileNotFoundError:
-		pass
-	try:
-		sgh.sparkle_marginal_contribution_actual_path.unlink()#TODO: Add in new python version missing_ok=True)
-	except FileNotFoundError:
-		pass
+	# Remove contents of the selector path to ensure everything is (re)computed for the new selector when required
+	sfh.rmtree(selector_path.parent)
+
+	# (Re)create the path to the selector
+	selector_path.parent.mkdir(parents=True, exist_ok=True)
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	python_executable = sgh.python_executable

@@ -16,6 +16,7 @@ import time
 import random
 import fcntl
 import pathlib
+from pathlib import Path
 
 try:
 	from sparkle_help import sparkle_global_help
@@ -351,5 +352,32 @@ def append_string_to_file(file_path, string_value):
 	fout.write(string_value.strip()+'\n')
 	fout.close()
 	'''
+	return
+
+
+def rmtree(directory: Path):
+	if directory.is_dir():
+		for path in directory.iterdir():
+			if path.is_dir():
+				rmtree(path)
+			else:
+				rmfile(path)
+		try:
+			directory.rmdir()
+		except FileNotFoundError:
+			pass
+	else:
+		rmfile(directory)
+
+	return
+
+
+def rmfile(file_name: Path):
+	try:
+		#TODO: In new python version use unlink(missing_ok=True)
+		file_name.unlink()
+	except FileNotFoundError:
+		pass
+
 	return
 
