@@ -12,20 +12,16 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
-import fcntl
 import argparse
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_construct_portfolio_selector_help as scps
-from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
+import compute_marginal_contribution as cmc
 from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 
 
 def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path):
@@ -34,13 +30,13 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)
 	if total_job_num>0:
 		return True
-	
+
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job()
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
 	if total_job_num>0:
 		return True
-	
+
 	return False
 
 
@@ -73,33 +69,39 @@ def print_log_paths():
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--recompute-portfolio-selector', action='store_true', help='force the construction of a new portfolio selector even when it already exists for the current feature and performance data. NOTE: This will also result in the computation of the marginal contributions of solvers to the new portfolio selector.')
+	parser.add_argument('--recompute-marginal-contribution', action='store_true', help='force marginal contribution to be recomputed even when it already exists in file for the current selector')
 
 	# Process command line arguments
 	args = parser.parse_args()
+	flag_recompute_portfolio = args.recompute_portfolio_selector
+	flag_recompute_marg_cont = args.recompute_marginal_contribution
 
 	print('c Start constructing Sparkle portfolio selector ...')
-	
+
 	generate_task_run_status()
-	
+
 	flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(sgh.feature_data_csv_path, sgh.performance_data_csv_path)
-	
+
 	if flag_judge_exist_remaining_jobs:
 		print(r'c There remain unperformed feature computation jobs or performance computation jobs!')
 		print(r'c Please first execute all unperformed jobs before constructing Sparkle portfolio selecotr')
 		print(r'c Sparkle portfolio selector is not successfully constructed!')
 		delete_task_run_status()
 		sys.exit()
-	
-	cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
 
 	delete_log_files() # Make sure no old log files remain
-	scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path, cutoff_time_each_run)
-	
+	scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path, flag_recompute_portfolio)
+
 	if not os.path.exists(sgh.sparkle_portfolio_selector_path):
 		print('c Sparkle portfolio selector is not successfully constructed!')
 		print('c There might be some errors!')
@@ -109,17 +111,11 @@ if __name__ == r'__main__':
 	else:
 		print('c Sparkle portfolio selector constructed!')
 		print('c Sparkle portfolio selector located at ' + sgh.sparkle_portfolio_selector_path)
-		
-		print(r"c Start computing each solver's marginal contribution to perfect selector ...")
-		rank_list = scmc.compute_perfect_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
-		scmc.print_rank_list(rank_list, 1)
-		print(r'c Marginal contribution (perfect selector) computing done!')
-	
-		
-		print(r"c Start computing each solver's marginal contribution to actual selector ...")
-		rank_list = scmc.compute_actual_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
-		scmc.print_rank_list(rank_list, 2)
-		print(r'c Marginal contribution (actual selector) computing done!')
+
+		# Compute and print marginal contributions of the perfect and actual portfolio selectors
+		cmc.compute_perfect(flag_recompute_marg_cont)
+		cmc.compute_actual(flag_recompute_marg_cont)
+
 		delete_task_run_status()
 		delete_log_files()
 

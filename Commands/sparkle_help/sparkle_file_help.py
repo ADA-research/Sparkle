@@ -16,13 +16,12 @@ import time
 import random
 import fcntl
 import pathlib
+from pathlib import Path
 
 try:
 	from sparkle_help import sparkle_global_help
-	from sparkle_help import sparkle_customized_config_help as scch
 except ImportError:
 	import sparkle_global_help
-	import sparkle_customized_config_help as scch
 
 
 def create_new_empty_file(filepath):
@@ -88,10 +87,11 @@ def get_file_least_extension(filepath):
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
 	if os.path.isfile(path):
-		file_extension = get_file_least_extension(path)
-		if file_extension == scch.file_extension:
-			filename = get_file_name(path)
-			list_all_cnf_filename.append(filename)
+		# TODO: Possibly add extension check back when we get this information from the user
+#		file_extension = get_file_least_extension(path)
+#		if file_extension == scch.file_extension:
+		filename = get_file_name(path)
+		list_all_cnf_filename.append(filename)
 		return
 	elif os.path.isdir(path):
 		if path[-1]!=r'/':
@@ -147,20 +147,6 @@ def get_list_all_directory(filepath):
 	list_all_directory = []
 	get_list_all_directory_recursive(filepath, list_all_directory)
 	return list_all_directory
-
-'''
-def get_list_all_cnf_filename(filepath):
-	if not os.path.exists(filepath):
-		print r'c Directory ' + filepath + r' does not exist!'
-		sys.exit()
-	list_all_items = os.listdir(filepath)
-	list_all_cnf_filename = []
-	for i in range(0, len(list_all_items)):
-		file_extension = get_file_least_extension(list_all_items[i])
-		if file_extension == r'cnf':
-			list_all_cnf_filename.append(list_all_items[i])
-	return list_all_cnf_filename
-'''
 
 def get_list_all_csv_filename(filepath):
 	csv_list = []
@@ -368,17 +354,30 @@ def append_string_to_file(file_path, string_value):
 	'''
 	return
 
-def get_cutoff_time_information():
-	fin = open(sparkle_global_help.cutoff_time_information_txt_path, 'r+')
-	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-	myline = fin.readline().strip()
-	mylist = myline.split()
-	cutoff_time_each_run = float(mylist[2])
-	myline = fin.readline().strip()
-	mylist = myline.split()
-	par_num = float(mylist[2])
-	penalty_time = cutoff_time_each_run * par_num
-	fin.close()
-	return [cutoff_time_each_run, par_num, penalty_time]
 
+def rmtree(directory: Path):
+	if directory.is_dir():
+		for path in directory.iterdir():
+			if path.is_dir():
+				rmtree(path)
+			else:
+				rmfile(path)
+		try:
+			directory.rmdir()
+		except FileNotFoundError:
+			pass
+	else:
+		rmfile(directory)
+
+	return
+
+
+def rmfile(file_name: Path):
+	try:
+		#TODO: In new python version use unlink(missing_ok=True)
+		file_name.unlink()
+	except FileNotFoundError:
+		pass
+
+	return
 

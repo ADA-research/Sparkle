@@ -12,10 +12,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
-import fcntl
 import argparse
-from sparkle_help import sparkle_record_help
-from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
 
 
@@ -50,13 +47,13 @@ if __name__ == r'__main__':
 	os.system(command_line)
 	command_line = r'rm -f slurm-*'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Extractor_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Extractor_Jobs/'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Solver_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Solver_Jobs/'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Portfolio_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Portfolio_Jobs/'
 	os.system(command_line)
-	command_line = r'mkdir -p TMP/SBATCH_Report_Jobs/'
+	command_line = r'mkdir -p Tmp/SBATCH_Report_Jobs/'
 	os.system(command_line)
 	print(r'c Temporary files cleaned!')
 

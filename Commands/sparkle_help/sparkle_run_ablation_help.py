@@ -14,15 +14,8 @@ import os
 import sys
 import re
 import pathlib
-import fcntl
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_run_solvers_help as srs
-from sparkle_help import sparkle_experiments_related_help as ser
 from sparkle_help import sparkle_add_train_instances_help as satih
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_slurm_help as ssh
@@ -46,13 +39,15 @@ def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_na
     ablation_scenario_solver_dir = pathlib.PurePath(ablation_scenario_dir, "solver/")
 
     sfh.checkout_directory(ablation_scenario_dir)
-    sfh.checkout_directory(ablation_scenario_solver_dir)
+    sfh.checkout_directory(str(ablation_scenario_solver_dir))
 
     #copy ablation executables to isolated scenario directory
     copy_candidates = ["conf/","lib/","ablationAnalysis","ablationAnalysis.jar","ablationValidation","LICENSE.txt","README.txt"]
     for candidate in copy_candidates:
         recursive = "-r" if candidate[-1] == "/" else ""
         candidate_path = str(pathlib.PurePath(sgh.ablation_dir,candidate))
+        print(candidate_path)
+        print(ablation_scenario_dir)
         cmd = "cp {} {} {}".format(recursive, candidate_path, ablation_scenario_dir)
         os.system(cmd)
 

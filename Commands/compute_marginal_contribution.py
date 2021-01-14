@@ -10,57 +10,50 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-import os
 import sys
-import fcntl
 import argparse
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_run_solvers_help as srs
-from sparkle_help import sparkle_construct_portfolio_selector_help as scps ##
-from sparkle_help import sparkle_run_portfolio_selector_help as srps ##
+from typing import List
+from typing import Tuple
+
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
-from sparkle_help import sparkle_csv_merge_help
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 
 
-def compute_perfect():
-	cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
-
+def compute_perfect(flag_recompute: bool = False) -> List[Tuple[str, float]]:
 	print(r"c Start computing each solver's marginal contribution to perfect selector ...")
-	rank_list = scmc.compute_perfect_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
+	rank_list = scmc.compute_perfect_selector_marginal_contribution(flag_recompute=flag_recompute)
 	scmc.print_rank_list(rank_list, 1)
 	print(r'c Marginal contribution (perfect selector) computing done!')
 
 	return rank_list
 
 
-def compute_actual():
-	cutoff_time_each_run = scps.get_cutoff_time_each_run_from_cutoff_time_information_txt_path()
-
+def compute_actual(flag_recompute: bool = False) -> List[Tuple[str, float]]:
 	print(r"c Start computing each solver's marginal contribution to actual selector ...")
-	rank_list = scmc.compute_actual_selector_marginal_contribution(cutoff_time_each_run = cutoff_time_each_run)
+	rank_list = scmc.compute_actual_selector_marginal_contribution(flag_recompute=flag_recompute)
 	scmc.print_rank_list(rank_list, 2)
 	print(r'c Marginal contribution (actual selector) computing done!')
 
 	return rank_list
 
 
-def compute_marginal_contribution(flag_compute_perfect, flag_compute_actual):
+def compute_marginal_contribution(flag_compute_perfect: bool, flag_compute_actual: bool, flag_recompute: bool):
 	if flag_compute_perfect:
-		compute_perfect()
+		compute_perfect(flag_recompute)
 	elif flag_compute_actual:
-		compute_actual()
+		compute_actual(flag_recompute)
 	else:
 		print(r'c ERROR: compute_marginal_contribution called without a flag set to True, stopping execution')
 		sys.exit()
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -69,11 +62,13 @@ if __name__ == r'__main__':
 	group = parser.add_mutually_exclusive_group(required=True)
 	group.add_argument('--perfect', action='store_true', help='compute the marginal contribution for the perfect selector')
 	group.add_argument('--actual', action='store_true', help='compute the marginal contribution for the actual selector')
+	parser.add_argument('--recompute', action='store_true', help='force marginal contribution to be recomputed even when it already exists in file for for the current selector')
 
 	# Process command line arguments
 	args = parser.parse_args()
 	flag_compute_perfect = args.perfect
 	flag_compute_actual = args.actual
+	flag_recompute = args.recompute
 
-	compute_marginal_contribution(flag_compute_perfect, flag_compute_actual)
+	compute_marginal_contribution(flag_compute_perfect, flag_compute_actual, flag_recompute)
 

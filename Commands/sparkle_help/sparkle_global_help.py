@@ -12,8 +12,14 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import fcntl
+from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+
+
+# TODO: Handle different seed requirements; for the moment this is a dummy function
+def get_seed():
+	return 1
 
 
 global settings
@@ -70,8 +76,20 @@ sparkle_err_path = sparkle_tmp_path + r'sparkle_log.err'
 global sparkle_system_log_path
 sparkle_system_log_path = r'Log/sparkle_system_log_path.txt'
 
+global sparkle_portfolio_selector_dir
+sparkle_portfolio_selector_dir = 'Sparkle_Portfolio_Selector/'
+
+global sparkle_portfolio_selector_name
+sparkle_portfolio_selector_name = 'sparkle_portfolio_selector' + sparkle_special_string
+
 global sparkle_portfolio_selector_path
-sparkle_portfolio_selector_path = r'Sparkle_Portfolio_Selector/sparkle_portfolio_selector' + sparkle_special_string
+sparkle_portfolio_selector_path = sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name
+
+global sparkle_marginal_contribution_perfect_path
+sparkle_marginal_contribution_perfect_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_perfect.csv')
+
+global sparkle_marginal_contribution_actual_path
+sparkle_marginal_contribution_actual_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_actual.csv')
 
 global sparkle_last_test_file_name
 sparkle_last_test_file_name = r'last_test_configured_default.txt'
@@ -109,12 +127,14 @@ global ablation_dir
 ablation_dir = r"Components/ablationAnalysis-0.9.4/"
 
 global feature_data_csv_path
+global feature_data_id_path
 global performance_data_csv_path
-global cutoff_time_information_txt_path
+global performance_data_id_path
 
 feature_data_csv_path = r'Feature_Data/sparkle_feature_data.csv'
+feature_data_id_path = 'Feature_Data/sparkle_feature_data.id'
 performance_data_csv_path = r'Performance_Data/sparkle_performance_data.csv'
-cutoff_time_information_txt_path = r'Performance_Data/sparkle_performance_data_cutoff_time_information.txt'
+performance_data_id_path = 'Performance_Data/sparkle_performance_data.id'
 
 global extractor_nickname_list_path
 global extractor_feature_vector_size_list_path

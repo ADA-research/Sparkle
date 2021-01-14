@@ -14,7 +14,11 @@ import time
 from pathlib import Path
 from pathlib import PurePath
 
-from sparkle_help import sparkle_global_help as sgh
+try:
+	from sparkle_help import sparkle_global_help as sgh
+except ImportError:
+	import sparkle_global_help as sgh
+
 
 # Keep track of which command called Sparkle
 global caller
@@ -24,26 +28,36 @@ caller = 'unknown'
 global caller_log_path
 caller_log_path = 'not set'
 
+# Root output directory for the calling command in the form of Output/<timestamp>_<command_name>/
 global caller_out_dir
 caller_out_dir = Path('.')
+
+# Log directory for the calling command in the form of Output/<timestamp>_<command_name>/Log/
+global caller_log_dir
+caller_log_dir = Path('.')
+
 
 def update_caller(argv):
 	global caller
 	caller = Path(argv[0]).stem
 
+
 # Create a new file path for the caller with the given timestamp
 def update_caller_file_path(timestamp: str):
 	caller_file = caller + '_main_log.txt'
-	caller_dir = Path(caller + '_' + timestamp)
+	caller_dir = Path(timestamp + '_' + caller)
 	# Set caller directory for other Sparkle functions to use
 	global caller_out_dir
 	caller_out_dir = Path(caller_dir)
 	global caller_log_path
 	caller_log_path = PurePath(sgh.sparkle_global_output_dir / caller_out_dir / caller_file)
+	global caller_log_dir
+	caller_log_dir = Path(sgh.sparkle_global_output_dir / caller_out_dir / sgh.sparkle_global_log_dir)
 
 	# Create needed directories if they don't exist
 	caller_dir = Path(caller_log_path).parents[0]
 	caller_dir.mkdir(parents=True, exist_ok=True)
+	caller_log_dir.mkdir(parents=True, exist_ok=True)
 
 	# If the caller output file does not exist yet, write the header
 	if not Path(caller_log_path).is_file():
@@ -53,7 +67,9 @@ def update_caller_file_path(timestamp: str):
 
 	return
 
-def add_output(output_path, description):
+
+# Add output location and description to the log of the current command
+def add_output(output_path: str, description: str):
 	# Prepare logging information
 	timestamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
 	output_str = timestamp + '   ' + output_path + '   ' + description + '\n'
@@ -61,6 +77,7 @@ def add_output(output_path, description):
 	# Write output path and description to caller file
 	with open(str(caller_log_path), "a") as output_file:
 		output_file.write(output_str)
+
 
 # Write to file which command was executed when, with which arguments, and
 # where details about it's output are stored (if any)
