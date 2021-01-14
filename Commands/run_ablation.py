@@ -83,9 +83,11 @@ if __name__ == r'__main__':
     else:
         print("c Configuration exists!")
 
-    #DEVELOP: REMOVE SCENARIO
+    #REMOVE SCENARIO
     ablation_scenario_dir = sah.get_ablation_scenario_directory(solver_name, instance_set_train_name, instance_set_test_name)
-    os.system("rm -rf {}".format(sgh.ablation_dir+ablation_scenario_dir))
+    if sah.check_for_ablation(solver_name, instance_set_train_name, instance_set_test_name):
+        print("c Warning: found existing ablation scenario for this combination. This will be removed.")
+        os.system("rm -rf {}".format(sgh.ablation_dir+ablation_scenario_dir))
 
     #Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(solver_name, instance_set_train_name, instance_set_test_name)
