@@ -48,7 +48,7 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str) -
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	seed_str = str(sgh.get_seed())
-	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + seed_str + ' --cutoff-time ' + cutoff_time_str
+	cmd_get_solver_call = solver_wrapper_path + ' --print-command \"' + instance_path + '\" --seed ' + seed_str + ' --cutoff-time ' + cutoff_time_str
 	solver_call_rawresult = os.popen(cmd_get_solver_call)
 	solver_call_result = solver_call_rawresult.readlines()[0].strip()
 
@@ -165,8 +165,8 @@ def running_solvers(performance_data_csv_path, mode):
 				performance_data_csv.set_value(instance_path, solver_path, runtime)
 				print('c Running Result: Status ' + status + ', Runtime' + penalised_str + ': ' + str(runtime))
 
-		print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
-		current_job_num += 1
+			print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
+			current_job_num += 1
 
 	performance_data_csv.update_csv()
 	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + cutoff_time_str)

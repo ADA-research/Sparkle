@@ -26,6 +26,19 @@ from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_logging as sl
 
 
+def _check_existence_of_test_instance_list_file(extractor_directory : str):
+	if not os.path.isdir(extractor_directory):
+		return False
+	
+	test_instance_list_file_name = 'sparkle_test_instance_list.txt'
+	test_instance_list_file_path = os.path.join(extractor_directory, test_instance_list_file_name)
+
+	if os.path.isfile(test_instance_list_file_path):
+		return True
+	else:
+		return False
+
+
 if __name__ == r'__main__':
 	# Log command call
 	sl.log_command(sys.argv)
@@ -65,12 +78,28 @@ if __name__ == r'__main__':
 	sfh.add_new_extractor_into_file(extractor_directory)
 	
 	##pre-run the feature extractor on a testing instance, to obtain the feature names
-	instance_path = os.path.join(extractor_directory, 'sparkle_test_instance.cnf')
-	if not os.path.isfile(instance_path):
-		instance_path = os.path.join(extractor_directory, 'sparkle_test_instance.txt')
-	result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_directory) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
-	command_line = extractor_directory + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_directory + r'/' + r' ' + instance_path + r' ' + result_path
-	os.system(command_line)
+	if _check_existence_of_test_instance_list_file(extractor_directory):
+		test_instance_list_file_name = 'sparkle_test_instance_list.txt'
+		test_instance_list_file_path = os.path.join(extractor_directory, test_instance_list_file_name)
+		infile = open(test_instance_list_file_path, 'r')
+		test_instance_files = infile.readline().strip().split()
+		instance_path = ''
+		for test_instance_file in test_instance_files:
+			instance_path += os.path.join(extractor_directory, test_instance_file) + ' '
+		instance_path = instance_path.strip()
+		infile.close()
+
+		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_directory) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+
+		command_line = '%s %s %s %s' % (os.path.join(extractor_directory, sparkle_global_help.sparkle_run_default_wrapper), extractor_directory + '/', instance_path, result_path)
+		os.system(command_line)
+	else:
+		instance_path = os.path.join(extractor_directory, 'sparkle_test_instance.cnf')
+		if not os.path.isfile(instance_path):
+			instance_path = os.path.join(extractor_directory, 'sparkle_test_instance.txt')
+		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_directory) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+		command_line = extractor_directory + r'/' + sparkle_global_help.sparkle_run_default_wrapper + r' ' + extractor_directory + r'/' + r' ' + instance_path + r' ' + result_path
+		os.system(command_line)
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
 
