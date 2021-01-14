@@ -104,10 +104,10 @@ if __name__ == r'__main__':
 
 		for i in range(0, num_inst):
 			instance_line = list_instance[i]
-			instance_related_flies = instance_line.strip().split()
+			instance_related_files = instance_line.strip().split()
 			intended_instance_line = ''
 
-			for related_file_name in instance_related_flies:
+			for related_file_name in instance_related_files:
 				source_file_path = os.path.join(instances_source, related_file_name)
 				target_file_path = os.path.join(instances_directory, related_file_name)
 				cmd = 'cp %s %s' % (source_file_path, target_file_path)
