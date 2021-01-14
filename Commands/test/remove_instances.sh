@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/remove_instances.sh
-#SBATCH --output=TMP/remove_instances.sh.txt
-#SBATCH --error=TMP/remove_instances.sh.err
+#SBATCH --output=Tmp/remove_instances.sh.txt
+#SBATCH --error=Tmp/remove_instances.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

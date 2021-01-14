@@ -16,11 +16,6 @@ import argparse
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_system_status_help
-from sparkle_help import sparkle_csv_merge_help
-from sparkle_help import sparkle_run_status_help
-from sparkle_help import sparkle_generate_report_help
-from sparkle_help import sparkle_generate_report_for_test_help
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_add_train_instances_help as satih

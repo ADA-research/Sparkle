@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/add_solver.sh
-#SBATCH --output=TMP/add_solver.sh.txt
-#SBATCH --error=TMP/add_solver.sh.err
+#SBATCH --output=Tmp/add_solver.sh.txt
+#SBATCH --error=Tmp/add_solver.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

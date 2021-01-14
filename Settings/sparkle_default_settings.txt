@@ -1,1 +1,1 @@
-cutoff_time_each_feature_computation = 10
+cutoff_time_each_feature_computation = 60

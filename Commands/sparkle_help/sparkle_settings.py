@@ -228,6 +228,9 @@ class Settings:
 		with open(str(file_path), 'w') as settings_file:
 			self.__settings.write(settings_file)
 
+			# Log the settings file location
+			slog.add_output(str(file_path), 'Settings used by Sparkle for this command')
+
 		return
 
 
@@ -295,9 +298,13 @@ class Settings:
 		return int(self.__settings['general']['penalty_multiplier'])
 
 
-	def get_penalised_time(self) -> int:
+	def get_penalised_time(self, custom_cutoff: int = None) -> int:
+		if custom_cutoff is None:
+			cutoff_time = self.get_general_target_cutoff_time()
+		else:
+			cutoff_time = custom_cutoff
+
 		penalty_multiplier = self.get_general_penalty_multiplier()
-		cutoff_time = self.get_general_target_cutoff_time()
 		penalised_time = cutoff_time * penalty_multiplier
 
 		return penalised_time

@@ -10,10 +10,7 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-import os
-import sys
 import pandas as pd
-import numpy as np
 import fcntl
 
 try:

@@ -20,7 +20,6 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_run_ablation_help as sah
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_add_train_instances_help as satih
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
@@ -67,7 +66,6 @@ if __name__ == r'__main__':
     if ac.set_by_user(args, 'number_of_runs'): sgh.settings.set_config_number_of_runs(args.number_of_runs, SettingState.CMD_LINE)
     if ac.set_by_user(args, 'racing'): sgh.settings.set_ablation_racing_flag(args.number_of_runs, SettingState.CMD_LINE)
 
-
     solver_name = sfh.get_last_level_directory_name(solver)
     instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
     instance_set_test_name = None
@@ -78,9 +76,17 @@ if __name__ == r'__main__':
         instance_set_test_name = instance_set_train_name
     #print(solver_name, instance_set_train_name, instance_set_test_name)
 
-    #DEVELOP: REMOVE SCENARIO
+    if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
+        print('c Error: No configuration results found for the given solver and training instance set. Ablation needs to have a target configuration. Please run configuration first')
+        sys.exit(-1)
+    else:
+        print("c Configuration exists!")
+
+    #REMOVE SCENARIO
     ablation_scenario_dir = sah.get_ablation_scenario_directory(solver_name, instance_set_train_name, instance_set_test_name)
-    os.system("rm -rf {}".format(sgh.ablation_dir+ablation_scenario_dir))
+    if sah.check_for_ablation(solver_name, instance_set_train_name, instance_set_test_name):
+        print("c Warning: found existing ablation scenario for this combination. This will be removed.")
+        os.system("rm -rf {}".format(sgh.ablation_dir+ablation_scenario_dir))
 
     #Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(solver_name, instance_set_train_name, instance_set_test_name)

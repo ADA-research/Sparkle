@@ -11,10 +11,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
-import time
-import random
 import sys
-import fcntl
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_file_help as sfh
@@ -76,9 +73,13 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	print('c The number of total running jobs: ' + str(total_job_num))
 	total_job_list = sjh.expand_total_job_from_list(list_performance_computation_job)
 	####
-	
+
+	# If there are no jobs, stop
 	if len(total_job_list) == 0:
 		return ''
+	# If there are jobs update performance data ID
+	else:
+		srs.update_performance_data_id()
 
 	sbatch_script_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, total_job_list)
 	command_line = 'sbatch ' + sbatch_script_path
@@ -90,11 +91,6 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 		run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
 	else:
 		run_solvers_parallel_jobid = ''
-	
-	####
-	# record the experimental settings 
-	sfh.write_string_to_file(sgh.cutoff_time_information_txt_path, "cutoff_time_each_run = " + cutoff_time_str)
-	sfh.append_string_to_file(sgh.cutoff_time_information_txt_path, "par_num = " + str(sgh.settings.get_general_penalty_multiplier()))
-	####
+
 	return run_solvers_parallel_jobid
 

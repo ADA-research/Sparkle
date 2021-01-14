@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/system_status.sh
-#SBATCH --output=TMP/system_status.sh.txt
-#SBATCH --error=TMP/system_status.sh.err
+#SBATCH --output=Tmp/system_status.sh.txt
+#SBATCH --error=Tmp/system_status.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

@@ -155,6 +155,10 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	fout.write('test_instance_file = ' + smac_test_instance_file + '\n')
 	fout.close()
 
+	# Log scenario file location
+	log_str = 'SMAC Scenario file for the validation of the ' + config_type + ' solver ' + solver_name + ' on the ' + inst_type + 'ing set'
+	sl.add_output(smac_file_scenario, log_str)
+
 	return scenario_file_name
 
 
@@ -281,7 +285,7 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
 
 # Check the results directory for this solver and instance set combination exists
 # NOTE: This function assumes SMAC output
-def check_configuration_exists(solver_name: str, instance_set_name: str):
+def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
 	# Check the results directory exists
 	smac_results_dir = Path(sgh.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/')
 
@@ -291,7 +295,7 @@ def check_configuration_exists(solver_name: str, instance_set_name: str):
 		print('c ERROR: No configuration results found for the given solver and training instance set.')
 		sys.exit(-1)
 
-	return
+	return all_good
 
 
 def check_instance_list_file_exist(solver_name: str, instance_set_name: str):
@@ -516,6 +520,13 @@ def generate_generic_callback_slurm_script(name,solver, instance_set_train, inst
 	fout.close()
 
 	os.popen("chmod 755 " + delayed_validation_file_path)
-	os.popen("sbatch ./" + delayed_validation_file_path)
+
+	output_list = os.popen("sbatch ./" + delayed_validation_file_path).readlines()
+	if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
+		jobid = output_list[0].strip().split()[-1]
+	else:
+		jobid = ''
+	#os.popen("sbatch ./" + delayed_validation_file_path)
 	print("c Callback script to launch {} is placed at {}".format(name,delayed_validation_file_path))
-	print("c Once configuration is finished, {} will automatically start as a Slurm job.".format(name))
+	print("c Once configuration is finished, {name} will automatically start as a Slurm job: {jobid}".format(name=name,
+																											 jobid=jobid))

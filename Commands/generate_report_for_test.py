@@ -10,30 +10,37 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-import os
 import sys
-import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_system_status_help
-from sparkle_help import sparkle_csv_merge_help
-from sparkle_help import sparkle_run_status_help
-from sparkle_help import sparkle_generate_report_help
-from sparkle_help import sparkle_generate_report_for_test_help 
+import argparse
+from pathlib import Path
+from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
+from sparkle_help import argparse_custom as ac
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
-	if len(sys.argv) != 2:
-		print(r'c Command error!')
-		print(r'c Usage: ' + sys.argv[0] + r' ' + r'<test_case_directory>')
-		sys.exit()
-	
-	test_case_directory = sys.argv[1]
-	
+	# Define command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('test_case_directory', type=str, help='Path to test case directory of an instance set')
+	parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
+
+	# Process command line arguments
+	args = parser.parse_args()
+	test_case_directory = args.test_case_directory
+
 	print(r'c Generating report for test ...')
-	sparkle_generate_report_for_test_help.generate_report_for_test(test_case_directory)
+	sgrh.generate_report(test_case_directory)
 	print(r'c Report for test generated ...')
+
+	# Write used settings to file
+	sgh.settings.write_used_settings()
 

@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/load_record.sh
-#SBATCH --output=TMP/load_record.sh.txt
-#SBATCH --error=TMP/load_record.sh.err
+#SBATCH --output=Tmp/load_record.sh.txt
+#SBATCH --error=Tmp/load_record.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

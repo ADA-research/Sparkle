@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/cleanup_temporary_files.sh
-#SBATCH --output=TMP/cleanup_temporary_files.sh.txt
-#SBATCH --error=TMP/cleanup_temporary_files.sh.err
+#SBATCH --output=Tmp/cleanup_temporary_files.sh.txt
+#SBATCH --error=Tmp/cleanup_temporary_files.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=

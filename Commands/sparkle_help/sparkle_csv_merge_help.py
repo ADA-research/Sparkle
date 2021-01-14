@@ -98,7 +98,6 @@ if __name__ == '__main__':
 	feature_data_csv_merge()
 	performance_data_csv_merge()
 else:
-	# TODO: Fix this horror so this file no longer has to be included by literally every command :')
 	feature_data_csv_merge()
 	performance_data_csv_merge()
 
