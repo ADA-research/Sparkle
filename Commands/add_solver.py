@@ -12,23 +12,23 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
-import fcntl
 import argparse
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
-from sparkle_help import sparkle_csv_merge_help
-from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_job_parallel_help
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -65,16 +65,16 @@ if __name__ == r'__main__':
 
 	os.system(r'cp -r ' + solver_source + r'/* ' + solver_diretory)
 
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 	performance_data_csv.add_column(solver_diretory)
 	performance_data_csv.update_csv()
 
-	sparkle_global_help.solver_list.append(solver_diretory)
+	sgh.solver_list.append(solver_diretory)
 	sfh.add_new_solver_into_file(solver_diretory, deterministic)
 	
 	if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
 		pcs_file_name = sacsh.get_pcs_file_from_solver_directory(solver_diretory)
-		smac_scenario_dir = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/'
+		smac_scenario_dir = sgh.smac_dir + r'/' + r'example_scenarios/'
 		command_line = r'cp -r ' + solver_diretory + r' ' + smac_scenario_dir
 		os.system(command_line)
 		smac_solver_dir = smac_scenario_dir + r'/' + sfh.get_last_level_directory_name(solver_source) + r'/'
@@ -84,30 +84,30 @@ if __name__ == r'__main__':
 	
 	print('c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!')
 
-	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
+	if os.path.exists(sgh.sparkle_portfolio_selector_path):
+		command_line = r'rm -f ' + sgh.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
+		print('c Removing Sparkle portfolio selector ' + sgh.sparkle_portfolio_selector_path + ' done!')
 	
-	if os.path.exists(sparkle_global_help.sparkle_report_path):
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
+	if os.path.exists(sgh.sparkle_report_path):
+		command_line = r'rm -f ' + sgh.sparkle_report_path
 		os.system(command_line)
-		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
+		print('c Removing Sparkle report ' + sgh.sparkle_report_path + ' done!')
 	
 	if nickname_str is not None:
-		sparkle_global_help.solver_nickname_mapping[nickname_str] = solver_diretory
+		sgh.solver_nickname_mapping[nickname_str] = solver_diretory
 		sfh.add_new_solver_nickname_into_file(nickname_str, solver_diretory)
 		pass
 
 	if not my_flag_run_solver_later:
 		if not my_flag_parallel:
 			print('c Start running solvers ...')
-			srs.running_solvers(sparkle_global_help.performance_data_csv_path, 1)
-			print('c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!')
+			srs.running_solvers(sgh.performance_data_csv_path, 1)
+			print('c Performance data file ' + sgh.performance_data_csv_path + ' has been updated!')
 			print('c Running solvers done!')
 		else:
-			num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
-			run_solvers_parallel_jobid = srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
+			num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
+			run_solvers_parallel_jobid = srsp.running_solvers_parallel(sgh.performance_data_csv_path, num_job_in_parallel, 1)
 			print('c Running solvers in parallel ...')
 			dependency_jobid_list = []
 			if run_solvers_parallel_jobid:
