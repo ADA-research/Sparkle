@@ -309,7 +309,7 @@ def check_for_ablation(solver_name, instance_train_name, instance_test_name):
 
 def get_ablation_table(solver_name, instance_train_name, instance_test_name):
     if not check_for_ablation(solver_name, instance_train_name, instance_test_name):
-        print("ERROR: no ablation table exists for this solver-instance pair")
+        #No ablation table exists for this solver-instance pair
         return dict()
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name, exec_path=False)
     print(scenario_dir)
