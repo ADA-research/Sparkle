@@ -155,6 +155,10 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 	fout.write('test_instance_file = ' + smac_test_instance_file + '\n')
 	fout.close()
 
+	# Log scenario file location
+	log_str = 'SMAC Scenario file for the validation of the ' + config_type + ' solver ' + solver_name + ' on the ' + inst_type + 'ing set'
+	sl.add_output(smac_file_scenario, log_str)
+
 	return scenario_file_name
 
 
