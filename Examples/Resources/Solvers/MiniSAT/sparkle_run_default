@@ -1,3 +1,0 @@
-#!/bin/bash
-
-./minisat $1 -no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02

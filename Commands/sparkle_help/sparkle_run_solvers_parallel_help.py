@@ -11,34 +11,18 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
-import time
-import random
 import sys
-import fcntl
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_basic_help
+from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_experiments_related_help as ser
-from sparkle_help import sparkle_job_help
+from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_slurm_help as ssh
 
 
-####
-# settings of experimental configurations
-global cutoff_time_each_run
-global par_num
-global penalty_time
-
-cutoff_time_each_run = ser.cutoff_time_each_run # cutoff time for each run (a solver tries to solve an instance)
-par_num = ser.par_num # the penalty number related to the penalty time
-penalty_time = ser.penalty_time # the penalty time = cutoff time * penalty number
-sleep_time_after_each_solver_run = ser.sleep_time_after_each_solver_run #the sleep time for the system after each run (add at version 1.0.2)
-####
-
-def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, performance_data_csv_path, total_job_list):
-	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, total_job_list):
+	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sbh.get_time_pid_random_string() + r'.sh'
 	sbatch_script_path = r'Tmp/' + sbatch_script_name
 	job_name = '--job-name=' + sbatch_script_name
 	output = '--output=' + sbatch_script_path + '.txt'
@@ -53,7 +37,8 @@ def generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_paral
 	for job in total_job_list:
 		instance_path = job[0]
 		solver_path = job[1]
-		job_params_list.append(instance_path + ' ' + solver_path + ' ' + performance_data_csv_path)
+		performance_measure = sgh.settings.get_general_performance_measure()
+		job_params_list.append('--instance ' + instance_path + ' --solver ' + solver_path + ' --performance-measure ' + performance_measure.name)
 
 	srun_options_str = '-N1 -n1'
 	srun_options_str = srun_options_str + ' ' + ssh.get_slurm_srun_user_options_str()
@@ -78,20 +63,25 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 		print('c Running solvers mode error!')
 		print('c Do not run solvers')
 		sys.exit()
-	
-	print('c Cutoff time for each run on solving an instance is set to ' + str(cutoff_time_each_run) + ' seconds') # print the information about the cutoff time
+
+	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+	print('c Cutoff time for each run on solving an instance is set to ' + cutoff_time_str + ' seconds') # print the information about the cutoff time
 	
 	####
 	# expand the job list
-	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_performance_computation_job)
+	total_job_num = sjh.get_num_of_total_job_from_list(list_performance_computation_job)
 	print('c The number of total running jobs: ' + str(total_job_num))
-	total_job_list = sparkle_job_help.expand_total_job_from_list(list_performance_computation_job)
+	total_job_list = sjh.expand_total_job_from_list(list_performance_computation_job)
 	####
-	
+
+	# If there are no jobs, stop
 	if len(total_job_list) == 0:
 		return ''
+	# If there are jobs update performance data ID
+	else:
+		srs.update_performance_data_id()
 
-	sbatch_script_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, performance_data_csv_path, total_job_list)
+	sbatch_script_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, total_job_list)
 	command_line = 'sbatch ' + sbatch_script_path
 	####
 	
@@ -101,11 +91,6 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 		run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
 	else:
 		run_solvers_parallel_jobid = ''
-	
-	####
-	# record the experimental settings 
-	sfh.write_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "cutoff_time_each_run = " + str(cutoff_time_each_run))
-	sfh.append_string_to_file(sparkle_global_help.cutoff_time_information_txt_path, "par_num = " + str(par_num))
-	####
+
 	return run_solvers_parallel_jobid
 

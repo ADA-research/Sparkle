@@ -84,7 +84,7 @@ Do note that when running on a cluster additional arguments may be needed, for i
   srun -N1 -n1 -p graceTST Commands/initialise.py
 \end{verbatim}
 
-In the \texttt{Examples/} directory a number of common command sequences are given. For instance, for configuration with specified training and testing sets see e.g. \texttt{Examples/configure\_solver\_pbo-ccsat.sh} for an example of a sequence of commands to execute. Note that these example scripts should not be executed directly.
+In the \texttt{Examples/} directory a number of common command sequences are given. For instance, for configuration with specified training and testing sets see e.g. \texttt{Examples/configure\_solver\_pbo-ccsat.sh} for an example of a sequence of commands to execute. Note that these example scripts should not be executed directly, but one command at a time, to give each command time to complete before starting the next one.
 
 \section{File structure}
 
@@ -150,6 +150,38 @@ Here \texttt{solver} is a binary executable of the solver that is to be configur
 
 \textbf{Note}: Currently the runsolver binary has to be in every solver directory, it can be found in the \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/} directory. 
 
+\section{Selection}
+
+\subsection{Requirements}
+
+\subsubsection{Solver directory}
+An example solver directory, in this case for the SAT solver CSCCSat.
+\begin{verbatim}
+Solver/
+  CSCCSat/
+    CSCCSat
+    sparkle_run_default_wrapper.py
+\end{verbatim}
+
+\subsubsection{\texttt{sparkle\_run\_default\_wrapper.py}}
+The \texttt{sparkle\_run\_default\_wrapper.py} has two functions that need to be implemented for each algorithm:
+
+\begin{itemize}[noitemsep]
+  \item \texttt{print\_command(instance\_file, seed\_str: str, cutoff\_time\_str: str)}
+  \item \texttt{print\_output(terminal\_output\_file)}
+\end{itemize}
+
+\texttt{print\_command(...)} should print a command line call that Sparkle can use to run the algorithm on a given instance file. Ideally, for reproducibility purposes, the seed provided by Sparkle should also be passed to the algorithm. If the algorithm requires this, the cutoff time can also be passed to the algorithm. However, in this case the cutoff time should be made very large. For instance by multiplying by ten with: \texttt{cutoff\_time\_str = str(int(cutoff\_time\_str) * 10)}. This is necessary to ensure Sparkle stops the algorithm after the cutoff time, rather than the algorithm itself. By doing this it is ensured runtime measurements are always done by Sparkle, and thus consistent between algorithms that might measure time differently.
+
+\texttt{print\_output(...)} should process the algorithm output. If the performance measure is \texttt{RUNTIME}, this function only needs to output the algorithm status. For all \texttt{QUALITY} performance measures both the algorithm status and the solution quality have to be given. Run time is measured by Sparkle internally, but can be overwritten by the user if desired. They should be printed in formatted as in the example below:
+\begin{verbatim}
+quality = 8734
+status = SUCCESS
+\end{verbatim}
+
+\subsection{Run solvers}
+The \texttt{run\_solvers} command runs each solver on every instance (set) currently in the Sparkle platform for which there are no performance values yet.
+
 \section{Commands}
 \todo[inline]{Add missing subsections with details of other commands}
 
@@ -208,7 +240,7 @@ Arguments:
 \begin{itemize}[noitemsep]
   \item[] \texttt{--solver <solver>}
   \item[] \texttt{--instance-set-train <instance-set-train>}
-  \item[] [\texttt{--instance-set-test <instance-set-test>]}
+  \item[] \texttt{[--instance-set-test <instance-set-test>]}
   \item[] \texttt{--validate}
   \item[] \texttt{--ablation}
 \end{itemize}
@@ -259,6 +291,102 @@ Arguments:
 \end{itemize}
 
 \section{Settings}
+
+\subsection{Sparkle settings}
+Most settings can be controlled through \texttt{Settings/sparkle\_settings.ini}. Possible settings are summarised per category in Sect.~\ref{sect:settings_details}. For any settings that are not provided the defaults will be used. Meaning, in the extreme case, that if the settings file is empty (and nothing is set through the command line) everything will run with default values.
+
+For convenience after every command \texttt{Settings/latest.ini} is written with the used settings. This can, for instance, be used to provide the same settings to the next command in a chain. E.g. for \texttt{validate\_configured\_vs\_default} after \texttt{configure\_solver}. The used settings are also recorded in the relevant \texttt{Output/} subdirectory. Note that when writing settings Sparkle always uses the name, and not an alias.
+
+\subsubsection{Example \texttt{sparkle\_settings.ini}}
+This is a short example to show the format, see the settings file in \texttt{Settings/sparkle\_settings.ini} for more.
+
+\begin{verbatim}
+  [general]
+  performance_measure = RUNTIME
+  target_cutoff_time = 60
+
+  [configuration]
+  number_of_runs = 25
+
+  [slurm]
+  number_of_runs_in_parallel = 25
+\end{verbatim}
+
+\subsubsection{Names and possible values}
+\label{sect:settings_details}
+\begin{itemize}[noitemsep]
+  \item[] \textbf{[general]}\\
+  \item[] \texttt{performance\_measure}
+
+          aliases: \texttt{smac\_run\_obj}
+
+          values: \texttt{\{RUNTIME, QUALITY\_ABSOLUTE} (also: \texttt{QUALITY\}})\texttt{\}}\\
+  \item[] \texttt{target\_cutoff\_time}
+
+          aliases: \texttt{smac\_each\_run\_cutoff\_time, cutoff\_time\_each\_performance\_computation}
+
+          values: integer\\
+  \item[] \texttt{penalty\_multiplier}
+
+          aliases: \texttt{penalty\_number}
+
+          values: integer\\
+  \item[] \texttt{solution\_verifier}
+
+          aliases: N/A
+
+          values: \texttt{\{NONE, SAT\}}
+
+          note: Only available for SAT solving.\\
+  \item[] \textbf{[configuration]}\\
+  \item[] \texttt{budget\_per\_run}
+
+          aliases: \texttt{smac\_whole\_time\_budget}
+
+          values: integer\\
+  \item[] \texttt{number\_of\_runs}
+
+          aliases: \texttt{num\_of\_smac\_runs}
+
+          values: integer\\
+  \item[] \textbf{[smac]}
+  \item[] \texttt{target\_cutoff\_length}
+
+          aliases: \texttt{smac\_each\_run\_cutoff\_length}
+
+          values: \texttt{\{max\}} (other values: whatever is allowed by SMAC)\\
+  \item[] \textbf{[ablation]}\\
+  \item[] \texttt{racing}
+
+          aliases: \texttt{ablation\_racing}
+
+          values: boolean\\
+  \item[] \textbf{[slurm]}\\
+  \item[] \texttt{number\_of\_runs\_in\_parallel}
+
+          aliases: \texttt{smac\_run\_obj}
+
+          values: integer\\
+  \item[] \texttt{clis\_per\_node}
+
+          aliases: N/A
+
+          values: integer
+
+          note: Not really a Slurm option, will likely be moved to another section.\\
+\end{itemize}
+
+
+\subsection{Priorities}
+Settings provided through different channels have different priorities as follows:
+
+\begin{itemize}[noitemsep]
+  \item[low] Default -- Default values will be overwritten if a value is given through any other mechanism;
+  \item[medium] File -- Settings form the \texttt{Settings/sparkle\_settings.ini} overwrite default values, but are overwritten by settings given through the command line; 
+  \item[high-1] Command line file -- Settings files provided through the command line, overwrite default values and other settings files.
+  \item[high-2] Command line -- Settings given through the command line overwrite all other settings, including settings files provided through the command line.
+
+\end{itemize}
 
 \subsection{Slurm (focused on Grace)}
 Slurm settings can be specified in the \texttt{Settings/sparkle\_slurm\_settings.txt} file. Currently these settings are inserted as is in any \texttt{srun} or \texttt{sbatch} calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see Section~\ref{slurm:disallowed}).

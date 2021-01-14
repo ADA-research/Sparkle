@@ -11,3 +11,8 @@
 @@solverPerfectRankingList@@
 @@solverActualRankingList@@
 @@figure-portfolio-selector-sparkle-vs-vbs@@
+
+@@testBool@@
+@@testInstanceClass@@
+@@numInstanceInTestInstanceClass@@
+@@testActualPAR10@@

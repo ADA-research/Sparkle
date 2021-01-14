@@ -16,7 +16,7 @@ import fcntl
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_experiments_related_help as serh
+from sparkle_help import sparkle_logging as sl
 
 
 def get_slurm_options_list(path_modifier=None):
@@ -107,6 +107,7 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 
 	return
 
+
 def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name=None):
 	## Set script name and path
 	if instance_set_test_name is not None:
@@ -117,16 +118,25 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	sbatch_script_path = sgh.smac_dir + sbatch_script_name
 
 	## Set sbatch options
-	max_jobs = serh.num_job_in_parallel
+	max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
 	num_jobs = 3
 	if num_jobs < max_jobs:
 		max_jobs = num_jobs
+	std_out = 'tmp/' + sbatch_script_name + '.txt'
+	std_err = 'tmp/' + sbatch_script_name + '.err'
 	job_name = '--job-name=' + sbatch_script_name
-	output = '--output=tmp/' + sbatch_script_name + '.txt'
-	error = '--error=tmp/' + sbatch_script_name + '.err'
+	output = '--output=' + std_out
+	error = '--error=' + std_err
 	array = '--array=0-' + str(num_jobs-1) + '%' + str(max_jobs)
+	n_cpus = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace CPU
+	cpus = '--cpus-per-task=' + str(n_cpus)
 
-	sbatch_options_list = [job_name, output, error, array]
+	# Log script and output paths
+	sl.add_output(sbatch_script_path, 'Slurm batch script for validation')
+	sl.add_output(sgh.smac_dir + std_out, 'Standard output of Slurm batch script for validation')
+	sl.add_output(sgh.smac_dir + std_err, 'Error output of Slurm batch script for validation')
+
+	sbatch_options_list = [job_name, output, error, array, cpus]
 	sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
 	sbatch_options_list.extend(get_slurm_sbatch_user_options_list()) # Get user options second to overrule defaults
 
@@ -138,7 +148,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	configuration_str = 'DEFAULT'
 	train_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 
-	train_default = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
+	train_default = '--scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
 
 	# Create job list
 	job_params_list = [train_default]
@@ -154,7 +164,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 		configuration_str = 'DEFAULT'
 		test_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 	
-		test_default = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
+		test_default = '--scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration ' + configuration_str
 	
 		# Test configured
 		default = False
@@ -172,16 +182,14 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	
 		test_configured_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 	
-		test_configured = ' --scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration-list ' + config_file_path
+		test_configured = '--scenario-file ' + scenario_file_path + ' --execdir ' + exec_dir + ' --configuration-list ' + config_file_path
 
 		# Extend job list
 		job_params_list.extend([test_default, test_configured])
 		job_output_list.extend([test_default_out, test_configured_out])
 
 	## Set srun options
-	n_cpus = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace CPU
-
-	srun_options_str = '-N1 -n1 --cpus-per-task ' + str(n_cpus)
+	srun_options_str = '--nodes=1 --ntasks=1 --cpus-per-task ' + str(n_cpus)
 	srun_options_str = srun_options_str + ' ' + get_slurm_srun_user_options_str()
 
 	## Create target call
@@ -201,7 +209,7 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
 	sbatch_script_path = sbatch_script_dir + sbatch_script_name
 
 	## Set sbatch options
-	max_jobs = serh.num_job_in_parallel
+	max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
 	num_jobs = n_jobs
 	if num_jobs < max_jobs:
 		max_jobs = num_jobs

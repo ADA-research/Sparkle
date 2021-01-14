@@ -10,14 +10,10 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
-import os
-import time
-import random
 import sys
 import fcntl
 try:
 	from sparkle_help import sparkle_global_help as sgh
-	from sparkle_help import sparkle_basic_help
 	from sparkle_help import sparkle_file_help as sfh
 	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 	from sparkle_help import sparkle_experiments_related_help as ser
@@ -26,7 +22,6 @@ try:
 	from sparkle_help import sparkle_slurm_help as ssh
 except ImportError:
 	import sparkle_global_help as sgh
-	import sparkle_basic_help
 	import sparkle_file_help as sfh
 	import sparkle_feature_data_csv_help as sfdcsv
 	import sparkle_experiments_related_help as ser
@@ -113,9 +108,13 @@ def computing_features_parallel(feature_data_csv_path, mode):
 	# expand the job list
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)
 
+	# If there are no jobs, stop
 	if total_job_num < 1:
 		print('c No feature computation jobs to run; stopping execution! To recompute feature values use the --recompute flag.')
 		sys.exit()
+	# If there are jobs update feature data ID
+	else:
+		scf.update_feature_data_id()
 
 	print('c The number of total running jobs: ' + str(total_job_num))
 	total_job_list = sparkle_job_help.expand_total_job_from_list(list_feature_computation_job)
