@@ -430,7 +430,7 @@ class Settings:
 		section = 'slurm'
 		name = 'clis_per_node'
 
-		if value != None and self.__check_setting_state(self.__slurm_number_of_runs_in_parallel_set, origin, name):
+		if value != None and self.__check_setting_state(self.__slurm_clis_per_node_set, origin, name):
 			self.__init_section(section)
 			self.__slurm_clis_per_node_set = origin
 			self.__settings[section][name] = str(value)
