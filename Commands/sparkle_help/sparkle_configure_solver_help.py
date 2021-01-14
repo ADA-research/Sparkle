@@ -285,7 +285,7 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
 
 # Check the results directory for this solver and instance set combination exists
 # NOTE: This function assumes SMAC output
-def check_configuration_exists(solver_name: str, instance_set_name: str):
+def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
 	# Check the results directory exists
 	smac_results_dir = Path(sgh.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/')
 
@@ -295,7 +295,7 @@ def check_configuration_exists(solver_name: str, instance_set_name: str):
 		print('c ERROR: No configuration results found for the given solver and training instance set.')
 		sys.exit(-1)
 
-	return
+	return all_good
 
 
 def check_instance_list_file_exist(solver_name: str, instance_set_name: str):
