@@ -118,9 +118,7 @@ if __name__ == r'__main__':
 			intended_status = r'UNKNOWN'
 			
 			sgh.instance_list.append(intended_instance_line)
-			sgh.instance_reference_mapping[intended_instance_line] = intended_status
 			sfh.add_new_instance_into_file(intended_instance_line)
-			sfh.add_new_instance_reference_into_file(intended_instance_line, intended_status)
 			feature_data_csv.add_row(intended_instance_line)
 			performance_data_csv.add_row(intended_instance_line)
 			
@@ -156,9 +154,7 @@ if __name__ == r'__main__':
 				intended_filename_path = instances_directory + r'/' + intended_filename
 				intended_status = r'UNKNOWN'
 				sgh.instance_list.append(intended_filename_path)
-				sgh.instance_reference_mapping[intended_filename_path] = intended_status
 				sfh.add_new_instance_into_file(intended_filename_path)
-				sfh.add_new_instance_reference_into_file(intended_filename_path, intended_status)
 				feature_data_csv.add_row(intended_filename_path)
 				performance_data_csv.add_row(intended_filename_path)
 				
