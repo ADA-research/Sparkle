@@ -35,7 +35,6 @@ def print_output(terminal_output_file):
 
 	solution_quality = sys.maxsize
 	status = 'UNKNOWN'
-	runtime = sys.maxsize
 	lines = infile.readlines()
 
 	for line in lines:
@@ -44,17 +43,17 @@ def print_output(terminal_output_file):
 			continue
 		if len(words) == 4 and _is_a_number(words[1]) and _is_a_number(words[2]) and _is_a_number(words[3]):
 			temp_solution_quality = int(words[2])
-			temp_runtime = float(words[1])
 			if temp_solution_quality < solution_quality:
 				solution_quality = temp_solution_quality
-				runtime = temp_runtime
 				status = 'SUCCESS'
+
+	if solution_quality == sys.maxsize:
+		status = 'CRASHED'
 
 	infile.close()
 
 	# [required for quality objective] Print keyword 'quality' followed by a space and the solution quality
 	print('quality ' + str(solution_quality))
-	print('runtime ' + str(runtime))
 	# [optional] Print keyword 'status' followed by a space and the run status
 	print('status ' + status)
 

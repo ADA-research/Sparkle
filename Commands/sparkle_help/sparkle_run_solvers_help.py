@@ -72,7 +72,7 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_
 
 	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
-	runsolver_option = r'--timestamp --use-pty'
+	runsolver_option = r'--timestamp --use-pty --add-eof'
 	cutoff_time_each_run_option = r'-C ' + cutoff_time_str
 	runsolver_values_log = '-v ' + runsolver_values_path
 	runsolver_watch_data_path = runsolver_values_path.replace('val', 'log')
@@ -90,14 +90,32 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_
 		if not os.path.exists(raw_result_path):
 			sfh.create_new_empty_file(raw_result_path)
 
+	# Check for known errors/issues
+	check_solver_output_for_errors(Path(raw_result_path))
+
 	#command_line = 'rm -f ' + runsolver_watch_data_path
 	#os.system(command_line)
 
 	return
 
 
+def check_solver_output_for_errors(raw_result_path: Path):
+	error_lines = \
+		["libstdc++.so.6: version `GLIBCXX"] # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found
+
+	# Find lines containing an error
+	with raw_result_path.open('r') as infile:
+		for current_line in infile:
+			for error in error_lines:
+				if error in current_line:
+					print('WARNING: Possible error deteced in', raw_result_path, 'involving', error)
+
+	return
+
+
 def run_solver_on_instance_and_process_results(solver_path: str, instance_path: str, custom_cutoff: int = None) -> (float, float, float, List[float], str, str):
 	# Prepare paths
+	# TODO: Fix result path for multi-file instances (only a single file is part of the result path)
 	raw_result_path = sgh.sparkle_tmp_path + sfh.get_last_level_directory_name(solver_path) + '_' + sfh.get_last_level_directory_name(instance_path) + '_' + sbh.get_time_pid_random_string() + '.rawres'
 	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
 	solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
@@ -145,6 +163,7 @@ def running_solvers(performance_data_csv_path, mode):
 			solver_path = solver_list[j]
 
 			print('c')
+			# TODO: Fix printing of multi-file instance 'path' (only one file name is printed)
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 
 			cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = run_solver_on_instance_and_process_results(solver_path, instance_path)
@@ -189,8 +208,8 @@ def handle_timeouts(runtime: float, status: str, custom_cutoff: int = None) -> (
 	else:
 		cutoff_time = custom_cutoff
 
-	if runtime > cutoff_time:
-		status = 'TIMEOUT' # Overwrites possible user status...
+	if runtime > cutoff_time and status is not 'CRASHED':
+		status = 'TIMEOUT' # Overwrites possible user status, unless it is 'CRASHED'
 	if status == 'TIMEOUT' or status == 'UNKNOWN':
 		runtime_penalised = sgh.settings.get_penalised_time(cutoff_time)
 	else:
