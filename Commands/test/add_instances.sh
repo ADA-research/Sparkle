@@ -28,3 +28,16 @@ else
 	echo $output
 fi
 
+# Add multi-file instances
+instances_path="Examples/Resources/CCAG/Instances/CCAG_test/"
+output_true="c Adding instances CCAG_test done!"
+output=$(Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path | tail -1)
+
+if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];
+then
+	echo "[success] add_instances for multi-file instances test succeeded"
+else              
+	echo "[failure] add_instances for multi-file instances test failed with output:"
+	echo $output
+fi
+

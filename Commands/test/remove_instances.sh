@@ -32,3 +32,21 @@ else
 	echo $output
 fi
 
+# Remove multi-file instances
+
+instances_name="CCAG/Instances/CCAG_test/"
+instances_source="Examples/Resources/$instances_name"
+Commands/add_instances.py --run-solver-later --run-extractor-later $instances_source > /dev/null
+
+instances_path="Instances/CCAG_test"
+output_true="c Removing instances in directory $instances_path done!"
+output=$(Commands/remove_instances.py $instances_path | tail -1)
+
+if [[ $output == $output_true ]];
+then
+	echo "[success] remove_instances for multi-file instances test succeeded"
+else
+	echo "[failure] remove_instances for multi-file instances test failed with output:"
+	echo $output
+fi
+
