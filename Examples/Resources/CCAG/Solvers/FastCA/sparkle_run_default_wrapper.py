@@ -27,6 +27,7 @@ def _is_a_number(input_str : str):
 	except:
 		return False
 
+
 # Parse problem specific output and print it for Sparkle; or ask Sparkle to use it's own parser (SAT only)
 def print_output(terminal_output_file):
 	# Read solution quality from file
@@ -41,6 +42,9 @@ def print_output(terminal_output_file):
 		words = line.strip().split()
 		if len(words) <= 0:
 			continue
+		if len(words) == 18 and words[1] == 'We' and words[2] == 'recommend':
+			# First output line is normal, probably no crash
+			solution_quality = sys.maxsize - 1
 		if len(words) == 4 and _is_a_number(words[1]) and _is_a_number(words[2]) and _is_a_number(words[3]):
 			temp_solution_quality = int(words[2])
 			if temp_solution_quality < solution_quality:
