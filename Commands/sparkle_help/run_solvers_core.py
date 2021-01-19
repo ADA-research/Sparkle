@@ -42,13 +42,13 @@ if __name__ == r'__main__':
 
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--instance', required=False, type=str, help='path to instance to run on')
+	parser.add_argument('--instance', required=False, type=str, nargs='+', help='path to instance to run on')
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, help='the performance measure, e.g. runtime')
 	args = parser.parse_args()
 
 	# Process command line arguments
-	instance_path = args.instance
+	instance_path = " ".join(args.instance) # Turn multiple instance files into a space separated string
 	solver_path = args.solver
 	performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 

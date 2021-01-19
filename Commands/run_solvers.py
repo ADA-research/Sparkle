@@ -49,6 +49,11 @@ def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report
 	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
 	dependency_jobid_list.append(run_job_parallel_jobid)
 
+	# TODO: Check output (files) for error messages, e.g.:
+	# error: unrecognized arguments
+	# srun: error:
+	# TODO: Check performance data CSV for missing values 
+
 	# Only do selector construction and report generation if the flag is set;
 	# Default behaviour is not to run them, like the sequential run_solvers command
 	if flag_also_construct_selector_and_report:
