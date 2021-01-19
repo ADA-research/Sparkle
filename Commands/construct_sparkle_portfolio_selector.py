@@ -100,15 +100,9 @@ if __name__ == r'__main__':
 		sys.exit()
 
 	delete_log_files() # Make sure no old log files remain
-	scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path, flag_recompute_portfolio)
+	success = scps.construct_sparkle_portfolio_selector(sgh.sparkle_portfolio_selector_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path, flag_recompute_portfolio)
 
-	if not os.path.exists(sgh.sparkle_portfolio_selector_path):
-		print('c Sparkle portfolio selector is not successfully constructed!')
-		print('c There might be some errors!')
-		print_log_paths()
-		delete_task_run_status()
-		sys.exit()
-	else:
+	if success:
 		print('c Sparkle portfolio selector constructed!')
 		print('c Sparkle portfolio selector located at ' + sgh.sparkle_portfolio_selector_path)
 

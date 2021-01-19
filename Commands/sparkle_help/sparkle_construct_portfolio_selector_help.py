@@ -11,6 +11,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
+import sys
 from pathlib import Path
 from pathlib import PurePath
 
@@ -149,6 +150,14 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 
 	if bool_exists_missing_value:
 		os.system(r'rm -f ' + impute_feature_data_csv_path)
+
+	# Check if the selector was constructed successfully
+	if not selector_path.is_file():
+		print('c Sparkle portfolio selector is not successfully constructed!')
+		print('c There might be some errors!')
+		print('c Standard output log:', log_path_str)
+		print('c Error output log:', err_path_str)
+		sys.exit()
 
 	# Update data IDs associated with this selector
 	write_selector_pd_id(Path(sparkle_portfolio_selector_path))
