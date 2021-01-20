@@ -189,6 +189,7 @@ def create_file_scenario_configuration(solver_name, instance_set_name):
 	fout.write('validation = true' + '\n')
 	fout.close()
 
+	sl.add_output(sgh.smac_dir+smac_outdir+smac_file_scenario[:-4], "SMAC configuration output on the training set")
 	return
 
 
@@ -259,14 +260,74 @@ def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 	result_dir = sgh.smac_dir + result_part
 	[item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
 
-	command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + str(num_of_smac_run) + ' ' + str(num_of_smac_run_in_parallel) + ' ' + execdir + ' ; ' + 'cd ../../'
-
+	#Remove when checked that nothing else if broken
+	#command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + str(num_of_smac_run) + ' ' + str(num_of_smac_run_in_parallel) + ' ' + execdir + ' ; ' + 'cd ../../'
 	#print(command_line)
-	os.system(command_line)
+	#os.system(command_line)
 
-	smac_configure_sbatch_script_name = smac_file_scenario_name + '_' + str(num_of_smac_run) + '_exp_sbatch.sh'
+	scenario_file = 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name
 
-	return smac_configure_sbatch_script_name
+	sbatch_script_path = "{scenario}_{num_of_smac_run}_exp_sbatch.sh".format(scenario=smac_file_scenario_name, num_of_smac_run=num_of_smac_run)
+
+	generate_configuration_sbatch_script(sbatch_script_path, scenario_file, result_part, num_of_smac_run, num_of_smac_run_in_parallel, execdir)
+
+	return sbatch_script_path
+
+
+def generate_configuration_sbatch_script(sbatch_script_path, scenario_file, result_directory, num_job_total, num_job_in_parallel, smac_execdir):
+	job_name = sbatch_script_path
+	sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
+	num_job_in_parallel = max(num_job_in_parallel, num_job_total)
+
+	sl.add_output(sgh.smac_dir + r'tmp/' + job_name + r'.txt',
+				  "Error log of batch script for parallel configuration runs with SMAC")
+
+	if result_directory[-1] != r'/':
+		result_directory += r'/'
+
+	if not os.path.exists(sgh.smac_dir+result_directory):
+		os.system(r'mkdir -p ' + sgh.smac_dir+result_directory)
+
+	if not os.path.exists(sgh.smac_dir+r'tmp/'):
+		os.system(r'mkdir -p '+ sgh.smac_dir + 'tmp/')
+
+	fout = open(sgh.smac_dir+sbatch_script_path, 'w+')
+	fout.write(r'#!/bin/bash' + '\n')
+	fout.write(r'###' + '\n')
+	fout.write(r'#SBATCH --job-name=' + job_name + '\n')
+	fout.write(r'#SBATCH --output=' + r'tmp/' + job_name + r'.txt' + '\n')
+	fout.write(r'#SBATCH --error=' + r'tmp/' + job_name + r'.err' + '\n')
+	fout.write(r'###' + '\n')
+	fout.write(r'###' + '\n')
+	fout.write(r'#SBATCH --mem-per-cpu=3000' + '\n')
+	fout.write(r"#SBATCH --array=0-{njobs}%{parallel}\n".format(njobs=num_job_total, parallel=num_job_in_parallel))
+	fout.write(r'###' + '\n')
+	# Options from the slurm/sbatch settings file
+	for i in sbatch_options_list:
+		fout.write(r'#SBATCH ' + str(i) + '\n')
+	fout.write(r'###' + '\n')
+
+	fout.write('params=( \\' + '\n')
+
+	sl.add_output(sgh.smac_dir + result_directory + sbatch_script_path + r'_seed_N_smac.txt', "Configuration log for SMAC run 1 < N <= {}".format(num_job_total))
+	for i in range(0, num_job_total):
+		seed = i + 1
+		result_path = result_directory + sbatch_script_path + r'_seed_' + str(seed) + r'_smac.txt'
+		smac_execdir_i = smac_execdir + r'/' + str(seed)
+		fout.write('\'%s %d %s %s\' \\' % (scenario_file, seed, result_path, smac_execdir_i) + '\n')
+
+	fout.write(r')' + '\n')
+
+	# cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
+	cmd_srun_prefix = r'srun -N1 -n1 '
+	cmd_srun_prefix += ssh.get_slurm_srun_user_options_str()
+	cmd_smac_prefix = r'./each_smac_run_core.sh '
+
+	cmd = cmd_srun_prefix + r' ' + cmd_smac_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'
+	fout.write(cmd + '\n')
+	fout.close()
+	return
+
 
 
 def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
@@ -475,7 +536,7 @@ def generate_ablation_callback_slurm_script(solver, instance_set_train, instance
 	generate_generic_callback_slurm_script("ablation", solver, instance_set_train, instance_set_test, dependency, command_line)
 
 
-def generate_generic_callback_slurm_script(name,solver, instance_set_train, instance_set_test, dependency, commands):
+def generate_generic_callback_slurm_script(name, solver, instance_set_train, instance_set_test, dependency, commands):
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = None
