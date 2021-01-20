@@ -202,6 +202,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 	return sbatch_script_name
 
+
 def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path, list_jobs):
 	## Set script name and path
 	sbatch_script_name = 'computing_features_sbatch_shell_script_' + str(n_jobs) + '_' + sbh.get_time_pid_random_string() + r'.sh'
@@ -228,7 +229,7 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
 	for i in range(0, num_jobs):
 		instance_path = list_jobs[i][0]
 		extractor_path = list_jobs[i][1]
-		job_params = instance_path + ' ' + extractor_path + ' ' + feature_data_csv_path
+		job_params = '--instance ' + instance_path + ' --extractor ' + extractor_path + ' --feature-csv ' + feature_data_csv_path
 		job_params_list.append(job_params)
 
 	## Set srun options
@@ -242,6 +243,7 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
 	generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
 
 	return sbatch_script_name, sbatch_script_dir
+
 
 def submit_sbatch_script(sbatch_script_name,execution_dir=None):
 	if execution_dir is None:
