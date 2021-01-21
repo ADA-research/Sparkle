@@ -100,21 +100,21 @@ The empirical comparison between the @@solver@@ (configured) and @@solver@@ (def
 \caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the training set of @@instanceSetTrain@@.}\label{fig:configured_vs_default_train}
 \end{figure}
 
-\ifruntime
+%\ifruntime
 
 Table \ref{tbl:timeouts_train} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the training set of @@instanceSetTrain@@, as well as on how many instances both timed out.
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{ccc}
-configured & default & overlap \\ \hline
-@@timeoutsTrainConfigured@@ & @@timeoutsTrainDefault@@ & @@timeoutsTrainOverlap@@
-\end{tabular}
-\caption{Number of time-outs for @@solver@@ (configured), @@solver@@ (default), and for how many instances both timed out on the training set of @@instanceSetTrain@@.}
-\label{tbl:timeouts_train}
-\end{table}
+    \begin{table}[htbp]
+        \centering
+            \begin{tabular}{ccc}
+                configured & default & overlap \\ \hline
+                @@timeoutsTrainConfigured@@ & @@timeoutsTrainDefault@@ & @@timeoutsTrainOverlap@@
+            \end{tabular}
+            \caption{Number of time-outs for @@solver@@ (configured), @@solver@@ (default), and for how many instances both timed out on the training set of @@instanceSetTrain@@.}
+        \label{tbl:timeouts_train}
+    \end{table}
 
-\fi % End ifruntime
+%\fi % End ifruntime
 
 \iftest
     \section{Comparison between Configured Version and Default Version on the Testing Instance Set}
@@ -139,7 +139,7 @@ configured & default & overlap \\ \hline
        \caption{Empirical comparison between the @@solver@@ (configured) and @@solver@@ (default) on the testing set of @@instanceSetTest@@.}\label{fig:configured_vs_default_test}
     \end{figure}
 
-    \ifruntime
+    %\ifruntime
 
         Table \ref{tbl:timeouts_test} shows on how many instances the @@solver@@ (configured) and @@solver@@ (default) timed out (did not solve the instance within the cutoff time of @@smacEachRunCutoffTime@@ seconds) on the testing set of @@instanceSetTest@@, as well as on how many instances both timed out.
 
@@ -154,7 +154,7 @@ configured & default & overlap \\ \hline
             \label{tbl:timeouts_test}
         \end{table}
 
-    \fi % End ifruntime
+    %\fi % End ifruntime
 
 \fi % End iftest
 
