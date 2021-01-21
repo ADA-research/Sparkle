@@ -109,7 +109,7 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 	def calc_virtual_best_score_of_portfolio_on_instance(self, instance: str, num_instances: int, num_solvers: int, capvalue: float = None) -> float:
 		# If capvalue is not set the objective is RUNTIME, so use the cutoff time as capvalue
 		if capvalue is None:
-			capvalue = sgh.get_general_target_cutoff_time()
+			capvalue = sgh.settings.get_general_target_cutoff_time()
 
 		virtual_best_score = -1
 
@@ -128,8 +128,12 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 		virtual_best_performance = 0
 
 		for instance_idx in range(0, len(self.list_rows())):
+			if capvalue_list is None:
+				capvalue = sgh.settings.get_general_target_cutoff_time()
+			else:
+				capvalue = capvalue_list[instance_idx]
+
 			instance = self.get_row_name(instance_idx)
-			capvalue = capvalue_list[instance_idx]
 			virtual_best_score = self.calc_virtual_best_score_of_portfolio_on_instance(instance, num_instances, num_solvers, capvalue)
 			#print 'c ' + instance + ' ' + str(virtual_best_score)
 			virtual_best_performance = virtual_best_performance + virtual_best_score

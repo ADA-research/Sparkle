@@ -184,7 +184,7 @@ def compute_actual_used_time_for_instance(actual_portfolio_selector_path: str, i
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
 	list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
-	print('c instance = ' + instance + ', schedule: ' + str(list_predict_schedule))
+#	print('c instance = ' + instance + ', schedule: ' + str(list_predict_schedule))
 	used_time_for_this_instance = 0
 	flag_successfully_solving = False
 
