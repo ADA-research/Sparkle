@@ -22,6 +22,7 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_run_solvers_help as srsh
 from sparkle_help import sparkle_compute_features_help as scfh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
@@ -110,7 +111,8 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 	if selector_exists(selector_path) and data_unchanged(selector_path) and not flag_recompute:
 		print('c Portfolio selector already exists for the current feature and performance data.')
 
-		return
+		# Nothing to do, success!
+		return True
 
 	# Remove contents of- and the selector path to ensure everything is (re)computed for the new selector when required
 	sfh.rmtree(selector_path.parent)
@@ -120,11 +122,21 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	python_executable = sgh.python_executable
-	objective_function = r'--objective runtime'
-	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
+	performance_measure = sgh.settings.get_general_performance_measure()
+	if performance_measure == PerformanceMeasure.RUNTIME:
+		objective_function = '--objective runtime'
+	elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+		objective_function = '--objective solution_quality'
+	else:
+		print('ERROR: Unknown performance measure in construct_sparkle_portfolio_selector')
+		sys.exit(-1)
+
+	if not os.path.exists(r'Tmp/'):
+		os.mkdir(r'Tmp/')
 
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
 	bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()
+
 	if bool_exists_missing_value:
 		print('c ****** WARNING: There are missing values in the feature data, and all missing values will be imputed as the mean value of all other non-missing values! ******')
 		print('c Imputing all missing values starts ...')
@@ -163,5 +175,6 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 	write_selector_pd_id(Path(sparkle_portfolio_selector_path))
 	write_selector_fd_id(Path(sparkle_portfolio_selector_path))
 
-	return
+	# If we reach this point portfolio construction should be successful
+	return True
 

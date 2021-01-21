@@ -96,9 +96,11 @@ class Sparkle_CSV:
 			return
 		self.dataframe.rename(columns = {ori_column_name:mod_column_name}, inplace=True)
 		return
-	
-	def get_column_size(self):
+
+
+	def get_column_size(self) -> int:
 		return len(self.dataframe.columns.tolist())
+
 
 	def add_column(self, column_name, value_list=[]):
 		if column_name in self.list_columns():
@@ -155,11 +157,11 @@ class Sparkle_CSV:
 			return
 		self.dataframe.rename(index = {ori_row_name:mod_row_name}, inplace=True)
 		return
+
 	
-	def get_row_size(self):
-		#ret = len(self.dataframe.index.tolist())
-		#return ret
+	def get_row_size(self) -> int:
 		return len(self.dataframe.index.tolist())
+
 
 	def add_row(self, row_name, value_list=[]):
 		if row_name in self.list_rows():
