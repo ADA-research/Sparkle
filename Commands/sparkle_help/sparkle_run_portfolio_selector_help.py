@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+
 try:
 	from sparkle_help import sparkle_basic_help
 	from sparkle_help import sparkle_file_help as sfh
@@ -20,6 +21,7 @@ try:
 	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 	from sparkle_help import sparkle_run_solvers_help as srs
+	from sparkle_help import sparkle_logging as sl
 except ImportError:
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
@@ -27,6 +29,7 @@ except ImportError:
 	import sparkle_feature_data_csv_help as sfdcsv
 	import sparkle_performance_data_csv_help as spdcsv
 	import sparkle_run_solvers_help as srs
+	import sparkle_logging as sl
 
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
