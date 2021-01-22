@@ -145,4 +145,6 @@ if __name__ == r'__main__':
 			scfp.computing_features_parallel(sgh.feature_data_csv_path, num_job_in_parallel, 1)
 			print('c Computing features in parallel ...')
 
+	# Write used settings to file
+	sgh.settings.write_used_settings()
 

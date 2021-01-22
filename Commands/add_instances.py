@@ -200,3 +200,6 @@ if __name__ == r'__main__':
 			srsp.running_solvers_parallel(sgh.performance_data_csv_path, num_job_in_parallel, 1)
 			print('c Running solvers in parallel ...')
 
+	# Write used settings to file
+	sgh.settings.write_used_settings()
+

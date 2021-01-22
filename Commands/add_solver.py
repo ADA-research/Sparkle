@@ -120,3 +120,6 @@ if __name__ == r'__main__':
 			job_script = 'Commands/generate_report.py'
 			run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
 
+	# Write used settings to file
+	sgh.settings.write_used_settings()
+
