@@ -95,7 +95,7 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 			capvalue = sgh.settings.get_general_target_cutoff_time()
 
 		score = -1
-		performance = self.get_value(instance, solver)
+		performance = float(self.get_value(instance, solver))
 
 		if performance < capvalue:
 			inc_score = (capvalue - performance) / (num_instances * num_solvers * capvalue + 1)

@@ -13,6 +13,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import argparse
+from pathlib import Path
+
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -57,7 +59,8 @@ if __name__ == r'__main__':
 	last_level_directory = sfh.get_last_level_directory_name(solver_source)
 
 	solver_diretory = r'Solvers/' + last_level_directory
-	if not os.path.exists(solver_diretory): os.mkdir(solver_diretory)
+	if not os.path.exists(solver_diretory):
+		Path(solver_diretory).mkdir(parents=True, exist_ok=True)
 	else:
 		print(r'c Solver ' + sfh.get_last_level_directory_name(solver_diretory) + r' already exists!')
 		print(r'c Do not add solver ' + sfh.get_last_level_directory_name(solver_diretory))

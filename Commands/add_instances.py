@@ -13,6 +13,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import argparse
+from pathlib import Path
+
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -91,7 +93,8 @@ if __name__ == r'__main__':
 		last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
 	instances_directory = r'Instances/' + last_level_directory
-	if not os.path.exists(instances_directory): os.mkdir(instances_directory)
+	if not os.path.exists(instances_directory):
+		Path(instances_directory).mkdir(parents=True, exist_ok=True)
 
 	if _check_existence_of_instance_list_file(instances_source):
 		list_instance = _get_list_instance(instances_source)
