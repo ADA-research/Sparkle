@@ -2,10 +2,10 @@
 
 Before starting Sparkle, please install the following packages with the specific versions:
 
-1. Install Python 3.5 -- other 3.x versions may work, but were not tested
+1. Install Python 3.9 -- other 3.x versions may work, but were not tested
 	* with anaconda:
 
-		`conda create -n <env_name> python=3.5`
+		`conda create -n <env_name> python=3.9`
 
 		`conda activate <env_name>`
 
@@ -14,11 +14,17 @@ Before starting Sparkle, please install the following packages with the specific
 
 		`conda install swig=3.0`
 
-3. Install required python packages:
-	* `pip install -r requirements.txt`
+3. Install first set of required python packages:
+	* `pip install -r requirements_first.txt`
 	* or with anaconda:
 
-		`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements.txt`
+		`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_first.txt`
+
+3. Install second set of required python packages:
+	* `pip install -r requirements_second.txt`
+	* or with anaconda:
+
+		`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_second.txt`
 
 ### Use Sparkle for algorithm selection
 

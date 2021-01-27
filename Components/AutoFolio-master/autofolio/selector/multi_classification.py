@@ -17,7 +17,7 @@ __author__ = "Marius Lindauer"
 __license__ = "BSD"
 
 
-class PairwiseClassifier(object):
+class MultiClassifier(object):
 
     @staticmethod
     def add_params(cs: ConfigurationSpace):
@@ -27,8 +27,8 @@ class PairwiseClassifier(object):
         
         selector = cs.get_hyperparameter("selector")
         classifier = cs.get_hyperparameter("classifier")
-        if "PairwiseClassifier" in selector.choices:
-            cond = InCondition(child=classifier, parent=selector, values=["PairwiseClassifier"])
+        if "MultiClassifier" in selector.choices:
+            cond = InCondition(child=classifier, parent=selector, values=["MultiClassifier"])
             cs.add_condition(cond)
 
     def __init__(self, classifier_class):
@@ -36,7 +36,7 @@ class PairwiseClassifier(object):
             Constructor
         '''
         self.classifiers = []
-        self.logger = logging.getLogger("PairwiseClassifier")
+        self.logger = logging.getLogger("MultiClassifier")
         self.classifier_class = classifier_class
         self.normalizer = MinMaxScaler()
 
@@ -67,16 +67,12 @@ class PairwiseClassifier(object):
         # are not converted to inf or -inf
         #X = (X - np.min(X)) / (np.max(X) - np.min(X))
         X = self.normalizer.fit_transform(X)
-        for i in range(n_algos):
-            for j in range(i + 1, n_algos):
-                y_i = scenario.performance_data[scenario.algorithms[i]].values
-                y_j = scenario.performance_data[scenario.algorithms[j]].values
-                y = y_i < y_j
-                weights = np.abs(y_i - y_j)
-                clf = self.classifier_class()
-                clf.fit(X, y, config, weights)
-                self.classifiers.append(clf)
-
+        y = np.argmin(scenario.performance_data.values,axis=1)
+        weights = scenario.performance_data.std(axis=1)
+        clf = self.classifier_class()
+        clf.fit(X, y, config, weights)
+        self.classifier = clf
+         
     def predict(self, scenario: ASlibScenario):
         '''
             predict schedules for all instances in ASLib scenario data
@@ -100,19 +96,7 @@ class PairwiseClassifier(object):
         n_algos = len(scenario.algorithms)
         X = scenario.feature_data.values
         X = self.normalizer.transform(X)
-        scores = np.zeros((X.shape[0], n_algos))
-        clf_indx = 0
-        for i in range(n_algos):
-            for j in range(i + 1, n_algos):
-                clf = self.classifiers[clf_indx]
-                Y = clf.predict(X)
-                scores[Y == 1, i] += 1
-                scores[Y == 0, j] += 1
-                clf_indx += 1
-
-        #self.logger.debug(
-        #   sorted(list(zip(scenario.algorithms, scores)), key=lambda x: x[1], reverse=True))
-        algo_indx = np.argmax(scores, axis=1)
+        algo_indx = self.classifier.predict(X)
         
         schedules = dict((str(inst),[s]) for s,inst in zip([(scenario.algorithms[i], cutoff+1) for i in algo_indx], scenario.feature_data.index))
         #self.logger.debug(schedules)

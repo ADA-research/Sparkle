@@ -208,7 +208,7 @@ def handle_timeouts(runtime: float, status: str, custom_cutoff: int = None) -> (
 	else:
 		cutoff_time = custom_cutoff
 
-	if runtime > cutoff_time and status is not 'CRASHED':
+	if runtime > cutoff_time and status != 'CRASHED':
 		status = 'TIMEOUT' # Overwrites possible user status, unless it is 'CRASHED'
 	if status == 'TIMEOUT' or status == 'UNKNOWN':
 		runtime_penalised = sgh.settings.get_penalised_time(cutoff_time)

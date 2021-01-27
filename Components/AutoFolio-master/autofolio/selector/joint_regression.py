@@ -3,7 +3,6 @@ import traceback
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
 
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformFloatHyperparameter, UniformIntegerHyperparameter
@@ -17,28 +16,27 @@ __author__ = "Marius Lindauer"
 __license__ = "BSD"
 
 
-class PairwiseClassifier(object):
+class JointRegression(object):
 
     @staticmethod
     def add_params(cs: ConfigurationSpace):
         '''
             adds parameters to ConfigurationSpace 
         '''
-        
+
         selector = cs.get_hyperparameter("selector")
-        classifier = cs.get_hyperparameter("classifier")
-        if "PairwiseClassifier" in selector.choices:
-            cond = InCondition(child=classifier, parent=selector, values=["PairwiseClassifier"])
+        regressor = cs.get_hyperparameter("regressor")
+        if "JointRegressor" in selector.choices:
+            cond = InCondition(child=regressor, parent=selector, values=["JointRegressor"])
             cs.add_condition(cond)
 
-    def __init__(self, classifier_class):
+    def __init__(self, regressor_class):
         '''
             Constructor
         '''
-        self.classifiers = []
-        self.logger = logging.getLogger("PairwiseClassifier")
-        self.classifier_class = classifier_class
-        self.normalizer = MinMaxScaler()
+        self.regressors = []
+        self.logger = logging.getLogger("JointRegressor")
+        self.regressor_class = regressor_class
 
     def fit(self, scenario: ASlibScenario, config: Configuration):
         '''
@@ -51,31 +49,31 @@ class PairwiseClassifier(object):
             config: ConfigSpace.Configuration
                 configuration
         '''
-        self.logger.info("Fit PairwiseClassifier with %s" %
-                         (self.classifier_class))
+        self.logger.info("Fit PairwiseRegressor with %s" %
+                         (self.regressor_class))
 
         self.algorithms = scenario.algorithms
 
-        from sklearn.utils import check_array
-        from sklearn.tree._tree import DTYPE
-
         n_algos = len(scenario.algorithms)
         X = scenario.feature_data.values
-        # since sklearn (at least the RFs) 
-        # uses float32 and we pass float64,
-        # the normalization ensures that floats
-        # are not converted to inf or -inf
-        #X = (X - np.min(X)) / (np.max(X) - np.min(X))
-        X = self.normalizer.fit_transform(X)
+        Xs = None
+        Ys = None
+        
         for i in range(n_algos):
-            for j in range(i + 1, n_algos):
-                y_i = scenario.performance_data[scenario.algorithms[i]].values
-                y_j = scenario.performance_data[scenario.algorithms[j]].values
-                y = y_i < y_j
-                weights = np.abs(y_i - y_j)
-                clf = self.classifier_class()
-                clf.fit(X, y, config, weights)
-                self.classifiers.append(clf)
+            y = scenario.performance_data[scenario.algorithms[i]].values
+            x_i = np.zeros((X.shape[0], n_algos))
+            x_i[:,i] = 1
+            X_i = np.hstack([X,x_i])
+            if i == 0:
+                Xs = X_i
+                Ys = y
+            else:
+                Xs = np.vstack([Xs,X_i])
+                Ys = np.hstack([Ys,y])
+            
+        reg = self.regressor_class()
+        reg.fit(Xs, Ys, config)
+        self.regressors = reg
 
     def predict(self, scenario: ASlibScenario):
         '''
@@ -99,20 +97,17 @@ class PairwiseClassifier(object):
 
         n_algos = len(scenario.algorithms)
         X = scenario.feature_data.values
-        X = self.normalizer.transform(X)
         scores = np.zeros((X.shape[0], n_algos))
-        clf_indx = 0
         for i in range(n_algos):
-            for j in range(i + 1, n_algos):
-                clf = self.classifiers[clf_indx]
-                Y = clf.predict(X)
-                scores[Y == 1, i] += 1
-                scores[Y == 0, j] += 1
-                clf_indx += 1
+            x_i = np.zeros((X.shape[0], n_algos))
+            x_i[:,i] = 1
+            X_i = np.hstack([X,x_i])
+            Y = self.regressors.predict(X_i)
+            scores[:, i] += Y
 
         #self.logger.debug(
         #   sorted(list(zip(scenario.algorithms, scores)), key=lambda x: x[1], reverse=True))
-        algo_indx = np.argmax(scores, axis=1)
+        algo_indx = np.argmin(scores, axis=1)
         
         schedules = dict((str(inst),[s]) for s,inst in zip([(scenario.algorithms[i], cutoff+1) for i in algo_indx], scenario.feature_data.index))
         #self.logger.debug(schedules)
@@ -127,7 +122,7 @@ class PairwiseClassifier(object):
             -------
             list of tuples of (attribute,value) 
         '''
-        class_attr = self.classifiers[0].get_attributes()
-        attr = [{self.classifier_class.__name__:class_attr}]
+        reg_attr = self.regressors[0].get_attributes()
+        attr = [{self.regressor_class.__name__:reg_attr}]
 
         return attr

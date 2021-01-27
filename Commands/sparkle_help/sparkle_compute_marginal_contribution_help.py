@@ -110,26 +110,36 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, 
 	python_executable = sgh.python_executable
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 	feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
-	predict_schedule_result_path = r'Tmp/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
 
-	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + actual_portfolio_selector_path + r' --feature_vec' + r' ' + feature_vector_string + r' 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
+	predit_schedule_file = 'predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + '.predres'
+	log_file = 'predict_schedule_autofolio.out'
+	err_file = 'predict_schedule_autofolio.err'
+	predict_schedule_result_path_str = str(Path(sl.caller_log_dir / predit_schedule_file))
+	log_path = Path(sl.caller_log_dir / log_file)
+	err_path_str = str(Path(sl.caller_log_dir / err_file))
 
-	#print 'c ' + command_line
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + actual_portfolio_selector_path + r' --feature_vec' + ' \"' + feature_vector_string + '\" 1> ' + predict_schedule_result_path_str + r' 2> ' + err_path_str
+
+	with log_path.open('a+') as log_file:
+		print('Running command below to get predicted schedule from autofolio:\n', command_line, file=log_file)
+
 	os.system(command_line)
 
-	list_predict_schedule = srps.get_list_predict_schedule_from_file(predict_schedule_result_path)
+	list_predict_schedule = srps.get_list_predict_schedule_from_file(predict_schedule_result_path_str)
 
 	#print r'c for solving instance ' + instance + r', ' + r'list_predict_schedule = ' + str(list_predict_schedule)
 
 	# If there is error output log temporary files for analsysis, otherwise remove them
-	with open(sgh.sparkle_err_path) as file_content:
+	with open(err_path_str) as file_content:
 		lines = file_content.read().splitlines()
 	if len(lines) > 1 or lines[0] != 'INFO:AutoFolio:Predict on Test':
-		sl.add_output(predict_schedule_result_path, 'Predicted portfolio schedule')
-		sl.add_output(sgh.sparkle_err_path, 'Predicted portfolio schedule error output')
+		sl.add_output(str(log_path), 'Predicted portfolio schedule command line call')
+		sl.add_output(predict_schedule_result_path_str, 'Predicted portfolio schedule')
+		sl.add_output(err_path_str, 'Predicted portfolio schedule error output')
 	else:
-		os.system(r'rm -f ' + predict_schedule_result_path)
-		os.system(r'rm -f ' + sgh.sparkle_err_path)
+		os.system('rm -f ' + predict_schedule_result_path_str)
+		os.system('rm -f ' + err_path_str)
+		os.system('rm -f ' + str(log_path))
 
 	return list_predict_schedule
 
@@ -262,7 +272,9 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		print('c Computing actual performance for portfolio selector excluding solver ' + solver_name + ' ...')
 		tmp_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 		tmp_performance_data_csv.delete_column(solver)
-		tmp_performance_data_csv_path = r'Tmp/' + r'tmp_performance_data_csv_' + sparkle_basic_help.get_time_pid_random_string() + r'.csv'
+		tmp_performance_data_csv_file = 'tmp_performance_data_csv_without_' + solver_name + '_' + sparkle_basic_help.get_time_pid_random_string() + '.csv'
+		tmp_performance_data_csv_path = str(Path(sl.caller_log_dir / tmp_performance_data_csv_file))
+		sl.add_output(tmp_performance_data_csv_path, '[written] Temporary performance data')
 		tmp_performance_data_csv.save_csv(tmp_performance_data_csv_path)
 		tmp_actual_portfolio_selector_path = r'Tmp/' + r'tmp_actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
 		tmp_actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_dir + 'without_' + solver_name + '/' + sgh.sparkle_portfolio_selector_name
@@ -284,6 +296,7 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		print('c Actual performance for portfolio selector excluding solver ' + solver_name + ' is ' + str(tmp_actual_selector_performance))
 		#print 'c tmp_actual_selector_performance excluding ' + solver + ' = ' + str(tmp_actual_selector_performance)
 		os.system(r'rm -f ' + tmp_performance_data_csv_path)
+		sl.add_output(tmp_performance_data_csv_path, '[removed] Temporary performance data')
 #		os.system(r'rm -f ' + tmp_actual_portfolio_selector_path)
 		print('c Computing done!')
 		
