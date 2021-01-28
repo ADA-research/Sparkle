@@ -159,6 +159,7 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 
 	#print 'c ' + command_line
 	os.system(command_line)
+	os.system('rm -f runhistory.json') # Remove autofolio output from root Sparkle directory
 
 	if bool_exists_missing_value:
 		os.system(r'rm -f ' + impute_feature_data_csv_path)
