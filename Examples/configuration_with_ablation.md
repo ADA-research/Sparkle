@@ -1,25 +1,3 @@
-### Installation
-
-Before starting Sparkle, please install the following packages with the specific versions:
-
-1. Install Python 3.5 -- other 3.x versions may work, but were not tested
-	* with anaconda:
-
-		`conda create -n <env_name> python=3.5`
-
-		`conda activate <env_name>`
-
-2. Install swig version 3.0
-	* with anaconda:
-
-		`conda install swig=3.0`
-
-3. Install required python packages:
-	* `pip install -r requirements.txt`
-	* or with anaconda:
-
-		`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements.txt`
-
 ### Load the solver and instances into Sparkle
 
 Initialise the Sparkle platform
