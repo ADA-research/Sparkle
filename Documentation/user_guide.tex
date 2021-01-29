@@ -30,11 +30,25 @@ Follow these steps:
 \label{quick:install}
 
 \begin{enumerate}
+
   \item Copy the Sparkle files to your desired directory
-  \item Install Python 3.5 (other 3.x versions may work, but were not tested with the packages included in the \texttt{requirements.txt} file.
-  \item Install Swig 3.0 -- With Anaconda: \texttt{conda install swig=3.0}
-  \item Install \texttt{requirements.txt}: \texttt{pip install -r requirements.txt} -- With Anaconda: \texttt{/home/<username>/<anaconda\_dir>/envs/<env\_name>/bin/pip install -r requirements.txt}
-  \item Install \texttt{epstopdf} as described in Section~\ref{package:epstopdf}
+  \item Install Python 3.9 (other 3.x versions may work, but were not tested with the packages included in the \texttt{requirements\_first.txt} and \texttt{requirements\_second.txt} files.\\
+        With Anaconda:\\
+        \texttt{conda create -n <env\_name> python=3.9}
+  \item Install Swig 3.0\\
+        With Anaconda:\\
+        \texttt{conda install swig=3.0}
+	\item Navigate into the Sparkle directory
+  \item Install \texttt{requirements\_first.txt}:\\
+        \texttt{pip install -r requirements\_first.txt}\\
+        With Anaconda:\\
+        \texttt{/home/<username>/<anaconda\_dir>/envs/<env\_name>/bin/pip install -r requirements\_first.txt}
+  \item Install \texttt{requirements\_second.txt}:\\
+        \texttt{pip install -r requirements\_second.txt}\\
+        With Anaconda:\\
+        \texttt{/home/<username>/<anaconda\_dir>/envs/<env\_name>/bin/pip install -r requirements\_second.txt}
+  \item Install \texttt{epstopdf}\\
+        (if manually, for instance on a cluster, as described in Section~\ref{package:epstopdf})
 \end{enumerate}
 
 \subsection{Configuration}
@@ -326,6 +340,11 @@ This is a short example to show the format, see the settings file in \texttt{Set
           aliases: \texttt{smac\_each\_run\_cutoff\_time, cutoff\_time\_each\_performance\_computation}
 
           values: integer\\
+  \item[] \texttt{extractor\_cutoff\_time}
+
+          aliases: \texttt{cutoff\_time\_each\_feature\_computation}
+
+          values: integer\\
   \item[] \texttt{penalty\_multiplier}
 
           aliases: \texttt{penalty\_number}
@@ -462,20 +481,15 @@ The \texttt{epstopdf} package (or a package containing it) is required for Spark
   \texttt{source \textasciitilde/.bashrc}
 \end{enumerate}
 
-\subsubsection{General requirements (to be revised)}
-\todo[inline]{Check which of these old installation instructions actually apply (if any)}
-
-Currently Sparkle uses Python 2.7.
+\subsubsection{General requirements}
+Other software used by Sparkle:
 
 \begin{verbatim}
-  # Before starting Sparkle, please install the following packages with the specific versions:
-  # pip3 install ConfigSpace==0.3.9 --user
-  # pip3 install smac==0.6.0 --user
-  # pip3 install install git+https://github.com/mlindauer/ASlibScenario --user
-  # pip3 install sphinx-bootstrap-theme==0.6.0 --user
-  
-  # Also, please install the following software:
-  # pdflatex, latex, bibtex, swig, gnuplot, gnuplot-x11
+  pdflatex,
+  latex,
+  bibtex,
+  gnuplot,
+  gnuplot-x11
 \end{verbatim}
 
 \subsection{Yahsp example}

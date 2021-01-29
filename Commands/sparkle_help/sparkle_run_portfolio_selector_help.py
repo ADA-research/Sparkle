@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+
 try:
 	from sparkle_help import sparkle_basic_help
 	from sparkle_help import sparkle_file_help as sfh
@@ -20,7 +21,7 @@ try:
 	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 	from sparkle_help import sparkle_run_solvers_help as srs
-	from sparkle_help import sparkle_experiments_related_help as ser
+	from sparkle_help import sparkle_logging as sl
 except ImportError:
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
@@ -28,7 +29,7 @@ except ImportError:
 	import sparkle_feature_data_csv_help as sfdcsv
 	import sparkle_performance_data_csv_help as spdcsv
 	import sparkle_run_solvers_help as srs
-	import sparkle_experiments_related_help as ser
+	import sparkle_logging as sl
 
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
@@ -144,7 +145,7 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performan
 	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 	list_feature_vector = []
 
-	cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance/len(sgh.extractor_list) + 1
+	cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
 
 	for extractor_path in sgh.extractor_list:
 		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')

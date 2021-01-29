@@ -43,7 +43,7 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str) -
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	seed_str = str(sgh.get_seed())
-	cmd_get_solver_call = solver_wrapper_path + ' --print-command ' + instance_path + ' --seed ' + seed_str + ' --cutoff-time ' + cutoff_time_str
+	cmd_get_solver_call = solver_wrapper_path + ' --print-command \"' + instance_path + '\" --seed ' + seed_str + ' --cutoff-time ' + cutoff_time_str
 	solver_call_rawresult = os.popen(cmd_get_solver_call)
 	solver_call_result = solver_call_rawresult.readlines()[0].strip()
 
@@ -72,7 +72,7 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_
 
 	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
-	runsolver_option = r'--timestamp --use-pty'
+	runsolver_option = r'--timestamp --use-pty --add-eof'
 	cutoff_time_each_run_option = r'-C ' + cutoff_time_str
 	runsolver_values_log = '-v ' + runsolver_values_path
 	runsolver_watch_data_path = runsolver_values_path.replace('val', 'log')
@@ -90,14 +90,32 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_
 		if not os.path.exists(raw_result_path):
 			sfh.create_new_empty_file(raw_result_path)
 
+	# Check for known errors/issues
+	check_solver_output_for_errors(Path(raw_result_path))
+
 	#command_line = 'rm -f ' + runsolver_watch_data_path
 	#os.system(command_line)
 
 	return
 
 
+def check_solver_output_for_errors(raw_result_path: Path):
+	error_lines = \
+		["libstdc++.so.6: version `GLIBCXX"] # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found
+
+	# Find lines containing an error
+	with raw_result_path.open('r') as infile:
+		for current_line in infile:
+			for error in error_lines:
+				if error in current_line:
+					print('WARNING: Possible error deteced in', raw_result_path, 'involving', error)
+
+	return
+
+
 def run_solver_on_instance_and_process_results(solver_path: str, instance_path: str, custom_cutoff: int = None) -> (float, float, float, List[float], str, str):
 	# Prepare paths
+	# TODO: Fix result path for multi-file instances (only a single file is part of the result path)
 	raw_result_path = sgh.sparkle_tmp_path + sfh.get_last_level_directory_name(solver_path) + '_' + sfh.get_last_level_directory_name(instance_path) + '_' + sbh.get_time_pid_random_string() + '.rawres'
 	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
 	solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
@@ -145,6 +163,7 @@ def running_solvers(performance_data_csv_path, mode):
 			solver_path = solver_list[j]
 
 			print('c')
+			# TODO: Fix printing of multi-file instance 'path' (only one file name is printed)
 			print('c Solver ' + sfh.get_last_level_directory_name(solver_path) + ' running on instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
 
 			cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = run_solver_on_instance_and_process_results(solver_path, instance_path)
@@ -174,8 +193,8 @@ def running_solvers(performance_data_csv_path, mode):
 				performance_data_csv.set_value(instance_path, solver_path, cpu_time_penalised)
 				print('c Running Result: Status ' + status + ', Runtime' + penalised_str + ': ' + str(cpu_time_penalised))
 
-		print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
-		current_job_num += 1
+			print(r'c Executing Progress: ' + str(current_job_num) + ' out of ' + str(total_job_num))
+			current_job_num += 1
 
 	performance_data_csv.update_csv()
 	print('c Performance data file ' + performance_data_csv_path + ' has been updated!')
@@ -189,8 +208,8 @@ def handle_timeouts(runtime: float, status: str, custom_cutoff: int = None) -> (
 	else:
 		cutoff_time = custom_cutoff
 
-	if runtime > cutoff_time:
-		status = 'TIMEOUT' # Overwrites possible user status...
+	if runtime > cutoff_time and status != 'CRASHED':
+		status = 'TIMEOUT' # Overwrites possible user status, unless it is 'CRASHED'
 	if status == 'TIMEOUT' or status == 'UNKNOWN':
 		runtime_penalised = sgh.settings.get_penalised_time(cutoff_time)
 	else:
@@ -363,20 +382,6 @@ def remove_faulty_solver(solver_path, instance_path):
 def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:
 	status = sat_judge_correctness_raw_result(instance_path, raw_result_path)
 
-	# TODO: Check if instance_reference_mapping is still useful to do or should be removed entirely
-#	if verify_string == 'SAT':
-#		status = 'SAT'
-#		if sgh.instance_reference_mapping[instance_path] != r'SAT':
-#			sgh.instance_reference_mapping[instance_path] = r'SAT'
-#			sfh.write_instance_reference_mapping()
-#	elif verify_string == 'UNSAT':
-#		status = 'UNSAT'
-#		if sgh.instance_reference_mapping[instance_path] != r'UNSAT':
-#			sgh.instance_reference_mapping[instance_path] = r'UNSAT'
-#			sfh.write_instance_reference_mapping()
-#	elif verify_string == 'WRONG':
-#		status = 'WRONG'
-#	else:
 	if status != 'SAT' and status != 'UNSAT' and status != 'WRONG':
 		status = 'UNKNOWN'
 		print('c Warning: Verification result was UNKNOWN for solver ' + sfh.get_last_level_directory_name(solver_path) + ' on instance ' + sfh.get_last_level_directory_name(instance_path) + '!')

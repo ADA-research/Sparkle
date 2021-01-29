@@ -16,7 +16,6 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
@@ -108,7 +107,7 @@ def get_instanceClassList():
 
 
 def get_featureComputationCutoffTime():
-	str_value = str(sparkle_experiments_related_help.cutoff_time_total_extractor_run_on_one_instance)
+	str_value = str(sgh.settings.get_general_extractor_cutoff_time())
 	return str_value
 
 

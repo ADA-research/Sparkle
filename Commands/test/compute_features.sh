@@ -12,11 +12,7 @@
 #SBATCH --nodes=1
 
 # Settings
-sparkle_settings_path="Settings/sparkle_default_settings.txt"
-sparkle_settings_tmp="Settings/sparkle_default_settings.tmp"
-sparkle_settings_test="Commands/test/test_files/sparkle_default_settings.txt"
-mv $sparkle_settings_path $sparkle_settings_tmp # Save user settings
-cp $sparkle_settings_test $sparkle_settings_path # Activate test settings
+sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN"
@@ -28,7 +24,7 @@ Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/n
 
 # Compute features
 output_true="c Computing features done!"
-output=$(Commands/compute_features.py | tail -1)
+output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -40,7 +36,7 @@ fi
 
 # Compute features parallel
 output_true="c Computing features in parallel ..."
-output=$(Commands/compute_features.py --parallel --recompute | tail -1)
+output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -49,7 +45,4 @@ else
 	echo "[failure] compute_features --parallel test failed with output:"
 	echo $output
 fi
-
-# Restore original settings
-mv $sparkle_settings_tmp $sparkle_settings_path
 
