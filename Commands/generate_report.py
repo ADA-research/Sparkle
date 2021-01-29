@@ -92,11 +92,12 @@ if __name__ == r'__main__':
 
 		if test_case_directory == None:
 			sgrh.generate_report()
+			print(r'c Report generated ...')
 		else:
 			sgrh.generate_report(test_case_directory)
+			print(r'c Report for test generated ...')
 
 		delete_task_run_status()
-		print(r'c Report generated ...')
 
 	else:
 		## Reporting for algorithm configuration
