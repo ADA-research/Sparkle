@@ -48,7 +48,7 @@ cp -r $test_results_test ./
 
 # Run generate report for tetst
 output_true="c Report for test generated ..."
-output=$(Commands/generate_report_for_test.py $test_results_dir | tail -1)
+output=$(Commands/generate_report.py --test-case-directory $test_results_dir | tail -1)
 # --settings-file $sparkle_test_settings_path
 
 if [[ $output == $output_true ]];
