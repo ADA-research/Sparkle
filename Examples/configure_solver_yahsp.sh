@@ -27,7 +27,7 @@ Commands/validate_configured_vs_default.py --solver Solvers/Yahsp3 --instance-se
 
 # Generate an experimental report for the latest run of test_configured_solver_and_default_solver. It will be located at:
 # Configuration_Reports/<datetime>_<solver_name>Sparkle-latex-generator-for-configuration/Sparkle_Report_for_Configuration.pdf.
-Commands/generate_report_for_configuration.py --solver Solvers/Yahsp3
+Commands/generate_report.py --solver Solvers/Yahsp3
 
 # Alternatively generate a report for a given train and test set (for which test_configured_solver_and_default_solver has been executed previously)
-Commands/generate_report_for_configuration.py --solver Solvers/Yahsp3 --instance-set-train Instances/Depots_train_few/ --instance-set-test Instances/Depots_test_few/
+Commands/generate_report --solver Solvers/Yahsp3 --instance-set-train Instances/Depots_train_few/ --instance-set-test Instances/Depots_test_few/

@@ -23,8 +23,8 @@ Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Reso
 Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/VRP_SISRs/
 
 # Configure a solver with a given instance set.
-# NOTE: Before running the next command, the option 'smac_run_obj = QUALITY'
-# must be set in 'Settings/sparkle_smac_settings.txt'
+# NOTE: Before running the next command, the option 'performance_measure = QUALITY_ABSOLUTE'
+# must be set in 'Settings/sparkle_settings.ini'
 Commands/configure_solver.py --solver Solvers/VRP_SISRs --instance-set-train Instances/X/
 
 # Compare the configured solver and the default solver to each other
@@ -34,4 +34,4 @@ Commands/validate_configured_vs_default.py --solver Solvers/VRP_SISRs --instance
 
 # Generate an experimental report for the latest run of test_configured_solver_and_default_solver. It will be located at:
 # Configuration_Reports/<datetime>_<solver_name>Sparkle-latex-generator-for-configuration/Sparkle_Report_for_Configuration.pdf.
-Commands/generate_report_for_configuration.py --solver Solvers/VRP_SISRs
+Commands/generate_report.py --solver Solvers/VRP_SISRs

@@ -34,7 +34,7 @@ At the same time you can validate the performance of the best found parameter co
 
 Generate a report detailing the results on the train (and test) set including ablation, and as before the experimental procedure and performance information; this will be located at `Configuration_Reports/PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
 
-`Commands/generate_report_for_configuration.py  --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
+`Commands/generate_report.py  --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
 
 The ablation section can be supressed with `--no-ablation` 
 
