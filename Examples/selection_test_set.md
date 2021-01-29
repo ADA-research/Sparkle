@@ -40,9 +40,9 @@ Generate an experimental report detailing the experimental procedure and perform
 
 ### Run on the test set
 
-Run the portfolio selector on a single testing instance; the result will be printed to the command line
+Run the portfolio selector on a *single* testing instance; the result will be printed to the command line
 
-`Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/`
+`Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/plain7824.cnf`
 
 Run the portfolio selector on a testing instance *set*
 
