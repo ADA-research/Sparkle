@@ -8,7 +8,7 @@
 
 Add instances in a given directory, without running solvers or feature extractors yet. The directory should contain a file `sparkle_instance_list.txt` describing which files together form an instance.
 
-`Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/CCAG/`
+`Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/CCAG/Instances/CCAG/`
 
 #### Add solvers
 
