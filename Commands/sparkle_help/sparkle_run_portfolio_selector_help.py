@@ -13,6 +13,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+from pathlib import Path
 
 try:
 	from sparkle_help import sparkle_basic_help
@@ -22,6 +23,8 @@ try:
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 	from sparkle_help import sparkle_run_solvers_help as srs
 	from sparkle_help import sparkle_logging as sl
+	from sparkle_help.reporting_scenario import ReportingScenario
+	from sparkle_help.reporting_scenario import Scenario
 except ImportError:
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
@@ -30,6 +33,8 @@ except ImportError:
 	import sparkle_performance_data_csv_help as spdcsv
 	import sparkle_run_solvers_help as srs
 	import sparkle_logging as sl
+	from reporting_scenario import ReportingScenario
+	from reporting_scenario import Scenario
 
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
@@ -155,11 +160,15 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performan
 		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!')
 	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + r' done!')
 
-	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + sgh.sparkle_portfolio_selector_path + r' --feature_vec'
-	for value in list_feature_vector:
-		command_line = command_line + r' ' + str(value)
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + sgh.sparkle_portfolio_selector_path + ' --feature_vec \"'
+	for i in range(0, len(list_feature_vector)):
+		command_line = command_line + str(list_feature_vector[i])
+
+		if i < (len(list_feature_vector) - 1):
+			command_line = command_line + ' '
+
 	predict_schedule_result_path = r'Tmp/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
-	command_line = command_line + r' 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
+	command_line = command_line + '\" 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
 	print('c Sparkle portfolio selector predicting ...')
 	os.system(command_line)
 	print('c Predicting done!')
@@ -246,7 +255,15 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	if instance_directory_path_last_level[-1] != r'/':
 		instance_directory_path_last_level += r'/'
 	test_case_directory_path = r'Test_Cases/' + instance_directory_path_last_level
-	
+
+	# Initialise latest scenario
+	global latest_scenario
+	sgh.latest_scenario = ReportingScenario()
+
+	# Update latest scenario
+	sgh.latest_scenario.set_selection_test_case_directory(Path(test_case_directory_path))
+	sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
+
 	list_all_cnf_filename = sfh.get_list_all_cnf_filename(instance_directory_path)
 	
 	if not os.path.exists(r'Test_Cases/'):
@@ -279,6 +296,6 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	
 	os.system(command_line)
 	#print(command_line)
-	
+
 	return
 

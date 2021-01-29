@@ -23,6 +23,8 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
+from sparkle_help.reporting_scenario import ReportingScenario
+from sparkle_help.reporting_scenario import Scenario
 
 from sparkle_help import sparkle_slurm_help as ssh
 #from validate_configured_vs_default import validate_configured_vs_default
@@ -31,6 +33,10 @@ if __name__ == r'__main__':
 	# Initialise settings
 	global settings
 	sgh.settings = sparkle_settings.Settings()
+
+	# Initialise latest scenario
+	global latest_scenario
+	sgh.latest_scenario = ReportingScenario()
 
 	# Log command call
 	sl.log_command(sys.argv)
@@ -93,6 +99,17 @@ if __name__ == r'__main__':
 	fout.write('solver ' + str(solver) + '\n')
 	fout.write('train ' + str(instance_set_train) + '\n')
 	fout.close()
+
+	# Update latest scenario
+	sgh.latest_scenario.set_config_solver(Path(solver))
+	sgh.latest_scenario.set_config_instance_set_train(Path(instance_set_train))
+	sgh.latest_scenario.set_latest_scenario(Scenario.CONFIGURATION)
+
+	if instance_set_test != None:
+		sgh.latest_scenario.set_config_instance_set_test(Path(instance_set_test))
+	else:
+		# Set to default to overwrite possible old path
+		sgh.latest_scenario.set_config_instance_set_test()
 
 	# Set validation to wait until configuration is done
 	if(validate):

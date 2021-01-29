@@ -24,6 +24,8 @@ def get_seed():
 
 global settings
 
+global latest_scenario
+
 flag_first_call = True
 
 global sparkle_maximum_int

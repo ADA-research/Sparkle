@@ -13,6 +13,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import argparse
+from pathlib import Path
+
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -25,6 +27,8 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
+from sparkle_help.reporting_scenario import ReportingScenario
+from sparkle_help.reporting_scenario import Scenario
 
 
 def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path):
@@ -78,6 +82,10 @@ if __name__ == r'__main__':
 	global settings
 	sgh.settings = sparkle_settings.Settings()
 
+	# Initialise latest scenario
+	global latest_scenario
+	sgh.latest_scenario = ReportingScenario()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -112,6 +120,12 @@ if __name__ == r'__main__':
 	if success:
 		print('c Sparkle portfolio selector constructed!')
 		print('c Sparkle portfolio selector located at ' + sgh.sparkle_portfolio_selector_path)
+
+		# Update latest scenario
+		sgh.latest_scenario.set_selection_portfolio_path(Path(sgh.sparkle_portfolio_selector_path))
+		sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
+		# Set to default to overwrite possible old path
+		sgh.latest_scenario.set_selection_test_case_directory()
 
 		# Compute and print marginal contributions of the perfect and actual portfolio selectors
 		cmc.compute_perfect(flag_recompute_marg_cont)
