@@ -64,5 +64,5 @@ Run the portfolio selector on a testing instance *set*
 
 Generate an experimental report detailing the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`
 
-`Commands/generate_report_for_test.py Test_Cases/CCAG2/ --performance-measure QUALITY_ABSOLUTE`
+`Commands/generate_report.py --test-case-directory Test_Cases/CCAG2/ --performance-measure QUALITY_ABSOLUTE`
 
