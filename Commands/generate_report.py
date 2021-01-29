@@ -17,6 +17,7 @@ from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_generate_report_help as sgrh
+from sparkle_help import sparkle_generate_report_for_configuration_help as sgrfch
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
@@ -50,7 +51,14 @@ if __name__ == r'__main__':
 
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--test-case-directory', type=str, default=None, help='Path to test case directory of an instance set')
+	## Configuration arguments
+	parser.add_argument('--solver', required=False, type=str, default=None, help='path to solver for an algorithm configuration report')
+	parser.add_argument('--instance-set-train', required=False, type=str, help='path to training instance set included in Sparkle for an algorithm configuration report')
+	parser.add_argument('--instance-set-test', required=False, type=str, help='path to testing instance set included in Sparkle for an algorithm configuration report')
+	parser.add_argument('--no-ablation', required=False, dest="flag_ablation", default=True, const=False, nargs="?", help='turn off reporting on ablation for an algorithm configuration report')
+	## Selection arguments
+	parser.add_argument('--test-case-directory', type=str, default=None, help='Path to test case directory of an instance set for a selection report')
+	## Common arguments
 	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, action=ac.SetByUser, help='the performance measure, e.g. runtime')
 	parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 
@@ -58,29 +66,64 @@ if __name__ == r'__main__':
 	args = parser.parse_args()
 	test_case_directory = args.test_case_directory
 
+	solver = args.solver
+	instance_set_train = args.instance_set_train
+	instance_set_test = args.instance_set_test
+
+	flag_instance_set_train = False if instance_set_train == None else True
+	flag_instance_set_test = False if instance_set_test == None else True
+
 	if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
 	if ac.set_by_user(args, 'performance_measure'): sgh.settings.set_general_performance_measure(PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
 
 	## Reporting for algorithm selection
-	if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
-		print('ERROR: The generate_report command is not yet implemented for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)')
-		sys.exit()
+	if solver == None:
+		if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
+			print('ERROR: The generate_report command is not yet implemented for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)')
+			sys.exit()
 
-	if not os.path.isfile(sgh.sparkle_portfolio_selector_path):
-		print(r'c Before generating Sparkle report, please first construct Sparkle portfolio selector!')
-		print(r'c Do not generate Sparkle report. Exit!')
-		sys.exit()
+		if not os.path.isfile(sgh.sparkle_portfolio_selector_path):
+			print(r'c Before generating Sparkle report, please first construct Sparkle portfolio selector!')
+			print(r'c Do not generate Sparkle report. Exit!')
+			sys.exit()
 	
-	print(r'c Generating report ...')
-	generate_task_run_status()
+		print(r'c Generating report ...')
+		generate_task_run_status()
 
-	if test_case_directory == None:
-		sgrh.generate_report()
+		if test_case_directory == None:
+			sgrh.generate_report()
+		else:
+			sgrh.generate_report(test_case_directory)
+
+		delete_task_run_status()
+		print(r'c Report generated ...')
+
 	else:
-		sgrh.generate_report(test_case_directory)
+		## Reporting for algorithm configuration
+		solver_name = sfh.get_last_level_directory_name(solver)
 
-	delete_task_run_status()
-	print(r'c Report generated ...')
+		# If no instance set(s) is/are given, try to retrieve them from the last run of validate_configured_vs_default
+		if not flag_instance_set_train and not flag_instance_set_test:
+			instance_set_train, instance_set_test, flag_instance_set_train, flag_instance_set_test = sgrfch.get_most_recent_test_run(solver_name)
+		# If only the testing set is given return an error
+		elif not flag_instance_set_train and flag_instance_set_test:
+			print('c Argument Error! Only a testing set was provided, please also provide a training set')
+			print('c Usage: %s --solver <solver> [--instance-set-train <instance-set-train>] [--instance-set-test <instance-set-test>]' % sys.argv[0])
+			sys.exit(-1)
+
+		# Generate a report depending on which instance sets are provided
+		if (flag_instance_set_train and flag_instance_set_test):
+			instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
+			instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+			sgrfch.check_results_exist(solver_name, instance_set_train_name, instance_set_test_name)
+			sgrfch.generate_report_for_configuration(solver_name, instance_set_train_name, instance_set_test_name, ablation=args.flag_ablation)
+		elif flag_instance_set_train:
+			instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
+			sgrfch.check_results_exist(solver_name, instance_set_train_name)
+			sgrfch.generate_report_for_configuration_train(solver_name, instance_set_train_name, ablation=args.flag_ablation)
+		else:
+			print('c Error: No results from validate_configured_vs_default found that can be used in the report!')
+			sys.exit(-1)
 
 	# Write used settings to file
 	sgh.settings.write_used_settings()
