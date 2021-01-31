@@ -17,7 +17,7 @@ from pathlib import Path
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_add_train_instances_help as satih
+from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
@@ -78,11 +78,10 @@ if __name__ == r'__main__':
 	sgh.settings.write_used_settings()
 
 	# Copy instances to smac directory
-	instances_directory = r'Instances/' + instance_set_train_name
-	list_all_path = satih.get_list_all_path(instances_directory)
-	inst_dir_prefix = instances_directory
-	smac_inst_dir_prefix = sgh.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
-	satih.copy_instances_to_smac(list_all_path, inst_dir_prefix, smac_inst_dir_prefix, r'train')
+	instances_directory = 'Instances/' + instance_set_train_name
+	list_all_path = sih.get_list_all_path(instances_directory)
+	smac_inst_dir_prefix = sgh.smac_dir + '/' + 'example_scenarios/' + 'instances/' + sfh.get_last_level_directory_name(instances_directory)
+	sih.copy_instances_to_smac(list_all_path, instances_directory, smac_inst_dir_prefix, 'train')
 
 	scsh.handle_file_instance_train(solver_name, instance_set_train_name)
 	scsh.create_file_scenario_configuration(solver_name, instance_set_train_name)

@@ -16,7 +16,7 @@ import re
 import pathlib
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_add_train_instances_help as satih
+from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_slurm_help as ssh
 
@@ -279,7 +279,7 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
     if instances_directory[-1] != "/":
         instances_directory += "/"
     print("c create_instance_file ({}, {}, {})".format(instances_directory, ablation_scenario_dir, train_or_test))
-    list_all_path = satih.get_list_all_path(instances_directory)
+    list_all_path = sih.get_list_all_path(instances_directory)
     #print(list_all_path)
     file_instance_path = ablation_scenario_dir + "instances" + file_suffix
 

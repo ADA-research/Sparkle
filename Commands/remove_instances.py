@@ -19,6 +19,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_instances_help as sih
 
 
 if __name__ == r'__main__':
@@ -55,7 +56,7 @@ if __name__ == r'__main__':
 
 		# Remove instance records
 		sgh.instance_list.remove(intended_instance)
-		sfh.remove_line_from_file(intended_instance, Path(sgh.instance_list_path))
+		sfh.remove_line_from_file(intended_instance, sgh.instance_list_path)
 		feature_data_csv.delete_row(intended_instance)
 		performance_data_csv.delete_row(intended_instance)
 
@@ -69,6 +70,11 @@ if __name__ == r'__main__':
 
 	sfh.rmdir(Path(instances_path))
 
+	# Remove instance reference list (for multi-file instances)
+	instance_set_name = Path(instances_path).name
+	sih.remove_reference_instance_list(instance_set_name)
+
+	# Remove instance set from SMAC directories
 	smac_train_instances_path = sgh.smac_dir + r'/' + r'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_path)
 	file_smac_train_instances = sgh.smac_dir + r'/' + r'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_path) + r'_train.txt'
 	#print(smac_train_instances_path, file_smac_train_instances)

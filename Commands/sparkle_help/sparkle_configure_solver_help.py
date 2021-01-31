@@ -88,12 +88,12 @@ def handle_file_instance_test(solver_name, instance_set_name):
 
 # Copy file with the specified postfix listing instances from the instance directory to the solver directory
 def handle_file_instance(solver_name, instance_set_name, file_postfix):
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + r'/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + '/'
 	smac_file_instance_path_ori = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + file_postfix
 	smac_file_instance_path_target = smac_solver_dir + instance_set_name + file_postfix
 
-	command_line = r'cp ' + smac_file_instance_path_ori + r' ' + smac_file_instance_path_target
+	command_line = 'cp ' + smac_file_instance_path_ori + ' ' + smac_file_instance_path_target
 	os.system(command_line)
 
 	return

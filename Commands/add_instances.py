@@ -25,35 +25,7 @@ from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
-
-
-def _check_existence_of_instance_list_file(instances_source: str):
-	if not os.path.isdir(instances_source):
-		return False
-
-	instance_list_file_name = 'sparkle_instance_list.txt'
-	instance_list_file_path = os.path.join(instances_source, instance_list_file_name)
-
-	if os.path.isfile(instance_list_file_path):
-		return True
-	else:
-		return False
-
-
-def _get_list_instance(instances_source: str):
-	list_instance = []
-	instance_list_file_name = 'sparkle_instance_list.txt'
-	instance_list_file_path = os.path.join(instances_source, instance_list_file_name)
-	infile = open(instance_list_file_path)
-	lines = infile.readlines()
-	for line in lines:
-		words = line.strip().split()
-		if len(words) <= 0:
-			continue
-		list_instance.append(line.strip())
-	infile.close()
-
-	return list_instance
+from sparkle_help import sparkle_instances_help as sih
 
 
 if __name__ == r'__main__':
@@ -96,8 +68,9 @@ if __name__ == r'__main__':
 	if not os.path.exists(instances_directory):
 		Path(instances_directory).mkdir(parents=True, exist_ok=True)
 
-	if _check_existence_of_instance_list_file(instances_source):
-		list_instance = _get_list_instance(instances_source)
+	if sih._check_existence_of_instance_list_file(instances_source):
+		sih._copy_instance_list_to_reference(Path(instances_source))
+		list_instance = sih._get_list_instance(instances_source)
 
 		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
 		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
@@ -118,8 +91,7 @@ if __name__ == r'__main__':
 				intended_instance_line += target_file_path + ' '
 			
 			intended_instance_line = intended_instance_line.strip()
-			intended_status = r'UNKNOWN'
-			
+
 			sgh.instance_list.append(intended_instance_line)
 			sfh.add_new_instance_into_file(intended_instance_line)
 			feature_data_csv.add_row(intended_instance_line)
@@ -148,19 +120,18 @@ if __name__ == r'__main__':
 			print(r'c')
 			print(r'c Adding ' + intended_filename + r' ...')
 			print('c Executing Progress: ' + str(i+1) + ' out of ' + str(num_inst))
-			
+
 			if intended_filename in list_target_all_filename:
 				print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' already exists in Directory ' + instances_directory)
 				print(r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_filename))
 				#continue
 			else:
 				intended_filename_path = instances_directory + r'/' + intended_filename
-				intended_status = r'UNKNOWN'
 				sgh.instance_list.append(intended_filename_path)
 				sfh.add_new_instance_into_file(intended_filename_path)
 				feature_data_csv.add_row(intended_filename_path)
 				performance_data_csv.add_row(intended_filename_path)
-				
+
 				if list_source_all_directory[i][-1] == r'/': list_source_all_directory[i] = list_source_all_directory[i][:-1]
 				os.system(r'cp ' + list_source_all_directory[i] + r'/' + intended_filename + r' ' + instances_directory)
 				print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been added!')

@@ -90,7 +90,7 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 	instances_path_str = str(instances_path)
 
 	# Read instances from reference file
-	instance_list_file_path = Path(sgh.instance_list_path)
+	instance_list_file_path = sgh.instance_list_path
 
 	with instance_list_file_path.open('r') as infile:
 		lines = infile.readlines()
@@ -218,7 +218,7 @@ def get_list_all_statusinfo_filename(filepath):
 	return statusinfo_list
 
 def add_new_instance_into_file(filepath):
-	fo = open(sgh.instance_list_path, 'a+')
+	fo = open(str(sgh.instance_list_path), 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(filepath + '\n')
 	fo.close()
@@ -343,7 +343,7 @@ def write_extractor_nickname_mapping():
 	return
 
 def write_instance_list():
-	fout = open(sgh.instance_list_path, 'w+')
+	fout = open(str(sgh.instance_list_path), 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 	for i in range(0, len(sgh.instance_list)):
 		fout.write(sgh.instance_list[i] + '\n')
@@ -401,11 +401,7 @@ def rmdir(dir_name: Path):
 
 
 def rmfile(file_name: Path):
-	try:
-		#TODO: In new python version use unlink(missing_ok=True)
-		file_name.unlink()
-	except FileNotFoundError:
-		pass
+	file_name.unlink(missing_ok=True)
 
 	return
 
