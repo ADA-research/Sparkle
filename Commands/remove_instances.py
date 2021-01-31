@@ -38,8 +38,8 @@ if __name__ == r'__main__':
 	if args.nickname:
 		instances_path = r'Instances/' + nickname_str
 	if not os.path.exists(instances_path):
-		print(r'c Instances path ' + "\'" + instances_path + "\'" + r' does not exist!')
-		sys.exit()
+		print('c Instances path ' + "\'" + instances_path + "\'" + ' does not exist!')
+		print('Removing possible leftovers (if any)')
 
 	if instances_path[-1] == r'/': instances_path = instances_path[:-1]
 
@@ -77,7 +77,6 @@ if __name__ == r'__main__':
 	# Remove instance set from SMAC directories
 	smac_train_instances_path = sgh.smac_dir + r'/' + r'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_path)
 	file_smac_train_instances = sgh.smac_dir + r'/' + r'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_path) + r'_train.txt'
-	#print(smac_train_instances_path, file_smac_train_instances)
 	os.system(r'rm -rf ' + smac_train_instances_path)
 	os.system(r'rm -f ' + file_smac_train_instances)
 	
