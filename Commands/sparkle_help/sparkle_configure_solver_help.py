@@ -22,6 +22,7 @@ from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
+from sparkle_help import sparkle_instances_help as sih
 
 
 class InstanceType(Enum):
@@ -483,9 +484,19 @@ def get_optimised_configuration(solver_name, instance_set_name):
 					# Skip the line before the line with the optimised configuration
 					myline_2 = fin.readline()
 					myline_2 = fin.readline()
-					mylist_2 = myline_2.strip().split()
-					# Skip 8 words before the configured parameters
-					start_index = 8
+					# If this is a single file instance:
+					if not sih.check_existence_of_reference_instance_list(instance_set_name):
+						mylist_2 = myline_2.strip().split()
+						# Skip 8 words before the configured parameters
+						start_index = 8
+					# Otherwise, for multi-file instances:
+					else:
+						# Skip everything before the last double quote "
+						mylist_2 = myline_2.strip().split('"')
+						last_idx = len(mylist_2) - 1
+						mylist_2 = mylist_2[last_idx].strip().split()
+						# Then skip another 4 words before the configured parameters
+						start_index = 4
 					end_index = len(mylist_2)
 					optimised_configuration_str = ''
 					for i in range(start_index, end_index):
