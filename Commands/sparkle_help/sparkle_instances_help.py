@@ -207,6 +207,8 @@ def _copy_instance_list_to_reference(instances_source: Path):
 	command_line = 'cp ' + str(instance_list_path) + ' ' + str(target_path)
 	os.system(command_line)
 
+	return
+
 
 def _check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
 	instance_list_path = Path(sgh.reference_list_dir / Path(instance_set_name + sgh.instance_list_postfix))
@@ -292,7 +294,7 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str, smac_in
 		os.system(command_line)
 
 		# Only do this when no instance_list file exists for this instance set
-		if _check_existence_of_reference_instance_list(instance_set_name):
+		if not _check_existence_of_reference_instance_list(instance_set_name):
 			# Write instance to SMAC instance file
 			fout.write(target_instance_path.replace(smac_instance_dir_prefix, '../../instances/' + sfh.get_last_level_directory_name(smac_instance_dir_prefix), 1) + '\n')
 

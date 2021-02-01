@@ -11,8 +11,6 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
-import time
-import random
 import sys
 import fcntl
 from pathlib import Path
@@ -470,6 +468,7 @@ def get_optimised_configuration(solver_name, instance_set_name):
 	for file_result_name in list_file_result_name:
 		file_result_path = smac_results_dir + file_result_name
 		fin = open(file_result_path, 'r+')
+
 		while True:
 			myline = fin.readline()
 			if not myline: break
@@ -496,7 +495,12 @@ def get_optimised_configuration(solver_name, instance_set_name):
 					myline_3 = fin.readline()
 					mylist_3 = myline_3.strip().split()
 					optimised_configuration_seed = mylist_3[4]
+
 		fin.close()
+
+	if optimised_configuration_seed == -1:
+		print('ERROR: Invalid optimised_configuration_seed in function \'get_optimised_configuration\'; Stopping execution!')
+		sys.exit(-1)
 
 	return optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed
 
