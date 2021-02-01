@@ -210,6 +210,20 @@ def _copy_instance_list_to_reference(instances_source: Path):
 	return
 
 
+def count_instances_in_reference_list(instance_set_name: str) -> int:
+	count = 0
+	instance_list_path = Path(sgh.reference_list_dir / Path(instance_set_name + sgh.instance_list_postfix))
+
+	# Count instances in instance list file
+	with instance_list_path.open('r') as infile:
+		for line in infile:
+			# If the line does not only contain whitespace, count it
+			if line.strip():
+				count = count + 1
+
+	return count
+
+
 def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
 	instance_list_path = Path(sgh.reference_list_dir / Path(instance_set_name + sgh.instance_list_postfix))
 
