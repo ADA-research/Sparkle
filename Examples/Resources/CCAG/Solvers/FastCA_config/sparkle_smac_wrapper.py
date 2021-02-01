@@ -50,6 +50,8 @@ def parse_output(output_list) -> (str, float):
 		if len(words) == 17 and words[0] == 'We' and words[1] == 'recommend':
 			# First output line is normal, probably no crash
 			solution_quality = sys.maxsize - 1
+			# If no actual solution is found, we probably reach the cutoff time before finding a solution
+			status = 'TIMEOUT'
 		if len(words) == 3 and _is_a_number(words[0]) and _is_a_number(words[1]) and _is_a_number(words[2]):
 			temp_solution_quality = int(words[1])
 			if temp_solution_quality < solution_quality:

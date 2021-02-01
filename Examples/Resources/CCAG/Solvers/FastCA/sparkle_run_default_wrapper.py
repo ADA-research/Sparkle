@@ -45,6 +45,8 @@ def print_output(terminal_output_file):
 		if len(words) == 18 and words[1] == 'We' and words[2] == 'recommend':
 			# First output line is normal, probably no crash
 			solution_quality = sys.maxsize - 1
+			# If no actual solution is found, we probably reach the cutoff time before finding a solution
+			status = 'TIMEOUT'
 		if len(words) == 4 and _is_a_number(words[1]) and _is_a_number(words[2]) and _is_a_number(words[3]):
 			temp_solution_quality = int(words[2])
 			if temp_solution_quality < solution_quality:
