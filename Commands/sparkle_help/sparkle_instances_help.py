@@ -210,7 +210,7 @@ def _copy_instance_list_to_reference(instances_source: Path):
 	return
 
 
-def _check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
+def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
 	instance_list_path = Path(sgh.reference_list_dir / Path(instance_set_name + sgh.instance_list_postfix))
 
 	if instance_list_path.is_file():
@@ -227,10 +227,9 @@ def remove_reference_instance_list(instance_set_name: str):
 	return
 
 
-def _copy_instance_list_to_smac(smac_instance_file: Path, instance_set_name: str):
+def copy_reference_instance_list(target_file: Path, instance_set_name: str, path_modifier: str):
 	instance_list_path = Path(sgh.reference_list_dir / Path(instance_set_name + sgh.instance_list_postfix))
 	outlines = []
-	path_modifier = '../../instances/' + instance_set_name + '/'
 
 	# Add quotes around instances in instance list file
 	with instance_list_path.open('r') as infile:
@@ -245,9 +244,16 @@ def _copy_instance_list_to_smac(smac_instance_file: Path, instance_set_name: str
 			outlines.append(outline)
 
 	# Write quoted instance list to SMAC instance file
-	with smac_instance_file.open('w') as outfile:
+	with target_file.open('w') as outfile:
 		for line in outlines:
 			outfile.write(line)
+
+	return
+
+
+def _copy_reference_instance_list_to_smac(smac_instance_file: Path, instance_set_name: str):
+	path_modifier = '../../instances/' + instance_set_name + '/'
+	copy_reference_instance_list(smac_instance_file, instance_set_name, path_modifier)
 
 	return
 
@@ -294,15 +300,15 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str, smac_in
 		os.system(command_line)
 
 		# Only do this when no instance_list file exists for this instance set
-		if not _check_existence_of_reference_instance_list(instance_set_name):
+		if not check_existence_of_reference_instance_list(instance_set_name):
 			# Write instance to SMAC instance file
 			fout.write(target_instance_path.replace(smac_instance_dir_prefix, '../../instances/' + sfh.get_last_level_directory_name(smac_instance_dir_prefix), 1) + '\n')
 
 	fout.close()
 
 	# If and instance_list file exists for this instance set: Write a version where every line is in double quotes to the SMAC instance file
-	if _check_existence_of_reference_instance_list(instance_set_name):
-		_copy_instance_list_to_smac(smac_instance_file, instance_set_name)
+	if check_existence_of_reference_instance_list(instance_set_name):
+		_copy_reference_instance_list_to_smac(smac_instance_file, instance_set_name)
 
 	return
 
