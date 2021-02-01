@@ -40,8 +40,13 @@ The ablation section can be supressed with `--no-ablation`
 
 ### Immediate ablation and validatation after configuration
 
-By adding `--ablation` and/or `--validation` to `configure_solver.py`, ablation and respectivelly validation will run directly after the configuration has finished. 
-`Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN --ablation --validation`
+By adding `--ablation` and/or `--validate` to `configure_solver.py`, ablation and respectivelly validation will run directly after the configuration has finished. 
+
+`Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN --ablation --validate`
+
+or, including the test set:
+
+`Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN --instance-set-test Instances/PTN2 --ablation --validate`
 
 There is no need to execute `run_ablation.py` and/or `validate_configured_vs_default.py` when these flags are given afterwards
 
