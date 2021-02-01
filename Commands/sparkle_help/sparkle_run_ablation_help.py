@@ -46,8 +46,6 @@ def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_na
     for candidate in copy_candidates:
         recursive = "-r" if candidate[-1] == "/" else ""
         candidate_path = str(pathlib.PurePath(sgh.ablation_dir,candidate))
-        print(candidate_path)
-        print(ablation_scenario_dir)
         cmd = "cp {} {} {}".format(recursive, candidate_path, ablation_scenario_dir)
         os.system(cmd)
 
