@@ -59,6 +59,7 @@ if __name__ == r'__main__':
 		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
 	else:
 		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
+
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
 
 	key_str = sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
@@ -92,6 +93,7 @@ if __name__ == r'__main__':
 	except:
 		print('c ****** WARNING: Feature vector computing on instance ' + instance_path + ' failed! ******')
 		print('c ****** WARNING: The feature vector of this instace consists of missing values ******')
+
 		command_line = r'rm -f ' + result_path
 		os.system(command_line)
 		tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path, extractor_path, result_path)

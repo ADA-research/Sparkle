@@ -88,3 +88,6 @@ if __name__ == r'__main__':
 	else:
 		compute_features_parallel(my_flag_recompute)
 
+	# Write used settings to file
+	sgh.settings.write_used_settings()
+
