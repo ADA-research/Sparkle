@@ -4,11 +4,11 @@ Initialise the Sparkle platform
 
 `Commands/initialise.py`
 
-Add instances (in CNF format) in a given directory, without running solvers or feature extractors yet
+Add instances (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
 
 `Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN/`
 
-Add solvers with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solvers yet
+Add solvers (here for SAT solving) with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solvers yet
 
 (the directory should contain both the executable and the wrapper)
 
@@ -38,7 +38,7 @@ Generate an experimental report detailing the experimental procedure and perform
 
 `Commands/generate_report.py`
 
-### Run on the test set
+### Run the portfolio selector (e.g. on a test set)
 
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line
 
@@ -48,7 +48,9 @@ Run the portfolio selector on a testing instance *set*
 
 `Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/`
 
-Generate an experimental report detailing the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`
+Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`
 
-`Commands/generate_report.py --test-case-directory Test_Cases/PTN2/`
+`Commands/generate_report.py`
+
+By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/PTN2/`
 
