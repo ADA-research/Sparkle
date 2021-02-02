@@ -12,6 +12,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
+
 try:
 	from sparkle_help import sparkle_global_help as sgh
 	from sparkle_help import sparkle_basic_help

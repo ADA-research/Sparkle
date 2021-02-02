@@ -57,14 +57,17 @@ class Sparkle_CSV:
 		self.dataframe.to_csv(self.csv_filepath)
 		fo.close();
 		return
-	
-	def save_csv(self, csv_filepath):
+
+
+	def save_csv(self, csv_filepath: str):
 		fo = open(csv_filepath, 'w+')
 		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 		self.dataframe.to_csv(csv_filepath)
 		fo.close()
+
 		return
-		
+
+
 	def get_value_index(self, row_index, column_index):
 		ret = self.dataframe.at[self.dataframe.index[row_index], self.dataframe.columns[column_index]]
 		return ret

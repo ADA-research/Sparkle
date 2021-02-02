@@ -11,21 +11,21 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import sys
-import fcntl
+
 try:
 	from sparkle_help import sparkle_global_help as sgh
-	from sparkle_help import sparkle_file_help as sfh
 	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 	from sparkle_help import sparkle_job_help
 	from sparkle_help import sparkle_compute_features_help as scf
 	from sparkle_help import sparkle_slurm_help as ssh
+	from sparkle_help import sparkle_logging as sl
 except ImportError:
 	import sparkle_global_help as sgh
-	import sparkle_file_help as sfh
 	import sparkle_feature_data_csv_help as sfdcsv
 	import sparkle_job_help
 	import sparkle_compute_features_help as scf
 	import sparkle_slurm_help as ssh
+	import sparkle_logging as sl
 
 
 def computing_features_parallel(feature_data_csv_path, mode):
@@ -77,6 +77,10 @@ def computing_features_parallel(feature_data_csv_path, mode):
 
 	execution_dir = './'
 	sbatch_script_path = sbatch_script_dir + sbatch_script_name
-	ssh.submit_sbatch_script(sbatch_script_path, execution_dir) # execute the sbatch script via slurm
-	return
+	jobid = ssh.submit_sbatch_script(sbatch_script_path, execution_dir) # execute the sbatch script via slurm
+
+	# Log output paths
+	sl.add_output(sbatch_script_path, 'Slurm batch script to compute features in parallel')
+
+	return jobid
 

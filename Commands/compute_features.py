@@ -38,7 +38,7 @@ def compute_features_parallel(my_flag_recompute):
 	if compute_features_parallel_jobid:
 		dependency_jobid_list.append(compute_features_parallel_jobid)
 
-	# Update performance data csv after the last job is done
+	# Update feature data csv after the last job is done
 	job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
 	compute_features_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
 
