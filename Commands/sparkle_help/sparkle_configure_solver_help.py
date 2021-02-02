@@ -457,13 +457,36 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name):
 	return
 
 
+def check_optimised_configuration_params(params: str):
+	# Check if a valid configuration was found
+	if params == '':
+		print('ERROR: Invalid optimised_configuration_str; Stopping execution!')
+		sys.exit(-1)
+
+	return
+
+
+def check_optimised_configuration_performance(performance: str):
+	# Check if a valid seed was found
+	if performance == -1:
+		print('ERROR: Invalid optimised_configuration_performance; Stopping execution!')
+		sys.exit(-1)
+
+	return
+
+
+def check_optimised_configuration_seed(seed: str):
+	# Check if a valid seed was found
+	if seed == -1:
+		print('ERROR: Invalid optimised_configuration_seed; Stopping execution!')
+		sys.exit(-1)
+
+	return
+
+
 def get_optimised_configuration_params(solver_name: str, instance_set_name: str) -> str:
 	(optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed) = get_optimised_configuration_from_file(solver_name, instance_set_name)
-
-	# Check if a valid configuration was found
-	if optimised_configuration_str == '':
-		print('ERROR: Invalid optimised_configuration_str in function \'get_optimised_configuration_params\'; Stopping execution!')
-		sys.exit(-1)
+	check_optimised_configuration_params(optimised_configuration_str)
 
 	return optimised_configuration_str
 
@@ -527,11 +550,9 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
 
 def get_optimised_configuration(solver_name: str, instance_set_name: str) -> Tuple[str, str, str]:
 	optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed = get_optimised_configuration_from_file(solver_name, instance_set_name)
-
-	# Check if a valid seed was found
-	if optimised_configuration_seed == -1:
-		print('ERROR: Invalid optimised_configuration_seed in function \'get_optimised_configuration\'; Stopping execution!')
-		sys.exit(-1)
+	check_optimised_configuration_params(optimised_configuration_str)
+	check_optimised_configuration_performance(optimised_configuration_performance)
+	check_optimised_configuration_seed(optimised_configuration_seed)
 
 	return optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed
 
