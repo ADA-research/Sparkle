@@ -236,7 +236,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
                                                                  instance_test_name,
                                                                  exec_path=True)
 
-    (optimised_configuration_params, _, _) = scsh.get_optimised_configuration(solver_name, instance_train_name)
+    optimised_configuration_params = scsh.get_optimised_configuration_params(solver_name, instance_train_name)
 
     smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
     concurrent_clis = sgh.settings.get_slurm_clis_per_node()

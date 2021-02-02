@@ -57,7 +57,6 @@ else
 	echo $output
 fi
 
-
 # Run ablation on test set
 output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path --instance-set-test $instances_test_path | tail -1)
 
