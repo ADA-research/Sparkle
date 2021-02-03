@@ -62,13 +62,13 @@ Generate an experimental report detailing the experimental procedure and perform
 
 Run the portfolio selector on a *single* testing instance; the result will be printed to the command line. We again set the performance measure to absolute quality.
 
-`Commands/run_sparkle_portfolio_selector.py "Examples/Resources/Instances/CCAG2/Banking2.model Examples/Resources/Instances/CCAG2/Banking2.constraints" --performance-measure QUALITY_ABSOLUTE`
+`Commands/run_sparkle_portfolio_selector.py Examples/Resources/CCAG/Instances/CCAG2/Banking2.model Examples/Resources/CCAG/Instances/CCAG2/Banking2.constraints --performance-measure QUALITY_ABSOLUTE`
 
 #### Run on an instance set
 
 Run the portfolio selector on a testing instance *set*. We again set the performance measure to absolute quality.
 
-`Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/CCAG2/ --performance-measure QUALITY_ABSOLUTE`
+`Commands/run_sparkle_portfolio_selector.py Examples/Resources/CCAG/Instances/CCAG2/ --performance-measure QUALITY_ABSOLUTE`
 
 #### Generate a report including results on the test set
 

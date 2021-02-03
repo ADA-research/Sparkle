@@ -39,20 +39,20 @@ except ImportError:
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
 	runsolver_path = sgh.runsolver_path
-	
+
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
 	err_path = result_path.replace(r'.rawres', r'.err')
 	runsolver_watch_data_path = result_path.replace(r'.rawres', r'.log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
-	
+
 	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sgh.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
-	
+
 	try:
 		os.system(command_line)
 	except:
 		if not os.path.exists(result_path):
 			sfh.create_new_empty_file(result_path)
-	
+
 	try:
 		tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
 	except:
@@ -68,14 +68,14 @@ def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_t
 		list_feature_vector = myline.split(',')
 		del list_feature_vector[0]
 		fin.close()
-	
+
 	command_line = r'rm -f ' + result_path
 	os.system(command_line)
 	command_line = r'rm -f ' + err_path
 	os.system(command_line)
 	command_line = r'rm -f ' + runsolver_watch_data_path
 	os.system(command_line)
-	
+
 	return list_feature_vector
 
 def print_predict_schedule(predict_schedule_result_path):
@@ -143,22 +143,32 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
 
 
 def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performance_data_csv_path: str = None):
-	print('c Start running Sparkle portfolio selector on solving instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
+	# Create instance strings to accommodate multi-file instances
+	instance_path_list = instance_path.split()
+	instance_file_list = []
+
+	for instance in instance_path_list:
+		instance_file_list.append(sfh.get_last_level_directory_name(instance))
+
+	instance_files_str = " ".join(instance_file_list)
+	instance_files_str_ = "_".join(instance_file_list)
+
+	print('c Start running Sparkle portfolio selector on solving instance ' + instance_files_str + ' ...')
 	python_executable = sgh.python_executable
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 
-	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
+	print('c Sparkle computing features of instance ' + instance_files_str + ' ...')
 	list_feature_vector = []
 
 	cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
 
 	for extractor_path in sgh.extractor_list:
-		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
-		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + instance_files_str + ' ...')
+		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + instance_files_str_ + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 
 		list_feature_vector = list_feature_vector + get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
-		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!')
-	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + r' done!')
+		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + instance_files_str + ' done!')
+	print('c Sparkle computing features of instance ' + instance_files_str + r' done!')
 
 	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + sgh.sparkle_portfolio_selector_path + ' --feature_vec \"'
 	for i in range(0, len(list_feature_vector)):

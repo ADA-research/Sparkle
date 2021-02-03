@@ -34,13 +34,13 @@ if __name__ == r'__main__':
 
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
-	parser.add_argument('instance_path', type=str, help='Path to instance or instance directory')
+	parser.add_argument('instance_path', type=str, nargs='+', help='Path to instance or instance directory')
 	parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, action=ac.SetByUser, help='the performance measure, e.g. runtime')
 
 	# Process command line arguments
 	args = parser.parse_args()
-	instance_path = args.instance_path
+	instance_path = " ".join(args.instance_path) # Turn multiple instance files into a space separated string
 
 	if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
 	if ac.set_by_user(args, 'performance_measure'): sgh.settings.set_general_performance_measure(PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
@@ -49,12 +49,14 @@ if __name__ == r'__main__':
 		print('ERROR: The run_sparkle_portfolio_selector command is not yet implemented for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)')
 		sys.exit()
 
-	if os.path.isfile(instance_path):
-		srps.call_sparkle_portfolio_selector_solve_instance(instance_path)
-		print('c Running Sparkle portfolio selector done!')
-	elif os.path.isdir(instance_path):
+	# Directory
+	if os.path.isdir(instance_path):
 		srps.call_sparkle_portfolio_selector_solve_instance_directory(instance_path)
 		print('c Sparkle portfolio selector is running ...')
+	# Single instance (single-file or multi-file)
+	elif os.path.isfile(instance_path) or os.path.isfile(instance_path.split()[0]):
+		srps.call_sparkle_portfolio_selector_solve_instance(instance_path)
+		print('c Running Sparkle portfolio selector done!')
 	else:
 		print('c Input instance or instance directory error!')
 
