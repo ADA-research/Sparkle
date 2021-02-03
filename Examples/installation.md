@@ -20,9 +20,14 @@ Before starting Sparkle, please install the following packages with the specific
 
 		`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_first.txt`
 
-3. Install second set of required python packages:
+4. Install second set of required python packages:
 	* `pip install -r requirements_second.txt`
 	* or with anaconda:
 
 		`/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_second.txt`
 
+5. Install other requirements if they are not on your system yet:
+	* `epstopdf`
+	* `LaTeX`
+	* `BibTeX`
+	* `gnuplot`
