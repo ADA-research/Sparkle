@@ -15,8 +15,12 @@ import sys
 import random
 from pathlib import Path
 
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
+try:
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help import sparkle_global_help as sgh
+except ImportError:
+	import sparkle_file_help as sfh
+	import sparkle_global_help as sgh
 
 
 __sparkle_instance_list_file = 'sparkle_instance_list.txt'

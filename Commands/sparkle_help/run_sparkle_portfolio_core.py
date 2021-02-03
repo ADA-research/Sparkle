@@ -33,12 +33,12 @@ if __name__ == r'__main__':
 
 	# Define command line arguments
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--instance', required=True, type=str, help='path to instance to run on')
+	parser.add_argument('--instance', required=True, type=str, nargs='+', help='path to instance to run on')
 	parser.add_argument('--performance-data-csv', required=True, type=str, help='path to performance data csv')
 	args = parser.parse_args()
 
 	# Process command line arguments
-	instance_path = args.instance
+	instance_path = " ".join(args.instance) # Turn multiple instance files into a space separated string
 	performance_data_csv_path = args.performance_data_csv
 
 	# Run portfolio selector

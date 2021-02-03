@@ -25,6 +25,7 @@ try:
 	from sparkle_help import sparkle_logging as sl
 	from sparkle_help.reporting_scenario import ReportingScenario
 	from sparkle_help.reporting_scenario import Scenario
+	from sparkle_help import sparkle_instances_help as sih
 except ImportError:
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
@@ -35,6 +36,7 @@ except ImportError:
 	import sparkle_logging as sl
 	from reporting_scenario import ReportingScenario
 	from reporting_scenario import Scenario
+	import sparkle_instances_help as sih
 
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
@@ -258,13 +260,16 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	return
 
 
-def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_path):
-	if instance_directory_path[-1] != r'/':
-		instance_directory_path += r'/'
+def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_path: str):
+	if instance_directory_path[-1] != '/':
+		instance_directory_path += '/'
+
 	instance_directory_path_last_level = sfh.get_last_level_directory_name(instance_directory_path)
-	if instance_directory_path_last_level[-1] != r'/':
-		instance_directory_path_last_level += r'/'
-	test_case_directory_path = r'Test_Cases/' + instance_directory_path_last_level
+
+	if instance_directory_path_last_level[-1] != '/':
+		instance_directory_path_last_level += '/'
+
+	test_case_directory_path = 'Test_Cases/' + instance_directory_path_last_level
 
 	# Initialise latest scenario
 	global latest_scenario
@@ -274,36 +279,48 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	sgh.latest_scenario.set_selection_test_case_directory(Path(test_case_directory_path))
 	sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
 
-	list_all_cnf_filename = sfh.get_list_all_cnf_filename(instance_directory_path)
-	
-	if not os.path.exists(r'Test_Cases/'):
-		os.system(r'mkdir Test_Cases/')
-	os.system(r'mkdir -p ' + test_case_directory_path)
-	os.system(r'mkdir -p ' + test_case_directory_path + r'Tmp/')
-	
-	test_performance_data_csv_name = r'sparkle_performance_data.csv'
+	if not os.path.exists('Test_Cases/'):
+		os.system('mkdir Test_Cases/')
+	os.system('mkdir -p ' + test_case_directory_path)
+	os.system('mkdir -p ' + test_case_directory_path + 'Tmp/')
+
+	test_performance_data_csv_name = 'sparkle_performance_data.csv'
 	test_performance_data_csv_path = test_case_directory_path + test_performance_data_csv_name
 	spdcsv.Sparkle_Performance_Data_CSV.create_empty_csv(test_performance_data_csv_path)
 	test_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(test_performance_data_csv_path)
-	
+
 	total_job_list = []
-	for cnf_filename in list_all_cnf_filename:
-		cnf_filepath = instance_directory_path + cnf_filename
-		test_performance_data_csv.add_row(cnf_filepath)
-		total_job_list.append([cnf_filepath])
-	
-	solver_name = r'Sparkle_Portfolio_Selector'
+
+	# Multi-file instances
+	if sih._check_existence_of_instance_list_file(instance_directory_path):
+		list_all_filename = sih._get_list_instance(instance_directory_path)
+	# Single file instances
+	else:
+		list_all_filename = sfh.get_list_all_cnf_filename(instance_directory_path)
+
+	for filename in list_all_filename:
+		paths = []
+
+		for name in filename.split():
+			path = instance_directory_path + name
+			paths.append(path)
+
+		filepath = " ".join(paths)
+		test_performance_data_csv.add_row(filepath)
+		total_job_list.append([filepath])
+
+	solver_name = 'Sparkle_Portfolio_Selector'
 	test_performance_data_csv.add_column(solver_name)
-	
+
 	test_performance_data_csv.update_csv()
-	
+
 	i = 0
 	j = len(total_job_list)
-	sbatch_shell_script_path = test_case_directory_path + r'Tmp/'+ r'running_sparkle_portfolio_selector_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+	sbatch_shell_script_path = test_case_directory_path + 'Tmp/'+ 'running_sparkle_portfolio_selector_sbatch_shell_script_' + str(i) + '_' + str(j) + '_' + sparkle_basic_help.get_time_pid_random_string() + '.sh'
 	generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell_script_path, test_case_directory_path, test_performance_data_csv_path, total_job_list, i, j)
-	os.system(r'chmod a+x ' + sbatch_shell_script_path)
-	command_line = r'sbatch ' + sbatch_shell_script_path
-	
+	os.system('chmod a+x ' + sbatch_shell_script_path)
+	command_line = 'sbatch ' + sbatch_shell_script_path
+
 	os.system(command_line)
 	#print(command_line)
 

@@ -89,17 +89,17 @@ if __name__ == r'__main__':
 				cmd = 'cp %s %s' % (source_file_path, target_file_path)
 				os.system(cmd)
 				intended_instance_line += target_file_path + ' '
-			
+
 			intended_instance_line = intended_instance_line.strip()
 
 			sgh.instance_list.append(intended_instance_line)
 			sfh.add_new_instance_into_file(intended_instance_line)
 			feature_data_csv.add_row(intended_instance_line)
 			performance_data_csv.add_row(intended_instance_line)
-			
+
 			print(r'c Instance ' + instance_line + r' has been added!')
 			print(r'c')
-		
+
 		feature_data_csv.update_csv()
 		performance_data_csv.update_csv()
 	else:
@@ -112,7 +112,7 @@ if __name__ == r'__main__':
 		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 
 		num_inst = len(list_source_all_filename)
-		
+
 		print('c The number of intended adding instances: ' + str(num_inst))
 
 		for i in range(0, len(list_source_all_filename)):
@@ -139,19 +139,19 @@ if __name__ == r'__main__':
 
 		feature_data_csv.update_csv()
 		performance_data_csv.update_csv()
-	
+
 	print('c Adding instances ' + sfh.get_last_level_directory_name(instances_directory) + ' done!')
 
 	if os.path.exists(sgh.sparkle_portfolio_selector_path):
 		command_line = r'rm -f ' + sgh.sparkle_portfolio_selector_path
 		os.system(command_line)
 		print('c Removing Sparkle portfolio selector ' + sgh.sparkle_portfolio_selector_path + ' done!')
-	
+
 	if os.path.exists(sgh.sparkle_report_path):
 		command_line = r'rm -f ' + sgh.sparkle_report_path
 		os.system(command_line)
 		print('c Removing Sparkle report ' + sgh.sparkle_report_path + ' done!')
-	
+
 	if not my_flag_run_extractor_later:
 		if not my_flag_parallel:
 			print('c Start computing features ...')
