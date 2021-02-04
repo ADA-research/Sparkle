@@ -128,7 +128,10 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	output = '--output=' + std_out
 	error = '--error=' + std_err
 	array = '--array=0-' + str(num_jobs-1) + '%' + str(max_jobs)
+
+
 	n_cpus = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace CPU
+	#Retrieve
 	cpus = '--cpus-per-task=' + str(n_cpus)
 
 	# Log script and output paths

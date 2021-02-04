@@ -314,6 +314,8 @@ def generate_configuration_sbatch_script(sbatch_script_path, scenario_file, resu
 		seed = i + 1
 		result_path = result_directory + sbatch_script_path + r'_seed_' + str(seed) + r'_smac.txt'
 		smac_execdir_i = smac_execdir + r'/' + str(seed)
+		sl.add_output(sgh.smac_dir + result_path,"Configuration log for SMAC run {}".format(num_job_total))
+
 		fout.write('\'%s %d %s %s\' \\' % (scenario_file, seed, result_path, smac_execdir_i) + '\n')
 
 	fout.write(r')' + '\n')
