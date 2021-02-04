@@ -12,12 +12,6 @@
 #SBATCH --nodes=1
 
 # Settings
-default_settings_path="Settings/sparkle_default_settings.txt"
-default_settings_tmp="Settings/sparkle_default_settings.tmp"
-default_settings_test="Commands/test/test_files/sparkle_default_settings.txt"
-mv $default_settings_path $default_settings_tmp # Save user settings
-cp $default_settings_test $default_settings_path # Activate test settings
-
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
@@ -71,7 +65,4 @@ else
 	echo "[failure] run_solvers --parallel --recompute --verifier SAT test failed with output:"
 	echo $output
 fi
-
-# Restore original settings
-mv $default_settings_tmp $default_settings_path
 

@@ -60,4 +60,25 @@ Grace is the computing cluster of the ADA group\footnote{\url{http://ada.liacs.n
 
 \end{enumerate}
 
+\subsection{TCA and FastCA solvers}
+The TCA and FastCA solvers, require \texttt{GLIBCXX\_3.4.21}. This library comes with \texttt{GCC 5.1.0} (or greater). Following installation you may have to update environment variables such as \texttt{LD\_LIBRARY\_PATH, LD\_RUN\_PATH, CPATH} to point to your installation directory.
+
+TCA can be recompiled as follows in the \texttt{Examples/Resources/CCAG/Solvers/TCA/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd src/TCA/
+make clean
+make
+cp TCA ../../
+\end{Verbatim}
+
+FastCA can be recompiled as follows in the \texttt{Examples/Resources/CCAG/Solvers/FastCA/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd src/fastca/fastCA/
+make clean
+make
+cp FastCA ../../../
+\end{Verbatim}
+
 \end{document}

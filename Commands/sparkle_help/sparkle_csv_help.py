@@ -57,14 +57,17 @@ class Sparkle_CSV:
 		self.dataframe.to_csv(self.csv_filepath)
 		fo.close();
 		return
-	
-	def save_csv(self, csv_filepath):
+
+
+	def save_csv(self, csv_filepath: str):
 		fo = open(csv_filepath, 'w+')
 		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 		self.dataframe.to_csv(csv_filepath)
 		fo.close()
+
 		return
-		
+
+
 	def get_value_index(self, row_index, column_index):
 		ret = self.dataframe.at[self.dataframe.index[row_index], self.dataframe.columns[column_index]]
 		return ret
@@ -96,9 +99,11 @@ class Sparkle_CSV:
 			return
 		self.dataframe.rename(columns = {ori_column_name:mod_column_name}, inplace=True)
 		return
-	
-	def get_column_size(self):
+
+
+	def get_column_size(self) -> int:
 		return len(self.dataframe.columns.tolist())
+
 
 	def add_column(self, column_name, value_list=[]):
 		if column_name in self.list_columns():
@@ -155,11 +160,11 @@ class Sparkle_CSV:
 			return
 		self.dataframe.rename(index = {ori_row_name:mod_row_name}, inplace=True)
 		return
+
 	
-	def get_row_size(self):
-		#ret = len(self.dataframe.index.tolist())
-		#return ret
+	def get_row_size(self) -> int:
 		return len(self.dataframe.index.tolist())
+
 
 	def add_row(self, row_name, value_list=[]):
 		if row_name in self.list_rows():

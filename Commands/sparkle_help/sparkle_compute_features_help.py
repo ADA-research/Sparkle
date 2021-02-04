@@ -12,19 +12,18 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
+
 try:
 	from sparkle_help import sparkle_global_help as sgh
 	from sparkle_help import sparkle_basic_help
 	from sparkle_help import sparkle_file_help as sfh
 	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-	from sparkle_help import sparkle_experiments_related_help as ser
 	from sparkle_help import sparkle_job_help
 except ImportError:
 	import sparkle_global_help as sgh
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
 	import sparkle_feature_data_csv_help as sfdcsv
-	import sparkle_experiments_related_help as ser
 	import sparkle_job_help
 
 
@@ -53,8 +52,10 @@ def computing_features(feature_data_csv_path, mode):
 		sys.exit()
 	
 	runsolver_path = sgh.runsolver_path
-	if len(sgh.extractor_list)==0: cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance + 1
-	else: cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance/len(sgh.extractor_list) + 1
+	if len(sgh.extractor_list) == 0:
+		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
+	else:
+		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
 	print('c Cutoff time for each run on computing features is set to ' + str(cutoff_time_each_extractor_run) + ' seconds')
 	

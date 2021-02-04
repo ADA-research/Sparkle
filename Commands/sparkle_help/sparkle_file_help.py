@@ -11,17 +11,17 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
-import sys
 import time
 import random
 import fcntl
-import pathlib
 from pathlib import Path
+from typing import List
+
 
 try:
-	from sparkle_help import sparkle_global_help
+	from sparkle_help import sparkle_global_help as sgh
 except ImportError:
-	import sparkle_global_help
+	import sparkle_global_help as sgh
 
 
 def create_new_empty_file(filepath):
@@ -32,7 +32,7 @@ def create_new_empty_file(filepath):
 
 def checkout_directory(path, make_if_not_exist=True):
 	if (make_if_not_exist) and not os.path.exists(path):
-		pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+		Path(path).mkdir(parents=True, exist_ok=True)
 	return os.path.isdir(path)
 
 def get_current_directory_name(filepath):
@@ -83,6 +83,27 @@ def get_file_least_extension(filepath):
 	if right_index<0: pass
 	else: file_extension = filename[right_index+1:]
 	return file_extension
+
+
+def get_instance_list_from_reference(instances_path: Path) -> List[str]:
+	instance_list = []
+	instances_path_str = str(instances_path)
+
+	# Read instances from reference file
+	instance_list_file_path = sgh.instance_list_path
+
+	with instance_list_file_path.open('r') as infile:
+		lines = infile.readlines()
+
+		for line in lines:
+			words = line.strip().split()
+
+			if len(words) <= 0:
+				continue
+			elif line.strip().startswith(instances_path_str):
+				instance_list.append(line.strip())
+
+	return instance_list
 
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
@@ -197,23 +218,15 @@ def get_list_all_statusinfo_filename(filepath):
 	return statusinfo_list
 
 def add_new_instance_into_file(filepath):
-	fo = open(sparkle_global_help.instance_list_path, 'a+')
+	fo = open(str(sgh.instance_list_path), 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(filepath + '\n')
 	fo.close()
 	return
 
 
-def add_new_instance_reference_into_file(filepath, status):
-	fo = open(sparkle_global_help.instance_reference_list_path, 'a+')
-	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	fo.write(filepath + r' ' + status + '\n')
-	fo.close()
-	return
-
-
 def add_new_solver_into_file(filepath, deterministic='0'):
-	fo = open(sparkle_global_help.solver_list_path, 'a+')
+	fo = open(sgh.solver_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(filepath + r' ' + deterministic + '\n')
 	fo.close()
@@ -221,7 +234,7 @@ def add_new_solver_into_file(filepath, deterministic='0'):
 
 
 def add_new_solver_nickname_into_file(nickname, filepath):
-	fo = open(sparkle_global_help.solver_nickname_list_path, 'a+')
+	fo = open(sgh.solver_nickname_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(nickname + r' ' + filepath + '\n')
 	fo.close()
@@ -229,21 +242,21 @@ def add_new_solver_nickname_into_file(nickname, filepath):
 
 
 def add_new_extractor_into_file(filepath):
-	fo = open(sparkle_global_help.extractor_list_path, 'a+')
+	fo = open(sgh.extractor_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(filepath + '\n')
 	fo.close()
 	return
 
 def add_new_extractor_feature_vector_size_into_file(filepath, feature_vector_size):
-	fo = open(sparkle_global_help.extractor_feature_vector_size_list_path, 'a+')
+	fo = open(sgh.extractor_feature_vector_size_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(filepath + r' ' + str(feature_vector_size) + '\n')
 	fo.close()
 	return
 	
 def add_new_extractor_nickname_into_file(nickname, filepath):
-	fo = open(sparkle_global_help.extractor_nickname_list_path, 'a+')
+	fo = open(sgh.extractor_nickname_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(nickname + r' ' + filepath + '\n')
 	fo.close()
@@ -252,11 +265,28 @@ def add_new_extractor_nickname_into_file(nickname, filepath):
 	
 
 def write_solver_list():
-	fout = open(sparkle_global_help.solver_list_path, 'w+')
+	fout = open(sgh.solver_list_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	for i in range(0, len(sparkle_global_help.solver_list)):
-		fout.write(sparkle_global_help.solver_list[i] + '\n')
+	for i in range(0, len(sgh.solver_list)):
+		fout.write(sgh.solver_list[i] + '\n')
 	fout.close()
+	return
+
+
+def remove_line_from_file(line_start: str, filepath: Path):
+	newlines = []
+
+	# Store lines that do not start with the input line
+	with filepath.open('r') as infile:
+		for current_line in infile:
+			if not current_line.startswith(line_start):
+				newlines.append(current_line)
+
+	# Overwrite the file with stored lines
+	with filepath.open('w') as outfile:
+		for current_line in newlines:
+			outfile.write(current_line)
+
 	return
 
 
@@ -264,67 +294,59 @@ def remove_from_solver_list(filepath):
 	newlines = []
 
 	# Store lines that do not contain filepath
-	with open(sparkle_global_help.solver_list_path, 'r') as infile:
+	with open(sgh.solver_list_path, 'r') as infile:
 		for line in infile:
 			if not filepath in line:
 				newlines.append(line)
 
 	# Overwrite the file with stored lines
-	with open(sparkle_global_help.solver_list_path, 'w') as outfile:
+	with open(sgh.solver_list_path, 'w') as outfile:
 		for line in newlines:
 			outfile.write(line)
 
 	# Remove solver from list
-	sparkle_global_help.solver_list.remove(filepath)
+	sgh.solver_list.remove(filepath)
 
 	return
 
 
 def write_solver_nickname_mapping():
-	fout = open(sparkle_global_help.solver_nickname_list_path, 'w+')
+	fout = open(sgh.solver_nickname_list_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	for key in sparkle_global_help.solver_nickname_mapping:
-		fout.write(key + r' ' + sparkle_global_help.solver_nickname_mapping[key] + '\n')
+	for key in sgh.solver_nickname_mapping:
+		fout.write(key + r' ' + sgh.solver_nickname_mapping[key] + '\n')
 	fout.close()
 	return
 
 def write_extractor_list():
-	fout = open(sparkle_global_help.extractor_list_path, 'w+')
+	fout = open(sgh.extractor_list_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	for i in range(0, len(sparkle_global_help.extractor_list)):
-		fout.write(sparkle_global_help.extractor_list[i] + '\n')
+	for i in range(0, len(sgh.extractor_list)):
+		fout.write(sgh.extractor_list[i] + '\n')
 	fout.close()
 	return
 
 def write_extractor_feature_vector_size_mapping():
-	fout = open(sparkle_global_help.extractor_feature_vector_size_list_path, 'w+')
+	fout = open(sgh.extractor_feature_vector_size_list_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	for key in sparkle_global_help.extractor_feature_vector_size_mapping:
-		fout.write(key + r' ' + str(sparkle_global_help.extractor_feature_vector_size_mapping[key]) + '\n')
+	for key in sgh.extractor_feature_vector_size_mapping:
+		fout.write(key + r' ' + str(sgh.extractor_feature_vector_size_mapping[key]) + '\n')
 	fout.close()
 	return
 
 def write_extractor_nickname_mapping():
-	fout = open(sparkle_global_help.extractor_nickname_list_path, 'w+')
+	fout = open(sgh.extractor_nickname_list_path, 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	for key in sparkle_global_help.extractor_nickname_mapping:
-		fout.write(key + r' ' + sparkle_global_help.extractor_nickname_mapping[key] + '\n')
+	for key in sgh.extractor_nickname_mapping:
+		fout.write(key + r' ' + sgh.extractor_nickname_mapping[key] + '\n')
 	fout.close()
 	return
 
 def write_instance_list():
-	fout = open(sparkle_global_help.instance_list_path, 'w+')
+	fout = open(str(sgh.instance_list_path), 'w+')
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	for i in range(0, len(sparkle_global_help.instance_list)):
-		fout.write(sparkle_global_help.instance_list[i] + '\n')
-	fout.close()
-	return
-
-def write_instance_reference_mapping():
-	fout = open(sparkle_global_help.instance_reference_list_path, 'w+')
-	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	for key in sparkle_global_help.instance_reference_mapping:
-		fout.write(key + r' ' + sparkle_global_help.instance_reference_mapping[key] + '\n')	
+	for i in range(0, len(sgh.instance_list)):
+		fout.write(sgh.instance_list[i] + '\n')
 	fout.close()
 	return
 
@@ -362,22 +384,24 @@ def rmtree(directory: Path):
 				rmtree(path)
 			else:
 				rmfile(path)
-		try:
-			directory.rmdir()
-		except FileNotFoundError:
-			pass
+		rmdir(directory)
 	else:
 		rmfile(directory)
 
 	return
 
 
-def rmfile(file_name: Path):
+def rmdir(dir_name: Path):
 	try:
-		#TODO: In new python version use unlink(missing_ok=True)
-		file_name.unlink()
+		dir_name.rmdir()
 	except FileNotFoundError:
 		pass
+
+	return
+
+
+def rmfile(file_name: Path):
+	file_name.unlink(missing_ok=True)
 
 	return
 

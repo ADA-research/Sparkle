@@ -11,19 +11,20 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
-import time
-import random
 import sys
 import fcntl
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
+from typing import Tuple
+
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
+from sparkle_help import sparkle_instances_help as sih
 
 
 class InstanceType(Enum):
@@ -88,12 +89,12 @@ def handle_file_instance_test(solver_name, instance_set_name):
 
 # Copy file with the specified postfix listing instances from the instance directory to the solver directory
 def handle_file_instance(solver_name, instance_set_name, file_postfix):
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + r'/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + '/'
 	smac_file_instance_path_ori = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + file_postfix
 	smac_file_instance_path_target = smac_solver_dir + instance_set_name + file_postfix
 
-	command_line = r'cp ' + smac_file_instance_path_ori + r' ' + smac_file_instance_path_target
+	command_line = 'cp ' + smac_file_instance_path_ori + ' ' + smac_file_instance_path_target
 	os.system(command_line)
 
 	return
@@ -458,7 +459,41 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name):
 	return
 
 
-def get_optimised_configuration(solver_name, instance_set_name):
+def check_optimised_configuration_params(params: str):
+	# Check if a valid configuration was found
+	if params == '':
+		print('ERROR: Invalid optimised_configuration_str; Stopping execution!')
+		sys.exit(-1)
+
+	return
+
+
+def check_optimised_configuration_performance(performance: str):
+	# Check if a valid seed was found
+	if performance == -1:
+		print('ERROR: Invalid optimised_configuration_performance; Stopping execution!')
+		sys.exit(-1)
+
+	return
+
+
+def check_optimised_configuration_seed(seed: str):
+	# Check if a valid seed was found
+	if seed == -1:
+		print('ERROR: Invalid optimised_configuration_seed; Stopping execution!')
+		sys.exit(-1)
+
+	return
+
+
+def get_optimised_configuration_params(solver_name: str, instance_set_name: str) -> str:
+	(optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed) = get_optimised_configuration_from_file(solver_name, instance_set_name)
+	check_optimised_configuration_params(optimised_configuration_str)
+
+	return optimised_configuration_str
+
+
+def get_optimised_configuration_from_file(solver_name: str, instance_set_name: str) -> Tuple[str, str, str]:
 	optimised_configuration_str = ''
 	optimised_configuration_performance = -1
 	optimised_configuration_seed = -1
@@ -472,6 +507,7 @@ def get_optimised_configuration(solver_name, instance_set_name):
 	for file_result_name in list_file_result_name:
 		file_result_path = smac_results_dir + file_result_name
 		fin = open(file_result_path, 'r+')
+
 		while True:
 			myline = fin.readline()
 			if not myline: break
@@ -486,9 +522,19 @@ def get_optimised_configuration(solver_name, instance_set_name):
 					# Skip the line before the line with the optimised configuration
 					myline_2 = fin.readline()
 					myline_2 = fin.readline()
-					mylist_2 = myline_2.strip().split()
-					# Skip 8 words before the configured parameters
-					start_index = 8
+					# If this is a single file instance:
+					if not sih.check_existence_of_reference_instance_list(instance_set_name):
+						mylist_2 = myline_2.strip().split()
+						# Skip 8 words before the configured parameters
+						start_index = 8
+					# Otherwise, for multi-file instances:
+					else:
+						# Skip everything before the last double quote "
+						mylist_2 = myline_2.strip().split('"')
+						last_idx = len(mylist_2) - 1
+						mylist_2 = mylist_2[last_idx].strip().split()
+						# Then skip another 4 words before the configured parameters
+						start_index = 4
 					end_index = len(mylist_2)
 					optimised_configuration_str = ''
 					for i in range(start_index, end_index):
@@ -498,7 +544,17 @@ def get_optimised_configuration(solver_name, instance_set_name):
 					myline_3 = fin.readline()
 					mylist_3 = myline_3.strip().split()
 					optimised_configuration_seed = mylist_3[4]
+
 		fin.close()
+
+	return optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed
+
+
+def get_optimised_configuration(solver_name: str, instance_set_name: str) -> Tuple[str, str, str]:
+	optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed = get_optimised_configuration_from_file(solver_name, instance_set_name)
+	check_optimised_configuration_params(optimised_configuration_str)
+	check_optimised_configuration_performance(optimised_configuration_performance)
+	check_optimised_configuration_seed(optimised_configuration_seed)
 
 	return optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed
 

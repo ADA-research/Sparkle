@@ -13,6 +13,14 @@
 #SBATCH --cpus-per-task=1
 
 ## Data
+feature_data_path="Feature_Data/sparkle_feature_data.csv"
+feature_data_tmp="Commands/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
+feature_data_test="Commands/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
+
+performance_data_path="Performance_Data/sparkle_performance_data.csv"
+performance_data_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
+performance_data_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
+
 selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
 selector_tmp="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
 selector_test="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
@@ -23,6 +31,8 @@ test_results_tmp="Test_Cases/PTN2/sparkle_performance_data.tmp"
 test_results_test="Commands/test/test_files/Test_Cases/"
 
 # Save user data if any
+mv $feature_data_path $feature_data_tmp 2> /dev/null
+mv $performance_data_path $performance_data_tmp 2> /dev/null
 mv $selector_path $selector_tmp 2> /dev/null
 mv $test_results_path $test_results_tmp 2> /dev/null
 
@@ -43,12 +53,14 @@ Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers, construct_sparkle_portfolio_selector and run_sparkle_portfolio_selector commands
+cp $feature_data_test $feature_data_path
+cp $performance_data_test $performance_data_path
 cp $selector_test $selector_path
 cp -r $test_results_test ./
 
 # Run generate report for tetst
 output_true="c Report for test generated ..."
-output=$(Commands/generate_report_for_test.py $test_results_dir | tail -1)
+output=$(Commands/generate_report.py --test-case-directory $test_results_dir | tail -1)
 # --settings-file $sparkle_test_settings_path
 
 if [[ $output == $output_true ]];
@@ -61,6 +73,8 @@ fi
 
 # Restore original data if any
 # OR true to get success exit code even when no user data was stored in the tmp file
+mv $feature_data_tmp $feature_data_path 2> /dev/null
+mv $performance_data_tmp $performance_data_path 2> /dev/null
 mv $test_results_tmp $test_results_path 2> /dev/null
 mv $selector_tmp $selector_path 2> /dev/null || true
 

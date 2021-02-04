@@ -25,6 +25,7 @@ from sparkle_help.sparkle_performance_data_csv_help import Sparkle_Performance_D
 from sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_logging as sl
+from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def read_marginal_contribution_csv(path: Path) -> List[Tuple[str, float]]:
@@ -48,6 +49,18 @@ def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]
 		sl.add_output(str(path), 'Marginal contributions to the portfolio selector per solver.')
 
 
+def get_capvalue_list(performance_data_csv: Sparkle_Performance_Data_CSV) -> List[float]:
+	performance_measure = sgh.settings.get_general_performance_measure()
+
+	# If QUALITY_ABSOLUTE is the performance measure, use the maximum performance per instance as capvalue; otherwise the cutoff time is used
+	if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+		capvalue_list = performance_data_csv.get_maximum_performance_per_instance()
+	else:
+		capvalue_list = None
+
+	return capvalue_list
+
+
 def compute_perfect_selector_marginal_contribution(performance_data_csv_path = sgh.performance_data_csv_path, flag_recompute: bool = False) -> List[Tuple[str, float]]:
 	perfect_margi_cont_path = sgh.sparkle_marginal_contribution_perfect_path
 
@@ -65,9 +78,10 @@ def compute_perfect_selector_marginal_contribution(performance_data_csv_path = s
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	num_instances = performance_data_csv.get_row_size()
 	num_solvers = performance_data_csv.get_column_size()
+	capvalue_list = get_capvalue_list(performance_data_csv)
 
 	print('c Computing virtual best performance for portfolio selector with all solvers ...')
-	virtual_best_performance = performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers)
+	virtual_best_performance = performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers, capvalue_list)
 	print('c Virtual best performance for portfolio selector with all solvers is ' + str(virtual_best_performance))
 	print('c Computing done!')
 
@@ -75,7 +89,7 @@ def compute_perfect_selector_marginal_contribution(performance_data_csv_path = s
 		print('c Computing virtual best performance for portfolio selector excluding solver ' + sfh.get_last_level_directory_name(solver) + ' ...')
 		tmp_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 		tmp_performance_data_csv.delete_column(solver)
-		tmp_virtual_best_performance = tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers)
+		tmp_virtual_best_performance = tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers, capvalue_list)
 		print('c Virtual best performance for portfolio selector excluding solver ' + sfh.get_last_level_directory_name(solver) + ' is ' + str(tmp_virtual_best_performance))
 		print('c Computing done!')
 		marginal_contribution = virtual_best_performance - tmp_virtual_best_performance
@@ -96,40 +110,60 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, 
 	python_executable = sgh.python_executable
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 	feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
-	predict_schedule_result_path = r'Tmp/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
 
-	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + actual_portfolio_selector_path + r' --feature_vec' + r' ' + feature_vector_string + r' 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
+	predit_schedule_file = 'predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + '.predres'
+	log_file = 'predict_schedule_autofolio.out'
+	err_file = 'predict_schedule_autofolio.err'
+	predict_schedule_result_path_str = str(Path(sl.caller_log_dir / predit_schedule_file))
+	log_path = Path(sl.caller_log_dir / log_file)
+	err_path_str = str(Path(sl.caller_log_dir / err_file))
 
-	#print 'c ' + command_line
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + actual_portfolio_selector_path + r' --feature_vec' + ' \"' + feature_vector_string + '\" 1> ' + predict_schedule_result_path_str + r' 2> ' + err_path_str
+
+	with log_path.open('a+') as log_file:
+		print('Running command below to get predicted schedule from autofolio:\n', command_line, file=log_file)
+
 	os.system(command_line)
 
-	list_predict_schedule = srps.get_list_predict_schedule_from_file(predict_schedule_result_path)
+	list_predict_schedule = srps.get_list_predict_schedule_from_file(predict_schedule_result_path_str)
 
 	#print r'c for solving instance ' + instance + r', ' + r'list_predict_schedule = ' + str(list_predict_schedule)
 
 	# If there is error output log temporary files for analsysis, otherwise remove them
-	with open(sgh.sparkle_err_path) as file_content:
+	with open(err_path_str) as file_content:
 		lines = file_content.read().splitlines()
 	if len(lines) > 1 or lines[0] != 'INFO:AutoFolio:Predict on Test':
-		sl.add_output(predict_schedule_result_path, 'Predicted portfolio schedule')
-		sl.add_output(sgh.sparkle_err_path, 'Predicted portfolio schedule error output')
+		sl.add_output(str(log_path), 'Predicted portfolio schedule command line call')
+		sl.add_output(predict_schedule_result_path_str, 'Predicted portfolio schedule')
+		sl.add_output(err_path_str, 'Predicted portfolio schedule error output')
 	else:
-		os.system(r'rm -f ' + predict_schedule_result_path)
-		os.system(r'rm -f ' + sgh.sparkle_err_path)
+		os.system('rm -f ' + predict_schedule_result_path_str)
+		os.system('rm -f ' + err_path_str)
+		os.system('rm -f ' + str(log_path))
 
 	return list_predict_schedule
 
 
-def compute_actual_selector_performance(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, num_instances, num_solvers):
+def compute_actual_selector_performance(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, num_instances: int, num_solvers: int, capvalue_list: List[float] = None):
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
-	
+
 	actual_selector_performance = 0
-	
-	for instance in performance_data_csv.list_rows():
-		used_time_for_this_instance, flag_successfully_solving = compute_actual_used_time_for_instance(actual_portfolio_selector_path, instance, feature_data_csv_path, performance_data_csv)
+
+	for instance_idx in range(0, len(performance_data_csv.list_rows())):
+		instance = performance_data_csv.get_row_name(instance_idx)
+
+		if capvalue_list is None:
+			# RUNTIME
+			capvalue = cutoff_time
+			performance_this_instance, flag_successfully_solving = compute_actual_used_time_for_instance(actual_portfolio_selector_path, instance, feature_data_csv_path, performance_data_csv)
+		else:
+			# QUALITY_ABSOLUTE
+			capvalue = capvalue_list[instance_idx]
+			performance_this_instance, flag_successfully_solving = compute_actual_performance_for_instance(actual_portfolio_selector_path, instance, feature_data_csv_path, performance_data_csv)
+
 		if flag_successfully_solving:
-			score_this_instance = 1 + (cutoff_time - used_time_for_this_instance) / (num_instances * cutoff_time * num_solvers + 1)
+			score_this_instance = 1 + (capvalue - performance_this_instance) / (num_instances * num_solvers * capvalue + 1)
 		else:
 			score_this_instance = 0
 		#print('c instance = ' + instance + ', score_this_instance = ' + str(score_this_instance))
@@ -139,11 +173,28 @@ def compute_actual_selector_performance(actual_portfolio_selector_path, performa
 	return actual_selector_performance
 
 
+def compute_actual_performance_for_instance(actual_portfolio_selector_path: str, instance: str, feature_data_csv_path: str, performance_data_csv: Sparkle_Performance_Data_CSV) -> Tuple[float, bool]:
+	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+	list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
+	performance_this_instance = sgh.sparkle_maximum_int
+	flag_successfully_solving = True
+
+	for i in range(0, len(list_predict_schedule)):
+		solver = list_predict_schedule[i][0]
+		performance = performance_data_csv.get_value(instance, solver)
+
+		# Take best performance from the scheduled solvers
+		if performance < performance_this_instance:
+			performance_this_instance = performance
+
+	return performance_this_instance, flag_successfully_solving
+
+
 def compute_actual_used_time_for_instance(actual_portfolio_selector_path: str, instance: str, feature_data_csv_path: str, performance_data_csv: Sparkle_Performance_Data_CSV) -> Tuple[float, bool]:
 	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
 	list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
-	#print('c instance = ' + instance + ', schedule: ' + str(list_predict_schedule))
+#	print('c instance = ' + instance + ', schedule: ' + str(list_predict_schedule))
 	used_time_for_this_instance = 0
 	flag_successfully_solving = False
 
@@ -188,9 +239,12 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 	#print r'c performance_data_csv_path = ' + performance_data_csv_path
 	#print r'c feature_data_csv_path = ' + feature_data_csv_path
 	rank_list = []
+
+	# Get values from CSV while all solvers and instances are included
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 	num_instances = performance_data_csv.get_row_size()
 	num_solvers = performance_data_csv.get_column_size()
+	capvalue_list = get_capvalue_list(performance_data_csv)
 
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 
@@ -204,10 +258,10 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		print(r'c ****** WARNING: ' + actual_portfolio_selector_path + r' does not exist! ******')
 		print(r'c ****** WARNING: ' + r'AutoFolio constructing the actual portfolio selector with all solvers failed! ******')
 		print(r'c ****** WARNING: ' + r'Using virtual best performance instead of actual performance for this portfolio selector! ******')
-		virtual_best_performance = performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers)
+		virtual_best_performance = performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers, capvalue_list)
 		actual_selector_performance = virtual_best_performance
 	else:
-		actual_selector_performance = compute_actual_selector_performance(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, num_instances, num_solvers)
+		actual_selector_performance = compute_actual_selector_performance(actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path, num_instances, num_solvers, capvalue_list)
 
 	print('c Actual performance for portfolio selector with all solvers is ' + str(actual_selector_performance))
 	print('c Computing done!')
@@ -218,7 +272,9 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 		print('c Computing actual performance for portfolio selector excluding solver ' + solver_name + ' ...')
 		tmp_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 		tmp_performance_data_csv.delete_column(solver)
-		tmp_performance_data_csv_path = r'Tmp/' + r'tmp_performance_data_csv_' + sparkle_basic_help.get_time_pid_random_string() + r'.csv'
+		tmp_performance_data_csv_file = 'tmp_performance_data_csv_without_' + solver_name + '_' + sparkle_basic_help.get_time_pid_random_string() + '.csv'
+		tmp_performance_data_csv_path = str(Path(sl.caller_log_dir / tmp_performance_data_csv_file))
+		sl.add_output(tmp_performance_data_csv_path, '[written] Temporary performance data')
 		tmp_performance_data_csv.save_csv(tmp_performance_data_csv_path)
 		tmp_actual_portfolio_selector_path = r'Tmp/' + r'tmp_actual_portfolio_selector_' + sparkle_basic_help.get_time_pid_random_string()
 		tmp_actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_dir + 'without_' + solver_name + '/' + sgh.sparkle_portfolio_selector_name
@@ -232,14 +288,15 @@ def compute_actual_selector_marginal_contribution(performance_data_csv_path = sg
 			print(r'c ****** WARNING: ' + tmp_actual_portfolio_selector_path + r' does not exist! ******')
 			print(r'c ****** WARNING: ' + r'AutoFolio constructing the actual portfolio selector excluding solver ' + solver_name + r' failed! ******')
 			print(r'c ****** WARNING: ' + r'Using virtual best performance instead of actual performance for this portfolio selector! ******')
-			tmp_virtual_best_performance = tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers)
+			tmp_virtual_best_performance = tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(num_instances, num_solvers, capvalue_list)
 			tmp_actual_selector_performance = tmp_virtual_best_performance
 		else:
-			tmp_actual_selector_performance = compute_actual_selector_performance(tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path, feature_data_csv_path, num_instances, num_solvers)
+			tmp_actual_selector_performance = compute_actual_selector_performance(tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path, feature_data_csv_path, num_instances, num_solvers, capvalue_list)
 		
 		print('c Actual performance for portfolio selector excluding solver ' + solver_name + ' is ' + str(tmp_actual_selector_performance))
 		#print 'c tmp_actual_selector_performance excluding ' + solver + ' = ' + str(tmp_actual_selector_performance)
 		os.system(r'rm -f ' + tmp_performance_data_csv_path)
+		sl.add_output(tmp_performance_data_csv_path, '[removed] Temporary performance data')
 #		os.system(r'rm -f ' + tmp_actual_portfolio_selector_path)
 		print('c Computing done!')
 		

@@ -13,6 +13,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import fcntl
+from pathlib import Path
+
 try:
 	from sparkle_help import sparkle_basic_help
 	from sparkle_help import sparkle_file_help as sfh
@@ -20,7 +22,10 @@ try:
 	from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 	from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 	from sparkle_help import sparkle_run_solvers_help as srs
-	from sparkle_help import sparkle_experiments_related_help as ser
+	from sparkle_help import sparkle_logging as sl
+	from sparkle_help.reporting_scenario import ReportingScenario
+	from sparkle_help.reporting_scenario import Scenario
+	from sparkle_help import sparkle_instances_help as sih
 except ImportError:
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
@@ -28,25 +33,28 @@ except ImportError:
 	import sparkle_feature_data_csv_help as sfdcsv
 	import sparkle_performance_data_csv_help as spdcsv
 	import sparkle_run_solvers_help as srs
-	import sparkle_experiments_related_help as ser
+	import sparkle_logging as sl
+	from reporting_scenario import ReportingScenario
+	from reporting_scenario import Scenario
+	import sparkle_instances_help as sih
 
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
 	runsolver_path = sgh.runsolver_path
-	
+
 	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
 	err_path = result_path.replace(r'.rawres', r'.err')
 	runsolver_watch_data_path = result_path.replace(r'.rawres', r'.log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
-	
+
 	command_line = runsolver_path + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + extractor_path + r'/' + sgh.sparkle_run_default_wrapper + r' ' + extractor_path + r'/' + r' ' + instance_path + r' ' + result_path + r' 2> ' + err_path
-	
+
 	try:
 		os.system(command_line)
 	except:
 		if not os.path.exists(result_path):
 			sfh.create_new_empty_file(result_path)
-	
+
 	try:
 		tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
 	except:
@@ -62,14 +70,14 @@ def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_t
 		list_feature_vector = myline.split(',')
 		del list_feature_vector[0]
 		fin.close()
-	
+
 	command_line = r'rm -f ' + result_path
 	os.system(command_line)
 	command_line = r'rm -f ' + err_path
 	os.system(command_line)
 	command_line = r'rm -f ' + runsolver_watch_data_path
 	os.system(command_line)
-	
+
 	return list_feature_vector
 
 def print_predict_schedule(predict_schedule_result_path):
@@ -137,28 +145,42 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
 
 
 def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performance_data_csv_path: str = None):
-	print('c Start running Sparkle portfolio selector on solving instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
+	# Create instance strings to accommodate multi-file instances
+	instance_path_list = instance_path.split()
+	instance_file_list = []
+
+	for instance in instance_path_list:
+		instance_file_list.append(sfh.get_last_level_directory_name(instance))
+
+	instance_files_str = " ".join(instance_file_list)
+	instance_files_str_ = "_".join(instance_file_list)
+
+	print('c Start running Sparkle portfolio selector on solving instance ' + instance_files_str + ' ...')
 	python_executable = sgh.python_executable
 	if not os.path.exists(r'Tmp/'): os.mkdir(r'Tmp/')
 
-	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
+	print('c Sparkle computing features of instance ' + instance_files_str + ' ...')
 	list_feature_vector = []
 
-	cutoff_time_each_extractor_run = ser.cutoff_time_total_extractor_run_on_one_instance/len(sgh.extractor_list) + 1
+	cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
 
 	for extractor_path in sgh.extractor_list:
-		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' ...')
-		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
+		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + instance_files_str + ' ...')
+		result_path = r'Tmp/' + sfh.get_last_level_directory_name(extractor_path) + r'_' + instance_files_str_ + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.rawres'
 
 		list_feature_vector = list_feature_vector + get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
-		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + ' done!')
-	print('c Sparkle computing features of instance ' + sfh.get_last_level_directory_name(instance_path) + r' done!')
+		print('c Extractor ' + sfh.get_last_level_directory_name(extractor_path) + ' computing features of instance ' + instance_files_str + ' done!')
+	print('c Sparkle computing features of instance ' + instance_files_str + r' done!')
 
-	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + sgh.sparkle_portfolio_selector_path + r' --feature_vec'
-	for value in list_feature_vector:
-		command_line = command_line + r' ' + str(value)
+	command_line = python_executable + r' ' + sgh.autofolio_path + r' --load ' + sgh.sparkle_portfolio_selector_path + ' --feature_vec \"'
+	for i in range(0, len(list_feature_vector)):
+		command_line = command_line + str(list_feature_vector[i])
+
+		if i < (len(list_feature_vector) - 1):
+			command_line = command_line + ' '
+
 	predict_schedule_result_path = r'Tmp/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
-	command_line = command_line + r' 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
+	command_line = command_line + '\" 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
 	print('c Sparkle portfolio selector predicting ...')
 	os.system(command_line)
 	print('c Predicting done!')
@@ -238,46 +260,69 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell
 	return
 
 
-def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_path):
-	if instance_directory_path[-1] != r'/':
-		instance_directory_path += r'/'
+def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_path: str):
+	if instance_directory_path[-1] != '/':
+		instance_directory_path += '/'
+
 	instance_directory_path_last_level = sfh.get_last_level_directory_name(instance_directory_path)
-	if instance_directory_path_last_level[-1] != r'/':
-		instance_directory_path_last_level += r'/'
-	test_case_directory_path = r'Test_Cases/' + instance_directory_path_last_level
-	
-	list_all_cnf_filename = sfh.get_list_all_cnf_filename(instance_directory_path)
-	
-	if not os.path.exists(r'Test_Cases/'):
-		os.system(r'mkdir Test_Cases/')
-	os.system(r'mkdir -p ' + test_case_directory_path)
-	os.system(r'mkdir -p ' + test_case_directory_path + r'Tmp/')
-	
-	test_performance_data_csv_name = r'sparkle_performance_data.csv'
+
+	if instance_directory_path_last_level[-1] != '/':
+		instance_directory_path_last_level += '/'
+
+	test_case_directory_path = 'Test_Cases/' + instance_directory_path_last_level
+
+	# Initialise latest scenario
+	global latest_scenario
+	sgh.latest_scenario = ReportingScenario()
+
+	# Update latest scenario
+	sgh.latest_scenario.set_selection_test_case_directory(Path(test_case_directory_path))
+	sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
+
+	if not os.path.exists('Test_Cases/'):
+		os.system('mkdir Test_Cases/')
+	os.system('mkdir -p ' + test_case_directory_path)
+	os.system('mkdir -p ' + test_case_directory_path + 'Tmp/')
+
+	test_performance_data_csv_name = 'sparkle_performance_data.csv'
 	test_performance_data_csv_path = test_case_directory_path + test_performance_data_csv_name
 	spdcsv.Sparkle_Performance_Data_CSV.create_empty_csv(test_performance_data_csv_path)
 	test_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(test_performance_data_csv_path)
-	
+
 	total_job_list = []
-	for cnf_filename in list_all_cnf_filename:
-		cnf_filepath = instance_directory_path + cnf_filename
-		test_performance_data_csv.add_row(cnf_filepath)
-		total_job_list.append([cnf_filepath])
-	
-	solver_name = r'Sparkle_Portfolio_Selector'
+
+	# Multi-file instances
+	if sih._check_existence_of_instance_list_file(instance_directory_path):
+		list_all_filename = sih._get_list_instance(instance_directory_path)
+	# Single file instances
+	else:
+		list_all_filename = sfh.get_list_all_cnf_filename(instance_directory_path)
+
+	for filename in list_all_filename:
+		paths = []
+
+		for name in filename.split():
+			path = instance_directory_path + name
+			paths.append(path)
+
+		filepath = " ".join(paths)
+		test_performance_data_csv.add_row(filepath)
+		total_job_list.append([filepath])
+
+	solver_name = 'Sparkle_Portfolio_Selector'
 	test_performance_data_csv.add_column(solver_name)
-	
+
 	test_performance_data_csv.update_csv()
-	
+
 	i = 0
 	j = len(total_job_list)
-	sbatch_shell_script_path = test_case_directory_path + r'Tmp/'+ r'running_sparkle_portfolio_selector_sbatch_shell_script_' + str(i) + r'_' + str(j) + r'_' + sparkle_basic_help.get_time_pid_random_string() + r'.sh'
+	sbatch_shell_script_path = test_case_directory_path + 'Tmp/'+ 'running_sparkle_portfolio_selector_sbatch_shell_script_' + str(i) + '_' + str(j) + '_' + sparkle_basic_help.get_time_pid_random_string() + '.sh'
 	generate_running_sparkle_portfolio_selector_sbatch_shell_script(sbatch_shell_script_path, test_case_directory_path, test_performance_data_csv_path, total_job_list, i, j)
-	os.system(r'chmod a+x ' + sbatch_shell_script_path)
-	command_line = r'sbatch ' + sbatch_shell_script_path
-	
+	os.system('chmod a+x ' + sbatch_shell_script_path)
+	command_line = 'sbatch ' + sbatch_shell_script_path
+
 	os.system(command_line)
 	#print(command_line)
-	
+
 	return
 

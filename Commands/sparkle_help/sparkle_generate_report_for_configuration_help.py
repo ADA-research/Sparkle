@@ -24,6 +24,8 @@ from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_compute_marginal_contribution_help
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_run_ablation_help as sah
+from sparkle_help import sparkle_instances_help as sih
+
 
 def get_customCommands():
 	str_value = r''
@@ -37,19 +39,22 @@ def get_sparkleVersion():
 	str_value = r'1.0.0'
 	return str_value
 
-def get_numInstanceInInstanceSet(instance_set_name):
+
+def get_numInstanceInInstanceSet_smacDir(instance_set_name: str) -> str:
 	str_value = ''
-	ori_instance_dir = 'Instances/' + instance_set_name + '/'
-	list_instance = sfh.get_list_all_filename(ori_instance_dir)
-	str_value = str(len(list_instance))
+
+	# For multi-file instances count based on the reference list
+	if sih.check_existence_of_reference_instance_list(instance_set_name):
+		instance_count = sih.count_instances_in_reference_list(instance_set_name)
+		str_value = str(instance_count)
+	# For single-file instances just count the number of instance files
+	else:
+		instance_dir = sgh.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_name + '/'
+		list_instance = sfh.get_list_all_filename(instance_dir)
+		str_value = str(len(list_instance))
+
 	return str_value
 
-def get_numInstanceInInstanceSet_smacDir(instance_set_name):
-	str_value = ''
-	instance_dir = sgh.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_name + '/'
-	list_instance = sfh.get_list_all_filename(instance_dir)
-	str_value = str(len(list_instance))
-	return str_value
 
 def get_PAR10_performance(results_file, cutoff):
 	list_instance_and_par10 = construct_list_instance_and_performance(results_file, cutoff)

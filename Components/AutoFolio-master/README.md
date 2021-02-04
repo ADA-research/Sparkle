@@ -30,12 +30,18 @@ You should have received a copy of the 2-clause BSD license along with this prog
 
 ### Requirements
 
+NOTE: AutoFolio requires the future SMAC 0.9; currently only available in the [development branch of SMAC](https://github.com/automl/SMAC3/tree/development)
+
 AutoFolio runs with '''Python 3.5'''.
-Many of its dependencies can be fulfilled by using [Anaconda 3.4](https://www.continuum.io/).  
 
 To install (nearly) all requirements, please run:
 
-`pip install -r requirements.txt`
+`cat requirements.txt | xargs -n 1 -L 1 pip install`
+
+Many of its dependencies can be fulfilled by using [Anaconda >3.4](https://www.continuum.io/).
+If you use Anaconda as your Python environment, you have to install three packages before you can install SMAC (as one of AutoFolio's requirements):
+
+`conda install gxx_linux-64 gcc_linux-64 swig`
 
 To use pre-solving schedules, [clingo](http://potassco.sourceforge.net/) is required. We provide binary compiled under Ubuntu 14.04 which may not work under another OS. Please put a working `clingo` binary with Python support into the folder `aspeed/`.
  
@@ -67,8 +73,8 @@ behavior. It is given with the `--config` option.
 The recognized options and their types are as follows.
 
 * `wallclock_limit`. The amount of time (in seconds) for optimizing 
-  hyperparameters. Type: integer. Default: 2 days.
-
+  hyperparameters. Type: integer. Default: 300 seconds --- should be increased!
+  
 #### Feature groups
   
 * `allowed_feature_groups`. A list of the feature groups to consider for 
@@ -109,7 +115,7 @@ further use in an "inner" cross-validation to avoid overfitting.
 The `--outer-cv` flag indicates to use this mode. For example:
 
 ```
-autofolio -s aslib_data/BNSL-2016/ --outer-cv
+python3 scripts/autofolio -s examples/asp-aslib/data/ --outer-cv
 
 ```
 #### Saving the outer cross-validation choices
@@ -126,7 +132,7 @@ single quotes to avoid shell replacement in the template. (Double quotes will
 not typically work.)
 
 ```
-autofolio -s aslib_data/BNSL-2016/ --outer-cv --out-template 'bnsl.fold-${fold}.${type}'
+python3 scripts/autofolio -s examples/asp-aslib/data/ --outer-cv --out-template 'asp.fold-${fold}.${type}'
 
 ```
 #### Parallelizing the outer cross-validation
@@ -139,7 +145,7 @@ specifies which fold is used. Typically, this option would be combined with
 **N.B.** This number should range from 1 to 10 (not 0 to 9).
 
 ```
-autofolio -s aslib_data/BNSL-2016/ --outer-cv --outer-cv-fold 1 --out-template 'bnsl.fold-${fold}.${type}'
+python3 scripts/autofolio -s examples/asp-aslib/data/ --outer-cv --outer-cv-fold 1 --out-template 'asp.fold-${fold}.${type}'
 ```
 
 
@@ -150,7 +156,9 @@ you need to train AutoFolio save its internal state to disk (use `python3 script
 To predict on a new instance,
 please run
 
-`python3 scripts/autofolio --load [filename] --feature_vec [space-separated feature vector]`
+`python3 scripts/autofolio --load [filename] --feature_vec "[space-separated feature vector]"`
+
+Please note that the quotes around the feature vector are important.
 
 ### Self-Tuning Mode
 

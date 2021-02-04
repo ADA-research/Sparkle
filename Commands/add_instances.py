@@ -13,7 +13,9 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import argparse
-from sparkle_help import sparkle_global_help
+from pathlib import Path
+
+from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -21,11 +23,16 @@ from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
-from sparkle_help import sparkle_experiments_related_help
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_settings
+from sparkle_help import sparkle_instances_help as sih
 
 
 if __name__ == r'__main__':
+	# Initialise settings
+	global settings
+	sgh.settings = sparkle_settings.Settings()
+
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -58,112 +65,115 @@ if __name__ == r'__main__':
 		last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
 	instances_directory = r'Instances/' + last_level_directory
-	if not os.path.exists(instances_directory): os.mkdir(instances_directory)
+	if not os.path.exists(instances_directory):
+		Path(instances_directory).mkdir(parents=True, exist_ok=True)
 
-	#os.system(r'cp ' + instances_source + r'/*.cnf ' + instances_directory)
-	list_source_all_filename = sfh.get_list_all_filename(instances_source)
-	list_source_all_directory = sfh.get_list_all_directory(instances_source)
-	list_target_all_filename = sfh.get_list_all_filename(instances_directory)
+	if sih._check_existence_of_instance_list_file(instances_source):
+		sih._copy_instance_list_to_reference(Path(instances_source))
+		list_instance = sih._get_list_instance(instances_source)
 
-	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sparkle_global_help.feature_data_csv_path)
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sparkle_global_help.performance_data_csv_path)
+		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 
-	num_inst = len(list_source_all_filename)
-	
-	print('c The number of intended adding instances: ' + str(num_inst))
+		num_inst = len(list_instance)
+		print('c The number of intended adding instances: ' + str(num_inst))
 
-	for i in range(0, len(list_source_all_filename)):
-		intended_filename = list_source_all_filename[i]
-		print(r'c')
-		print(r'c Adding ' + intended_filename + r' ...')
-		print('c Executing Progress: ' + str(i+1) + ' out of ' + str(num_inst))
-		
-		if intended_filename in list_target_all_filename:
-			print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' already exists in Directory ' + instances_directory)
-			print(r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_filename))
-			#continue
-		else:
-			intended_filename_path = instances_directory + r'/' + intended_filename
-			intended_status = r'UNKNOWN'
-			sparkle_global_help.instance_list.append(intended_filename_path)
-			sparkle_global_help.instance_reference_mapping[intended_filename_path] = intended_status
-			sfh.add_new_instance_into_file(intended_filename_path)
-			sfh.add_new_instance_reference_into_file(intended_filename_path, intended_status)
-			feature_data_csv.add_row(intended_filename_path)
-			performance_data_csv.add_row(intended_filename_path)
-			
-			if list_source_all_directory[i][-1] == r'/': list_source_all_directory[i] = list_source_all_directory[i][:-1]
-			os.system(r'cp ' + list_source_all_directory[i] + r'/' + intended_filename + r' ' + instances_directory)
-			print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been added!')
+		for i in range(0, num_inst):
+			instance_line = list_instance[i]
+			instance_related_files = instance_line.strip().split()
+			intended_instance_line = ''
+
+			for related_file_name in instance_related_files:
+				source_file_path = os.path.join(instances_source, related_file_name)
+				target_file_path = os.path.join(instances_directory, related_file_name)
+				cmd = 'cp %s %s' % (source_file_path, target_file_path)
+				os.system(cmd)
+				intended_instance_line += target_file_path + ' '
+
+			intended_instance_line = intended_instance_line.strip()
+
+			sgh.instance_list.append(intended_instance_line)
+			sfh.add_new_instance_into_file(intended_instance_line)
+			feature_data_csv.add_row(intended_instance_line)
+			performance_data_csv.add_row(intended_instance_line)
+
+			print(r'c Instance ' + instance_line + r' has been added!')
 			print(r'c')
 
-#	print('c Selecting training instances ...')
-#	list_cnf_path = satih.get_list_cnf_path(instances_directory)
-#	list_train_cnf_index = satih.get_list_train_cnf_index(list_cnf_path)
-#	cnf_dir_prefix = instances_directory
-#	smac_cnf_dir_prefix = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
-#	satih.selecting_train_cnf(list_cnf_path, list_train_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix)
-#	list_train_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix)
-#	file_train_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory) + r'_train.txt'
-#	
-#	fout = open(file_train_cnf, 'w+')
-#	for path in list_train_cnf_path:
-#		fout.write(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
-#		#print(path.replace(smac_cnf_dir_prefix, '../instances/' + sfh.get_last_level_directory_name(instances_directory), 1))
-#		#print(path, smac_cnf_dir_prefix)
-#	fout.close()
-#	print('c Selecting training instances done!')
-#	
-#	print('c Selecting testing instances ...')
-#	list_cnf_path = satih.get_list_cnf_path(instances_directory)
-#	list_test_cnf_index = satih.get_list_test_cnf_index(list_cnf_path, list_train_cnf_index)
-#	cnf_dir_prefix = instances_directory
-#	smac_cnf_dir_prefix_test = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory)
-#	satih.selecting_test_cnf(list_cnf_path, list_test_cnf_index, cnf_dir_prefix, smac_cnf_dir_prefix_test)
-#	list_test_cnf_path = satih.get_list_cnf_path(smac_cnf_dir_prefix_test)
-#	file_test_cnf = sparkle_global_help.smac_dir + r'/' + 'example_scenarios/' + r'instances_test/' + sfh.get_last_level_directory_name(instances_directory) + r'_test.txt'
-#	
-#	fout = open(file_test_cnf, 'w+')
-#	for path in list_test_cnf_path:
-#		fout.write(path.replace(smac_cnf_dir_prefix_test, '../instances_test/' + sfh.get_last_level_directory_name(instances_directory), 1) + '\n')
-#	fout.close()
-#	print('c Selecting testing instances done!')
+		feature_data_csv.update_csv()
+		performance_data_csv.update_csv()
+	else:
+		#os.system(r'cp ' + instances_source + r'/*.cnf ' + instances_directory)
+		list_source_all_filename = sfh.get_list_all_filename(instances_source)
+		list_source_all_directory = sfh.get_list_all_directory(instances_source)
+		list_target_all_filename = sfh.get_list_all_filename(instances_directory)
 
-	feature_data_csv.update_csv()
-	performance_data_csv.update_csv()
-	
+		feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+
+		num_inst = len(list_source_all_filename)
+
+		print('c The number of intended adding instances: ' + str(num_inst))
+
+		for i in range(0, len(list_source_all_filename)):
+			intended_filename = list_source_all_filename[i]
+			print(r'c')
+			print(r'c Adding ' + intended_filename + r' ...')
+			print('c Executing Progress: ' + str(i+1) + ' out of ' + str(num_inst))
+
+			if intended_filename in list_target_all_filename:
+				print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' already exists in Directory ' + instances_directory)
+				print(r'c Ignore adding file ' + sfh.get_last_level_directory_name(intended_filename))
+				#continue
+			else:
+				intended_filename_path = instances_directory + r'/' + intended_filename
+				sgh.instance_list.append(intended_filename_path)
+				sfh.add_new_instance_into_file(intended_filename_path)
+				feature_data_csv.add_row(intended_filename_path)
+				performance_data_csv.add_row(intended_filename_path)
+
+				if list_source_all_directory[i][-1] == r'/': list_source_all_directory[i] = list_source_all_directory[i][:-1]
+				os.system(r'cp ' + list_source_all_directory[i] + r'/' + intended_filename + r' ' + instances_directory)
+				print(r'c Instance ' + sfh.get_last_level_directory_name(intended_filename) + r' has been added!')
+				print(r'c')
+
+		feature_data_csv.update_csv()
+		performance_data_csv.update_csv()
+
 	print('c Adding instances ' + sfh.get_last_level_directory_name(instances_directory) + ' done!')
 
-	if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_portfolio_selector_path
+	if os.path.exists(sgh.sparkle_portfolio_selector_path):
+		command_line = r'rm -f ' + sgh.sparkle_portfolio_selector_path
 		os.system(command_line)
-		print('c Removing Sparkle portfolio selector ' + sparkle_global_help.sparkle_portfolio_selector_path + ' done!')
-	
-	if os.path.exists(sparkle_global_help.sparkle_report_path):
-		command_line = r'rm -f ' + sparkle_global_help.sparkle_report_path
+		print('c Removing Sparkle portfolio selector ' + sgh.sparkle_portfolio_selector_path + ' done!')
+
+	if os.path.exists(sgh.sparkle_report_path):
+		command_line = r'rm -f ' + sgh.sparkle_report_path
 		os.system(command_line)
-		print('c Removing Sparkle report ' + sparkle_global_help.sparkle_report_path + ' done!')
-	
+		print('c Removing Sparkle report ' + sgh.sparkle_report_path + ' done!')
+
 	if not my_flag_run_extractor_later:
 		if not my_flag_parallel:
 			print('c Start computing features ...')
-			scf.computing_features(sparkle_global_help.feature_data_csv_path, 1)
-			print('c Feature data file ' + sparkle_global_help.feature_data_csv_path + ' has been updated!')
+			scf.computing_features(sgh.feature_data_csv_path, 1)
+			print('c Feature data file ' + sgh.feature_data_csv_path + ' has been updated!')
 			print('c Computing features done!')
 		else:
-			num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
-			scfp.computing_features_parallel(sparkle_global_help.feature_data_csv_path, num_job_in_parallel, 1)
+			num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
+			scfp.computing_features_parallel(sgh.feature_data_csv_path, num_job_in_parallel, 1)
 			print('c Computing features in parallel ...')
 
 	if not my_flag_run_solver_later:
 		if not my_flag_parallel:
 			print('c Start running solvers ...')
-			srs.running_solvers(sparkle_global_help.performance_data_csv_path, 1)
-			print('c Performance data file ' + sparkle_global_help.performance_data_csv_path + ' has been updated!')
+			srs.running_solvers(sgh.performance_data_csv_path, 1)
+			print('c Performance data file ' + sgh.performance_data_csv_path + ' has been updated!')
 			print('c Running solvers done!')
 		else:
-			num_job_in_parallel = sparkle_experiments_related_help.num_job_in_parallel
-			srsp.running_solvers_parallel(sparkle_global_help.performance_data_csv_path, num_job_in_parallel, 1)
+			num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
+			srsp.running_solvers_parallel(sgh.performance_data_csv_path, num_job_in_parallel, 1)
 			print('c Running solvers in parallel ...')
-			
+
+	# Write used settings to file
+	sgh.settings.write_used_settings()
 

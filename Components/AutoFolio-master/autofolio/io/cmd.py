@@ -29,6 +29,10 @@ class CMDParser(object):
                          help="performance data in csv table (column: algorithm, row: instance, delimeter: ,)")
         csv.add_argument("--feature_csv", default=None,
                          help="instance features data in csv table (column: features, row: instance, delimeter: ,)")
+        csv.add_argument("--performance_test_csv", default=None,
+                         help="performance *test* data in csv table (column: algorithm, row: instance, delimeter: ,)")
+        csv.add_argument("--feature_test_csv", default=None,
+                         help="instance *test* features data in csv table (column: features, row: instance, delimeter: ,)")
         csv.add_argument("--cv_csv", default=None,
                          help="cross validation splits in csv table (column: split ID, row: instance, delimeter: ,)")
         csv.add_argument("--objective", default="solution_quality", choices=[
@@ -39,7 +43,13 @@ class CMDParser(object):
 
         opt = self._arg_parser.add_argument_group("Optional Options")
         opt.add_argument("-t", "--tune", action="store_true", default=False,
-                         help="uses SMAC3 to determine a better parameter configuration")
+                         help="uses SMAC3 to determine a better hyperparameter configuration")
+        opt.add_argument("--smac_seed", default=42, type=int,
+                         help="Seed passed to SMAC")
+        opt.add_argument("-p", "--pcs", default=None,
+                         help="pcs file to be read")
+        opt.add_argument("--output_dir", default=None,
+                         help="output directory of SMAC")
         opt.add_argument("--runcount_limit", type=int, default=42,
                          help="maximal number of AS evaluations (SMAC budget)")
         opt.add_argument("--wallclock_limit", type=int, default=300,
@@ -50,7 +60,7 @@ class CMDParser(object):
                          help="trains AutoFolio and saves AutoFolio's state in the given filename")
         opt.add_argument("--load", type=str, default=None,
                          help="loads model (from --save); other modes are disabled with this options")
-        opt.add_argument("--feature_vec", default=None, nargs="*",
+        opt.add_argument("--feature_vec", default=None, type=str,
                          help="feature vector to predict algorithm to use -- has to be used in combination with --load")
 
         opt.add_argument("--config", type=str, default=None,

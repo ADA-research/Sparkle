@@ -24,6 +24,8 @@ def get_seed():
 
 global settings
 
+global latest_scenario
+
 flag_first_call = True
 
 global sparkle_maximum_int
@@ -136,21 +138,23 @@ feature_data_id_path = 'Feature_Data/sparkle_feature_data.id'
 performance_data_csv_path = r'Performance_Data/sparkle_performance_data.csv'
 performance_data_id_path = 'Performance_Data/sparkle_performance_data.id'
 
+global reference_list_dir
 global extractor_nickname_list_path
 global extractor_feature_vector_size_list_path
 global extractor_list_path
 global solver_nickname_list_path
 global solver_list_path
 global instance_list_path
-global instance_reference_list_path
 
-extractor_nickname_list_path = r'Reference_Lists/sparkle_extractor_nickname_list.txt'
-extractor_list_path = r'Reference_Lists/sparkle_extractor_list.txt'
-extractor_feature_vector_size_list_path = r'Reference_Lists/extractor_feature_vector_size_list.txt'
-solver_nickname_list_path = r'Reference_Lists/sparkle_solver_nickname_list.txt'
-solver_list_path = r'Reference_Lists/sparkle_solver_list.txt'
-instance_list_path = r'Reference_Lists/sparkle_instance_list.txt'
-instance_reference_list_path = r'Reference_Lists/sparkle_instance_reference_list.txt'
+reference_list_dir = Path('Reference_Lists/')
+instance_list_postfix = '_instance_list.txt'
+extractor_nickname_list_path = str(reference_list_dir) + '/sparkle_extractor_nickname_list.txt'
+extractor_list_path = str(reference_list_dir) + '/sparkle_extractor_list.txt'
+extractor_feature_vector_size_list_path = str(reference_list_dir) + '/extractor_feature_vector_size_list.txt'
+solver_nickname_list_path = str(reference_list_dir) + '/sparkle_solver_nickname_list.txt'
+solver_list_path = str(reference_list_dir) + '/sparkle_solver_list.txt'
+instance_list_file = Path('sparkle' + instance_list_postfix)
+instance_list_path = Path(reference_list_dir / instance_list_file)
 
 global solver_list
 global solver_nickname_mapping
@@ -158,7 +162,6 @@ global extractor_list
 global extractor_feature_vector_size_mapping
 global extractor_nickname_mapping
 global instance_list
-global instance_reference_mapping
 
 solver_list = []
 solver_nickname_mapping = {}
@@ -166,7 +169,6 @@ extractor_list = []
 extractor_nickname_mapping = {}
 extractor_feature_vector_size_mapping = {}
 instance_list = []
-instance_reference_mapping = {}
 
 if os.path.exists(extractor_nickname_list_path):
 	fo = open(extractor_nickname_list_path, 'r+')
@@ -221,8 +223,8 @@ if os.path.exists(solver_list_path):
 		solver_list.append(mylist[0])
 	fo.close()
 
-if os.path.exists(instance_list_path):
-	fo = open(instance_list_path, 'r+')
+if os.path.exists(str(instance_list_path)):
+	fo = open(str(instance_list_path), 'r+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	while True:
 		myline = fo.readline()
@@ -230,15 +232,4 @@ if os.path.exists(instance_list_path):
 		if not myline: break
 		instance_list.append(myline)
 	fo.close()
-
-if os.path.exists(instance_reference_list_path):
-	fo = open(instance_reference_list_path, 'r+')
-	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	while True:
-		myline = fo.readline()
-		myline = myline.strip()
-		if not myline: break
-		mylist = myline.split()
-		instance_reference_mapping[mylist[0]] = mylist[1]
-	fo.close()	
 

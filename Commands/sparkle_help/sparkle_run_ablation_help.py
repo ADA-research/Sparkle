@@ -13,12 +13,16 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import re
-import pathlib
+from pathlib import Path
+from pathlib import PurePath
+
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_add_train_instances_help as satih
+from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_slurm_help as ssh
+from sparkle_help import sparkle_add_solver_help as sash
+
 
 '''
 exec_path: overwrite of the default ablation path to put the scenario in
@@ -36,7 +40,7 @@ def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_na
     ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
                                                             instance_train_name,
                                                             instance_test_name)
-    ablation_scenario_solver_dir = pathlib.PurePath(ablation_scenario_dir, "solver/")
+    ablation_scenario_solver_dir = PurePath(ablation_scenario_dir, "solver/")
 
     sfh.checkout_directory(ablation_scenario_dir)
     sfh.checkout_directory(str(ablation_scenario_solver_dir))
@@ -45,9 +49,7 @@ def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_na
     copy_candidates = ["conf/","lib/","ablationAnalysis","ablationAnalysis.jar","ablationValidation","LICENSE.txt","README.txt"]
     for candidate in copy_candidates:
         recursive = "-r" if candidate[-1] == "/" else ""
-        candidate_path = str(pathlib.PurePath(sgh.ablation_dir,candidate))
-        print(candidate_path)
-        print(ablation_scenario_dir)
+        candidate_path = str(PurePath(sgh.ablation_dir,candidate))
         cmd = "cp {} {} {}".format(recursive, candidate_path, ablation_scenario_dir)
         os.system(cmd)
 
@@ -234,7 +236,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
                                                                  instance_test_name,
                                                                  exec_path=True)
 
-    (optimised_configuration_params, _, _) = scsh.get_optimised_configuration(solver_name, instance_train_name)
+    optimised_configuration_params = scsh.get_optimised_configuration_params(solver_name, instance_train_name)
 
     smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
     concurrent_clis = sgh.settings.get_slurm_clis_per_node()
@@ -259,7 +261,11 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         fout.write('useRacing = {}\n'.format(ablation_racing))
 
         fout.write('seed = 1234\n')
-        fout.write('paramfile = ./solver/PbO-CCSAT-params_test.pcs\n') #Get from solver
+        # Get PCS file name from solver directory
+        solver_directory = 'Solvers/' + solver_name
+        pcs_file_name = sash.get_pcs_file_from_solver_directory(solver_directory)
+        pcs_file_path = './solver/' + pcs_file_name
+        fout.write('paramfile = ' + pcs_file_path + '\n')
         fout.write('instance_file = instances_train.txt\n')
         fout.write('test_instance_file = instances_test.txt\n')
         fout.write('sourceConfiguration=DEFAULT\n')
@@ -279,7 +285,7 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
     if instances_directory[-1] != "/":
         instances_directory += "/"
     print("c create_instance_file ({}, {}, {})".format(instances_directory, ablation_scenario_dir, train_or_test))
-    list_all_path = satih.get_list_all_path(instances_directory)
+    list_all_path = sih.get_list_all_path(instances_directory)
     #print(list_all_path)
     file_instance_path = ablation_scenario_dir + "instances" + file_suffix
 
@@ -289,17 +295,29 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
     full_instances_directory = os.path.join(pwd, instances_directory)
     relative_instance_directory = os.path.relpath(full_instances_directory, full_ablation_scenario_dir)
 
-    list_all_path = [instance[len(instances_directory):] for instance in list_all_path]
+    instance_set_name = Path(instances_directory).name
 
-    with open(file_instance_path, "w") as fh:
-        for instance in list_all_path:
-            instance_path = "{}\n".format(os.path.join(relative_instance_directory, instance))
-            fh.write(instance_path)
-        fh.close()
+    # If a reference list does not exist this is a single-file instance
+    if not sih.check_existence_of_reference_instance_list(instance_set_name):
+        list_all_path = [instance[len(instances_directory):] for instance in list_all_path]
+    
+        with open(file_instance_path, "w") as fh:
+            for instance in list_all_path:
+                instance_path = "{}\n".format(os.path.join(relative_instance_directory, instance))
+                fh.write(instance_path)
+
+            fh.close()
+    # Otherwise this is a multi-file instance, and instances need to be wrapped in quotes with function below
+    # TODO: Check whether this function also works for single-file instances and can be used in all cases
+    else:
+        relative_instance_directory = relative_instance_directory + '/'
+        sih.copy_reference_instance_list(Path(file_instance_path), instance_set_name, relative_instance_directory)
+
+    return
 
 def check_for_ablation(solver_name, instance_train_name, instance_test_name):
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name, exec_path=False)
-    table_file = pathlib.Path(scenario_dir, "ablationValidation.txt")
+    table_file = Path(scenario_dir, "ablationValidation.txt")
     return table_file.is_file()
 
 def get_ablation_table(solver_name, instance_train_name, instance_test_name):

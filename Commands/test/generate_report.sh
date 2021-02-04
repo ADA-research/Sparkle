@@ -21,10 +21,6 @@ performance_data_path="Performance_Data/sparkle_performance_data.csv"
 performance_data_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
 performance_data_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
 
-cutoff_time_path="Performance_Data/sparkle_performance_data_cutoff_time_information.txt"
-cutoff_time_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data_cutoff_time_information.txt.tmp"
-cutoff_time_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector_cutoff_time.txt"
-
 selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
 selector_tmp="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
 selector_test="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
@@ -32,7 +28,6 @@ selector_test="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portf
 # Save user data if any
 mv $feature_data_path $feature_data_tmp 2> /dev/null
 mv $performance_data_path $performance_data_tmp 2> /dev/null
-mv $cutoff_time_path $cutoff_time_tmp 2> /dev/null
 mv $selector_path $selector_tmp 2> /dev/null
 
 # Prepare for test
@@ -50,12 +45,11 @@ Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $feature_data_test $feature_data_path
 cp $performance_data_test $performance_data_path
-cp $cutoff_time_test $cutoff_time_path
 cp $selector_test $selector_path
 
 # Generate report
 output_true="c Report generated ..."
-output=$(Commands/generate_report.py | tail -1)
+output=$(Commands/generate_report.py --selection | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -68,7 +62,6 @@ fi
 # Restore original data if any
 mv $feature_data_tmp $feature_data_path 2> /dev/null
 mv $performance_data_tmp $performance_data_path 2> /dev/null
-mv $cutoff_time_tmp $cutoff_time_path 2> /dev/null
 # OR true to get success exit code even when no user data was stored in the tmp file
 mv $selector_tmp $selector_path 2> /dev/null || true
 

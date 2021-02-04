@@ -17,12 +17,14 @@ from pathlib import Path
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_add_train_instances_help as satih
+from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
+from sparkle_help.reporting_scenario import ReportingScenario
+from sparkle_help.reporting_scenario import Scenario
 
 from sparkle_help import sparkle_slurm_help as ssh
 #from validate_configured_vs_default import validate_configured_vs_default
@@ -31,6 +33,10 @@ if __name__ == r'__main__':
 	# Initialise settings
 	global settings
 	sgh.settings = sparkle_settings.Settings()
+
+	# Initialise latest scenario
+	global latest_scenario
+	sgh.latest_scenario = ReportingScenario()
 
 	# Log command call
 	sl.log_command(sys.argv)
@@ -72,11 +78,10 @@ if __name__ == r'__main__':
 	sgh.settings.write_used_settings()
 
 	# Copy instances to smac directory
-	instances_directory = r'Instances/' + instance_set_train_name
-	list_all_path = satih.get_list_all_path(instances_directory)
-	inst_dir_prefix = instances_directory
-	smac_inst_dir_prefix = sgh.smac_dir + r'/' + 'example_scenarios/' + r'instances/' + sfh.get_last_level_directory_name(instances_directory)
-	satih.copy_instances_to_smac(list_all_path, inst_dir_prefix, smac_inst_dir_prefix, r'train')
+	instances_directory = 'Instances/' + instance_set_train_name
+	list_all_path = sih.get_list_all_path(instances_directory)
+	smac_inst_dir_prefix = sgh.smac_dir + '/' + 'example_scenarios/' + 'instances/' + sfh.get_last_level_directory_name(instances_directory)
+	sih.copy_instances_to_smac(list_all_path, instances_directory, smac_inst_dir_prefix, 'train')
 
 	scsh.handle_file_instance_train(solver_name, instance_set_train_name)
 	scsh.create_file_scenario_configuration(solver_name, instance_set_train_name)
@@ -93,6 +98,17 @@ if __name__ == r'__main__':
 	fout.write('solver ' + str(solver) + '\n')
 	fout.write('train ' + str(instance_set_train) + '\n')
 	fout.close()
+
+	# Update latest scenario
+	sgh.latest_scenario.set_config_solver(Path(solver))
+	sgh.latest_scenario.set_config_instance_set_train(Path(instance_set_train))
+	sgh.latest_scenario.set_latest_scenario(Scenario.CONFIGURATION)
+
+	if instance_set_test != None:
+		sgh.latest_scenario.set_config_instance_set_test(Path(instance_set_test))
+	else:
+		# Set to default to overwrite possible old path
+		sgh.latest_scenario.set_config_instance_set_test()
 
 	# Set validation to wait until configuration is done
 	if(validate):

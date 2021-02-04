@@ -14,7 +14,7 @@ except ImportError:
 class PerformanceMeasure(Enum):
 	RUNTIME = 0
 	QUALITY_ABSOLUTE = 1
-	QUALITY = 1 # If not specified, assume ABSOLTUE QUALITY
+	QUALITY = 1 # If not specified, assume ABSOLUTE QUALITY
 	#QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
 
 
@@ -59,6 +59,7 @@ class Settings:
 	DEFAULT_general_solution_verifier = SolutionVerifier.NONE
 	DEFAULT_general_target_cutoff_time = 60
 	DEFAULT_general_penalty_multiplier = 10
+	DEFAULT_general_extractor_cutoff_time = 60
 
 	DEFAULT_config_budget_per_run = 600
 	DEFAULT_config_number_of_runs = 25
@@ -80,6 +81,7 @@ class Settings:
 		self.__general_solution_verifier_set = SettingState.NOT_SET
 		self.__general_target_cutoff_time_set = SettingState.NOT_SET
 		self.__general_penalty_multiplier_set = SettingState.NOT_SET
+		self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
 
 		self.__config_budget_per_run_set = SettingState.NOT_SET
 		self.__config_number_of_runs_set = SettingState.NOT_SET
@@ -106,7 +108,7 @@ class Settings:
 		file_settings = configparser.ConfigParser()
 		file_settings.read(str(file_path))
 
-		# Set internal settings based on data read from FILE if they were read succesfully
+		# Set internal settings based on data read from FILE if they were read successfully
 		if file_settings.sections() != []:
 			section = 'general'
 			option_names = ('performance_measure', 'smac_run_obj')
@@ -135,6 +137,13 @@ class Settings:
 				if file_settings.has_option(section, option):
 					value = file_settings.getint(section, option)
 					self.set_general_penalty_multiplier(value, state)
+					file_settings.remove_option(section, option)
+
+			option_names = ('extractor_cutoff_time', 'cutoff_time_each_feature_computation')
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getint(section, option)
+					self.set_general_extractor_cutoff_time(value, state)
 					file_settings.remove_option(section, option)
 
 			section = 'configuration'
@@ -246,13 +255,13 @@ class Settings:
 
 		if current_state == SettingState.FILE and new_state == SettingState.DEFAULT:
 			change_setting_ok = False
-			print('Warning: Atempting to overwrite setting for', name, 'with default value; keeping the value read from file!')
+			print('Warning: Attempting to overwrite setting for', name, 'with default value; keeping the value read from file!')
 		elif current_state == SettingState.CMD_LINE and new_state == SettingState.DEFAULT:
 			change_setting_ok = False
-			print('Warning: Atempting to overwrite setting for', name, 'with default value; keeping the value read from command line!')
+			print('Warning: Attempting to overwrite setting for', name, 'with default value; keeping the value read from command line!')
 		elif current_state == SettingState.CMD_LINE and new_state == SettingState.FILE:
 			change_setting_ok = False
-			print('Warning: Atempting to overwrite setting for', name, 'with value from file; keeping the value read from command line!')
+			print('Warning: Attempting to overwrite setting for', name, 'with value from file; keeping the value read from command line!')
 
 		return change_setting_ok
 
@@ -348,6 +357,25 @@ class Settings:
 		return int(self.__settings['general']['target_cutoff_time'])
 
 
+	def set_general_extractor_cutoff_time(self, value: int = DEFAULT_general_extractor_cutoff_time, origin: SettingState = SettingState.DEFAULT):
+		section = 'general'
+		name = 'extractor_cutoff_time'
+
+		if value != None and self.__check_setting_state(self.__general_extractor_cutoff_time_set, origin, name):
+			self.__init_section(section)
+			self.__general_extractor_cutoff_time_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_general_extractor_cutoff_time(self) -> int:
+		if self.__general_extractor_cutoff_time_set == SettingState.NOT_SET:
+			self.set_general_extractor_cutoff_time()
+
+		return int(self.__settings['general']['extractor_cutoff_time'])
+
+
 	### Configuration settings ###
 
 
@@ -437,7 +465,7 @@ class Settings:
 		section = 'slurm'
 		name = 'clis_per_node'
 
-		if value != None and self.__check_setting_state(self.__slurm_number_of_runs_in_parallel_set, origin, name):
+		if value != None and self.__check_setting_state(self.__slurm_clis_per_node_set, origin, name):
 			self.__init_section(section)
 			self.__slurm_clis_per_node_set = origin
 			self.__settings[section][name] = str(value)

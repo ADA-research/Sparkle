@@ -27,16 +27,22 @@ sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN/"
-instances_test_path="Examples/Resources/Instances/PTN2/"
+instances_path_two="Examples/Resources/Instances/PTN2/"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
+configuration_results_path="Commands/test/test_files/results/"
+smac_path="Components/smac-v2.10.03-master-778/"
+smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic/"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_test_path > /dev/null
+Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_two > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
 
+# Copy configuration results to simulate the configuration command (it won't have finished yet)
+cp -r $configuration_results_path $smac_path
+
 # Configure solver
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --ablation | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_two --settings-file $sparkle_test_settings_path --ablation | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then
@@ -57,9 +63,8 @@ else
 	echo $output
 fi
 
-
 # Run ablation on test set
-output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path --instance-set-test $instances_test_path | tail -1)
+output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path --instance-set-test $instances_path_two | tail -1)
 
 if [[ $output =~ [0-9] ]];
 then

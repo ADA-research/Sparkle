@@ -19,7 +19,7 @@ def print_command(instance_file, seed_str: str, cutoff_time_str: str):
 
 
 # Parse problem specific output and print it for Sparkle; or ask Sparkle to use it's own parser (SAT only)
-def print_output(terminal_output_file):
+def print_output(terminal_output_file: str):
 	# Read solution quality from file
 	infile = open(terminal_output_file, 'r')
 	fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
