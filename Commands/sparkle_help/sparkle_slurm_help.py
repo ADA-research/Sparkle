@@ -12,6 +12,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import fcntl
+import pathlib
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help as sbh
@@ -107,7 +108,6 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 
 	return
 
-
 def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name=None):
 	## Set script name and path
 	if instance_set_test_name is not None:
@@ -128,20 +128,12 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	output = '--output=' + std_out
 	error = '--error=' + std_err
 	array = '--array=0-' + str(num_jobs-1) + '%' + str(max_jobs)
-
-
-	n_cpus = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace CPU
-	#Retrieve
-	cpus = '--cpus-per-task=' + str(n_cpus)
+	sbatch_options_list = [job_name, output, error, array]
 
 	# Log script and output paths
 	sl.add_output(sbatch_script_path, 'Slurm batch script for validation')
 	sl.add_output(sgh.smac_dir + std_out, 'Standard output of Slurm batch script for validation')
 	sl.add_output(sgh.smac_dir + std_err, 'Error output of Slurm batch script for validation')
-
-	sbatch_options_list = [job_name, output, error, array, cpus]
-	sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
-	sbatch_options_list.extend(get_slurm_sbatch_user_options_list()) # Get user options second to overrule defaults
 
 	# Train default
 	default = True
@@ -191,14 +183,35 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 		job_params_list.extend([test_default, test_configured])
 		job_output_list.extend([test_default_out, test_configured_out])
 
+	n_cpus = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace CPU
+
+	#Adjust maximum number of cores to be the maximum of the instances we validate on
+	instance_sizes = []
+	#Get instance set sizes
+	for instance_set_name, inst_type in [(instance_set_train_name, "train"), (instance_set_test_name, "test")]:
+		if instance_set_name is not None:
+			smac_instance_file = sgh.smac_dir +'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
+			if pathlib.Path(smac_instance_file).is_file():
+				instance_count = sum(1 for line in open(smac_instance_file,"r"))
+				instance_sizes.append(instance_count)
+
+	#Adjust cpus when nessacery
+	if len(instance_sizes) > 0:
+		max_instance_count = max(*instance_sizes) if len(instance_sizes) > 1 else instance_sizes[0]
+		n_cpus = min(n_cpus, max_instance_count)
+
+	## Extend sbatch options
+	cpus = '--cpus-per-task=' + str(n_cpus)
+	sbatch_options_list.append(cpus)
+	sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
+	sbatch_options_list.extend(get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
+
 	## Set srun options
 	srun_options_str = '--nodes=1 --ntasks=1 --cpus-per-task ' + str(n_cpus)
 	srun_options_str = srun_options_str + ' ' + get_slurm_srun_user_options_str()
 
 	## Create target call
-	n_cores = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace CPU
-
-	target_call_str = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cores)
+	target_call_str = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cpus)
 
 	## Generate script
 	generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str, job_output_list)
