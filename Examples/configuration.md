@@ -19,6 +19,8 @@ The solver directory should contain the solver executable, the `sparkle_smac_wra
 
 `Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/`
 
+If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
+
 #### Configure the solver
 
 Perform configuration on the solver to obtain a target configuration
@@ -29,7 +31,7 @@ Perform configuration on the solver to obtain a target configuration
 
 Validate the performance of the best found parameter configuration. The test set is optional.
 
-`./Commands/validate_configured_vs_default.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
+`Commands/validate_configured_vs_default.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
 
 #### Generate a report
 
@@ -45,7 +47,7 @@ By default the `generate_report` command will create a report for the most recen
 
 Run ablation using the training instances and validate the parameter importance with the test set
 
-`./Commands/run_ablation.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
+`Commands/run_ablation.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
 
 #### Generate a report
 

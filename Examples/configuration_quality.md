@@ -19,6 +19,8 @@ The solver directory should contain the solver executable, the `sparkle_smac_wra
 
 `Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/VRP_SISRs/`
 
+If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
+
 #### Configure the solver
 
 Perform configuration on the solver to obtain a target configuration. For the VRP we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
@@ -29,7 +31,7 @@ Perform configuration on the solver to obtain a target configuration. For the VR
 
 Validate the performance of the best found parameter configuration. The test set is optional. We again set the performance measure to absolute quality.
 
-`./Commands/validate_configured_vs_default.py --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X/ --instance-set-test Instances/X2/ --performance-measure QUALITY_ABSOLUTE`
+`Commands/validate_configured_vs_default.py --solver Solvers/VRP_SISRs/ --instance-set-train Instances/X/ --instance-set-test Instances/X2/ --performance-measure QUALITY_ABSOLUTE`
 
 #### Generate a report
 
