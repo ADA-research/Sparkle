@@ -76,14 +76,7 @@ if __name__ == r'__main__':
 	sfh.add_new_solver_into_file(solver_diretory, deterministic)
 	
 	if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
-		pcs_file_name = sacsh.get_pcs_file_from_solver_directory(solver_diretory)
-		smac_scenario_dir = sgh.smac_dir + r'/' + r'example_scenarios/'
-		command_line = r'cp -r ' + solver_diretory + r' ' + smac_scenario_dir
-		os.system(command_line)
-		smac_solver_dir = smac_scenario_dir + r'/' + sfh.get_last_level_directory_name(solver_source) + r'/'
-		sacsh.create_necessary_files_for_configured_solver(smac_solver_dir)
-		print('c pcs file detected, this is a configured solver')
-		print('c solver added to SMAC')
+		print('c pcs file detected, this is a configurable solver')
 	
 	print('c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!')
 

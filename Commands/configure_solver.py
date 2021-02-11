@@ -25,9 +25,8 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
-
 from sparkle_help import sparkle_slurm_help as ssh
-#from validate_configured_vs_default import validate_configured_vs_default
+
 
 if __name__ == r'__main__':
 	# Initialise settings
@@ -71,11 +70,12 @@ if __name__ == r'__main__':
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = None
+
 	if instance_set_test is not None:
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
-	# Write used settings to file
-	sgh.settings.write_used_settings()
+	# Clean the configuration directory for this solver to make sure we start with a clean slate
+	scsh.clean_configuration_directory(solver_name)
 
 	# Copy instances to smac directory
 	instances_directory = 'Instances/' + instance_set_train_name
@@ -116,4 +116,7 @@ if __name__ == r'__main__':
 
 	if(ablation):
 		scsh.generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, configure_jobid)
+
+	# Write used settings to file
+	sgh.settings.write_used_settings()
 

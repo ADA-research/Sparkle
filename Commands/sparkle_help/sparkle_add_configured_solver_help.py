@@ -11,11 +11,8 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
-import time
-import random
-import sys
-import fcntl
 from sparkle_help import sparkle_file_help as sfh
+
 
 def check_adding_solver_contain_pcs_file(solver_diretory):
 	list_files = os.listdir(solver_diretory)
@@ -25,6 +22,7 @@ def check_adding_solver_contain_pcs_file(solver_diretory):
 			return True
 	return False
 
+
 def get_pcs_file_from_solver_directory(solver_diretory):
 	list_files = os.listdir(solver_diretory)
 	for file_name in list_files:
@@ -33,21 +31,15 @@ def get_pcs_file_from_solver_directory(solver_diretory):
 			return file_name
 	return r''
 
+
 def create_necessary_files_for_configured_solver(smac_solver_dir):
-	outdir_dir = smac_solver_dir + r'/' + 'outdir_train_configuration/'
+	outdir_dir = smac_solver_dir + '/' + 'outdir_train_configuration/'
 	command_line = 'mkdir -p ' + outdir_dir
-	#print(command_line)
 	os.system(command_line)
 	
-	tmp_dir = smac_solver_dir + r'/' + 'tmp/'
+	tmp_dir = smac_solver_dir + '/' + 'tmp/'
 	command_line = 'mkdir -p ' + tmp_dir
-	#print(command_line)
 	os.system(command_line)
+
 	return
 
-
-
-
-
-
-	

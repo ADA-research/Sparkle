@@ -56,23 +56,9 @@ def get_smac_settings():
 
 	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel
 
-'''
-TODO: fix ablation settings
-		elif mylist[0] == 'ablation_concurrent_clis':
-			ablation_concurrent_clis = mylist[2]
-		elif mylist[0] == 'ablation_racing':
-			ablation_racing = mylist[2].lower() in ['true', '1']
-	fin.close()
-
-	return_list = [smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str]
-	if with_ablation:
-		return_list.append(ablation_concurrent_clis)
-		return_list.append(ablation_racing)
-'''
-
 
 # Copy file listing the training instances from the instance directory to the solver directory
-def handle_file_instance_train(solver_name, instance_set_name):
+def handle_file_instance_train(solver_name: str, instance_set_name: str):
 	file_postfix = r'_train.txt'
 	handle_file_instance(solver_name, instance_set_name, file_postfix)
 
@@ -80,7 +66,7 @@ def handle_file_instance_train(solver_name, instance_set_name):
 
 
 # Copy file listing the testing instances from the instance directory to the solver directory
-def handle_file_instance_test(solver_name, instance_set_name):
+def handle_file_instance_test(solver_name: str, instance_set_name: str):
 	file_postfix = r'_test.txt'
 	handle_file_instance(solver_name, instance_set_name, file_postfix)
 
@@ -88,7 +74,7 @@ def handle_file_instance_test(solver_name, instance_set_name):
 
 
 # Copy file with the specified postfix listing instances from the instance directory to the solver directory
-def handle_file_instance(solver_name, instance_set_name, file_postfix):
+def handle_file_instance(solver_name: str, instance_set_name: str, file_postfix: str):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
 	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + '/'
 	smac_file_instance_path_ori = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + file_postfix
@@ -96,6 +82,9 @@ def handle_file_instance(solver_name, instance_set_name, file_postfix):
 
 	command_line = 'cp ' + smac_file_instance_path_ori + ' ' + smac_file_instance_path_target
 	os.system(command_line)
+
+	log_str = 'List of instances to be used for configuration'
+	sl.add_output(smac_file_instance_path_target, log_str)
 
 	return
 
@@ -164,7 +153,7 @@ def create_file_scenario_validate(solver_name, instance_set_name, instance_type,
 
 
 # Create a file with the configuration scenario in the solver directory
-def create_file_scenario_configuration(solver_name, instance_set_name):
+def create_file_scenario_configuration(solver_name: str, instance_set_name: str):
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario = smac_solver_dir + solver_name + r'_' + instance_set_name + r'_scenario.txt'
 
@@ -175,7 +164,7 @@ def create_file_scenario_configuration(solver_name, instance_set_name):
 	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_train.txt'
 	smac_test_instance_file = smac_instance_file
 
-	fout = open(smac_file_scenario, 'w+')
+	fout = open(smac_file_scenario, 'w')
 	fout.write('algo = ./' + sgh.sparkle_smac_wrapper + '\n')
 	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
 	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
@@ -190,21 +179,54 @@ def create_file_scenario_configuration(solver_name, instance_set_name):
 	fout.write('validation = true' + '\n')
 	fout.close()
 
-	sl.add_output(sgh.smac_dir+smac_outdir+smac_file_scenario[:-4], "SMAC configuration output on the training set")
+	sl.add_output(smac_file_scenario, "SMAC configuration scenario on the training set")
+	sl.add_output(sgh.smac_dir+smac_outdir, "SMAC configuration output on the training set")
+
 	return
 
 
-def prepare_smac_execution_directories_configuration(solver_name):
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
+def remove_configuration_directory(solver_name: str):
+	smac_solver_dir = Path(sgh.smac_dir + '/example_scenarios/' + solver_name + '/')
+
+	# Remove the solver directory to make sure any possible old files don't interfere
+	sfh.rmtree(smac_solver_dir)
+
+	return
+
+
+def clean_configuration_directory(solver_name: str):
+	remove_configuration_directory(solver_name)
+	create_configuraiton_directory(solver_name)
+
+	return
+
+
+def create_configuraiton_directory(solver_name: str):
+	smac_scenario_dir = sgh.smac_dir + '/' + 'example_scenarios/'
+	smac_solver_dir = smac_scenario_dir + '/' + solver_name + '/'
+	sacsh.create_necessary_files_for_configured_solver(smac_solver_dir)
+
+	# Copy PCS file to smac_solver_dir
+	solver_diretory = 'Solvers/' + solver_name + '/'
+	pcs_file = solver_diretory + sacsh.get_pcs_file_from_solver_directory(solver_diretory)
+	command_line = 'cp ' + pcs_file + ' ' + smac_solver_dir
+	os.system(command_line)
+
+	return
+
+
+def prepare_smac_execution_directories_configuration(solver_name: str):
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	_, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
 	for i in range(1, num_of_smac_run+1):
+		smac_solver_path_i = smac_solver_dir + str(i)
 		# Create directories, -p makes sure any missing parents are also created
-		cmd = "mkdir -p " + smac_solver_dir + str(i) + '/tmp/'
+		cmd = 'mkdir -p ' + smac_solver_path_i + '/tmp/'
 		os.system(cmd)
 
-		solver_diretory = r'Solvers/' + solver_name + r'/*'
-		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + str(i)
+		solver_diretory = 'Solvers/' + solver_name + '/*'
+		cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + str(i)
 		os.system(cmd)
 
 	return
