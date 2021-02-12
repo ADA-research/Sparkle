@@ -50,6 +50,9 @@ Commands/test/compute_marginal_contribution.sh
 # Test configure solver
 Commands/test/configure_solver.sh
 
+# Test configure solver with validate option
+Commands/test/configure_solver_validate.sh
+
 # Test construct sparkle portfolio selector
 Commands/test/construct_sparkle_portfolio_selector.sh
 
