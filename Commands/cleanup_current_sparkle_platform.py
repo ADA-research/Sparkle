@@ -13,11 +13,13 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import sys
 import argparse
+
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_logging as sl
+import cleanup_temporary_files as ctf
 
 
-if __name__ == r'__main__':
+if __name__ == '__main__':
 	# Log command call
 	sl.log_command(sys.argv)
 
@@ -27,29 +29,10 @@ if __name__ == r'__main__':
 	# Process command line arguments
 	args = parser.parse_args()
 
-	print(r'c Cleaning existing Sparkle platform ...')
+	print('c Cleaning existing Sparkle platform ...')
 	sparkle_record_help.cleanup_current_sparkle_platform()
-	command_line = r'rm -rf Commands/sparkle_help/*.pyc'
+	ctf.remove_temporary_files()
+	command_line = 'rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf'
 	os.system(command_line)
-	command_line = r'rm -rf Tmp/*'
-	os.system(command_line)
-	command_line = r'rm -rf Tmp/SBATCH_Extractor_Jobs/*'
-	os.system(command_line)
-	command_line = r'rm -rf Tmp/SBATCH_Solver_Jobs/*'
-	os.system(command_line)
-	command_line = r'rm -rf Tmp/SBATCH_Portfolio_Jobs/*'
-	os.system(command_line)
-	command_line = r'rm -rf Tmp/SBATCH_Report_Jobs/*'
-	os.system(command_line)
-	command_line = r'rm -rf Feature_Data/Tmp/*'
-	os.system(command_line)
-	command_line = r'rm -rf Performance_Data/Tmp/*'
-	os.system(command_line)
-	command_line = r'rm -rf Log/*'
-	os.system(command_line)
-	command_line = r'rm -f slurm-*'
-	os.system(command_line)
-	command_line = r'rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf'
-	os.system(command_line)
-	print(r'c Existing Sparkle platform cleaned!')
+	print('c Existing Sparkle platform cleaned!')
 

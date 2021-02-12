@@ -196,12 +196,12 @@ def remove_configuration_directory(solver_name: str):
 
 def clean_configuration_directory(solver_name: str):
 	remove_configuration_directory(solver_name)
-	create_configuraiton_directory(solver_name)
+	create_configuration_directory(solver_name)
 
 	return
 
 
-def create_configuraiton_directory(solver_name: str):
+def create_configuration_directory(solver_name: str):
 	smac_scenario_dir = sgh.smac_dir + '/' + 'example_scenarios/'
 	smac_solver_dir = smac_scenario_dir + '/' + solver_name + '/'
 	sacsh.create_necessary_files_for_configured_solver(smac_solver_dir)
@@ -272,7 +272,7 @@ def prepare_smac_execution_directories_validation(solver_name):
 	return
 
 
-def create_smac_configure_sbatch_script(solver_name, instance_set_name):
+def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str) -> str:
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
 	execdir = '/example_scenarios/' + solver_name + r'/'
 	smac_file_scenario_name = solver_name + r'_' + instance_set_name + r'_scenario.txt'
@@ -282,11 +282,6 @@ def create_smac_configure_sbatch_script(solver_name, instance_set_name):
 	result_part = 'results/' + solver_name + '_' + instance_set_name + '/'
 	result_dir = sgh.smac_dir + result_part
 	[item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
-
-	#Remove when checked that nothing else if broken
-	#command_line = 'cd ' + sgh.smac_dir + ' ; ' + './generate_sbatch_script.py ' + 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name + ' ' + result_part + ' ' + str(num_of_smac_run) + ' ' + str(num_of_smac_run_in_parallel) + ' ' + execdir + ' ; ' + 'cd ../../'
-	#print(command_line)
-	#os.system(command_line)
 
 	scenario_file = 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name
 
@@ -302,37 +297,47 @@ def generate_configuration_sbatch_script(sbatch_script_path, scenario_file, resu
 	sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
 	num_job_in_parallel = max(num_job_in_parallel, num_job_total)
 
-	sl.add_output(sgh.smac_dir + r'tmp/' + job_name + r'.txt',
-				  "Error log of batch script for parallel configuration runs with SMAC")
+	output_log_path = sgh.smac_dir + 'tmp/' + job_name + '.txt'
+	error_log_path = sgh.smac_dir + 'tmp/' + job_name + '.err'
 
-	if result_directory[-1] != r'/':
-		result_directory += r'/'
+	# Remove possible old output
+	sfh.rmfile(Path(output_log_path))
+	sfh.rmfile(Path(error_log_path))
 
-	if not os.path.exists(sgh.smac_dir+result_directory):
-		os.system(r'mkdir -p ' + sgh.smac_dir+result_directory)
+	# Log output paths
+	sl.add_output(output_log_path,
+				  'Output log of batch script for parallel configuration runs with SMAC')
+	sl.add_output(error_log_path,
+				  'Error log of batch script for parallel configuration runs with SMAC')
 
-	if not os.path.exists(sgh.smac_dir+r'tmp/'):
-		os.system(r'mkdir -p '+ sgh.smac_dir + 'tmp/')
+	if result_directory[-1] != '/':
+		result_directory += '/'
+
+	if not os.path.exists(sgh.smac_dir + result_directory):
+		os.system('mkdir -p ' + sgh.smac_dir + result_directory)
+
+	if not os.path.exists(sgh.smac_dir + 'tmp/'):
+		os.system('mkdir -p '+ sgh.smac_dir + 'tmp/')
 
 	fout = open(sgh.smac_dir+sbatch_script_path, 'w+')
-	fout.write(r'#!/bin/bash' + '\n')
-	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --job-name=' + job_name + '\n')
-	fout.write(r'#SBATCH --output=' + r'tmp/' + job_name + r'.txt' + '\n')
-	fout.write(r'#SBATCH --error=' + r'tmp/' + job_name + r'.err' + '\n')
-	fout.write(r'###' + '\n')
-	fout.write(r'###' + '\n')
-	fout.write(r'#SBATCH --mem-per-cpu=3000' + '\n')
+	fout.write('#!/bin/bash' + '\n')
+	fout.write('###' + '\n')
+	fout.write('#SBATCH --job-name=' + job_name + '\n')
+	fout.write('#SBATCH --output=' + 'tmp/' + job_name + '.txt' + '\n')
+	fout.write('#SBATCH --error=' + 'tmp/' + job_name + '.err' + '\n')
+	fout.write('###' + '\n')
+	fout.write('###' + '\n')
+	fout.write('#SBATCH --mem-per-cpu=3000' + '\n')
 	fout.write(r"#SBATCH --array=0-{njobs}%{parallel}\n".format(njobs=num_job_total, parallel=num_job_in_parallel))
 	fout.write(r'###' + '\n')
 	# Options from the slurm/sbatch settings file
 	for i in sbatch_options_list:
-		fout.write(r'#SBATCH ' + str(i) + '\n')
-	fout.write(r'###' + '\n')
+		fout.write('#SBATCH ' + str(i) + '\n')
+	fout.write('###' + '\n')
 
 	fout.write('params=( \\' + '\n')
 
-	sl.add_output(sgh.smac_dir + result_directory + sbatch_script_path + r'_seed_N_smac.txt', "Configuration log for SMAC run 1 < N <= {}".format(num_job_total))
+	sl.add_output(sgh.smac_dir + result_directory + sbatch_script_path + '_seed_N_smac.txt', "Configuration log for SMAC run 1 < N <= {}".format(num_job_total))
 	for i in range(0, num_job_total):
 		seed = i + 1
 		result_path = result_directory + sbatch_script_path + r'_seed_' + str(seed) + r'_smac.txt'
@@ -595,15 +600,17 @@ def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
 
 	return
 
+
 def generate_validation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
 	command_line = 'echo $(pwd) $(date)\n'
-	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py  --settings-file Settings/latest.ini'
+	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
 	command_line += ' --instance-set-train ' + instance_set_train
 	if instance_set_test is not None:
 		command_line += ' --instance-set-test ' + instance_set_test
 
 	generate_generic_callback_slurm_script("validation", solver, instance_set_train, instance_set_test, dependency, command_line)
+
 
 def generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
 	command_line = 'echo $(pwd) $(date)\n'
@@ -623,7 +630,7 @@ def generate_generic_callback_slurm_script(name, solver, instance_set_train, ins
 	if instance_set_test is not None:
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
-	delayed_validation_file_name = "delayed_{}_{}_{}".format(name,solver_name, instance_set_train_name)
+	delayed_validation_file_name = "delayed_{}_{}_{}".format(name, solver_name, instance_set_train_name)
 	if instance_set_test is not None:
 		delayed_validation_file_name += "_{}".format(instance_set_test_name)
 	delayed_validation_file_name += "_script.sh"
