@@ -12,12 +12,13 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import fcntl
-import pathlib
+from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_file_help as sfh
 
 
 def get_slurm_options_list(path_modifier=None):
@@ -108,7 +109,8 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 
 	return
 
-def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name=None):
+
+def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_name: str, instance_set_test_name: str = None) -> str:
 	## Set script name and path
 	if instance_set_test_name is not None:
 		sbatch_script_name = solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '_validation_sbatch.sh'
@@ -185,17 +187,17 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 	n_cpus = sgh.settings.get_slurm_clis_per_node() # Number of cores available on a Grace CPU
 
-	#Adjust maximum number of cores to be the maximum of the instances we validate on
+	# Adjust maximum number of cores to be the maximum of the instances we validate on
 	instance_sizes = []
-	#Get instance set sizes
+	# Get instance set sizes
 	for instance_set_name, inst_type in [(instance_set_train_name, "train"), (instance_set_test_name, "test")]:
 		if instance_set_name is not None:
-			smac_instance_file = sgh.smac_dir +'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
-			if pathlib.Path(smac_instance_file).is_file():
+			smac_instance_file = sgh.smac_dir + 'example_scenarios/' + solver_name + '/' + instance_set_name + '_' + inst_type + '.txt'
+			if Path(smac_instance_file).is_file():
 				instance_count = sum(1 for line in open(smac_instance_file,"r"))
 				instance_sizes.append(instance_count)
 
-	#Adjust cpus when nessacery
+	# Adjust cpus when nessacery
 	if len(instance_sizes) > 0:
 		max_instance_count = max(*instance_sizes) if len(instance_sizes) > 1 else instance_sizes[0]
 		n_cpus = min(n_cpus, max_instance_count)
@@ -213,6 +215,14 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 	## Create target call
 	target_call_str = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cpus)
 
+	# Remove possible old output
+	sfh.rmfile(Path(sgh.smac_dir + std_out))
+	sfh.rmfile(Path(sgh.smac_dir + std_err))
+
+	# Remove possible old results
+	for result_output_file in job_output_list:
+		sfh.rmfile(Path(result_output_file))
+
 	## Generate script
 	generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str, job_output_list)
 
@@ -221,7 +231,7 @@ def generate_sbatch_script_for_validation(solver_name, instance_set_train_name, 
 
 def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path, list_jobs):
 	## Set script name and path
-	sbatch_script_name = 'computing_features_sbatch_shell_script_' + str(n_jobs) + '_' + sbh.get_time_pid_random_string() + r'.sh'
+	sbatch_script_name = 'computing_features_sbatch_shell_script_' + str(n_jobs) + '_' + sbh.get_time_pid_random_string() + '.sh'
 	sbatch_script_dir = sgh.sparkle_tmp_path
 	sbatch_script_path = sbatch_script_dir + sbatch_script_name
 

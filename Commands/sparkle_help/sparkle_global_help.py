@@ -110,7 +110,7 @@ SAT_verifier_path = r'Components/Sparkle-SAT-verifier/SAT'
 autofolio_path = r'Components/AutoFolio-master/scripts/autofolio'
 
 global smac_dir
-smac_dir = r'Components/smac-v2.10.03-master-778/'
+smac_dir = 'Components/smac-v2.10.03-master-778/'
 
 global sparkle_run_default_wrapper
 sparkle_run_default_wrapper = r'sparkle_run_default_wrapper.py'

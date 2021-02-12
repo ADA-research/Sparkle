@@ -109,7 +109,7 @@ def get_solver_deterministic(solver_name):
 
 
 # Create a file with the configuration scenario to be used for smac validation in the solver directory
-def create_file_scenario_validate(solver_name, instance_set_name, instance_type, default):
+def create_file_scenario_validate(solver_name: str, instance_set_name: str, instance_type: InstanceType, default: bool) -> str:
 	if instance_type is InstanceType.TRAIN:
 		inst_type = 'train'
 	else:
@@ -216,7 +216,7 @@ def create_configuration_directory(solver_name: str):
 
 
 def prepare_smac_execution_directories_configuration(solver_name: str):
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/'
 	_, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
 	for i in range(1, num_of_smac_run+1):
@@ -232,41 +232,66 @@ def prepare_smac_execution_directories_configuration(solver_name: str):
 	return
 
 
-def prepare_smac_execution_directories_validation(solver_name):
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
+def remove_validation_directories_execution_or_output(solver_name: str, exec_or_out: str):
+	solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/' + exec_or_out
+
+	train_default_dir = Path(solver_dir + '_train_default/')
+	sfh.rmtree(train_default_dir)
+
+	test_default_dir = Path(solver_dir + '_test_default/')
+	sfh.rmtree(test_default_dir)
+
+	test_configured_dir = Path(solver_dir + '_test_configured/')
+	sfh.rmtree(test_configured_dir)
+
+	return
+
+
+def remove_validation_directories(solver_name: str):
+	remove_validation_directories_execution_or_output(solver_name, 'validate')
+	remove_validation_directories_execution_or_output(solver_name, 'output')
+
+	return
+
+
+def prepare_smac_execution_directories_validation(solver_name: str):
+	# Make sure no old files remain that could interfere
+	remove_validation_directories(solver_name)
+
+	smac_solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/'
+	_, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
 	for i in range(1, num_of_smac_run+1):
-		solver_diretory = r'Solvers/' + solver_name + r'/*'
+		solver_diretory = 'Solvers/' + solver_name + '/*'
 
 		## Train default
-		execdir = "validate_train_default/"
+		execdir = 'validate_train_default/'
 
 		# Create directories, -p makes sure any missing parents are also created
-		cmd = "mkdir -p " + smac_solver_dir + execdir + '/tmp/'
+		cmd = 'mkdir -p ' + smac_solver_dir + execdir + '/tmp/'
 		os.system(cmd)
 		# Copy solver to execution directory
-		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + execdir
+		cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + execdir
 		os.system(cmd)
 
 		## Test default
-		execdir = "validate_test_default/"
+		execdir = 'validate_test_default/'
 
 		# Create directories, -p makes sure any missing parents are also created
-		cmd = "mkdir -p " + smac_solver_dir + execdir + '/tmp/'
+		cmd = 'mkdir -p ' + smac_solver_dir + execdir + '/tmp/'
 		os.system(cmd)
 		# Copy solver to execution directory
-		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + execdir
+		cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + execdir
 		os.system(cmd)
 
 		## Test configured
-		execdir = "validate_test_configured/"
+		execdir = 'validate_test_configured/'
 
 		# Create directories, -p makes sure any missing parents are also created
-		cmd = "mkdir -p " + smac_solver_dir + execdir + '/tmp/'
+		cmd = 'mkdir -p ' + smac_solver_dir + execdir + '/tmp/'
 		os.system(cmd)
 		# Copy solver to execution directory
-		cmd = r'cp -r ' + solver_diretory + r' ' + smac_solver_dir + execdir
+		cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + execdir
 		os.system(cmd)
 
 	return
@@ -356,16 +381,16 @@ def generate_configuration_sbatch_script(sbatch_script_path, scenario_file, resu
 	cmd = cmd_srun_prefix + r' ' + cmd_smac_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'
 	fout.write(cmd + '\n')
 	fout.close()
+
 	return
 
 
-
-def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name):
+def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) -> str:
 	ori_path = os.getcwd()
 	command_line = 'cd ' + sgh.smac_dir + ' ; ' + 'sbatch ' + smac_configure_sbatch_script_name + ' ; ' + 'cd ' + ori_path
-	#os.system(command_line)
 
 	output_list = os.popen(command_line).readlines()
+
 	if len(output_list) > 0 and len(output_list[0].strip().split())>0:
 		jobid = output_list[0].strip().split()[-1]
 	else:
@@ -601,7 +626,7 @@ def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
 	return
 
 
-def generate_validation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
+def generate_validation_callback_slurm_script(solver: str, instance_set_train: str, instance_set_test: str, dependency: str):
 	command_line = 'echo $(pwd) $(date)\n'
 	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
@@ -611,70 +636,87 @@ def generate_validation_callback_slurm_script(solver, instance_set_train, instan
 
 	generate_generic_callback_slurm_script("validation", solver, instance_set_train, instance_set_test, dependency, command_line)
 
+	return
 
-def generate_ablation_callback_slurm_script(solver, instance_set_train, instance_set_test, dependency):
+
+def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str, instance_set_test: str, dependency: str):
 	command_line = 'echo $(pwd) $(date)\n'
 	command_line += 'srun -N1 -n1 ./Commands/run_ablation.py --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
 	command_line += ' --instance-set-train ' + instance_set_train
+
 	if instance_set_test is not None:
 		command_line += ' --instance-set-test ' + instance_set_test
 
-	generate_generic_callback_slurm_script("ablation", solver, instance_set_train, instance_set_test, dependency, command_line)
+	generate_generic_callback_slurm_script('ablation', solver, instance_set_train, instance_set_test, dependency, command_line)
+
+	return
 
 
-def generate_generic_callback_slurm_script(name, solver, instance_set_train, instance_set_test, dependency, commands):
+def generate_generic_callback_slurm_script(name: str, solver: str, instance_set_train: str, instance_set_test: str, dependency: str, command_line: str):
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = None
+
 	if instance_set_test is not None:
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
-	delayed_validation_file_name = "delayed_{}_{}_{}".format(name, solver_name, instance_set_train_name)
+	delayed_job_file_name = 'delayed_{}_{}_{}'.format(name, solver_name, instance_set_train_name)
+
 	if instance_set_test is not None:
-		delayed_validation_file_name += "_{}".format(instance_set_test_name)
-	delayed_validation_file_name += "_script.sh"
+		delayed_job_file_name += '_{}'.format(instance_set_test_name)
+
+	delayed_job_file_name += '_script.sh'
 
 	sfh.checkout_directory(sgh.sparkle_tmp_path)
-	delayed_validation_file_path = sgh.sparkle_tmp_path + delayed_validation_file_name
+	delayed_job_file_path = sgh.sparkle_tmp_path + delayed_job_file_name
+	delayed_job_output = delayed_job_file_path + '.txt'
+	delayed_job_error = delayed_job_file_path + '.err'
 
-	job_name = '--job-name=' + delayed_validation_file_name
-	output = '--output=' + delayed_validation_file_path + '.txt'
-	error = '--error=' + delayed_validation_file_path + '.err'
+	job_name = '--job-name=' + delayed_job_file_name
+	output = '--output=' + delayed_job_output
+	error = '--error=' + delayed_job_error
+
+	sl.add_output(delayed_job_file_path, 'Delayed ' + name + ' script')
+	sl.add_output(delayed_job_output, 'Delayed ' + name + ' standard output')
+	sl.add_output(delayed_job_error, 'Delayed ' + name + ' error output')
 
 	sbatch_options_list = [job_name, output, error]
 	sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
-	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())  # Get user options second to overrule defaults
+	sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list()) # Get user options second to overrule defaults
 
-	#Only overwrite task specific arguments
-	sbatch_options_list.append("--dependency=afterany:{}".format(dependency))
-	sbatch_options_list.append("--nodes=1")
-	sbatch_options_list.append("--ntasks=1")
-	sbatch_options_list.append("-c1")
-	sbatch_options_list.append("--mem-per-cpu=3000")
+	# Only overwrite task specific arguments
+	sbatch_options_list.append('--dependency=afterany:{}'.format(dependency))
+	sbatch_options_list.append('--nodes=1')
+	sbatch_options_list.append('--ntasks=1')
+	sbatch_options_list.append('-c1')
+	sbatch_options_list.append('--mem-per-cpu=3000')
 
 	ori_path = os.getcwd()
 
-	command_line = commands
+	fout = open(delayed_job_file_path, 'w')
+	fout.write('#!/bin/bash' + '\n') # use bash to execute this script
+	fout.write('###' + '\n')
+	fout.write('###' + '\n')
 
-	fout = open(delayed_validation_file_path, "w")
-	fout.write(r'#!/bin/bash' + '\n')  # use bash to execute this script
-	fout.write(r'###' + '\n')
-	fout.write(r'###' + '\n')
 	for sbatch_option in sbatch_options_list:
-		fout.write(r'#SBATCH ' + str(sbatch_option) + '\n')
-	fout.write(r'###' + '\n')
+		fout.write('#SBATCH ' + str(sbatch_option) + '\n')
+
+	fout.write('###' + '\n')
 	fout.write(command_line + "\n")
 	fout.close()
 
-	os.popen("chmod 755 " + delayed_validation_file_path)
+	os.popen('chmod 755 ' + delayed_job_file_path)
 
-	output_list = os.popen("sbatch ./" + delayed_validation_file_path).readlines()
+	output_list = os.popen("sbatch ./" + delayed_job_file_path).readlines()
+
 	if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
 		jobid = output_list[0].strip().split()[-1]
 	else:
 		jobid = ''
-	#os.popen("sbatch ./" + delayed_validation_file_path)
-	print("c Callback script to launch {} is placed at {}".format(name,delayed_validation_file_path))
-	print("c Once configuration is finished, {name} will automatically start as a Slurm job: {jobid}".format(name=name,
-																											 jobid=jobid))
+
+	print('c Callback script to launch {} is placed at {}'.format(name, delayed_job_file_path))
+	print('c Once configuration is finished, {name} will automatically start as a Slurm job: {jobid}'.format(name=name, jobid=jobid))
+
+	return
+
