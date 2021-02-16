@@ -109,7 +109,7 @@ if __name__ == r'__main__':
 
 	if flag_judge_exist_remaining_jobs:
 		print(r'c There remain unperformed feature computation jobs or performance computation jobs!')
-		print(r'c Please first execute all unperformed jobs before constructing Sparkle portfolio selecotr')
+		print(r'c Please first execute all unperformed jobs before constructing Sparkle portfolio selector')
 		print(r'c Sparkle portfolio selector is not successfully constructed!')
 		delete_task_run_status()
 		sys.exit()
