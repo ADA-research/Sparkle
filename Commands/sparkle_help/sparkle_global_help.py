@@ -87,6 +87,15 @@ sparkle_portfolio_selector_name = 'sparkle_portfolio_selector' + sparkle_special
 global sparkle_portfolio_selector_path
 sparkle_portfolio_selector_path = sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name
 
+global sparkle_parallel_portfolio_dir
+sparkle_parallel_portfolio_dir = 'Sparkle_Parallel_portfolio/'
+
+global sparkle_parallel_portfolio_name
+sparkle_parallel_portfolio_name = 'sparkle_parallel_portfolio' + sparkle_special_string
+
+global sparkle_parallel_portfolio_path
+sparkle_parallel_portfolio_path = sparkle_parallel_portfolio_dir + sparkle_parallel_portfolio_name
+
 global sparkle_marginal_contribution_perfect_path
 sparkle_marginal_contribution_perfect_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_perfect.csv')
 

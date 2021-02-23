@@ -15,6 +15,7 @@ class Scenario(Enum):
 	NONE = 0
 	SELECTION = 1
 	CONFIGURATION = 2
+	PARALLEL = 3
 
 
 	def from_str(scenario):
@@ -24,6 +25,8 @@ class Scenario(Enum):
 			scenario = Scenario.SELECTION
 		elif scenario == 'CONFIGURATION':
 			scenario = Scenario.CONFIGURATION
+		elif scenario == 'PARALLEL':
+			scenario = Scenario.PARALLEL
 
 		return scenario
 
@@ -39,6 +42,9 @@ class ReportingScenario:
 
 	DEFAULT_selection_portfolio_path = Path('')
 	DEFAULT_selection_test_case_directory = Path('')
+
+	DEFAULT_parallel_portfolio_path = Path('')
+	DEFAULT_parallel_portfolio_test_case_directory = Path('')
 
 	DEFAULT_config_solver = Path('')
 	DEFAULT_config_instance_set_train = Path('')
@@ -61,6 +67,8 @@ class ReportingScenario:
 			self.set_latest_scenario()
 			self.set_selection_portfolio_path()
 			self.set_selection_test_case_directory()
+			self.set_parallel_portfolio_path()
+			self.set_parallel_test_case_directory()
 			self.set_config_solver()
 			self.set_config_instance_set_train()
 			self.set_config_instance_set_test()
@@ -115,6 +123,22 @@ class ReportingScenario:
 				if file_scenario.has_option(section, option):
 					value = Path(file_scenario.get(section, option))
 					self.set_config_instance_set_test(value)
+					file_scenario.remove_option(section, option)
+			
+			section = 'parallel'
+			option_names = ('portfolio_path',) # Comma so python understands it's a tuple...
+			for option in option_names:
+				if file_scenario.has_option(section, option):
+					value = Path(file_scenario.get(section, option))
+					self.set_parallel_portfolio_path(value)
+					file_scenario.remove_option(section, option)
+
+			section = 'parallel'
+			option_names = ('test_case_directory',) # Comma so python understands it's a tuple...
+			for option in option_names:
+				if file_scenario.has_option(section, option):
+					value = Path(file_scenario.get(section, option))
+					self.set_parallel_test_case_directory(value)
 					file_scenario.remove_option(section, option)
 
 			# Report on any unknown settings that were read
@@ -224,6 +248,36 @@ class ReportingScenario:
 
 		return self.none_if_empty_path(Path(path))
 
+	### parallel portfolio settings ###
+
+
+	def set_parallel_portfolio_path(self, value: Path = DEFAULT_parallel_portfolio_path):
+		section = 'parallel'
+		name = 'portfolio_path'
+		self.path_setter(section, name, value)
+
+		return
+
+
+	def get_parallel_portfolio_path(self) -> Path:
+		return Path(self.__scenario['parallel']['test_case_directory'])
+
+
+	def set_parallel_test_case_directory(self, value: Path = DEFAULT_parallel_portfolio_test_case_directory):
+		section = 'parallel'
+		name = 'test_case_directory'
+		self.path_setter(section, name, value)
+
+		return
+
+
+	def get_parallel_test_case_directory(self) -> Path:
+		try:
+			path = self.__scenario['parallel']['test_case_directory']
+		except KeyError:
+			path = ''
+
+		return self.none_if_empty_path(Path(path))
 
 	### Configuration settings ###
 

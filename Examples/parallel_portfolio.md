@@ -20,11 +20,11 @@ Add solvers with a wrapper containing the executable name of the solver and a st
 ​
 Construct a parallel portfolio, using the all solvers and keeping in mind the given settings (default only for now.)
 ​
-`Commands/construct_parallel_portfolio.py`
+`Commands/construct_sparkle_parallel_portfolio.py`
 ​
 Run the portfolio on the instances; add `--parallel` to run the instances in parallel.
 ​
-`Commands/run_parallel_portfolio.py`
+`Commands/run_sparkle_parallel_portfolio.py`
 ​
 Generate an experimental report detailing the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report.pdf`
 ​
