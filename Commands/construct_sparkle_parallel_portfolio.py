@@ -82,7 +82,8 @@ if __name__ == r'__main__':
 
         delete_task_run_status()
         delete_log_files()
-
+        
+    # Write used settings to file
     sgh.settings.write_used_settings()
 
     print('c After adding into scenario')
