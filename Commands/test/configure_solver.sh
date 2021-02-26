@@ -39,7 +39,7 @@ else
 	echo $output
 fi
 
-sleep 1
+sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with performance measure option RUNTIME
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path | tail -1)
@@ -52,7 +52,7 @@ else
 	echo $output
 fi
 
-sleep 1
+sleep 1 # Sleep to avoid interference from previous test
 
 # TODO: Add test: Configure solver with performance measure option QUALITY (needs a quality configuration solver+instances)
 
@@ -67,7 +67,7 @@ else
 	echo $output
 fi
 
-sleep 1
+sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with budget per run option
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 --settings-file $sparkle_test_settings_path | tail -1)
@@ -80,7 +80,7 @@ else
 	echo $output
 fi
 
-sleep 1
+sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with number of runs option
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path | tail -1)
