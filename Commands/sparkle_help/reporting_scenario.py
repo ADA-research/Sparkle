@@ -15,7 +15,7 @@ class Scenario(Enum):
 	NONE = 0
 	SELECTION = 1
 	CONFIGURATION = 2
-	PARALLEL = 3
+	PARALLELPORTFOLIO = 3
 
 
 	def from_str(scenario):
@@ -25,8 +25,8 @@ class Scenario(Enum):
 			scenario = Scenario.SELECTION
 		elif scenario == 'CONFIGURATION':
 			scenario = Scenario.CONFIGURATION
-		elif scenario == 'PARALLEL':
-			scenario = Scenario.PARALLEL
+		elif scenario == 'PARALLELPORTFOLIO':
+			scenario = Scenario.PARALLELPORTFOLIO
 
 		return scenario
 
@@ -44,7 +44,7 @@ class ReportingScenario:
 	DEFAULT_selection_test_case_directory = Path('')
 
 	DEFAULT_parallel_portfolio_path = Path('')
-	DEFAULT_parallel_portfolio_test_case_directory = Path('')
+	DEFAULT_parallel_portfolio_instance = Path('')
 
 	DEFAULT_config_solver = Path('')
 	DEFAULT_config_instance_set_train = Path('')
@@ -68,7 +68,7 @@ class ReportingScenario:
 			self.set_selection_portfolio_path()
 			self.set_selection_test_case_directory()
 			self.set_parallel_portfolio_path()
-			self.set_parallel_test_case_directory()
+			self.set_parallel_portfolio_instance()
 			self.set_config_solver()
 			self.set_config_instance_set_train()
 			self.set_config_instance_set_test()
@@ -134,11 +134,11 @@ class ReportingScenario:
 					file_scenario.remove_option(section, option)
 
 			section = 'parallel'
-			option_names = ('test_case_directory',) # Comma so python understands it's a tuple...
+			option_names = ('instance',) # Comma so python understands it's a tuple...
 			for option in option_names:
 				if file_scenario.has_option(section, option):
 					value = Path(file_scenario.get(section, option))
-					self.set_parallel_test_case_directory(value)
+					self.set_parallel_portfolio_instance(value)
 					file_scenario.remove_option(section, option)
 
 			# Report on any unknown settings that were read
@@ -260,20 +260,20 @@ class ReportingScenario:
 
 
 	def get_parallel_portfolio_path(self) -> Path:
-		return Path(self.__scenario['parallel']['test_case_directory'])
+		return Path(self.__scenario['parallel']['portfolio_path'])
 
 
-	def set_parallel_test_case_directory(self, value: Path = DEFAULT_parallel_portfolio_test_case_directory):
+	def set_parallel_portfolio_instance(self, value: Path = DEFAULT_parallel_portfolio_instance):
 		section = 'parallel'
-		name = 'test_case_directory'
+		name = 'instance'
 		self.path_setter(section, name, value)
 
 		return
 
 
-	def get_parallel_test_case_directory(self) -> Path:
+	def get_parallel_portfolio_instance(self) -> Path:
 		try:
-			path = self.__scenario['parallel']['test_case_directory']
+			path = self.__scenario['parallel']['instance']
 		except KeyError:
 			path = ''
 

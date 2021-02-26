@@ -10,5 +10,5 @@ import sys
 from pathlib import Path
 
 
-def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: str, performance_data_csv_path: str, feature_data_csv_path: str):
+def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: str, performance_data_csv_path: str, feature_data_csv_path: str)->bool:
     return True

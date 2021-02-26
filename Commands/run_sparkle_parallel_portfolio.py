@@ -25,7 +25,7 @@ if __name__ == r'__main__':
 
     # Process command line arguments
     # not needed yet.
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
     print('c Sparkle parallel portfolio is running ...')
     print('c TODO ...')
