@@ -31,25 +31,29 @@ if __name__ == r'__main__':
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = argparse.ArgumentParser
-    #TODO add arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n","--portfolio-name", type=str, help='If you want to have multiple portfolios you can name it, otherwise it will override the latest portfolio.')
+    # Process command line arguments;
+    args = parser.parse_args() 
+    portfolio_str = args.portfolio_name
 
-    # Process command line arguments; none to process yet.
-    # args = parser.parse_args() 
-
+    if portfolio_str is not None:
+        portfolio_path = "Sparkle_Parallel_portfolio/" + portfolio_str
+    else:
+        portfolio_path = sgh.sparkle_parallel_portfolio_path
     print('c Start constructing Sparkle parallel portfolio ...')
 
     print('c TODO ...')
 
     #TODO construct portfolio.
-    success = scpp.construct_sparkle_parallel_portfolio(sgh.sparkle_parallel_portfolio_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path)
+    success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, sgh.performance_data_csv_path, sgh.feature_data_csv_path)
     
     if success:
         print('c Sparkle portfolio constructed!')
-        print('c Sparkle portfolio located at ' + sgh.sparkle_parallel_portfolio_path)
+        print('c Sparkle portfolio located at ' + portfolio_path)
         
         # Update latest scenario
-        sgh.latest_scenario.set_parallel_portfolio_path(Path(sgh.sparkle_parallel_portfolio_path))
+        sgh.latest_scenario.set_parallel_portfolio_path(Path(portfolio_path))
         sgh.latest_scenario.set_latest_scenario(Scenario.PARALLELPORTFOLIO)
         # Set to default to overwrite possible old instance used
         sgh.latest_scenario.set_parallel_portfolio_instance()
