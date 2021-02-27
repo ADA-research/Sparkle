@@ -33,10 +33,12 @@ if __name__ == r'__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-n","--portfolio-name", type=str, help='Gives a name to the portfolio, otherwise it will overwrite the latest portfolio.')
+    parser.add_argument("-s","--solver", required=True, metavar='N', nargs="+", type=str, help='List of names of the solvers')
     parser.add_argument("-o","--overwrite", action="store_true", help='Allows overwrite of the directory, default true if no name is specified otherwise the default is false')
     # Process command line arguments;
     args = parser.parse_args() 
     portfolio_str = args.portfolio_name
+    list_of_solvers = args.solver
     overwrite = args.overwrite
 
     if portfolio_str is not None:
@@ -49,7 +51,7 @@ if __name__ == r'__main__':
     print('c TODO ...')
 
     #TODO construct portfolio.
-    success = scpp.construct_sparkle_parallel_portfolio(Path(portfolio_path),overwrite)
+    success = scpp.construct_sparkle_parallel_portfolio(Path(portfolio_path),overwrite,list_of_solvers)
     
     if success:
         print('c Sparkle portfolio constructed!')
