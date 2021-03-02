@@ -27,6 +27,7 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
+from sparkle_help.sparkle_command_help import CommandName
 
 
 if __name__ == r'__main__':
@@ -92,7 +93,7 @@ if __name__ == r'__main__':
 	sbatch_script_dir = sgh.smac_dir
 	sbatch_script_path = sbatch_script_dir + sbatch_script_name
 
-	validate_jobid = ssh.submit_sbatch_script(sbatch_script_name, sbatch_script_dir)
+	validate_jobid = ssh.submit_sbatch_script(sbatch_script_name, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, sbatch_script_dir)
 
 	print("c Running validation in parallel. Waiting for Slurm job with id:")
 	print(validate_jobid)

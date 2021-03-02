@@ -19,6 +19,7 @@ try:
 	from sparkle_help import sparkle_compute_features_help as scf
 	from sparkle_help import sparkle_slurm_help as ssh
 	from sparkle_help import sparkle_logging as sl
+	from sparkle_help.sparkle_command_help import CommandName
 except ImportError:
 	import sparkle_global_help as sgh
 	import sparkle_feature_data_csv_help as sfdcsv
@@ -26,6 +27,7 @@ except ImportError:
 	import sparkle_compute_features_help as scf
 	import sparkle_slurm_help as ssh
 	import sparkle_logging as sl
+	from sparkle_command_help import CommandName
 
 
 def computing_features_parallel(feature_data_csv_path, mode):
@@ -77,7 +79,7 @@ def computing_features_parallel(feature_data_csv_path, mode):
 
 	execution_dir = './'
 	sbatch_script_path = sbatch_script_dir + sbatch_script_name
-	jobid = ssh.submit_sbatch_script(sbatch_script_path, execution_dir) # execute the sbatch script via slurm
+	jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES, execution_dir) # execute the sbatch script via slurm
 
 	# Log output paths
 	sl.add_output(sbatch_script_path, 'Slurm batch script to compute features in parallel')

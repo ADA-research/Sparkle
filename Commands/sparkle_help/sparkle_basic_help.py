@@ -14,7 +14,6 @@ import os
 import time
 import random
 import sys
-import fcntl
 
 
 def get_time_pid_random_string():
@@ -26,10 +25,3 @@ def get_time_pid_random_string():
 	my_time_pid_random_str = my_time_str + '_' + my_pid_str + '_' + my_random_str
 	return my_time_pid_random_str
 
-
-
-
-
-
-
-	

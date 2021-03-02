@@ -27,6 +27,7 @@ from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SolutionVerifier
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
+from sparkle_help.sparkle_command_help import CommandName
 
 
 def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report=False):
@@ -46,7 +47,7 @@ def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report
 
 	# Update performance data csv after the last job is done
 	job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
-	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
+	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list, CommandName.RUN_SOLVERS)
 	dependency_jobid_list.append(run_job_parallel_jobid)
 
 	# TODO: Check output (files) for error messages, e.g.:
@@ -69,12 +70,12 @@ def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report
 
 def construct_selector_and_report(dependency_jobid_list: List[str] = []):
 	job_script = 'Commands/construct_sparkle_portfolio_selector.py'
-	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
+	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list, CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
 
 	if run_job_parallel_jobid:
 		dependency_jobid_list.append(run_job_parallel_jobid)
 	job_script = 'Commands/generate_report.py'
-	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
+	run_job_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list, CommandName.GENERATE_REPORT)
 
 	return run_job_parallel_jobid
 

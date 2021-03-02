@@ -18,6 +18,8 @@ import fcntl
 from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_slurm_help as ssh
+from sparkle_help.sparkle_command_help import CommandName
+from sparkle_help import sparkle_job_help as sjh
 
 
 def get_dependency_list_str(dependency_jobid_list):
@@ -52,7 +54,7 @@ def generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, depen
 	return
 
 
-def running_job_parallel(job_script, dependency_jobid_list):
+def running_job_parallel(job_script, dependency_jobid_list, command_name: CommandName) -> str:
 	sbatch_shell_script_path = r'Tmp/' + r'running_job_parallel_' + sbh.get_time_pid_random_string() + r'.sh'
 	generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script, dependency_jobid_list)
 	os.system(r'chmod a+x ' + sbatch_shell_script_path)
@@ -60,6 +62,8 @@ def running_job_parallel(job_script, dependency_jobid_list):
 	output_list = os.popen(command_line).readlines()
 	if len(output_list) > 0 and len(output_list[0].strip().split())>0:
 		run_job_parallel_jobid = output_list[0].strip().split()[-1]
+		# Add job to active job CSV
+		sjh.write_active_job(run_job_parallel_jobid, command_name)
 	else:
 		run_job_parallel_jobid = ''
 	return run_job_parallel_jobid

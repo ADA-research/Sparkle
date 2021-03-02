@@ -26,6 +26,8 @@ try:
 	from sparkle_help.reporting_scenario import ReportingScenario
 	from sparkle_help.reporting_scenario import Scenario
 	from sparkle_help import sparkle_instances_help as sih
+	from sparkle_help.sparkle_command_help import CommandName
+	from sparkle_help import sparkle_job_help as sjh
 except ImportError:
 	import sparkle_basic_help
 	import sparkle_file_help as sfh
@@ -37,6 +39,8 @@ except ImportError:
 	from reporting_scenario import ReportingScenario
 	from reporting_scenario import Scenario
 	import sparkle_instances_help as sih
+	from sparkle_command_help import CommandName
+	import sparkle_job_help as sjh
 
 
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
@@ -321,8 +325,14 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	os.system('chmod a+x ' + sbatch_shell_script_path)
 	command_line = 'sbatch ' + sbatch_shell_script_path
 
-	os.system(command_line)
-	#print(command_line)
+	output_list = os.popen(command_line).readlines()
+
+	if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
+		jobid = output_list[0].strip().split()[-1]
+		# Add job to active job CSV
+		sjh.write_active_job(jobid, CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR)
+	else:
+		jobid = ''
 
 	return
 

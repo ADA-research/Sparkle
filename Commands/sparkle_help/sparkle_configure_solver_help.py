@@ -25,6 +25,8 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help import sparkle_instances_help as sih
+from sparkle_help.sparkle_command_help import CommandName
+from sparkle_help import sparkle_job_help as sjh
 
 
 class InstanceType(Enum):
@@ -393,6 +395,8 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) 
 
 	if len(output_list) > 0 and len(output_list[0].strip().split())>0:
 		jobid = output_list[0].strip().split()[-1]
+		# Add job to active job CSV
+		sjh.write_active_job(jobid, CommandName.CONFIGURE_SOLVER)
 	else:
 		jobid = ''
 
@@ -634,7 +638,7 @@ def generate_validation_callback_slurm_script(solver: str, instance_set_train: s
 	if instance_set_test is not None:
 		command_line += ' --instance-set-test ' + instance_set_test
 
-	generate_generic_callback_slurm_script("validation", solver, instance_set_train, instance_set_test, dependency, command_line)
+	generate_generic_callback_slurm_script("validation", solver, instance_set_train, instance_set_test, dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
 
 	return
 
@@ -648,12 +652,12 @@ def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str
 	if instance_set_test is not None:
 		command_line += ' --instance-set-test ' + instance_set_test
 
-	generate_generic_callback_slurm_script('ablation', solver, instance_set_train, instance_set_test, dependency, command_line)
+	generate_generic_callback_slurm_script('ablation', solver, instance_set_train, instance_set_test, dependency, command_line, CommandName.RUN_ABLATION)
 
 	return
 
 
-def generate_generic_callback_slurm_script(name: str, solver: str, instance_set_train: str, instance_set_test: str, dependency: str, command_line: str):
+def generate_generic_callback_slurm_script(name: str, solver: str, instance_set_train: str, instance_set_test: str, dependency: str, command_line: str, command_name: CommandName):
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = None
@@ -712,6 +716,8 @@ def generate_generic_callback_slurm_script(name: str, solver: str, instance_set_
 
 	if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
 		jobid = output_list[0].strip().split()[-1]
+		# Add job to active job CSV
+		sjh.write_active_job(jobid, command_name)
 	else:
 		jobid = ''
 

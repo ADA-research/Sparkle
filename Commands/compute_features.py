@@ -23,6 +23,7 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
+from sparkle_help.sparkle_command_help import CommandName
 
 
 def compute_features_parallel(my_flag_recompute):
@@ -40,7 +41,7 @@ def compute_features_parallel(my_flag_recompute):
 
 	# Update feature data csv after the last job is done
 	job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
-	compute_features_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list)
+	compute_features_parallel_jobid = sjph.running_job_parallel(job_script, dependency_jobid_list, CommandName.COMPUTE_FEATURES)
 
 	last_job_id = compute_features_parallel_jobid
 
