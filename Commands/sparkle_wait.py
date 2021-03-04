@@ -38,5 +38,5 @@ if __name__ == r'__main__':
 	elif command is not None:
 		sjh.wait_for_dependencies(command)
 	else:
-		wait_for_all_jobs()
+		sjh.wait_for_all_jobs()
 
