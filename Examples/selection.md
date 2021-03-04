@@ -42,6 +42,10 @@ Run the solvers on all instances; add the `--parallel` option to run in parallel
 
 #### Construct a portfolio selector
 
+To make sure feature computation and solver performance computation are done before constructing the portfolio use the `sparkle_wait` command
+
+`Commands/sparkle_wait.py`
+
 Construct a portfolio selector, using the previously computed features and the results of running the solvers
 
 `Commands/construct_sparkle_portfolio_selector.py`
@@ -67,6 +71,10 @@ Run the portfolio selector on a testing instance *set*
 `Commands/run_sparkle_portfolio_selector.py Examples/Resources/Instances/PTN2/`
 
 #### Generate a report including results on the test set
+
+Wait for the portfolio selector to be done running on the testing instance set
+
+`Commands/sparkle_wait.py`
 
 Generate an experimental report that includes the results on the test set, and as before the experimental procedure and performance information; this will be located at `Components/Sparkle-latex-generator/Sparkle_Report_For_Test.pdf`
 
