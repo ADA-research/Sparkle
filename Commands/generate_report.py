@@ -102,8 +102,8 @@ if __name__ == r'__main__':
 			sys.exit()
 
 		if not os.path.isfile(sgh.sparkle_portfolio_selector_path):
-			print(r'c Before generating Sparkle report, please first construct Sparkle portfolio selector!')
-			print(r'c Do not generate Sparkle report. Exit!')
+			print('c Before generating a Sparkle report, please first construct the Sparkle portfolio selector!')
+			print('c Not generating a Sparkle report, stopping execution!')
 			sys.exit()
 	
 		print(r'c Generating report ...')

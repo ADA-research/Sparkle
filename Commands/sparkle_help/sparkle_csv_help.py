@@ -23,8 +23,8 @@ class Sparkle_CSV:
 	@staticmethod
 	def create_empty_csv(csv_filepath):
 		if os.path.exists(csv_filepath):
-			print(r'c Path ' + csv_filepath + r'already exists!')
-			print(r'c Nothing changed!')
+			print('c Path', csv_filepath, 'already exists!')
+			print('c Nothing changed!')
 			return
 		fo = open(csv_filepath, 'w+')
 		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
@@ -168,8 +168,8 @@ class Sparkle_CSV:
 
 	def add_row(self, row_name, value_list=[]):
 		if row_name in self.list_rows():
-			print(r'c Row ' + row_name + r' already exists!')
-			print(r'c Nothing changed!')
+			print('c Row', row_name, 'already exists!')
+			print('c Nothing changed!')
 			return
 		
 		if value_list == []: value_list = [None]*self.get_column_size()

@@ -93,15 +93,18 @@ def print_predict_schedule(predict_schedule_result_path):
 	return
 
 def get_list_predict_schedule_from_file(predict_schedule_result_path):
-	#print 'c predict_schedule_result_path = ' + predict_schedule_result_path
 	list_predict_schedule = []
 	prefix_string = r'Selected Schedule [(algorithm, budget)]: '
 	fin = open(predict_schedule_result_path, 'r+')
 	fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-	myline = fin.readline().strip()
-	#print 'c myline = ' + myline
-	mylist_string = myline[len(prefix_string):]
-	list_predict_schedule = eval(mylist_string)
+	predict_schedule = fin.readline().strip()
+
+	if predict_schedule == '':
+		print('ERROR: Failed to get schedule from algorithm portfolio. Stopping execution!')
+		sys.exit(-1)
+
+	predict_schedule_string = predict_schedule[len(prefix_string):]
+	list_predict_schedule = eval(predict_schedule_string)
 	fin.close()
 	return list_predict_schedule
 
