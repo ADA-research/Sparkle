@@ -71,6 +71,8 @@ class Settings:
 
 	DEFAULT_ablation_racing = False
 
+	DEFAULT_parallel_portfolio_overwriting = False
+
 
 	def __init__(self, file_path: PurePath = None):
 		# Settings 'dictionary' in configparser format
@@ -93,6 +95,8 @@ class Settings:
 		self.__smac_target_cutoff_length_set = SettingState.NOT_SET
 
 		self.__ablation_racing_flag_set = SettingState.NOT_SET
+
+		self.__parallel_portfolio_overwriting_flag_set = SettingState.NOT_SET
 
 		if file_path == None:
 			# Initialise settings from default file path
@@ -192,6 +196,15 @@ class Settings:
 				if file_settings.has_option(section, option):
 					value = file_settings.getboolean(section, option)
 					self.set_ablation_racing_flag(value, state)
+					file_settings.remove_option(section, option)
+
+
+			section = 'parallelportfolio'
+			option_names = ('overwriting', )
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getboolean(section, option)
+					self.set_parallel_portfolio_overwriting_flag(value, state)
 					file_settings.remove_option(section, option)
 
 			# TODO: Report on any unknown settings that were read
@@ -522,4 +535,24 @@ class Settings:
 			self.set_ablation_racing_flag()
 
 		return bool(self.__settings['ablation']['racing'])
+
+
+	### Parallel Portfolio settings ###
+
+	def set_parallel_portfolio_overwriting_flag(self, value: bool = DEFAULT_parallel_portfolio_overwriting, origin: SettingState = SettingState.DEFAULT):
+		section = 'parallelportfolio'
+		name = 'overwriting'
+
+		if value != None and self.__check_setting_state(self.__parallel_portfolio_overwriting_flag_set, origin, name):
+			self.__init_section(section)
+			self.__parallel_portfolio_overwriting_flag_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+	def get_parallel_portfolio_overwriting_flag(self) -> bool:
+		if self.__parallel_portfolio_overwriting_flag_set == SettingState.NOT_SET:
+			self.set_parallel_portfolio_overwriting_flag()
+		
+		return bool(self.__settings['parallelportfolio']['overwriting'])
 
