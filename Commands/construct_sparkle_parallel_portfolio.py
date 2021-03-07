@@ -14,6 +14,8 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_settings
+from sparkle_help.sparkle_settings import SettingState
+from sparkle_help import argparse_custom as ac
 from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
@@ -32,22 +34,27 @@ if __name__ == r'__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n","--portfolio-name", type=str, help='Gives a name to the portfolio, otherwise it will overwrite the latest portfolio.')
-    parser.add_argument("-s","--solver", required=True, metavar='N', nargs="+", type=str, help='List of names of the solvers')
-    parser.add_argument("-o","--overwrite", action="store_true", help='Allows overwrite of the directory, default true if no name is specified otherwise the default is false')
+    parser.add_argument("--portfolio-name", type=str, help='Gives a name to the portfolio, otherwise it will overwrite the latest portfolio.')
+    parser.add_argument("--solver", required=True, metavar='N', nargs="+", type=str, help='List of names of the solvers')
+    parser.add_argument("--overwrite", default=sgh.settings.DEFAULT_parallel_portfolio_overwriting, action=ac.SetByUser, help='Allows overwrite of the directory, default true if no name is specified otherwise the default is false')
+    parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
+
     # Process command line arguments;
     args = parser.parse_args() 
     portfolio_str = args.portfolio_name
     list_of_solvers = args.solver
-    overwrite = args.overwrite
+    print('before changes ' + str(args.overwrite))
+    if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
+    if ac.set_by_user(args, 'overwrite'): 
+        sgh.settings.set_parallel_portfolio_overwriting_flag(args.overwrite, SettingState.CMD_LINE)
+    elif portfolio_str is None: overwrite = True
 
+    overwrite = args.overwrite
     if portfolio_str is not None:
         portfolio_path = "Sparkle_Parallel_portfolio/" + portfolio_str
     else:
         portfolio_path = sgh.sparkle_parallel_portfolio_path
-        overwrite = True
     print('c Start constructing Sparkle parallel portfolio ...')
-
     print('c TODO ...')
 
     #TODO construct portfolio.
