@@ -33,9 +33,12 @@ if __name__ == r'__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--instances", default=sgh.instance_list, metavar='N', nargs="+", type=str, action=ac.SetByUser, help='Specify the instance_path(s) on which the portfolio will run.')
     parser.add_argument("--portfolio-name", default=sgh.latest_scenario.get_parallel_portfolio_path(),type=str, action=ac.SetByUser, help='Specify the name of the portfolio, if the portfolio is not in the standard location use its full path. The default is the latest Portfolio created.')
+    #TODO change default settings to a settingsvalue
+    parser.add_argument("--cutoff-time", default=3000, type=int, action=ac.SetByUser, help='The duration the portfolio will run before the program is stopped')
 
     # Process command line arguments
     args = parser.parse_args()
+    
     if ac.set_by_user(args, 'portfolio_name'):
 
         if(os.path.isdir(args.portfolio_name)): 
@@ -44,6 +47,8 @@ if __name__ == r'__main__':
             portfolio_path = Path('Sparkle_Parallel_portfolio/' + args.portfolio_name)
             if(not os.path.isdir(portfolio_path)):
                 sys.exit("c Portfolio not found, aborting the process")
+
+    
     if ac.set_by_user(args, 'instances'):
         instances = []
         for instance in args.instances:
@@ -61,15 +66,22 @@ if __name__ == r'__main__':
                     print('c Added ' + str(len(os.listdir(instance_with_dir))) + ' instances from directory ' + str(instance))
                     for item in os.listdir(instance_with_dir):
                         item_with_dir = 'Instances/' + str(instance) + '/' + str(item)
-                        instances.append(str(item_with_dir))
-        
+                        instances.append(str(item_with_dir))    
     else:
         if(args.instances is None):
             sys.exit("c Instances not found, aborting the process")
         instances = args.instances
     
+    if ac.set_by_user(args, 'cutoff_time'):
+        #TODO write the used time into settings.
+        pass    
+    cutoff_time = args.cutoff_time
+    
     print('c Sparkle parallel portfolio is running ...')
     print('c TODO ...')
+    # instances = list of paths to all instances
+    # portfolio_path = Path to the portfolio containing the solvers
+    # cutoff_time = int of the cutoff_time in seconds (for now)
     succes = srpp.run_parallel_portfolio()
 
     if succes:
