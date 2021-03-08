@@ -15,6 +15,7 @@ from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help import argparse_custom as ac
+from sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 
 if __name__ == r'__main__':
     # Initialise settings
@@ -51,6 +52,9 @@ if __name__ == r'__main__':
                 for item in os.listdir(instance):
                         item_with_dir = str(instance) + str(item)
                         instances.append(str(item_with_dir))
+            elif(os.path.isfile(instance)):
+                print('c Added instance ' + str(instance))
+                instances.append(str(instance))
             else:
                 instance_with_dir = 'Instances/' + instance
                 if(os.path.isdir(instance_with_dir)):
@@ -64,9 +68,14 @@ if __name__ == r'__main__':
             sys.exit("c Instances not found, aborting the process")
         instances = args.instances
     
-    print(instances)
     print('c Sparkle parallel portfolio is running ...')
     print('c TODO ...')
+    succes = srpp.run_parallel_portfolio()
+
+    if succes:
+        sgh.latest_scenario.set_parallel_portfolio_instance(instances)
+    
+    
     print('c Running Sparkle parallel portfolio is done!')
 
     # Write used settings to file
