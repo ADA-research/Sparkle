@@ -38,14 +38,14 @@ def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path, 
         print('c directory already exists')
         print('c use \'--overwrite\' or give the portfolio a different name')
         return False
-    elif(overwrite==True):
-        #TODO add the removing of the existing files, sf
-        print('c this is not yet implemented please use a different name')
-        return False
     else:
-        if(make_directory(Path(sparkle_parallel_portfolio_path)) == False):
-            return False
-    # Directory is now created or cleaned
+        if(overwrite): 
+            print('DEBUG '  + str(sparkle_parallel_portfolio_path))
+            sfh.rmtree(Path(sparkle_parallel_portfolio_path))
+        print('after overwrite ' + str(sparkle_parallel_portfolio_path) + str(overwrite))
+        if(make_directory(Path(sparkle_parallel_portfolio_path)) == False): return False
+
+    # Directory is now created (and cleaned)
     # Add a file which specifies the location of the solvers.
     if(add_solvers(Path(sparkle_parallel_portfolio_path),list_of_solvers) == False):
         print('c An error occured when adding the solvers to the portfolio')

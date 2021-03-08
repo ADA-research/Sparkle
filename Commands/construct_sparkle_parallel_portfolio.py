@@ -35,7 +35,7 @@ if __name__ == r'__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--portfolio-name", type=str, help='Gives a name to the portfolio, otherwise it will overwrite the latest portfolio.')
-    parser.add_argument("--solver", required=True, metavar='N', nargs="+", type=str, help='List of names of the solvers')
+    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str, help='List of paths to the solvers')
     parser.add_argument("--overwrite", default=sgh.settings.DEFAULT_parallel_portfolio_overwriting, action=ac.SetByUser, help='Allows overwrite of the directory, default true if no name is specified otherwise the default is false')
     parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 
@@ -43,7 +43,10 @@ if __name__ == r'__main__':
     args = parser.parse_args() 
     portfolio_str = args.portfolio_name
     list_of_solvers = args.solver
-    print('before changes ' + str(args.overwrite))
+    #If no solvers are given all previously added solvers are used
+    #TODO only use all solvers which havent been used yet
+    if list_of_solvers is None: list_of_solvers = sgh.solver_list
+
     if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, 'overwrite'): 
         sgh.settings.set_parallel_portfolio_overwriting_flag(args.overwrite, SettingState.CMD_LINE)
