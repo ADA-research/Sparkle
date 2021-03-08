@@ -40,9 +40,7 @@ def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path, 
         return False
     else:
         if(overwrite): 
-            print('DEBUG '  + str(sparkle_parallel_portfolio_path))
             sfh.rmtree(Path(sparkle_parallel_portfolio_path))
-        print('after overwrite ' + str(sparkle_parallel_portfolio_path) + str(overwrite))
         if(make_directory(Path(sparkle_parallel_portfolio_path)) == False): return False
 
     # Directory is now created (and cleaned)

@@ -49,16 +49,17 @@ if __name__ == r'__main__':
 
     if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, 'overwrite'): 
+        if(args.overwrite != 'True'): args.overwrite = False
         sgh.settings.set_parallel_portfolio_overwriting_flag(args.overwrite, SettingState.CMD_LINE)
-    elif portfolio_str is None: overwrite = True
-
-    overwrite = args.overwrite
+        overwrite = args.overwrite
+    else:
+        overwrite = args.overwrite
+        if portfolio_str is None: overwrite = True
     if portfolio_str is not None:
         portfolio_path = "Sparkle_Parallel_portfolio/" + portfolio_str
     else:
         portfolio_path = sgh.sparkle_parallel_portfolio_path
     print('c Start constructing Sparkle parallel portfolio ...')
-    print('c TODO ...')
 
     #TODO construct portfolio.
     success = scpp.construct_sparkle_parallel_portfolio(Path(portfolio_path),overwrite,list_of_solvers)

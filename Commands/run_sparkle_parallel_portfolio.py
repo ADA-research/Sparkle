@@ -11,11 +11,16 @@ import argparse
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_global_help as sgh
+from sparkle_help.reporting_scenario import ReportingScenario
 
 if __name__ == r'__main__':
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
+
+    # Initialise latest scenario
+    global latest_scenario
+    sgh.latest_scenario = ReportingScenario()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -29,7 +34,7 @@ if __name__ == r'__main__':
 
     print('c Sparkle parallel portfolio is running ...')
     print('c TODO ...')
-
+    print(str(sgh.latest_scenario.get_parallel_portfolio_path()))
     print('c Running Sparkle parallel portfolio is done!')
 
     # Write used settings to file
