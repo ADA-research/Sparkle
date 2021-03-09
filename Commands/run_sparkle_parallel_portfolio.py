@@ -16,6 +16,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help import argparse_custom as ac
 from sparkle_help import sparkle_run_parallel_portfolio_help as srpp
+from sparkle_help import sparkle_file_help as sfh
 
 if __name__ == r'__main__':
     # Initialise settings
@@ -71,6 +72,11 @@ if __name__ == r'__main__':
         if(args.instances is None):
             sys.exit("c Instances not found, aborting the process")
         instances = args.instances
+        if(os.path.isfile(sgh.used_instance_list_file)):
+            temp = [i for i in instances if i not in sfh.get_used_instance_list_from_file('Instances/')]
+            instances = temp
+        if(len(instances) is 0):
+            sys.exit("c No unused instances found, aborting the process")
     
     if ac.set_by_user(args, 'cutoff_time'):
         #TODO write the used time into settings.
@@ -80,13 +86,18 @@ if __name__ == r'__main__':
     print('c Sparkle parallel portfolio is running ...')
     print('c TODO ...')
     # instances = list of paths to all instances
+    
     # portfolio_path = Path to the portfolio containing the solvers
     # cutoff_time = int of the cutoff_time in seconds (for now)
     succes = srpp.run_parallel_portfolio()
 
     if succes:
         sgh.latest_scenario.set_parallel_portfolio_instance(instances)
-    
+        if(not os.path.isfile(sgh.used_instance_list_file)):
+            sfh.create_new_empty_file(sgh.used_instance_list_file)
+        for used_instance in instances:
+            sfh.add_used_instance_into_file(used_instance)
+        
     
     print('c Running Sparkle parallel portfolio is done!')
 

@@ -105,6 +105,25 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 
 	return instance_list
 
+def get_used_instance_list_from_file(instances_path: Path)->List[str]:
+	used_instance_list = []
+	used_instance_path_str = str(instances_path)
+	
+	#read used instances from file
+	used_instance_file_path = sgh.used_instance_list_file
+
+	with used_instance_file_path.open('r') as infile:
+		lines = infile.readlines()
+
+		for line in lines:
+			words = line.strip().split()
+
+			if len(words) <= 0:
+				continue
+			elif line.strip().startswith(used_instance_path_str):
+				used_instance_list.append(line.strip())
+	
+	return used_instance_list
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
 	if os.path.isfile(path):
@@ -224,6 +243,12 @@ def add_new_instance_into_file(filepath):
 	fo.close()
 	return
 
+def add_used_instance_into_file(filepath):
+	fo = open(str(sgh.used_instance_list_file), 'a+')
+	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+	fo.write(filepath + '\n')
+	fo.close()
+	return
 
 def add_new_solver_into_file(filepath, deterministic='0'):
 	fo = open(sgh.solver_list_path, 'a+')
