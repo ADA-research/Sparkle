@@ -48,7 +48,7 @@ if __name__ == r'__main__':
             portfolio_path = Path('Sparkle_Parallel_portfolio/' + args.portfolio_name)
             if(not os.path.isdir(portfolio_path)):
                 sys.exit("c Portfolio not found, aborting the process")
-
+    else: portfolio_path = args.portfolio_name
     
     if ac.set_by_user(args, 'instances'):
         instances = []
@@ -75,7 +75,7 @@ if __name__ == r'__main__':
         if(os.path.isfile(sgh.used_instance_list_file)):
             temp = [i for i in instances if i not in sfh.get_used_instance_list_from_file('Instances/')]
             instances = temp
-        if(len(instances) is 0):
+        if(len(instances) == 0):
             sys.exit("c No unused instances found, aborting the process")
     
     if ac.set_by_user(args, 'cutoff_time'):
