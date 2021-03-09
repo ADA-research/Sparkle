@@ -108,7 +108,7 @@ def check_solver_output_for_errors(raw_result_path: Path):
 		for current_line in infile:
 			for error in error_lines:
 				if error in current_line:
-					print('WARNING: Possible error deteced in', raw_result_path, 'involving', error)
+					print('WARNING: Possible error detected in', raw_result_path, 'involving', error)
 
 	return
 

@@ -125,6 +125,26 @@ def get_used_instance_list_from_file(instances_path: Path)->List[str]:
 	
 	return used_instance_list
 
+def get_solver_list_from_parallel_portfolio(portfolio_path: Path)->List[str]:
+	portfolio_solver_list = []
+	portfolio_solvers_path_str = str(portfolio_path)
+	solvers_path_str = 'Solvers/'
+
+	#read used instances from file
+	portfolio_solvers_file_path = Path(portfolio_solvers_path_str + '/solvers.txt')
+	
+	with portfolio_solvers_file_path.open('r') as infile:
+		lines = infile.readlines()
+
+		for line in lines:
+			words = line.strip().split()
+
+			if len(words) <= 0:
+				continue
+			elif line.strip().startswith(solvers_path_str):
+				portfolio_solver_list.append(line.strip())
+	return portfolio_solver_list
+
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
 	if os.path.isfile(path):
 		# TODO: Possibly add extension check back when we get this information from the user

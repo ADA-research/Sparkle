@@ -35,7 +35,7 @@ if __name__ == r'__main__':
     parser.add_argument("--instances", default=sgh.instance_list, metavar='N', nargs="+", type=str, action=ac.SetByUser, help='Specify the instance_path(s) on which the portfolio will run.')
     parser.add_argument("--portfolio-name", default=sgh.latest_scenario.get_parallel_portfolio_path(),type=str, action=ac.SetByUser, help='Specify the name of the portfolio, if the portfolio is not in the standard location use its full path. The default is the latest Portfolio created.')
     #TODO change default settings to a settingsvalue
-    parser.add_argument("--cutoff-time", default=3000, type=int, action=ac.SetByUser, help='The duration the portfolio will run before the program is stopped')
+    parser.add_argument("--cutoff-time", default=sgh.settings.get_general_target_cutoff_time(), type=int, action=ac.SetByUser, help='The duration the portfolio will run before the program is stopped')
 
     # Process command line arguments
     args = parser.parse_args()
@@ -86,10 +86,9 @@ if __name__ == r'__main__':
     print('c Sparkle parallel portfolio is running ...')
     print('c TODO ...')
     # instances = list of paths to all instances
-    
     # portfolio_path = Path to the portfolio containing the solvers
     # cutoff_time = int of the cutoff_time in seconds (for now)
-    succes = srpp.run_parallel_portfolio()
+    succes = srpp.run_parallel_portfolio(instances, portfolio_path, cutoff_time)
 
     if succes:
         sgh.latest_scenario.set_parallel_portfolio_instance(instances)
@@ -98,8 +97,7 @@ if __name__ == r'__main__':
         for used_instance in instances:
             sfh.add_used_instance_into_file(used_instance)
         
-    
-    print('c Running Sparkle parallel portfolio is done!')
-
-    # Write used settings to file
-    sgh.settings.write_used_settings()
+        print('c Running Sparkle parallel portfolio is done!')
+        
+        # Write used settings to file
+        sgh.settings.write_used_settings()
