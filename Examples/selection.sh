@@ -20,7 +20,7 @@ Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Reso
 
 Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/CSCCSat/
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/Lingeling/
+Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
 Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/MiniSAT/
 

@@ -59,7 +59,6 @@ The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta
 Unclear:
 
 
-* `Examples/Resources/Solvers/Lingeling/`
 * `Examples/Resources/Solvers/MiniSAT/`
 * `Examples/Resources/Solvers/VRP_SISRs/`
 * `Examples/Resources/Solvers/Yahsp3/`
