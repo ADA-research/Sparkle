@@ -530,4 +530,29 @@ Other software used by Sparkle:
 
 To manually install \texttt{gnuplot} see for instance the instructions on their website \url{http://www.gnuplot.info/development/}
 
+\section{Installation and compilation of examples}
+
+\subsection{Solvers}
+
+\subsubsection{TCA and FastCA}
+The TCA and FastCA solvers, require \texttt{GLIBCXX\_3.4.21}. This library comes with \texttt{GCC 5.1.0} (or greater). Following installation you may have to update environment variables such as \texttt{LD\_LIBRARY\_PATH, LD\_RUN\_PATH, CPATH} to point to your installation directory.
+
+TCA can be recompiled as follows in the \texttt{Examples/Resources/CCAG/Solvers/TCA/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd TCA-master/
+make clean
+make
+cp TCA ../
+\end{Verbatim}
+
+FastCA can be recompiled as follows in the \texttt{Examples/Resources/CCAG/Solvers/FastCA/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd fastca-master/fastCA/
+make clean
+make
+cp FastCA ../../
+\end{Verbatim}
+
 \end{document}
