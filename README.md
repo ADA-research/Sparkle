@@ -61,8 +61,6 @@ Unclear:
 
 * `Examples/Resources/Solvers/MiniSAT/`
 * `Examples/Resources/Solvers/VRP_SISRs/`
-* `Examples/Resources/Solvers/Yahsp3/`
-* `Examples/Resources/Instances/Depots/` + `test/train_few` subsets
 * `Examples/Resources/Instances/X/` and `X2`
 
 
