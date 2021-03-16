@@ -1,0 +1,6 @@
+Source: http://vrp.atd-lab.inf.puc-rio.br/index.php/en/ (Uchoa et al. (2014))
+Version: -
+Authors: Uchoa, Pecin, Pessoa, Poggi, Vidal, Subramanian
+Paper: Uchoa et al 2017 - New benchmark instances for the Capacitated Vehicle Routing Problem
+License: -
+License location: -

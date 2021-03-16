@@ -1,0 +1,7 @@
+Source (plain7824.cnf and bce7824.cnf): https://www.cs.utexas.edu/~marijn/ptn/
+Source: (Ptn-7824-b**.cnf) https://baldur.iti.kit.edu/sat-competition-2016/downloads/crafted16.zip
+Version: -
+Authors: Heule
+Paper: Heule 2016 - Avoiding Monochromatic Solutions of a + b = c and a^2 + b^2 = c^2
+License: -
+License location: -

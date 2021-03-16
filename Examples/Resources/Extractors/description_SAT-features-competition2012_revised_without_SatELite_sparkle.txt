@@ -1,0 +1,7 @@
+Source: http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/SAT-feature-code-2012.tar.gz
+Version: SATzilla 2012
+Authors: Xu, Hutter, Hoos, Leyton-Brown
+Paper: Xu et al 2012 - Features for SAT
+License: Permission from the authors
+License location: -
+Modifications: The main modification of this component is to disable calling the SAT instance preprocessor called SatELite

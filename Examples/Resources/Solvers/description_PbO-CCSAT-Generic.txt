@@ -1,0 +1,6 @@
+Source: https://github.com/chuanluocs/PbO-CCSAT
+Version: -
+Authors: Luo, Hoos, Cai
+Paper: Luo et al 2020 - PbO-CCSAT: Boosting Local Search for Satisfiability Using Programming by Optimisation
+License: GPLv3
+License location: https://github.com/chuanluocs/PbO-CCSAT/blob/master/LICENSE.md

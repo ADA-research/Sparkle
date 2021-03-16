@@ -3,4 +3,4 @@ Version: -
 Authors: IBM
 Paper: Segall et al 2011 - Using binary decision diagrams for combinatorial test design
 License: -
-License location (in src.zip): fastca-master/fastCA/LICENSE
+License location: -

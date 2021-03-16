@@ -1,0 +1,6 @@
+Source: https://github.com/niklasso/minisat
+Version: -
+Authors: Eén, Sörenss
+Paper: http://minisat.se/Papers.html
+License: Custom permissive
+License location: https://github.com/niklasso/minisat/blob/master/LICENSE

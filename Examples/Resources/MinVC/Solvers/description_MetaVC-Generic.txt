@@ -1,0 +1,6 @@
+Source: Chuan Luo
+Version: -
+Authors: Luo, Hoos, Cai, Lin, Zhang, Zhang
+Paper: Luo et al 2019 - Local Search with Efficient Automatic Configuration for Minimum Vertex Cover
+License: MIT
+License location (in src.zip): src/MetaVC_Framework/LICENSE.txt
