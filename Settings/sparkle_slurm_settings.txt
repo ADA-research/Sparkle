@@ -1,5 +1,4 @@
 --mem-per-cpu=3000
---partition=graceCPU
+--partition=graceTST
 --exclude=ethnode[23-30]
 --nodelist=
---mem-per-cpu=3000
