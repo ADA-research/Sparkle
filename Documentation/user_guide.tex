@@ -552,6 +552,15 @@ make
 cp build/release/bin/minisat ../
 \end{Verbatim}
 
+\subsubsection{PbO-CCSAT}
+PbO-CCSAT can be recompiled as follows in the \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd PbO-CCSAT-master/PbO-CCSAT_process_oriented_version_source_code/
+make
+cp PbO-CCSAT ../../
+\end{Verbatim}
+
 \subsubsection{TCA and FastCA}
 The TCA and FastCA solvers, require \texttt{GLIBCXX\_3.4.21}. This library comes with \texttt{GCC 5.1.0} (or greater). Following installation you may have to update environment variables such as \texttt{LD\_LIBRARY\_PATH, LD\_RUN\_PATH, CPATH} to point to your installation directory.
 
