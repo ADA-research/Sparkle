@@ -534,6 +534,15 @@ To manually install \texttt{gnuplot} see for instance the instructions on their 
 
 \subsection{Solvers}
 
+\subsubsection{CSCCSat}
+CSCCSat can be recompiled as follows in the \texttt{Examples/Resources/Solvers/CSCCSat/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd src/CSCCSat_source_codes/
+make
+cp CSCCSat ../../
+\end{Verbatim}
+
 \subsubsection{TCA and FastCA}
 The TCA and FastCA solvers, require \texttt{GLIBCXX\_3.4.21}. This library comes with \texttt{GCC 5.1.0} (or greater). Following installation you may have to update environment variables such as \texttt{LD\_LIBRARY\_PATH, LD\_RUN\_PATH, CPATH} to point to your installation directory.
 
