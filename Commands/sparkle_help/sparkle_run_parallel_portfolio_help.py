@@ -15,12 +15,20 @@ from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 
+def cancel_remaining_jobs(job_id:str):
+    command_line = 'scancel -f ' + str(job_id)
+
+    os.system(command_line)
+
+    return
+
+
 def wait_for_finished_solver(job_id: str, num_jobs):
     number_of_solvers = int(num_jobs)
     n_seconds = 10
 
     done = False
-    print('DEBUG into solver subprocess')
+ 
     while not done:
         result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
         if(' PD ' in str(result)):
@@ -32,7 +40,7 @@ def wait_for_finished_solver(job_id: str, num_jobs):
             #print('Checking for a finished solver again in', n_seconds, 'seconds')
 
 
-    print('Job with ID', job_id, ' has a finished solver!')
+    print('Job with ID', job_id, ' has a finished solver! (or cut-off time has been reached)')
 
     return
 
@@ -118,6 +126,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         print('DEBUG job_number: ' + job_number)
         wait_for_finished_solver(job_number, num_jobs)
+        cancel_remaining_jobs(job_number)
 
     except:
         print('c an error occurred when running the portfolio')
