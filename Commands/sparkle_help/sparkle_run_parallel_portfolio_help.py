@@ -4,6 +4,7 @@
 
 import sys
 import os
+import subprocess
 from pathlib import Path
 
 from sparkle_help import sparkle_file_help as sfh
@@ -13,6 +14,27 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
+
+def wait_for_finished_solver(job_id: str, num_jobs):
+    number_of_solvers = int(num_jobs)
+    n_seconds = 10
+
+    done = False
+    print('DEBUG into solver subprocess')
+    while not done:
+        result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
+        if(' PD ' in str(result)):
+            sjh.sleep(n_seconds) #The job is still pending;
+        elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
+            done = True
+        else:
+            sjh.sleep(n_seconds)
+            #print('Checking for a finished solver again in', n_seconds, 'seconds')
+
+
+    print('Job with ID', job_id, ' has a finished solver!')
+
+    return
 
 def generate_sbatch_script(parameters, num_jobs):
     # Set script name and path
@@ -61,27 +83,28 @@ def generate_parameters(solver_list, instance_path, cutoff_time):
 
 def run_sbatch(sbatch_script_path,sbatch_script_name):
     sbatch_shell_script_path_str = str(sbatch_script_path) + str(sbatch_script_name)
-    print('DEBUG ' + sbatch_shell_script_path_str)
+
     os.system('chmod a+x ' + sbatch_shell_script_path_str)
     command_line = 'sbatch ' + str(sbatch_shell_script_path_str)
-    
-    os.system(command_line)
 
-    return True
+    output_list = os.popen(command_line).readlines()
+    if len(output_list) > 0 and len(output_list[0].strip().split())>0:
+        run_job_parallel_jobid = output_list[0].strip().split()[-1]
+        return run_job_parallel_jobid
+
+    print('DEBUG INTO output_list not good')
+    return ''
 
 def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: int)->bool:
-    print('DEBUG instances: ' + str(instances))
-    print('DEBUG portfolio_path: ' + str(portfolio_path))
     print('DEBUG cutoff_time: ' + str(cutoff_time))
+
     #TODO add functionality for multiple instances
-    # Something with generate_running_solvers_sbatch_shell_script + total jobs is parallel jobs * nr of instances
     if(len(instances) > 1): 
         print('c running on multiple instances is not yet supported, aborting the process')
         return False
 
     solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
     num_jobs = len(solver_list)
-    print('c there are ' + str(num_jobs) + ' jobs, this requires a total of ' + str(num_jobs*3) + ' gb')
 
     # Makes SBATCH scripts for all individual solvers in a list
     parameters = generate_parameters(solver_list, Path(instances[0]), cutoff_time)
@@ -89,11 +112,13 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
     
     # Generates a SBATCH script which uses the created parameters
     sbatch_script_name,sbatch_script_path = generate_sbatch_script(parameters, num_jobs)
-    print('DEBUG ' + str(sbatch_script_path) + ' + ' + str(sbatch_script_name))
 
     # Runs the script and cancels the remaining scripts if a script finishes before the end of the cutoff_time
     try:
-        run_sbatch(sbatch_script_path,sbatch_script_name)
+        job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
+        print('DEBUG job_number: ' + job_number)
+        wait_for_finished_solver(job_number, num_jobs)
+
     except:
         print('c an error occurred when running the portfolio')
         return False

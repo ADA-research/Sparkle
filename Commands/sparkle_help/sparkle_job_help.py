@@ -16,9 +16,12 @@ from pathlib import Path
 import subprocess
 import csv
 
-from sparkle_help.sparkle_command_help import CommandName
-from sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
-
+try:
+	from sparkle_help.sparkle_command_help import CommandName
+	from sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
+except:
+	from sparkle_command_help import CommandName
+	from sparkle_command_help import COMMAND_DEPENDENCIES
 
 __active_jobs_path = Path('Output/active_jobs.csv')
 __active_jobs_csv_header = ['job_id', 'command']
@@ -125,7 +128,7 @@ def wait_for_all_jobs():
 
 	while remaining_jobs > 0:
 #		print(remaining_jobs, 'job remaining; checking again in', n_seconds, 'seconds')
-		sleep(10)
+		sleep(n_seconds)
 		remaining_jobs = cleanup_active_jobs()
 
 	print('All jobs done!')
