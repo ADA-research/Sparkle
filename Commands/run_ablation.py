@@ -26,6 +26,8 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
+from sparkle_help.sparkle_command_help import CommandName
+
 
 if __name__ == r'__main__':
     # Initialise settings
@@ -109,24 +111,24 @@ if __name__ == r'__main__':
     sbatch_script_path = sah.generate_slurm_script(solver_name, instance_set_train_name, instance_set_test_name)
     print("c Created {}".format(sbatch_script_path))
 
-    jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
+    jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir)
     print("c Launched sbatch script '{}' with jobid {}".format(sbatch_script_path,jobid))
 
     #Submit intermediate actions (copy path from log)
     sbatch_script_path = sah.generate_callback_slurm_script(solver_name, instance_set_train_name, instance_set_test_name,
                                                             dependency=jobid)
-    jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
+    jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir)
     print("c Launched callback sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))
 
     #Submit ablation validation run when nessesary
     if instance_set_test is not None:
         sbatch_script_path = sah.generate_validation_slurm_script(solver_name, instance_set_train_name, instance_set_test_name,
                                                                   dependency=jobid)
-        jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
+        jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir)
         print("c Launched validation sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))
 
         # Submit intermediate actions (copy validation table from log)
         sbatch_script_path = sah.generate_validation_callback_slurm_script(solver_name, instance_set_train_name,
                                                                            instance_set_test_name, dependency=jobid)
-        jobid = ssh.submit_sbatch_script(sbatch_script_path, ablation_scenario_dir)
+        jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir)
         print("c Launched validation callback sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid))

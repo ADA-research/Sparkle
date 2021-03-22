@@ -24,6 +24,7 @@ from sparkle_help import sparkle_job_parallel_help
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
+from sparkle_help.sparkle_command_help import CommandName
 
 
 if __name__ == r'__main__':
@@ -109,12 +110,12 @@ if __name__ == r'__main__':
 			if run_solvers_parallel_jobid:
 				dependency_jobid_list.append(run_solvers_parallel_jobid)
 			job_script = 'Commands/construct_sparkle_portfolio_selector.py'
-			run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
+			run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list, CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
 		
 			if run_job_parallel_jobid:
 				dependency_jobid_list.append(run_job_parallel_jobid)
 			job_script = 'Commands/generate_report.py'
-			run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list)
+			run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(job_script, dependency_jobid_list, CommandName.GENERATE_REPORT)
 
 	# Write used settings to file
 	sgh.settings.write_used_settings()

@@ -29,11 +29,19 @@ Perform configuration on the solver to obtain a target configuration
 
 #### Validate the configuration
 
+To make sure configuration is completed before running validation you can use the `sparkle_wait` command
+
+`Commands/sparkle_wait.py`
+
 Validate the performance of the best found parameter configuration. The test set is optional.
 
 `Commands/validate_configured_vs_default.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
 
 #### Generate a report
+
+Wait for validation to be completed
+
+`Commands/sparkle_wait.py`
 
 Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
 
@@ -50,6 +58,10 @@ Run ablation using the training instances and validate the parameter importance 
 `Commands/run_ablation.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
 
 #### Generate a report
+
+Wait for ablation to be completed
+
+`Commands/sparkle_wait.py`
 
 Generate a report including ablation, and as before the results on the train (and optionally test) set, the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
 
@@ -68,6 +80,10 @@ There is no need to execute `run_ablation.py` and/or `validate_configured_vs_def
 `Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --ablation --validate`
 
 #### Training and testing sets
+
+Wait for the previous example to be completed
+
+`Commands/sparkle_wait.py`
 
 `Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/ --ablation --validate`
 

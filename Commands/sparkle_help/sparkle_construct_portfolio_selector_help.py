@@ -120,7 +120,15 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str, p
 	# (Re)create the path to the selector
 	selector_path.parent.mkdir(parents=True, exist_ok=True)
 
-	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+	cutoff_time = sgh.settings.get_general_target_cutoff_time()
+	cutoff_time_minimum = 2
+
+	# AutoFolio cannot handle cutoff time less than 2, adjust if needed
+	if cutoff_time < cutoff_time_minimum:
+		print('Warning: A cutoff time of', cutoff_time, 'is too small for AutoFolio, setting it to', cutoff_time_minimum)
+		cutoff_time = cutoff_time_minimum
+
+	cutoff_time_str = str(cutoff_time)
 	python_executable = sgh.python_executable
 	performance_measure = sgh.settings.get_general_performance_measure()
 	if performance_measure == PerformanceMeasure.RUNTIME:

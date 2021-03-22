@@ -20,6 +20,8 @@ from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help.sparkle_command_help import CommandName
+from sparkle_help import sparkle_job_help as sjh
 
 
 def generate_running_solvers_sbatch_shell_script(total_job_num: int, num_job_in_parallel: int, total_job_list) -> (str, str, str):
@@ -97,6 +99,8 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	output_list = os.popen(command_line).readlines()
 	if len(output_list) > 0 and len(output_list[0].strip().split())>0:
 		run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
+		# Add job to active job CSV
+		sjh.write_active_job(run_solvers_parallel_jobid, CommandName.RUN_SOLVERS)
 	else:
 		run_solvers_parallel_jobid = ''
 
