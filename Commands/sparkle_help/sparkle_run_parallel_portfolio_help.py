@@ -28,7 +28,11 @@ def cancel_remaining_jobs(job_id:str):
         print('Cancelling job ' + str(job))
         command_line = 'scancel ' + str(job)
         os.system(command_line)
-
+    
+    ######### !!Temporary!! ############
+    # Cleanup running file
+    #os.system('rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/*')
+    
     return
 
 
