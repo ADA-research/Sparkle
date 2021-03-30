@@ -16,17 +16,25 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 
 def cancel_remaining_jobs(job_id:str):
-    command_line = 'scancel -f ' + str(job_id)
 
-    os.system(command_line)
+    result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
+    
+    remaining_jobs = []
+    for ids in result.stdout.strip().split(' '):
+        if str(job_id) in ids:
+            remaining_jobs.append(ids)
+
+    for job in remaining_jobs:
+        print('Cancelling job ' + str(job))
+        command_line = 'scancel ' + str(job)
+        os.system(command_line)
 
     return
 
 
 def wait_for_finished_solver(job_id: str, num_jobs):
     number_of_solvers = int(num_jobs)
-    n_seconds = 10
-
+    n_seconds = 1
     done = False
  
     while not done:
@@ -71,8 +79,8 @@ def generate_sbatch_script(parameters, num_jobs):
     srun_options_str = srun_options_str + ' ' + ssh.get_slurm_srun_user_options_str()
 
     ## Create target call
-    target_call_str = 'Commands/sparkle_help/run_solvers_core.py'
-    
+    target_call_str = 'Commands/sparkle_help/run_solvers_core.py --run-status-path Tmp/SBATCH_Parallel_Portfolio_Jobs/'
+
     ## Generate script
     ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
 
@@ -126,6 +134,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         print('DEBUG job_number: ' + job_number)
         wait_for_finished_solver(job_number, num_jobs)
+        print('DEBUG out of waiting for finished solver')
         cancel_remaining_jobs(job_number)
 
     except:

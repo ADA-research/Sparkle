@@ -45,18 +45,19 @@ if __name__ == r'__main__':
 	parser.add_argument('--instance', required=False, type=str, nargs='+', help='path to instance to run on')
 	parser.add_argument('--solver', required=True, type=str, help='path to solver')
 	parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, help='the performance measure, e.g. runtime')
+	parser.add_argument('--run-status-path', choices=['Tmp/SBATCH_Solver_Jobs/','Tmp/SBATCH_Parallel_Portfolio_Jobs/'], default='Tmp/SBATCH_Solver_Jobs/', help='set the runstatus path of the process')
 	args = parser.parse_args()
 
 	# Process command line arguments
 	instance_path = " ".join(args.instance) # Turn multiple instance files into a space separated string
 	solver_path = args.solver
 	performance_measure = PerformanceMeasure.from_str(args.performance_measure)
-
+	run_status_path = args.run_status_path
 	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sbh.get_time_pid_random_string()
 	raw_result_path = r'Tmp/' + key_str + r'.rawres'
 	processed_result_path = r'Performance_Data/Tmp/' + key_str + r'.result'
 	
-	task_run_status_path = r'Tmp/SBATCH_Solver_Jobs/' + key_str + r'.statusinfo'
+	task_run_status_path = run_status_path + key_str + r'.statusinfo'
 	status_info_str = 'Status: Running\n' + 'Solver: %s\n' %(sfh.get_last_level_directory_name(solver_path)) + 'Instance: %s\n' % (sfh.get_last_level_directory_name(instance_path))
 	
 	start_time = time.time()
