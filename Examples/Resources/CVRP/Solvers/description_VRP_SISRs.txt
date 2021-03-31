@@ -3,4 +3,6 @@ Version: -
 Authors: Leyman
 Paper: -
 License: Permission from the author
+Copyright notice (in src.zip): VRP_SISRs.cpp
 License location: -
+Changes: Added Makefile

@@ -1,0 +1,12 @@
+startTemp real [20.0,1000.0][100.0]#starting temperature of SA
+endTemp real [0.1,10.0][1.0]#end temperature of SA
+avRemovedCust integer [2,25][10]#average number of removed customers, compared with average tour length
+lengthRemovedStrings integer [2,30][10]#length of the string to be removed for a selected tour
+numberOfStringsConstant integer [1,8][4]#constant for the maximum number of strings to be removed
+alpha real [0.00,1.00][0.01]#1-alpha: probabilty to increase the number of skipped customers for ruinSplitString
+probSplitString real [0.00,1.00][0.5]#probability to select ruinSplitString as ruin heuristic
+blinkRate real [0.00,0.99][0.01]#1-beta: probability to skip possible reinsertion position, blinkRate=1 is nonsense, will never reinsert removed nodes
+sortRandom integer [1,10][4]#probability to sort missing customers in random order
+sortDemandLarge integer [1,10][4]#probability to sort missing customers based on demand (decreasing order)
+sortDistDepotLarge integer [1,10][2]#probability to sort missing customers based on distance to depot (decreasing order)
+sortDistDepotSmall integer [1,10][1]#probability to sort missing customers based on distance to depot (increasing order)

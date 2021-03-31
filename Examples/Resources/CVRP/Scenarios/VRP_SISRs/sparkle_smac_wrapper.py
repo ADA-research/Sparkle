@@ -65,7 +65,7 @@ os.system(r'rm -f ' + runsolver_watch_data_path)
 
 #print output_list
 
-quality=1000000
+quality=1000000000000
 status = r'SUCCESS'#always ok, code checks per iteration whether cutoff time is exceeded
 
 for line in output_list:
