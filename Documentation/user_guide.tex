@@ -4,6 +4,7 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{listings}
+\usepackage{fancyvrb}
 \lstset{%
   basicstyle=\ttfamily,
 }
@@ -580,6 +581,15 @@ cd fastca-master/fastCA/
 make clean
 make
 cp FastCA ../../
+\end{Verbatim}
+
+\subsubsection{VRP\_SISRs}
+VRP\_SISRs can be recompiled as follows in the \texttt{Examples/Resources/CVRP/Solvers/VRP\_SISRs/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd src/
+make
+cp VRP_SISRs ../
 \end{Verbatim}
 
 \end{document}
