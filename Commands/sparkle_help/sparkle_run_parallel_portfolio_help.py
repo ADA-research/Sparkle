@@ -16,7 +16,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 
 def cancel_remaining_jobs(job_id:str):
-
+    sjh.sleep(2)
     result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
     
     remaining_jobs = []
