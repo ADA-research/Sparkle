@@ -1,0 +1,35 @@
+\begin{thebibliography}{1}
+
+\bibitem{FreEtAl16}
+Alexandre Fr{\'{e}}chette, Lars Kotthoff, Tomasz~P. Michalak, Talal Rahwan,
+  Holger~H. Hoos, and Kevin Leyton{-}Brown.
+\newblock Using the shapley value to analyze algorithm portfolios.
+\newblock In {\em Proceedings of the 30th {AAAI} Conference on Artificial
+  Intelligence (AAAI-16)}, pages 3397--3403. {AAAI} Press, 2016.
+
+\bibitem{Hoos12}
+Holger~H. Hoos.
+\newblock Programming by optimization.
+\newblock {\em Communications of the ACM}, 55(2):70--80, 2012.
+
+\bibitem{Hoos15}
+Holger~H. Hoos.
+\newblock {Sparkle}: A pbo-based multi-agent problem-solving platform.
+\newblock Technical report, Department of Computer Science, University of
+  British Columbia, 2015.
+
+\bibitem{LinEtAl15}
+Marius~Thomas Lindauer, Holger~H. Hoos, Frank Hutter, and Torsten Schaub.
+\newblock {AutoFolio}: An automatically configured algorithm selector.
+\newblock {\em Journal of Artificial Intelligence Research}, 53:745--778, 2015.
+
+\bibitem{XuEtAl12}
+Lin Xu, Frank Hutter, Holger Hoos, and Kevin Leyton{-}Brown.
+\newblock Evaluating component solver contributions to portfolio-based
+  algorithm selectors.
+\newblock In Alessandro Cimatti and Roberto Sebastiani, editors, {\em Theory
+  and Applications of Satisfiability Testing - {SAT} 2012 - 15th International
+  Conference, Trento, Italy, June 17-20, 2012. Proceedings}, volume 7317 of
+  {\em Lecture Notes in Computer Science}, pages 228--241. Springer, 2012.
+
+\end{thebibliography}

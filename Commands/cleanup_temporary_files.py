@@ -29,6 +29,8 @@ def remove_temporary_files():
 	os.system(command_line)
 	command_line = 'rm -rf Tmp/SBATCH_Report_Jobs/*'
 	os.system(command_line)
+	command_line = 'rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/*'
+	os.system(command_line)
 	command_line = 'rm -rf Feature_Data/Tmp/*'
 	os.system(command_line)
 	command_line = 'rm -rf Performance_Data/Tmp/*'
@@ -51,6 +53,8 @@ def create_temporary_directories():
 	command_line = 'mkdir -p Tmp/SBATCH_Portfolio_Jobs/'
 	os.system(command_line)
 	command_line = 'mkdir -p Tmp/SBATCH_Report_Jobs/'
+	os.system(command_line)
+	command_line = 'mkdir -p Tmp/SBATCH_Parallel_Portfolio_Jobs/'
 	os.system(command_line)
 
 	return

@@ -51,6 +51,9 @@ if __name__ == r'__main__':
 	if not os.path.exists(r'Tmp/SBATCH_Report_Jobs/'):
 		output = os.mkdir(r'Tmp/SBATCH_Report_Jobs/')
 	
+	if not os.path.exists(r'Tmp/SBATCH_Parallel_Portfolio_Jobs/'):
+		output = os.mkdir(r'Tmp/SBATCH_Report_Jobs/')
+	
 	if not os.path.exists(r'Log/'):
 		output = os.mkdir(r'Log/')
 
@@ -64,6 +67,7 @@ if __name__ == r'__main__':
 		output = os.mkdir(r'Performance_Data/')
 		output = os.mkdir(r'Reference_Lists/')
 		output = os.mkdir(r'Sparkle_Portfolio_Selector/')
+		output = os.mkdir(r'Sparkle_Parallel_portfolio/')
 		scsv.Sparkle_CSV.create_empty_csv(sparkle_global_help.feature_data_csv_path)
 		scsv.Sparkle_CSV.create_empty_csv(sparkle_global_help.performance_data_csv_path)
 		output = os.mkdir(r'Feature_Data/Tmp/')
@@ -83,6 +87,7 @@ if __name__ == r'__main__':
 		output = os.mkdir(r'Performance_Data/')
 		output = os.mkdir(r'Reference_Lists/')
 		output = os.mkdir(r'Sparkle_Portfolio_Selector/')
+		output = os.mkdir(r'Sparkle_Parallel_portfolio/')
 		scsv.Sparkle_CSV.create_empty_csv(sparkle_global_help.feature_data_csv_path)
 		scsv.Sparkle_CSV.create_empty_csv(sparkle_global_help.performance_data_csv_path)
 		output = os.mkdir(r'Feature_Data/Tmp/')

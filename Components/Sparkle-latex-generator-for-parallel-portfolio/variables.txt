@@ -1,0 +1,7 @@
+@@customCommands@@
+@@sparkle@@
+@@numSolvers@@
+@@solverList@@
+@@numInstanceClasses@@
+@@instanceClassList@@
+@@cutoffTime@@
