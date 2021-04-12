@@ -14,6 +14,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
+from sparkle_help.sparkle_settings import PerformanceMeasure
 
 def cancel_remaining_jobs(job_id:str):
     sjh.sleep(2)
@@ -40,7 +41,7 @@ def wait_for_finished_solver(job_id: str, num_jobs):
     number_of_solvers = int(num_jobs)
     n_seconds = 1
     done = False
- 
+    
     while not done:
         result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
         if(' PD ' in str(result)):
@@ -91,13 +92,13 @@ def generate_sbatch_script(parameters, num_jobs):
     return sbatch_script_name, sbatch_script_dir
 
 
-def generate_parameters(solver_list, instance_path, cutoff_time):
+def generate_parameters(solver_list, instance_path, cutoff_time, performance):
     
     parameters = list()
     for solver in solver_list:
         solver_path = Path(solver)
         # TODO add cutoff_time
-        commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path)
+        commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance)
         parameters.append(str(commandline))
     return parameters
 
@@ -123,16 +124,21 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         print('c running on multiple instances is not yet supported, aborting the process')
         return False
 
+    #TODO add performance functionality
+    if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
+        performance = 'QUALITY_ABSOLUTE'
+    else:
+        performance = 'RUNTIME'
+
     solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
     num_jobs = len(solver_list)
 
     # Makes SBATCH scripts for all individual solvers in a list
-    parameters = generate_parameters(solver_list, Path(instances[0]), cutoff_time)
+    parameters = generate_parameters(solver_list, Path(instances[0]), cutoff_time, performance)
     #print('DEBUG parameters ' + str(parameters))
     
     # Generates a SBATCH script which uses the created parameters
     sbatch_script_name,sbatch_script_path = generate_sbatch_script(parameters, num_jobs)
-
     # Runs the script and cancels the remaining scripts if a script finishes before the end of the cutoff_time
     try:
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
