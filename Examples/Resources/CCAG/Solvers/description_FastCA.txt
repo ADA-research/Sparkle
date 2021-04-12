@@ -1,0 +1,6 @@
+Source: https://github.com/jkunlin/fastca
+Version: 2021 Feb 9, commit d0a60a23f524639fc88704fa92e0bc1ba9eb6307
+Authors: Lin, Cai, He, Fu, Luo, Lin
+Paper: Lin et al 2021 - FastCA: An Effective and Efficient Tool for Combinatorial Covering Array Generation
+License: GPLv3
+License location (in src.zip): fastca-master/fastCA/LICENSE

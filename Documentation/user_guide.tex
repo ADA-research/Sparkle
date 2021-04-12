@@ -4,6 +4,7 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{listings}
+\usepackage{fancyvrb}
 \lstset{%
   basicstyle=\ttfamily,
 }
@@ -470,7 +471,7 @@ The options below are exclusive to \texttt{srun} and are thus disallowed:
 A number of Sparkle commands internally call the \texttt{srun} command, and for those commands the provided settings need to match the restrictions of your call to a Sparkle command. Take for instance the following command:
 
 \begin{lstlisting}[breaklines]
-srun -N1 -n1 -p graceTST Commands/configure_solver.py --solver Solvers/Yahsp3 --instances-train Instances/Depots_train_few/
+srun -N1 -n1 -p graceTST Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
 \end{lstlisting}
 
 This call restricts itself to the \texttt{graceTST} partition (the \texttt{graceTST} partition only consists of node 22). So if the settings file contains the setting \texttt{--exclude=ethnode22}, all available nodes are excluded, and the command cannot execute any internal \texttt{srun} commands it may have.
@@ -529,5 +530,66 @@ Other software used by Sparkle:
 \end{verbatim}
 
 To manually install \texttt{gnuplot} see for instance the instructions on their website \url{http://www.gnuplot.info/development/}
+
+\section{Installation and compilation of examples}
+
+\subsection{Solvers}
+
+\subsubsection{CSCCSat}
+CSCCSat can be recompiled as follows in the \texttt{Examples/Resources/Solvers/CSCCSat/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd src/CSCCSat_source_codes/
+make
+cp CSCCSat ../../
+\end{Verbatim}
+
+\subsubsection{MiniSAT}
+MiniSAT can be recompiled as follows in the \texttt{Examples/Resources/Solvers/MiniSAT/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd minisat-master/
+make
+cp build/release/bin/minisat ../
+\end{Verbatim}
+
+\subsubsection{PbO-CCSAT}
+PbO-CCSAT can be recompiled as follows in the \texttt{Examples/Resources/Solvers/PbO-CCSAT-Generic/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd PbO-CCSAT-master/PbO-CCSAT_process_oriented_version_source_code/
+make
+cp PbO-CCSAT ../../
+\end{Verbatim}
+
+\subsubsection{TCA and FastCA}
+The TCA and FastCA solvers, require \texttt{GLIBCXX\_3.4.21}. This library comes with \texttt{GCC 5.1.0} (or greater). Following installation you may have to update environment variables such as \texttt{LD\_LIBRARY\_PATH, LD\_RUN\_PATH, CPATH} to point to your installation directory.
+
+TCA can be recompiled as follows in the \texttt{Examples/Resources/CCAG/Solvers/TCA/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd TCA-master/
+make clean
+make
+cp TCA ../
+\end{Verbatim}
+
+FastCA can be recompiled as follows in the \texttt{Examples/Resources/CCAG/Solvers/FastCA/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd fastca-master/fastCA/
+make clean
+make
+cp FastCA ../../
+\end{Verbatim}
+
+\subsubsection{VRP\_SISRs}
+VRP\_SISRs can be recompiled as follows in the \texttt{Examples/Resources/CVRP/Solvers/VRP\_SISRs/} directory:
+\begin{Verbatim}[frame=single]
+unzip src.zip
+cd src/
+make
+cp VRP_SISRs ../
+\end{Verbatim}
 
 \end{document}

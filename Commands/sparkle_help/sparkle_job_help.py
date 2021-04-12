@@ -19,9 +19,10 @@ import csv
 try:
 	from sparkle_help.sparkle_command_help import CommandName
 	from sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
-except:
+except ImportError:
 	from sparkle_command_help import CommandName
 	from sparkle_command_help import COMMAND_DEPENDENCIES
+
 
 __active_jobs_path = Path('Output/active_jobs.csv')
 __active_jobs_csv_header = ['job_id', 'command']

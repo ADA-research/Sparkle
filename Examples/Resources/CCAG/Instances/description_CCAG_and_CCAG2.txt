@@ -1,0 +1,6 @@
+Source: https://researcher.watson.ibm.com/researcher/files/il-ITAIS/ctdBenchmarks.zip
+Version: -
+Authors: IBM
+Paper: Segall et al 2011 - Using binary decision diagrams for combinatorial test design
+License: -
+License location: -

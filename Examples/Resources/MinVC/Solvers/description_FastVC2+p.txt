@@ -1,0 +1,6 @@
+Source: Chuan Luo
+Version: -
+Authors: Cai, Lin, Luo
+Paper: Cai et al 2017 - Finding A Small Vertex Cover in Massive Sparse Graphs: Construct, Local Search, and Preprocess
+License: Permission from the authors
+License location: -

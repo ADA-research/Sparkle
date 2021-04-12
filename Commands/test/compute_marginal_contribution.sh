@@ -35,7 +35,7 @@ settings_file="Commands/test/test_files/sparkle_settings.ini"
 instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
-solverB_path="Examples/Resources/Solvers/Lingeling/"
+solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null

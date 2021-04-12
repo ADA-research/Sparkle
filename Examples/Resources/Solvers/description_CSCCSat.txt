@@ -1,0 +1,6 @@
+Source: https://baldur.iti.kit.edu/sat-competition-2016/solvers/random/CSCCSat.zip
+Version: -
+Authors: Luo, Cai, Wu, Su
+Paper: Luo et al 2016 - CSCCSat in SAT Competition 2016
+License: Permission from the authors
+License location: -

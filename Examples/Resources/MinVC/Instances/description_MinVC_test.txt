@@ -1,0 +1,7 @@
+Source: http://sites.nlsde.buaa.edu.cn/~kexu/benchmarks/graph-benchmarks.htm
+Version: -
+Authors: Xu, Boussemart, Hemery, Lecoutre
+Paper: Xu et al 2007 - Random constraint satisfaction: Easy generation of hard (satisfiable) instancesa
+Short origin description: Cai et al 2010 - EWLS: A New Local Search for Minimum Vertex Cover
+License: -
+License location: -

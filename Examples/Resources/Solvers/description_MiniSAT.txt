@@ -1,0 +1,6 @@
+Source: https://github.com/niklasso/minisat
+Version: 2013 Sep 25, commit 37dc6c67e2af26379d88ce349eb9c4c6160e8543
+Authors: Eén, Srensson
+Paper: http://minisat.se/Papers.html
+License: Custom permissive
+License location (in src.zip): minisat-master/LICENSE

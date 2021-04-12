@@ -1,0 +1,6 @@
+Source: https://github.com/jkunlin/TCA
+Version: 2021 Feb 9, commit 4cba1253335d34865173a13253e64f5d8675f2a2
+Authors: Lin, Luo, Cai, Su, Hao, Zhang
+Paper: Lin et al 2015 - TCA: An Efficient Two-Mode Meta-Heuristic Algorithm for Combinatorial Test Generation
+License: GPLv3
+License location (in src.zip): TCA-master/LICENSE
