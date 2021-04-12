@@ -52,7 +52,7 @@ if __name__ == r'__main__':
 		output = os.mkdir(r'Tmp/SBATCH_Report_Jobs/')
 	
 	if not os.path.exists(r'Tmp/SBATCH_Parallel_Portfolio_Jobs/'):
-		output = os.mkdir(r'Tmp/SBATCH_Report_Jobs/')
+		output = os.mkdir(r'Tmp/SBATCH_Parallel_Portfolio_Jobs/')
 	
 	if not os.path.exists(r'Log/'):
 		output = os.mkdir(r'Log/')

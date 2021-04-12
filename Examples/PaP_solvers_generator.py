@@ -84,7 +84,7 @@ def create_solver_variation(number: str, param_str: str, executable_name: str):
     directory_path = os.getcwd()
     Solver_directory_path = str(directory_path) + '/Examples/Resources/Solvers/'
     Solver_path = str(directory_path) + '/Examples/Resources/Solvers/' + executable_name + '/'
-    new_solver_directory_path = Solver_directory_path + str(executable_name) + '_variation_' + str(number) + '/'
+    new_solver_directory_path = Solver_directory_path + str(executable_name) + '-variation-' + str(number) + '/'
 
     # copy the directory
     command_line = 'cp -a -r ' + str(Solver_path) + ' ' + str(new_solver_directory_path)
@@ -100,7 +100,7 @@ def create_solver_variation(number: str, param_str: str, executable_name: str):
 if __name__ == r'__main__':
 
     executable_name = 'PbO-CCSAT-Generic'
-    number_of_variations = 3
+    number_of_variations = 5
     variations_options_list = list()
     
     list_of_all_numbers = range(0,858654720)

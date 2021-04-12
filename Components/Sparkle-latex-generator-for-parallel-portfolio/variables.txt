@@ -5,3 +5,5 @@
 @@numInstanceClasses@@
 @@instanceClassList@@
 @@cutoffTime@@
+@@solversWithSolution@@
+@@figureComputationComparison@@
