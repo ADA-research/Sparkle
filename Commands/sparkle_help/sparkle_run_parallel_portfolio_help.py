@@ -143,9 +143,14 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
     try:
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         print('DEBUG job_number: ' + job_number)
-        wait_for_finished_solver(job_number, num_jobs)
-        print('DEBUG out of waiting for finished solver')
-        cancel_remaining_jobs(job_number)
+        
+        if(performance == 'RUNTIME'):
+            wait_for_finished_solver(job_number, num_jobs)
+            print('DEBUG out of waiting for finished solver')
+            cancel_remaining_jobs(job_number)
+        else:
+            print('c the sbatch job has been generated and submitted,')
+            
 
     except:
         print('c an error occurred when running the portfolio')
