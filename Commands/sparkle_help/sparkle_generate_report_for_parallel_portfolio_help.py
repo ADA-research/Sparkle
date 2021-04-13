@@ -122,9 +122,9 @@ def get_figure_parallel_portfolio_vs_average_sequential(parallel_portfolio_path:
 	cutoff_time = get_cutoffTime()
 	max_sequential_time = (int(nr_of_solvers) - 1) * int(cutoff_time) + float(best_solver_time)
 	average_sequential_time = (int(nr_of_solvers) - 1)/2 * int(cutoff_time) + float(best_solver_time)
-	fout.write("best_solver_time" + r' ' + str(best_solver_time) + '\n')
-	fout.write("worst_case_sequential_time" + r' ' + str(max_sequential_time) + '\n')
-	fout.write("average_case_sequential_time" + r' ' + str(average_sequential_time) + '\n')
+	fout.write("0 best-solver" + r' ' + str(best_solver_time) + '\n')
+	fout.write("1 worst-case" + r' ' + str(max_sequential_time) + '\n')
+	fout.write("2 average-case" + r' ' + str(average_sequential_time) + '\n')
 	fout.close()
 
 	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_best_solvers_vs_average_solver_order_filename + r' ' + figure_best_solvers_vs_average_solver_order_filename
