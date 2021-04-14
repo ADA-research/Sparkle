@@ -42,6 +42,7 @@ Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
+Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 *.json
 
 
