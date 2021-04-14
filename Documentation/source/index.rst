@@ -10,7 +10,10 @@ Welcome to sparkle's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   installation
+   examples/examples
    modules
+   
 
 
 
