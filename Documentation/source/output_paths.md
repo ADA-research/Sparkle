@@ -1,4 +1,6 @@
-### Configuration ###
+# Output Paths
+
+## Configuration
 
 Path: ../../Components/smac-v2.10.03-master-778/
 File: <solver_name>_<instance_set>_scenario.txt_<number_of_configuration_runs>_exp_sbatch.sh
@@ -17,7 +19,7 @@ Other:
  Last solver, training-, and testing instance sets used for validation: example_scenarios/cadical-sc17_for_sparkle/last_test_configured_default.txt
   Training instances: <instance_set>_train.txt
 
-### Validation ###
+## Validation
 
 Path: ../../Components/smac-v2.10.03-master-778/
 File: <solver_name>_<instance_set>_validation_sbatch.sh

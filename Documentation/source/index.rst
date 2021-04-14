@@ -11,7 +11,9 @@ Welcome to sparkle's documentation!
    :caption: Contents:
 
    installation
+   user_guide
    examples/examples
+   output_paths
    modules
    
 
