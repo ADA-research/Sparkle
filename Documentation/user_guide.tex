@@ -531,6 +531,26 @@ Other software used by Sparkle:
 
 To manually install \texttt{gnuplot} see for instance the instructions on their website \url{http://www.gnuplot.info/development/}
 
+\subsubsection{Installing software on Grace}
+If you want to install software on grace make sure to check {\tt /software/ada} if it is located there. \\
+For example if you want to add {\tt gnuplot} and you see that {\tt /software/ada} contains the directory {\tt gnuplot-5.4.0} it can be added as follows:
+
+\begin{enumerate}
+  \item Locate the path to the directory which holds the executable, it this case it is
+
+  \texttt{/software/ada/gnuplot-5.4.0/gnuplot-5.4.0/bin}
+
+  \item Add this line to your \texttt{.bashrc} (open with e.g. \texttt{vim \~{}/.bashrc})
+
+  \texttt{export PATH="/<directory>/:\$PATH"}
+
+  (replace "\texttt{<directory>}" with the path to wanted the software in the \texttt{/software/ada} directory, e.g.: \texttt{/software/ada/gnuplot-5.4.0/gnuplot-5.4.0/bin})
+
+  \item Reload \texttt{.bashrc} to make sure everything is updated
+
+  \texttt{source \textasciitilde/.bashrc}
+\end{enumerate}
+
 \section{Installation and compilation of examples}
 
 \subsection{Solvers}
