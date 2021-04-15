@@ -14,7 +14,7 @@ Welcome to sparkle's documentation!
    user_guide
    examples/examples
    output_paths
-   modules
+   _generated/modules
    
 
 
