@@ -1,0 +1,4 @@
+# Requirements for sparkle documentation build
+
+sphinx
+recommandmark

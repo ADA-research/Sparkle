@@ -1,7 +1,7 @@
 # Documentation system for Sparkle
 
 ## Requirements
-* spinx
+* sphinx
 * recommondmark
 
 ## Build

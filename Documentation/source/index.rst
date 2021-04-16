@@ -15,9 +15,6 @@ Welcome to sparkle's documentation!
    examples/examples
    output_paths
    _generated/modules
-   
-
-
 
 Indices and tables
 ==================
