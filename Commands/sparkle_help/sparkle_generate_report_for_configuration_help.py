@@ -26,15 +26,8 @@ from sparkle_help import sparkle_compute_marginal_contribution_help
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_run_ablation_help as sah
 from sparkle_help import sparkle_instances_help as sih
+from sparkle_help import sparkle_generate_report_help as sgrh
 
-
-def get_customCommands():
-	str_value = r''
-	return str_value
-
-def get_sparkle():
-	str_value = r'\emph{Sparkle}'
-	return str_value
 
 def get_sparkleVersion():
 	str_value = r'1.0.0'
@@ -475,11 +468,11 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
 	common_dict[variable] = str_value
 
 	variable = r'customCommands'
-	str_value = get_customCommands()
+	str_value = sgrh.get_customCommands()
 	common_dict[variable] = str_value
 	
 	variable = r'sparkle'
-	str_value = get_sparkle()
+	str_value = sgrh.get_sparkle()
 	common_dict[variable] = str_value
 	
 	variable = r'solver'

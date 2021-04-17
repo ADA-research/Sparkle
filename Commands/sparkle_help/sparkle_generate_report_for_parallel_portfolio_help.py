@@ -9,16 +9,9 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_generate_report_help as sgrh
 import compute_marginal_contribution as cmc
 
-
-def get_customCommands():
-	str_value = r''
-	return str_value
-
-def get_sparkle():
-	str_value = r'\emph{Sparkle}'
-	return str_value
 
 def get_numSolvers(parallel_portfolio_path: str):
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
@@ -73,12 +66,6 @@ def get_instanceClassList(instances: list):
 
 	return str_value
 
-
-def get_cutoffTime():
-	str_value = str(sgh.settings.get_general_target_cutoff_time())
-	return str_value
-
-
 def get_results():
 	# TODO Change the directory
 	solutions_dir  = r'Performance_Data/Tmp/'
@@ -119,7 +106,7 @@ def get_figure_parallel_portfolio_vs_average_sequential(parallel_portfolio_path:
 	result_lines = get_results()
 	best_solver_time = result_lines[2]
 	nr_of_solvers = get_numSolvers(parallel_portfolio_path)
-	cutoff_time = get_cutoffTime()
+	cutoff_time = sgrh.get_performanceComputationCutoffTime()
 	max_sequential_time = (int(nr_of_solvers) - 1) * int(cutoff_time) + float(best_solver_time)
 	average_sequential_time = (int(nr_of_solvers) - 1)/2 * int(cutoff_time) + float(best_solver_time)
 	fout.write("0 best-solver" + r' ' + str(best_solver_time) + '\n')
@@ -144,11 +131,11 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	mydict = {}
 
 	variable = r'customCommands'
-	str_value = get_customCommands()
+	str_value = sgrh.get_customCommands()
 	mydict[variable] = str_value
 
 	variable = r'sparkle'
-	str_value = get_sparkle()
+	str_value = sgrh.get_sparkle()
 	mydict[variable] = str_value
 
 	variable = r'numSolvers'
@@ -168,7 +155,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	mydict[variable] = str_value
 
 	variable = r'cutoffTime'
-	str_value = get_cutoffTime()
+	str_value = sgrh.get_performanceComputationCutoffTime()
 	mydict[variable] = str_value
 
 	variable = r'solversWithSolution'
