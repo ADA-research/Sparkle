@@ -1,9 +1,11 @@
 @@customCommands@@
 @@sparkle@@
+@@testbool@@
 @@numSolvers@@
 @@solverList@@
 @@numInstanceClasses@@
 @@instanceClassList@@
 @@cutoffTime@@
 @@solversWithSolution@@
-@@figureComputationComparison@@
+@@figure-parallel-portfolio-sparkle-vs-vbs@@
+@@figure-parallel-portfolio-sparkle-vs-sbs@@
