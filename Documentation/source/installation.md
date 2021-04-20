@@ -1,1 +1,0 @@
-../../Examples/installation.md

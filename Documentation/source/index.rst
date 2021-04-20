@@ -11,7 +11,6 @@ Sparkle's documentation!
    :caption: Contents:
    :numbered:
 
-   installation
    userguide/userguide
    examples/examples
    _generated/modules
