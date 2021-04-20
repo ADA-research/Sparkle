@@ -131,7 +131,7 @@ quickly.
 .. _quick:select_wrapper:
 
 Creating a wrapper for your algorithm
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 A template for the wrapper that connects your algorithm with Sparkle is
 available at
