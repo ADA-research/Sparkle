@@ -28,6 +28,9 @@ global latest_scenario
 
 flag_first_call = True
 
+global sparkle_version
+sparkle_version = r'1.0.0'
+
 global sparkle_maximum_int
 sparkle_maximum_int = 2147483647
 

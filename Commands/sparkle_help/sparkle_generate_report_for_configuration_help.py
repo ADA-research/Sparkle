@@ -29,11 +29,6 @@ from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_generate_report_help as sgrh
 
 
-def get_sparkleVersion():
-	str_value = r'1.0.0'
-	return str_value
-
-
 def get_numInstanceInInstanceSet_smacDir(instance_set_name: str) -> str:
 	str_value = ''
 
@@ -484,7 +479,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
 	common_dict[variable] = str_value
 	
 	variable = r'sparkleVersion' 
-	str_value = get_sparkleVersion()
+	str_value = sgh.sparkle_version
 	common_dict[variable] = str_value
 	
 	variable = r'numInstanceInTrainingInstanceSet'
