@@ -5,6 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
+USERGUIDEDIR  = source/userguide
 BUILDDIR      = build
 
 # Put it first so that "make" without argument is like "make help".
@@ -21,10 +22,10 @@ apidoc:
 %: makefile apidoc
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-latexpdf: makefile apidoc
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	cp "$(BUILDDIR)/latex/sparkle.pdf" sparkle-doc.pdf
+userguide: makefile
+	@$(SPHINXBUILD) -M latexpdf "$(SOURCEDIR)/userguide" "$(BUILDDIR)/userguide" $(SPHINXOPTS) $(O)
+	cp "$(BUILDDIR)/userguide/latex/sparkle-userguide.pdf" sparkle-userguide.pdf
 
 clean: makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	rm $(SOURCEDIR)/_generated/*
+	rm -f $(SOURCEDIR)/_generated/*

@@ -5,98 +5,100 @@ Sparkle user guide
 Quick start
 ===========
 
-**Note**: Sparkle currently relies on Slurm
-(``https://slurm.schedmd.com/``), and does not work without it.
+.. note:: Sparkle currently relies on `Slurm <https://slurm.schedmd.com/>`_, and does not work without it.
 
 Follow these steps:
 
--  Install Sparkle
+#. :ref:`Install Sparkle <quick:install>`
+#. Prepare an :ref:`algorithm configuration <quick:config_environment>` or an :ref:`algorithm selection <quick:select_environment>`.
+#. :ref:`Execute commands <quick:execute_commands>`
 
--  Prepare your configuration environment; or
-   `1.3 <#quick:select_environment>`__ Prepare your selection
-   environment
-
--  Execute commands
 
 .. _quick:install:
 
 Installing Sparkle
-------------------
+==================
 
-#. Copy the Sparkle files to your desired directory
+.. note:: The installation process use the ``conda`` command available in `Anaconda <https://www.anaconda.com/>`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage some of the dependencies. 
 
-#. | Install Python 3.9 (other 3.x versions may work, but were not
-     tested with the packages included in the ``requirements_first.txt``
-     and ``requirements_second.txt`` files.
-   | With Anaconda:
-   | ``conda create -n <env_name> python=3.9``
+1. Copy the Sparkle files to your desired directory
 
-#. | Install Swig 3.0
-   | With Anaconda:
-   | ``conda install swig=3.0``
+2. Install Python 3.9 (other 3.x versions may work, but were not 
+   tested with the packages included in the ``requirements_first.txt``
+   and ``requirements_second.txt`` files.
 
-#. Navigate into the Sparkle directory
+   Using conda::
 
-#. | Install ``requirements_first.txt``:
-   | ``pip install -r requirements_first.txt``
-   | With Anaconda:
-   | ``/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_first.txt``
+      conda create -n <env_name> python=3.9
 
-#. | Install ``requirements_second.txt``:
-   | ``pip install -r requirements_second.txt``
-   | With Anaconda:
-   | ``/home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_second.txt``
+3. Install Swig 3.0
 
-#. | Install ``epstopdf``
-   | (if manually, for instance on a cluster, as described in
-     Section \ `6.1.2 <#package:epstopdf>`__)
+   Using conda::
 
-#. | Install other requirements if they are not on your system yet:
-   | ``LaTeX``
-   | ``BibTeX``
-   | ``gnuplot``
+      conda install swig=3.0
+
+4. Navigate into the Sparkle directory
+
+5. Install ``requirements_first.txt``::
+ 
+      pip install -r requirements_first.txt
+
+   With Anaconda::
+
+      /home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_first.txt
+
+6. Install ``requirements_second.txt``::
+
+      pip install -r requirements_second.txt
+   
+   With Anaconda::
+
+      /home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_second.txt
+
+7. Install ``epstopdf``
+   (if manually, for instance on a cluster, as described in
+   Section :numref:`package:epstopdf`.
+
+8. Install other requirements if they are not on your system yet: ``LaTeX``, ``BibTeX`` and ``gnuplot``.
+      
 
 .. _quick:config_environment:
 
 Algorithm Configuration
------------------------
+=======================
 
 Configuring an algorithm has the following minimal requirements for the
-algorithm (for an example of a solver directory see
-Section \ `2.2 <#dir:solvers>`__):
+algorithm (for an example of a solver directory see :numref:`dir:solvers`):
 
--  A working solver executable
-
--  An algorithm wrapper called ``sprakle_smac_wrapper.py``
-
--  A PCS (parameter configuration space) file
-
--  The runsolver binary (e.g. from
-   ``Examples/Resources/Solvers/PbO-CCSAT-Generic/``)
+* A working solver executable
+* An algorithm wrapper called ``sprakle_smac_wrapper.py``
+* A PCS (parameter configuration space) file
+* The runsolver binary (e.g. from ``Examples/Resources/Solvers/PbO-CCSAT-Generic/``)
 
 Further, training and testing instance sets are needed (for an example
-of an instances directory see Section \ `2.1 <#dir:instances>`__). For
+of an instances directory see :numref:`dir:instances`). For
 the purpose of testing whether your configuration setup works with
 Sparkle, it is advised to primarily use instances that are solved
 (relatively) quickly even with the default parameters.
 
+
 .. _quick:config_wrapper:
 
 Creating a wrapper for your algorithm
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 A template for the wrapper that connects your algorithm with Sparkle is
-available at
-``Examples/Resources/Solvers/template/sparkle_smac_wrapper.py``. Within
+available at ``Examples/Resources/Solvers/template/sparkle_smac_wrapper.py``. Within
 this template a number of ``TODO``\ s are indicated where you are likely
 to need to make changes for your specific algorithm. You can also
 compare the different example solvers to get an idea for what kind of
 changes are needed.
 
+
 .. _quick:pcs_file:
 
 Parameter configuration space (PCS) file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
 
 The PCS (parameter configuration space) format [1]_ is used to pass the
 possible parameter ranges of an algorithm to Sparkle in a ``.pcs`` file.
@@ -111,18 +113,17 @@ included in the PCS file.
 .. _quick:select_environment:
 
 Algorithm Selection
--------------------
+===================
 
 Creating a portfolio selector requires multiple algorithms with the
 following minimal requirements (for an example of a solver directory see
-Section \ `2.3 <#dir:solvers_selection>`__):
+:numref:`dir:solvers_selection`):
 
--  A working solver executable
-
--  An algorithm wrapper called ``sprakle_run_default_wrapper.py``
+*  A working solver executable
+*  An algorithm wrapper called ``sprakle_run_default_wrapper.py``
 
 Further, training and testing instance sets are needed (for an example
-of an instances directory see Section \ `2.1 <#dir:instances>`__). For
+of an instances directory see :numref:`dir:instances`). For
 the purpose of testing whether your selection setup works with Sparkle,
 it is advised to primarily use instances that are solved (relatively)
 quickly.
@@ -229,9 +230,7 @@ parameters are described in the PCS format. Finally, ``runsolver`` is a
 binary executable of the runsolver tool. This allows Sparkle to make
 fair time measurements for all configuration experiments.
 
-**Note**: Currently the runsolver binary has to be in every solver
-directory, it can be found in the
-``Examples/Resources/Solvers/PbO-CCSAT-Generic/`` directory.
+.. note:: Currently the runsolver binary has to be in every solver directory, it can be found in the ``Examples/Resources/Solvers/PbO-CCSAT-Generic/`` directory.
 
 .. _dir:solvers_selection:
 
@@ -303,55 +302,31 @@ Currently the commands below are available in Sparkle (listed
 alphabetically). Every command can be called with the ``–help`` option
 to get a description of the required arguments and other options.
 
--  ``about.py``
-
--  ``add_feature_extractor.py``
-
--  ``add_instances.py``
-
--  ``add_solver.py``
-
--  ``cleanup_current_sparkle_platform.py``
-
--  ``cleanup_temporary_files.py``
-
--  ``compute_features_parallel.py``
-
--  ``compute_features.py``
-
--  ``compute_marginal_contribution.py``
-
--  ``configure_solver.py``
-
--  ``construct_sparkle_portfolio_selector.py``
-
--  ``generate_report.py``
-
--  ``initialise.py``
-
--  ``load_record.py``
-
--  ``remove_feature_extractor.py``
-
--  ``remove_instances.py``
-
--  ``remove_record.py``
-
--  ``remove_solver.py``
-
--  ``run_ablation.py``
-
--  ``run_solvers.py``
-
--  ``run_sparkle_portfolio_selector.py``
-
--  ``run_status.py``
-
--  ``save_record.py``
-
--  ``system_status.py``
-
--  ``validate_configured_vs_default.py``
+*  about.py
+*  add_feature_extractor.py
+*  add_instances.py
+*  :ref:`cmd:add_solver`
+*  cleanup_current_sparkle_platform.py
+*  cleanup_temporary_files.py
+*  compute_features_parallel.py
+*  compute_features.py
+*  compute_marginal_contribution.py
+*  :ref:`cmd:configure_solver`
+*  construct_sparkle_portfolio_selector.py
+*  :ref:`cmd:generate_report`
+*  :ref:`cmd:initialise`
+*  load_record.py
+*  remove_feature_extractor.py
+*  remove_instances.py
+*  remove_record.py
+*  remove_solver.py
+*  run_ablation.py
+*  run_solvers.py
+*  run_sparkle_portfolio_selector.py
+*  run_status.py
+*  save_record.py
+*  system_status.py
+*  :ref:`cmd:validate_configured_vs_default`
 
 Arguments in [square brackets] are optional, arguments without brackets
 are mandatory. Input in <chevrons> indicate required text input, {curly
@@ -366,13 +341,10 @@ Add a solver to the Sparkle platform.
 
 Arguments:
 
--  ``[–run-solver-later]``
-
--  ``[–parallel]``
-
--  ``–deterministic {0, 1}``
-
--  ``<solver_source_directory>``
+*  ``[-–run-solver-later]``
+*  ``[-–parallel]``
+*  ``–-deterministic {0, 1}``
+*  ``<solver_source_directory>``
 
 .. _cmd:configure_solver:
 
@@ -383,18 +355,14 @@ Configure a solver in the Sparkle platform.
 
 Arguments:
 
--  ``–solver <solver>``
+*  ``–-solver <solver>``
+*  ``–-instance-set-train <instance-set-train>``
+*  ``[-–instance-set-test <instance-set-test>]``
+*  ``–-validate``
+*  ``–-ablation``
 
--  ``–instance-set-train <instance-set-train>``
-
--  ``[–instance-set-test <instance-set-test>]``
-
--  ``–validate``
-
--  ``–ablation``
-
-Note that the test instance set is only used if the ``–ablation`` or
-``–validation`` flags are given.
+Note that the test instance set is only used if the ``-–ablation`` or
+``–-validation`` flags are given.
 
 .. _cmd:generate_report:
 
@@ -412,11 +380,9 @@ specific instance sets in the Sparkle platform.
 
 Arguments:
 
--  ``–solver <solver>``
-
--  ``[–instance-set-train <instance-set-train>]``
-
--  ``[–instance-set-test <instance-set-test>]``
+*  ``-–solver <solver>``
+*  ``[-–instance-set-train <instance-set-train>]``
+*  ``[-–instance-set-test <instance-set-test>]``
 
 Note that if a test instance set is given, the training instance set
 must also be given.
@@ -440,11 +406,9 @@ solver instance pair.
 
 Arguments:
 
--  ``–solver <solver>``
-
--  ``[–instance-set-train <instance-set-train>]``
-
--  ``[–instance-set-test <instance-set-test>]``
+*  ``–-solver <solver>``
+*  ``[-–instance-set-train <instance-set-train>]``
+*  ``[-–instance-set-test <instance-set-test>]``
 
 Note that if no test instance set is given, the validation is performed
 on the training set.
@@ -459,21 +423,16 @@ doing validation experiments on the training and test sets.
 
 Arguments:
 
--  ``–solver <solver>``
-
--  ``–instance-set-train <instance-set-train>``
-
--  ``[–instance-set-test <instance-set-test>]``
-
-Settings
-========
+*  ``-–solver <solver>``
+*  ``-–instance-set-train <instance-set-train>``
+*  ``[-–instance-set-test <instance-set-test>]``
 
 Sparkle settings
-----------------
+================
 
 Most settings can be controlled through
 ``Settings/sparkle_settings.ini``. Possible settings are summarised per
-category in Sect. \ `5.1.2 <#sect:settings_details>`__. For any settings
+category in :numref:`sect:settings_details`. For any settings
 that are not provided the defaults will be used. Meaning, in the extreme
 case, that if the settings file is empty (and nothing is set through the
 command line) everything will run with default values.
@@ -487,7 +446,7 @@ Note that when writing settings Sparkle always uses the name, and not an
 alias.
 
 Example ``sparkle_settings.ini``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 This is a short example to show the format, see the settings file in
 ``Settings/sparkle_settings.ini`` for more.
@@ -507,87 +466,63 @@ This is a short example to show the format, see the settings file in
 .. _sect:settings_details:
 
 Names and possible values
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
--  | **[general]**
+**[general]**
 
--  ``performance_measure``
-
-   aliases: ``smac_run_obj``
-
+``performance_measure``
+   | aliases: ``smac_run_obj``
    | values: ``{RUNTIME, QUALITY_ABSOLUTE`` (also: ``QUALITY``)\ ``}``
 
--  ``target_cutoff_time``
-
-   aliases:
-   ``smac_each_run_cutoff_time, cutoff_time_each_performance_computation``
-
+``target_cutoff_time``
+   | aliases: ``smac_each_run_cutoff_time``, ``cutoff_time_each_performance_computation``
    | values: integer
 
--  ``extractor_cutoff_time``
-
-   aliases: ``cutoff_time_each_feature_computation``
-
+``extractor_cutoff_time``
+   | aliases: ``cutoff_time_each_feature_computation``
    | values: integer
 
--  ``penalty_multiplier``
-
-   aliases: ``penalty_number``
-
+``penalty_multiplier``
+   | aliases: ``penalty_number``
    | values: integer
 
--  ``solution_verifier``
-
-   aliases: N/A
-
-   values: ``{NONE, SAT}``
-
+``solution_verifier``
+   | aliases: N/A
+   | values: ``{NONE, SAT}``
    | note: Only available for SAT solving.
 
--  | **[configuration]**
+**[configuration]**
 
--  ``budget_per_run``
-
-   aliases: ``smac_whole_time_budget``
-
+``budget_per_run``
+   | aliases: ``smac_whole_time_budget``
    | values: integer
 
--  ``number_of_runs``
-
-   aliases: ``num_of_smac_runs``
-
+``number_of_runs``
+   | aliases: ``num_of_smac_runs``
    | values: integer
 
--  **[smac]**
+**[smac]**
 
--  ``target_cutoff_length``
-
-   aliases: ``smac_each_run_cutoff_length``
-
+``target_cutoff_length``
+   | aliases: ``smac_each_run_cutoff_length``
    | values: ``{max}`` (other values: whatever is allowed by SMAC)
 
--  | **[ablation]**
+**[ablation]**
 
--  ``racing``
-
-   aliases: ``ablation_racing``
-
+``racing``
+   | aliases: ``ablation_racing``
    | values: boolean
 
--  | **[slurm]**
+**[slurm]**
 
--  ``number_of_runs_in_parallel``
+``number_of_runs_in_parallel``
 
-   aliases: ``smac_run_obj``
-
+   | aliases: ``smac_run_obj``
    | values: integer
 
--  ``clis_per_node``
-
-   aliases: N/A
-
-   values: integer
-
+``clis_per_node``
+   | aliases: N/A
+   | values: integer
    | note: Not really a Slurm option, will likely be moved to another
      section.
 
@@ -597,17 +532,14 @@ Priorities
 Settings provided through different channels have different priorities
 as follows:
 
--  Default – Default values will be overwritten if a value is given
+*  Default –- Default values will be overwritten if a value is given
    through any other mechanism;
-
--  File – Settings form the ``Settings/sparkle_settings.ini`` overwrite
+*  File –- Settings form the ``Settings/sparkle_settings.ini`` overwrite
    default values, but are overwritten by settings given through the
    command line;
-
--  Command line file – Settings files provided through the command line,
+*  Command line file -– Settings files provided through the command line,
    overwrite default values and other settings files.
-
--  Command line – Settings given through the command line overwrite all
+*  Command line –- Settings given through the command line overwrite all
    other settings, including settings files provided through the command
    line.
 
@@ -619,7 +551,8 @@ Slurm settings can be specified in the
 are inserted *as is* in any ``srun`` or ``sbatch`` calls done by
 Sparkle. This means that any options exclusive to one or the other
 currently should not be used (see
-Section \ `5.3.2 <#slurm:disallowed>`__).
+:numref:`slurm:disallowed`).
+
 
 Tested options
 ~~~~~~~~~~~~~~
@@ -631,11 +564,9 @@ that any options related to commands other than ``srun`` and ``sbatch``
 should not be used with Sparkle, and should not be included in
 ``Settings/sparkle_slurm_settings.txt``.
 
--  ``–partition / -p``
-
--  ``–exclude``
-
--  ``–nodelist``
+*  ``-–partition / -p``
+*  ``-–exclude``
+*  ``-–nodelist``
 
 .. _slurm:disallowed:
 
@@ -644,15 +575,13 @@ Disallowed options
 
 The options below are exclusive to ``sbatch`` and are thus disallowed:
 
--  ``–array``
-
--  ``–clusters``
-
--  ``–wrap``
+*  ``-–array``
+*  ``-–clusters``
+*  ``-–wrap``
 
 The options below are exclusive to ``srun`` and are thus disallowed:
 
--  ``–label``
+*  ``-–label``
 
 Nested ``srun`` calls
 ~~~~~~~~~~~~~~~~~~~~~
@@ -707,42 +636,41 @@ Sparkle’s reporting component to work (e.g.
 ``generate_report, generate_report_for_configuration``), it can be
 installed in your user directory as follows:
 
-#. Download ``epstopdf``
+#. Download ``epstopdf``:: 
 
-   ``wget http://mirrors.ctan.org/support/epstopdf.zip``
+      wget http://mirrors.ctan.org/support/epstopdf.zip
+
 
 #. Unzip the package (ideally somewhere static, rather than a
-   ``/Downloads/`` directory)
+   ``/Downloads/`` directory)::
 
-   ``unzip epstopdf.zip``
+      unzip epstopdf.zip
 
-#. Rename ``epstopdf.pl`` (inside the directory you just unzipped)
+#. Rename ``epstopdf.pl`` (inside the directory you just unzipped)::
 
-   ``mv epstopdf.pl epstopdf``
+      mv epstopdf.pl epstopdf
 
-#. Add this line to your ``.bashrc`` (open with e.g. ``vim ~/.bashrc``)
+#. Add this line to your ``.bashrc`` (open with e.g. ``vim ~/.bashrc``)::
 
-   ``export PATH="/<directory>/epstopdf:$PATH"``
+      export PATH="/<directory>/epstopdf:$PATH"
 
    (replace "``<directory>``" with the path to the ``epstopdf``
    directory, e.g.: ``home/blomkvander/bin``)
 
-#. Reload ``.bashrc`` to make sure everything is updated
+#. Reload ``.bashrc`` to make sure everything is updated::
 
-   ``source ~/.bashrc``
+      source ~/.bashrc
 
 General requirements
 ~~~~~~~~~~~~~~~~~~~~
 
 Other software used by Sparkle:
 
-::
-
-     pdflatex,
-     latex,
-     bibtex,
-     gnuplot,
-     gnuplot-x11
+*  ``pdflatex``
+*  ``latex``
+*  ``bibtex``
+*  ``gnuplot``
+*  ``gnuplot-x11``
 
 To manually install ``gnuplot`` see for instance the instructions on
 their website http://www.gnuplot.info/development/

@@ -1,12 +1,32 @@
 # Documentation system for Sparkle
 
-To build the html documentation and the pdf documentation
+Sparkle use Sphinx to generate its documentation. The requirements are included in `../requirments_first.txt`. 
+
+## Full documentation
+
+To build the full html documentation
 ```bash
 make html latexpdf
 ```
-The resulting documention are in `./build/*`.
-The file `sparkle-doc.pdf` is a copy of the generated documentation in `build/latex`.
+The resulting documentation is in `./build/html` with `./build/html/index.html` as entry point.
 
-See `requirements.txt` file for requirements.
+The documentation can also be build in other format, for example `pdf` with 
+```
+make latexpdf
+```
 
-To clean up: `make clean`
+## User Guide
+
+A user guide can also be build using 
+```bash
+make userguide
+```
+
+That will generate the file `sparkle-userguide.pdf`. For easy consultation, an up-to-date file should be include in the directory. 
+
+## Clean 
+
+To clean up the generated files
+```bash
+make clean
+```

@@ -119,6 +119,7 @@ htmlhelp_basename = 'sparkledoc'
 
 # -- Options for LaTeX output ------------------------------------------------
 
+latex_engine = 'pdflatex'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
@@ -130,19 +131,27 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': '',
-
+    #'preamble': r'''
+    #    \usepackage[titles]{tocloft}
+    #    \cftsetpnumwidth {1.25cm}\cftsetrmarg{1.5cm}
+    #    \setlength{\cftchapnumwidth}{0.75cm}
+    #    \setlength{\cftsecindent}{\cftchapnumwidth}
+    #    \setlength{\cftsecnumwidth}{1.25cm}
+    #    ''',
+    #'fncychap': r'\usepackage[Bjornstrup]{fncychap}',
+    #'printindex': r'\footnotesize\raggedright\printindex',
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
 }
+latex_show_urls = 'footnote'    
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'sparkle.tex', 'Sparkle Documentation',
-     'ADA Research Group, LIACS', 'manual'),
+    (master_doc, 'sparkle-userguide.tex', 'Sparkle User Guide',
+     'ADA Research Group, LIACS', 'howto'),
 ]
 
 
@@ -162,7 +171,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'sparkle', 'sparkle Documentation',
+    (master_doc, 'sparkle', 'Sparkle User Guide',
      author, 'sparkle', ' A PbO-based Multi-agent Problem-solving Platform.',
      'Miscellaneous'),
 ]
@@ -192,3 +201,4 @@ epub_exclude_files = ['search.html']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
