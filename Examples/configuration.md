@@ -1,17 +1,17 @@
-### Use Sparkle for algorithm configuration
+# Use Sparkle for algorithm configuration
 
-#### Initialise the Sparkle platform
+## Initialise the Sparkle platform
 
 `Commands/initialise.py`
 
-#### Add instances
+## Add instances
 
 Add train, and optionally test, instances (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
 
 `Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN/`
 `Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN2/`
 
-#### Add a configurable solver
+## Add a configurable solver
 
 Add a configurable solver (here for SAT solving) with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
 
@@ -21,13 +21,13 @@ The solver directory should contain the solver executable, the `sparkle_smac_wra
 
 If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
 
-#### Configure the solver
+## Configure the solver
 
 Perform configuration on the solver to obtain a target configuration
 
 `Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/`
 
-#### Validate the configuration
+## Validate the configuration
 
 To make sure configuration is completed before running validation you can use the `sparkle_wait` command
 
@@ -37,7 +37,7 @@ Validate the performance of the best found parameter configuration. The test set
 
 `Commands/validate_configured_vs_default.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
 
-#### Generate a report
+## Generate a report
 
 Wait for validation to be completed
 
@@ -49,15 +49,15 @@ Generate a report detailing the results on the training (and optionally testing)
 
 By default the `generate_report` command will create a report for the most recent solver and instance set(s). To generate a report for older solver-instance set combinations, the desired solver can be specified with `--solver Solvers/PbO-CCSAT-Generic/`, the training instance set with `--instance-set-train Instances/PTN/`, and the testing instance set with `--instance-set-test Instances/PTN2/`.
 
-### Run ablation to determine parameter importance based on default (from the `.pcs` file) and configured parameters
+## Run ablation to determine parameter importance based on default (from the `.pcs` file) and configured parameters
 
-#### Run ablation
+### Run ablation
 
 Run ablation using the training instances and validate the parameter importance with the test set
 
 `Commands/run_ablation.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/`
 
-#### Generate a report
+### Generate a report
 
 Wait for ablation to be completed
 
@@ -69,17 +69,17 @@ Generate a report including ablation, and as before the results on the train (an
 
 The ablation section can be suppressed with `--no-ablation` 
 
-### Immediate ablation and validation after configuration
+## Immediate ablation and validation after configuration
 
 By adding `--ablation` and/or `--validate` to the `configure_solver.py` command, ablation and respectively validation will run directly after the configuration is finished.
 
 There is no need to execute `run_ablation.py` and/or `validate_configured_vs_default.py` when these flags are given with the `configure_solver.py` command
 
-#### Training set only
+### Training set only
 
 `Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --ablation --validate`
 
-#### Training and testing sets
+### Training and testing sets
 
 Wait for the previous example to be completed
 

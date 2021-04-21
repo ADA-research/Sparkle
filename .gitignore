@@ -44,3 +44,8 @@ Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
 Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 *.json
+
+
+# Generated documentation 
+Documentation/build/
+Documentation/source/_generated/

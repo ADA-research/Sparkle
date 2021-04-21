@@ -1,0 +1,1 @@
+../../../Examples/configuration_quality.md
