@@ -38,11 +38,12 @@ import functools
 print = functools.partial(print, flush=True)
 
 
-def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str) -> str:
+def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str, seed: str = None) -> str:
 	cmd_solver_call = ''
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	seed_str = str(sgh.get_seed())
+	if not seed == r'': seed_str = seed
 	cmd_get_solver_call = solver_wrapper_path + ' --print-command \"' + instance_path + '\" --seed ' + seed_str + ' --cutoff-time ' + cutoff_time_str
 	solver_call_rawresult = os.popen(cmd_get_solver_call)
 	solver_call_result = solver_call_rawresult.readlines()[0].strip()
@@ -57,7 +58,8 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str) -
 	return cmd_solver_call
 
 
-def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_path: str, raw_result_path: str, runsolver_values_path: str, custom_cutoff: int = None):
+def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_path: str, raw_result_path: str, runsolver_values_path: str, seed: str = None, custom_cutoff: int = None):
+	if seed is None: seed = r''
 	if custom_cutoff is None:
 		cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	else:
@@ -68,7 +70,7 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_
 		sys.exit()
 
 	# Get the solver call command from the wrapper
-	cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path)
+	cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path, seed)
 
 	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
@@ -113,15 +115,16 @@ def check_solver_output_for_errors(raw_result_path: Path):
 	return
 
 
-def run_solver_on_instance_and_process_results(solver_path: str, instance_path: str, custom_cutoff: int = None) -> (float, float, float, List[float], str, str):
+def run_solver_on_instance_and_process_results(solver_path: str, instance_path: str, seed: str = None, custom_cutoff: int = None) -> (float, float, float, List[float], str, str):
 	# Prepare paths
 	# TODO: Fix result path for multi-file instances (only a single file is part of the result path)
-	raw_result_path = sgh.sparkle_tmp_path + sfh.get_last_level_directory_name(solver_path) + '_' + sfh.get_last_level_directory_name(instance_path) + '_' + sbh.get_time_pid_random_string() + '.rawres'
+	if seed is None: seed = r''
+	raw_result_path = sgh.sparkle_tmp_path + sfh.get_last_level_directory_name(solver_path) + seed + '_' + sfh.get_last_level_directory_name(instance_path) + '_' + sbh.get_time_pid_random_string() + '.rawres'
 	runsolver_values_path = raw_result_path.replace('.rawres', '.val')
 	solver_wrapper_path = solver_path + '/' + sgh.sparkle_run_default_wrapper
 
 	# Run
-	run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, custom_cutoff)
+	run_solver_on_instance(solver_path, solver_wrapper_path, instance_path, raw_result_path, runsolver_values_path, custom_cutoff, seed)
 
 	# Process results
 	cpu_time, wc_time, quality, status = process_results(raw_result_path, solver_wrapper_path, runsolver_values_path)

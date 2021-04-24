@@ -15,6 +15,8 @@ def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list)->bool:
     empty_file = str(sparkle_parallel_portfolio_path) + "/solvers.txt"
     sfh.create_new_empty_file(empty_file)
     for solver in solver_list:
+        if solver.rfind(',') >= 0:
+            solver = solver[:solver.rfind(',')] + r' ' + solver[solver.rfind(',')+1:]
         sfh.append_string_to_file(empty_file, solver)
     return True
 

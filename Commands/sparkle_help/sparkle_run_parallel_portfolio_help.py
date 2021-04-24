@@ -93,13 +93,18 @@ def generate_sbatch_script(parameters, num_jobs):
 
 
 def generate_parameters(solver_list, instance_path, cutoff_time, performance):
-    
+    # TODO add cutoff_time
     parameters = list()
     for solver in solver_list:
-        solver_path = Path(solver)
-        # TODO add cutoff_time
-        commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance)
-        parameters.append(str(commandline))
+        if " " in solver:
+            solver_path, seed = solver.strip().split()
+            for instance in range(1,int(seed)+1):
+                commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance) + ' --seed ' + str(instance)
+                parameters.append(str(commandline))  
+        else:
+            solver_path = Path(solver)
+            commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance)
+            parameters.append(str(commandline))
     return parameters
 
 def run_sbatch(sbatch_script_path,sbatch_script_name):

@@ -35,7 +35,7 @@ if __name__ == r'__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--portfolio-name", type=str, help='Gives a name to the portfolio, otherwise it will overwrite the latest portfolio.')
-    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str, help='List of paths to the solvers')
+    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str, help='List of paths to the solvers, add \",solver_instances\" to the end of a path to add multiple instances of a single solver')
     parser.add_argument("--overwrite", default=sgh.settings.DEFAULT_parallel_portfolio_overwriting, action=ac.SetByUser, help='Allows overwrite of the directory, default true if no name is specified otherwise the default is false')
     parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 
