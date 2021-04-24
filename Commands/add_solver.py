@@ -22,6 +22,7 @@ from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_job_parallel_help
 from sparkle_help import sparkle_add_configured_solver_help as sacsh
+from sparkle_help import argparse_custom as ac
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_command_help import CommandName
@@ -42,6 +43,8 @@ if __name__ == r'__main__':
 	parser.add_argument('--run-solver-later', action='store_true', help='do not immediately run the newly added solver')
 	parser.add_argument('--nickname', type=str, help='set a nickname for the solver')
 	parser.add_argument('--parallel', action='store_true', help='run the solver on multiple instances in parallel')
+	# TODO choose a less confusing argument name
+	parser.add_argument('--solver-instances', default=1, type=int, action=ac.SetByUser, help='if a solver is NOT deterministic this argument can be used to add multiple instances of the solver')
 
 	# Process command line arguments
 	args = parser.parse_args()
@@ -54,7 +57,10 @@ if __name__ == r'__main__':
 	my_flag_run_solver_later = args.run_solver_later
 	nickname_str = args.nickname
 	my_flag_parallel = args.parallel
-
+	if ac.set_by_user(args, 'solver_instances'):
+		solver_instances = args.solver_instances
+		if solver_instances < 1: solver_instances = 1
+	
 	# Start add solver
 	last_level_directory = r''
 	last_level_directory = sfh.get_last_level_directory_name(solver_source)
@@ -64,8 +70,13 @@ if __name__ == r'__main__':
 		Path(solver_diretory).mkdir(parents=True, exist_ok=True)
 	else:
 		print(r'c Solver ' + sfh.get_last_level_directory_name(solver_diretory) + r' already exists!')
-		print(r'c Do not add solver ' + sfh.get_last_level_directory_name(solver_diretory))
-		sys.exit()
+		if deterministic == 0:
+			print(r'c adding ' + solver_instances + r' solver instance(s)!')
+			sfh.change_solver_instances_from_solver_list(solver_diretory,solver_instances,True)
+			sys.exit() 
+		else:
+			print(r'c Do not add solver ' + sfh.get_last_level_directory_name(solver_diretory))
+			sys.exit()
 
 	os.system(r'cp -r ' + solver_source + r'/* ' + solver_diretory)
 
@@ -74,11 +85,11 @@ if __name__ == r'__main__':
 	performance_data_csv.update_csv()
 
 	sgh.solver_list.append(solver_diretory)
-	sfh.add_new_solver_into_file(solver_diretory, deterministic)
+	sfh.add_new_solver_into_file(solver_diretory, deterministic, solver_instances)
 	
 	if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
 		print('c pcs file detected, this is a configurable solver')
-	
+
 	print('c Adding solver ' + sfh.get_last_level_directory_name(solver_diretory) + ' done!')
 
 	if os.path.exists(sgh.sparkle_portfolio_selector_path):
