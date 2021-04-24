@@ -14,6 +14,7 @@ import os
 import time
 import fcntl
 import argparse
+import shutil
 from pathlib import Path
 from pathlib import PurePath
 
@@ -52,8 +53,15 @@ if __name__ == r'__main__':
 	# Process command line arguments
 	instance_path = " ".join(args.instance) # Turn multiple instance files into a space separated string
 	solver_path = args.solver
-	if args.seed is not None: seed = args.seed
-	else: seed = r''
+	if args.seed is not None: 
+		seed = args.seed
+		# Creating a new directory for the solver to facilitate running several solver_instances in parallel.
+		new_solver_directory_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_seed_' + str(seed)
+		command_line = 'cp -a -r ' + str(solver_path) + ' ' + str(new_solver_directory_path)
+		os.system(command_line)
+		solver_path = new_solver_directory_path
+	else: 
+		seed = r''
 	performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 	run_status_path = args.run_status_path
 	key_str = sfh.get_last_level_directory_name(solver_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + seed + r'_' + sbh.get_time_pid_random_string()
@@ -82,7 +90,8 @@ if __name__ == r'__main__':
 
 	sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
 	os.system('rm -f ' + task_run_status_path)
-
+	if solver_path.startswith("Tmp/"):
+		shutil.rmtree(solver_path)
 	if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
 		obj_str = str(quality[0]) # TODO: Handle the multi-objective case
 	else:
