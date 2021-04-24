@@ -1,2 +1,7 @@
 Cython==0.29.21
 numpy==1.19.5
+
+
+# Requirements for sparkle documentation build
+sphinx
+recommandmark

@@ -288,6 +288,8 @@ def write_data_for_plot_and_find_min_and_max(configured_results_dir: str, defaul
 		fout.write(str(default_par10_value) + ' ' + str(configured_par10_value) + '\n')
 
 		# Detect zeros to avoid issues for the log-scale plots
+		zero_found = False
+
 		if configured_par10_value == 0:
 			zero_found = True
 		elif configured_par10_value < min_value: min_value = configured_par10_value
