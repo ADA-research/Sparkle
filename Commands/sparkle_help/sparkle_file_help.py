@@ -273,7 +273,7 @@ def add_used_instance_into_file(filepath):
 def add_new_solver_into_file(filepath, deterministic='0',solver_instances='1'):
 	fo = open(sgh.solver_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	fo.write(filepath + r' ' + deterministic + r' ' + solver_instances + '\n')
+	fo.write(filepath + r' ' + deterministic + r' ' + str(solver_instances) + '\n')
 	fo.close()
 	return
 

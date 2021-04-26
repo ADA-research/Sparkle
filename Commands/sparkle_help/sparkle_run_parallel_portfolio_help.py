@@ -92,12 +92,14 @@ def generate_sbatch_script(parameters, num_jobs):
     return sbatch_script_name, sbatch_script_dir
 
 
-def generate_parameters(solver_list, instance_path, cutoff_time, performance):
+def generate_parameters(solver_list, instance_path, cutoff_time, performance, num_jobs):
     # TODO add cutoff_time
     parameters = list()
+    new_num_jobs = num_jobs
     for solver in solver_list:
         if " " in solver:
             solver_path, seed = solver.strip().split()
+            new_num_jobs = new_num_jobs + int(seed) - 1
             for instance in range(1,int(seed)+1):
                 commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance) + ' --seed ' + str(instance)
                 parameters.append(str(commandline))  
@@ -105,7 +107,7 @@ def generate_parameters(solver_list, instance_path, cutoff_time, performance):
             solver_path = Path(solver)
             commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance)
             parameters.append(str(commandline))
-    return parameters
+    return parameters, new_num_jobs
 
 def run_sbatch(sbatch_script_path,sbatch_script_name):
     sbatch_shell_script_path_str = str(sbatch_script_path) + str(sbatch_script_name)
@@ -139,7 +141,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
     num_jobs = len(solver_list)
 
     # Makes SBATCH scripts for all individual solvers in a list
-    parameters = generate_parameters(solver_list, Path(instances[0]), cutoff_time, performance)
+    parameters, num_jobs = generate_parameters(solver_list, Path(instances[0]), cutoff_time, performance, num_jobs)
     #print('DEBUG parameters ' + str(parameters))
     
     # Generates a SBATCH script which uses the created parameters

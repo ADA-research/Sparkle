@@ -61,7 +61,7 @@ if __name__ == r'__main__':
         portfolio_path = sgh.sparkle_parallel_portfolio_path
     print('c Start constructing Sparkle parallel portfolio ...')
 
-    #TODO construct portfolio.
+    #TODO use relative solver path
     success = scpp.construct_sparkle_parallel_portfolio(Path(portfolio_path),overwrite,list_of_solvers)
     
     if success:
