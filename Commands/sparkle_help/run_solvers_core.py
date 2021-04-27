@@ -56,7 +56,7 @@ if __name__ == r'__main__':
 	if args.seed is not None: 
 		seed = args.seed
 		# Creating a new directory for the solver to facilitate running several solver_instances in parallel.
-		new_solver_directory_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_seed_' + str(seed)
+		new_solver_directory_path = r'Tmp/' + sfh.get_last_level_directory_name(solver_path) + r'_seed_' + str(seed) + r'_' + sfh.get_last_level_directory_name(instance_path)
 		command_line = 'cp -a -r ' + str(solver_path) + ' ' + str(new_solver_directory_path)
 		os.system(command_line)
 		solver_path = new_solver_directory_path
@@ -92,8 +92,10 @@ if __name__ == r'__main__':
 
 	sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
 	os.system('rm -f ' + task_run_status_path)
-	if solver_path.startswith("Tmp/"):
-		shutil.rmtree(solver_path)
+	if run_status_path != 'Tmp/SBATCH_Parallel_Portfolio_Jobs/':
+		if solver_path.startswith("Tmp/"):
+			shutil.rmtree(solver_path)
+	
 	if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
 		obj_str = str(quality[0]) # TODO: Handle the multi-objective case
 	else:
