@@ -72,6 +72,7 @@ if __name__ == r'__main__':
 		scsv.Sparkle_CSV.create_empty_csv(sparkle_global_help.performance_data_csv_path)
 		output = os.mkdir(r'Feature_Data/Tmp/')
 		output = os.mkdir(r'Performance_Data/Tmp/')
+		output = os.mkdir(r'Performance_Data/Tmp_PaP/')
 		print('c New Sparkle platform initialised!')
 	else:
 		my_suffix = sparkle_basic_help.get_time_pid_random_string()

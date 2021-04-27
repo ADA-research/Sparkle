@@ -35,6 +35,8 @@ def remove_temporary_files():
 	os.system(command_line)
 	command_line = 'rm -rf Performance_Data/Tmp/*'
 	os.system(command_line)
+	command_line = 'rm -rf Performance_Data/Tmp_PaP/*'
+	os.system(command_line)
 	command_line = 'rm -rf Log/*'
 	os.system(command_line)
 	command_line = 'rm -f slurm-*'
