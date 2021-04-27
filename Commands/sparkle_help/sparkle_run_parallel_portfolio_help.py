@@ -3,6 +3,7 @@
 
 
 import sys
+import shutil
 import os
 import subprocess
 from pathlib import Path
@@ -16,10 +17,27 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
+def remove_temp_files_unfinished_solvers(solver_array_list: list, unfinished_solver_list: list, sbatch_script_name: str, temp_solvers: list):
+    
+    for unfinished_solver in unfinished_solver_list:
+        solver_file_name = solver_array_list[int(unfinished_solver[int(len(unfinished_solver)-1)])]
+        commandline = 'rm -rf Tmp/' + solver_file_name + '*'
+        os.system(commandline)
+        commandline = 'rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/' + solver_file_name + '*'
+        os.system(commandline)
+        for temp_solver in temp_solvers:
+            if solver_file_name.startswith(temp_solver):
+                commandline = 'Tmp/' + solver_file_name[:len(temp_solver)+1]
+                shutil.rmtree(commandline)
+   
+    commandline = 'rm -rf Tmp/' + sbatch_script_name + '*'
+    os.system(commandline)
+
+    return
+
 def cancel_remaining_jobs(job_id:str):
     sjh.sleep(2)
     result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
-    
     remaining_jobs = []
     for ids in result.stdout.strip().split(' '):
         if str(job_id) in ids:
@@ -30,11 +48,10 @@ def cancel_remaining_jobs(job_id:str):
         command_line = 'scancel ' + str(job)
         os.system(command_line)
     
-    ######### !!Temporary!! ############
-    # Cleanup running file
+    # Cleanup remaining job files
     #os.system('rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/*')
     
-    return
+    return remaining_jobs
 
 
 def wait_for_finished_solver(job_id: str, num_jobs):
@@ -96,18 +113,23 @@ def generate_parameters(solver_list, instance_path, cutoff_time, performance, nu
     # TODO add cutoff_time
     parameters = list()
     new_num_jobs = num_jobs
+    solver_array_list = []
+    tmp_solver_instances = []
     for solver in solver_list:
         if " " in solver:
             solver_path, seed = solver.strip().split()
+            tmp_solver_instances.append(str(sfh.get_last_level_directory_name(str(solver_path))) + r'_seed_')
             new_num_jobs = new_num_jobs + int(seed) - 1
             for instance in range(1,int(seed)+1):
                 commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance) + ' --seed ' + str(instance)
-                parameters.append(str(commandline))  
+                parameters.append(str(commandline))
+                solver_array_list.append(str(sfh.get_last_level_directory_name(str(solver_path))) + r'_seed_' + str(instance)  + r'_' + str(sfh.get_last_level_directory_name(str(instance_path))))  
         else:
             solver_path = Path(solver)
+            solver_array_list.append(str(sfh.get_last_level_directory_name(str(solver_path))) + r'_seed_' + str(sfh.get_last_level_directory_name(str(instance_path))))
             commandline = ' --instance ' + str(instance_path) + ' --solver ' + str(solver_path) + ' --performance-measure ' + str(performance)
             parameters.append(str(commandline))
-    return parameters, new_num_jobs
+    return parameters, new_num_jobs, solver_array_list, tmp_solver_instances
 
 def run_sbatch(sbatch_script_path,sbatch_script_name):
     sbatch_shell_script_path_str = str(sbatch_script_path) + str(sbatch_script_name)
@@ -141,7 +163,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
     num_jobs = len(solver_list)
 
     # Makes SBATCH scripts for all individual solvers in a list
-    parameters, num_jobs = generate_parameters(solver_list, Path(instances[0]), cutoff_time, performance, num_jobs)
+    parameters, num_jobs, solver_array_list, temp_solvers = generate_parameters(solver_list, Path(instances[0]), cutoff_time, performance, num_jobs)
     #print('DEBUG parameters ' + str(parameters))
     
     # Generates a SBATCH script which uses the created parameters
@@ -154,12 +176,16 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         if(performance == 'RUNTIME'):
             wait_for_finished_solver(job_number, num_jobs)
             print('DEBUG out of waiting for finished solver')
-            cancel_remaining_jobs(job_number)
+            unfinished_solver_list = cancel_remaining_jobs(job_number)
+
+            remove_temp_files_unfinished_solvers(solver_array_list,unfinished_solver_list,sbatch_script_name, temp_solvers)
         else:
             print('c the sbatch job has been generated and submitted,')
             
 
-    except:
+    except Exception as e:
+        # DEBUG
+        print(e)
         print('c an error occurred when running the portfolio')
         return False
 

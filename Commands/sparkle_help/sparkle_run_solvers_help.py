@@ -38,9 +38,9 @@ import functools
 print = functools.partial(print, flush=True)
 
 
-def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str, seed: str) -> str:
+def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str, seed: str = None) -> str:
 	cmd_solver_call = ''
-
+	if seed is None: seed = r''
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	seed_str = str(sgh.get_seed())
 	if not seed == r'': seed_str = seed
@@ -58,8 +58,8 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str, s
 	return cmd_solver_call
 
 
-def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_path: str, raw_result_path: str, runsolver_values_path: str, seed: str, custom_cutoff: int = None):
-
+def run_solver_on_instance(solver_path: str, solver_wrapper_path: str, instance_path: str, raw_result_path: str, runsolver_values_path: str, seed: str = None, custom_cutoff: int = None):
+	if seed is None: seed = r''
 	if custom_cutoff is None:
 		cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	else:
@@ -114,7 +114,7 @@ def check_solver_output_for_errors(raw_result_path: Path):
 	return
 
 
-def run_solver_on_instance_and_process_results(solver_path: str, instance_path: str, seed: str, custom_cutoff: int = None) -> (float, float, float, List[float], str, str):
+def run_solver_on_instance_and_process_results(solver_path: str, instance_path: str, seed: str = None, custom_cutoff: int = None) -> (float, float, float, List[float], str, str):
 	# Prepare paths
 	# TODO: Fix result path for multi-file instances (only a single file is part of the result path)
 	if seed is None: seed = r''
