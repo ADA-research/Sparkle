@@ -41,7 +41,8 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list, unfinished_sol
 def cancel_remaining_jobs(job_id:str, to_be_cancelled_list: list, num_jobs: int, finished_job_array_nr: str, portfolio_size: int):
     sjh.sleep(2)
     result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
-    remaining_jobs = to_be_cancelled_list
+    remaining_jobs = []
+    cancelled_list = to_be_cancelled_list
     num_remaining_jobs = num_jobs - 1
     for ids in result.stdout.strip().split(' '):
         if str(job_id) in ids:
@@ -49,21 +50,13 @@ def cancel_remaining_jobs(job_id:str, to_be_cancelled_list: list, num_jobs: int,
 
     for job in remaining_jobs:
         # If job not in same array segment as finished job than skip this part and remove remaining_job list
-        print(portfolio_size)
-        print(remaining_jobs)
-        print('job: ' + job)
-        print('job[-1]: ' + job[len(job_id)+1])
-        print('finished job array number: ' + str(finished_job_array_nr))
-        print(str(int(int(job[len(job_id)+1])/int(portfolio_size))))
-        print(str(int(int(finished_job_array_nr)/int(portfolio_size))))
         if int(int(job[len(job_id)+1])/int(portfolio_size)) == int(int(finished_job_array_nr)/int(portfolio_size)):
-            print('Cancelling job ' + str(job))
+            print('c Cancelling job ' + str(job) + ' because the instances has been solved.')
             command_line = 'scancel ' + str(job)
             os.system(command_line)
+            cancelled_list.append(str(job))
             num_remaining_jobs = num_remaining_jobs - 1
-        else:
-            remaining_jobs.remove(job)
-    return remaining_jobs, num_remaining_jobs
+    return cancelled_list, num_remaining_jobs
 
 
 def wait_for_finished_solver(job_id: str, num_jobs):
@@ -174,13 +167,12 @@ def run_sbatch(sbatch_script_path,sbatch_script_name):
 
 def handle_waiting_and_removal_process(job_number: str, num_jobs: int, solver_array_list: list, sbatch_script_name: str, temp_solvers: list, portfolio_size: int, to_be_cancelled_list: list = []):
     cancelled_jobs = to_be_cancelled_list
-    print('DEBUG handle waiting')
     finished_job_array_nr = wait_for_finished_solver(job_number, num_jobs)
     print('DEBUG after wait for finished solver')
     unfinished_solver_list, remaining_jobs = cancel_remaining_jobs(job_number, cancelled_jobs, num_jobs, finished_job_array_nr, portfolio_size)
     print('DEBUG cancel remaining jobs')
     if remaining_jobs > 0:
-        handle_waiting_and_removal_process(job_number, remaining_jobs , solver_array_list, sbatch_script_name, temp_solvers, unfinished_solver_list)
+        handle_waiting_and_removal_process(job_number, remaining_jobs , solver_array_list, sbatch_script_name, temp_solvers, portfolio_size, unfinished_solver_list)
     remove_temp_files_unfinished_solvers(solver_array_list,unfinished_solver_list,sbatch_script_name, temp_solvers)
     return True
 
