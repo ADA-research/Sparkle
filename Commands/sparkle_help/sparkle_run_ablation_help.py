@@ -318,7 +318,15 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
 def check_for_ablation(solver_name, instance_train_name, instance_test_name):
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name, exec_path=False)
     table_file = Path(scenario_dir, "ablationValidation.txt")
-    return table_file.is_file()
+    if not table_file.is_file():
+        return False
+    fh = open(table_file, "r")
+    first_line = fh.readline().strip()
+    fh.close()
+    if first_line != "Ablation analysis validation complete.":
+        return False
+
+    return True
 
 def get_ablation_table(solver_name, instance_train_name, instance_test_name):
     if not check_for_ablation(solver_name, instance_train_name, instance_test_name):
@@ -332,11 +340,11 @@ def get_ablation_table(solver_name, instance_train_name, instance_test_name):
 
     with open(table_file, "r") as fh:
         for line in fh.readlines():
-            values = re.sub("\s+"," ",line.strip())
-            values = re.sub(", ",",",values)
-            values = [val.replace(",",", ") for val in values.split(' ')]
+            values = re.sub("\s+", " ", line.strip())
+            values = re.sub(", ", ",", values)
+            values = [val.replace(",", ", ") for val in values.split(' ')]
             if len(values) == 5:
-               results.append(values)
+                results.append(values)
 
         fh.close()
 
