@@ -36,6 +36,15 @@ def get_ablation_scenario_directory(solver_name, instance_train_name, instance_t
                                                         instance_test_name)
     return ablation_scenario_dir
 
+
+def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str):
+    ablation_scenario_dir = Path(sgh.ablation_dir + "scenarios/")
+    if ablation_scenario_dir.is_dir():
+        for ablation_scenario in ablation_scenario_dir.glob("{}_{}_*".format(solver_name, instance_set_train_name)):
+            sfh.rmtree(ablation_scenario)
+    return
+
+
 def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_name):
     ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
                                                             instance_train_name,
