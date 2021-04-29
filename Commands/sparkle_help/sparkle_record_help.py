@@ -131,6 +131,8 @@ def cleanup_current_sparkle_platform():
 	if os.path.exists(r'Performance_Data/'): shutil.rmtree(r'Performance_Data/')
 	if os.path.exists(r'Reference_Lists/'): shutil.rmtree(r'Reference_Lists/')
 	if os.path.exists(r'Sparkle_Portfolio_Selector'): shutil.rmtree(r'Sparkle_Portfolio_Selector/')
+	ablation_scenario_dir = sgh.ablation_dir + "scenarios/"
+	if os.path.exists(ablation_scenario_dir): shutil.rmtree(ablation_scenario_dir)
 	return
 
 
