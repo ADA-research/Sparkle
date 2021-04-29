@@ -159,7 +159,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 		default = True
 		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
 		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-		exec_dir = 'example_scenarios/' + solver_name + '/validate_test_default/'
+		exec_dir = 'example_scenarios/' + solver_name + '/validate_{}_test_default/'.format(instance_set_test_name)
 		configuration_str = 'DEFAULT'
 		test_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 	
@@ -170,7 +170,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
 		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
 		optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
-		exec_dir = 'example_scenarios/' + solver_name + '/validate_test_configured/'
+		exec_dir = 'example_scenarios/' + solver_name + '/validate_{}_test_configured/'.format(instance_set_test_name)
 		configuration_str = '\"' + str(optimised_configuration_str) + '\"'
 
 		# Write configuration to file to be used by smac-validate

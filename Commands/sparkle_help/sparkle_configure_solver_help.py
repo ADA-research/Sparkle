@@ -129,7 +129,10 @@ def create_file_scenario_validate(solver_name: str, instance_set_name: str, inst
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
 	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
-	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
+	if instance_type == InstanceType.TRAIN:
+		smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
+	else:
+		smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + instance_set_name + '_' + inst_type + '_' + config_type + '/'
 	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
 	smac_test_instance_file = smac_instance_file
 
@@ -186,7 +189,6 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str)
 
 	return
 
-
 def remove_configuration_directory(solver_name: str):
 	smac_solver_dir = Path(sgh.smac_dir + '/example_scenarios/' + solver_name + '/')
 
@@ -234,31 +236,31 @@ def prepare_smac_execution_directories_configuration(solver_name: str):
 	return
 
 
-def remove_validation_directories_execution_or_output(solver_name: str, exec_or_out: str):
+def remove_validation_directories_execution_or_output(solver_name: str, instance_set_test_name: str, exec_or_out: str):
 	solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/' + exec_or_out
 
 	train_default_dir = Path(solver_dir + '_train_default/')
 	sfh.rmtree(train_default_dir)
+	if instance_set_test_name != None:
+		test_default_dir = Path(solver_dir + '_' + instance_set_test_name + '_test_default/')
+		sfh.rmtree(test_default_dir)
 
-	test_default_dir = Path(solver_dir + '_test_default/')
-	sfh.rmtree(test_default_dir)
-
-	test_configured_dir = Path(solver_dir + '_test_configured/')
-	sfh.rmtree(test_configured_dir)
-
-	return
-
-
-def remove_validation_directories(solver_name: str):
-	remove_validation_directories_execution_or_output(solver_name, 'validate')
-	remove_validation_directories_execution_or_output(solver_name, 'output')
+		test_configured_dir = Path(solver_dir + '_' + instance_set_test_name + '_test_configured/')
+		sfh.rmtree(test_configured_dir)
 
 	return
 
 
-def prepare_smac_execution_directories_validation(solver_name: str):
+def remove_validation_directories(solver_name: str, instance_set_test_name: str):
+	remove_validation_directories_execution_or_output(solver_name, instance_set_test_name, 'validate')
+	remove_validation_directories_execution_or_output(solver_name, instance_set_test_name, 'output')
+
+	return
+
+
+def prepare_smac_execution_directories_validation(solver_name: str, instance_set_train_name: str, instance_set_test_name: str):
 	# Make sure no old files remain that could interfere
-	remove_validation_directories(solver_name)
+	remove_validation_directories(solver_name, instance_set_test_name)
 
 	smac_solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/'
 	_, _, _, _, num_of_smac_run, _ = get_smac_settings()
@@ -277,24 +279,25 @@ def prepare_smac_execution_directories_validation(solver_name: str):
 		os.system(cmd)
 
 		## Test default
-		execdir = 'validate_test_default/'
+		if instance_set_test_name != None:
+			execdir = 'validate_{}_test_default/'.format(instance_set_test_name)
 
-		# Create directories, -p makes sure any missing parents are also created
-		cmd = 'mkdir -p ' + smac_solver_dir + execdir + '/tmp/'
-		os.system(cmd)
-		# Copy solver to execution directory
-		cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + execdir
-		os.system(cmd)
+			# Create directories, -p makes sure any missing parents are also created
+			cmd = 'mkdir -p ' + smac_solver_dir + execdir + '/tmp/'
+			os.system(cmd)
+			# Copy solver to execution directory
+			cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + execdir
+			os.system(cmd)
 
-		## Test configured
-		execdir = 'validate_test_configured/'
+			## Test configured
+			execdir = 'validate_{}_test_configured/'.format(instance_set_test_name)
 
-		# Create directories, -p makes sure any missing parents are also created
-		cmd = 'mkdir -p ' + smac_solver_dir + execdir + '/tmp/'
-		os.system(cmd)
-		# Copy solver to execution directory
-		cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + execdir
-		os.system(cmd)
+			# Create directories, -p makes sure any missing parents are also created
+			cmd = 'mkdir -p ' + smac_solver_dir + execdir + '/tmp/'
+			os.system(cmd)
+			# Copy solver to execution directory
+			cmd = 'cp -r ' + solver_diretory + ' ' + smac_solver_dir + execdir
+			os.system(cmd)
 
 	return
 
