@@ -349,8 +349,12 @@ def get_ablation_table(solver_name, instance_train_name, instance_test_name):
 
     with open(table_file, "r") as fh:
         for line in fh.readlines():
-            values = re.sub("\s+", " ", line.strip())
-            values = re.sub(", ", ",", values)
+            # Pre-process lines from the ablation file and add to the results dictionary.
+            # Sometimes ablation rounds switch multiple parameters at once.
+            # EXAMPLE: 2 EDR, EDRalpha   0, 0.1   1, 0.1013241633106732 486.31691
+            # To split the row correctly, we remove the space before the comma separated parameters and add it back.
+            values = re.sub(r"\s+", " ", line.strip())
+            values = re.sub(r", ", ",", values)
             values = [val.replace(",", ", ") for val in values.split(' ')]
             if len(values) == 5:
                 results.append(values)
