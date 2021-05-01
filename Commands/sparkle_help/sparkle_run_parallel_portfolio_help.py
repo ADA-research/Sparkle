@@ -19,22 +19,25 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
-def remove_temp_files_unfinished_solvers(solver_array_list: list, unfinished_solver_list: list, sbatch_script_name: str, temp_solvers: list):
-    print('DEBUG ')
-    print(unfinished_solver_list)
-    for unfinished_solver in unfinished_solver_list:
-        
-        solver_file_name = solver_array_list[int(unfinished_solver[unfinished_solver.find('_')+1:])]
-        commandline = 'rm -rf Tmp/' + solver_file_name + '*'
-        os.system(commandline)
-        commandline = 'rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/' + solver_file_name + '*'
-        os.system(commandline)
-        for temp_solver in temp_solvers:
-            if solver_file_name.startswith(temp_solver):
-                for directories in os.listdir(r'Tmp/'):
-                    if os.path.isdir(directories) and directories.startswith(solver_file_name[:len(temp_solver)+1]):
-                        commandline = 'Tmp/' + directories
-                        shutil.rmtree(commandline)
+def remove_temp_files_unfinished_solvers(solver_array_list: list, sbatch_script_name: str, temp_solvers: list):
+    print('DEBUG unfinished, first temp_solvers then solver_array_list ')
+    print(temp_solvers)
+    print(solver_array_list)  
+
+
+    # TODO move the other Tmp files by listing all of them and removing the ones starting with a solver_array.
+    # TODO handle the files with a solution in Tmp_PaP differently
+    # commandline = 'rm -rf Tmp/' + solver_file_name + '*'
+    # os.system(commandline)
+    # commandline = 'rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/' + solver_file_name + '*'
+    # os.system(commandline)
+
+    # Removes the directories generated
+    for temp_solver in temp_solvers:
+            for directories in os.listdir(r'Tmp/'):
+                if os.path.isdir(directories) and directories.startswith(solver_file_name[:len(temp_solver)+1]):
+                    commandline = 'Tmp/' + directories
+                    shutil.rmtree(commandline)
    
     commandline = 'rm -rf Tmp/' + sbatch_script_name + '*'
     os.system(commandline)
@@ -42,10 +45,12 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list, unfinished_sol
     return
 
 def find_finished_time_finished_solver(solver_array_list: list, finished_job_array_nr: int):
-    time_in_format_str = r'1:00'
+    # If there is a solver that ended but did not make a result file this means that it was manually cancelled
+    # or it gave an error the template will ensure that all solver on that instance will be cancelled. 
+    time_in_format_str = r'1:00' 
     solutions_dir  = r'Performance_Data/Tmp_PaP/'
     results = sfh.get_list_all_result_filename(solutions_dir)
-    print('DEBUG FIND finished time: ')
+
     for result in results:
         if result.startswith(str(solver_array_list[int(finished_job_array_nr)])):
             result_file_path = solutions_dir + result
@@ -54,43 +59,46 @@ def find_finished_time_finished_solver(solver_array_list: list, finished_job_arr
             # Rounding up because the listed number has a slight delay from the actual time the solver finished.
             result_time = int(float(result_lines[2].strip())) + 1
             time_in_format_str = str(datetime.timedelta(seconds = result_time))
-            print('DEBUG found: ' + time_in_format_str)
+            print('DEBUG In a time of: ' + time_in_format_str)
     return time_in_format_str
 
-def cancel_remaining_jobs(job_id:str, to_be_cancelled_list: list, num_jobs: int, finished_job_array_nr: str, portfolio_size: int, solver_array_list: list):
-    sjh.sleep(2)
+def cancel_remaining_jobs(job_id:str, finished_job_array: list, portfolio_size: int, solver_array_list: list):
+
+    # Find all job_array_numbers that are currently running
     result = subprocess.run(['squeue', '-r', '-j', job_id], capture_output=True, text=True)
     remaining_jobs = []
-    cancelled_list = to_be_cancelled_list
-    num_remaining_jobs = num_jobs - 1
     for ids in result.stdout.strip().split(' '):
         if str(job_id) in ids:
             remaining_jobs.append(ids)
 
     for job in remaining_jobs:
-        # If job not in same array segment as finished job than skip this part and remove remaining_job list
-        if int(int(job[job.find('_')+1:])/int(portfolio_size)) == int(int(finished_job_array_nr)/int(portfolio_size)):
-            print('c Cancelling job ' + str(job) + ' because the instances has been solved.')
-            # Update the cutofftime of the to be cancelled job, if job if already past that it automatically stops.
-            newCutoffTime = find_finished_time_finished_solver(solver_array_list, finished_job_array_nr)
-            command_line = 'scontrol update JobId=' + str(job) + ' TimeLimit=' + newCutoffTime
-            os.system(command_line)
+        # Update all jobs in the same array segment as the finished job with its finishing time
+        for finished_job in finished_job_array:
+            # if job in the same array segment
+            if int(int(job[job.find('_')+1:])/int(portfolio_size)) == int(int(finished_job)/int(portfolio_size)):
+                print('c Cancelling job ' + str(job) + ' because the instances has been solved.')
+                # Update the cutofftime of the to be cancelled job, if job if already past that it automatically stops.
+                newCutoffTime = find_finished_time_finished_solver(solver_array_list, finished_job)
+                command_line = 'scontrol update JobId=' + str(job) + ' TimeLimit=' + newCutoffTime
+                os.system(command_line)
+    
+    return remaining_jobs
 
 
-            cancelled_list.append(str(job))
-            num_remaining_jobs = num_remaining_jobs - 1
-    return cancelled_list, num_remaining_jobs
-
-
-def wait_for_finished_solver(job_id: str, num_jobs):
-    number_of_solvers = int(num_jobs)
+def wait_for_finished_solver(job_id: str, remaining_job_list: list):
+    print('DEBUG remaining job list: ')
+    print(remaining_job_list)
+    number_of_solvers = len(remaining_job_list)
     n_seconds = 1
     done = False
-    current_solver_list = []
+    current_solver_list = remaining_job_list
     finished_solver_list = []
     while not done:
         result = subprocess.run(['squeue', '-r', '-j', job_id], capture_output=True, text=True)
-        if(' R ' not in str(result)):
+        if ' R ' not in str(result):
+            if len(result.stdout.strip().split('\n')) == 1:
+                done = True
+                break
             sjh.sleep(n_seconds) #No jobs have started yet;
         elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
             unfinished_solver_list = []
@@ -107,17 +115,17 @@ def wait_for_finished_solver(job_id: str, num_jobs):
                 jobid = jobs.strip().split()[0]
                 if(jobid.startswith(str(job_id))):
                     current_solver_list.append(jobid[jobid.find('_')+1:])
+            number_of_solvers = len(current_solver_list)
 
     if len(finished_solver_list):
         print('Job with ID', job_id, ' has a finished solver!')
     else:
-        print('DEBUG first unfinished solver list then current solver list')
-        print(unfinished_solver_list)
-        print(current_solver_list)
-        print('Job with ID', job_id, ' has a finished solver! (or cut-off time has been reached)')
-    finished_solver = int(finished_solver_list[0])
-    print('DEBUG finished solver: ' + str(finished_solver))
-    return finished_solver
+        print('Job with ID', job_id, ' has finished!')
+
+    print('DEBUG finished solver: ')
+    print(finished_solver_list)
+
+    return finished_solver_list
 
 def generate_sbatch_script(parameters, num_jobs):
     # Set script name and path
@@ -191,21 +199,22 @@ def run_sbatch(sbatch_script_path,sbatch_script_name):
     print('DEBUG INTO output_list not good')
     return ''
 
-def handle_waiting_and_removal_process(job_number: str, num_jobs: int, solver_array_list: list, sbatch_script_name: str, temp_solvers: list, portfolio_size: int, to_be_cancelled_list: list = []):
-    cancelled_jobs = to_be_cancelled_list
-    print('DEBUG cancelled_jobs length = ' + str(len(cancelled_jobs)) + ' and num_jobs size = ' + str(num_jobs))
-    finished_job_array_nr = wait_for_finished_solver(job_number, num_jobs)
+def handle_waiting_and_removal_process(job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list = []):
 
-    unfinished_solver_list, remaining_jobs = cancel_remaining_jobs(job_number, cancelled_jobs, num_jobs, finished_job_array_nr, portfolio_size, solver_array_list)
+    print('DEBUG remaining jobs = ' + str(len(remaining_job_list)))
+    finished_jobs = wait_for_finished_solver(job_number, remaining_job_list)
+    
+    # Handles the updating of all jobs within the portfolios of which contain a finished job
+    remaining_job_list = cancel_remaining_jobs(job_number, finished_jobs, portfolio_size, solver_array_list)
 
-    if remaining_jobs > 0:
-        handle_waiting_and_removal_process(job_number, remaining_jobs , solver_array_list, sbatch_script_name, temp_solvers, portfolio_size, unfinished_solver_list)
-    remove_temp_files_unfinished_solvers(solver_array_list,unfinished_solver_list,sbatch_script_name, temp_solvers)
+    # If there are still unfinished jobs recursively handle the remaining jobs.
+    if len(remaining_job_list):
+        handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, portfolio_size, remaining_job_list)
+
     return True
 
 def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: int)->bool:
     print('DEBUG cutoff_time: ' + str(cutoff_time))
-    #TODO add functionality for nodes, differentiating starting times.
 
     #TODO add performance functionality
     if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
@@ -227,8 +236,11 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         print('DEBUG job_number: ' + job_number)
         
         if(performance == 'RUNTIME'):
-            handle_waiting_and_removal_process(job_number, num_jobs, solver_array_list, sbatch_script_name, temp_solvers, num_jobs/len(instances))
+            handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances))
             
+            # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
+            remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
+
         else:
             print('c the sbatch job has been generated and submitted,')
             
