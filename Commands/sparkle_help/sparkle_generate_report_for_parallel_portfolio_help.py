@@ -72,8 +72,8 @@ def get_instanceClassList(instances: list):
 	return str_value
 
 def get_results():
-	# TODO Change the directory
-	solutions_dir  = r'Performance_Data/Tmp/'
+	
+	solutions_dir  = r'Performance_Data/Tmp_PaP/'
 	results = sfh.get_list_all_result_filename(solutions_dir)
 	# TODO functionality for multiple results.
 	result_path = solutions_dir + str(results[0])
