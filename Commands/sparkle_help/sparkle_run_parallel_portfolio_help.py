@@ -19,9 +19,11 @@ from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 def remove_temp_files_unfinished_solvers(solver_array_list: list, unfinished_solver_list: list, sbatch_script_name: str, temp_solvers: list):
-    
+    print('DEBUG the unfinished solvers are: ')
+
     for unfinished_solver in unfinished_solver_list:
-        solver_file_name = solver_array_list[int(unfinished_solver[int(len(unfinished_solver)-1)])]
+        print(unfinished_solver)
+        solver_file_name = solver_array_list[int(unfinished_solver[unfinished_solver.find('_')+1:])] # THIS IS WRONG
         commandline = 'rm -rf Tmp/' + solver_file_name + '*'
         os.system(commandline)
         commandline = 'rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/' + solver_file_name + '*'
@@ -50,7 +52,7 @@ def cancel_remaining_jobs(job_id:str, to_be_cancelled_list: list, num_jobs: int,
 
     for job in remaining_jobs:
         # If job not in same array segment as finished job than skip this part and remove remaining_job list
-        if int(int(job[len(job_id)+1])/int(portfolio_size)) == int(int(finished_job_array_nr)/int(portfolio_size)):
+        if int(int(job[job.find('_')+1:])/int(portfolio_size)) == int(int(finished_job_array_nr)/int(portfolio_size)):
             print('c Cancelling job ' + str(job) + ' because the instances has been solved.')
             command_line = 'scancel ' + str(job)
             os.system(command_line)
@@ -72,25 +74,30 @@ def wait_for_finished_solver(job_id: str, num_jobs):
         elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
             unfinished_solver_list = []
             for jobs in result.stdout.strip().split('\n'):
-                if(jobs.strip().split()[0].startswith(str(job_id))):
-                    unfinished_solver_list.append(jobs.strip().split()[0][-1])
+                jobid = jobs.strip().split()[0]
+                if(jobid.startswith(str(job_id))):
+                    unfinished_solver_list.append(jobid[jobid.find('_')+1:])
             finished_solver_list = [item for item in current_solver_list if item not in unfinished_solver_list]
             done = True
         else:
             sjh.sleep(n_seconds)
             current_solver_list = []
             for jobs in result.stdout.strip().split('\n'):
-                if(jobs.strip().split()[0].startswith(str(job_id))):
-                    current_solver_list.append(jobs.strip().split()[0][-1])
+                jobid = jobs.strip().split()[0]
+                if(jobid.startswith(str(job_id))):
+                    current_solver_list.append(jobid[jobid.find('_')+1:])
 
             #print('Checking for a finished solver again in', n_seconds, 'seconds')
 
     if len(finished_solver_list):
         print('Job with ID', job_id, ' has a finished solver!')
     else:
+        print('DEBUG first unfinished solver list then current solver list')
+        print(unfinished_solver_list)
+        print(current_solver_list)
         print('Job with ID', job_id, ' has a finished solver! (or cut-off time has been reached)')
     finished_solver = int(finished_solver_list[0])
-    print(finished_solver)
+    print('DEBUG finished solver: ' + str(finished_solver))
     return finished_solver
 
 def generate_sbatch_script(parameters, num_jobs):
@@ -167,6 +174,7 @@ def run_sbatch(sbatch_script_path,sbatch_script_name):
 
 def handle_waiting_and_removal_process(job_number: str, num_jobs: int, solver_array_list: list, sbatch_script_name: str, temp_solvers: list, portfolio_size: int, to_be_cancelled_list: list = []):
     cancelled_jobs = to_be_cancelled_list
+    print('DEBUG cancelled_jobs length = ' + str(len(cancelled_jobs)) + ' and num_jobs size = ' + str(num_jobs))
     finished_job_array_nr = wait_for_finished_solver(job_number, num_jobs)
     print('DEBUG after wait for finished solver')
     unfinished_solver_list, remaining_jobs = cancel_remaining_jobs(job_number, cancelled_jobs, num_jobs, finished_job_array_nr, portfolio_size)
@@ -178,10 +186,7 @@ def handle_waiting_and_removal_process(job_number: str, num_jobs: int, solver_ar
 
 def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: int)->bool:
     print('DEBUG cutoff_time: ' + str(cutoff_time))
-    #TODO add functionality for multiple instances
-    # if(len(instances) > 1): 
-    #     print('c running on multiple instances is not yet supported, aborting the process')
-    #     return False
+    #TODO add functionality for nodes, differentiating starting times.
 
     #TODO add performance functionality
     if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
@@ -198,9 +203,6 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
     # Generates a SBATCH script which uses the created parameters
     sbatch_script_name,sbatch_script_path = generate_sbatch_script(parameters, num_jobs)
     # Runs the script and cancels the remaining scripts if a script finishes before the end of the cutoff_time
-    # if(len(instances) > 1): 
-    #     print('c running on multiple instances is not yet supported, aborting the process')
-    #     return False
     try:
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         print('DEBUG job_number: ' + job_number)
