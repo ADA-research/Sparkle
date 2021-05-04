@@ -17,6 +17,11 @@ import compute_marginal_contribution as cmc
 def get_numSolvers(parallel_portfolio_path: str):
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
 	num_solvers = len(solver_list)
+	# If a solver contains multiple solver_instances.
+	for solver in solver_list:
+		if ' ' in solver:
+			num_solvers += int(solver[solver.rfind(' ')+1:]) - 1
+	
 	str_value = str(num_solvers)
 
 	if int(str_value) < 1:
@@ -27,13 +32,24 @@ def get_numSolvers(parallel_portfolio_path: str):
 
 def get_solverList(parallel_portfolio_path: str):
 	str_value = r''
+	
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
 	for solver_path in solver_list:
+		solver_instances = 0
+		if ' ' in solver_path:
+			solver_instances = int(solver_path[solver_path.rfind(' ')+1:])
+			solver_path = solver_path[:solver_path.rfind(' ')]
 		solver_name = sfh.get_file_name(solver_path)
 		if solver_name == "": solver_name = sfh.get_last_level_directory_name(solver_path)
 		x = solver_name.rfind("_")
 		if str(x) != '-1':solver_name = solver_name[:x] + '\\' + solver_name[x:]
-		str_value += r'\item \textbf{' + solver_name + r'}' + '\n'
+		str_value += r'\item \textbf{' + sgrh.underscore_to_dash(solver_name) + r'}' + '\n'
+		if solver_instances > 1:
+			seed_number = r''
+			for instances in range(1,solver_instances+1):
+				seed_number += str(instances) 
+				if instances != solver_instances: seed_number += r','
+			str_value += r'\item[] With seeds: ' + seed_number + '\n'
 		print(str_value)
 	return str_value
 
@@ -67,7 +83,7 @@ def get_instanceClassList(instances: list):
 			dict_number_of_instances_in_instance_class[instance_class] += 1
 
 	for instance_class in list_instance_class:
-		str_value += r'\item \textbf{' + instance_class + r'}, number of instances: ' + str(dict_number_of_instances_in_instance_class[instance_class]) + '\n'
+		str_value += r'\item \textbf{' + sgrh.underscore_to_dash(instance_class) + r'}, number of instances: ' + str(dict_number_of_instances_in_instance_class[instance_class]) + '\n'
 
 	return str_value
 
@@ -96,9 +112,9 @@ def get_solversWithSolution():
 	duration = result_lines[2]
 	#TODO #URGENT rewrite this function for multiple instances
 	if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
-		str_value += r'\item \textbf{' + instance + r'}, was scored by: ' + r'\textbf{' + solver + r'} with a score of ' + duration
+		str_value += r'\item \textbf{' + sgrh.underscore_to_dash(instance) + r'}, was scored by: ' + r'\textbf{' + sgrh.underscore_to_dash(solver) + r'} with a score of ' + duration
 	else:
-		str_value += r'\item Solver \textbf{' + solver + r'}, was the best solver on ' + r'\textbf{' + '1' + r'} instance(s)'
+		str_value += r'\item Solver \textbf{' + sgrh.underscore_to_dash(solver) + r'}, was the best solver on ' + r'\textbf{' + '1' + r'} instance(s)'
 
 	return str_value
 
@@ -165,7 +181,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, i
 
 	penalised_time_str = str(sgh.settings.get_penalised_time())
 
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sbs_solver + ')\' ' + r'Parallel-Portfolio' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
+	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sgrh.underscore_to_dash(sbs_solver) + ')\' ' + r'Parallel-Portfolio' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
 
 	#print(gnuplot_command)
 	
@@ -173,32 +189,6 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, i
 	
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_sbs_filename)
 	return str_value
-
-
-# def get_figure_parallel_portfolio_sparkle_vs_vbs(parallel_portfolio_path: str):
-# 	str_value = r''
-# 	dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
-# 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance(parallel_portfolio_path)
-	
-# 	latex_directory_path = r'Components/Sparkle-latex-generator-for-parallel-portfolio/'
-# 	figure_portfolio_selector_sparkle_vs_vbs_filename = r'figure_parallel_portfolio_sparkle_vs_vbs'
-# 	data_portfolio_selector_sparkle_vs_vbs_filename = r'data_parallel_portfolio_sparkle_vs_vbs_filename.dat'
-# 	data_portfolio_selector_sparkle_vs_vbs_filepath = latex_directory_path + data_portfolio_selector_sparkle_vs_vbs_filename
-	
-# 	fout = open(data_portfolio_selector_sparkle_vs_vbs_filepath, 'w+')
-# 	for instance in dict_vbs_penalty_time_on_each_instance:
-# 		vbs_penalty_time = dict_vbs_penalty_time_on_each_instance[instance]
-# 		sparkle_penalty_time = dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]
-# 		fout.write(str(vbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
-# 	fout.close()
-
-# 	penalised_time_str = str(sgh.settings.get_penalised_time())
-# 	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_vbs_filename + r' ' + penalised_time_str + r' ' + r'VBS' + r' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_vbs_filename
-	
-# 	os.system(gnuplot_command)
-	
-# 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_vbs_filename)
-# 	return str_value
 
 
 def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
@@ -215,11 +205,11 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	variable = r'numSolvers'
 	str_value = get_numSolvers(parallel_portfolio_path)
 	mydict[variable] = str_value
-	
+
 	variable = r'solverList'
 	str_value = get_solverList(parallel_portfolio_path)
 	mydict[variable] = str_value
-	
+	## updated up-to here##	
 	variable = r'numInstanceClasses'
 	str_value = get_numInstanceClasses(instances)
 	mydict[variable] = str_value
@@ -240,10 +230,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	str_value = get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path, instances)
 	mydict[variable] = str_value
 	print('DEBUG ' + variable)
-	# variable = r'figure-parallel-portfolio-sparkle-vs-vbs'
-	# str_value = get_figure_parallel_portfolio_sparkle_vs_vbs(parallel_portfolio_path)
-	# mydict[variable] = str_value
-	# print('DEBUG ' + variable)
+
 	variable = r'testBool'
 	str_value = r'\destrue'
 	if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:

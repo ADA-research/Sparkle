@@ -21,6 +21,16 @@ from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
 
 
+def underscore_to_dash(value: str):
+	changed_value = value
+
+	while(changed_value.rfind('_') != -1):
+		list_var = list(changed_value)
+		list_var[changed_value.rfind('_')] = '-'
+		changed_value = "".join(list_var)
+	
+	return changed_value
+
 def get_customCommands():
 	str_value = r''
 	return str_value
