@@ -55,7 +55,7 @@ def get_solverList(parallel_portfolio_path: str):
 
 def get_numInstanceClasses(instances: list):
 	list_instance_class = []
-	instance_list = instances
+	instance_list = eval(str(instances[0]))
 	for instance_path in instance_list:
 		instance_class = sfh.get_current_directory_name(instance_path)
 		if not (instance_class in list_instance_class):
@@ -73,7 +73,7 @@ def get_instanceClassList(instances: list):
 	str_value = r''
 	list_instance_class = []
 	dict_number_of_instances_in_instance_class = {}
-	instance_list = instances
+	instance_list = eval(str(instances[0]))
 	for instance_path in instance_list:
 		instance_class = sfh.get_current_directory_name(instance_path)
 		if not (instance_class in list_instance_class):
@@ -88,96 +88,158 @@ def get_instanceClassList(instances: list):
 	return str_value
 
 def get_results():
-	
+	# TODO add check if instance and solver listed in the result are part of the job
 	solutions_dir  = r'Performance_Data/Tmp_PaP/'
 	results = sfh.get_list_all_result_filename(solutions_dir)
-	# TODO functionality for multiple results.
-	result_path = solutions_dir + str(results[0])
-	with open(result_path, "r") as result:
-		lines = result.readlines()
-		
-	result_lines = []
-	for i in lines:
-		result_lines.append(i.strip())
-
-	return result_lines
+	results_dict = dict()
+	for result in results:
+		result_path = solutions_dir + str(result)
+		with open(result_path, "r") as result_file:
+			lines = result_file.readlines()
+			
+		result_lines = []
+		for i in lines:
+			result_lines.append(i.strip())
+		if len(result_lines) == 3:
+			instance = sfh.get_last_level_directory_name(result_lines[0])
+			if instance in results_dict:
+				if float(results_dict[instance][1]) > float(result_lines[2]):
+					results_dict[instance][0] = result_lines[1]
+					results_dict[instance][1] = result_lines[2]
+			else:
+				results_dict[instance] = [result_lines[1],result_lines[2]]
+	
+	return results_dict
 
 
 def get_solversWithSolution():
 	
-	result_lines = get_results()
+	results_on_instances = get_results()
 	str_value = ""
-	instance = sfh.get_file_name(result_lines[0])
-	solver = sfh.get_file_name(result_lines[1])
-	duration = result_lines[2]
-	#TODO #URGENT rewrite this function for multiple instances
+	if sgh.settings.get_general_performance_measure() != PerformanceMeasure.QUALITY_ABSOLUTE:
+		solver_dict = dict()
+		unsolved_instances = 0
+		for instances in results_on_instances:
+			solver_name = sfh.get_file_name(results_on_instances[instances][0])
+			cutoff_time = str(sgh.settings.get_general_target_cutoff_time() * 10)
+
+			if results_on_instances[instances][1] != cutoff_time:
+				if '_seed_' in solver_name:
+					solver_name = solver_name[:solver_name.rfind('_seed_')+7]
+				if solver_name in solver_dict:
+					solver_dict[solver_name] = solver_dict[solver_name] + 1
+				else: 
+					solver_dict[solver_name] = 1
+			else:
+				unsolved_instances += 1
+
 	if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
-		str_value += r'\item \textbf{' + sgrh.underscore_to_dash(instance) + r'}, was scored by: ' + r'\textbf{' + sgrh.underscore_to_dash(solver) + r'} with a score of ' + duration
+		for instances in results_on_instances:
+			str_value += r'\item \textbf{' + sgrh.underscore_to_dash(instance) + r'}, was scored by: ' + r'\textbf{' + sgrh.underscore_to_dash(sfh.get_last_level_directory_name(results_on_instances[instances][0])) + r'} with a score of ' + str(results_on_instances[instances][1])
 	else:
-		str_value += r'\item Solver \textbf{' + sgrh.underscore_to_dash(solver) + r'}, was the best solver on ' + r'\textbf{' + '1' + r'} instance(s)'
+		for solver in solver_dict:
+			str_value += r'\item Solver \textbf{' + sgrh.underscore_to_dash(solver) + r'}, was the best solver on ' + r'\textbf{' + str(solver_dict[solver]) + r'} instance(s)'
+		if unsolved_instances:
+			str_value += r'\item \textbf{' + str(unsolved_instances) + r'} instance(s) remained unsolved'
 
 	return str_value
 
-def get_dict_sbs_penalty_time_on_each_instance(instances: list):
+def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, instances: list):
+	mydict = {}
+	# This is for the single best solver!! so count everything for every solver!!
+	cutoff_time = sgh.settings.get_general_target_cutoff_time()
+	results = get_results()
+	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
+	for lines in solver_list:
+		full_solver_list = []
+		if ' ' in lines:
+			for solver_instances in range(1,int(lines[lines.rfind(' ')+1:])+1):
+				solver_path = lines[:lines.rfind(' ')]
+				solver_instance = sfh.get_last_level_directory_name(solver_path)
+				if '/' in solver_instance: solver_instance = solver_instance[:solver_instance.rfind('/')]
+				solver_instance = r'Tmp/' + solver_instance + r'_seed_' + str(solver_instances)
+				full_solver_list.append(solver_instance)
+		else: 
+			full_solver_list.append(lines)
+
+	# Find single best solver
+	instance_list = eval(str(instances[0]))
+	for instance in instance_list:
+		instance_name = sfh.get_last_level_directory_name(instance)
+		if instance_name in results:
+			this_run_time = results[instance_name][1]
+			if float(this_run_time) <= cutoff_time:
+				for solver in full_solver_list:
+					# in because the solver name contains the instance name aswell
+					if solver in results[instance_name][0]:
+						if solver in mydict:
+							mydict[solver] += float(this_run_time)
+						else:
+							mydict[solver] = float(this_run_time)
+					else:
+						if solver in mydict:
+							mydict[solver] += float(sgh.settings.get_penalised_time())
+						else:
+							mydict[solver] = float(sgh.settings.get_penalised_time())
+			else:
+				for solver in full_solver_list:
+					if solver in mydict:
+						mydict[solver] += float(sgh.settings.get_penalised_time())
+					else:
+						mydict[solver] = float(sgh.settings.get_penalised_time())
+		else:
+			for solver in full_solver_list:
+				if solver in mydict:
+					mydict[solver] += float(sgh.settings.get_penalised_time())
+				else:
+					mydict[solver] = float(sgh.settings.get_penalised_time())
+	sbs_name = min(mydict, key=mydict.get)
+	sbs_name = sfh.get_last_level_directory_name(sbs_name)
+	sbs_dict = {}
+	for instance in instance_list:
+		instance_name = sfh.get_last_level_directory_name(instance)
+		if sbs_name in results[instance_name][0]:
+			sbs_dict[instance_name] = results[instance_name][1]
+		else:
+			sbs_dict[instance_name] = sgh.settings.get_penalised_time()
+	print('DEBUG sbs_dict is ' + str(sbs_name))
+	print(sbs_dict)
+	return sbs_dict,sbs_name
+
+def get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances: str):
 	mydict = {}
 
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
 	results = get_results()
-
-	for instance in instances:
-		#TODO Create this for multiple instances.!! SBS so get_results doesnt work anymore since it finds only the PaP results.
-		this_run_time = results[2]
-		if float(this_run_time) <= cutoff_time:
-			mydict[instance] = this_run_time
+	instance_list = eval(str(instances[0]))
+	for instance in instance_list:
+		instance_name = sfh.get_last_level_directory_name(instance)
+		if instance_name in results:
+			if float(results[instance_name][1]) <= cutoff_time:
+				mydict[instance_name] = float(results[instance_name][1])
+			else:
+				mydict[instance_name] = sgh.settings.get_penalised_time()
 		else:
-			mydict[instance] = sgh.settings.get_penalised_time()	
+			mydict[instance_name] = sgh.settings.get_penalised_time()	
 	
-	return mydict
-
-# def get_dict_vbs_penalty_time_on_each_instance():
-# 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
-# 	mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
-# 	return mydict
-
-def get_dict_actual_portfolio_selector_penalty_time_on_each_instance(parallel_portfolio_path: str, instances: str):
-	mydict = {}
-
-	cutoff_time = sgh.settings.get_general_target_cutoff_time()
-	results = get_results()
-
-	for instance in instances:
-		#TODO Create this for multiple instances.!! SBS so get_results doesnt work anymore since it finds only the PaP results.
-		this_run_time = results[2]
-		if float(this_run_time) <= cutoff_time:
-			mydict[instance] = this_run_time
-		else:
-			mydict[instance] = sgh.settings.get_penalised_time()	
-	
-
 	return mydict
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, instances: list):
 	str_value = r''
-	dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance(instances)
-
-	print(dict_sbs_penalty_time_on_each_instance)
-	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance(parallel_portfolio_path, instances)
+	dict_sbs_penalty_time_on_each_instance, sbs_solver = get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances)
+	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances)
 
 	latex_directory_path = r'Components/Sparkle-latex-generator-for-parallel-portfolio/'
 	figure_portfolio_selector_sparkle_vs_sbs_filename = r'figure_parallel_portfolio_sparkle_vs_sbs'
 	data_portfolio_selector_sparkle_vs_sbs_filename = r'data_parallel_portfolio_sparkle_vs_sbs_filename.dat'
 	data_portfolio_selector_sparkle_vs_sbs_filepath = latex_directory_path + data_portfolio_selector_sparkle_vs_sbs_filename
-	
+
 	fout = open(data_portfolio_selector_sparkle_vs_sbs_filepath, 'w+')
 	for instance in dict_sbs_penalty_time_on_each_instance:
 		sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
 		sparkle_penalty_time = dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]
 		fout.write(str(sbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
 	fout.close()
-
-	#TODO change this for multiple instances.
-	result_lines = get_results()
-	sbs_solver = sfh.get_file_name(result_lines[1])
 
 	penalised_time_str = str(sgh.settings.get_penalised_time())
 
@@ -241,7 +303,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 
 
 def generate_report(parallel_portfolio_path: str, instances: list):
-	
+
 	latex_report_filename = r'Sparkle_Report'
 	dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path, instances)
 

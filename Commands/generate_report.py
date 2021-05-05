@@ -97,8 +97,6 @@ if __name__ == r'__main__':
 			pap_instance = sgh.latest_scenario.get_parallel_portfolio_instance()
 			pap_instance_list = []
 			pap_instance_list.append(str(pap_instance))
-			print('DEBUG + ' + str(parallel_portfolio_path))
-			print('DEBUG + ' + str(pap_instance_list))
 
 
 
