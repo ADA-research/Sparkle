@@ -87,30 +87,48 @@ def find_finished_time_finished_solver(solver_array_list: list, finished_job_arr
 
     return time_in_format_str
 
-def cancel_remaining_jobs(job_id:str, finished_job_array: list, portfolio_size: int, solver_array_list: list, updated_list: list = []):
-
+def cancel_remaining_jobs(job_id:str, finished_job_array: list, portfolio_size: int, solver_array_list: list, pending_job_with_new_cutoff: dict = {}):
     # Find all job_array_numbers that are currently running
     result = subprocess.run(['squeue', '-r', '-j', job_id], capture_output=True, text=True)
-    remaining_jobs = []
-    for ids in result.stdout.strip().split(' '):
-        if str(job_id) in ids:
-            remaining_jobs.append(ids)
+    remaining_jobs = {}
+    for jobs in result.stdout.strip().split('\n'):
+            jobid = jobs.strip().split()[0]
+            jobtime = jobs.strip().split()[5]
+            jobstatus = jobs.strip().split()[4]
+            if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
+                current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
+                sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
+                command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobid)
+                pending_job_with_new_cutoff.pop(jobid)
+            if jobid.startswith(str(job_id)):
+                remaining_jobs[jobid] = [jobtime, jobstatus]
 
     for job in remaining_jobs:
         # Update all jobs in the same array segment as the finished job with its finishing time
         for finished_job in finished_job_array:
             # if job in the same array segment
-            if (int(int(job[job.find('_')+1:])/int(portfolio_size)) == int(int(finished_job)/int(portfolio_size))) and job not in updated_list:
+            if (int(int(job[job.find('_')+1:])/int(portfolio_size)) == int(int(finished_job)/int(portfolio_size))):
                 # Update the cutofftime of the to be cancelled job, if job if already past that it automatically stops.
                 newCutoffTime = find_finished_time_finished_solver(solver_array_list, finished_job)
-                command_line = 'scontrol update JobId=' + str(job) + ' TimeLimit=' + newCutoffTime
-                updated_list.append(job)
-                os.system(command_line)
+                current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(remaining_jobs[job][0].split(':'))))
+                cutoff_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(newCutoffTime.split(':'))))
+                actual_cutofftime = sgh.settings.get_general_target_cutoff_time()
+                if remaining_jobs[job][1] == 'R' and int(cutoff_seconds) < int(actual_cutofftime):
+                    if  int(current_seconds) < int(cutoff_seconds):
+                        sleep_time = int(cutoff_seconds) - int(current_seconds)
+                        command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(job)
+                        print(command_line)
+                    else:
+                        command_line = r'scancel ' + str(job)
+                        print(command_line)
+                    process = subprocess.Popen(command_line, shell=True)
+                else:
+                    pending_job_with_new_cutoff[job] = cutoff_seconds
     
-    return remaining_jobs, updated_list
+    return remaining_jobs, pending_job_with_new_cutoff
 
 
-def wait_for_finished_solver(job_id: str, remaining_job_list: list):
+def wait_for_finished_solver(job_id: str, remaining_job_list: list, pending_job_with_new_cutoff = dict):
     number_of_solvers = len(remaining_job_list)
     n_seconds = 1
     done = False
@@ -136,11 +154,18 @@ def wait_for_finished_solver(job_id: str, remaining_job_list: list):
             current_solver_list = []
             for jobs in result.stdout.strip().split('\n'):
                 jobid = jobs.strip().split()[0]
+                jobtime = jobs.strip().split()[5]
+                jobstatus = jobs.strip().split()[4]
+                if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
+                    current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
+                    sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
+                    command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobs)
+                    pending_job_with_new_cutoff.pop(jobid)
                 if(jobid.startswith(str(job_id))):
                     current_solver_list.append(jobid[jobid.find('_')+1:])
             number_of_solvers = len(current_solver_list)
 
-    return finished_solver_list
+    return finished_solver_list, pending_job_with_new_cutoff
 
 def generate_sbatch_script(parameters, num_jobs):
     # Set script name and path
@@ -214,18 +239,18 @@ def run_sbatch(sbatch_script_path,sbatch_script_name):
     print('DEBUG INTO output_list not good')
     return ''
 
-def handle_waiting_and_removal_process(job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list, updated_jobs_list: list = []):
+def handle_waiting_and_removal_process(job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list, pending_job_with_new_cutoff: dict):
 
     if len(remaining_job_list): 
         print('c a job has ended, remaining jobs = ' + str(len(remaining_job_list)))
-    finished_jobs = wait_for_finished_solver(job_number, remaining_job_list)
+    finished_jobs, pending_job_with_new_cutoff = wait_for_finished_solver(job_number, remaining_job_list, pending_job_with_new_cutoff)
     
     # Handles the updating of all jobs within the portfolios of which contain a finished job
-    remaining_job_list, updated_jobs_list = cancel_remaining_jobs(job_number, finished_jobs, portfolio_size, solver_array_list, updated_jobs_list)
+    remaining_job_list, pending_job_with_new_cutoff = cancel_remaining_jobs(job_number, finished_jobs, portfolio_size, solver_array_list, pending_job_with_new_cutoff)
 
     # If there are still unfinished jobs recursively handle the remaining jobs.
     if len(remaining_job_list):
-        handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, portfolio_size, remaining_job_list)
+        handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, portfolio_size, remaining_job_list, pending_job_with_new_cutoff)
 
     return True
 
@@ -251,7 +276,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         
         if(performance == 'RUNTIME'):
-            handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [])
+            handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {})
             
             # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
             remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
