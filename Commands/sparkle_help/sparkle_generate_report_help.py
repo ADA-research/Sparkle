@@ -21,15 +21,16 @@ from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
 
 
-def underscore_to_dash(value: str):
-	changed_value = value
+def underscore_for_latex(value: str):
+	list_of_chars = list(value)
+	updated_string = r''
 
-	while(changed_value.rfind('_') != -1):
-		list_var = list(changed_value)
-		list_var[changed_value.rfind('_')] = '-'
-		changed_value = "".join(list_var)
-	
-	return changed_value
+	for i,chars in enumerate(list_of_chars):
+		if chars == '_':
+			updated_string += '\\'
+		updated_string += chars
+
+	return updated_string
 
 def get_customCommands():
 	str_value = r''

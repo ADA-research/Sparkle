@@ -43,7 +43,7 @@ def get_solverList(parallel_portfolio_path: str):
 		if solver_name == "": solver_name = sfh.get_last_level_directory_name(solver_path)
 		x = solver_name.rfind("_")
 		if str(x) != '-1':solver_name = solver_name[:x] + '\\' + solver_name[x:]
-		str_value += r'\item \textbf{' + sgrh.underscore_to_dash(solver_name) + r'}' + '\n'
+		str_value += r'\item \textbf{' + sgrh.underscore_for_latex(solver_name) + r'}' + '\n'
 		if solver_instances > 1:
 			seed_number = r''
 			for instances in range(1,solver_instances+1):
@@ -83,7 +83,7 @@ def get_instanceClassList(instances: list):
 			dict_number_of_instances_in_instance_class[instance_class] += 1
 
 	for instance_class in list_instance_class:
-		str_value += r'\item \textbf{' + sgrh.underscore_to_dash(instance_class) + r'}, number of instances: ' + str(dict_number_of_instances_in_instance_class[instance_class]) + '\n'
+		str_value += r'\item \textbf{' + sgrh.underscore_for_latex(instance_class) + r'}, number of instances: ' + str(dict_number_of_instances_in_instance_class[instance_class]) + '\n'
 
 	return str_value
 
@@ -135,10 +135,10 @@ def get_solversWithSolution():
 
 	if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
 		for instances in results_on_instances:
-			str_value += r'\item \textbf{' + sgrh.underscore_to_dash(instance) + r'}, was scored by: ' + r'\textbf{' + sgrh.underscore_to_dash(sfh.get_last_level_directory_name(results_on_instances[instances][0])) + r'} with a score of ' + str(results_on_instances[instances][1])
+			str_value += r'\item \textbf{' + sgrh.underscore_for_latex(instance) + r'}, was scored by: ' + r'\textbf{' + sgrh.underscore_for_latex(sfh.get_last_level_directory_name(results_on_instances[instances][0])) + r'} with a score of ' + str(results_on_instances[instances][1])
 	else:
 		for solver in solver_dict:
-			str_value += r'\item Solver \textbf{' + sgrh.underscore_to_dash(solver) + r'}, was the best solver on ' + r'\textbf{' + str(solver_dict[solver]) + r'} instance(s)'
+			str_value += r'\item Solver \textbf{' + sgrh.underscore_for_latex(solver) + r'}, was the best solver on ' + r'\textbf{' + str(solver_dict[solver]) + r'} instance(s)'
 		if unsolved_instances:
 			str_value += r'\item \textbf{' + str(unsolved_instances) + r'} instance(s) remained unsolved'
 
@@ -204,7 +204,7 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 			sbs_dict[instance_name] = sgh.settings.get_penalised_time()
 	print('DEBUG sbs_dict is ' + str(sbs_name))
 	print(sbs_dict)
-	return sbs_dict,sbs_name
+	return sbs_dict,sbs_name, mydict
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances: str):
 	mydict = {}
@@ -226,7 +226,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances: 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, instances: list):
 	str_value = r''
-	dict_sbs_penalty_time_on_each_instance, sbs_solver = get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances)
+	dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances)
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances)
 
 	latex_directory_path = r'Components/Sparkle-latex-generator-for-parallel-portfolio/'
@@ -243,14 +243,31 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, i
 
 	penalised_time_str = str(sgh.settings.get_penalised_time())
 
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sgrh.underscore_to_dash(sbs_solver) + ')\' ' + r'Parallel-Portfolio' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
+	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sgrh.underscore_for_latex(sbs_solver) + ')\' ' + r'Parallel-Portfolio' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
 
 	#print(gnuplot_command)
 	
 	os.system(gnuplot_command)
 	
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_sbs_filename)
-	return str_value
+	return str_value, dict_all_solvers, dict_actual_portfolio_selector_penalty_time_on_each_instance
+
+def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_portfolio: dict):
+	str_value = r''
+	portfolio_PAR10 = 0.0
+	for instance in dict_portfolio:
+		portfolio_PAR10 += dict_portfolio[instance]
+	results = dict_all_solvers
+	table_string = "\\begin{tabular}{rr}"
+	for i,line in enumerate(results):
+		solver_name = sfh.get_last_level_directory_name(line)
+		if i == 0:
+			table_string += "\\textbf{Solver} & \\textbf{PAR10} \\\\ \\hline "
+			table_string += sgrh.underscore_for_latex(sfh.get_last_level_directory_name(parallel_portfolio_path)) + " & " + str(portfolio_PAR10) + " \\\\ "
+		table_string += sgrh.underscore_for_latex(solver_name) + " & " + str(results[line]) + " \\\\ "
+	table_string += "\\end{tabular}"
+
+	return table_string
 
 
 def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
@@ -271,7 +288,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	variable = r'solverList'
 	str_value = get_solverList(parallel_portfolio_path)
 	mydict[variable] = str_value
-	## updated up-to here##	
+
 	variable = r'numInstanceClasses'
 	str_value = get_numInstanceClasses(instances)
 	mydict[variable] = str_value
@@ -289,9 +306,13 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	mydict[variable] = str_value
 	print('DEBUG ' + variable)
 	variable = r'figure-parallel-portfolio-sparkle-vs-sbs'
-	str_value = get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path, instances)
+	str_value, dict_all_solvers, dict_actual_portfolio_selector_penalty_time_on_each_instance = get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path, instances)
 	mydict[variable] = str_value
 	print('DEBUG ' + variable)
+
+	variable = r'resultsTable'
+	str_value = get_resultsTable(dict_all_solvers, parallel_portfolio_path, dict_actual_portfolio_selector_penalty_time_on_each_instance)
+	mydict[variable] = str_value
 
 	variable = r'testBool'
 	str_value = r'\destrue'

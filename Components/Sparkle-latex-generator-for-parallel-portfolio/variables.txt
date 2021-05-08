@@ -6,6 +6,7 @@
 @@numInstanceClasses@@
 @@instanceClassList@@
 @@cutoffTime@@
+@@resultsTable@@
 @@solversWithSolution@@
 @@figure-parallel-portfolio-sparkle-vs-vbs@@
 @@figure-parallel-portfolio-sparkle-vs-sbs@@
