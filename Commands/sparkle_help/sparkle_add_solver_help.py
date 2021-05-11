@@ -18,13 +18,14 @@ from sparkle_help import sparkle_file_help as sfh
 def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
 	list_files = os.listdir(solver_directory)
 
+	pcs_count = 0
 	for file_name in list_files:
 		file_extension = sfh.get_file_least_extension(file_name)
 
 		if file_extension == 'pcs':
-			return True
+			pcs_count += 1
 
-	return False
+	return False if pcs_count != 1 else True
 
 
 def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
