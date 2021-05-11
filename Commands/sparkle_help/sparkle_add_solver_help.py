@@ -14,6 +14,8 @@ import os
 
 from sparkle_help import sparkle_file_help as sfh
 
+def get_solver_directory(solver_name: str) -> str:
+	return r'Solvers/' + solver_name
 
 def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
 	list_files = os.listdir(solver_directory)

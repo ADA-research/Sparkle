@@ -16,6 +16,7 @@ from pathlib import Path
 
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_add_solver_help as sash
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_logging as sl
@@ -74,6 +75,12 @@ if __name__ == r'__main__':
 
 	if instance_set_test is not None:
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+
+	# Check if solver has pcs file and is configurable
+	solver_directory = sash.get_solver_directory(solver_name)
+	if not sash.check_adding_solver_contain_pcs_file(solver_directory):
+		print("c None or multiple .pcs files found. Solver is not valid for configuration.")
+		sys.exit()
 
 	# Clean the configuration and ablation directories for this solver to make sure we start with a clean slate
 	scsh.clean_configuration_directory(solver_name)
