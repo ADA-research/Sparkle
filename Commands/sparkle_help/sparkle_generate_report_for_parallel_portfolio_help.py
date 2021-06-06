@@ -306,7 +306,7 @@ def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_
 	# Table 1: Portfolio results
 	table_string = "\\caption *{\\textbf{Portfolio results}} \\label{tab:portfolio_results} "
 	table_string += "\\begin{tabular}{rrrrr}"
-	table_string += "\\textbf{Portfolio nickname} & \\textbf{PAR10} & \\textbf{Timeouts} & \\textbf{Cancelled} & \\textbf{Best solver} \\\\ \\hline "
+	table_string += "\\textbf{Portfolio nickname} & \\textbf{PAR10} & \\textbf{\\#Timeouts} & \\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline "
 	table_string += sgrh.underscore_for_latex(sfh.get_last_level_directory_name(parallel_portfolio_path)) + " & " + str(round(portfolio_PAR10,2)) + " & " + str(unsolved_instances) + " & 0" + " & " + str(int(instances)-int(unsolved_instances)) + " \\\\ "
 	table_string += "\\end{tabular}"
 	table_string += "\\bigskip"
@@ -316,7 +316,7 @@ def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_
 	for i,line in enumerate(results):
 		solver_name = sfh.get_last_level_directory_name(line)
 		if i == 0:
-			table_string += "\\textbf{Solver} & \\textbf{PAR10} & \\textbf{Timeouts} & \\textbf{Cancelled} & \\textbf{Best solver} \\\\ \\hline "
+			table_string += "\\textbf{Solver} & \\textbf{PAR10} & \\textbf{\\#Timeouts} & \\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline "
 		if solver_name not in solver_with_solutions:
 			cancelled = int(instances) - int(unsolved_instances)
 			table_string += sgrh.underscore_for_latex(solver_name) + " & " + str(round(results[line], 2)) + " & " + str(unsolved_instances) + " & " + str(cancelled) + " & 0 " + " \\\\ "
