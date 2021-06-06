@@ -3,6 +3,7 @@
 
 import os
 import sys
+from datetime import datetime, timedelta
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -71,6 +72,7 @@ def get_numInstanceClasses(instances: list):
 
 def get_instanceClassList(instances: list):
 	str_value = r''
+	nr_of_instances = 0
 	list_instance_class = []
 	dict_number_of_instances_in_instance_class = {}
 	instance_list = eval(str(instances[0]))
@@ -84,8 +86,8 @@ def get_instanceClassList(instances: list):
 
 	for instance_class in list_instance_class:
 		str_value += r'\item \textbf{' + sgrh.underscore_for_latex(instance_class) + r'}, number of instances: ' + str(dict_number_of_instances_in_instance_class[instance_class]) + '\n'
-
-	return str_value
+		nr_of_instances += int(dict_number_of_instances_in_instance_class[instance_class])
+	return str_value, str(nr_of_instances)
 
 def get_results():
 	# TODO add check if instance and solver listed in the result are part of the job
@@ -135,14 +137,14 @@ def get_solversWithSolution():
 
 	if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
 		for instances in results_on_instances:
-			str_value += r'\item \textbf{' + sgrh.underscore_for_latex(instance) + r'}, was scored by: ' + r'\textbf{' + sgrh.underscore_for_latex(sfh.get_last_level_directory_name(results_on_instances[instances][0])) + r'} with a score of ' + str(results_on_instances[instances][1])
+			str_value += r'\item \textbf{' + sgrh.underscore_for_latex(instances) + r'}, was scored by: ' + r'\textbf{' + sgrh.underscore_for_latex(sfh.get_last_level_directory_name(results_on_instances[instances][0])) + r'} with a score of ' + str(results_on_instances[instances][1])
 	else:
 		for solver in solver_dict:
 			str_value += r'\item Solver \textbf{' + sgrh.underscore_for_latex(solver) + r'}, was the best solver on ' + r'\textbf{' + str(solver_dict[solver]) + r'} instance(s)'
 		if unsolved_instances:
 			str_value += r'\item \textbf{' + str(unsolved_instances) + r'} instance(s) remained unsolved'
 
-	return str_value
+	return str_value, solver_dict, unsolved_instances
 
 def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, instances: list):
 	mydict = {}
@@ -202,7 +204,6 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 			sbs_dict[instance_name] = results[instance_name][1]
 		else:
 			sbs_dict[instance_name] = sgh.settings.get_penalised_time()
-	print('DEBUG sbs_dict is ' + str(sbs_name))
 	print(sbs_dict)
 	return sbs_dict,sbs_name, mydict
 
@@ -252,21 +253,84 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, i
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_sbs_filename)
 	return str_value, dict_all_solvers, dict_actual_portfolio_selector_penalty_time_on_each_instance
 
-def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_portfolio: dict):
-	str_value = r''
+def get_wallclock_time(portfolio_path: str):
+	logging_file = str(portfolio_path) + '/logging.txt'
+	with open(logging_file, "r") as result_file:
+		lines = result_file.readlines()
+	start_time = r''
+	end_time = r''
+	for line in lines:
+		if "starting time of portfolio" in line.strip():
+			start_time = line[line.rfind(' ')+1:].strip()
+		if "ending time of portfolio" in line.strip():
+			end_time = line[line.rfind(' ')+1:].strip()
+	if start_time and end_time:
+		FMT = '%H:%M:%S'
+		time_difference = datetime.strptime(end_time, FMT) - datetime.strptime(start_time, FMT)
+		if time_difference.days < 0:
+			time_difference = timedelta(days=0,seconds=time_difference.seconds,microseconds=time_difference.microseconds)
+	return str(time_difference)
+
+def get_runtime(portfolio_path: str, nr_of_jobs: int):
+	logging_file = str(portfolio_path) + '/logging2.txt'
+	with open(logging_file, "r") as result_file:
+		lines = result_file.readlines()
+	runtime_jobs = {}
+	cutoff_time = sgh.settings.get_general_target_cutoff_time()
+	for line in lines:
+		line = line.strip()
+		if ':' in line:
+			job_nr = line[:line.rfind(':')]
+			job_runtime = int(line[line.rfind(':')+1:])
+			if job_nr in runtime_jobs:
+				if int(runtime_jobs[job_nr]) > job_runtime:
+					runtime_jobs[job_nr] = job_runtime
+			else:
+				if int(job_runtime) > int(cutoff_time):
+					job_runtime = cutoff_time
+				runtime_jobs[job_nr] = job_runtime
+	total_runtime = 0
+	for job in runtime_jobs:
+		total_runtime += runtime_jobs[job]
+	if len(runtime_jobs) < nr_of_jobs:
+		total_runtime += cutoff_time * (nr_of_jobs - len(runtime_jobs))
+	str_total_runtime = str(timedelta(seconds=int(total_runtime)))
+	
+	return str_total_runtime
+
+def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_portfolio: dict, solver_with_solutions: dict, unsolved_instances: str, instances: str):
 	portfolio_PAR10 = 0.0
 	for instance in dict_portfolio:
 		portfolio_PAR10 += dict_portfolio[instance]
 	results = dict_all_solvers
-	table_string = "\\begin{tabular}{rr}"
+	# Table 1: Portfolio results
+	table_string = "\\caption *{\\textbf{Portfolio results}} \\label{tab:portfolio_results} "
+	table_string += "\\begin{tabular}{rrrrr}"
+	table_string += "\\textbf{Portfolio nickname} & \\textbf{PAR10} & \\textbf{Timeouts} & \\textbf{Cancelled} & \\textbf{Best solver} \\\\ \\hline "
+	table_string += sgrh.underscore_for_latex(sfh.get_last_level_directory_name(parallel_portfolio_path)) + " & " + str(round(portfolio_PAR10,2)) + " & " + str(unsolved_instances) + " & 0" + " & " + str(int(instances)-int(unsolved_instances)) + " \\\\ "
+	table_string += "\\end{tabular}"
+	table_string += "\\bigskip"
+	# Table 2: Solver results
+	table_string += "\\caption *{\\textbf{Solver results}} \\label{tab:solver_results} "
+	table_string += "\\begin{tabular}{rrrrr}"
 	for i,line in enumerate(results):
 		solver_name = sfh.get_last_level_directory_name(line)
 		if i == 0:
-			table_string += "\\textbf{Solver} & \\textbf{PAR10} \\\\ \\hline "
-			table_string += sgrh.underscore_for_latex(sfh.get_last_level_directory_name(parallel_portfolio_path)) + " & " + str(portfolio_PAR10) + " \\\\ "
-		table_string += sgrh.underscore_for_latex(solver_name) + " & " + str(results[line]) + " \\\\ "
+			table_string += "\\textbf{Solver} & \\textbf{PAR10} & \\textbf{Timeouts} & \\textbf{Cancelled} & \\textbf{Best solver} \\\\ \\hline "
+		if solver_name not in solver_with_solutions:
+			cancelled = int(instances) - int(unsolved_instances)
+			table_string += sgrh.underscore_for_latex(solver_name) + " & " + str(round(results[line], 2)) + " & " + str(unsolved_instances) + " & " + str(cancelled) + " & 0 " + " \\\\ "
+		else:
+			cancelled = int(instances) - int(unsolved_instances) - int(solver_with_solutions[solver_name])
+			table_string += sgrh.underscore_for_latex(solver_name) + " & " + str(round(results[line], 2)) + " & " + str(unsolved_instances) + " & " + str(cancelled) + " & " + str(solver_with_solutions[solver_name]) + " \\\\ "
 	table_string += "\\end{tabular}"
-
+	# Table 3: Process duration results
+	table_string += "\\caption *{\\textbf{Process duration results}} \\label{tab:process_duration_results} "
+	table_string += "\\begin{tabular}{rr}"
+	table_string += "\\textbf{Variations} & \\textbf{Duration} \\\\ \\hline "
+	table_string += "Total runtime & " + str(get_runtime(parallel_portfolio_path, (int(instances)*len(results)))) + "\\\\"
+	table_string += "Wallclock time & " + str(get_wallclock_time(parallel_portfolio_path)) + "\\\\"
+	table_string += "\\end{tabular}"
 	return table_string
 
 
@@ -294,24 +358,23 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	mydict[variable] = str_value
 	
 	variable = r'instanceClassList'
-	str_value = get_instanceClassList(instances)
+	str_value, nr_of_instances = get_instanceClassList(instances)
 	mydict[variable] = str_value
 	
 	variable = r'cutoffTime'
-	str_value = sgrh.get_performanceComputationCutoffTime()
+	str_value = str(sgh.settings.get_general_target_cutoff_time())
 	mydict[variable] = str_value
 	
 	variable = r'solversWithSolution'
-	str_value = get_solversWithSolution()
+	str_value, solvers_with_solution, unsolved_instances = get_solversWithSolution()
 	mydict[variable] = str_value
-	print('DEBUG ' + variable)
+
 	variable = r'figure-parallel-portfolio-sparkle-vs-sbs'
 	str_value, dict_all_solvers, dict_actual_portfolio_selector_penalty_time_on_each_instance = get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path, instances)
 	mydict[variable] = str_value
-	print('DEBUG ' + variable)
 
 	variable = r'resultsTable'
-	str_value = get_resultsTable(dict_all_solvers, parallel_portfolio_path, dict_actual_portfolio_selector_penalty_time_on_each_instance)
+	str_value = get_resultsTable(dict_all_solvers, parallel_portfolio_path, dict_actual_portfolio_selector_penalty_time_on_each_instance, solvers_with_solution, unsolved_instances, nr_of_instances)
 	mydict[variable] = str_value
 
 	variable = r'testBool'

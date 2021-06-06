@@ -8,6 +8,7 @@ import os
 import subprocess
 import datetime
 import math
+import fcntl
 from pathlib import Path
 
 from sparkle_help import sparkle_file_help as sfh
@@ -18,6 +19,37 @@ from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
+
+def add_log_statement_to_file(logging_file: str, line: str, jobtime: str):
+    now = datetime.datetime.now()
+    convert_to_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
+    job_running_time = datetime.timedelta(seconds=int(convert_to_seconds))
+    if line.rfind(';') != -1:
+        sleep_seconds = line[:line.rfind(';')]
+        sleep_seconds = int(sleep_seconds[sleep_seconds.rfind(' ')+1:])
+        now = now + datetime.timedelta(seconds=sleep_seconds)
+        job_running_time = job_running_time + datetime.timedelta(seconds=sleep_seconds)
+        line = line[line.rfind(';')+2:]
+    current_time = now.strftime("%H:%M:%S")
+    job_starting_time = now - job_running_time
+    start_time_formatted = job_starting_time.strftime("%H:%M:%S")
+    fo = open(logging_file, 'a+')
+    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+    fo.write(r'starting time: ' + start_time_formatted + r' end time: ' + current_time + r' job number: ' + line + '\n')
+    fo.close()
+    return
+
+def log_computation_time(logging_file: str, job_nr: str, job_duration: str):
+    if ':' in str(job_duration):
+        convert_to_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(str(job_duration).split(':'))))
+        job_duration = str(convert_to_seconds)
+    if '_' in str(job_nr):
+        job_nr = job_nr[job_nr.rfind('_')+1:]
+    fo = open(str(logging_file), 'a+')
+    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+    fo.write(str(job_nr) + r':' + str(job_duration) + '\n')
+    fo.close()
+    return
 
 def remove_temp_files_unfinished_solvers(solver_array_list: list, sbatch_script_name: str, temp_solvers: list):
 
@@ -73,11 +105,13 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list, sbatch_script_
 def find_finished_time_finished_solver(solver_array_list: list, finished_job_array_nr: int):
     # If there is a solver that ended but did not make a result file this means that it was manually cancelled
     # or it gave an error the template will ensure that all solver on that instance will be cancelled. 
-    time_in_format_str = r'1:00' 
+    time_in_format_str = r'-1:00' 
     solutions_dir  = r'Performance_Data/Tmp_PaP/'
     results = sfh.get_list_all_result_filename(solutions_dir)
 
     for result in results:
+        if '_' in str(finished_job_array_nr):
+            finished_job_array_nr = finished_job_array_nr[finished_job_array_nr.rfind('_')+1:]
         if result.startswith(str(solver_array_list[int(finished_job_array_nr)])):
             result_file_path = solutions_dir + result
             result_file = open(result_file_path, 'r')
@@ -87,7 +121,7 @@ def find_finished_time_finished_solver(solver_array_list: list, finished_job_arr
 
     return time_in_format_str
 
-def cancel_remaining_jobs(job_id:str, finished_job_array: list, portfolio_size: int, solver_array_list: list, pending_job_with_new_cutoff: dict = {}):
+def cancel_remaining_jobs(logging_file: str, job_id:str, finished_job_array: list, portfolio_size: int, solver_array_list: list, pending_job_with_new_cutoff: dict = {}):
     # Find all job_array_numbers that are currently running
     result = subprocess.run(['squeue', '-r', '-j', job_id], capture_output=True, text=True)
     remaining_jobs = {}
@@ -99,6 +133,7 @@ def cancel_remaining_jobs(job_id:str, finished_job_array: list, portfolio_size: 
                 current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
                 sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
                 command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobid)
+                add_log_statement_to_file(logging_file, command_line, jobtime)
                 pending_job_with_new_cutoff.pop(jobid)
             if jobid.startswith(str(job_id)):
                 remaining_jobs[jobid] = [jobtime, jobstatus]
@@ -117,10 +152,12 @@ def cancel_remaining_jobs(job_id:str, finished_job_array: list, portfolio_size: 
                     if  int(current_seconds) < int(cutoff_seconds):
                         sleep_time = int(cutoff_seconds) - int(current_seconds)
                         command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(job)
-                        print(command_line)
+                        add_log_statement_to_file(logging_file, command_line, remaining_jobs[job][0])
                     else:
                         command_line = r'scancel ' + str(job)
-                        print(command_line)
+                        add_log_statement_to_file(logging_file, command_line, remaining_jobs[job][0])
+                        logging_file2 = logging_file[:logging_file.rfind('.')] + r'2.txt'
+                        log_computation_time(logging_file2,job,cutoff_seconds)
                     process = subprocess.Popen(command_line, shell=True)
                 else:
                     pending_job_with_new_cutoff[job] = cutoff_seconds
@@ -128,7 +165,7 @@ def cancel_remaining_jobs(job_id:str, finished_job_array: list, portfolio_size: 
     return remaining_jobs, pending_job_with_new_cutoff
 
 
-def wait_for_finished_solver(job_id: str, remaining_job_list: list, pending_job_with_new_cutoff = dict):
+def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: list, remaining_job_list: list, pending_job_with_new_cutoff = dict, started = bool):
     number_of_solvers = len(remaining_job_list)
     n_seconds = 1
     done = False
@@ -142,14 +179,37 @@ def wait_for_finished_solver(job_id: str, remaining_job_list: list, pending_job_
                 break
             sjh.sleep(n_seconds) #No jobs have started yet;
         elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
+            if started == False:
+                now = datetime.datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                fo = open(logging_file, 'a+')
+                fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+                fo.write(r'starting time of portfolio: ' + current_time + '\n')
+                fo.close()
+                started = True
             unfinished_solver_list = []
             for jobs in result.stdout.strip().split('\n'):
                 jobid = jobs.strip().split()[0]
                 if jobid.startswith(str(job_id)):
                     unfinished_solver_list.append(jobid[jobid.find('_')+1:])
             finished_solver_list = [item for item in current_solver_list if item not in unfinished_solver_list]
+            for finished_solver in finished_solver_list:
+                newCutoffTime = find_finished_time_finished_solver(solver_array_list, finished_solver)
+                if newCutoffTime != r'-1:00':
+                    log_statement = str(finished_solver) + r' finished succesfully or has reached the cutoff time'
+                    add_log_statement_to_file(logging_file, log_statement, str(newCutoffTime))
+                    logging_file2 = logging_file[:logging_file.rfind('.')] + r'2.txt'
+                    log_computation_time(logging_file2,finished_solver,newCutoffTime)
             done = True
         else:
+            if started == False:
+                now = datetime.datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                fo = open(logging_file, 'a+')
+                fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+                fo.write(r'starting time of portfolio: ' + current_time + '\n')
+                fo.close()
+                started = True
             sjh.sleep(n_seconds)
             current_solver_list = []
             for jobs in result.stdout.strip().split('\n'):
@@ -159,13 +219,14 @@ def wait_for_finished_solver(job_id: str, remaining_job_list: list, pending_job_
                 if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
                     current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
                     sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
-                    command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobs)
+                    command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobid)
+                    add_log_statement_to_file(logging_file, command_line, jobtime)
                     pending_job_with_new_cutoff.pop(jobid)
                 if(jobid.startswith(str(job_id))):
                     current_solver_list.append(jobid[jobid.find('_')+1:])
             number_of_solvers = len(current_solver_list)
 
-    return finished_solver_list, pending_job_with_new_cutoff
+    return finished_solver_list, pending_job_with_new_cutoff, started
 
 def generate_sbatch_script(parameters, num_jobs):
     # Set script name and path
@@ -235,22 +296,19 @@ def run_sbatch(sbatch_script_path,sbatch_script_name):
     if len(output_list) > 0 and len(output_list[0].strip().split())>0:
         run_job_parallel_jobid = output_list[0].strip().split()[-1]
         return run_job_parallel_jobid
-
-    print('DEBUG INTO output_list not good')
     return ''
 
-def handle_waiting_and_removal_process(job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list, pending_job_with_new_cutoff: dict):
-
+def handle_waiting_and_removal_process(logging_file: str, job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list, pending_job_with_new_cutoff: dict, started: bool):
     if len(remaining_job_list): 
         print('c a job has ended, remaining jobs = ' + str(len(remaining_job_list)))
-    finished_jobs, pending_job_with_new_cutoff = wait_for_finished_solver(job_number, remaining_job_list, pending_job_with_new_cutoff)
-    
+    finished_jobs, pending_job_with_new_cutoff, started = wait_for_finished_solver(logging_file, job_number, solver_array_list, remaining_job_list, pending_job_with_new_cutoff, started)
+
     # Handles the updating of all jobs within the portfolios of which contain a finished job
-    remaining_job_list, pending_job_with_new_cutoff = cancel_remaining_jobs(job_number, finished_jobs, portfolio_size, solver_array_list, pending_job_with_new_cutoff)
+    remaining_job_list, pending_job_with_new_cutoff = cancel_remaining_jobs(logging_file, job_number, finished_jobs, portfolio_size, solver_array_list, pending_job_with_new_cutoff)
 
     # If there are still unfinished jobs recursively handle the remaining jobs.
     if len(remaining_job_list):
-        handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, portfolio_size, remaining_job_list, pending_job_with_new_cutoff)
+        handle_waiting_and_removal_process(logging_file, job_number, solver_array_list, sbatch_script_name, portfolio_size, remaining_job_list, pending_job_with_new_cutoff, started)
 
     return True
 
@@ -276,8 +334,17 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         
         if(performance == 'RUNTIME'):
-            handle_waiting_and_removal_process(job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {})
-            
+            logging_file = str(portfolio_path) + '/logging2.txt'
+            sfh.create_new_empty_file(logging_file)
+            logging_file = str(portfolio_path) + '/logging.txt'
+            sfh.create_new_empty_file(logging_file)
+            handle_waiting_and_removal_process(logging_file, job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {}, False)
+            now = datetime.datetime.now()
+            current_time = now.strftime("%H:%M:%S")
+            fo = open(logging_file, 'a+')
+            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+            fo.write(r'ending time of portfolio: ' + current_time + '\n')
+            fo.close()    
             # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
             remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
 
