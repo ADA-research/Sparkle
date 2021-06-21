@@ -15,9 +15,9 @@ All commands need to be executed from this cloned root directory. See the `Examp
 
 ## Documentation
 
-The documentation can be found in the `Documentation` directory. A `PDF` is available and the `HTML` documentation can be generated.
+The documentation can be found in the `Documentation` directory. A `PDF` is available at `Documentation/sparkle-userguide.pdf` and the `HTML` documentation can be generated.
 
-## Licenses
+## Licensing
 
 Sparkle is distributed under the MIT licence
 
