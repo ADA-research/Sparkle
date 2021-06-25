@@ -46,8 +46,7 @@ tornado==6.1
 zict==2.0.0
 
 # Requirements for sparkle documentation build
-sphinx
-recommandmark
+recommonmark
 Sphinx==3.4.3
 sphinx-bootstrap-theme==0.7.1
 sphinx-rtd-theme==0.5.1
