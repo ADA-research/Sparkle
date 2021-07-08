@@ -49,6 +49,3 @@ Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 # Generated documentation 
 Documentation/build/
 Documentation/source/_generated/
-
-# Virtual environment
-env/*
