@@ -37,41 +37,34 @@ You can also download the stable version here: https://bitbucket.org/sparkle-ai/
 Install dependencies
 --------------------
 
-Sparkle depends on Python 3.9+, swig 3.0, gnuplot and LaTeX. An easy way to install those is to use the ``conda`` package manager. 
-The package manager is available in ``miniconda`` (https://docs.conda.io/en/latest/miniconda.html).
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX and multiple Python packages. An easy way to install everything to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
 
 You can install the base requirements with
 
 .. code-block:: shell
 
-  $ conda install -c conda-forge python=3 swig=3.0 gnuplot texlive-core
+  $ conda env create -f environment.yml
 
+This will an environment named ``sparkle`` that contains everything needed to run Sparkle.
 
-We recommend using a virtual environment to install the Python package needed and to use Sparkle.
-To create a virtual environment for Sparkle, from the root directory of Sparkle execute:
-
-.. code-block:: shell
-
-  $ python -m venv env
-
-This will create a directory named ``env`` where a bare Python environment exist. To activate it, execute:
+To activate it, execute:
 
 .. code-block:: shell
 
-  $ source env/bin/activate
+  $ conda activate sparkle
 
 .. note:: You will need to reactivate the environment every time you log in, before using Sparkle.
-  
 
-The file ``requirements.txt`` contains a tested list of python packages with fixed version required to execute Sparkle. It is recommended that you use it.
+The file ``environment.yml`` contains a tested list of python packages with fixed version required to execute Sparkle. We recommended using it.
 
-The file ``requirements-dev.txt`` contains mostly unpinned packages directly used in the Sparkle code. It is used for development and can cause errors. 
+The file ``environment-dev.txt`` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems. 
 
-To install the requirements, using ``pip`` (if a virtual environment is active, the package will be installed in the virtual environment):
+The two environment can be created in parallel as one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update/reinstall an environment it is safer to remove it and recreate it. For example:
 
 .. code-block:: shell
 
-  $ pip install -r requirements.txt
+   $ conda env remove -n sparkle
+   $ conda env create -f environment.yml
 
 
 .. _quick:config_environment:
