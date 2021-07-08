@@ -1,0 +1,24 @@
+# For Sparkle
+numpy
+pandas
+
+# For AutoFolio
+git+https://github.com/mlindauer/ASlibScenario # aslib git need to be manually set when freezing requirement
+xgboost
+scikit-learn
+ConfigSpace
+smac
+scipy==1.6.3  # 1.7.x removed a private function used by smac
+
+
+# Requirements for sparkle documentation build
+Sphinx
+recommonmark
+sphinx-bootstrap-theme
+sphinx-rtd-theme
+sphinxcontrib-applehelp
+sphinxcontrib-devhelp
+sphinxcontrib-htmlhelp
+sphinxcontrib-jsmath
+sphinxcontrib-qthelp
+sphinxcontrib-serializinghtml

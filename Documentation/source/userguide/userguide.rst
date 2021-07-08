@@ -19,48 +19,60 @@ Follow these steps:
 Installing Sparkle
 ==================
 
-.. note:: The installation process use the ``conda`` command available in `Anaconda <https://www.anaconda.com/>`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage some of the dependencies. 
+.. note:: The installation process use the ``conda`` command available in `Anaconda <https://www.anaconda.com/>`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage some dependencies. 
 
-1. Copy the Sparkle files to your desired directory
+Get a copy of Sparkle
+---------------------
+To get a copy of Sparkle you can clone the repository.
 
-2. Install Python 3.9 (other 3.x versions may work, but were not 
-   tested with the packages included in the ``requirements_first.txt``
-   and ``requirements_second.txt`` files.
+If ``git`` is available on your system, this will clone the Sparkle repository and create a subdirectory named ``sparkle`` : 
 
-   Using conda::
+.. code-block:: shell
 
-      conda create -n <env_name> python=3.9
+  $ git clone https://bitbucket.org/sparkle-ai/sparkle.git
 
-3. Install Swig 3.0
+You can also download the stable version here: https://bitbucket.org/sparkle-ai/sparkle/get/main.zip
 
-   Using conda::
 
-      conda install swig=3.0
+Install dependencies
+--------------------
 
-4. Navigate into the Sparkle directory
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot and LaTeX. An easy way to install those is to use the ``conda`` package manager. 
+The package manager is available in ``miniconda`` (https://docs.conda.io/en/latest/miniconda.html).
 
-5. Install ``requirements_first.txt``::
- 
-      pip install -r requirements_first.txt
+You can install the base requirements with
 
-   With Anaconda::
+.. code-block:: shell
 
-      /home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_first.txt
+  $ conda install -c conda-forge python=3 swig=3.0 gnuplot texlive-core
 
-6. Install ``requirements_second.txt``::
 
-      pip install -r requirements_second.txt
-   
-   With Anaconda::
+We recommend using a virtual environment to install the Python package needed and to use Sparkle.
+To create a virtual environment for Sparkle, from the root directory of Sparkle execute:
 
-      /home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_second.txt
+.. code-block:: shell
 
-7. Install ``epstopdf``
-   (if manually, for instance on a cluster, as described in
-   Section :numref:`package:epstopdf`.
+  $ python -m venv env
 
-8. Install other requirements if they are not on your system yet: ``LaTeX``, ``BibTeX`` and ``gnuplot``.
-      
+This will create a directory named ``env`` where a bare Python environment exist. To activate it, execute:
+
+.. code-block:: shell
+
+  $ source env/bin/activate
+
+.. note:: You will need to reactivate the environment every time you log in, before using Sparkle.
+  
+
+The file ``requirements.txt`` contains a tested list of python packages with fixed version required to execute Sparkle. It is recommended that you use it.
+
+The file ``requirements-dev.txt`` contains mostly unpinned packages directly used in the Sparkle code. It is used for development and can cause errors. 
+
+To install the requirements, using ``pip`` (if a virtual environment is active, the package will be installed in the virtual environment):
+
+.. code-block:: shell
+
+  $ pip install -r requirements.txt
+
 
 .. _quick:config_environment:
 
