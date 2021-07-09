@@ -13,7 +13,7 @@ pipelines:
           script:
             - pwd
             - ls -la
-            - conda env create -f environments.yml 
+            - conda env create -f environment.yml 
             - conda activate sparkle
             - pytest -v tests/* --junitxml=test-reports/report.xml
       - step:
