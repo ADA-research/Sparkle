@@ -13,7 +13,6 @@ pipelines:
           caches:
             - pip
             - condacache
-            - condacache-root
           script:
             - conda info
             - conda env create -f environment.yml 
@@ -21,8 +20,6 @@ pipelines:
             - pytest -v tests/* --junitxml=test-reports/report.xml
       - step:
           name: Lint code
-          caches:
-            - pip
           script:
             # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
             - pip install flake8
@@ -31,4 +28,3 @@ pipelines:
 definitions:
   caches:
     condacache: /opt/conda/pkgs
-    condacache-root: /root/.conda/pkgs
