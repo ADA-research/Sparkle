@@ -10,15 +10,18 @@ pipelines:
     - parallel:
       - step:
           name: Test
+          cache:
+            - pip
           script:
-            - pwd
-            - ls -la
+            - conda info
             - conda env create -f environment.yml 
             - conda activate sparkle
             - pytest -v tests/* --junitxml=test-reports/report.xml
       - step:
           name: Lint code
+          cache:
+            - pip
           script:
             # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
             - pip install flake8
-            - flake8 . --extend-exclude=dist,build,Commands --no-show-source --statistics
+            - flake8 . --extend-exclude=Commands,Examples,Components --no-show-source --statistics

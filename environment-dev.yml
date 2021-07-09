@@ -7,10 +7,11 @@ dependencies:
   - swig=3.0
   - texlive-core
   - gnuplot
+  - pytest
+  - numpy
+  - pandas
   - pip
   - pip:
-    # For Sparkle numpy
-    - pandas
     # For AutoFolio
     -  aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     -  xgboost
