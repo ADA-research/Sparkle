@@ -10,8 +10,6 @@ pipelines:
     - parallel:
       - step:
           name: Test
-          caches:
-            - conda
           script:
             - conda env create -f environments.yml 
             - conda activate sparkle
