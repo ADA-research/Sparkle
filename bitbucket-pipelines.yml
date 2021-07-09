@@ -3,7 +3,7 @@
 #  This template allows you to validate your python code.
 #  The workflow allows running tests and code linting on the default branch.
 
-image: python:3.9
+image: continuumio/miniconda3:latest
 
 pipelines:
   default:
@@ -11,14 +11,14 @@ pipelines:
       - step:
           name: Test
           caches:
-            - pip
+            - conda
           script:
-            - if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-            - pip install pytest
+            - conda env create -f environments.yml 
+            - conda activate sparkle
             - pytest -v tests/* --junitxml=test-reports/report.xml
       - step:
           name: Lint code
           script:
             # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
             - pip install flake8
-            - flake8 . --extend-exclude=dist,build --show-source --statistics
+            - flake8 . --extend-exclude=dist,build,Commands --show-source --statistics
