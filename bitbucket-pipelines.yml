@@ -11,6 +11,8 @@ pipelines:
       - step:
           name: Test
           script:
+            - pwd
+            - ls -la
             - conda env create -f environments.yml 
             - conda activate sparkle
             - pytest -v tests/* --junitxml=test-reports/report.xml
@@ -19,4 +21,4 @@ pipelines:
           script:
             # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
             - pip install flake8
-            - flake8 . --extend-exclude=dist,build,Commands --show-source --statistics
+            - flake8 . --extend-exclude=dist,build,Commands --no-show-source --statistics
