@@ -12,6 +12,8 @@ pipelines:
           name: Test
           cache:
             - pip
+            - condacache
+            - condacache-root
           script:
             - conda info
             - conda env create -f environment.yml 
@@ -25,3 +27,8 @@ pipelines:
             # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
             - pip install flake8
             - flake8 . --extend-exclude=Commands,Examples,Components --no-show-source --statistics
+
+definitions:
+  caches:
+    condacache: /opt/conda/pkgs
+    condacache-root: /root/.conda/pkgs
