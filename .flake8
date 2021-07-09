@@ -1,0 +1,39 @@
+[flake8]
+
+max-line-length = 99
+max-doc-length = 99
+indent-size = 4
+statistics = True
+max-complexity = 10
+
+# For now, exlude sparkle_help and test
+exclude =
+    Commands/sparkle_help,
+    Commands/test,
+    Components,
+    Examples,
+    Extractors,
+    Feature_Data,
+    .git,
+    .gitignore,
+    Instances,
+    Log,
+    Output,
+    Performance_Data,
+    __pycache__,
+    .pytest_cache,
+    Records,
+    Reference_Lists,
+    scratch,
+    Solvers,
+    Sparkle_Portfolio_Selector,
+    Tmp,
+    build,
+    dist
+
+# for now ignore the indentation problems
+ignore = 
+    # E101 indentation contains mixed spaces and tabs
+    E101,
+    # W191 indentation contains tabs
+    W191
