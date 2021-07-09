@@ -30,10 +30,3 @@ exclude =
     Tmp,
     build,
     dist
-
-# for now ignore the indentation problems
-ignore = 
-    # E101 indentation contains mixed spaces and tabs
-    E101,
-    # W191 indentation contains tabs
-    W191
