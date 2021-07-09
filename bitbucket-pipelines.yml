@@ -10,7 +10,7 @@ pipelines:
     - parallel:
       - step:
           name: Test
-          cache:
+          caches:
             - pip
             - condacache
             - condacache-root
@@ -21,7 +21,7 @@ pipelines:
             - pytest -v tests/* --junitxml=test-reports/report.xml
       - step:
           name: Lint code
-          cache:
+          caches:
             - pip
           script:
             # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
