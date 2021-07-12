@@ -1,10 +1,12 @@
 [flake8]
 
-max-line-length = 99
-max-doc-length = 99
+max-line-length = 89
+max-doc-length = 89
 indent-size = 4
 statistics = True
-max-complexity = 10
+
+# Cyclomatic complexity desactivated
+# max-complexity = 15 
 
 # For now, exlude sparkle_help and test
 exclude =
