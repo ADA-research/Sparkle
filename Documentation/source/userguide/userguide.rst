@@ -37,7 +37,7 @@ You can also download the stable version here: https://bitbucket.org/sparkle-ai/
 Install dependencies
 --------------------
 
-Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX and multiple Python packages. An easy way to install everything to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX and multiple Python packages. An easy way to install everything is to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
 
 You can install the base requirements with
 
@@ -55,11 +55,11 @@ To activate it, execute:
 
 .. note:: You will need to reactivate the environment every time you log in, before using Sparkle.
 
-The file ``environment.yml`` contains a tested list of python packages with fixed version required to execute Sparkle. We recommended using it.
+The file ``environment.yml`` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
 
 The file ``environment-dev.txt`` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems. 
 
-The two environment can be created in parallel as one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update/reinstall an environment it is safer to remove it and recreate it. For example:
+The two environments can be created in parallel since one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update/reinstall an environment it is safest to remove it and recreate it. For example:
 
 .. code-block:: shell
 
