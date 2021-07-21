@@ -83,7 +83,7 @@ if __name__ == r'__main__':
 		sys.exit()
 
 	# Clean the configuration and ablation directories for this solver to make sure we start with a clean slate
-	scsh.clean_configuration_directory(solver_name)
+	scsh.clean_configuration_directory(solver_name, instance_set_train_name)
 	sah.clean_ablation_scenarios(solver_name, instance_set_train_name)
 
 	# Copy instances to smac directory
@@ -94,14 +94,14 @@ if __name__ == r'__main__':
 
 	scsh.handle_file_instance_train(solver_name, instance_set_train_name)
 	scsh.create_file_scenario_configuration(solver_name, instance_set_train_name)
-	scsh.prepare_smac_execution_directories_configuration(solver_name)
+	scsh.prepare_smac_execution_directories_configuration(solver_name, instance_set_train_name)
 	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_train_name)
 	configure_jobid = scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
 
 	print("c Running configuration in parallel. Waiting for Slurm job with id: {}".format(configure_jobid))
 
 	# Write most recent run to file
-	last_configuration_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_configuration_file_name
+	last_configuration_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/' + sgh.sparkle_last_configuration_file_name
 
 	fout = open(last_configuration_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')

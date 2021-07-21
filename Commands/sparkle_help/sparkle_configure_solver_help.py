@@ -77,7 +77,7 @@ def handle_file_instance_test(solver_name: str, instance_set_name: str):
 
 # Copy file with the specified postfix listing instances from the instance directory to the solver directory
 def handle_file_instance(solver_name: str, instance_set_name: str, file_postfix: str):
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
 	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + '/'
 	smac_file_instance_path_ori = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + file_postfix
 	smac_file_instance_path_target = smac_solver_dir + instance_set_name + file_postfix
@@ -111,7 +111,7 @@ def get_solver_deterministic(solver_name):
 
 
 # Create a file with the configuration scenario to be used for smac validation in the solver directory
-def create_file_scenario_validate(solver_name: str, instance_set_name: str, instance_type: InstanceType, default: bool) -> str:
+def create_file_scenario_validate(solver_name: str, instance_set_train_name: str, instance_set_val_name: str, instance_type: InstanceType, default: bool) -> str:
 	if instance_type is InstanceType.TRAIN:
 		inst_type = 'train'
 	else:
@@ -122,23 +122,23 @@ def create_file_scenario_validate(solver_name: str, instance_set_name: str, inst
 	else:
 		config_type = 'configured'
 
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	scenario_file_name = instance_set_name + '_' + inst_type + '_' + config_type + r'_scenario.txt'
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_val_name)
+	scenario_file_name = instance_set_val_name + '_' + inst_type + '_' + config_type + r'_scenario.txt'
 	smac_file_scenario = smac_solver_dir + scenario_file_name
 
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
-	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
+	smac_paramfile = 'example_scenarios/' + solver_name + '_' + instance_set_train_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
 	if instance_type == InstanceType.TRAIN:
-		smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
+		smac_outdir = 'example_scenarios/' + solver_name + '_' + instance_set_train_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
 	else:
-		smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_' + instance_set_name + '_' + inst_type + '_' + config_type + '/'
-	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_' + inst_type + '.txt'
+		smac_outdir = 'example_scenarios/' + solver_name + '_' + instance_set_train_name + r'/' + 'outdir_' + instance_set_val_name + '_' + inst_type + '_' + config_type + '/'
+	smac_instance_file = 'example_scenarios/' + solver_name + '_' + instance_set_train_name + r'/' + instance_set_val_name + '_' + inst_type + '.txt'
 	smac_test_instance_file = smac_instance_file
 
 	fout = open(smac_file_scenario, 'w+')
 	fout.write('algo = ./' + sgh.sparkle_smac_wrapper + '\n')
-	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
+	fout.write('execdir = example_scenarios/' + solver_name + '_' + instance_set_train_name + '/' + '\n')
 	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
 	fout.write('run_obj = ' + smac_run_obj + '\n')
 	fout.write('wallclock-limit = ' + str(smac_whole_time_budget) + '\n')
@@ -159,19 +159,19 @@ def create_file_scenario_validate(solver_name: str, instance_set_name: str, inst
 
 # Create a file with the configuration scenario in the solver directory
 def create_file_scenario_configuration(solver_name: str, instance_set_name: str):
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
 	smac_file_scenario = smac_solver_dir + solver_name + r'_' + instance_set_name + r'_scenario.txt'
 
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
-	smac_paramfile = 'example_scenarios/' + solver_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
-	smac_outdir = 'example_scenarios/' + solver_name + r'/' + 'outdir_train_configuration/'
-	smac_instance_file = 'example_scenarios/' + solver_name + r'/' + instance_set_name + '_train.txt'
+	smac_paramfile = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
+	smac_outdir = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + 'outdir_train_configuration/'
+	smac_instance_file = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + instance_set_name + '_train.txt'
 	smac_test_instance_file = smac_instance_file
 
 	fout = open(smac_file_scenario, 'w')
 	fout.write('algo = ./' + sgh.sparkle_smac_wrapper + '\n')
-	fout.write('execdir = example_scenarios/' + solver_name + '/' + '\n')
+	fout.write('execdir = example_scenarios/' + solver_name + '_' + instance_set_name + '/' + '\n')
 	fout.write('deterministic = ' + get_solver_deterministic(solver_name) + '\n')
 	fout.write('run_obj = ' + smac_run_obj + '\n')
 	fout.write('wallclock-limit = ' + str(smac_whole_time_budget) + '\n')
@@ -189,8 +189,8 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str)
 
 	return
 
-def remove_configuration_directory(solver_name: str):
-	smac_solver_dir = Path(sgh.smac_dir + '/example_scenarios/' + solver_name + '/')
+def remove_configuration_directory(solver_name: str, instance_set_name: str):
+	smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
 
 	# Remove the solver directory to make sure any possible old files don't interfere
 	sfh.rmtree(smac_solver_dir)
@@ -198,16 +198,21 @@ def remove_configuration_directory(solver_name: str):
 	return
 
 
-def clean_configuration_directory(solver_name: str):
-	remove_configuration_directory(solver_name)
-	create_configuration_directory(solver_name)
+def clean_configuration_directory(solver_name: str, instance_set_name: str):
+	remove_configuration_directory(solver_name, instance_set_name)
+	create_configuration_directory(solver_name, instance_set_name)
 
 	return
 
 
-def create_configuration_directory(solver_name: str):
+def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
 	smac_scenario_dir = sgh.smac_dir + '/' + 'example_scenarios/'
-	smac_solver_dir = smac_scenario_dir + '/' + solver_name + '/'
+	smac_solver_dir = smac_scenario_dir + '/' + solver_name + '_' + instance_set_name + '/'
+	return smac_solver_dir
+
+
+def create_configuration_directory(solver_name: str, instance_set_name: str):
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
 	sacsh.create_necessary_files_for_configured_solver(smac_solver_dir)
 
 	# Copy PCS file to smac_solver_dir
@@ -219,8 +224,8 @@ def create_configuration_directory(solver_name: str):
 	return
 
 
-def prepare_smac_execution_directories_configuration(solver_name: str):
-	smac_solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/'
+def prepare_smac_execution_directories_configuration(solver_name: str, instance_set_name: str):
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
 	_, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
 	for i in range(1, num_of_smac_run+1):
@@ -236,8 +241,8 @@ def prepare_smac_execution_directories_configuration(solver_name: str):
 	return
 
 
-def remove_validation_directories_execution_or_output(solver_name: str, instance_set_test_name: str, exec_or_out: str):
-	solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/' + exec_or_out
+def remove_validation_directories_execution_or_output(solver_name: str, instance_set_train_name: str, instance_set_test_name: str, exec_or_out: str):
+	solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name) + exec_or_out
 
 	train_default_dir = Path(solver_dir + '_train_default/')
 	sfh.rmtree(train_default_dir)
@@ -251,18 +256,18 @@ def remove_validation_directories_execution_or_output(solver_name: str, instance
 	return
 
 
-def remove_validation_directories(solver_name: str, instance_set_test_name: str):
-	remove_validation_directories_execution_or_output(solver_name, instance_set_test_name, 'validate')
-	remove_validation_directories_execution_or_output(solver_name, instance_set_test_name, 'output')
+def remove_validation_directories(solver_name: str, instance_set_train_name: str, instance_set_test_name: str):
+	remove_validation_directories_execution_or_output(solver_name,  instance_set_train_name, instance_set_test_name, 'validate')
+	remove_validation_directories_execution_or_output(solver_name,  instance_set_train_name, instance_set_test_name, 'output')
 
 	return
 
 
 def prepare_smac_execution_directories_validation(solver_name: str, instance_set_train_name: str, instance_set_test_name: str):
 	# Make sure no old files remain that could interfere
-	remove_validation_directories(solver_name, instance_set_test_name)
+	remove_validation_directories(solver_name, instance_set_train_name, instance_set_test_name)
 
-	smac_solver_dir = sgh.smac_dir + 'example_scenarios/' + solver_name + '/'
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
 	_, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
 	for i in range(1, num_of_smac_run+1):
@@ -303,8 +308,7 @@ def prepare_smac_execution_directories_validation(solver_name: str, instance_set
 
 
 def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str) -> str:
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + r'/'
-	execdir = '/example_scenarios/' + solver_name + r'/'
+	execdir = './example_scenarios/' + solver_name + '_' + instance_set_name
 	smac_file_scenario_name = solver_name + r'_' + instance_set_name + r'_scenario.txt'
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
@@ -313,7 +317,7 @@ def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str
 	result_dir = sgh.smac_dir + result_part
 	[item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
 
-	scenario_file = 'example_scenarios/' + solver_name + r'/' + smac_file_scenario_name
+	scenario_file = execdir +  r'/' + smac_file_scenario_name
 
 	sbatch_script_path = "{scenario}_{num_of_smac_run}_exp_sbatch.sh".format(scenario=smac_file_scenario_name, num_of_smac_run=num_of_smac_run)
 
@@ -358,8 +362,8 @@ def generate_configuration_sbatch_script(sbatch_script_path, scenario_file, resu
 	fout.write('###' + '\n')
 	fout.write('###' + '\n')
 	fout.write('#SBATCH --mem-per-cpu=3000' + '\n')
-	fout.write(r"#SBATCH --array=0-{njobs}%{parallel}\n".format(njobs=num_job_total, parallel=num_job_in_parallel))
-	fout.write(r'###' + '\n')
+	fout.write("#SBATCH --array=0-{njobs}%{parallel}\n".format(njobs=num_job_total, parallel=num_job_in_parallel))
+	fout.write('###' + '\n')
 	# Options from the slurm/sbatch settings file
 	for i in sbatch_options_list:
 		fout.write('#SBATCH ' + str(i) + '\n')
@@ -372,7 +376,7 @@ def generate_configuration_sbatch_script(sbatch_script_path, scenario_file, resu
 		seed = i + 1
 		result_path = result_directory + sbatch_script_path + r'_seed_' + str(seed) + r'_smac.txt'
 		smac_execdir_i = smac_execdir + r'/' + str(seed)
-		sl.add_output(sgh.smac_dir + result_path,"Configuration log for SMAC run {}".format(num_job_total))
+		sl.add_output(sgh.smac_dir + result_path, "Configuration log for SMAC run {}".format(num_job_total))
 
 		fout.write('\'%s %d %s %s\' \\' % (scenario_file, seed, result_path, smac_execdir_i) + '\n')
 
@@ -618,8 +622,8 @@ def get_optimised_configuration(solver_name: str, instance_set_name: str) -> Tup
 	return optimised_configuration_str, optimised_configuration_performance, optimised_configuration_seed
 
 
-def generate_configure_solver_wrapper(solver_name, optimised_configuration_str):
-	smac_solver_dir = sgh.smac_dir + r'/example_scenarios/' + solver_name + r'/'
+def generate_configure_solver_wrapper(solver_name: str, instance_set_name: str, optimised_configuration_str: str):
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
 	sparkle_run_configured_wrapper_path = smac_solver_dir + sgh.sparkle_run_configured_wrapper
 
 	fout = open(sparkle_run_configured_wrapper_path, 'w+')

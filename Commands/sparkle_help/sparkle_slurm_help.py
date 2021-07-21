@@ -141,7 +141,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 
 	# Train default
 	default = True
-	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, scsh.InstanceType.TRAIN, default)
+	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, instance_set_train_name, scsh.InstanceType.TRAIN, default)
 	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
 	exec_dir = 'example_scenarios/' + solver_name + '/validate_train_default/'
 	configuration_str = 'DEFAULT'
@@ -157,7 +157,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 	if instance_set_test_name is not None:
 		# Test default
 		default = True
-		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, instance_set_test_name, scsh.InstanceType.TEST, default)
 		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
 		exec_dir = 'example_scenarios/' + solver_name + '/validate_{}_test_default/'.format(instance_set_test_name)
 		configuration_str = 'DEFAULT'
@@ -167,7 +167,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 	
 		# Test configured
 		default = False
-		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, instance_set_test_name, scsh.InstanceType.TEST, default)
 		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
 		optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
 		exec_dir = 'example_scenarios/' + solver_name + '/validate_{}_test_configured/'.format(instance_set_test_name)
