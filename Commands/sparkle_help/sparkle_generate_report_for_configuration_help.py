@@ -748,7 +748,7 @@ def generate_report_for_configuration_common(configuration_reports_directory, di
 	fout.close()
 	
 	# Compile the report
-	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
+	compile_command = r'cd ' + latex_directory_path + r'; pdflatex -interaction=nonstopmode ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
 	
@@ -756,7 +756,7 @@ def generate_report_for_configuration_common(configuration_reports_directory, di
 	os.system(compile_command)
 	os.system(compile_command)
 	
-	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
+	compile_command = r'cd ' + latex_directory_path + r'; pdflatex -interaction=nonstopmode ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
 	
