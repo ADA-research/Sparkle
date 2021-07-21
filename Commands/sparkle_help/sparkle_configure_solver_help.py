@@ -60,27 +60,27 @@ def get_smac_settings():
 
 
 # Copy file listing the training instances from the instance directory to the solver directory
-def handle_file_instance_train(solver_name: str, instance_set_name: str):
-	file_postfix = r'_train.txt'
-	handle_file_instance(solver_name, instance_set_name, file_postfix)
-
-	return
+#def handle_file_instance_train(solver_name: str, instance_set_name: str):
+#	file_postfix = r'_train.txt'
+#	handle_file_instance(solver_name, instance_set_name, file_postfix)
+#	return
 
 
 # Copy file listing the testing instances from the instance directory to the solver directory
-def handle_file_instance_test(solver_name: str, instance_set_name: str):
-	file_postfix = r'_test.txt'
-	handle_file_instance(solver_name, instance_set_name, file_postfix)
-
-	return
+#def handle_file_instance_test(solver_name: str, instance_set_name: str):
+#	file_postfix = r'_test.txt'
+#	handle_file_instance(solver_name, instance_set_name, file_postfix)
+#	return
 
 
 # Copy file with the specified postfix listing instances from the instance directory to the solver directory
-def handle_file_instance(solver_name: str, instance_set_name: str, file_postfix: str):
-	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
-	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + '/'
-	smac_file_instance_path_ori = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_name + file_postfix
-	smac_file_instance_path_target = smac_solver_dir + instance_set_name + file_postfix
+def handle_file_instance(solver_name: str, instance_set_train_name: str, instance_set_target_name: str, instance_type: str):
+	file_postfix = '_{}.txt'.format(instance_type)
+
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
+	smac_instance_set_dir = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_target_name + '/'
+	smac_file_instance_path_ori = sgh.smac_dir + '/example_scenarios/instances/' + instance_set_target_name + file_postfix
+	smac_file_instance_path_target = smac_solver_dir + instance_set_target_name + file_postfix
 
 	command_line = 'cp ' + smac_file_instance_path_ori + ' ' + smac_file_instance_path_target
 	os.system(command_line)
@@ -122,7 +122,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
 	else:
 		config_type = 'configured'
 
-	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_val_name)
+	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
 	scenario_file_name = instance_set_val_name + '_' + inst_type + '_' + config_type + r'_scenario.txt'
 	smac_file_scenario = smac_solver_dir + scenario_file_name
 
@@ -428,7 +428,7 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
 def check_instance_list_file_exist(solver_name: str, instance_set_name: str):
 	# Check the instance list file exists
 	file_name = Path(instance_set_name + '_train.txt')
-	instance_list_file_path = Path(PurePath(Path(sgh.smac_dir) / Path('example_scenarios') / Path(solver_name) / file_name))
+	instance_list_file_path = Path(PurePath(Path(sgh.smac_dir) / Path('example_scenarios') / Path(solver_name + '_' + instance_set_name) / file_name))
 
 	all_good = instance_list_file_path.is_file()
 

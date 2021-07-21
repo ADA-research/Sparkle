@@ -92,7 +92,7 @@ if __name__ == r'__main__':
 	smac_inst_dir_prefix = sgh.smac_dir + '/' + 'example_scenarios/' + 'instances/' + sfh.get_last_level_directory_name(instances_directory)
 	sih.copy_instances_to_smac(list_all_path, instances_directory, smac_inst_dir_prefix, 'train')
 
-	scsh.handle_file_instance_train(solver_name, instance_set_train_name)
+	scsh.handle_file_instance(solver_name, instance_set_train_name, instance_set_train_name, "train")
 	scsh.create_file_scenario_configuration(solver_name, instance_set_train_name)
 	scsh.prepare_smac_execution_directories_configuration(solver_name, instance_set_train_name)
 	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_train_name)
