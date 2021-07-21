@@ -37,7 +37,9 @@ You can also download the stable version here: https://bitbucket.org/sparkle-ai/
 Install dependencies
 --------------------
 
-Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX and multiple Python packages. An easy way to install everything is to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. An easy way to install most of what is needed is to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
+
+.. note:: LaTeX is used to create the reports and the documentation and must be installed manually on the system. If you don't plan to use the reports or recreate the documentations, you can skip it.
 
 You can install the base requirements with
 
@@ -45,9 +47,9 @@ You can install the base requirements with
 
   $ conda env create -f environment.yml
 
-This will an environment named ``sparkle`` that contains everything needed to run Sparkle.
+This will create an environment named ``sparkle`` that contains everything needed to run Sparkle, except LaTeX that needs to be installed manually.
 
-To activate it, execute:
+To activate the environment in the current sheel, execute:
 
 .. code-block:: shell
 
@@ -59,13 +61,16 @@ The file ``environment.yml`` contains a tested list of Python packages with fixe
 
 The file ``environment-dev.txt`` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems. 
 
-The two environments can be created in parallel since one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update/reinstall an environment it is safest to remove it and recreate it. For example:
+The two environments can be created in parallel since one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
 
 .. code-block:: shell
 
+   $ conda deactivate 
    $ conda env remove -n sparkle
    $ conda env create -f environment.yml
+   $ conda activate sparkle
 
+This should be fast as both ``conda`` and ``pip`` use local cache for the packages.
 
 .. _quick:config_environment:
 
