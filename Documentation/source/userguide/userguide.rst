@@ -636,40 +636,6 @@ Shell and Python scripts should work as is. If a compiled binary does
 not work, you may have to compile it on Grace and manually install
 packages on Grace that are needed by your algorithm.
 
-.. _package:epstopdf:
-
-``epstopdf``
-~~~~~~~~~~~~
-
-The ``epstopdf`` package (or a package containing it) is required for
-Sparkle’s reporting component to work (e.g.
-``generate_report, generate_report_for_configuration``), it can be
-installed in your user directory as follows:
-
-#. Download ``epstopdf``:: 
-
-      wget http://mirrors.ctan.org/support/epstopdf.zip
-
-
-#. Unzip the package (ideally somewhere static, rather than a
-   ``/Downloads/`` directory)::
-
-      unzip epstopdf.zip
-
-#. Rename ``epstopdf.pl`` (inside the directory you just unzipped)::
-
-      mv epstopdf.pl epstopdf
-
-#. Add this line to your ``.bashrc`` (open with e.g. ``vim ~/.bashrc``)::
-
-      export PATH="/<directory>/epstopdf:$PATH"
-
-   (replace "``<directory>``" with the path to the ``epstopdf``
-   directory, e.g.: ``home/blomkvander/bin``)
-
-#. Reload ``.bashrc`` to make sure everything is updated::
-
-      source ~/.bashrc
 
 General requirements
 ~~~~~~~~~~~~~~~~~~~~
