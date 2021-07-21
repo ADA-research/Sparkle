@@ -1,0 +1,11 @@
+# Requirements for Sparkle documentation
+recommonmark
+Sphinx
+sphinx-bootstrap-theme
+sphinx-rtd-theme
+sphinxcontrib-applehelp
+sphinxcontrib-devhelp
+sphinxcontrib-htmlhelp
+sphinxcontrib-jsmath
+sphinxcontrib-qthelp
+sphinxcontrib-serializinghtml
