@@ -71,6 +71,7 @@ def get_PAR10_performance(results_file, cutoff):
 
 	return mean_par10
 
+
 def get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_name, smac_each_run_cutoff_time):
 	str_value = ''
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
@@ -80,6 +81,7 @@ def get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_
 	output = os.popen(command_line).readlines()
 	str_value = output[0].strip().split()[2]
 	return str_value
+
 
 def get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_name, smac_each_run_cutoff_time):
 	str_value = ''
@@ -259,7 +261,7 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	str_value = ''
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
@@ -337,7 +339,7 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
 	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	
@@ -360,7 +362,7 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	return str_value
 
 
-def get_timeouts_test(solver_name, instance_set_name, cutoff):
+def get_timeouts_test(solver_name, instance_set_train_name, instance_set_name, cutoff):
 	configured_timeouts = 0
 	default_timeouts = 0
 	overlapping_timeouts = 0
@@ -368,7 +370,7 @@ def get_timeouts_test(solver_name, instance_set_name, cutoff):
 	# Retrieve instances and PAR10 values
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_' + instance_set_name + '_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_' + instance_set_name + '_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, cutoff)
@@ -392,7 +394,7 @@ def get_timeouts_test(solver_name, instance_set_name, cutoff):
 	return configured_timeouts, default_timeouts, overlapping_timeouts
 
 
-def get_timeouts_train(solver_name, instance_set_name, cutoff):
+def get_timeouts_train(solver_name, instance_set_train_name, instance_set_name, cutoff):
 	configured_timeouts = 0
 	default_timeouts = 0
 	overlapping_timeouts = 0
@@ -401,7 +403,7 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_name)
 	configured_results_file = 'validationObjectiveMatrix-traj-run-' + optimised_configuration_seed + '-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_name + '_scenario/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_train_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, cutoff)
@@ -519,7 +521,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
 	variable = r'optimisedConfiguration'
 	common_dict[variable] = str(optimised_configuration_str)
 	
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name  + '/'
 
 	variable = r'optimisedConfigurationTrainingPerformancePAR10'
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
@@ -539,7 +541,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
 	common_dict[variable] = str_value
 	
 	# Retrieve timeout numbers for the training instances
-	configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = get_timeouts_train(solver_name, instance_set_train_name, float(smac_each_run_cutoff_time))
+	configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = get_timeouts_train(solver_name, instance_set_train_name, instance_set_train_name, float(smac_each_run_cutoff_time))
 
 	variable = r'timeoutsTrainDefault'
 	common_dict[variable] = str(default_timeouts_train)
@@ -574,7 +576,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 	
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str = scsh.get_smac_settings()
 
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name  + '/'
 
 	variable = r'optimisedConfigurationTestingPerformancePAR10'
 	configured_results_test_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
@@ -593,7 +595,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 	test_dict[variable] = str_value
 
 	# Retrieve timeout numbers for the testing instances
-	configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = get_timeouts_test(solver_name, instance_set_test_name, float(smac_each_run_cutoff_time))
+	configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = get_timeouts_test(solver_name, instance_set_train_name, instance_set_test_name, float(smac_each_run_cutoff_time))
 
 	variable = r'timeoutsTestDefault'
 	test_dict[variable] = str(default_timeouts_test)
@@ -622,7 +624,7 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 		all_good = False
 
 	# Check train results exist: configured+default
-	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name  + '/'
 	configured_results_train_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/'
 	default_results_train_dir = smac_solver_dir + 'outdir_train_default/'
 
@@ -636,7 +638,7 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 			all_good = False
 
 		# Check test results exist: configured+default
-		smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+		smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name  + '/'
 		configured_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/'
 		default_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/'
 
@@ -657,6 +659,7 @@ def get_most_recent_test_run(solver_name):
 	flag_instance_set_test = False
 
 	# Read most recent run from file
+	# TODO: Does not work anymore
 	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_test_file_name
 
 	try:
