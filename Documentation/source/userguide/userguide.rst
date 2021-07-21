@@ -37,7 +37,9 @@ You can also download the stable version here: https://bitbucket.org/sparkle-ai/
 Install dependencies
 --------------------
 
-Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX and multiple Python packages. An easy way to install everything to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. An easy way to install most of what is needed is to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
+
+.. note:: LaTeX is used to create the reports and the documentation and must be installed manually on the system. If you don't plan to use the reports or recreate the documentations, you can skip it.
 
 You can install the base requirements with
 
@@ -45,9 +47,9 @@ You can install the base requirements with
 
   $ conda env create -f environment.yml
 
-This will an environment named ``sparkle`` that contains everything needed to run Sparkle.
+This will create an environment named ``sparkle`` that contains everything needed to run Sparkle, except LaTeX that needs to be installed manually.
 
-To activate it, execute:
+To activate the environment in the current sheel, execute:
 
 .. code-block:: shell
 
@@ -55,17 +57,20 @@ To activate it, execute:
 
 .. note:: You will need to reactivate the environment every time you log in, before using Sparkle.
 
-The file ``environment.yml`` contains a tested list of python packages with fixed version required to execute Sparkle. We recommended using it.
+The file ``environment.yml`` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
 
 The file ``environment-dev.txt`` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems. 
 
-The two environment can be created in parallel as one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update/reinstall an environment it is safer to remove it and recreate it. For example:
+The two environments can be created in parallel since one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
 
 .. code-block:: shell
 
+   $ conda deactivate 
    $ conda env remove -n sparkle
    $ conda env create -f environment.yml
+   $ conda activate sparkle
 
+This should be fast as both ``conda`` and ``pip`` use local cache for the packages.
 
 .. _quick:config_environment:
 
@@ -631,40 +636,6 @@ Shell and Python scripts should work as is. If a compiled binary does
 not work, you may have to compile it on Grace and manually install
 packages on Grace that are needed by your algorithm.
 
-.. _package:epstopdf:
-
-``epstopdf``
-~~~~~~~~~~~~
-
-The ``epstopdf`` package (or a package containing it) is required for
-Sparkle’s reporting component to work (e.g.
-``generate_report, generate_report_for_configuration``), it can be
-installed in your user directory as follows:
-
-#. Download ``epstopdf``:: 
-
-      wget http://mirrors.ctan.org/support/epstopdf.zip
-
-
-#. Unzip the package (ideally somewhere static, rather than a
-   ``/Downloads/`` directory)::
-
-      unzip epstopdf.zip
-
-#. Rename ``epstopdf.pl`` (inside the directory you just unzipped)::
-
-      mv epstopdf.pl epstopdf
-
-#. Add this line to your ``.bashrc`` (open with e.g. ``vim ~/.bashrc``)::
-
-      export PATH="/<directory>/epstopdf:$PATH"
-
-   (replace "``<directory>``" with the path to the ``epstopdf``
-   directory, e.g.: ``home/blomkvander/bin``)
-
-#. Reload ``.bashrc`` to make sure everything is updated::
-
-      source ~/.bashrc
 
 General requirements
 ~~~~~~~~~~~~~~~~~~~~

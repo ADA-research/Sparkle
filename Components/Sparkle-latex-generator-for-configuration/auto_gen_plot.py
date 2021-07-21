@@ -2,8 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 import os
+from os.path import abspath, dirname, join
 import sys
 import fcntl
+from shutil import which
 
 if __name__ == r'__main__':
 	
@@ -55,8 +57,10 @@ if __name__ == r'__main__':
 	cmd = "gnuplot \'%s\'" % (output_gnuplot_script)
 	os.system(cmd)
 	
-	cmd = "epstopdf \'%s\'" % (output_eps_file)
-	os.system(cmd)
+	# Some systems are missing epstopdf so a copy is included
+	epsbackup = abspath(join(dirname(__file__), "..", "epstopdf.pl"))
+	epstopdf = which("epstopdf") or epsbackup
+	os.system("%s '%s'" % (epstopdf, output_eps_file))
 	
 	os.system('rm -f \'%s\'' % (output_gnuplot_script))
 	

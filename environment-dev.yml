@@ -1,33 +1,24 @@
 name: sparkle-dev
 channels:
-  - conda-forge
   - defaults
+  - conda-forge
 dependencies:
+  # Basic conda install
   - python=3
   - swig=3.0
-  - texlive-core
   - gnuplot
-  - pytest
-  - flake8
-  - numpy
-  - pandas
   - pip
   - pip:
+    # For Sparkle
+    - numpy
+    - pandas
+    # Testing
+    - pytest
+    - flake8
     # For AutoFolio
-    -  aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
-    -  xgboost
-    -  scikit-learn
-    -  ConfigSpace
-    -  smac
-    -  scipy==1.6.3  # 1.7.x removed a private function used by smac
-    # Requirements for sparkle documentation build
-    -  Sphinx
-    -  recommonmark
-    -  sphinx-bootstrap-theme
-    -  sphinx-rtd-theme
-    -  sphinxcontrib-applehelp
-    -  sphinxcontrib-devhelp
-    -  sphinxcontrib-htmlhelp
-    -  sphinxcontrib-jsmath
-    -  sphinxcontrib-qthelp
-    -  sphinxcontrib-serializinghtml
+    - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
+    - xgboost
+    - scikit-learn
+    - ConfigSpace
+    - smac
+    - scipy==1.6.3  # 1.7.x removed a private function used by smac
