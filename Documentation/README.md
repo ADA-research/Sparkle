@@ -1,6 +1,6 @@
 # Documentation system for Sparkle
 
-Sparkle uses Sphinx to generate the documentation. The requirements are included in `../requirments_first.txt`. 
+Sparkle uses Sphinx to generate the documentation. The requirements are included in `../Documentation/requirments.txt`. LaTeX is also needed to build the `pdf` version of the documentation and userguide.
 
 ## Full documentation
 
