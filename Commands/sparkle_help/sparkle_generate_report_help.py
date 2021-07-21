@@ -474,7 +474,7 @@ def generate_report(test_case_directory: str = None):
 	fout.write(report_content)
 	fout.close()
 
-	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
+	compile_command = r'cd ' + latex_directory_path + r'; pdflatex -interaction=nonstopmode ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
 
@@ -482,7 +482,7 @@ def generate_report(test_case_directory: str = None):
 	os.system(compile_command)
 	os.system(compile_command)
 
-	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
+	compile_command = r'cd ' + latex_directory_path + r'; pdflatex -interaction=nonstopmode ' + latex_report_filename + r'.tex 1> /dev/null 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
 
