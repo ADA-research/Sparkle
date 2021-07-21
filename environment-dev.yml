@@ -8,7 +8,8 @@ dependencies:
   - gnuplot
   - pip
   - pip:
-    # For Sparkle numpy
+    # For Sparkle
+    - numpy
     - pandas
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
