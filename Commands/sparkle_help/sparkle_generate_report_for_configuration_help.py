@@ -652,16 +652,15 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 	return
 
 
-def get_most_recent_test_run(solver_name):
+def get_most_recent_test_run(solver_name: str):
 	instance_set_train = ''
 	instance_set_test = ''
 	flag_instance_set_train = False
 	flag_instance_set_test = False
 
 	# Read most recent run from file
-	# TODO: Does not work anymore
-	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_test_file_name
-
+	#last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train + '/' + sgh.sparkle_last_test_file_name
+	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + sgh.sparkle_last_test_file_name
 	try:
 		fin = open(last_test_file_path, 'r')
 	except IOError:

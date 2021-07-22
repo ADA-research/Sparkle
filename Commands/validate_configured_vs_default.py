@@ -99,7 +99,7 @@ if __name__ == r'__main__':
 	print(validate_jobid)
 
 	# Write most recent run to file
-	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/' + sgh.sparkle_last_test_file_name
+	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + sgh.sparkle_last_test_file_name
 
 	fout = open(last_test_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')
