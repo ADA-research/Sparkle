@@ -58,21 +58,6 @@ def get_smac_settings():
 
 	return smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel
 
-
-# Copy file listing the training instances from the instance directory to the solver directory
-#def handle_file_instance_train(solver_name: str, instance_set_name: str):
-#	file_postfix = r'_train.txt'
-#	handle_file_instance(solver_name, instance_set_name, file_postfix)
-#	return
-
-
-# Copy file listing the testing instances from the instance directory to the solver directory
-#def handle_file_instance_test(solver_name: str, instance_set_name: str):
-#	file_postfix = r'_test.txt'
-#	handle_file_instance(solver_name, instance_set_name, file_postfix)
-#	return
-
-
 # Copy file with the specified postfix listing instances from the instance directory to the solver directory
 def handle_file_instance(solver_name: str, instance_set_train_name: str, instance_set_target_name: str, instance_type: str):
 	file_postfix = '_{}.txt'.format(instance_type)
