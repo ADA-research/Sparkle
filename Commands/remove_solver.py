@@ -65,7 +65,7 @@ if __name__ == r'__main__':
 	os.system(command_line)
 	
 	solver_name = sfh.get_last_level_directory_name(solver_path)
-	smac_solver_path = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/' + solver_name + r'/'
+	smac_solver_path = sparkle_global_help.smac_dir + r'/' + r'example_scenarios/' + solver_name + r'_*/'
 	if os.path.exists(smac_solver_path):
 		command_line = r'rm -rf ' + smac_solver_path
 		os.system(command_line)

@@ -83,10 +83,10 @@ if __name__ == r'__main__':
 		sih.copy_instances_to_smac(list_path, inst_dir_prefix, smac_inst_dir_prefix, 'test')
 
 		# Copy file listing test instances to smac solver directory
-		scsh.handle_file_instance_test(solver_name, instance_set_test_name)
+		scsh.handle_file_instance(solver_name, instance_set_train_name, instance_set_test_name, "test")
 
 	# Create solver execution directories, and copy necessary files there
-	scsh.prepare_smac_execution_directories_validation(solver_name,instance_set_train_name,instance_set_test_name)
+	scsh.prepare_smac_execution_directories_validation(solver_name, instance_set_train_name, instance_set_test_name)
 
 	# Generate and run sbatch script for validation runs
 	sbatch_script_name = ssh.generate_sbatch_script_for_validation(solver_name, instance_set_train_name, instance_set_test_name)
@@ -99,7 +99,7 @@ if __name__ == r'__main__':
 	print(validate_jobid)
 
 	# Write most recent run to file
-	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_test_file_name
+	last_test_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + sgh.sparkle_last_test_file_name
 
 	fout = open(last_test_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')

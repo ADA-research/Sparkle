@@ -16,6 +16,7 @@ from pathlib import Path
 
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_add_solver_help as sash
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_logging as sl
@@ -75,8 +76,14 @@ if __name__ == r'__main__':
 	if instance_set_test is not None:
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
+	# Check if solver has pcs file and is configurable
+	solver_directory = sash.get_solver_directory(solver_name)
+	if not sash.check_adding_solver_contain_pcs_file(solver_directory):
+		print("c None or multiple .pcs files found. Solver is not valid for configuration.")
+		sys.exit()
+
 	# Clean the configuration and ablation directories for this solver to make sure we start with a clean slate
-	scsh.clean_configuration_directory(solver_name)
+	scsh.clean_configuration_directory(solver_name, instance_set_train_name)
 	sah.clean_ablation_scenarios(solver_name, instance_set_train_name)
 
 	# Copy instances to smac directory
@@ -85,16 +92,16 @@ if __name__ == r'__main__':
 	smac_inst_dir_prefix = sgh.smac_dir + '/' + 'example_scenarios/' + 'instances/' + sfh.get_last_level_directory_name(instances_directory)
 	sih.copy_instances_to_smac(list_all_path, instances_directory, smac_inst_dir_prefix, 'train')
 
-	scsh.handle_file_instance_train(solver_name, instance_set_train_name)
+	scsh.handle_file_instance(solver_name, instance_set_train_name, instance_set_train_name, "train")
 	scsh.create_file_scenario_configuration(solver_name, instance_set_train_name)
-	scsh.prepare_smac_execution_directories_configuration(solver_name)
+	scsh.prepare_smac_execution_directories_configuration(solver_name, instance_set_train_name)
 	smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(solver_name, instance_set_train_name)
 	configure_jobid = scsh.submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name)
 
 	print("c Running configuration in parallel. Waiting for Slurm job with id: {}".format(configure_jobid))
 
 	# Write most recent run to file
-	last_configuration_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '/' + sgh.sparkle_last_configuration_file_name
+	last_configuration_file_path = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/' + sgh.sparkle_last_configuration_file_name
 
 	fout = open(last_configuration_file_path, 'w+')
 	fout.write('solver ' + str(solver) + '\n')
