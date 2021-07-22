@@ -20,8 +20,8 @@ from typing import Tuple
 
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_add_configured_solver_help as sacsh
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_add_solver_help as sash
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help import sparkle_instances_help as sih
@@ -113,7 +113,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
 
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
-	smac_paramfile = 'example_scenarios/' + solver_name + '_' + instance_set_train_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
+	smac_paramfile = 'example_scenarios/' + solver_name + '_' + instance_set_train_name + r'/' + sash.get_pcs_file_from_solver_directory(smac_solver_dir)
 	if instance_type == InstanceType.TRAIN:
 		smac_outdir = 'example_scenarios/' + solver_name + '_' + instance_set_train_name + r'/' + 'outdir_' + inst_type + '_' + config_type + '/'
 	else:
@@ -149,7 +149,7 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str)
 
 	smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time, smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
-	smac_paramfile = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + sacsh.get_pcs_file_from_solver_directory(smac_solver_dir)
+	smac_paramfile = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + sash.get_pcs_file_from_solver_directory(smac_solver_dir)
 	smac_outdir = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + 'outdir_train_configuration/'
 	smac_instance_file = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + instance_set_name + '_train.txt'
 	smac_test_instance_file = smac_instance_file
@@ -198,11 +198,11 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
 
 def create_configuration_directory(solver_name: str, instance_set_name: str):
 	smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
-	sacsh.create_necessary_files_for_configured_solver(smac_solver_dir)
+	sash.create_necessary_files_for_configured_solver(smac_solver_dir)
 
 	# Copy PCS file to smac_solver_dir
 	solver_diretory = 'Solvers/' + solver_name + '/'
-	pcs_file = solver_diretory + sacsh.get_pcs_file_from_solver_directory(solver_diretory)
+	pcs_file = solver_diretory + sash.get_pcs_file_from_solver_directory(solver_diretory)
 	command_line = 'cp ' + pcs_file + ' ' + smac_solver_dir
 	os.system(command_line)
 
@@ -460,7 +460,7 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name):
 
 	# Read existing PCS file and create output content
 	solver_diretory = 'Solvers/' + solver_name
-	pcs_file = solver_diretory + '/' + sacsh.get_pcs_file_from_solver_directory(solver_diretory)
+	pcs_file = solver_diretory + '/' + sash.get_pcs_file_from_solver_directory(solver_diretory)
 	pcs_file_out = []
 
 	with open(pcs_file) as infile:

@@ -43,3 +43,13 @@ def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
 
 	return ''
 
+def create_necessary_files_for_configured_solver(smac_solver_dir: str):
+	outdir_dir = smac_solver_dir + '/' + 'outdir_train_configuration/'
+	command_line = 'mkdir -p ' + outdir_dir
+	os.system(command_line)
+
+	tmp_dir = smac_solver_dir + '/' + 'tmp/'
+	command_line = 'mkdir -p ' + tmp_dir
+	os.system(command_line)
+
+	return
