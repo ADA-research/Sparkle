@@ -2,8 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 import os
+from os.path import abspath, dirname, join
 import sys
 import fcntl
+from shutil import which
 
 if __name__ == r'__main__':
 	
@@ -28,7 +30,7 @@ if __name__ == r'__main__':
 	fout.write('set ylabel \'%s, PAR10\'' % (portfolio_selector_sparkle_name)  + '\n')
 	fout.write('set title \'%s vs %s\'' % (portfolio_selector_sparkle_name, vbs_name)  + '\n')
 	fout.write('unset key'  + '\n')
-	fout.write('set xrange [0.01:%s]' % (penalty_time) + '\n')
+	fout.write('set xrange [0.01}:%s]' % (penalty_time) + '\n')
 	fout.write('set yrange [0.01:%s]' % (penalty_time)  + '\n')
 	fout.write('set logscale x'  + '\n')
 	fout.write('set logscale y'  + '\n')
@@ -43,8 +45,10 @@ if __name__ == r'__main__':
 	cmd = "gnuplot \'%s\'" % (output_gnuplot_script)
 	os.system(cmd)
 	
-	cmd = "epstopdf \'%s\'" % (output_eps_file)
-	os.system(cmd)
+	# Some systems are missing epstopdf so a copy is included
+	epsbackup = abspath(join(dirname(__file__), "..", "epstopdf.pl"))
+	epstopdf = which("epstopdf") or epsbackup
+	os.system("%s '%s'" % (epstopdf, output_eps_file))
 	
-	os.system('rm -f \'%s\'' % (output_gnuplot_script))
+	os.system("rm -f '%s'" % (output_gnuplot_script))
 	

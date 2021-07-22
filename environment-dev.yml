@@ -1,0 +1,20 @@
+name: sparkle-dev
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3
+  - swig=3.0
+  - gnuplot
+  - pip
+  - pip:
+    # For Sparkle
+    - numpy
+    - pandas
+    # For AutoFolio
+    - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
+    - xgboost
+    - scikit-learn
+    - ConfigSpace
+    - smac
+    - scipy==1.6.3  # 1.7.x removed a private function used by smac
