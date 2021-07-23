@@ -313,9 +313,7 @@ def handle_waiting_and_removal_process(logging_file: str, job_number: str, solve
     return True
 
 def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: int)->bool:
-    print('DEBUG cutoff_time: ' + str(cutoff_time))
 
-    #TODO add performance functionality
     if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
         performance = 'QUALITY_ABSOLUTE'
     else:
