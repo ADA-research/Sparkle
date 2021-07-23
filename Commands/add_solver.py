@@ -43,8 +43,7 @@ if __name__ == r'__main__':
 	parser.add_argument('--run-solver-later', action='store_true', help='do not immediately run the newly added solver')
 	parser.add_argument('--nickname', type=str, help='set a nickname for the solver')
 	parser.add_argument('--parallel', action='store_true', help='run the solver on multiple instances in parallel')
-	# TODO choose a less confusing argument name
-	parser.add_argument('--solver-instances', default=1, type=int, action=ac.SetByUser, help='if a solver is NOT deterministic this argument can be used to add multiple instances of the solver')
+	parser.add_argument('--solver-variations', default=1, type=int, action=ac.SetByUser, help='This argument can be used to add multiple instances of the solver, note this makes use of the seed number of the solver.')
 
 	# Process command line arguments
 	args = parser.parse_args()
@@ -57,9 +56,9 @@ if __name__ == r'__main__':
 	my_flag_run_solver_later = args.run_solver_later
 	nickname_str = args.nickname
 	my_flag_parallel = args.parallel
-	if ac.set_by_user(args, 'solver_instances'):
-		solver_instances = args.solver_instances
-		if solver_instances < 1: solver_instances = 1
+	if ac.set_by_user(args, 'solver_variations'):
+		solver_variations = args.solver_variations
+		if solver_variations < 1: solver_variations = 1
 	
 	# Start add solver
 	last_level_directory = r''
@@ -71,8 +70,8 @@ if __name__ == r'__main__':
 	else:
 		print(r'c Solver ' + sfh.get_last_level_directory_name(solver_diretory) + r' already exists!')
 		if deterministic == 0:
-			print(r'c adding ' + solver_instances + r' solver instance(s)!')
-			sfh.change_solver_instances_from_solver_list(solver_diretory,solver_instances,True)
+			print(r'c adding ' + solver_variations + r' solver instance(s)!')
+			sfh.change_solver_variations_from_solver_list(solver_diretory,solver_variations,True)
 			sys.exit() 
 		else:
 			print(r'c Do not add solver ' + sfh.get_last_level_directory_name(solver_diretory))
@@ -85,7 +84,7 @@ if __name__ == r'__main__':
 	performance_data_csv.update_csv()
 
 	sgh.solver_list.append(solver_diretory)
-	sfh.add_new_solver_into_file(solver_diretory, deterministic, solver_instances)
+	sfh.add_new_solver_into_file(solver_diretory, deterministic, solver_variations)
 	
 	if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
 		print('c pcs file detected, this is a configurable solver')
