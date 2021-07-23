@@ -34,14 +34,14 @@ if __name__ == r'__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--portfolio-name", type=str, help='Gives a name to the portfolio, otherwise it will overwrite the latest portfolio.')
-    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str, help='List of paths to the solvers, add \",solver_instances\" to the end of a path to add multiple instances of a single solver')
+    parser.add_argument("--nickname", type=str, help='Give a nickname to the portfolio, otherwise it will overwrite the latest portfolio.')
+    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str, help='List of paths to the solvers, add \",solver_variations\" to the end of a path to add multiple instances of a single solver')
     parser.add_argument("--overwrite", default=sgh.settings.DEFAULT_parallel_portfolio_overwriting, action=ac.SetByUser, help='Allows overwrite of the directory, default true if no name is specified otherwise the default is false')
     parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
 
     # Process command line arguments;
     args = parser.parse_args() 
-    portfolio_str = args.portfolio_name
+    portfolio_str = args.nickname
     list_of_solvers = args.solver
     #If no solvers are given all previously added solvers are used
     #TODO only use all solvers which havent been used yet
@@ -56,12 +56,11 @@ if __name__ == r'__main__':
         overwrite = args.overwrite
         if portfolio_str is None: overwrite = True
     if portfolio_str is not None:
-        portfolio_path = "Sparkle_Parallel_portfolio/" + portfolio_str
+        portfolio_path = "Sparkle_Parallel_Portfolio/" + portfolio_str
     else:
         portfolio_path = sgh.sparkle_parallel_portfolio_path
     print('c Start constructing Sparkle parallel portfolio ...')
 
-    #TODO use relative solver path
     success = scpp.construct_sparkle_parallel_portfolio(Path(portfolio_path),overwrite,list_of_solvers)
     
     if success:
@@ -75,8 +74,7 @@ if __name__ == r'__main__':
         sgh.latest_scenario.set_parallel_portfolio_instance()
     else:
         #TODO unsuccesful logging
+        print('c An error occurred when constructing the portfolio, please check your input and try again.')
         pass
     # Write used settings to file
     sgh.settings.write_used_settings()
-
-    print('DEBUG After adding into scenario')
