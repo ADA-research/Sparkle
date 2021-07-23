@@ -270,10 +270,10 @@ def add_used_instance_into_file(filepath):
 	fo.close()
 	return
 
-def add_new_solver_into_file(filepath, deterministic='0',solver_instances='1'):
+def add_new_solver_into_file(filepath, deterministic='0',solver_variations='1'):
 	fo = open(sgh.solver_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	fo.write(filepath + r' ' + deterministic + r' ' + str(solver_instances) + '\n')
+	fo.write(filepath + r' ' + deterministic + r' ' + str(solver_variations) + '\n')
 	fo.close()
 	return
 
@@ -354,7 +354,7 @@ def remove_from_solver_list(filepath):
 
 	return
 
-def change_solver_instances_from_solver_list(filepath, solver_instances, add=False):
+def change_solver_variations_from_solver_list(filepath, solver_variations, add=False):
 	newlines = []
 
 	# Store lines that do not contain filepath
@@ -365,8 +365,8 @@ def change_solver_instances_from_solver_list(filepath, solver_instances, add=Fal
 			else:
 				right_index = line.rfind(r' ')
 				if add:
-					solver_instances = str(int(line[right_index+1:]) + int(solver_instances))
-				updatedLine = line[:right_index+1] + str(solver_instances)
+					solver_variations = str(int(line[right_index+1:]) + int(solver_variations))
+				updatedLine = line[:right_index+1] + str(solver_variations)
 				newlines.append(updatedLine)
 
 	# Overwrite the file with stored lines
@@ -376,17 +376,17 @@ def change_solver_instances_from_solver_list(filepath, solver_instances, add=Fal
 
 	return
 
-def get_solver_instances_from_solver_list(filepath):
+def get_solver_variations_from_solver_list(filepath):
 	# Default value (only needed for outdated solver_lists)
-	solver_instances = '1'
+	solver_variations = '1'
 
 	with open(sgh.solver_list_path, 'r') as infile:
 		for line in infile:
 			if filepath in line:
 				right_index = line.rfind(r' ')
-				solver_instances = line[right_index+1:]
+				solver_variations = line[right_index+1:]
 
-	return solver_instances
+	return solver_variations
 
 def write_solver_nickname_mapping():
 	fout = open(sgh.solver_nickname_list_path, 'w+')
