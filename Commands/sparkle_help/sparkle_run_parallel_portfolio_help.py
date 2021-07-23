@@ -21,6 +21,8 @@ from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 def add_log_statement_to_file(logging_file: str, line: str, jobtime: str):
+    # log a statement to a given file
+    # The statement contains the starting time, end time and job number
     now = datetime.datetime.now()
     convert_to_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
     job_running_time = datetime.timedelta(seconds=int(convert_to_seconds))
@@ -40,6 +42,8 @@ def add_log_statement_to_file(logging_file: str, line: str, jobtime: str):
     return
 
 def log_computation_time(logging_file: str, job_nr: str, job_duration: str):
+    # Logging a less verbose log statement
+    # The statement contains the job_nr and job_duration
     if ':' in str(job_duration):
         convert_to_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(str(job_duration).split(':'))))
         job_duration = str(convert_to_seconds)
@@ -123,7 +127,7 @@ def find_finished_time_finished_solver(solver_array_list: list, finished_job_arr
 
 def cancel_remaining_jobs(logging_file: str, job_id:str, finished_job_array: list, portfolio_size: int, solver_array_list: list, pending_job_with_new_cutoff: dict = {}):
     # Find all job_array_numbers that are currently running
-    result = subprocess.run(['squeue', '-r', '-j', job_id], capture_output=True, text=True)
+    result = subprocess.run(['squeue', '--array', '--jobs', job_id], capture_output=True, text=True)
     remaining_jobs = {}
     for jobs in result.stdout.strip().split('\n'):
             jobid = jobs.strip().split()[0]
@@ -172,14 +176,14 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
     current_solver_list = remaining_job_list
     finished_solver_list = []
     while not done:
-        result = subprocess.run(['squeue', '-r', '-j', job_id], capture_output=True, text=True)
+        result = subprocess.run(['squeue', '--array', '--jobs', job_id], capture_output=True, text=True)
         if ' R ' not in str(result):
             if len(result.stdout.strip().split('\n')) == 1:
-                done = True
+                done = True # No jobs are remaining
                 break
-            sjh.sleep(n_seconds) #No jobs have started yet;
+            sjh.sleep(n_seconds) # No jobs have started yet;
         elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
-            if started == False:
+            if started == False: # Log starting time
                 now = datetime.datetime.now()
                 current_time = now.strftime("%H:%M:%S")
                 fo = open(logging_file, 'a+')
@@ -202,7 +206,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
                     log_computation_time(logging_file2,finished_solver,newCutoffTime)
             done = True
         else:
-            if started == False:
+            if started == False: # Log starting time
                 now = datetime.datetime.now()
                 current_time = now.strftime("%H:%M:%S")
                 fo = open(logging_file, 'a+')
@@ -216,13 +220,16 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
                 jobid = jobs.strip().split()[0]
                 jobtime = jobs.strip().split()[5]
                 jobstatus = jobs.strip().split()[4]
-                if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
+                if jobid in pending_job_with_new_cutoff and jobstatus == 'R': 
+                    # Job is in a portfolio with a solver that already has finished 
+                    # and has to be cancelled in the finishing time of that solver
                     current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
                     sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
                     command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobid)
                     add_log_statement_to_file(logging_file, command_line, jobtime)
                     pending_job_with_new_cutoff.pop(jobid)
                 if(jobid.startswith(str(job_id))):
+                    # add the job to the current solver list
                     current_solver_list.append(jobid[jobid.find('_')+1:])
             number_of_solvers = len(current_solver_list)
 
@@ -234,7 +241,7 @@ def generate_sbatch_script(parameters, num_jobs):
     sbatch_script_dir = sgh.sparkle_tmp_path
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
 
-    ## Set sbatch options
+    # Set sbatch options
     max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
     if num_jobs < max_jobs:
         max_jobs = num_jobs
@@ -250,24 +257,25 @@ def generate_sbatch_script(parameters, num_jobs):
     # Create job list
     job_params_list = parameters
 
-    ## Set srun options
+    # Set srun options
     srun_options_str = '-N1 -n1'
     srun_options_str = srun_options_str + ' ' + ssh.get_slurm_srun_user_options_str()
 
-    ## Create target call
+    # Create target call
     target_call_str = 'Commands/sparkle_help/run_solvers_core.py --run-status-path Tmp/SBATCH_Parallel_Portfolio_Jobs/'
 
-    ## Generate script
+    # Generate script
     ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str)
 
     return sbatch_script_name, sbatch_script_dir
 
 def generate_parameters(solver_list, instance_path_list, cutoff_time, performance, num_jobs):
-    # TODO add cutoff_time
+    # The function generates the parameters used in the SBATCH script of the portfolio
     parameters = list()
     new_num_jobs = num_jobs
     solver_array_list = []
     tmp_solver_instances = []
+    # Adds all the jobs of instances and their portfolio to the parameter list
     for instance_path in instance_path_list:
         for solver in solver_list:
             if " " in solver:
@@ -287,6 +295,7 @@ def generate_parameters(solver_list, instance_path_list, cutoff_time, performanc
     return parameters, new_num_jobs, solver_array_list, list(dict.fromkeys(tmp_solver_instances))
 
 def run_sbatch(sbatch_script_path,sbatch_script_name):
+    # Run the SBATCH script
     sbatch_shell_script_path_str = str(sbatch_script_path) + str(sbatch_script_name)
 
     os.system('chmod a+x ' + sbatch_shell_script_path_str)
@@ -301,6 +310,7 @@ def run_sbatch(sbatch_script_path,sbatch_script_name):
 def handle_waiting_and_removal_process(logging_file: str, job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list, pending_job_with_new_cutoff: dict, started: bool):
     if len(remaining_job_list): 
         print('c a job has ended, remaining jobs = ' + str(len(remaining_job_list)))
+    # Monitors the running jobs waiting for a solver that finishes
     finished_jobs, pending_job_with_new_cutoff, started = wait_for_finished_solver(logging_file, job_number, solver_array_list, remaining_job_list, pending_job_with_new_cutoff, started)
 
     # Handles the updating of all jobs within the portfolios of which contain a finished job
@@ -351,8 +361,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
             
 
     except Exception as e:
-        # DEBUG
-        print(e)
+        # print(e) # Use this for debugging
         print('c an error occurred when running the portfolio')
         return False
 
