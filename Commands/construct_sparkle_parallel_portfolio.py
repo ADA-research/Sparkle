@@ -43,11 +43,11 @@ if __name__ == r'__main__':
     args = parser.parse_args() 
     portfolio_str = args.nickname
     list_of_solvers = args.solver
-    #If no solvers are given all previously added solvers are used
-    #TODO only use all solvers which havent been used yet
+    
+    # If no solvers are given all previously added solvers are used
     if list_of_solvers is None: list_of_solvers = sgh.solver_list
-
-    if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE) # Do first, so other command line options can override settings from the file
+    # Do first, so other command line options can override settings from the file
+    if ac.set_by_user(args, 'settings_file'): sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if ac.set_by_user(args, 'overwrite'): 
         if(args.overwrite != 'True'): args.overwrite = False
         sgh.settings.set_parallel_portfolio_overwriting_flag(args.overwrite, SettingState.CMD_LINE)
@@ -73,8 +73,7 @@ if __name__ == r'__main__':
         # Set to default to overwrite possible old instance used
         sgh.latest_scenario.set_parallel_portfolio_instance()
     else:
-        #TODO unsuccesful logging
-        print('c An error occurred when constructing the portfolio, please check your input and try again.')
+        print('c An unexpected error occurred when constructing the portfolio, please check your input and try again.')
         pass
     # Write used settings to file
     sgh.settings.write_used_settings()
