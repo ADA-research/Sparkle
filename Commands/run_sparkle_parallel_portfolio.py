@@ -37,8 +37,7 @@ if __name__ == r'__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance-paths", default=sgh.instance_list, metavar='N', nargs="+", type=str, action=ac.SetByUser, help='Specify the instance_path(s) on which the portfolio will run.')
     parser.add_argument("--portfolio-name", default=sgh.latest_scenario.get_parallel_portfolio_path(),type=str, action=ac.SetByUser, help='Specify the name of the portfolio, if the portfolio is not in the standard location use its full path. The default is the latest Portfolio created.')
-    #TODO change default settings to a getter
-    parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.DEFAULT_general_performance_measure, action=ac.SetByUser, help='the performance measure, e.g. runtime')
+    parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.get_general_performance_measure(), action=ac.SetByUser, help='the performance measure, e.g. runtime')
     parser.add_argument("--cutoff-time", default=sgh.settings.get_general_target_cutoff_time(), type=int, action=ac.SetByUser, help='The duration the portfolio will run before the program is stopped')
 
     # Process command line arguments
@@ -83,7 +82,7 @@ if __name__ == r'__main__':
             sys.exit("c No unused instances found, aborting the process")
     
     if ac.set_by_user(args, 'cutoff_time'):
-        #TODO write the used time into settings.
+        sgh.set_general_target_cutoff_time(args.cutoff_time)
         pass    
     cutoff_time = args.cutoff_time
     
@@ -101,3 +100,5 @@ if __name__ == r'__main__':
         
         # Write used settings to file
         sgh.settings.write_used_settings()
+    else:
+        print('c An unexpected error occurred, please check your input an try again.')
