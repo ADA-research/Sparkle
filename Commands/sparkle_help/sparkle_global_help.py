@@ -182,12 +182,6 @@ extractor_nickname_mapping = {}
 extractor_feature_vector_size_mapping = {}
 instance_list = []
 
-global used_instance_list_file
-global used_instance_list
-
-used_instance_list_file = Path('Instances/sparkle_used_instances.txt')
-used_instance_list = []
-
 if os.path.exists(extractor_nickname_list_path):
 	fo = open(extractor_nickname_list_path, 'r+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
