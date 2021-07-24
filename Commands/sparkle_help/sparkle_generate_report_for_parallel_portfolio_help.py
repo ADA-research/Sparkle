@@ -18,7 +18,7 @@ import compute_marginal_contribution as cmc
 def get_numSolvers(parallel_portfolio_path: str):
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
 	num_solvers = len(solver_list)
-	# If a solver contains multiple solver_instances.
+	# If a solver contains multiple solver_variations.
 	for solver in solver_list:
 		if ' ' in solver:
 			num_solvers += int(solver[solver.rfind(' ')+1:]) - 1
@@ -36,20 +36,20 @@ def get_solverList(parallel_portfolio_path: str):
 	
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
 	for solver_path in solver_list:
-		solver_instances = 0
+		solver_variations = 0
 		if ' ' in solver_path:
-			solver_instances = int(solver_path[solver_path.rfind(' ')+1:])
+			solver_variations = int(solver_path[solver_path.rfind(' ')+1:])
 			solver_path = solver_path[:solver_path.rfind(' ')]
 		solver_name = sfh.get_file_name(solver_path)
 		if solver_name == "": solver_name = sfh.get_last_level_directory_name(solver_path)
 		x = solver_name.rfind("_")
 		if str(x) != '-1':solver_name = solver_name[:x] + '\\' + solver_name[x:]
 		str_value += r'\item \textbf{' + sgrh.underscore_for_latex(solver_name) + r'}' + '\n'
-		if solver_instances > 1:
+		if solver_variations > 1:
 			seed_number = r''
-			for instances in range(1,solver_instances+1):
+			for instances in range(1,solver_variations+1):
 				seed_number += str(instances) 
-				if instances != solver_instances: seed_number += r','
+				if instances != solver_variations: seed_number += r','
 			str_value += r'\item[] With seeds: ' + seed_number + '\n'
 		print(str_value)
 	return str_value
@@ -155,12 +155,12 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 	for lines in solver_list:
 		full_solver_list = []
 		if ' ' in lines:
-			for solver_instances in range(1,int(lines[lines.rfind(' ')+1:])+1):
+			for solver_variations in range(1,int(lines[lines.rfind(' ')+1:])+1):
 				solver_path = lines[:lines.rfind(' ')]
-				solver_instance = sfh.get_last_level_directory_name(solver_path)
-				if '/' in solver_instance: solver_instance = solver_instance[:solver_instance.rfind('/')]
-				solver_instance = r'Tmp/' + solver_instance + r'_seed_' + str(solver_instances)
-				full_solver_list.append(solver_instance)
+				solver_variation = sfh.get_last_level_directory_name(solver_path)
+				if '/' in solver_variation: solver_variation = solver_variation[:solver_variation.rfind('/')]
+				solver_variation = r'Tmp/' + solver_variation + r'_seed_' + str(solver_variations)
+				full_solver_list.append(solver_varation)
 		else: 
 			full_solver_list.append(lines)
 
