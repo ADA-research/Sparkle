@@ -126,7 +126,6 @@ if __name__ == r'__main__':
 
 		delete_task_run_status()
 	elif scenario == Scenario.PARALLELPORTFOLIO:
-		print('DEBUG report generation section')
 		sgrfpph.generate_report(str(parallel_portfolio_path),pap_instance_list)
 		print(r'c Report generated ...')
 	else:
