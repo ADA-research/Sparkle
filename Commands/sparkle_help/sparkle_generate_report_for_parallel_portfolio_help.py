@@ -90,7 +90,6 @@ def get_instanceClassList(instances: list):
 	return str_value, str(nr_of_instances)
 
 def get_results():
-	# TODO add check if instance and solver listed in the result are part of the job
 	solutions_dir  = r'Performance_Data/Tmp_PaP/'
 	results = sfh.get_list_all_result_filename(solutions_dir)
 	results_dict = dict()
@@ -118,7 +117,7 @@ def get_solversWithSolution():
 	
 	results_on_instances = get_results()
 	str_value = ""
-	if sgh.settings.get_general_performance_measure() != PerformanceMeasure.QUALITY_ABSOLUTE:
+	if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME:
 		solver_dict = dict()
 		unsolved_instances = 0
 		for instances in results_on_instances:
@@ -207,7 +206,7 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 	print(sbs_dict)
 	return sbs_dict,sbs_name, mydict
 
-def get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances: str):
+def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances: str):
 	mydict = {}
 
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
@@ -228,30 +227,30 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances: 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, instances: list):
 	str_value = r''
 	dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances)
-	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance(instances)
+	dict_actual_parallel_portfolio_penalty_time_on_each_instance = get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances)
 
 	latex_directory_path = r'Components/Sparkle-latex-generator-for-parallel-portfolio/'
-	figure_portfolio_selector_sparkle_vs_sbs_filename = r'figure_parallel_portfolio_sparkle_vs_sbs'
-	data_portfolio_selector_sparkle_vs_sbs_filename = r'data_parallel_portfolio_sparkle_vs_sbs_filename.dat'
-	data_portfolio_selector_sparkle_vs_sbs_filepath = latex_directory_path + data_portfolio_selector_sparkle_vs_sbs_filename
+	figure_parallel_portfolio_sparkle_vs_sbs_filename = r'figure_parallel_portfolio_sparkle_vs_sbs'
+	data_parallel_portfolio_sparkle_vs_sbs_filename = r'data_parallel_portfolio_sparkle_vs_sbs_filename.dat'
+	data_parallel_portfolio_sparkle_vs_sbs_filepath = latex_directory_path + data_parallel_portfolio_sparkle_vs_sbs_filename
 
-	fout = open(data_portfolio_selector_sparkle_vs_sbs_filepath, 'w+')
+	fout = open(data_parallel_portfolio_sparkle_vs_sbs_filepath, 'w+')
 	for instance in dict_sbs_penalty_time_on_each_instance:
 		sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
-		sparkle_penalty_time = dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]
+		sparkle_penalty_time = dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance]
 		fout.write(str(sbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
 	fout.close()
 
 	penalised_time_str = str(sgh.settings.get_penalised_time())
 
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sgrh.underscore_for_latex(sbs_solver) + ')\' ' + r'Parallel-Portfolio' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
+	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_parallel_portfolio_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sgrh.underscore_for_latex(sbs_solver) + ')\' ' + r'Parallel-Portfolio' + r' ' + figure_parallel_portfolio_sparkle_vs_sbs_filename
 
 	#print(gnuplot_command)
 	
 	os.system(gnuplot_command)
 	
-	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_sbs_filename)
-	return str_value, dict_all_solvers, dict_actual_portfolio_selector_penalty_time_on_each_instance
+	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_parallel_portfolio_sparkle_vs_sbs_filename)
+	return str_value, dict_all_solvers, dict_actual_parallel_portfolio_penalty_time_on_each_instance
 
 def get_wallclock_time(portfolio_path: str):
 	logging_file = str(portfolio_path) + '/logging.txt'
@@ -370,11 +369,11 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	mydict[variable] = str_value
 
 	variable = r'figure-parallel-portfolio-sparkle-vs-sbs'
-	str_value, dict_all_solvers, dict_actual_portfolio_selector_penalty_time_on_each_instance = get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path, instances)
+	str_value, dict_all_solvers, dict_actual_parallel_portfolio_penalty_time_on_each_instance = get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path, instances)
 	mydict[variable] = str_value
 
 	variable = r'resultsTable'
-	str_value = get_resultsTable(dict_all_solvers, parallel_portfolio_path, dict_actual_portfolio_selector_penalty_time_on_each_instance, solvers_with_solution, unsolved_instances, nr_of_instances)
+	str_value = get_resultsTable(dict_all_solvers, parallel_portfolio_path, dict_actual_parallel_portfolio_penalty_time_on_each_instance, solvers_with_solution, unsolved_instances, nr_of_instances)
 	mydict[variable] = str_value
 
 	variable = r'testBool'
