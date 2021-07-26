@@ -390,8 +390,6 @@ def generate_report(parallel_portfolio_path: str, instances: list):
 
 	latex_directory_path = r'Components/Sparkle-latex-generator-for-parallel-portfolio/'
 	latex_template_filename = r'template-Sparkle.tex'
-
-	print(dict_variable_to_value)
 	
 	latex_template_filepath = latex_directory_path + latex_template_filename
 	report_content = r''

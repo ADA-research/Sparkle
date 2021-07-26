@@ -127,12 +127,14 @@ def find_finished_time_finished_solver(solver_array_list: list, finished_job_arr
 
 def cancel_remaining_jobs(logging_file: str, job_id:str, finished_job_array: list, portfolio_size: int, solver_array_list: list, pending_job_with_new_cutoff: dict = {}):
     # Find all job_array_numbers that are currently running
+    # This is specifically for Grace
     result = subprocess.run(['squeue', '--array', '--jobs', job_id], capture_output=True, text=True)
     remaining_jobs = {}
     for jobs in result.stdout.strip().split('\n'):
             jobid = jobs.strip().split()[0]
             jobtime = jobs.strip().split()[5]
             jobstatus = jobs.strip().split()[4]
+            # If a job in a portfolio with a finished solver starts running its timelimit needs to be updated.
             if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
                 current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
                 sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
