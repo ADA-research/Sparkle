@@ -244,8 +244,6 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, i
 	penalised_time_str = str(sgh.settings.get_penalised_time())
 
 	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_parallel_portfolio_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sgrh.underscore_for_latex(sbs_solver) + ')\' ' + r'Parallel-Portfolio' + r' ' + figure_parallel_portfolio_sparkle_vs_sbs_filename
-
-	#print(gnuplot_command)
 	
 	os.system(gnuplot_command)
 	
@@ -408,7 +406,6 @@ def generate_report(parallel_portfolio_path: str, instances: list):
 		variable = r'@@' + variable_key + r'@@'
 		report_content = report_content.replace(variable, str_value)
 
-	#print(report_content)
 	latex_report_filepath = latex_directory_path + latex_report_filename + r'.tex'
 	fout = open(latex_report_filepath, 'w+')
 	fout.write(report_content)
