@@ -11,7 +11,7 @@ LOG/*
 TMP/*
 Feature_Data/*
 Sparkle_Portfolio_Selector/*
-Sparkle_Parallel_portfolio/*
+Sparkle_Parallel_Portfolio/*
 Tmp/*
 Log/*
 Output/*
@@ -40,6 +40,13 @@ Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_vbs_filena
 Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
 Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
 Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
+
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.pdf
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.bbl
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.tex
+Components/Sparkle-latex-generator-for-parallel-portfolio/data_parallel_portfolio_sparkle_vs_sbs_filename.dat
+Components/Sparkle-latex-generator-for-parallel-portfolio/figure_parallel_portfolio_sparkle_vs_sbs.pdf
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report_for_Test.*
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/

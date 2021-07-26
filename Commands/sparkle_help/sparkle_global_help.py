@@ -91,7 +91,7 @@ global sparkle_portfolio_selector_path
 sparkle_portfolio_selector_path = sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name
 
 global sparkle_parallel_portfolio_dir
-sparkle_parallel_portfolio_dir = 'Sparkle_Parallel_portfolio/'
+sparkle_parallel_portfolio_dir = 'Sparkle_Parallel_Portfolio/'
 
 global sparkle_parallel_portfolio_name
 sparkle_parallel_portfolio_name = 'sparkle_parallel_portfolio'

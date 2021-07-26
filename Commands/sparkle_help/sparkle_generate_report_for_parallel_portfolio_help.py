@@ -160,7 +160,7 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 				solver_variation = sfh.get_last_level_directory_name(solver_path)
 				if '/' in solver_variation: solver_variation = solver_variation[:solver_variation.rfind('/')]
 				solver_variation = r'Tmp/' + solver_variation + r'_seed_' + str(solver_variations)
-				full_solver_list.append(solver_varation)
+				full_solver_list.append(solver_variation)
 		else: 
 			full_solver_list.append(lines)
 
