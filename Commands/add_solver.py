@@ -70,8 +70,8 @@ if __name__ == r'__main__':
 	else:
 		print(r'c Solver ' + sfh.get_last_level_directory_name(solver_diretory) + r' already exists!')
 		# Adding additional variations of a solver
-		if deterministic == 0:
-			print(r'c adding ' + solver_variations + r' solver variation(s)!')
+		if deterministic == '0':
+			print(r'c adding ' + str(solver_variations) + r' solver variation(s)!')
 			sfh.change_solver_variations_from_solver_list(solver_diretory,solver_variations,True)
 			sys.exit() 
 		else:
