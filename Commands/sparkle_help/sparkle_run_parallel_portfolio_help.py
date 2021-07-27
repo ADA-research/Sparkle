@@ -239,7 +239,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
 
     return finished_solver_list, pending_job_with_new_cutoff, started
 
-def generate_sbatch_script(parameters, num_jobs):
+def generate_parallel_portfolio_sbatch_script(parameters, num_jobs):
     # Set script name and path
     sbatch_script_name = 'parallel_portfolio_sbatch_shell_script_' + str(num_jobs) + '_' + sbh.get_time_pid_random_string() + '.sh'
     sbatch_script_dir = sgh.sparkle_tmp_path
@@ -273,7 +273,7 @@ def generate_sbatch_script(parameters, num_jobs):
 
     return sbatch_script_name, sbatch_script_dir
 
-def generate_parameters(solver_list, instance_path_list, performance, num_jobs):
+def generate_SBATCH_job_list(solver_list, instance_path_list, performance, num_jobs):
     # The function generates the parameters used in the SBATCH script of the portfolio
     parameters = list()
     new_num_jobs = num_jobs
@@ -337,20 +337,19 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
     num_jobs = len(solver_list) * len(instances)
 
     # Makes SBATCH scripts for all individual solvers in a list
-    parameters, num_jobs, solver_array_list, temp_solvers = generate_parameters(solver_list, instances, performance, num_jobs)
+    parameters, num_jobs, solver_array_list, temp_solvers = generate_SBATCH_job_list(solver_list, instances, performance, num_jobs)
     
     # Generates a SBATCH script which uses the created parameters
-    sbatch_script_name,sbatch_script_path = generate_sbatch_script(parameters, num_jobs)
+    sbatch_script_name,sbatch_script_path = generate_parallel_portfolio_sbatch_script(parameters, num_jobs)
     # Runs the script and cancels the remaining scripts if a script finishes before the end of the cutoff_time
+    file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "Log/logging.txt"))
+    file_path_output2 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "Log/logging2.txt"))
+    sfh.create_new_empty_file(file_path_output1)
+    sfh.create_new_empty_file(file_path_output2)
     try:
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         
         if(performance == 'RUNTIME'):
-
-            file_path_output1 = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "logging.txt")
-            file_path_output2 = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "logging2.txt")
-            sfh.create_new_empty_file(file_path_output1)
-            sfh.create_new_empty_file(file_path_output2)
             
             handle_waiting_and_removal_process(file_path_output1, job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {}, False)
             now = datetime.datetime.now()
@@ -367,7 +366,11 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
             
 
     except Exception as e:
-        # print(e) # Use this for debugging
+        fo = open(file_path_output1, 'a+')
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        fo.write(e)
+        fo.close()    
+        
         print('c an error occurred when running the portfolio')
         return False
 
