@@ -82,22 +82,20 @@ if __name__ == r'__main__':
             sys.exit("c No unused instances found, aborting the process")
     
     if ac.set_by_user(args, 'cutoff_time'):
-        sgh.set_general_target_cutoff_time(args.cutoff_time)
-        pass    
+        sgh.settings.set_general_target_cutoff_time(args.cutoff_time, SettingState.CMD_LINE)
     cutoff_time = args.cutoff_time
     
     if ac.set_by_user(args, 'performance_measure'): sgh.settings.set_general_performance_measure(PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
-    
     print('c Sparkle parallel portfolio is running ...')
     # instance_paths = list of paths to all instances
     # portfolio_path = Path to the portfolio containing the solvers
     # cutoff_time = int of the cutoff_time in seconds (for now)
-    succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path, cutoff_time)
+    succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path)
 
     if succes:
         sgh.latest_scenario.set_parallel_portfolio_instance(instance_paths)    
         print('c Running Sparkle parallel portfolio is done!')
-        
+
         # Write used settings to file
         sgh.settings.write_used_settings()
     else:

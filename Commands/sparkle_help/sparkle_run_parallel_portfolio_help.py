@@ -10,11 +10,13 @@ import datetime
 import math
 import fcntl
 from pathlib import Path
+from pathlib import PurePath
 
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_run_solvers_help as srsh
 from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_logging as slog
 from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
@@ -271,7 +273,7 @@ def generate_sbatch_script(parameters, num_jobs):
 
     return sbatch_script_name, sbatch_script_dir
 
-def generate_parameters(solver_list, instance_path_list, cutoff_time, performance, num_jobs):
+def generate_parameters(solver_list, instance_path_list, performance, num_jobs):
     # The function generates the parameters used in the SBATCH script of the portfolio
     parameters = list()
     new_num_jobs = num_jobs
@@ -324,7 +326,7 @@ def handle_waiting_and_removal_process(logging_file: str, job_number: str, solve
 
     return True
 
-def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: int)->bool:
+def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
 
     if sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
         performance = 'QUALITY_ABSOLUTE'
@@ -335,7 +337,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
     num_jobs = len(solver_list) * len(instances)
 
     # Makes SBATCH scripts for all individual solvers in a list
-    parameters, num_jobs, solver_array_list, temp_solvers = generate_parameters(solver_list, instances, cutoff_time, performance, num_jobs)
+    parameters, num_jobs, solver_array_list, temp_solvers = generate_parameters(solver_list, instances, performance, num_jobs)
     
     # Generates a SBATCH script which uses the created parameters
     sbatch_script_name,sbatch_script_path = generate_sbatch_script(parameters, num_jobs)
@@ -344,14 +346,16 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path, cutoff_time: i
         job_number = run_sbatch(sbatch_script_path,sbatch_script_name)
         
         if(performance == 'RUNTIME'):
-            logging_file = str(portfolio_path) + '/logging2.txt'
-            sfh.create_new_empty_file(logging_file)
-            logging_file = str(portfolio_path) + '/logging.txt'
-            sfh.create_new_empty_file(logging_file)
-            handle_waiting_and_removal_process(logging_file, job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {}, False)
+
+            file_path_output1 = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "logging.txt")
+            file_path_output2 = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "logging2.txt")
+            sfh.create_new_empty_file(file_path_output1)
+            sfh.create_new_empty_file(file_path_output2)
+            
+            handle_waiting_and_removal_process(file_path_output1, job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {}, False)
             now = datetime.datetime.now()
             current_time = now.strftime("%H:%M:%S")
-            fo = open(logging_file, 'a+')
+            fo = open(file_path_output1, 'a+')
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             fo.write(r'ending time of portfolio: ' + current_time + '\n')
             fo.close()    

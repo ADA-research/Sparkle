@@ -105,26 +105,6 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 
 	return instance_list
 
-def get_used_instance_list_from_file(instances_path: Path)->List[str]:
-	used_instance_list = []
-	used_instance_path_str = str(instances_path)
-	
-	#read used instances from file
-	used_instance_file_path = sgh.used_instance_list_file
-
-	with used_instance_file_path.open('r') as infile:
-		lines = infile.readlines()
-
-		for line in lines:
-			words = line.strip().split()
-
-			if len(words) <= 0:
-				continue
-			elif line.strip().startswith(used_instance_path_str):
-				used_instance_list.append(line.strip())
-	
-	return used_instance_list
-
 def get_solver_list_from_parallel_portfolio(portfolio_path: Path)->List[str]:
 	portfolio_solver_list = []
 	portfolio_solvers_path_str = str(portfolio_path)
@@ -258,13 +238,6 @@ def get_list_all_statusinfo_filename(filepath):
 
 def add_new_instance_into_file(filepath):
 	fo = open(str(sgh.instance_list_path), 'a+')
-	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	fo.write(filepath + '\n')
-	fo.close()
-	return
-
-def add_used_instance_into_file(filepath):
-	fo = open(str(sgh.used_instance_list_file), 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(filepath + '\n')
 	fo.close()
