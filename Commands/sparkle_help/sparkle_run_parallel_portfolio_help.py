@@ -180,12 +180,15 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
     current_solver_list = remaining_job_list
     finished_solver_list = []
     while not done:
+        # Ask the cluster for a list of all jobs which are currently running
         result = subprocess.run(['squeue', '--array', '--jobs', job_id], capture_output=True, text=True)
+        # If none of the jobs on the cluster are running then nothing has to done yet, check back in n_seconds
         if ' R ' not in str(result):
             if len(result.stdout.strip().split('\n')) == 1:
                 done = True # No jobs are remaining
                 break
             sjh.sleep(n_seconds) # No jobs have started yet;
+        # If the results are less than the number of solvers then this means that the are finished solvers(+1 becuase of the header of results)
         elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
             if started == False: # Log starting time
                 now = datetime.datetime.now()
@@ -209,6 +212,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
                     logging_file2 = logging_file[:logging_file.rfind('.')] + r'2.txt'
                     log_computation_time(logging_file2,finished_solver,newCutoffTime)
             done = True
+        # No jobs have finished but some jobs are running
         else:
             if started == False: # Log starting time
                 now = datetime.datetime.now()
@@ -220,6 +224,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
                 started = True
             sjh.sleep(n_seconds)
             current_solver_list = []
+            # Check if the running jobs are from a portfolio which contain an already finished solver
             for jobs in result.stdout.strip().split('\n'):
                 jobid = jobs.strip().split()[0]
                 jobtime = jobs.strip().split()[5]
@@ -371,7 +376,8 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
         fo.write(e)
         fo.close()    
         
-        print('c an error occurred when running the portfolio')
+        print('c an error occurred when running the portfolio please check your input or \n ')
+        print('c look at the logs of the command in the Output/ directory')
         return False
 
     return True
