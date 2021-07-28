@@ -64,8 +64,7 @@ if __name__ == r"__main__":
         type=Path,
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than "
-              "the default"),
+        help="specify the settings file to use instead of the default",
     )
 
     # Process command line arguments
@@ -119,7 +118,9 @@ if __name__ == r"__main__":
         )
 
         # Copy file listing test instances to smac solver directory
-        scsh.handle_file_instance_test(solver_name, instance_set_test_name)
+        scsh.handle_file_instance(
+            solver_name, instance_set_train_name, instance_set_test_name, "test"
+        )
 
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(
@@ -147,7 +148,7 @@ if __name__ == r"__main__":
         sgh.smac_dir
         + "/example_scenarios/"
         + solver_name
-        + "/"
+        + "_"
         + sgh.sparkle_last_test_file_name
     )
 

@@ -32,7 +32,7 @@ if __name__ == r"__main__":
     solver_path = args.solver_path
 
     if args.nickname:
-        solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]
+        solver_path = sparkle_global_help.solver_nickname_mapping[nickname_str]
     if not os.path.exists(solver_path):
         print(r"c Solver path " + "'" + solver_path + "'" + r" does not exist!")
         sys.exit()
@@ -72,7 +72,11 @@ if __name__ == r"__main__":
 
     solver_name = sfh.get_last_level_directory_name(solver_path)
     smac_solver_path = (
-        sparkle_global_help.smac_dir + r"/" + r"example_scenarios/" + solver_name + r"/"
+        sparkle_global_help.smac_dir
+        + r"/"
+        + r"example_scenarios/"
+        + solver_name
+        + r"_*/"
     )
     if os.path.exists(smac_solver_path):
         command_line = r"rm -rf " + smac_solver_path

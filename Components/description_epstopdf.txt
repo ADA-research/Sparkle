@@ -1,0 +1,6 @@
+Source: https://www.ctan.org/tex-archive/support/epstopdf 
+Version: 2.28
+Authors: Sebastian Rahtz, Gerben Wierda, Karl Berry et al.
+Paper: - 
+License: Free license
+License location: epstopdf.pl header

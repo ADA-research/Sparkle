@@ -11,7 +11,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_job_parallel_help
-from sparkle_help import sparkle_add_configured_solver_help as sacsh
+from sparkle_help import sparkle_add_solver_help as sash
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_command_help import CommandName
@@ -28,7 +28,10 @@ if __name__ == r"__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "solver_path", metavar="solver-path", type=str, help="path to the solver"
+        "solver_path",
+        metavar="solver-path",
+        type=str,
+        help="path to the solver"
     )
     parser.add_argument(
         "--deterministic",
@@ -42,7 +45,11 @@ if __name__ == r"__main__":
         action="store_true",
         help="do not immediately run the newly added solver",
     )
-    parser.add_argument("--nickname", type=str, help="set a nickname for the solver")
+    parser.add_argument(
+        "--nickname",
+        type=str,
+        help="set a nickname for the solver"
+    )
     parser.add_argument(
         "--parallel",
         action="store_true",
@@ -65,37 +72,31 @@ if __name__ == r"__main__":
     last_level_directory = r""
     last_level_directory = sfh.get_last_level_directory_name(solver_source)
 
-    solver_diretory = r"Solvers/" + last_level_directory
-    if not os.path.exists(solver_diretory):
-        Path(solver_diretory).mkdir(parents=True, exist_ok=True)
+    solver_directory = sash.get_solver_directory(last_level_directory)
+    if not os.path.exists(solver_directory):
+        Path(solver_directory).mkdir(parents=True, exist_ok=True)
     else:
-        print(
-            r"c Solver "
-            + sfh.get_last_level_directory_name(solver_diretory)
-            + r" already exists!"
-        )
-        print(
-            r"c Do not add solver " + sfh.get_last_level_directory_name(solver_diretory)
-        )
+        print(r"c Solver " + last_level_directory + r" already exists!")
+        print(r"c Do not add solver " + last_level_directory)
         sys.exit()
 
-    os.system(r"cp -r " + solver_source + r"/* " + solver_diretory)
+    os.system(r"cp -r " + solver_source + r"/* " + solver_directory)
 
     performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
         sgh.performance_data_csv_path
     )
-    performance_data_csv.add_column(solver_diretory)
+    performance_data_csv.add_column(solver_directory)
     performance_data_csv.update_csv()
 
-    sgh.solver_list.append(solver_diretory)
-    sfh.add_new_solver_into_file(solver_diretory, deterministic)
+    sgh.solver_list.append(solver_directory)
+    sfh.add_new_solver_into_file(solver_directory, deterministic)
 
-    if sacsh.check_adding_solver_contain_pcs_file(solver_diretory):
-        print("c pcs file detected, this is a configurable solver")
+    if sash.check_adding_solver_contain_pcs_file(solver_directory):
+        print("c one pcs file detected, this is a configurable solver")
 
     print(
         "c Adding solver "
-        + sfh.get_last_level_directory_name(solver_diretory)
+        + sfh.get_last_level_directory_name(solver_directory)
         + " done!"
     )
 
@@ -114,8 +115,8 @@ if __name__ == r"__main__":
         print("c Removing Sparkle report " + sgh.sparkle_report_path + " done!")
 
     if nickname_str is not None:
-        sgh.solver_nickname_mapping[nickname_str] = solver_diretory
-        sfh.add_new_solver_nickname_into_file(nickname_str, solver_diretory)
+        sgh.solver_nickname_mapping[nickname_str] = solver_directory
+        sfh.add_new_solver_nickname_into_file(nickname_str, solver_directory)
         pass
 
     if not my_flag_run_solver_later:
