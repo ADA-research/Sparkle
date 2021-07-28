@@ -6,7 +6,7 @@
 image: continuumio/miniconda3:latest
 
 pipelines:
-  pull-request:
+  pull-requests:
     '*':
       - parallel:
         - step:
