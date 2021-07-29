@@ -32,7 +32,7 @@ if __name__ == r"__main__":
     solver_path = args.solver_path
 
     if args.nickname:
-        solver_path = sparkle_global_help.solver_nickname_mapping[nickname_str]
+        solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]
     if not os.path.exists(solver_path):
         print(r"c Solver path " + "'" + solver_path + "'" + r" does not exist!")
         sys.exit()
