@@ -1,0 +1,35 @@
+[flake8]
+
+max-line-length = 99
+max-doc-length = 99
+indent-size = 4
+statistics = True
+max-complexity = 10
+
+# Ignore the unused import in __init__.py
+per-file-ignores = __init__.py:F401
+
+# For now, exlude sparkle_help
+exclude =
+    Commands/sparkle_help,
+    Commands/test,
+    Components,
+    Examples,
+    Extractors,
+    Feature_Data,
+    .git,
+    .gitignore,
+    Instances,
+    Log,
+    Output,
+    Performance_Data,
+    __pycache__,
+    .pytest_cache,
+    Records,
+    Reference_Lists,
+    scratch,
+    Solvers,
+    Sparkle_Portfolio_Selector,
+    Tmp,
+    build,
+    dist
