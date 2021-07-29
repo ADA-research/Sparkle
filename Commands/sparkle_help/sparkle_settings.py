@@ -26,7 +26,6 @@ class PerformanceMeasure(Enum):
 	
 		return performance_measure
 
-
 class SolutionVerifier(Enum):
 	NONE = 0
 	SAT = 1
@@ -39,6 +38,21 @@ class SolutionVerifier(Enum):
 			verifier = SolutionVerifier.SAT
 
 		return verifier
+
+class processMonitoring(Enum):
+	REALISTIC = 0
+	EXTENTED = 1
+	#COMPLETE = 2 # TODO: Add when this functionality is implemented
+
+
+	def from_str(process_monitoring):
+		if process_monitoring == 'REALISTIC':
+			process_monitoring = processMonitoring.REALISTIC
+		elif process_monitoring == 'EXTENDED':
+			process_monitoring = processMonitoring.EXTENDED
+	
+		return process_monitoring
+
 
 
 class SettingState(Enum):
@@ -72,6 +86,7 @@ class Settings:
 	DEFAULT_ablation_racing = False
 
 	DEFAULT_parallel_portfolio_overwriting = False
+	DEFAULT_parallel_portfolio_process_monitoring = processMonitoring.REALISTIC
 
 
 	def __init__(self, file_path: PurePath = None):
@@ -97,6 +112,7 @@ class Settings:
 		self.__ablation_racing_flag_set = SettingState.NOT_SET
 
 		self.__parallel_portfolio_overwriting_flag_set = SettingState.NOT_SET
+		self.__parallel_portfolio_process_monitoring_set = SettingState.NOT_SET
 
 		if file_path == None:
 			# Initialise settings from default file path
@@ -206,6 +222,15 @@ class Settings:
 					value = file_settings.getboolean(section, option)
 					self.set_parallel_portfolio_overwriting_flag(value, state)
 					file_settings.remove_option(section, option)
+
+			section = 'parallelportfolio'
+			option_names = ('process_monitoring', )
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = processMonitoring.from_str(file_settings.get(section, option))
+					self.set_parallel_portfolio_process_monitoring(value, state)
+					file_settings.remove_option(section, option)
+
 
 			# TODO: Report on any unknown settings that were read
 			sections = file_settings.sections()
@@ -555,4 +580,22 @@ class Settings:
 			self.set_parallel_portfolio_overwriting_flag()
 		
 		return bool(self.__settings['parallelportfolio']['overwriting'])
+
+	def set_parallel_portfolio_process_monitoring(self, value: PerformanceMeasure = DEFAULT_parallel_portfolio_process_monitoring, origin: SettingState = SettingState.DEFAULT):
+		section = 'parallelportfolio'
+		name = 'process_monitoring'
+
+		if value != None and self.__check_setting_state(self.__parallel_portfolio_overwriting_flag_set, origin, name):
+			self.__init_section(section)
+			self.__parallel_portfolio_process_monitoring_set = origin
+			self.__settings[section][name] = value.name
+
+		return
+
+
+	def get_parallel_portfolio_process_monitoring(self) -> processMonitoring:
+		if self.__parallel_portfolio_process_monitoring_set == SettingState.NOT_SET:
+			self.set_parallel_portfolio_process_monitoring()
+
+		return processMonitoring.from_str(self.__settings['parallelportfolio']['process_monitoring'])
 

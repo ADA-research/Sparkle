@@ -15,7 +15,7 @@ from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help import argparse_custom as ac
-from sparkle_help.sparkle_settings import SettingState
+from sparkle_help.sparkle_settings import SettingState, processMonitoring
 from sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help.sparkle_settings import PerformanceMeasure
@@ -37,6 +37,7 @@ if __name__ == r'__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance-paths", default=sgh.instance_list, metavar='N', nargs="+", type=str, action=ac.SetByUser, help='Specify the instance_path(s) on which the portfolio will run.')
     parser.add_argument("--portfolio-name", default=sgh.latest_scenario.get_parallel_portfolio_path(),type=str, action=ac.SetByUser, help='Specify the name of the portfolio, if the portfolio is not in the standard location use its full path. The default is the latest Portfolio created.')
+    parser.add_argument("--process-monitoring", choices=processMonitoring.__members__, default=sgh.settings.get_parallel_portfolio_process_monitoring(), action=ac.SetByUser, help='Specify wheneter the monitoring of the portfolio should cancel all solvers within a portfolio once a solver finishes(realistic), or allow all solvers within a portfolio to get an equal chance to have the lowest amount of running time on an instance(extented).')
     parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__, default=sgh.settings.get_general_performance_measure(), action=ac.SetByUser, help='the performance measure, e.g. runtime')
     parser.add_argument("--cutoff-time", default=sgh.settings.get_general_target_cutoff_time(), type=int, action=ac.SetByUser, help='The duration the portfolio will run before the program is stopped')
 
@@ -85,6 +86,10 @@ if __name__ == r'__main__':
         sgh.settings.set_general_target_cutoff_time(args.cutoff_time, SettingState.CMD_LINE)
     cutoff_time = args.cutoff_time
     
+    if ac.set_by_user(args, 'process_monitoring'):
+        sgh.settings.set_parallel_portfolio_process_monitoring(args.process_monitoring, SettingState.CMD_LINE)
+    process_monitoring = args.process_monitoring
+
     if ac.set_by_user(args, 'performance_measure'): sgh.settings.set_general_performance_measure(PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
     print('c Sparkle parallel portfolio is running ...')
     # instance_paths = list of paths to all instances
