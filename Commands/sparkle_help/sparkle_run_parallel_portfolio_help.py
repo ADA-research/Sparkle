@@ -358,7 +358,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
     
     # Generates a SBATCH script which uses the created parameters
     sbatch_script_name,sbatch_script_path = generate_parallel_portfolio_sbatch_script(parameters, num_jobs)
-    
+
     # Runs the script and cancels the remaining scripts if a script finishes before the end of the cutoff_time
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "Log/logging.txt"))
     file_path_output2 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "Log/logging2.txt"))
@@ -375,12 +375,34 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
             fo = open(file_path_output1, 'a+')
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             fo.write(r'ending time of portfolio: ' + current_time + '\n')
-            fo.close()    
+            fo.close() 
+
+            #TODO print solver results
+
             # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
             remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
 
         else:
-            print('c the sbatch job has been generated and submitted,')
+            done = False
+            wait_cutoff_time = False
+            n_seconds = 4
+            while not done:
+                # Ask the cluster for a list of all jobs which are currently running
+                result = subprocess.run(['squeue', '--array', '--jobs', job_number], capture_output=True, text=True)
+                # If none of the jobs on the cluster are running then nothing has to done yet, check back in n_seconds
+                if ' R ' not in str(result):
+                    if len(result.stdout.strip().split('\n')) == 1:
+                        done = True # No jobs are remaining
+                        break
+                    sjh.sleep(n_seconds) # No jobs have started yet;
+                else:
+                    if not wait_cutoff_time: # Wait until the last few seconds before checking often
+                        n_seconds = int(sgh.settings.get_general_target_cutoff_time())-6
+                        sjh.sleep(n_seconds)
+                        wait_cutoff_time = True
+                        n_seconds = 1 # Start checking often
+                    sjh.sleep(n_seconds)
+            #TODO print solver results
             
 
     except Exception as e:
