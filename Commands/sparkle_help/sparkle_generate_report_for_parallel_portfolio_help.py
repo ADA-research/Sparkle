@@ -3,6 +3,8 @@
 
 import os
 import sys
+from pathlib import PurePath
+
 from datetime import datetime, timedelta
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
@@ -11,7 +13,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_generate_report_help as sgrh
-from sparkle_help.sparkle_settings import PerformanceMeasure
+from sparkle_help.sparkle_settings import PerformanceMeasure, processMonitoring
 import compute_marginal_contribution as cmc
 
 
@@ -250,51 +252,6 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, i
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_parallel_portfolio_sparkle_vs_sbs_filename)
 	return str_value, dict_all_solvers, dict_actual_parallel_portfolio_penalty_time_on_each_instance
 
-def get_wallclock_time(portfolio_path: str):
-	logging_file = str(portfolio_path) + '/logging.txt'
-	with open(logging_file, "r") as result_file:
-		lines = result_file.readlines()
-	start_time = r''
-	end_time = r''
-	for line in lines:
-		if "starting time of portfolio" in line.strip():
-			start_time = line[line.rfind(' ')+1:].strip()
-		if "ending time of portfolio" in line.strip():
-			end_time = line[line.rfind(' ')+1:].strip()
-	if start_time and end_time:
-		FMT = '%H:%M:%S'
-		time_difference = datetime.strptime(end_time, FMT) - datetime.strptime(start_time, FMT)
-		if time_difference.days < 0:
-			time_difference = timedelta(days=0,seconds=time_difference.seconds,microseconds=time_difference.microseconds)
-	return str(time_difference)
-
-def get_runtime(portfolio_path: str, nr_of_jobs: int):
-	logging_file = str(portfolio_path) + '/logging2.txt'
-	with open(logging_file, "r") as result_file:
-		lines = result_file.readlines()
-	runtime_jobs = {}
-	cutoff_time = sgh.settings.get_general_target_cutoff_time()
-	for line in lines:
-		line = line.strip()
-		if ':' in line:
-			job_nr = line[:line.rfind(':')]
-			job_runtime = int(line[line.rfind(':')+1:])
-			if job_nr in runtime_jobs:
-				if int(runtime_jobs[job_nr]) > job_runtime:
-					runtime_jobs[job_nr] = job_runtime
-			else:
-				if int(job_runtime) > int(cutoff_time):
-					job_runtime = cutoff_time
-				runtime_jobs[job_nr] = job_runtime
-	total_runtime = 0
-	for job in runtime_jobs:
-		total_runtime += runtime_jobs[job]
-	if len(runtime_jobs) < nr_of_jobs:
-		total_runtime += cutoff_time * (nr_of_jobs - len(runtime_jobs))
-	str_total_runtime = str(timedelta(seconds=int(total_runtime)))
-	
-	return str_total_runtime
-
 def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_portfolio: dict, solver_with_solutions: dict, unsolved_instances: str, instances: str):
 	portfolio_PAR10 = 0.0
 	for instance in dict_portfolio:
@@ -320,13 +277,6 @@ def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_
 		else:
 			cancelled = int(instances) - int(unsolved_instances) - int(solver_with_solutions[solver_name])
 			table_string += sgrh.underscore_for_latex(solver_name) + " & " + str(round(results[line], 2)) + " & " + str(unsolved_instances) + " & " + str(cancelled) + " & " + str(solver_with_solutions[solver_name]) + " \\\\ "
-	table_string += "\\end{tabular}"
-	# Table 3: Process duration results
-	table_string += "\\caption *{\\textbf{Process duration results}} \\label{tab:process_duration_results} "
-	table_string += "\\begin{tabular}{rr}"
-	table_string += "\\textbf{Variations} & \\textbf{Duration} \\\\ \\hline "
-	table_string += "Total runtime & " + str(get_runtime(parallel_portfolio_path, (int(instances)*len(results)))) + "\\\\"
-	table_string += "Wallclock time & " + str(get_wallclock_time(parallel_portfolio_path)) + "\\\\"
 	table_string += "\\end{tabular}"
 	return table_string
 

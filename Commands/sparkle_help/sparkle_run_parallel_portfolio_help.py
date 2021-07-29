@@ -20,7 +20,7 @@ from sparkle_help import sparkle_logging as slog
 from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help.sparkle_settings import PerformanceMeasure
+from sparkle_help.sparkle_settings import PerformanceMeasure, processMonitoring
 
 def add_log_statement_to_file(logging_file: str, line: str, jobtime: str):
     # log a statement to a given file
@@ -133,9 +133,11 @@ def cancel_remaining_jobs(logging_file: str, job_id:str, finished_job_array: lis
     result = subprocess.run(['squeue', '--array', '--jobs', job_id], capture_output=True, text=True)
     remaining_jobs = {}
     for jobs in result.stdout.strip().split('\n'):
-            jobid = jobs.strip().split()[0]
-            jobtime = jobs.strip().split()[5]
-            jobstatus = jobs.strip().split()[4]
+        jobid = jobs.strip().split()[0]
+        jobtime = jobs.strip().split()[5]
+        jobstatus = jobs.strip().split()[4]
+        # If option extended is used some jobs are not directly cancelled to allow all jobs to compute for at least the same running time.
+        if sgh.settings.get_parallel_portfolio_process_monitoring() == processMonitoring.EXTENDED:
             # If a job in a portfolio with a finished solver starts running its timelimit needs to be updated.
             if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
                 current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
@@ -143,32 +145,40 @@ def cancel_remaining_jobs(logging_file: str, job_id:str, finished_job_array: lis
                 command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobid)
                 add_log_statement_to_file(logging_file, command_line, jobtime)
                 pending_job_with_new_cutoff.pop(jobid)
-            if jobid.startswith(str(job_id)):
-                remaining_jobs[jobid] = [jobtime, jobstatus]
+        if jobid.startswith(str(job_id)):
+            remaining_jobs[jobid] = [jobtime, jobstatus]
 
     for job in remaining_jobs:
         # Update all jobs in the same array segment as the finished job with its finishing time
         for finished_job in finished_job_array:
             # if job in the same array segment
             if (int(int(job[job.find('_')+1:])/int(portfolio_size)) == int(int(finished_job)/int(portfolio_size))):
-                # Update the cutofftime of the to be cancelled job, if job if already past that it automatically stops.
-                newCutoffTime = find_finished_time_finished_solver(solver_array_list, finished_job)
-                current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(remaining_jobs[job][0].split(':'))))
-                cutoff_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(newCutoffTime.split(':'))))
-                actual_cutofftime = sgh.settings.get_general_target_cutoff_time()
-                if remaining_jobs[job][1] == 'R' and int(cutoff_seconds) < int(actual_cutofftime):
-                    if  int(current_seconds) < int(cutoff_seconds):
-                        sleep_time = int(cutoff_seconds) - int(current_seconds)
-                        command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(job)
-                        add_log_statement_to_file(logging_file, command_line, remaining_jobs[job][0])
+                # If option extended is used some jobs are not directly cancelled to allow all jobs to compute for at least the same running time.
+                if sgh.settings.get_parallel_portfolio_process_monitoring() == processMonitoring.EXTENDED:
+                    # Update the cutofftime of the to be cancelled job, if job if already past that it automatically stops.
+                    newCutoffTime = find_finished_time_finished_solver(solver_array_list, finished_job)
+                    current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(remaining_jobs[job][0].split(':'))))
+                    cutoff_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(newCutoffTime.split(':'))))
+                    actual_cutofftime = sgh.settings.get_general_target_cutoff_time()
+                    if remaining_jobs[job][1] == 'R' and int(cutoff_seconds) < int(actual_cutofftime):
+                        if  int(current_seconds) < int(cutoff_seconds):
+                            sleep_time = int(cutoff_seconds) - int(current_seconds)
+                            command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(job)
+                            add_log_statement_to_file(logging_file, command_line, remaining_jobs[job][0])
+                        else:
+                            command_line = r'scancel ' + str(job)
+                            add_log_statement_to_file(logging_file, command_line, remaining_jobs[job][0])
+                            logging_file2 = logging_file[:logging_file.rfind('.')] + r'2.txt'
+                            log_computation_time(logging_file2,job,cutoff_seconds)
+                        process = subprocess.Popen(command_line, shell=True)
                     else:
-                        command_line = r'scancel ' + str(job)
-                        add_log_statement_to_file(logging_file, command_line, remaining_jobs[job][0])
-                        logging_file2 = logging_file[:logging_file.rfind('.')] + r'2.txt'
-                        log_computation_time(logging_file2,job,cutoff_seconds)
-                    process = subprocess.Popen(command_line, shell=True)
+                        pending_job_with_new_cutoff[job] = cutoff_seconds
                 else:
-                    pending_job_with_new_cutoff[job] = cutoff_seconds
+                    command_line = r'scancel ' + str(job)
+                    add_log_statement_to_file(logging_file, command_line, remaining_jobs[job][0])
+                    logging_file2 = logging_file[:logging_file.rfind('.')] + r'2.txt'
+                    log_computation_time(logging_file2,job,'-1')
+                    process = subprocess.Popen(command_line, shell=True)
     
     return remaining_jobs, pending_job_with_new_cutoff
 
@@ -229,14 +239,16 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
                 jobid = jobs.strip().split()[0]
                 jobtime = jobs.strip().split()[5]
                 jobstatus = jobs.strip().split()[4]
-                if jobid in pending_job_with_new_cutoff and jobstatus == 'R': 
-                    # Job is in a portfolio with a solver that already has finished 
-                    # and has to be cancelled in the finishing time of that solver
-                    current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
-                    sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
-                    command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobid)
-                    add_log_statement_to_file(logging_file, command_line, jobtime)
-                    pending_job_with_new_cutoff.pop(jobid)
+                # If option extended is used some jobs are not directly cancelled to allow all jobs to compute for at least the same running time.
+                if sgh.settings.get_parallel_portfolio_process_monitoring() == processMonitoring.EXTENDED:
+                    if jobid in pending_job_with_new_cutoff and jobstatus == 'R': 
+                        # Job is in a portfolio with a solver that already has finished 
+                        # and has to be cancelled in the finishing time of that solver
+                        current_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(jobtime.split(':'))))
+                        sleep_time = int(pending_job_with_new_cutoff[jobid]) - int(current_seconds)
+                        command_line = r'sleep ' + str(sleep_time) + r'; scancel ' + str(jobid)
+                        add_log_statement_to_file(logging_file, command_line, jobtime)
+                        pending_job_with_new_cutoff.pop(jobid)
                 if(jobid.startswith(str(job_id))):
                     # add the job to the current solver list
                     current_solver_list.append(jobid[jobid.find('_')+1:])
@@ -346,6 +358,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
     
     # Generates a SBATCH script which uses the created parameters
     sbatch_script_name,sbatch_script_path = generate_parallel_portfolio_sbatch_script(parameters, num_jobs)
+    
     # Runs the script and cancels the remaining scripts if a script finishes before the end of the cutoff_time
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "Log/logging.txt"))
     file_path_output2 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir / "Log/logging2.txt"))

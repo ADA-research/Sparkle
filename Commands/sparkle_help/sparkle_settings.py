@@ -41,7 +41,7 @@ class SolutionVerifier(Enum):
 
 class processMonitoring(Enum):
 	REALISTIC = 0
-	EXTENTED = 1
+	EXTENDED = 1
 	#COMPLETE = 2 # TODO: Add when this functionality is implemented
 
 
