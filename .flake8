@@ -8,7 +8,10 @@ statistics = True
 # Cyclomatic complexity desactivated
 # max-complexity = 15 
 
-# For now, exlude sparkle_help and test
+# Ignore the unused import in __init__.py
+per-file-ignores = __init__.py:F401
+
+# For now, exlude sparkle_help
 exclude =
     Commands/sparkle_help,
     Commands/test,

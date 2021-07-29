@@ -3,16 +3,18 @@ channels:
   - defaults
   - conda-forge
 dependencies:
+  # Basic conda install
   - python=3
   - swig=3.0
   - gnuplot
-  - pytest
-  - flake8
   - pip
   - pip:
-    # For Sparkl
+    # For Sparkle
     - numpy
     - pandas
+    # Testing
+    - pytest
+    - flake8
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost
