@@ -13,7 +13,10 @@ if __name__ == r"__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--verbose", "-v", action="store_true", help="output run status in verbose mode"
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="output run status in verbose mode"
     )
 
     # Process command line arguments

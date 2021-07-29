@@ -50,7 +50,9 @@ if __name__ == r"__main__":
         help="do not immediately run the newly added feature extractor",
     )
     parser.add_argument(
-        "--nickname", type=str, help="set a nickname for the feature extractor"
+        "--nickname",
+        type=str,
+        help="set a nickname for the feature extractor"
     )
     parser.add_argument(
         "--parallel",

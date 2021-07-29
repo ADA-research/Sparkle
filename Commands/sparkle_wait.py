@@ -16,7 +16,11 @@ if __name__ == r"__main__":
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "--job-id", required=False, type=str, default=None, help="job ID to wait for"
+        "--job-id",
+        required=False,
+        type=str,
+        default=None,
+        help="job ID to wait for"
     )
     group.add_argument(
         "--command",

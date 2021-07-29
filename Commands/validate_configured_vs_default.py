@@ -32,7 +32,12 @@ if __name__ == r"__main__":
     sl.log_command(sys.argv)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--solver", required=True, type=str, help="path to solver")
+    parser.add_argument(
+        "--solver",
+        required=True,
+        type=str,
+        help="path to solver"
+    )
     parser.add_argument(
         "--instance-set-train",
         required=True,
