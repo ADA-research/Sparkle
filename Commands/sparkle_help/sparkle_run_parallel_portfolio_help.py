@@ -121,15 +121,16 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list, sbatch_script_
                     file = open(file_path)
                     content = file.readlines()
                     nr_of_lines_content = len(content)
-                    for lines in range(0,nr_of_lines_content):
-                        if '\tc ' in content[nr_of_lines_content-lines-1] and 'step' not in content[nr_of_lines_content-lines-1] and '=' in content[nr_of_lines_content-lines-1]:
-                            runtime_line = content[nr_of_lines_content-lines-1]
-                            print('c Solver: ' + str(full_solver_name) + ' found a result on instance: ' + str(instance))
-                            print(runtime_line[runtime_line.find('c'):].strip())
-                            for lines2 in range(0,nr_of_lines_content):
-                                if '\ts ' in content[nr_of_lines_content-lines2-1]:
-                                    results_line = content[nr_of_lines_content-lines2-1]
+
+                    for lines2 in range(0,nr_of_lines_content):
+                        if '\ts ' in content[nr_of_lines_content-lines2-1]:
+                            results_line = content[nr_of_lines_content-lines2-1]
+                            for lines in range(0,nr_of_lines_content):
+                                if '\tc ' in content[nr_of_lines_content-lines-1] and 'step' not in content[nr_of_lines_content-lines-1] and '=' in content[nr_of_lines_content-lines-1]:
+                                    runtime_line = content[nr_of_lines_content-lines-1]
+                                    print('c Solver: ' + str(full_solver_name) + ' found a result on instance: ' + str(instance))
                                     print('c result = ' + str(results_line[results_line.find('s')+2:].strip()))
+                                    print(runtime_line[runtime_line.find('c'):].strip())
                                     break
                             break
                     

@@ -152,8 +152,8 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
 	results = get_results()
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
+	full_solver_list = []
 	for lines in solver_list:
-		full_solver_list = []
 		if ' ' in lines:
 			for solver_variations in range(1,int(lines[lines.rfind(' ')+1:])+1):
 				solver_path = lines[:lines.rfind(' ')]
@@ -161,9 +161,8 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 				if '/' in solver_variation: solver_variation = solver_variation[:solver_variation.rfind('/')]
 				solver_variation = r'Tmp/' + solver_variation + r'_seed_' + str(solver_variations)
 				full_solver_list.append(solver_variation)
-		else: 
+		else:
 			full_solver_list.append(lines)
-
 	# Find single best solver
 	instance_list = eval(str(instances[0]))
 	for instance in instance_list:
@@ -172,8 +171,9 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 			this_run_time = results[instance_name][1]
 			if float(this_run_time) <= cutoff_time:
 				for solver in full_solver_list:
-					# in because the solver name contains the instance name aswell
-					if solver in results[instance_name][0]:
+					# in because the solver name contains the instance name aswell,
+					# or the solver can have an additional '/' at the end of the path
+					if solver in results[instance_name][0] or results[instance_name][0] in solver:
 						if solver in mydict:
 							mydict[solver] += float(this_run_time)
 						else:
