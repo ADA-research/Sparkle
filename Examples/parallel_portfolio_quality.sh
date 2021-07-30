@@ -32,7 +32,7 @@ Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/C
 # This will happen by default unless the nickname option is used then this will throw an error
 
 # The --nickname option can be used to name your portfolio, the option must be followed by a nickname to name your portfolio. 
-# For example '--nickname quality_example', if this option is not used then the default nickname is used
+# For example '--nickname quality_experiment', if this option is not used then the default nickname is used
 # This is sparkle_parallel_portfolio
 # Without using the --solver option all solvers will be added, if you want, for example, only a subset of solvers from the Solver/ directory 
 # you can use a space seperated list, like --solver Solvers/FastCA or --solver Solvers/TCA
