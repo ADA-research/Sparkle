@@ -104,27 +104,51 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list, sbatch_script_
             except:
                 print('c the Tmp_PaP already contains a file with the same name, it will be skipped')
         else:
-            if '.rawres' in files:
-                if 'seed' in files:
-                    part1 = files[:files.find('_seed_')+1]
-                    part2 = files[files.find('_seed_')+6:]
-                    full_solver_name = part1 + part2[:part2.find('_')]
-                    part3 = part2[part2.find('_')+1:]
-                    instance = part3[:part3.find('_')]
-                else:
-                    part1 = files[:files.find('_')]
-                    part2 = files[files.find('_')+1:]
-                    full_solver_name = part1
-                    instance = part2[:part2.find('_')]
-                print('c Solver: ' + str(full_solver_name) + ' found a results on instance: ' + str(instance))
-                file_path = 'Tmp/' + str(files)
-                file = open(file_path)
-                content = file.readlines()
-                nr_of_lines_content = len(content)
-                runtime_line = content[nr_of_lines_content-3]
-                results_line = content[nr_of_lines_content-6]
-                print(runtime_line[runtime_line.find('c'):].strip())
-                print('c results = ' + str(results_line[results_line.find('s')+1:].strip()))  
+            if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME:
+                if '.rawres' in files:
+                    if 'seed' in files:
+                        part1 = files[:files.find('_seed_')+1]
+                        part2 = files[files.find('_seed_')+6:]
+                        full_solver_name = part1 + part2[:part2.find('_')]
+                        part3 = part2[part2.find('_')+1:]
+                        instance = part3[:part3.find('_')]
+                    else:
+                        part1 = files[:files.find('_')]
+                        part2 = files[files.find('_')+1:]
+                        full_solver_name = part1
+                        instance = part2[:part2.find('_')]
+                    print('c Solver: ' + str(full_solver_name) + ' found a result on instance: ' + str(instance))
+                    file_path = 'Tmp/' + str(files)
+                    file = open(file_path)
+                    content = file.readlines()
+                    nr_of_lines_content = len(content)
+                    runtime_line = content[nr_of_lines_content-3]
+                    results_line = content[nr_of_lines_content-6]
+                    print(runtime_line[runtime_line.find('c'):].strip())
+                    print('c result = ' + str(results_line[results_line.find('s')+1:].strip()))
+            elif sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
+                if '.rawres' in files:
+                    if 'seed' in files:
+                        part1 = files[:files.find('_seed_')+1]
+                        part2 = files[files.find('_seed_')+6:]
+                        full_solver_name = part1 + part2[:part2.find('_')]
+                        part3 = part2[part2.find('_')+1:]
+                        instance = part3[:part3.find('_')]
+                    else:
+                        part1 = files[:files.find('_')]
+                        part2 = files[files.find('_')+1:]
+                        full_solver_name = part1
+                        instance = part2[:part2.find('_')]
+                    file_path = 'Tmp/' + str(files)
+                    file = open(file_path)
+                    content = file.readlines()
+                    nr_of_lines_content = len(content)
+                    if(nr_of_lines_content > 1):
+                        results_line = content[nr_of_lines_content-2]
+                        result = str(results_line[results_line.find('\t')+1:].strip())
+                        results_without_time = str(result[result.find('\t')+1:])
+                        print('c Solver: ' + str(full_solver_name) + ' found a result on instance: ' + str(instance))
+                        print('c result = ' + str(results_without_time))
             commandline = 'rm -rf Tmp/' + files
             os.system(commandline)
     return
@@ -398,8 +422,6 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
             fo.write(r'ending time of portfolio: ' + current_time + '\n')
             fo.close() 
 
-            #TODO print solver results
-
             # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
             remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
 
@@ -423,13 +445,15 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
                         wait_cutoff_time = True
                         n_seconds = 1 # Start checking often
                     sjh.sleep(n_seconds)
-            #TODO print solver results
+
+            # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
+            remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
             
 
     except Exception as e:
         fo = open(file_path_output1, 'a+')
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(e)
+        fo.write(str(e))
         fo.close()    
         
         print('c an error occurred when running the portfolio please check your input or \n ')

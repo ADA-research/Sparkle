@@ -56,8 +56,8 @@ if __name__ == r'__main__':
 	my_flag_run_solver_later = args.run_solver_later
 	nickname_str = args.nickname
 	my_flag_parallel = args.parallel
+	solver_variations = args.solver_variations
 	if ac.set_by_user(args, 'solver_variations'):
-		solver_variations = args.solver_variations
 		if solver_variations < 1: solver_variations = 1
 	
 	# Start add solver
