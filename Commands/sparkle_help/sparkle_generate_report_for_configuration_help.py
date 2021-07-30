@@ -260,8 +260,8 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
-	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
+	configured_results_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/' + configured_results_file
+	default_results_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
 	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, smac_each_run_cutoff_time)
 	
@@ -369,8 +369,8 @@ def get_timeouts_test(solver_name, instance_set_name, cutoff):
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
-	configured_results_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_file
-	default_results_dir = smac_solver_dir + 'outdir_test_default/' + default_results_file
+	configured_results_dir = smac_solver_dir + 'outdir_' + instance_set_name + '_test_configured/' + configured_results_file
+	default_results_dir = smac_solver_dir + 'outdir_' + instance_set_name + '_test_default/' + default_results_file
 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, cutoff)
 	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, cutoff)
 
@@ -578,13 +578,13 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 
 	variable = r'optimisedConfigurationTestingPerformancePAR10'
 	configured_results_test_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
-	configured_results_test_dir = smac_solver_dir + 'outdir_test_configured/' + configured_results_test_file
+	configured_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/' + configured_results_test_file
 	str_value = get_PAR10_performance(configured_results_test_dir, smac_each_run_cutoff_time)
 	test_dict[variable] = str(str_value)
 	
 	variable = r'defaultConfigurationTestingPerformancePAR10'
 	default_results_test_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-	default_results_test_dir = smac_solver_dir + 'outdir_test_default/' + default_results_test_file
+	default_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/' + default_results_test_file
 	str_value = get_PAR10_performance(default_results_test_dir, smac_each_run_cutoff_time)
 	test_dict[variable] = str(str_value)
 	
@@ -637,8 +637,8 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 
 		# Check test results exist: configured+default
 		smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
-		configured_results_test_dir = smac_solver_dir + 'outdir_test_configured/'
-		default_results_test_dir = smac_solver_dir + 'outdir_test_default/'
+		configured_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/'
+		default_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/'
 
 		if not (os.path.exists(configured_results_test_dir) and os.path.exists(default_results_test_dir)):
 			all_good = False

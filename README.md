@@ -1,73 +1,40 @@
-Sparkle
-=======
+# Sparkle
 
+Sparkle is a Programming by Optimisation (PbO)-based problem-solving platform designed to enable the widespread and effective use of PbO techniques for improving the state-of-the-art in solving a broad range of prominent AI problems, including SAT and AI Planning.
 
-# About
-Sparkle is a platform for the evaluation of empirical algorithms/solvers.
+Specifically, Sparkle facilitates the use of:
 
+ * Automated algorithm configuration
+ * Automated algorithm selection
 
-# Version
-TBD
+## Usage
 
+To use Sparkle, clone it using Git and follow the installation instructions provided under `Examples/installation.md`. All files and results will be produced under the main Sparkle directory. 
 
-# License
-TBD
+All commands need to be executed from this cloned root directory. See the `Examples` directory for some examples. 
 
+## Documentation
 
-# Authors
+The documentation can be found in the `Documentation` directory. A `PDF` is available at `Documentation/sparkle-userguide.pdf` and the `HTML` documentation can be generated.
+
+## Licensing
+
+Sparkle is distributed under the MIT licence
+
+### Component licences 
+
+Sparkle is distributed with a number of external components, solvers, and instance sets. Descriptions and licensing information for each these are included in the `Components/` and `Examples/Resources/` directories.
+
+The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. The main modification of this component is to disable calling the SAT instance preprocessor called SatELite. It is located in: `Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
+
+## Authors
 Chuan Luo,
 Koen van der Blom,
 Jeroen Rook,
-Holger H. Hoos
+Holger H. Hoos,
+Richard Middelkoop,
+Jeremie Gobeil
 
-
-# Contact
+## Contact
 k.van.der.blom@liacs.leidenuniv.nl
 
-
-# Licenses for components and examples packaged with Sparkle
-
-
-AutoFolio license:
-	`Components/AutoFolio-master/doc/license.rst`
-
-ablation analysis license:
-	`Components/ablationAnalysis-0.9.4/LICENSE.txt`
-
-runsolver license:
-	`Components/runsolver/src/LICENSE-GPL-3.0.txt`
-
-smac license:
-	`Components/smac-v2.10.03-master-778/LICENSE-AGPLv3.txt`
-
-The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. The main modification of this component is to disable calling the SAT instance preprocessor called SatELite. It is located in:	`Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/` and license of components are available in:
-
-* `VARSAT/Main.C`
-* `lp_solve_4.0/LICENSE`
-
-# Instances
-* The instances located in `Examples/Resources/Instances/SAT_test/` are taken from SATLIB (<https://www.cs.ubc.ca/~hoos/SATLIB/benchm.html>)
-
-* The instances located in `Examples/Resources/Instances/PTN/` and `Examples/Resources/Instances/PTN/2` are taken from <https://www.cs.utexas.edu/~marijn/ptn/> and <https://baldur.iti.kit.edu/sat-competition-2016/downloads/crafted16.zip>
-
-
-# Solvers
-* The solver `CSCCSat` located in `Examples/Resources/Solvers/CSCCSat/` is taken from <https://baldur.iti.kit.edu/sat-competition-2016/solvers/random/CSCCSat.zip>
-
-* The solver `PbO-CCSAT` located in `Examples/Resources/Solvers/PbO-CCSAT-Generic/` is taken from <https://github.com/chuanluocs/PbO-CCSAT>
-
-Unclear:
-
-
-* `Examples/Resources/Solvers/MiniSAT/`
-* `Examples/Resources/Solvers/VRP_SISRs/`
-* `Examples/Resources/Instances/X/` and `X2`
-
-
-
-Components and examples provided as part of Sparkle:
-
-* `Components/Sparkle-SAT-verifier/`
-* `Components/Sparkle-latex-generator/`
-* `Components/Sparkle-latex-generator-for-configuration/`
-* `Components/Sparkle-latex-generator-for-test/`

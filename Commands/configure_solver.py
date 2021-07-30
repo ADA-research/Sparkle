@@ -20,6 +20,7 @@ from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
+from sparkle_help import sparkle_run_ablation_help as sah
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
@@ -74,8 +75,9 @@ if __name__ == r'__main__':
 	if instance_set_test is not None:
 		instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
-	# Clean the configuration directory for this solver to make sure we start with a clean slate
+	# Clean the configuration and ablation directories for this solver to make sure we start with a clean slate
 	scsh.clean_configuration_directory(solver_name)
+	sah.clean_ablation_scenarios(solver_name, instance_set_train_name)
 
 	# Copy instances to smac directory
 	instances_directory = 'Instances/' + instance_set_train_name
