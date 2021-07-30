@@ -51,7 +51,7 @@ Commands/construct_sparkle_parallel_portfolio.py --nickname quality_experiment
 # The --instance-paths option must be followed by a space seperated list of paths to an instance or an instance set.
 # For example --instance-paths Instances/Instance_Set_Name/Single_Instance Instances/Other_Instance_Set_Name
 
-Commands/run_sparkle_parallel_portfolio.py --instance-paths Instances/CCAG/ --performance-measure QUALITY --portfolio-name quality_experiment
+Commands/run_sparkle_parallel_portfolio.py --instance-paths Instances/CCAG/ --performance-measure QUALITY_ABSOLUTE --portfolio-name quality_experiment
 
 #### Generate the report
 
