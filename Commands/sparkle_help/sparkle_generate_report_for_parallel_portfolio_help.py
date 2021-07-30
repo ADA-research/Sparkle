@@ -53,7 +53,6 @@ def get_solverList(parallel_portfolio_path: str):
 				seed_number += str(instances) 
 				if instances != solver_variations: seed_number += r','
 			str_value += r'\item[] With seeds: ' + seed_number + '\n'
-		print(str_value)
 	return str_value
 
 def get_numInstanceClasses(instances: list):
@@ -205,7 +204,6 @@ def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, ins
 			sbs_dict[instance_name] = results[instance_name][1]
 		else:
 			sbs_dict[instance_name] = sgh.settings.get_penalised_time()
-	print(sbs_dict)
 	return sbs_dict,sbs_name, mydict
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances: str):
@@ -359,20 +357,23 @@ def generate_report(parallel_portfolio_path: str, instances: list):
 	fout.write(report_content)
 	fout.close()
 
-	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex'
+	file_path_output = str(PurePath(sgh.sparkle_global_output_dir / sl.caller_out_dir / "Log/latex.txt"))
+	sfh.create_new_empty_file(file_path_output)
+	file_path_output = '../../' + file_path_output
+	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> '+ str(file_path_output)+ ' 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
 
-	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux'
+	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux 1> '+ str(file_path_output)+ ' 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
 
-	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex'
+	compile_command = r'cd ' + latex_directory_path + r'; pdflatex ' + latex_report_filename + r'.tex 1> '+ str(file_path_output)+ ' 2>&1'
 	os.system(compile_command)
 	os.system(compile_command)
 
 	report_path = latex_directory_path + latex_report_filename + r'.pdf'
-	print(r'Report is placed at: ' + report_path)
+	print(r'c Report is placed at: ' + report_path)
 	sl.add_output(report_path, 'Sparkle parallel portfolio report')
 
 	return
