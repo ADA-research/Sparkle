@@ -34,10 +34,10 @@ if __name__ == r'__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--nickname", type=str, help='Give a nickname to the portfolio, otherwise it will overwrite the latest portfolio.')
-    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str, help='List of paths to the solvers, add \",solver_variations\" to the end of a path to add multiple instances of a single solver')
-    parser.add_argument("--overwrite", default=sgh.settings.DEFAULT_parallel_portfolio_overwriting, action=ac.SetByUser, help='Allows overwrite of the directory, default true if no name is specified otherwise the default is false')
-    parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='specify the settings file to use in case you want to use one other than the default')
+    parser.add_argument("--nickname", type=str, help='Give a nickname to the portfolio, the default name of a portfolio is sparkle_parallel_portfolio.')
+    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str, help='Specify the list of solvers, add \",solver_variations\" to the end of a path to add multiple instances of a single solver. For example --solver Solver/PbO-CCSAT-Generic,25 to construct a portfolio containing 25 variations of PbO-CCSAT-Generic.')
+    parser.add_argument("--overwrite", default=sgh.settings.DEFAULT_parallel_portfolio_overwriting, action=ac.SetByUser, help='Allows overwriting of the directory, default true the --nickname option is NOT specified otherwise constructing a portfolio with a name of an already existing portfolio will throw an error if --overwrite True is not used.')
+    parser.add_argument('--settings-file', type=Path, default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser, help='Specify the settings file to use in case you want to use one other than the default')
 
     # Process command line arguments;
     args = parser.parse_args() 
