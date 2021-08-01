@@ -43,7 +43,7 @@ if __name__ == r'__main__':
 	parser.add_argument('--run-solver-later', action='store_true', help='do not immediately run the newly added solver')
 	parser.add_argument('--nickname', type=str, help='set a nickname for the solver')
 	parser.add_argument('--parallel', action='store_true', help='run the solver on multiple instances in parallel')
-	parser.add_argument('--solver-variations', default=1, type=int, action=ac.SetByUser, help='This option can be used to add multiple variations of the solver, note this makes use of the seed number of the solver. The default number variations is 1.')
+	parser.add_argument('--solver-variations', default=1, type=int, action=ac.SetByUser, help='Use this option to add multiple variations of the solver note this makes use of the seed number of the solver. The default number of variations is 1.')
 
 	# Process command line arguments
 	args = parser.parse_args()
