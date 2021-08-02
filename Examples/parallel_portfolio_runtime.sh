@@ -33,11 +33,12 @@ Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/S
 
 # The --nickname option can be used to name your portfolio.
 # For example '--nickname runtime_experiment', if this option is not used then the default nickname is used, which is 'sparkle_parallel_portfolio'
-# Without using the --solver option all solvers will be added, if you want, for example, only a subset of solvers from the Solver/ directory 
+# Without using the --solver option ALL solvers will be added, if you want, for example, only a subset of solvers from the Solver/ directory 
 # you can use a space separated list, like '--solver Solvers/CSCCSat Solvers/PbO-CCSAT-Generic'
 
 # In order to add multiple variations of a single solver you have to add ',<number_of_solver_variations>' within the space separated solver list.
 # For example '--solver Solvers/PbO-CCSAT-Generic,4' which will create a portfolio containing four variations of PbO-CCSAT-Generic
+# If this is not used only a single variation of the solver will be added
 
 Commands/construct_sparkle_parallel_portfolio.py --nickname runtime_experiment
 

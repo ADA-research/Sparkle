@@ -103,60 +103,6 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list, sbatch_script_
                 shutil.move(commandline_from, commandline_to)
             except:
                 print('c the Tmp_PaP already contains a file with the same name, it will be skipped')
-        else:
-            if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME:
-                if '.rawres' in files:
-                    if 'seed' in files:
-                        part1 = files[:files.find('_seed_')+1]
-                        part2 = files[files.find('_seed_')+6:]
-                        full_solver_name = part1 + part2[:part2.find('_')]
-                        part3 = part2[part2.find('_')+1:]
-                        instance = part3[:part3.find('_')]
-                    else:
-                        part1 = files[:files.find('_')]
-                        part2 = files[files.find('_')+1:]
-                        full_solver_name = part1
-                        instance = part2[:part2.find('_')]
-                    file_path = 'Tmp/' + str(files)
-                    file = open(file_path)
-                    content = file.readlines()
-                    nr_of_lines_content = len(content)
-
-                    for lines2 in range(0,nr_of_lines_content):
-                        if '\ts ' in content[nr_of_lines_content-lines2-1]:
-                            results_line = content[nr_of_lines_content-lines2-1]
-                            for lines in range(0,nr_of_lines_content):
-                                if '\tc ' in content[nr_of_lines_content-lines-1] and 'step' not in content[nr_of_lines_content-lines-1] and '=' in content[nr_of_lines_content-lines-1]:
-                                    runtime_line = content[nr_of_lines_content-lines-1]
-                                    print('c Solver: ' + str(full_solver_name) + ' found a result on instance: ' + str(instance))
-                                    print('c result = ' + str(results_line[results_line.find('s')+2:].strip()))
-                                    print(runtime_line[runtime_line.find('c'):].strip())
-                                    break
-                            break
-                    
-            elif sgh.settings.get_general_performance_measure() == PerformanceMeasure.QUALITY_ABSOLUTE:
-                if '.rawres' in files:
-                    if 'seed' in files:
-                        part1 = files[:files.find('_seed_')+1]
-                        part2 = files[files.find('_seed_')+6:]
-                        full_solver_name = part1 + part2[:part2.find('_')]
-                        part3 = part2[part2.find('_')+1:]
-                        instance = part3[:part3.find('_')]
-                    else:
-                        part1 = files[:files.find('_')]
-                        part2 = files[files.find('_')+1:]
-                        full_solver_name = part1
-                        instance = part2[:part2.find('_')]
-                    file_path = 'Tmp/' + str(files)
-                    file = open(file_path)
-                    content = file.readlines()
-                    nr_of_lines_content = len(content)
-                    if(nr_of_lines_content > 1):
-                        results_line = content[nr_of_lines_content-2]
-                        result = str(results_line[results_line.find('\t')+1:].strip())
-                        results_without_time = str(result[result.find('\t')+1:])
-                        print('c Solver: ' + str(full_solver_name) + ' found a result on instance: ' + str(instance))
-                        print('c result = ' + str(results_without_time))
             commandline = 'rm -rf Tmp/' + files
             os.system(commandline)
     return
@@ -403,6 +349,7 @@ def handle_waiting_and_removal_process(instances: list, logging_file: str, job_n
                     else:
                         finished_instances_dict[instance][1] = float(content[2].strip())
                         print('c ' + str(instance) + ' has been solved in ' + str(content[2].strip()) + ' seconds!')
+
                         for temp_files in os.listdir(r'Tmp/'):
                             temp_file_match = str(sfh.get_file_name(content[1].strip()))
                             if temp_file_match in str(temp_files.strip()) and sfh.get_file_least_extension(str(temp_files.strip())) == 'rawres':
@@ -414,6 +361,7 @@ def handle_waiting_and_removal_process(instances: list, logging_file: str, job_n
                                     if '\ts ' in raw_content[nr_of_lines_raw_content-lines-1]:
                                         results_line = raw_content[nr_of_lines_raw_content-lines-1]
                                         print('c result = ' + str(results_line[results_line.find('s')+2:].strip()))
+                                        finished_instances_dict[instance][0] = str(results_line[results_line.find('s')+2:].strip())
                                         break
                 # A solver has an improved performance time on an instance
                 elif (float(finished_instances_dict[instance][1]) > float(content[2].strip())):
@@ -491,10 +439,30 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
                         n_seconds = 1 # Start checking often
                     sjh.sleep(n_seconds)
 
-            # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
-            remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
-            
+        finished_instances_dict = {}
+        for instance in instances:
+            instance = sfh.get_last_level_directory_name(instance)
+            finished_instances_dict[instance] = ['UNSOLVED',0]
 
+        for finished_solver_files in os.listdir(r'Performance_Data/Tmp_PaP/'):
+            for instance in finished_instances_dict:
+                if str(instance) in str(finished_solver_files):
+                    file_path = str('Performance_Data/Tmp_PaP/') + str(finished_solver_files)
+                    file = open(file_path)
+                    content = file.readlines()
+                    # A new instance is solved
+                    if (finished_instances_dict[instance][0] == 'UNSOLVED'):
+                        finished_instances_dict[instance][1] = float(content[2].strip())
+                        finished_instances_dict[instance][0] = 'SOLVED'
+                    elif (float(finished_instances_dict[instance][1]) > float(content[2].strip())):
+                        finished_instances_dict[instance][1] = float(content[2].strip())
+        for instances in finished_instances_dict:
+            if finished_instances_dict[instances][0] == 'SOLVED' and float(finished_instances_dict[instances][1]) > 0:
+                # To filter out constraint files
+                if 'e' not in str(finished_instances_dict[instances][1]):
+                    print('c ' + str(instances) + ' was solved with a results: ' + str(finished_instances_dict[instances][1]))
+            else:
+                print('c ' + str(instances) + ' was not solved in the given cutoff-time')
     except Exception as e:
         fo = open(file_path_output1, 'a+')
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)

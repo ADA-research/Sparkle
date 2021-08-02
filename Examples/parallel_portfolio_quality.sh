@@ -38,6 +38,7 @@ Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/C
 
 # In order to add multiple variations of a single solver you have to add ',number_of_solver_variations' within the space seperated solver list.
 # For example --solver Solvers/FastCA,4 wich will create a portfolio containing four variations of FastCA
+# If this is not used only a single variation of the solver will be added.
 
 Commands/construct_sparkle_parallel_portfolio.py --nickname quality_experiment
 
