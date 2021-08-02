@@ -51,10 +51,8 @@ if __name__ == r'__main__':
     if ac.set_by_user(args, 'overwrite'): 
         if(args.overwrite != 'True'): args.overwrite = False
         sgh.settings.set_parallel_portfolio_overwriting_flag(args.overwrite, SettingState.CMD_LINE)
-        overwrite = args.overwrite
-    else:
-        overwrite = args.overwrite
-        if portfolio_str is None: overwrite = True
+    overwrite = args.overwrite
+
     if portfolio_str is not None:
         portfolio_path = "Sparkle_Parallel_Portfolio/" + portfolio_str
     else:
