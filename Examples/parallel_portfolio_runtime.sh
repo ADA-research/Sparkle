@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### Example usage of Sparkle for parallel algorithm portfolio
-### The example illustrates the use of a decision algorithm that uses runtime as measurement
+### The example illustrates the use of a decision algorithm and measures runtime performance
 
 #### Initialise the Sparkle platform
 
