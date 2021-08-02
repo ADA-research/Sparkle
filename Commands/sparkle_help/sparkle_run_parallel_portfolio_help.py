@@ -381,9 +381,46 @@ def run_sbatch(sbatch_script_path,sbatch_script_name):
         return run_job_parallel_jobid
     return ''
 
-def handle_waiting_and_removal_process(logging_file: str, job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list, pending_job_with_new_cutoff: dict, started: bool):
+def handle_waiting_and_removal_process(instances: list, logging_file: str, job_number: str, solver_array_list: list, sbatch_script_name: str, portfolio_size: int, remaining_job_list: list, finished_instances_dict: dict, pending_job_with_new_cutoff: dict, started: bool):
     if len(remaining_job_list): 
         print('c a job has ended, remaining jobs = ' + str(len(remaining_job_list)))
+    if finished_instances_dict == {}:
+        for instance in instances:
+            instance = sfh.get_last_level_directory_name(instance)
+            finished_instances_dict[instance] = ['UNSOLVED',0]
+    
+    for finished_solver_files in os.listdir(r'Performance_Data/Tmp_PaP/'):
+        for instance in finished_instances_dict:
+            if str(instance) in str(finished_solver_files):
+                file_path = str('Performance_Data/Tmp_PaP/') + str(finished_solver_files)
+                file = open(file_path)
+                content = file.readlines()
+                # A new instance is solved
+                if (finished_instances_dict[instance][1] == float(0)):
+                    if (float(content[2].strip()) > float(sgh.settings.get_general_target_cutoff_time())):
+                        print('c ' + str(instance) + ' has reached the cutoff time without being solved.')
+                        finished_instances_dict[instance][1] = float(content[2].strip())
+                    else:
+                        finished_instances_dict[instance][1] = float(content[2].strip())
+                        print('c ' + str(instance) + ' has been solved in ' + str(content[2].strip()) + ' seconds!')
+                        for temp_files in os.listdir(r'Tmp/'):
+                            temp_file_match = str(sfh.get_file_name(content[1].strip()))
+                            if temp_file_match in str(temp_files.strip()) and sfh.get_file_least_extension(str(temp_files.strip())) == 'rawres':
+                                rawres_file_path = 'Tmp/' + str(temp_files.strip())
+                                rawres_file = open(rawres_file_path)
+                                raw_content = rawres_file.readlines()
+                                nr_of_lines_raw_content = len(raw_content)
+                                for lines in range(0,nr_of_lines_raw_content):
+                                    if '\ts ' in raw_content[nr_of_lines_raw_content-lines-1]:
+                                        results_line = raw_content[nr_of_lines_raw_content-lines-1]
+                                        print('c result = ' + str(results_line[results_line.find('s')+2:].strip()))
+                                        break
+                # A solver has an improved performance time on an instance
+                elif (float(finished_instances_dict[instance][1]) > float(content[2].strip())):
+                    finished_instances_dict[instance][1] = float(content[2].strip())
+                    print('c ' + str(instance) + ' has been solved with an improved solving time of ' + str(content[2].strip()) + ' seconds!')
+                
+
     # Monitors the running jobs waiting for a solver that finishes
     finished_jobs, pending_job_with_new_cutoff, started = wait_for_finished_solver(logging_file, job_number, solver_array_list, remaining_job_list, pending_job_with_new_cutoff, started)
 
@@ -392,7 +429,7 @@ def handle_waiting_and_removal_process(logging_file: str, job_number: str, solve
 
     # If there are still unfinished jobs recursively handle the remaining jobs.
     if len(remaining_job_list):
-        handle_waiting_and_removal_process(logging_file, job_number, solver_array_list, sbatch_script_name, portfolio_size, remaining_job_list, pending_job_with_new_cutoff, started)
+        handle_waiting_and_removal_process(instances, logging_file, job_number, solver_array_list, sbatch_script_name, portfolio_size, remaining_job_list, finished_instances_dict, pending_job_with_new_cutoff, started)
 
     return True
 
@@ -422,7 +459,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
         
         if(performance == 'RUNTIME'):
             
-            handle_waiting_and_removal_process(file_path_output1, job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {}, False)
+            handle_waiting_and_removal_process(instances, file_path_output1, job_number, solver_array_list, sbatch_script_name, num_jobs/len(instances), [], {},{}, False)
             now = datetime.datetime.now()
             current_time = now.strftime("%H:%M:%S")
             fo = open(file_path_output1, 'a+')
@@ -431,7 +468,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path)->bool:
             fo.close() 
 
             # After all jobs have finished remove/extract the files in temp only needed for the running of the portfolios.
-            remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
+            # remove_temp_files_unfinished_solvers(solver_array_list,sbatch_script_name, temp_solvers)
 
         else:
             done = False
