@@ -49,7 +49,7 @@ You can install the base requirements with
 
 This will create an environment named ``sparkle`` that contains everything needed to run Sparkle, except LaTeX that needs to be installed manually.
 
-To activate the environment in the current sheel, execute:
+To activate the environment in the current shell, execute:
 
 .. code-block:: shell
 
