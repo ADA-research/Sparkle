@@ -31,6 +31,8 @@ The rest of the dependencies can installed and activated with
   $ conda activate sparkle
 ```
 
+For detailed instalation instructions see the documentation: https://sparkle-ai.readthedocs.io/
+
 ## Examples
 
 See the `Examples` directory for some examples on how to use `Sparkle`. All commands need to be executed from the root directory. 
