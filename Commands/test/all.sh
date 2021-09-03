@@ -56,8 +56,17 @@ Commands/test/configure_solver_validate.sh
 # Test construct sparkle portfolio selector
 Commands/test/construct_sparkle_portfolio_selector.sh
 
-# Test generate report
+# Test run sparkle portfolio selector
+Commands/test/run_sparkle_portfolio_selector.sh
+
+# Test generate report (selection)
 Commands/test/generate_report.sh
+
+# Test generate report (selection) for test set
+Commands/test/generate_report_for_test.sh
+
+# Test generate report for configuration
+Commands/test/generate_report_for_configuration.sh
 
 # Test save record
 Commands/test/save_record.sh
