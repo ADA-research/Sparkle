@@ -29,3 +29,5 @@ userguide: makefile
 clean: makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	rm -f $(SOURCEDIR)/_generated/*
+
+all: userguide html;

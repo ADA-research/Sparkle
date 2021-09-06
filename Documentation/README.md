@@ -2,7 +2,17 @@
 
 Sparkle uses Sphinx to generate the documentation. The requirements are included in `../Documentation/requirments.txt`. LaTeX is also needed to build the `pdf` version of the documentation and userguide.
 
-## Full documentation
+To install the requirements use pip (ideally in a virtual or conda environemnet)
+```bash
+pip install -r requirements.txt
+```
+
+To build the html documentation and the userguide (pdf).
+```
+make all
+```
+
+## Build the html documentation
 
 To build the full html documentation
 ```bash
@@ -18,7 +28,7 @@ make latexpdf
 Consult the [Sphinx documentation](https://www.sphinx-doc.org) on how to use Sphinx.
 
 
-## User Guide
+## Build the pdf User Guide
 
 A user guide is also availible in the file `sparkle-userguide.pdf`. To regenete the file, use  
 ```bash

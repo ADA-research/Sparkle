@@ -30,7 +30,7 @@ if __name__ == r'__main__':
 	fout.write('set ylabel \'%s, PAR10\'' % (portfolio_selector_sparkle_name)  + '\n')
 	fout.write('set title \'%s vs %s\'' % (portfolio_selector_sparkle_name, vbs_name)  + '\n')
 	fout.write('unset key'  + '\n')
-	fout.write('set xrange [0.01}:%s]' % (penalty_time) + '\n')
+	fout.write('set xrange [0.01:%s]' % (penalty_time) + '\n')
 	fout.write('set yrange [0.01:%s]' % (penalty_time)  + '\n')
 	fout.write('set logscale x'  + '\n')
 	fout.write('set logscale y'  + '\n')

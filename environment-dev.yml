@@ -1,10 +1,10 @@
 name: sparkle-dev
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
   # Basic conda install
-  - python=3
+  - python=3.9
   - swig=3.0
   - gnuplot
   - pip
@@ -22,3 +22,5 @@ dependencies:
     - ConfigSpace
     - smac
     - scipy==1.6.3  # 1.7.x removed a private function used by smac
+    # To build documentation
+    - -r Documentation/requirements.txt
