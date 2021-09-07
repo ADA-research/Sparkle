@@ -11,7 +11,7 @@ When ready, create a pull request towards the `development` branch.
 ## CHANGELOG
 
 The file `CHANGELOG.md` aims to track changes between versions. 
-When making changes, please add in the `[unrelease]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
+When making changes, please add a short description in the `[unrelease]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
 
 ## Tests
 
