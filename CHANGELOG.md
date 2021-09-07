@@ -8,10 +8,10 @@ Notable changes to Sparkle will be documented in this file.
 ## [0.2] - 2021/09/08
 ### Added
 - Automatic testing system based on pytest (in `./tests`)
-- Defined a coding style (in `.flake8` file)
+- Add a coding style (in `.flake8` file)
 - Activated CI/CD for testing and coding style
 - New installation process using an conda environment
-- Created two separated environment (conda) for users or devs 
+- Created two separated environments (conda) for users or devs 
 - Published the documentation on https://sparkle-ai.readthedocs.io/
 - Created a `CHANGELOG.md` file documenting the changes to Sparkle
 - Created a `CONTRIBUTING.md` file explaining how to contribute
@@ -34,8 +34,8 @@ Notable changes to Sparkle will be documented in this file.
 - Updated the README
 - Updated dependencies
 - Merge add\_solver\_help.py and add\_configured\_solver\_help.py
-- Changed file location of last\_test\_file\_path such that only the solver name is required to find the correct folder
-- Seperate configuration for different train and test sets. Tested code for configuration
+- Changed file location of last\_test\_file\_path such that only the solver name is required to find the correct directory
+- Seperate configuration for different train and test sets
 - Remove ablation scenarios when platform is cleaned
 - Change selection report title
 - Remove Yahsp solver and Depots instances (unclear redistribution permissions)
@@ -45,8 +45,8 @@ Notable changes to Sparkle will be documented in this file.
 - Change LaTeX build to non-interactive to prevent hanging
 - get\_solver\_directory function and pcs check before configuration
 - Make pcs file check only return true iff one pcs file is found
-- Remove ablations scenarios when starting a new configuration
+- Remove ablation scenarios when starting a new configuration
 - Fix call to unassigned variable
-- Fix issue where plotting for configuration reports did not work when zero or negative values existed
+- Hotfix for issue where plotting for configuration reports did not work when zero or negative values existed
 
 

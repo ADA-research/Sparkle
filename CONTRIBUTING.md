@@ -4,14 +4,14 @@ For now, the development of Sparkle is done by a closed core team.
 
 We will gladly accept contributions in the form of bug reports, feature requests and pull requests in the near future, when the appropriate infrastructure is in place, and the code base is ready.
 
-The development is done the branch `development`. 
-To add some change to Sparkle, please create a branch from `development`, give it a descriptive name and add your code there.
+The development is done on the `development` branch. 
+To make changes to Sparkle, please create a branch from `development`, give it a descriptive name and add your code there.
 When ready, create a pull request towards the `development` branch.
 
 ## CHANGELOG
 
 The file `CHANGELOG.md` aims to track changes between versions. 
-When making changes, please add a short description in the `[unrelease]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
+When making changes, please add a short description in the `[Unreleased]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
 
 ## Tests
 
