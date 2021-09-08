@@ -16,8 +16,8 @@ if __name__ == r"__main__":
     args = parser.parse_args()
 
     print("c Sparkle (Platform for evaluating empirical algorithms/solvers)")
-    print("c Version: TBD")
-    print("c License: TBD")
-    print("c Written by Chuan Luo, Koen van der Blom, Jeroen Rook, and Holger H. Hoos")
+    print("c Version: 0.2")
+    print("c License: MIT")
+    print("c Written by Chuan Luo, Koen van der Blom, Jeremie Gobeil, Jeroen Rook, and Holger H. Hoos")
     print("c Contact: k.van.der.blom@liacs.leidenuniv.nl")
     print("c For more details see README.md")
