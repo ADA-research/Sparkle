@@ -19,48 +19,58 @@ Follow these steps:
 Installing Sparkle
 ==================
 
-.. note:: The installation process use the ``conda`` command available in `Anaconda <https://www.anaconda.com/>`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage some of the dependencies. 
+.. note:: The installation process use the ``conda`` command available in `Anaconda <https://www.anaconda.com/>`_ or `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage some dependencies. 
 
-1. Copy the Sparkle files to your desired directory
+Get a copy of Sparkle
+---------------------
+To get a copy of Sparkle you can clone the repository.
 
-2. Install Python 3.9 (other 3.x versions may work, but were not 
-   tested with the packages included in the ``requirements_first.txt``
-   and ``requirements_second.txt`` files.
+If ``git`` is available on your system, this will clone the Sparkle repository and create a subdirectory named ``sparkle`` : 
 
-   Using conda::
+.. code-block:: shell
 
-      conda create -n <env_name> python=3.9
+  $ git clone https://bitbucket.org/sparkle-ai/sparkle.git
 
-3. Install Swig 3.0
+You can also download the stable version here: https://bitbucket.org/sparkle-ai/sparkle/get/main.zip
 
-   Using conda::
 
-      conda install swig=3.0
+Install dependencies
+--------------------
 
-4. Navigate into the Sparkle directory
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. An easy way to install most of what is needed is to use the ``conda`` package manager (https://docs.conda.io/en/latest/miniconda.html).
 
-5. Install ``requirements_first.txt``::
- 
-      pip install -r requirements_first.txt
+.. note:: LaTeX is used to create the reports and the documentation and must be installed manually on the system. If you don't plan to use the reports or recreate the documentations, you can skip it.
 
-   With Anaconda::
+You can install the base requirements with
 
-      /home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_first.txt
+.. code-block:: shell
 
-6. Install ``requirements_second.txt``::
+  $ conda env create -f environment.yml
 
-      pip install -r requirements_second.txt
-   
-   With Anaconda::
+This will create an environment named ``sparkle`` that contains everything needed to run Sparkle, except LaTeX that needs to be installed manually.
 
-      /home/<username>/<anaconda_dir>/envs/<env_name>/bin/pip install -r requirements_second.txt
+To activate the environment in the current shell, execute:
 
-7. Install ``epstopdf``
-   (if manually, for instance on a cluster, as described in
-   Section :numref:`package:epstopdf`.
+.. code-block:: shell
 
-8. Install other requirements if they are not on your system yet: ``LaTeX``, ``BibTeX`` and ``gnuplot``.
-      
+  $ conda activate sparkle
+
+.. note:: You will need to reactivate the environment every time you log in, before using Sparkle.
+
+The file ``environment.yml`` contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.
+
+The file ``environment-dev.txt`` contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems. 
+
+The two environments can be created in parallel since one is named ``sparkle`` and the other ``sparkle-dev``. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:
+
+.. code-block:: shell
+
+   $ conda deactivate 
+   $ conda env remove -n sparkle
+   $ conda env create -f environment.yml
+   $ conda activate sparkle
+
+This should be fast as both ``conda`` and ``pip`` use local cache for the packages.
 
 .. _quick:config_environment:
 
@@ -626,40 +636,6 @@ Shell and Python scripts should work as is. If a compiled binary does
 not work, you may have to compile it on Grace and manually install
 packages on Grace that are needed by your algorithm.
 
-.. _package:epstopdf:
-
-``epstopdf``
-~~~~~~~~~~~~
-
-The ``epstopdf`` package (or a package containing it) is required for
-Sparkle’s reporting component to work (e.g.
-``generate_report, generate_report_for_configuration``), it can be
-installed in your user directory as follows:
-
-#. Download ``epstopdf``:: 
-
-      wget http://mirrors.ctan.org/support/epstopdf.zip
-
-
-#. Unzip the package (ideally somewhere static, rather than a
-   ``/Downloads/`` directory)::
-
-      unzip epstopdf.zip
-
-#. Rename ``epstopdf.pl`` (inside the directory you just unzipped)::
-
-      mv epstopdf.pl epstopdf
-
-#. Add this line to your ``.bashrc`` (open with e.g. ``vim ~/.bashrc``)::
-
-      export PATH="/<directory>/epstopdf:$PATH"
-
-   (replace "``<directory>``" with the path to the ``epstopdf``
-   directory, e.g.: ``home/blomkvander/bin``)
-
-#. Reload ``.bashrc`` to make sure everything is updated::
-
-      source ~/.bashrc
 
 General requirements
 ~~~~~~~~~~~~~~~~~~~~

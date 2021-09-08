@@ -139,11 +139,13 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 	sl.add_output(sgh.smac_dir + std_out, 'Standard output of Slurm batch script for validation')
 	sl.add_output(sgh.smac_dir + std_err, 'Error output of Slurm batch script for validation')
 
+	scenario_dir = 'example_scenarios/' + solver_name + "_" + instance_set_train_name;
+
 	# Train default
 	default = True
-	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, scsh.InstanceType.TRAIN, default)
-	scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-	exec_dir = 'example_scenarios/' + solver_name + '/validate_train_default/'
+	scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, instance_set_train_name, scsh.InstanceType.TRAIN, default)
+	scenario_file_path = scenario_dir + '/' + scenario_file_name
+	exec_dir = scenario_dir + '/validate_train_default/'
 	configuration_str = 'DEFAULT'
 	train_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 
@@ -157,9 +159,9 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 	if instance_set_test_name is not None:
 		# Test default
 		default = True
-		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
-		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
-		exec_dir = 'example_scenarios/' + solver_name + '/validate_{}_test_default/'.format(instance_set_test_name)
+		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+		scenario_file_path = scenario_dir + '/' + scenario_file_name
+		exec_dir = scenario_dir + '/validate_{}_test_default/'.format(instance_set_test_name)
 		configuration_str = 'DEFAULT'
 		test_default_out = 'results/' + solver_name + '_validation_' + scenario_file_name
 	
@@ -167,14 +169,14 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 	
 		# Test configured
 		default = False
-		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_test_name, scsh.InstanceType.TEST, default)
-		scenario_file_path = 'example_scenarios/' + solver_name + '/' + scenario_file_name
+		scenario_file_name = scsh.create_file_scenario_validate(solver_name, instance_set_train_name, instance_set_test_name, scsh.InstanceType.TEST, default)
+		scenario_file_path = scenario_dir + '/' + scenario_file_name
 		optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
-		exec_dir = 'example_scenarios/' + solver_name + '/validate_{}_test_configured/'.format(instance_set_test_name)
+		exec_dir = scenario_dir + '/validate_{}_test_configured/'.format(instance_set_test_name)
 		configuration_str = '\"' + str(optimised_configuration_str) + '\"'
 
 		# Write configuration to file to be used by smac-validate
-		config_file_path = 'example_scenarios/' + solver_name + '/configuration_for_validation.txt'
+		config_file_path = scenario_dir + '/configuration_for_validation.txt'
 		fout = open(sgh.smac_dir + config_file_path, 'w+') # open the file of sbatch script
 		fcntl.flock(fout.fileno(), fcntl.LOCK_EX) # using the UNIX file lock to prevent other attempts to visit this sbatch script
 		fout.write(optimised_configuration_str + '\n')
@@ -194,9 +196,9 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 	# Get instance set sizes
 	for instance_set_name, inst_type in [(instance_set_train_name, "train"), (instance_set_test_name, "test")]:
 		if instance_set_name is not None:
-			smac_instance_file = sgh.smac_dir + 'example_scenarios/' + solver_name + '/' + instance_set_name + '_' + inst_type + '.txt'
+			smac_instance_file = sgh.smac_dir + scenario_dir + '/' + instance_set_name + '_' + inst_type + '.txt'
 			if Path(smac_instance_file).is_file():
-				instance_count = sum(1 for line in open(smac_instance_file,"r"))
+				instance_count = sum(1 for _ in open(smac_instance_file, "r"))
 				instance_sizes.append(instance_count)
 
 	# Adjust cpus when nessacery

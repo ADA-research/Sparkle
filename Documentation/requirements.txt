@@ -1,0 +1,4 @@
+# Requirements for Sparkle documentation
+recommonmark
+Sphinx
+sphinxcontrib-jsmath

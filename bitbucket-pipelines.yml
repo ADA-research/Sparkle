@@ -1,0 +1,31 @@
+#  Template python-build
+
+#  This template allows you to validate your python code.
+#  The workflow allows running tests and code linting on the default branch.
+
+image: continuumio/miniconda3:latest
+
+pipelines:
+  pull-requests:
+    '**':
+      - parallel:
+        - step:
+            name: Test
+            caches:
+              - pip
+              - condacache
+            script:
+              - conda info
+              - conda env create -f environment.yml 
+              - conda activate sparkle
+              - pytest -v tests/* --junitxml=test-reports/report.xml
+        - step:
+            name: Lint code
+            script:
+              # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
+              - pip install flake8
+              - flake8 
+
+definitions:
+  caches:
+    condacache: /opt/conda/pkgs

@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
-
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-
-Authors: 	Chuan Luo, chuanluosaber@gmail.com
-			Holger H. Hoos, hh@liacs.nl
-
-Contact: 	Chuan Luo, chuanluosaber@gmail.com
-'''
 
 import os
 import sys
@@ -19,20 +9,19 @@ from sparkle_help import sparkle_logging as sl
 import cleanup_temporary_files as ctf
 
 
-if __name__ == '__main__':
-	# Log command call
-	sl.log_command(sys.argv)
+if __name__ == "__main__":
+    # Log command call
+    sl.log_command(sys.argv)
 
-	# Define command line arguments
-	parser = argparse.ArgumentParser()
+    # Define command line arguments
+    parser = argparse.ArgumentParser()
 
-	# Process command line arguments
-	args = parser.parse_args()
+    # Process command line arguments
+    args = parser.parse_args()
 
-	print('c Cleaning existing Sparkle platform ...')
-	sparkle_record_help.cleanup_current_sparkle_platform()
-	ctf.remove_temporary_files()
-	command_line = 'rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf'
-	os.system(command_line)
-	print('c Existing Sparkle platform cleaned!')
-
+    print("c Cleaning existing Sparkle platform ...")
+    sparkle_record_help.cleanup_current_sparkle_platform()
+    ctf.remove_temporary_files()
+    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+    os.system(command_line)
+    print("c Existing Sparkle platform cleaned!")
