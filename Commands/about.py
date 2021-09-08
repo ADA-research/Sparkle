@@ -8,13 +8,13 @@ from sparkle_help import sparkle_logging as sl
 __description__ = "Platform for evaluating empirical algorithms/solvers"
 __version__ = "0.2"
 __licence__ = "MIT"
-__authors__ = ["Chuan Luo", 
-               "Koen van der Blom", 
+__authors__ = ["Chuan Luo",
+               "Koen van der Blom",
                "Richard Middelkoop",
-               "Jeroen Rook", 
-               "Jeremie Gobeil", 
+               "Jeroen Rook",
+               "Jeremie Gobeil",
                "Holger H. Hoos",
-              ]
+               ]
 __contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
 
 random.shuffle(__authors__)
