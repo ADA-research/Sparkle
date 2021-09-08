@@ -2,9 +2,6 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [Unreleased]
-
-
 ## [0.2] - 2021/09/08
 ### Added
 - Automatic testing system based on pytest (in `./tests`)
@@ -49,4 +46,4 @@ Notable changes to Sparkle will be documented in this file.
 - Fix call to unassigned variable
 - Hotfix for issue where plotting for configuration reports did not work when zero or negative values existed
 
-
+## [Unreleased]
