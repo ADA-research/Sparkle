@@ -30,9 +30,9 @@ smac_path="Components/smac-v2.10.03-master-778/"
 smac_validation_results_path="$smac_path/example_scenarios/"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_train > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_test > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
+Commands/add_instances.py $instances_path_train > /dev/null
+Commands/add_instances.py $instances_path_test > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Copy configuration results to simulate the configuration command
 cp -r $configuration_results_path $smac_path

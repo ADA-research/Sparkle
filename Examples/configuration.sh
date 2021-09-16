@@ -10,8 +10,8 @@ Commands/initialise.py
 
 # Add train, and optionally test, instances (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
 
-Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN/
-Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN2/
+Commands/add_instances.py Examples/Resources/Instances/PTN/
+Commands/add_instances.py Examples/Resources/Instances/PTN2/
 
 #### Add a configurable solver
 
@@ -19,7 +19,7 @@ Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Reso
 
 # The solver directory should contain the solver executable, the `sparkle_smac_wrapper.py` wrapper, and a `.pcs` file describing the configurable parameters
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
+Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
 # If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
 

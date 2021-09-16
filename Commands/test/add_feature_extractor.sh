@@ -18,7 +18,7 @@ Commands/initialise.py > /dev/null
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 output_true="c Adding feature extractor SAT-features-competition2012_revised_without_SatELite_sparkle done!"
 output_true_b="c Removing Sparkle report Components/Sparkle-latex-generator/Sparkle_Report.pdf done!"
-output=$(Commands/add_feature_extractor.py --run-extractor-later $extractor_path | tail -1)
+output=$(Commands/add_feature_extractor.py $extractor_path | tail -1)
 
 if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];
 then

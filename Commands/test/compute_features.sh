@@ -19,8 +19,8 @@ instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
-Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/null
+Commands/add_instances.py $instances_path > /dev/null
+Commands/add_feature_extractor.py $extractor_path > /dev/null
 
 # Compute features
 output_true="c Computing features done!"

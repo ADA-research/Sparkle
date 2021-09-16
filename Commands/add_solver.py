@@ -40,10 +40,18 @@ if __name__ == r"__main__":
         choices=range(0, 2),
         help="indicate whether the solver is deterministic or not",
     )
-    parser.add_argument(
+    group_solver_run = parser.add_mutually_exclusive_group()
+    group_solver_run.add_argument(
         "--run-solver-later",
+        dest="run_solver_now",
+        action="store_false",
+        help="do not immediately run the newly added solver on all instances (default)",
+    )
+    group_solver_run.add_argument(
+        "--run-solver-now",
         action="store_true",
-        help="do not immediately run the newly added solver",
+        default=False,
+        help="immediately run the newly added solver on all instances",
     )
     parser.add_argument(
         "--nickname",
@@ -64,7 +72,6 @@ if __name__ == r"__main__":
         sys.exit()
 
     deterministic = str(args.deterministic)
-    my_flag_run_solver_later = args.run_solver_later
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
 
@@ -119,7 +126,7 @@ if __name__ == r"__main__":
         sfh.add_new_solver_nickname_into_file(nickname_str, solver_directory)
         pass
 
-    if not my_flag_run_solver_later:
+    if args.run_solver_now:
         if not my_flag_parallel:
             print("c Start running solvers ...")
             srs.running_solvers(sgh.performance_data_csv_path, 1)
