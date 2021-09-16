@@ -39,14 +39,14 @@ if __name__ == r"__main__":
         "--run-extractor-later",
         dest="run_extractor_now",
         action="store_false",
-        help=("do not immediately run the feature extractor "
+        help=("do not immediately run the feature extractor(s) "
               + "on the newly added instances (default)")
     )
     group_extractor_run.add_argument(
         "--run-extractor-now",
         action="store_true",
         default=False,
-        help="immediately run the feature extractor on the newly added instances",
+        help="immediately run the feature extractor(s) on the newly added instances",
     )
     group_solver = parser.add_mutually_exclusive_group()
     group_solver.add_argument(

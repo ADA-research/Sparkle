@@ -45,13 +45,13 @@ if __name__ == r"__main__":
         "--run-solver-later",
         dest="run_solver_now",
         action="store_false",
-        help="do not immediately run the newly added solver (default)",
+        help="do not immediately run the newly added solver on all instances (default)",
     )
     group_solver_run.add_argument(
         "--run-solver-now",
         action="store_true",
         default=False,
-        help="immediately run the newly added solver",
+        help="immediately run the newly added solver on all instances",
     )
     parser.add_argument(
         "--nickname",
