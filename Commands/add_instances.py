@@ -39,13 +39,13 @@ if __name__ == r"__main__":
         "--run-extractor-later",
         dest="run_extractor_now",
         action="store_false",
-        default=False,
         help=("do not immediately run the feature extractor "
               + "on the newly added instances (default)")
     )
     group_extractor_run.add_argument(
         "--run-extractor-now",
         action="store_true",
+        default=False,
         help="immediately run the feature extractor on the newly added instances",
     )
     group_solver = parser.add_mutually_exclusive_group()
@@ -53,13 +53,13 @@ if __name__ == r"__main__":
         "--run-solver-later",
         dest="run_solver_now",
         action="store_false",
-        default=False,
         help=("do not immediately run the solver(s) "
               + "on the newly added instances (default)")
     )
     group_solver.add_argument(
         "--run-solver-now",
         action="store_true",
+        default=False,
         help="immediately run the solver(s) on the newly added instances",
     )
     parser.add_argument(
