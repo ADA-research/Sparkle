@@ -10,8 +10,8 @@ Commands/initialise.py
 
 # Add train, and optionally test, instances (in this case for the VRP) in a given directory, without running solvers or feature extractors yet
 
-Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/CVRP/Instances/X-1-10/
-Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/CVRP/Instances/X-11-20/
+Commands/add_instances.py Examples/Resources/CVRP/Instances/X-1-10/
+Commands/add_instances.py Examples/Resources/CVRP/Instances/X-11-20/
 
 #### Add a configurable solver
 
@@ -19,7 +19,7 @@ Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Reso
 
 # The solver directory should contain the solver executable, the `sparkle_smac_wrapper.py` wrapper, and a `.pcs` file describing the configurable parameters
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/CVRP/VRP_SISRs/
+Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/CVRP/VRP_SISRs/
 
 # If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
 
