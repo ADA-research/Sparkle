@@ -17,7 +17,7 @@ Commands/initialise.py > /dev/null
 # Add instances
 instances_name="PTN"
 instances_source="Examples/Resources/Instances/$instances_name"
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_source > /dev/null
+Commands/add_instances.py $instances_source > /dev/null
 
 # Remove instances
 instances_path="Instances/$instances_name"
@@ -36,7 +36,7 @@ fi
 
 instances_name="CCAG/Instances/CCAG/"
 instances_source="Examples/Resources/$instances_name"
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_source > /dev/null
+Commands/add_instances.py $instances_source > /dev/null
 
 instances_path="Instances/CCAG"
 output_true="c Removing instances in directory $instances_path done!"
