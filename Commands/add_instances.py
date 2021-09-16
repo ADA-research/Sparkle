@@ -40,7 +40,8 @@ if __name__ == r"__main__":
         dest="run_extractor_now",
         action="store_false",
         default=False,
-        help="do not immediately run the feature extractor on the newly added instances",
+        help=("do not immediately run the feature extractor "
+              + "on the newly added instances (default)")
     )
     group_extractor_run.add_argument(
         "--run-extractor-now",
@@ -53,7 +54,8 @@ if __name__ == r"__main__":
         dest="run_solver_now",
         action="store_false",
         default=False,
-        help="do not immediately run the solver(s) on the newly added instances",
+        help=("do not immediately run the solver(s) "
+              + "on the newly added instances (default)")
     )
     group_solver.add_argument(
         "--run-solver-now",

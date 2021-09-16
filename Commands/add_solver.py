@@ -46,7 +46,7 @@ if __name__ == r"__main__":
         dest="run_solver_now",
         action="store_false",
         default=False,
-        help="do not immediately run the newly added solver",
+        help="do not immediately run the newly added solver (default)",
     )
     group_solver_run.add_argument(
         "--run-solver-now",
