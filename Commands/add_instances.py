@@ -36,31 +36,31 @@ if __name__ == r"__main__":
     )
     group_extractor_run = parser.add_mutually_exclusive_group()
     group_extractor_run.add_argument(
+        "--run-extractor-now",
+        default=False,
+        action="store_true",
+        help="immediately run the feature extractor(s) on the newly added instances",
+    )
+    group_extractor_run.add_argument(
         "--run-extractor-later",
         dest="run_extractor_now",
         action="store_false",
         help=("do not immediately run the feature extractor(s) "
               + "on the newly added instances (default)")
     )
-    group_extractor_run.add_argument(
-        "--run-extractor-now",
-        action="store_true",
-        default=False,
-        help="immediately run the feature extractor(s) on the newly added instances",
-    )
     group_solver = parser.add_mutually_exclusive_group()
+    group_solver.add_argument(
+        "--run-solver-now",
+        default=False,
+        action="store_true",
+        help="immediately run the solver(s) on the newly added instances",
+    )
     group_solver.add_argument(
         "--run-solver-later",
         dest="run_solver_now",
         action="store_false",
         help=("do not immediately run the solver(s) "
               + "on the newly added instances (default)")
-    )
-    group_solver.add_argument(
-        "--run-solver-now",
-        action="store_true",
-        default=False,
-        help="immediately run the solver(s) on the newly added instances",
     )
     parser.add_argument(
         "--nickname", type=str, help="set a nickname for the instance set"

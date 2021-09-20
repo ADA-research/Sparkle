@@ -42,16 +42,16 @@ if __name__ == r"__main__":
     )
     group_solver_run = parser.add_mutually_exclusive_group()
     group_solver_run.add_argument(
+        "--run-solver-now",
+        default=False,
+        action="store_true",
+        help="immediately run the newly added solver on all instances",
+    )
+    group_solver_run.add_argument(
         "--run-solver-later",
         dest="run_solver_now",
         action="store_false",
         help="do not immediately run the newly added solver on all instances (default)",
-    )
-    group_solver_run.add_argument(
-        "--run-solver-now",
-        action="store_true",
-        default=False,
-        help="immediately run the newly added solver on all instances",
     )
     parser.add_argument(
         "--nickname",
@@ -71,6 +71,7 @@ if __name__ == r"__main__":
         print(r"c Solver path " + "'" + solver_source + "'" + r" does not exist!")
         sys.exit()
 
+    print(f"so:{args.run_solver_now}")
     deterministic = str(args.deterministic)
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
