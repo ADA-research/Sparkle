@@ -71,7 +71,6 @@ if __name__ == r"__main__":
         print(r"c Solver path " + "'" + solver_source + "'" + r" does not exist!")
         sys.exit()
 
-    print(f"so:{args.run_solver_now}")
     deterministic = str(args.deterministic)
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
