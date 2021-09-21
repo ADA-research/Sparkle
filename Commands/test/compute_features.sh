@@ -35,12 +35,13 @@ else
 fi
 
 # Compute features parallel
-output_true="c Computing features in parallel ..."
 output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
-if [[ $output == $output_true ]];
+if [[ $output =~ [0-9] ]];
 then
 	echo "[success] compute_features --parallel test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] compute_features --parallel test failed with output:"
 	echo $output

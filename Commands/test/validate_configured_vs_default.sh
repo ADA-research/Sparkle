@@ -45,6 +45,8 @@ output=$(Commands/validate_configured_vs_default.py --solver $solver_path --inst
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] validate_configured_vs_default with both train and test sets test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
@@ -56,6 +58,8 @@ output=$(Commands/validate_configured_vs_default.py --solver $solver_path --inst
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] validate_configured_vs_default with just training set test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] validate_configured_vs_default with just training set test failed with output:"
 	echo $output

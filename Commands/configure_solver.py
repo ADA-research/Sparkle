@@ -176,11 +176,8 @@ if __name__ == r"__main__":
         smac_configure_sbatch_script_name
     )
 
-    print(
-        "c Running configuration in parallel. Waiting for Slurm job with id: {}".format(
-            configure_jobid
-        )
-    )
+    dependency_jobid_list = []
+    dependency_jobid_list.append(configure_jobid)
 
     # Write most recent run to file
     last_configuration_file_path = (
@@ -211,14 +208,20 @@ if __name__ == r"__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        scsh.generate_validation_callback_slurm_script(
+        validate_jobid = scsh.generate_validation_callback_slurm_script(
             solver, instance_set_train, instance_set_test, configure_jobid
         )
+        dependency_jobid_list.append(validate_jobid)
 
     if ablation:
-        scsh.generate_ablation_callback_slurm_script(
+        ablation_jobid = scsh.generate_ablation_callback_slurm_script(
             solver, instance_set_train, instance_set_test, configure_jobid
         )
+        dependency_jobid_list.append(ablation_jobid)
+
+    job_id_str = ','.join(dependency_jobid_list)
+    print(f"c Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+        f"{job_id_str}")
 
     # Write used settings to file
     sgh.settings.write_used_settings()

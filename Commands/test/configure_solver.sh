@@ -34,6 +34,8 @@ output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] configure_solver test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] configure_solver test failed with output:"
 	echo $output
@@ -47,6 +49,8 @@ output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] configure_solver performance measure RUNTIME option test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] configure_solver performance measure RUNTIME option test failed with output:"
 	echo $output
@@ -62,6 +66,8 @@ output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] configure_solver cutoff time option test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] configure_solver cutoff time option test failed with output:"
 	echo $output
@@ -75,6 +81,8 @@ output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] configure_solver budget per run option test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] configure_solver budget per run option test failed with output:"
 	echo $output
@@ -88,6 +96,8 @@ output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] configure_solver number of runs option test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] configure_solver number of runs option test failed with output:"
 	echo $output

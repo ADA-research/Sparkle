@@ -47,6 +47,8 @@ output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] configure_solver with sequential ablation run test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] configure_solver with sequential ablation run test failed with output:"
 	echo $output
@@ -58,6 +60,8 @@ output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $in
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] run_ablation test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] run_ablation test failed with output:"
 	echo $output
@@ -69,6 +73,8 @@ output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $in
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] run_ablation with test set test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] run_ablation with test set test failed with output:"
 	echo $output

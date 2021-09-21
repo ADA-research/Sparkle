@@ -57,11 +57,11 @@ def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report
     # Default behaviour is not to run them, like the sequential run_solvers command
     if flag_also_construct_selector_and_report:
         run_job_parallel_jobid = construct_selector_and_report(dependency_jobid_list)
+        dependency_jobid_list.append(run_job_parallel_jobid)
 
-    last_job_id = run_job_parallel_jobid
-
-    print("c Running solvers in parallel. Waiting for Slurm job with id:")
-    print(last_job_id)
+    job_id_str = ','.join(dependency_jobid_list)
+    print(f"c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+        f"{job_id_str}")
 
     return
 

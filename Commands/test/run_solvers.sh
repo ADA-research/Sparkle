@@ -39,6 +39,8 @@ output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --p
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] run_solvers --parallel test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] run_solvers --parallel test failed with output:"
 	echo $output
@@ -50,6 +52,8 @@ output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --p
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] run_solvers --parallel --recompute test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] run_solvers --parallel --recompute test failed with output:"
 	echo $output
@@ -61,6 +65,8 @@ output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --p
 if [[ $output =~ [0-9] ]];
 then
 	echo "[success] run_solvers --parallel --recompute --verifier SAT test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] run_solvers --parallel --recompute --verifier SAT test failed with output:"
 	echo $output
