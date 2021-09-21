@@ -221,7 +221,7 @@ if __name__ == r"__main__":
 
     job_id_str = ','.join(dependency_jobid_list)
     print(f"c Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
-        f"{job_id_str}")
+          f"{job_id_str}")
 
     # Write used settings to file
     sgh.settings.write_used_settings()

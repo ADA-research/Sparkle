@@ -61,7 +61,7 @@ def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report
 
     job_id_str = ','.join(dependency_jobid_list)
     print(f"c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-        f"{job_id_str}")
+          f"{job_id_str}")
 
     return
 

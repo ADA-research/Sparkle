@@ -42,7 +42,7 @@ def compute_features_parallel(my_flag_recompute):
 
     job_id_str = ','.join(dependency_jobid_list)
     print(f"c Computing features in parallel. Waiting for Slurm job(s) with id(s): "
-        f"{job_id_str}")
+          f"{job_id_str}")
 
     return
 
