@@ -56,4 +56,5 @@ Notable changes to Sparkle will be documented in this file.
 - Default to --run-solver-later in add\_solver.py and add\_instances.py
 - Default to --run-extractor-later in add\_instances.py and add\_feature\_extractor.py
 - Updated documentation, examples and tests for new behaviour of --run-solver-later and --run-extrator-later
+- Improve integration tests so all launched jobs are cancelled upon test completion
 
