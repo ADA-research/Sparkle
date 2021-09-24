@@ -176,8 +176,7 @@ if __name__ == r"__main__":
         smac_configure_sbatch_script_name
     )
 
-    dependency_jobid_list = []
-    dependency_jobid_list.append(configure_jobid)
+    dependency_jobid_list = [configure_jobid]
 
     # Write most recent run to file
     last_configuration_file_path = (
