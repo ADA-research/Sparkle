@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/run_solvers.sh
@@ -44,6 +47,7 @@ then
 else
 	echo "[failure] run_solvers --parallel test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Run solvers recompute
@@ -57,6 +61,7 @@ then
 else
 	echo "[failure] run_solvers --parallel --recompute test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Run solvers with verifier
@@ -70,5 +75,6 @@ then
 else
 	echo "[failure] run_solvers --parallel --recompute --verifier SAT test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 

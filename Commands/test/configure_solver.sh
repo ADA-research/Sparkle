@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/configure_solver.sh
@@ -39,6 +42,7 @@ then
 else              
 	echo "[failure] configure_solver test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -54,6 +58,7 @@ then
 else              
 	echo "[failure] configure_solver performance measure RUNTIME option test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -71,6 +76,7 @@ then
 else              
 	echo "[failure] configure_solver cutoff time option test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -86,6 +92,7 @@ then
 else              
 	echo "[failure] configure_solver budget per run option test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -101,6 +108,7 @@ then
 else              
 	echo "[failure] configure_solver number of runs option test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Restore original settings

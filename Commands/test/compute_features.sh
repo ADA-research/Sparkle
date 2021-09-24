@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/compute_features.sh
@@ -45,5 +48,6 @@ then
 else              
 	echo "[failure] compute_features --parallel test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 

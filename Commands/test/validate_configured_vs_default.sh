@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/validate_configured_vs_default.sh
@@ -50,6 +53,7 @@ then
 else              
 	echo "[failure] validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Test configured solver and default solver with just training set
@@ -63,6 +67,7 @@ then
 else              
 	echo "[failure] validate_configured_vs_default with just training set test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Restore original settings

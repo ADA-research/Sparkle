@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/configure_solver.sh
@@ -52,6 +55,7 @@ then
 else
 	echo "[failure] configure_solver with sequential ablation run test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Run ablation on train set
@@ -65,6 +69,7 @@ then
 else              
 	echo "[failure] run_ablation test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Run ablation on test set
@@ -78,6 +83,7 @@ then
 else
 	echo "[failure] run_ablation with test set test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Restore original settings
