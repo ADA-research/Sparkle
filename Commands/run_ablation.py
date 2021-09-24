@@ -183,9 +183,12 @@ if __name__ == r"__main__":
     )
     print("c Created {}".format(sbatch_script_path))
 
+    dependency_jobid_list = []
+
     jobid = ssh.submit_sbatch_script(
         sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
     )
+    dependency_jobid_list.append(jobid)
     print(
         "c Launched sbatch script '{}' with jobid {}".format(sbatch_script_path, jobid)
     )
@@ -197,6 +200,7 @@ if __name__ == r"__main__":
     jobid = ssh.submit_sbatch_script(
         sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
     )
+    dependency_jobid_list.append(jobid)
     print(
         "c Launched callback sbatch script '{}' with jobid {}".format(
             sbatch_script_path, jobid
@@ -214,6 +218,7 @@ if __name__ == r"__main__":
         jobid = ssh.submit_sbatch_script(
             sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
         )
+        dependency_jobid_list.append(jobid)
         print(
             "c Launched validation sbatch script '{}' with jobid {}".format(
                 sbatch_script_path, jobid
@@ -230,8 +235,13 @@ if __name__ == r"__main__":
         jobid = ssh.submit_sbatch_script(
             sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
         )
+        dependency_jobid_list.append(jobid)
         print(
             "c Launched validation callback sbatch script '{}' with jobid {}".format(
                 sbatch_script_path, jobid
             )
         )
+
+    job_id_str = ','.join(dependency_jobid_list)
+    print(f"c Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+          f"{job_id_str}")
