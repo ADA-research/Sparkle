@@ -46,8 +46,9 @@ cp -r $configuration_results_path $smac_path
 
 # Configure solver
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_two --settings-file $sparkle_test_settings_path --ablation | tail -1)
+output_true="c Ablation analysis running. Waiting for Slurm job(s) with id(s): "
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] configure_solver with sequential ablation run test succeeded"
     jobid=${output##* }
@@ -61,7 +62,7 @@ fi
 # Run ablation on train set
 output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path | tail -1)
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] run_ablation test succeeded"
     jobid=${output##* }
@@ -75,7 +76,7 @@ fi
 # Run ablation on test set
 output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path --instance-set-test $instances_path_two | tail -1)
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] run_ablation with test set test succeeded"
     jobid=${output##* }

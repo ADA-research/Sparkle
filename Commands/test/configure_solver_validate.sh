@@ -27,6 +27,7 @@ Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Configure solver
 output=$(Commands/configure_solver.py --validate --ablation --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path | tail -1)
+output_true="c Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
 
 validationcallbackfile=Tmp/delayed_validation_PbO-CCSAT-Generic_PTN_script.sh
 ablationcallbackfile=Tmp/delayed_ablation_PbO-CCSAT-Generic_PTN_script.sh
@@ -37,7 +38,7 @@ if [ ! -f "$validationcallbackfile" ]; then
 elif [ ! -f "$ablationcallbackfile" ]; then
     echo "[failure] $ablationcallbackfile does not exist for configure_solver_validation."
     kill_started_jobs_slurm
-elif [[ $output =~ [0-9] ]]; then
+elif [[ $output =~ [^$output_true] ]]; then
 	echo "[success] configure_solver_validation test succeeded"
     jobid=${output##* }
 	scancel $jobid
