@@ -24,16 +24,8 @@ pipelines:
             script:
               # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
               - pip install flake8
-              - flake8 
-        - step:
-            name: Sonar cube
-            script:
-              - pipe: sonarsource/sonarcloud-scan:1.2.1
-              - pipe: sonarsource/sonarcloud-quality-gate:0.1.4
+              - flake8
               
 definitions:
   caches:
     condacache: /opt/conda/pkgs
-
-clone:
-  depth: full    # SonarCloud scanner needs the full history to assign issues properly
