@@ -29,29 +29,35 @@ cp $slurm_settings_test $slurm_settings_path # Activate test settings
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
-instances_path="Examples/Resources/Instances/PTN/"
-instances_path_two="Examples/Resources/Instances/PTN2/"
-solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
+examples_path="Examples/Resources/"
+instances_path_train="Instances/PTN/"
+instances_path_test="Instances/PTN2/"
+solver_path="Solvers/PbO-CCSAT-Generic/"
+instances_src_path_train="${examples_path}${instances_path_train}"
+instances_src_path_test="${examples_path}${instances_path_test}"
+solver_src_path="${examples_path}${solver_path}"
+
 configuration_results_path="Commands/test/test_files/results/"
 smac_path="Components/smac-v2.10.03-master-778/"
 smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic_PTN/"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_instances.py $instances_path_two > /dev/null
-Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
+Commands/add_instances.py $instances_src_path_train > /dev/null
+Commands/add_instances.py $instances_src_path_test > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
 # Copy configuration results to simulate the configuration command (it won't have finished yet)
 cp -r $configuration_results_path $smac_path
 
 # Configure solver
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_two --settings-file $sparkle_test_settings_path --ablation | tail -1)
-output_true="c Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation | tail -1)
+output_true="c Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
 
-if [[ $output =~ [^$output_true] ]];
+if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] configure_solver with sequential ablation run test succeeded"
     jobid=${output##* }
+    echo $output
 	scancel $jobid
 else
 	echo "[failure] configure_solver with sequential ablation run test failed with output:"
@@ -60,12 +66,14 @@ else
 fi
 
 # Run ablation on train set
-output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path | tail -1)
+output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
+output_true="c Ablation analysis running. Waiting for Slurm job(s) with id(s): "
 
-if [[ $output =~ [^$output_true] ]];
+if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] run_ablation test succeeded"
     jobid=${output##* }
+    echo $output
 	scancel $jobid
 else              
 	echo "[failure] run_ablation test failed with output:"
@@ -74,12 +82,13 @@ else
 fi
 
 # Run ablation on test set
-output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path --instance-set-test $instances_path_two | tail -1)
+output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test | tail -1)
 
-if [[ $output =~ [^$output_true] ]];
+if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] run_ablation with test set test succeeded"
     jobid=${output##* }
+    echo $output
 	scancel $jobid
 else
 	echo "[failure] run_ablation with test set test failed with output:"
