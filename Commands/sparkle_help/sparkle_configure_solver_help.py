@@ -510,7 +510,8 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name):
 def check_optimised_configuration_params(params: str):
 	# Check if a valid configuration was found
 	if params == '':
-		print('ERROR: Invalid optimised_configuration_str; Stopping execution!')
+		print(f'ERROR: Invalid optimised_configuration_str: "{params}"; '
+			'Stopping execution!')
 		sys.exit(-1)
 
 	return

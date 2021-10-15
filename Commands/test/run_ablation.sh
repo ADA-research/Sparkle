@@ -39,15 +39,15 @@ solver_src_path="${examples_path}${solver_path}"
 
 configuration_results_path="Commands/test/test_files/results/"
 smac_path="Components/smac-v2.10.03-master-778/"
-smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic_PTN/"
+smac_results_path="${smac_path}results/"
+smac_results_path_tmp="${smac_path}results_tmp/"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py $instances_src_path_train > /dev/null
 Commands/add_instances.py $instances_src_path_test > /dev/null
 Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
-# Copy configuration results to simulate the configuration command (it won't have finished yet)
-cp -r $configuration_results_path $smac_path
+mv $smac_results_path $smac_results_path_tmp &> /dev/null # Save user results
 
 # Configure solver
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation | tail -1)
@@ -64,6 +64,9 @@ else
 	echo $output
     kill_started_jobs_slurm
 fi
+
+# Copy configuration results to simulate the configuration command (it won't have finished yet)
+cp -r $configuration_results_path $smac_path # Place test results
 
 # Run ablation on train set
 output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
@@ -96,5 +99,6 @@ else
     kill_started_jobs_slurm
 fi
 
-# Restore original settings
-mv $slurm_settings_tmp $slurm_settings_path
+rm -r $smac_results_path # Remove test results
+mv $smac_results_path_tmp $smac_results_path &> /dev/null # Restore user results
+mv $slurm_settings_tmp $slurm_settings_path # Restore original settings
