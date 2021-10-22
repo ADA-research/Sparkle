@@ -13,14 +13,24 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 import os
 import fcntl
 from pathlib import Path
+from typing import List
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_basic_help as sbh
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help.sparkle_command_help import CommandName
-from sparkle_help import sparkle_job_help as sjh
+try:
+	from sparkle_help import sparkle_global_help as sgh
+	from sparkle_help import sparkle_basic_help as sbh
+	from sparkle_help import sparkle_configure_solver_help as scsh
+	from sparkle_help import sparkle_logging as sl
+	from sparkle_help import sparkle_file_help as sfh
+	from sparkle_help.sparkle_command_help import CommandName
+	from sparkle_help import sparkle_job_help as sjh
+except ImportError:
+	import sparkle_global_help as sgh
+	import sparkle_basic_help as sbh
+	import sparkle_configure_solver_help as scsh
+	import sparkle_logging as sl
+	import sparkle_file_help as sfh
+	from sparkle_command_help import CommandName
+	import sparkle_job_help as sjh
 
 
 def get_slurm_options_list(path_modifier=None):
@@ -112,32 +122,57 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 	return
 
 
-def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_name: str, instance_set_test_name: str = None) -> str:
-	## Set script name and path
-	if instance_set_test_name is not None:
-		sbatch_script_name = solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '_validation_sbatch.sh'
+def get_sbatch_options_list(sbatch_script_path: str, num_jobs: int,
+							job: str, smac: bool = True) -> List[str]:
+	if smac:
+		tmp_dir = 'tmp/'
 	else:
-		sbatch_script_name = solver_name + '_' + instance_set_train_name + '_validation_sbatch.sh'
+		tmp_dir = 'Tmp/'
 
-	sbatch_script_path = sgh.smac_dir + sbatch_script_name
+	sbatch_script_name = sfh.get_file_name(sbatch_script_path)
 
-	## Set sbatch options
+	# Set sbatch options
 	max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
-	num_jobs = 3
 	if num_jobs < max_jobs:
 		max_jobs = num_jobs
-	std_out = 'tmp/' + sbatch_script_name + '.txt'
-	std_err = 'tmp/' + sbatch_script_name + '.err'
-	job_name = '--job-name=' + sbatch_script_name
-	output = '--output=' + std_out
-	error = '--error=' + std_err
-	array = '--array=0-' + str(num_jobs-1) + '%' + str(max_jobs)
+	std_out = f'{tmp_dir}{sbatch_script_name}.txt'
+	std_err = f'{tmp_dir}{sbatch_script_name}.err'
+	job_name = f'--job-name={sbatch_script_name}'
+	output = f'--output={std_out}'
+	error = f'--error={std_err}'
+	array = f'--array=0-{str(num_jobs - 1)}%{str(max_jobs)}'
 	sbatch_options_list = [job_name, output, error, array]
 
 	# Log script and output paths
-	sl.add_output(sbatch_script_path, 'Slurm batch script for validation')
-	sl.add_output(sgh.smac_dir + std_out, 'Standard output of Slurm batch script for validation')
-	sl.add_output(sgh.smac_dir + std_err, 'Error output of Slurm batch script for validation')
+	sl.add_output(sbatch_script_path, f'Slurm batch script for {job}')
+	sl.add_output(sgh.smac_dir + std_out,
+		f'Standard output of Slurm batch script for {job}')
+	sl.add_output(sgh.smac_dir + std_err,
+		f'Error output of Slurm batch script for {job}')
+
+	# Remove possible old output
+	sfh.rmfile(Path(sgh.smac_dir + std_out))
+	sfh.rmfile(Path(sgh.smac_dir + std_err))
+
+	return sbatch_options_list
+
+
+def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_name: str,
+											instance_set_test_name: str = None) -> str:
+	# Set script name and path
+	if instance_set_test_name is not None:
+		sbatch_script_name = (f'{solver_name}_{instance_set_train_name}_'
+			f'{instance_set_test_name}_validation_sbatch.sh')
+	else:
+		sbatch_script_name = (f'{solver_name}_{instance_set_train_name}_validation_'
+			'sbatch.sh')
+
+	sbatch_script_path = sgh.smac_dir + sbatch_script_name
+
+	# Get sbatch options
+	num_jobs = 3
+	job = 'validation'
+	sbatch_options_list = get_sbatch_options_list(sbatch_script_path, num_jobs, job)
 
 	scenario_dir = 'example_scenarios/' + solver_name + "_" + instance_set_train_name;
 
@@ -218,10 +253,6 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 
 	## Create target call
 	target_call_str = './smac-validate --use-scenario-outdir true --num-run 1 --cli-cores ' + str(n_cpus)
-
-	# Remove possible old output
-	sfh.rmfile(Path(sgh.smac_dir + std_out))
-	sfh.rmfile(Path(sgh.smac_dir + std_err))
 
 	# Remove possible old results
 	for result_output_file in job_output_list:

@@ -20,8 +20,10 @@ from typing import List
 
 try:
 	from sparkle_help import sparkle_global_help as sgh
+	from sparkle_help import sparkle_instances_help as sih
 except ImportError:
 	import sparkle_global_help as sgh
+	import sparkle_instances_help as sih
 
 
 def create_new_empty_file(filepath):
@@ -104,6 +106,17 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 				instance_list.append(line.strip())
 
 	return instance_list
+
+
+def get_instance_list_from_path(path: str) -> List[str]:
+	# Multi-file instances
+	if sih._check_existence_of_instance_list_file(path):
+		list_all_filename = sih._get_list_instance(path)
+	# Single file instances
+	else:
+		list_all_filename = get_list_all_cnf_filename(path)
+
+	return list_all_filename
 
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):

@@ -39,6 +39,7 @@ class CommandName(Enum):
 	SPARKLE_WAIT = 22
 	SYSTEM_STATUS = 23
 	VALIDATE_CONFIGURED_VS_DEFAULT = 24
+	RUN_CONFIGURED_SOLVER = 25
 
 	def from_str(command_name: str):
 		if command_name == 'ABOUT':
@@ -91,6 +92,8 @@ class CommandName(Enum):
 			command_name = CommandName.SYSTEM_STATUS
 		elif command_name == 'VALIDATE_CONFIGURED_VS_DEFAULT':
 			command_name = CommandName.VALIDATE_CONFIGURED_VS_DEFAULT
+		elif command_name == 'RUN_CONFIGURED_SOLVER':
+			command_name = CommandName.RUN_CONFIGURED_SOLVER
 
 		return command_name
 
@@ -132,6 +135,6 @@ COMMAND_DEPENDENCIES = {
 	CommandName.SAVE_RECORD: [],
 	CommandName.SPARKLE_WAIT: [],
 	CommandName.SYSTEM_STATUS: [],
-	CommandName.VALIDATE_CONFIGURED_VS_DEFAULT: [CommandName.CONFIGURE_SOLVER]
+	CommandName.VALIDATE_CONFIGURED_VS_DEFAULT: [CommandName.CONFIGURE_SOLVER],
+	CommandName.RUN_CONFIGURED_SOLVER: [CommandName.CONFIGURE_SOLVER]
 }
-

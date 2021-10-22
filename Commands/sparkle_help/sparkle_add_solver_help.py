@@ -12,7 +12,10 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 
-from sparkle_help import sparkle_file_help as sfh
+try:
+	from sparkle_help import sparkle_file_help as sfh
+except ImportError:
+	import sparkle_file_help as sfh
 
 
 def get_solver_directory(solver_name: str) -> str:
