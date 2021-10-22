@@ -57,7 +57,6 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] configure_solver with sequential ablation run test succeeded"
     jobid=${output##* }
-    echo $output
 	scancel $jobid
 else
 	echo "[failure] configure_solver with sequential ablation run test failed with output:"
@@ -76,7 +75,6 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] run_ablation test succeeded"
     jobid=${output##* }
-    echo $output
 	scancel $jobid
 else              
 	echo "[failure] run_ablation test failed with output:"
@@ -91,7 +89,6 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] run_ablation with test set test succeeded"
     jobid=${output##* }
-    echo $output
 	scancel $jobid
 else
 	echo "[failure] run_ablation with test set test failed with output:"
