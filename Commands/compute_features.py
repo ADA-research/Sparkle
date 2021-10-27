@@ -38,12 +38,11 @@ def compute_features_parallel(my_flag_recompute):
     compute_features_parallel_jobid = sjph.running_job_parallel(
         job_script, dependency_jobid_list, CommandName.COMPUTE_FEATURES
     )
+    dependency_jobid_list.append(compute_features_parallel_jobid)
 
-    last_job_id = compute_features_parallel_jobid
-
-    print("c Waiting for Slurm job with id:")
-    print(last_job_id)
-    print("c Computing features in parallel ...")
+    job_id_str = ','.join(dependency_jobid_list)
+    print(f"c Computing features in parallel. Waiting for Slurm job(s) with id(s): "
+          f"{job_id_str}")
 
     return
 

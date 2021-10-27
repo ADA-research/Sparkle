@@ -352,6 +352,7 @@ Add a solver to the Sparkle platform.
 Arguments:
 
 *  ``[-–run-solver-later]``
+*  ``[-–run-solver-now]``
 *  ``[-–parallel]``
 *  ``–-deterministic {0, 1}``
 *  ``<solver_source_directory>``

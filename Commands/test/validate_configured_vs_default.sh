@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/validate_configured_vs_default.sh
@@ -30,9 +33,9 @@ smac_path="Components/smac-v2.10.03-master-778/"
 smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic/"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_train > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_test > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
+Commands/add_instances.py $instances_path_train > /dev/null
+Commands/add_instances.py $instances_path_test > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
 cp -r $configuration_results_path $smac_path
@@ -41,24 +44,31 @@ cp $configuration_files_path $smac_configuration_files_path
 
 # Test configured solver and default solver with both train and test sets
 output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
+output_true="c Running validation in parallel. Waiting for Slurm job with id: "
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] validate_configured_vs_default with both train and test sets test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Test configured solver and default solver with just training set
 output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path | tail -1)
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] validate_configured_vs_default with just training set test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] validate_configured_vs_default with just training set test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Restore original settings

@@ -44,10 +44,20 @@ if __name__ == r"__main__":
         type=str,
         help="path to the feature extractor",
     )
-    parser.add_argument(
-        "--run-extractor-later",
+    group_extractor_run = parser.add_mutually_exclusive_group()
+    group_extractor_run.add_argument(
+        "--run-extractor-now",
+        default=False,
         action="store_true",
-        help="do not immediately run the newly added feature extractor",
+        help=("immediately run the newly added feature extractor "
+              + "on the existing instances")
+    )
+    group_extractor_run.add_argument(
+        "--run-extractor-later",
+        dest="run_extractor_now",
+        action="store_false",
+        help=("do not immediately run the newly added feature extractor "
+              + "on the existing instances (default)")
     )
     parser.add_argument(
         "--nickname",
@@ -67,7 +77,6 @@ if __name__ == r"__main__":
         print(f"c Feature extractor path '{extractor_source}' does not exist!")
         sys.exit()
 
-    my_flag_run_extractor_later = args.run_extractor_later
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
 
@@ -198,7 +207,7 @@ if __name__ == r"__main__":
         sfh.add_new_extractor_nickname_into_file(nickname_str, extractor_directory)
         pass
 
-    if not my_flag_run_extractor_later:
+    if args.run_extractor_now:
         if not my_flag_parallel:
             print("c Start computing features ...")
             scf.computing_features(sgh.feature_data_csv_path, 1)

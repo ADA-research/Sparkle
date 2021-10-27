@@ -34,15 +34,33 @@ if __name__ == r"__main__":
         type=str,
         help="path to the instance set",
     )
-    parser.add_argument(
-        "--run-extractor-later",
+    group_extractor_run = parser.add_mutually_exclusive_group()
+    group_extractor_run.add_argument(
+        "--run-extractor-now",
+        default=False,
         action="store_true",
-        help="do not immediately run the feature extractor on the newly added instances",
+        help="immediately run the feature extractor(s) on the newly added instances",
     )
-    parser.add_argument(
-        "--run-solver-later",
+    group_extractor_run.add_argument(
+        "--run-extractor-later",
+        dest="run_extractor_now",
+        action="store_false",
+        help=("do not immediately run the feature extractor(s) "
+              + "on the newly added instances (default)")
+    )
+    group_solver = parser.add_mutually_exclusive_group()
+    group_solver.add_argument(
+        "--run-solver-now",
+        default=False,
         action="store_true",
-        help="do not immediately run the solver(s) on the newly added instances",
+        help="immediately run the solver(s) on the newly added instances",
+    )
+    group_solver.add_argument(
+        "--run-solver-later",
+        dest="run_solver_now",
+        action="store_false",
+        help=("do not immediately run the solver(s) "
+              + "on the newly added instances (default)")
     )
     parser.add_argument(
         "--nickname", type=str, help="set a nickname for the instance set"
@@ -62,8 +80,6 @@ if __name__ == r"__main__":
         )
         sys.exit()
 
-    my_flag_run_extractor_later = args.run_extractor_later
-    my_flag_run_solver_later = args.run_solver_later
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
 
@@ -195,7 +211,7 @@ if __name__ == r"__main__":
         os.system(command_line)
         print("c Removing Sparkle report " + sgh.sparkle_report_path + " done!")
 
-    if not my_flag_run_extractor_later:
+    if args.run_extractor_now:
         if not my_flag_parallel:
             print("c Start computing features ...")
             scf.computing_features(sgh.feature_data_csv_path, 1)
@@ -212,7 +228,7 @@ if __name__ == r"__main__":
             )
             print("c Computing features in parallel ...")
 
-    if not my_flag_run_solver_later:
+    if args.run_solver_now:
         if not my_flag_parallel:
             print("c Start running solvers ...")
             srs.running_solvers(sgh.performance_data_csv_path, 1)

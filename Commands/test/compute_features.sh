@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/compute_features.sh
@@ -19,8 +22,8 @@ instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
-Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/null
+Commands/add_instances.py $instances_path > /dev/null
+Commands/add_feature_extractor.py $extractor_path > /dev/null
 
 # Compute features
 output_true="c Computing features done!"
@@ -35,14 +38,17 @@ else
 fi
 
 # Compute features parallel
-output_true="c Computing features in parallel ..."
+output_true="c Computing features in parallel. Waiting for Slurm job(s) with id(s): "
 output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
-if [[ $output == $output_true ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] compute_features --parallel test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else              
 	echo "[failure] compute_features --parallel test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 

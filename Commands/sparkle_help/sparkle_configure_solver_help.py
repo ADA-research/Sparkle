@@ -622,7 +622,7 @@ def generate_configure_solver_wrapper(solver_name: str, instance_set_name: str, 
 	return
 
 
-def generate_validation_callback_slurm_script(solver: str, instance_set_train: str, instance_set_test: str, dependency: str):
+def generate_validation_callback_slurm_script(solver: str, instance_set_train: str, instance_set_test: str, dependency: str) -> str:
 	command_line = 'echo $(pwd) $(date)\n'
 	command_line += 'srun -N1 -n1 ./Commands/validate_configured_vs_default.py --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
@@ -630,12 +630,12 @@ def generate_validation_callback_slurm_script(solver: str, instance_set_train: s
 	if instance_set_test is not None:
 		command_line += ' --instance-set-test ' + instance_set_test
 
-	generate_generic_callback_slurm_script("validation", solver, instance_set_train, instance_set_test, dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+	jobid = generate_generic_callback_slurm_script("validation", solver, instance_set_train, instance_set_test, dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
 
-	return
+	return jobid
 
 
-def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str, instance_set_test: str, dependency: str):
+def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str, instance_set_test: str, dependency: str) -> str:
 	command_line = 'echo $(pwd) $(date)\n'
 	command_line += 'srun -N1 -n1 ./Commands/run_ablation.py --settings-file Settings/latest.ini'
 	command_line += ' --solver ' + solver
@@ -644,12 +644,12 @@ def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str
 	if instance_set_test is not None:
 		command_line += ' --instance-set-test ' + instance_set_test
 
-	generate_generic_callback_slurm_script('ablation', solver, instance_set_train, instance_set_test, dependency, command_line, CommandName.RUN_ABLATION)
+	jobid = generate_generic_callback_slurm_script('ablation', solver, instance_set_train, instance_set_test, dependency, command_line, CommandName.RUN_ABLATION)
 
-	return
+	return jobid
 
 
-def generate_generic_callback_slurm_script(name: str, solver: str, instance_set_train: str, instance_set_test: str, dependency: str, command_line: str, command_name: CommandName):
+def generate_generic_callback_slurm_script(name: str, solver: str, instance_set_train: str, instance_set_test: str, dependency: str, command_line: str, command_name: CommandName) -> str:
 	solver_name = sfh.get_last_level_directory_name(solver)
 	instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
 	instance_set_test_name = None
@@ -716,5 +716,5 @@ def generate_generic_callback_slurm_script(name: str, solver: str, instance_set_
 	print('c Callback script to launch {} is placed at {}'.format(name, delayed_job_file_path))
 	print('c Once configuration is finished, {name} will automatically start as a Slurm job: {jobid}'.format(name=name, jobid=jobid))
 
-	return
+	return jobid
 
