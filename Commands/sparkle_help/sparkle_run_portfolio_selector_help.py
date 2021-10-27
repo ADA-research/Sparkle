@@ -170,7 +170,7 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performan
 	list_feature_vector = []
 
 	if len(sgh.extractor_list) == 0:
-		print("ERROR: no feature extractor known! Please add a feature extractor to the platform before running this command again.")
+		print("ERROR: No feature extractor added to Sparkle.")
 		sys.exit()
 
 	cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
@@ -189,8 +189,6 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performan
 
 		if i < (len(list_feature_vector) - 1):
 			command_line = command_line + ' '
-
-	print(f"debug: {command_line}")
 
 	predict_schedule_result_path = r'Tmp/predict_schedule_' + sparkle_basic_help.get_time_pid_random_string() + r'.predres'
 	command_line = command_line + '\" 1> ' + predict_schedule_result_path + r' 2> ' + sgh.sparkle_err_path
