@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/run_sparkle_portfolio_selector.sh
-#SBATCH --output=TMP/run_sparkle_portfolio_selector.sh.txt
-#SBATCH --error=TMP/run_sparkle_portfolio_selector.sh.err
+#SBATCH --output=Tmp/run_sparkle_portfolio_selector.sh.txt
+#SBATCH --error=Tmp/run_sparkle_portfolio_selector.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -35,6 +35,7 @@ Commands/add_instances.py --run-solver-later --run-extractor-later $instances_pa
 Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
+Commands/construct_sparkle_portfolio_selector.py > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $selector_test $selector_path
