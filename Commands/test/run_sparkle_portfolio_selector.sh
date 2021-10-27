@@ -35,7 +35,6 @@ Commands/add_instances.py --run-solver-later --run-extractor-later $instances_pa
 Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev/null
 Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
-Commands/construct_sparkle_portfolio_selector.py > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $selector_test $selector_path
