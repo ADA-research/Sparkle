@@ -35,7 +35,7 @@ class Sparkle_CSV:
 	
 	def __init__(self, csv_filepath):
 		self.csv_filepath = csv_filepath
-		self.dataframe = pd.read_csv(csv_filepath,index_col=0)
+		self.dataframe = pd.read_csv(csv_filepath, index_col=0)
 		return
 	
 	def clean_csv(self):
@@ -55,7 +55,7 @@ class Sparkle_CSV:
 		fo = open(self.csv_filepath, 'w+')
 		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 		self.dataframe.to_csv(self.csv_filepath)
-		fo.close();
+		fo.close()
 		return
 
 
@@ -100,10 +100,8 @@ class Sparkle_CSV:
 		self.dataframe.rename(columns = {ori_column_name:mod_column_name}, inplace=True)
 		return
 
-
 	def get_column_size(self) -> int:
 		return len(self.dataframe.columns.tolist())
-
 
 	def add_column(self, column_name, value_list=[]):
 		if column_name in self.list_columns():
@@ -161,10 +159,8 @@ class Sparkle_CSV:
 		self.dataframe.rename(index = {ori_row_name:mod_row_name}, inplace=True)
 		return
 
-	
 	def get_row_size(self) -> int:
 		return len(self.dataframe.index.tolist())
-
 
 	def add_row(self, row_name, value_list=[]):
 		if row_name in self.list_rows():

@@ -169,6 +169,10 @@ def call_sparkle_portfolio_selector_solve_instance(instance_path: str, performan
 	print('c Sparkle computing features of instance ' + instance_files_str + ' ...')
 	list_feature_vector = []
 
+	if len(sgh.extractor_list) == 0:
+		print("ERROR: No feature extractor added to Sparkle.")
+		sys.exit()
+
 	cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
 
 	for extractor_path in sgh.extractor_list:
