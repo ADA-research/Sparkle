@@ -51,7 +51,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    #'sphinx.ext.autosectionlabel',
+    # 'sphinx.ext.autosectionlabel',
     'recommonmark',
 ]
 
@@ -131,20 +131,20 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    #'preamble': r'''
-    #    \usepackage[titles]{tocloft}
-    #    \cftsetpnumwidth {1.25cm}\cftsetrmarg{1.5cm}
-    #    \setlength{\cftchapnumwidth}{0.75cm}
-    #    \setlength{\cftsecindent}{\cftchapnumwidth}
-    #    \setlength{\cftsecnumwidth}{1.25cm}
-    #    ''',
-    #'fncychap': r'\usepackage[Bjornstrup]{fncychap}',
-    #'printindex': r'\footnotesize\raggedright\printindex',
+    # 'preamble': r'''
+    #     \usepackage[titles]{tocloft}
+    #     \cftsetpnumwidth {1.25cm}\cftsetrmarg{1.5cm}
+    #     \setlength{\cftchapnumwidth}{0.75cm}
+    #     \setlength{\cftsecindent}{\cftchapnumwidth}
+    #     \setlength{\cftsecnumwidth}{1.25cm}
+    #     ''',
+    # 'fncychap': r'\usepackage[Bjornstrup]{fncychap}',
+    # 'printindex': r'\footnotesize\raggedright\printindex',
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
 }
-latex_show_urls = 'footnote'    
+latex_show_urls = 'footnote'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
@@ -201,4 +201,3 @@ epub_exclude_files = ['search.html']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-

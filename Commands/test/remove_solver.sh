@@ -17,7 +17,7 @@ Commands/initialise.py > /dev/null
 # Add solver
 solver_name="PbO-CCSAT-Generic"
 solver_source="Examples/Resources/Solvers/$solver_name"
-Commands/add_solver.py --run-solver-later --deterministic 0 $solver_source > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_source > /dev/null
 
 # Remove solver
 solver_path="Solvers/$solver_name"

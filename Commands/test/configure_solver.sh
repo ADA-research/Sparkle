@@ -25,8 +25,8 @@ instances_path="Examples/Resources/Instances/PTN/"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
+Commands/add_instances.py $instances_path > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Configure solver
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path | tail -1)

@@ -31,12 +31,12 @@ instances_path_two="Examples/Resources/Instances/PTN2/"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 configuration_results_path="Commands/test/test_files/results/"
 smac_path="Components/smac-v2.10.03-master-778/"
-smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic/"
+smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic_PTN/"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path_two > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solver_path > /dev/null
+Commands/add_instances.py $instances_path > /dev/null
+Commands/add_instances.py $instances_path_two > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Copy configuration results to simulate the configuration command (it won't have finished yet)
 cp -r $configuration_results_path $smac_path

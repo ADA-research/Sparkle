@@ -32,7 +32,7 @@ def detect_current_sparkle_platform_exists():
 	if os.path.exists(r'Performance_Data/'): my_flag_anyone = True
 	if os.path.exists(r'Reference_Lists/'): my_flag_anyone = True
 	if os.path.exists(r'Sparkle_Portfolio_Selector/'): my_flag_anyone = True
-	if os.path.exists(r'Sparkle_Parallel_portfolio/'): my_flag_anyone = True
+	if os.path.exists(r'Sparkle_Parallel_Portfolio/'): my_flag_anyone = True
 	return my_flag_anyone
 
 
@@ -53,7 +53,7 @@ def save_current_sparkle_platform(my_record_filename):
 	if os.path.exists(r'Performance_Data/'): my_flag_performance_data = True
 	if os.path.exists(r'Reference_Lists/'): my_flag_reference_lists = True
 	if os.path.exists(r'Sparkle_Portfolio_Selector/'): my_flag_sparkle_portfolio_selector = True
-	if os.path.exists(r'Sparkle_Parallel_portfolio/'): my_flag_sparkle_parallel_portfolio = True
+	if os.path.exists(r'Sparkle_Parallel_Portfolio/'): my_flag_sparkle_parallel_portfolio = True
 	
 	if not os.path.exists(r'Tmp/'):
 		output = os.mkdir(r'Tmp/')
@@ -126,10 +126,10 @@ def save_current_sparkle_platform(my_record_filename):
 		if my_flag_sparkle_parallel_portfolio:
 			my_record_filename_exist = True
 			print(r'c Now recording current Sparkle platform in file ' + my_record_filename + r' ...')
-			output = os.system(r'zip -r ' + my_record_filename + r' Sparkle_Parallel_portfolio/' + " >> " + record_log_file_path)
+			output = os.system(r'zip -r ' + my_record_filename + r' Sparkle_Parallel_Portfolio/' + " >> " + record_log_file_path)
 	else:
 		if my_flag_sparkle_parallel_portfolio:
-			output = os.system(r'zip -g -r ' + my_record_filename + r' Sparkle_Parallel_portfolio/' + " >> " + record_log_file_path)
+			output = os.system(r'zip -g -r ' + my_record_filename + r' Sparkle_Parallel_Portfolio/' + " >> " + record_log_file_path)
 	
 	os.system(r'rm -f ' + record_log_file_path)
 	return
@@ -143,7 +143,9 @@ def cleanup_current_sparkle_platform():
 	if os.path.exists(r'Performance_Data/'): shutil.rmtree(r'Performance_Data/')
 	if os.path.exists(r'Reference_Lists/'): shutil.rmtree(r'Reference_Lists/')
 	if os.path.exists(r'Sparkle_Portfolio_Selector'): shutil.rmtree(r'Sparkle_Portfolio_Selector/')
-	if os.path.exists(r'Sparkle_Parallel_portfolio'): shutil.rmtree(r'Sparkle_Parallel_portfolio/')
+	if os.path.exists(r'Sparkle_Parallel_Portfolio'): shutil.rmtree(r'Sparkle_Parallel_Portfolio/')
+	ablation_scenario_dir = sgh.ablation_dir + "scenarios/"
+	if os.path.exists(ablation_scenario_dir): shutil.rmtree(ablation_scenario_dir)
 	return
 
 

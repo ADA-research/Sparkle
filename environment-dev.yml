@@ -1,0 +1,26 @@
+name: sparkle-dev
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Basic conda install
+  - python=3.9
+  - swig=3.0
+  - gnuplot
+  - pip
+  - pip:
+    # For Sparkle
+    - numpy
+    - pandas
+    # Testing
+    - pytest
+    - flake8
+    # For AutoFolio
+    - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
+    - xgboost
+    - scikit-learn
+    - ConfigSpace
+    - smac
+    - scipy==1.6.3  # 1.7.x removed a private function used by smac
+    # To build documentation
+    - -r Documentation/requirements.txt

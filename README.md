@@ -1,73 +1,66 @@
-Sparkle
-=======
+# Sparkle
+
+Sparkle is a Programming by Optimisation (PbO)-based problem-solving platform designed to enable the widespread and effective use of PbO techniques for improving the state-of-the-art in solving a broad range of prominent AI problems, including SAT and AI Planning.
+
+Specifically, Sparkle facilitates the use of:
+
+ * Automated algorithm configuration
+ * Automated algorithm selection
+
+## Installation
+
+The installation process use the `conda` package manager (to install https://docs.conda.io/en/latest/miniconda.html`). 
+
+### Get a copy of Sparkle
+To get a copy of Sparkle you can clone the repository using `git`.
+``` bash
+  $ git clone https://bitbucket.org/sparkle-ai/sparkle.git
+```
+
+You can also download the stable version here: https://bitbucket.org/sparkle-ai/sparkle/get/main.zip
 
 
-# About
-Sparkle is a platform for the evaluation of empirical algorithms/solvers.
+### Install dependencies
 
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. LaTeX is used to create the reports, if you want to use this functionality you will need to instal it manually.
 
-# Version
-TBD
+The rest of the dependencies can installed and activated with
 
+``` bash
+  $ conda env create -f environment.yml
+  $ conda activate sparkle
+```
 
-# License
-TBD
+For detailed instalation instructions see the documentation: https://sparkle-ai.readthedocs.io/
 
+## Examples
 
-# Authors
+See the `Examples` directory for some examples on how to use `Sparkle`. All commands need to be executed from the root directory. 
+
+## Documentation
+
+The documentation can be read at https://sparkle-ai.readthedocs.io/. 
+
+A `PDF` is also available in the repository at [Documentation/sparkle-userguide.pdf](./Documentation/sparkle-userguide.pdf).
+
+## Licensing
+
+Sparkle is distributed under the MIT licence
+
+### Component licences 
+
+Sparkle is distributed with a number of external components, solvers, and instance sets. Descriptions and licensing information for each these are included in the `Components/` and `Examples/Resources/` directories.
+
+The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. The main modification of this component is to disable calling the SAT instance preprocessor called SatELite. It is located in: `Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
+
+## Authors
 Chuan Luo,
 Koen van der Blom,
 Jeroen Rook,
-Holger H. Hoos
+Holger H. Hoos,
+Richard Middelkoop,
+Jeremie Gobeil
 
-
-# Contact
+## Contact
 k.van.der.blom@liacs.leidenuniv.nl
 
-
-# Licenses for components and examples packaged with Sparkle
-
-
-AutoFolio license:
-	`Components/AutoFolio-master/doc/license.rst`
-
-ablation analysis license:
-	`Components/ablationAnalysis-0.9.4/LICENSE.txt`
-
-runsolver license:
-	`Components/runsolver/src/LICENSE-GPL-3.0.txt`
-
-smac license:
-	`Components/smac-v2.10.03-master-778/LICENSE-AGPLv3.txt`
-
-The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. The main modification of this component is to disable calling the SAT instance preprocessor called SatELite. It is located in:	`Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/` and license of components are available in:
-
-* `VARSAT/Main.C`
-* `lp_solve_4.0/LICENSE`
-
-# Instances
-* The instances located in `Examples/Resources/Instances/SAT_test/` are taken from SATLIB (<https://www.cs.ubc.ca/~hoos/SATLIB/benchm.html>)
-
-* The instances located in `Examples/Resources/Instances/PTN/` and `Examples/Resources/Instances/PTN/2` are taken from <https://www.cs.utexas.edu/~marijn/ptn/> and <https://baldur.iti.kit.edu/sat-competition-2016/downloads/crafted16.zip>
-
-
-# Solvers
-* The solver `CSCCSat` located in `Examples/Resources/Solvers/CSCCSat/` is taken from <https://baldur.iti.kit.edu/sat-competition-2016/solvers/random/CSCCSat.zip>
-
-* The solver `PbO-CCSAT` located in `Examples/Resources/Solvers/PbO-CCSAT-Generic/` is taken from <https://github.com/chuanluocs/PbO-CCSAT>
-
-Unclear:
-
-
-* `Examples/Resources/Solvers/MiniSAT/`
-* `Examples/Resources/Solvers/VRP_SISRs/`
-* `Examples/Resources/Instances/X/` and `X2`
-
-
-
-Components and examples provided as part of Sparkle:
-
-* `Components/Sparkle-SAT-verifier/`
-* `Components/Sparkle-latex-generator/`
-* `Components/Sparkle-latex-generator-for-configuration/`
-* `Components/Sparkle-latex-generator-for-test/`
