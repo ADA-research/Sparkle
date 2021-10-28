@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Import utils
+. Commands/test/utils.sh
+
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/run_solvers.sh
@@ -35,34 +38,44 @@ fi
 
 # Run solvers parallel
 output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel | tail -1)
+output_true="c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] run_solvers --parallel test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] run_solvers --parallel test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Run solvers recompute
 output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] run_solvers --parallel --recompute test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] run_solvers --parallel --recompute test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 
 # Run solvers with verifier
 output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
 
-if [[ $output =~ [0-9] ]];
+if [[ $output =~ [^$output_true] ]];
 then
 	echo "[success] run_solvers --parallel --recompute --verifier SAT test succeeded"
+    jobid=${output##* }
+	scancel $jobid
 else
 	echo "[failure] run_solvers --parallel --recompute --verifier SAT test failed with output:"
 	echo $output
+    kill_started_jobs_slurm
 fi
 

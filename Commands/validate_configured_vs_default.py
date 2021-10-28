@@ -145,8 +145,8 @@ if __name__ == r"__main__":
         sbatch_script_dir,
     )
 
-    print("c Running validation in parallel. Waiting for Slurm job with id:")
-    print(validate_jobid)
+    print(f"c Running validation in parallel. Waiting for Slurm job with id: "
+          f"{validate_jobid}")
 
     # Write most recent run to file
     last_test_file_path = (
