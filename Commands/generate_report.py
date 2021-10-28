@@ -175,7 +175,7 @@ if __name__ == r"__main__":
             print(r"c Report for test generated ...")
 
         delete_task_run_status()
-    elif scenario == Scenario.PARALLELPORTFOLIO:
+    elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLELPORTFOLIO:
         # Reporting for parallel portfolio
         sgrfpph.generate_report(str(parallel_portfolio_path), pap_instance_list)
         print(r'c Parallel portfolio report generated ...')
