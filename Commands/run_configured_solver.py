@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 import argparse
 from pathlib import Path
@@ -27,9 +26,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "instance_path",
-        type=str,
+        type=Path,
         nargs="+",
-        help="Path to instance or instance directory")
+        help="Path(s) to instance file(s) or instance directory")
     parser.add_argument(
         "--settings-file",
         type=Path,
@@ -45,8 +44,7 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    # Turn multiple instance files into a space separated string
-    instance_path = " ".join(args.instance_path)
+    instance_path = args.instance_path
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file
@@ -60,12 +58,13 @@ if __name__ == "__main__":
     sgh.latest_scenario = ReportingScenario()
 
     # Directory
-    if os.path.isdir(instance_path):
-        job_id_str = srcsh.call_configured_solver_for_instance_directory(instance_path)
+    if len(instance_path) == 1 and instance_path[0].is_dir():
+        job_id_str = srcsh.call_configured_solver_for_instance_directory(
+            instance_path[0])
         print("c Running configured solver in parallel. Waiting for Slurm job(s) with "
               f"id(s): {job_id_str}")
     # Single instance (single-file or multi-file)
-    elif os.path.isfile(instance_path) or os.path.isfile(instance_path.split()[0]):
+    elif [path.is_file() for path in instance_path]:
         srcsh.call_configured_solver_for_instance(instance_path)
         print("c Running configured solver done!")
     else:

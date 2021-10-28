@@ -59,6 +59,7 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str) -
 def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
 							instance_path: str, raw_result_path: str,
 							runsolver_values_path: str, custom_cutoff: int = None):
+	"""Get the appropriate command line call and run the solver on the given instance."""
 	if not Path(solver_wrapper_path).is_file():
 		print(f'c ERROR: Wrapper named \'{solver_wrapper_path}\' not found, stopping '
 			'execution!')
@@ -67,16 +68,18 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
 	# Get the solver call command from the wrapper
 	cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path)
 
-	run_solver_on_instance_with_cmd(solver_path, cmd_solver_call, raw_result_path,
-									runsolver_values_path, custom_cutoff)
+	run_solver_on_instance_with_cmd(Path(solver_path), cmd_solver_call,
+									Path(raw_result_path),
+									Path(runsolver_values_path), custom_cutoff)
 
 	return
 
 
-def run_solver_on_instance_with_cmd(solver_path: str, cmd_solver_call: str,
-									raw_result_path: str, runsolver_values_path: str,
+def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
+									raw_result_path: Path, runsolver_values_path: Path,
 									custom_cutoff: int = None,
-									is_configured: bool = False) -> str:
+									is_configured: bool = False) -> Path:
+	"""Run the solver on the given instance, with a given command line call."""
 	if custom_cutoff is None:
 		cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	else:
@@ -86,10 +89,10 @@ def run_solver_on_instance_with_cmd(solver_path: str, cmd_solver_call: str,
 	runsolver_path = sgh.runsolver_path
 	runsolver_option = '--timestamp --use-pty --add-eof'
 	cutoff_time_each_run_option = f'-C {cutoff_time_str}'
-	runsolver_values_log = f'-v {runsolver_values_path}'
-	runsolver_watch_data_path = runsolver_values_path.replace('val', 'log')
+	runsolver_values_log = f'-v {str(runsolver_values_path)}'
+	runsolver_watch_data_path = str(runsolver_values_path).replace('val', 'log')
 	runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'
-	raw_result_path_option = f'-o {raw_result_path}'
+	raw_result_path_option = f'-o {str(raw_result_path)}'
 
 	# For configured solvers change the directory to accommodate sparkle_smac_wrapper
 	original_path = os.getcwd()
@@ -97,16 +100,16 @@ def run_solver_on_instance_with_cmd(solver_path: str, cmd_solver_call: str,
 	if is_configured:
 		# Change paths to accommodate configured execution directory
 		runsolver_path = f'../../{sgh.runsolver_path}'
-		runsolver_values_log = f'-v ../../{runsolver_values_path}'
-		runsolver_values_path = f'../../{runsolver_values_path}'
-		runsolver_watch_data_path = runsolver_values_path.replace('val', 'log')
+		runsolver_values_log = f'-v ../../{str(runsolver_values_path)}'
+		runsolver_values_path = '../../' / runsolver_values_path
+		runsolver_watch_data_path = str(runsolver_values_path).replace('val', 'log')
 		runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'
-		raw_result_path_option = f'-o ../../{raw_result_path}'
+		raw_result_path_option = f'-o ../../{str(raw_result_path)}'
 
 		# Copy to execution directory
-		exec_path = raw_result_path.replace('.rawres', '_exec_dir/')
+		exec_path = str(raw_result_path).replace('.rawres', '_exec_dir/')
 		Path(exec_path).mkdir(parents=True)
-		cmd_copy_solver = f'cp -r {solver_path}/* {exec_path}'
+		cmd_copy_solver = f'cp -r {str(solver_path)}/* {exec_path}'
 		os.system(cmd_copy_solver)
 
 		# Change to execution directory
@@ -118,7 +121,7 @@ def run_solver_on_instance_with_cmd(solver_path: str, cmd_solver_call: str,
 	# Finalise command
 	command_line_run_solver = (f'{runsolver_path} {runsolver_option} '
 		f'{cutoff_time_each_run_option} {runsolver_watch_data_path_option} '
-		f'{runsolver_values_log} {raw_result_path_option} {solver_path}/'
+		f'{runsolver_values_log} {raw_result_path_option} {str(solver_path)}/'
 		f'{cmd_solver_call}')
 
 	if is_configured:
@@ -135,8 +138,8 @@ def run_solver_on_instance_with_cmd(solver_path: str, cmd_solver_call: str,
 		print(f'The used command was: {command_line_run_solver}')
 
 		# TODO: Why create an empty file if the command fails?
-		if not os.path.exists(raw_result_path):
-			sfh.create_new_empty_file(raw_result_path)
+		if not raw_result_path.exists():
+			sfh.create_new_empty_file(str(raw_result_path))
 	else:
 		# Clean up on success
 		if is_configured:
@@ -144,7 +147,7 @@ def run_solver_on_instance_with_cmd(solver_path: str, cmd_solver_call: str,
 			# to raw_result_path + '_solver'
 			tmp_raw_res = f'{exec_path}tmp/'
 			tmp_paths = list(Path(tmp_raw_res).glob('*.rawres'))
-			raw_result_solver_path = raw_result_path.replace('.rawres', '.rawres_solver')
+			raw_result_solver_path = str(raw_result_path).replace('.rawres', '.rawres_solver')
 
 			# Only one result should exist
 			if len(tmp_paths) < 1:
@@ -163,7 +166,7 @@ def run_solver_on_instance_with_cmd(solver_path: str, cmd_solver_call: str,
 		sfh.rmfile(Path(runsolver_watch_data_path))
 
 	# Check for known errors/issues
-	check_solver_output_for_errors(Path(raw_result_path))
+	check_solver_output_for_errors(raw_result_path)
 
 	if is_configured:
 		return raw_result_solver_path

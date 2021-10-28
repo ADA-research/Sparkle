@@ -3,7 +3,6 @@
 
 import sys
 from pathlib import Path
-from typing import List
 
 try:
     from sparkle_help import sparkle_file_help as sfh
@@ -23,83 +22,76 @@ except ImportError:
     import sparkle_slurm_help as ssh
 
 
-def call_configured_solver_for_instance(instance_path: str):
-    # Create instance strings to accommodate multi-file instances
-    instance_path_list = instance_path.split()
-    instance_file_list = []
+def call_configured_solver_for_instance(instance_path_list: list[Path]):
+    """Prepare to run the latest configured solver on the given instance."""
+    # Use original path for output string
+    instance_path_str = ' '.join([str(path) for path in instance_path_list])
 
-    for instance in instance_path_list:
-        instance_file_list.append(f'../../{instance}')
-
-    instance_files_str = " ".join(instance_file_list)
+    # Extend paths to work from execution directory under Tmp/
+    instance_path_list = ['../../' / instance for instance in instance_path_list]
 
     # Run the configured solver
     print(f'c Start running the latest configured solver to solve instance '
-          f'{instance_files_str} ...')
-    run_configured_solver(instance_files_str)
+          f'{instance_path_str} ...')
+    run_configured_solver(instance_path_list)
 
     return
 
 
 def generate_sbatch_script_for_configured_solver(num_jobs: int,
-                                                 instance_list: List[str]) -> str:
+                                                 instance_list: list[str]) -> Path:
+    """Return the path to a Slurm batch script to run the solver on all instances."""
     # Set script name and path
     solver_name, _ = get_latest_configured_solver_and_configuration()
     sbatch_script_name = (f'run_{solver_name}_configured_sbatch_'
                           f'{sbh.get_time_pid_random_string()}.sh')
-    sbatch_script_path = sgh.sparkle_tmp_path + sbatch_script_name
+    sbatch_script_path = Path(f'{sgh.sparkle_tmp_path}{sbatch_script_name}')
 
     job = 'run_configured_solver'
     sbatch_options_list = ssh.get_sbatch_options_list(sbatch_script_path, num_jobs, job,
-                                                      False)
+                                                      smac=False)
     sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
 
-    job_params_list = []
     job_params_common = ('--performance-measure '
                          f'{sgh.settings.get_general_performance_measure().name}')
-
-    for instance in instance_list:
-        job_params = f'--instance {instance} {job_params_common}'
-        job_params_list.append(job_params)
+    job_params_list = [f'--instance {instance} {job_params_common}'
+                       for instance in instance_list]
 
     srun_options_str = f'--nodes=1 --ntasks=1 {ssh.get_slurm_srun_user_options_str()}'
 
     target_call_str = (f'{sgh.python_executable} '
                        'Commands/sparkle_help/run_configured_solver_core.py')
 
-    ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,
+    ssh.generate_sbatch_script_generic(str(sbatch_script_path), sbatch_options_list,
                                        job_params_list, srun_options_str,
                                        target_call_str)
 
     return sbatch_script_path
 
 
-def call_configured_solver_for_instance_directory(instance_directory_path: str) -> str:
-    if instance_directory_path[-1] != '/':
-        instance_directory_path += '/'
-
+def call_configured_solver_for_instance_directory(instance_directory_path: Path) -> str:
+    """Run the latest configured solver in parallel on all instances in the directory."""
     list_all_filename = sfh.get_instance_list_from_path(instance_directory_path)
 
+    # Create an instance list keeping in mind possible multi-file instances
     instance_list = []
 
-    for filename in list_all_filename:
-        paths = []
+    for filename_str in list_all_filename:
+        instance_list.append(' '.join([str(instance_directory_path / name)
+                                      for name in filename_str.split()]))
 
-        for name in filename.split():
-            path = instance_directory_path + name
-            paths.append(path)
-
-        filepath = " ".join(paths)
-        instance_list.append(filepath)
-
+    # Prepare batch script
     num_jobs = len(instance_list)
     sbatch_script_path = generate_sbatch_script_for_configured_solver(
         num_jobs, instance_list)
+
+    # Run batch script
     command_name = CommandName.RUN_CONFIGURED_SOLVER
     execution_dir = './'
-    jobid_str = ssh.submit_sbatch_script(sbatch_script_path, command_name, execution_dir)
+    jobid_str = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
+                                         execution_dir)
     print('Submitted sbatch script for configured solver, '
           'output and results will be written to: '
           f'{sbatch_script_path}.txt')
@@ -108,6 +100,7 @@ def call_configured_solver_for_instance_directory(instance_directory_path: str) 
 
 
 def get_latest_configured_solver_and_configuration() -> (str, str):
+    """Return the name and parameter string of the latest configured solver."""
     # Get latest configured solver + instance set
     solver_name = sfh.get_last_level_directory_name(
         str(sgh.latest_scenario.get_config_solver()))
@@ -125,38 +118,37 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
     return solver_name, config_str
 
 
-def run_configured_solver(instance_path: str):
+def run_configured_solver(instance_path_list: list[Path]):
+    """Run the latest configured solver on the given instance."""
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
 
-    # call smac wrapper OR call run_solver_on_instance...?
-    # Single instance:
-    # a) Create cmd_solver_call that could call smac wrapper
-    # Unique string to request sparkle_smac_wrapper to write a '.rawres' file with raw
-    # solver output in the tmp/ subdirectory of the execution directory:
+    # a) Create cmd_solver_call that could call sparkle_smac_wrapper
+    instance_path_str = ' '.join([str(path) for path in instance_path_list])
+    # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
+    # write a '.rawres' file with raw solver output in the tmp/ subdirectory of the
+    # execution directory:
     specifics = 'rawres'
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     run_length = '2147483647'  # Arbitrary, not used in the SMAC wrapper
     seed_str = str(sgh.get_seed())
-    cmd_solver_call = (f'{sgh.sparkle_smac_wrapper} {instance_path} {specifics} '
+    cmd_solver_call = (f'{sgh.sparkle_smac_wrapper} {instance_path_str} {specifics} '
                        f'{cutoff_time_str} {run_length} {seed_str} {config_str}')
-    # b) Call run_solver_cmd_on_instance (split run_solver_on_instance in two)
-    solver_path = f'Solvers/{solver_name}'
+
     # Prepare paths
-    instance_name = sfh.get_last_level_directory_name(instance_path)
-    # TODO: Fix result path for multi-file instances (only a single file is part of the
-    # result path)
-    raw_result_path = (f'{sgh.sparkle_tmp_path}'
-                       f'{sfh.get_last_level_directory_name(solver_path)}_'
-                       f'{instance_name}_{sbh.get_time_pid_random_string()}.rawres')
-    runsolver_values_path = raw_result_path.replace('.rawres', '.val')
+    solver_path = Path(f'Solvers/{solver_name}')
+    instance_name = '_'.join([path.name for path in instance_path_list])
+    raw_result_path = Path(f'{sgh.sparkle_tmp_path}{solver_path.name}_'
+                           f'{instance_name}_{sbh.get_time_pid_random_string()}.rawres')
+    runsolver_values_path = Path(str(raw_result_path).replace('.rawres', '.val'))
+    # b) Run the solver
     rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
                                                          raw_result_path,
                                                          runsolver_values_path,
                                                          is_configured=True)
 
     # Process 'Result for SMAC' line from raw_result_path
-    with open(Path(raw_result_path), 'r') as infile:
+    with open(raw_result_path, 'r') as infile:
         results_good = False
 
         for line in infile:
@@ -183,11 +175,11 @@ def run_configured_solver(instance_path: str):
                 # Handle the timeout case
                 results_good = True
                 status = 'TIMEOUT'
-                _, wc_time = srsh.get_runtime_from_runsolver(runsolver_values_path)
+                _, wc_time = srsh.get_runtime_from_runsolver(str(runsolver_values_path))
                 runtime = wc_time
 
         if not results_good:
-            print(f'ERROR: Results in {raw_result_path} appear to be faulty. '
+            print(f'ERROR: Results in {str(raw_result_path)} appear to be faulty. '
                   'Stopping execution!')
             sys.exit(0)
 
@@ -196,14 +188,9 @@ def run_configured_solver(instance_path: str):
                   f' in {runtime} seconds.')
 
     if status == 'SUCCESS':
-        output_msg += f' Solver output of the results can be found at: {rawres_solver}'
+        output_msg += (' Solver output of the results can be found at: '
+                       f'{str(rawres_solver)}')
 
     print(output_msg)
 
-    # Multi-instance:
-    # a) Same?
-    # b) Call running_solvers_parallel or run_solvers_core.py (somehow make them accept
-    #    configured solver style input)
-
-    # process output
-    # write/print output
+    return

@@ -28,16 +28,15 @@ if __name__ == r'__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--instance', required=True, type=str, nargs='+',
+    parser.add_argument('--instance', required=True, type=Path, nargs='+',
                         help='path to instance to run on')
     parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__,
                         default=sgh.settings.DEFAULT_general_performance_measure,
                         help='the performance measure, e.g. runtime')
-    args = parser.parse_args()
 
     # Process command line arguments
-    # Turn multiple instance files into a space separated string
-    instance_path = " ".join(args.instance)
+    args = parser.parse_args()
+    instance_path = args.instance
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 
     # Initialise latest scenario

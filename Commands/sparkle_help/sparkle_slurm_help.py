@@ -74,7 +74,11 @@ def get_slurm_srun_user_options_str(path_modifier=None):
 
 	return srun_options_str
 
-def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_params_list, srun_options_str, target_call_str, job_output_list=None):
+def generate_sbatch_script_generic(sbatch_script_path: str,
+									sbatch_options_list: List[str],
+									job_params_list: List[str], srun_options_str: str,
+									target_call_str: str,
+									job_output_list: List[str] = None):
 	fout = open(sbatch_script_path, 'w+') # open the file of sbatch script
 	fcntl.flock(fout.fileno(), fcntl.LOCK_EX) # using the UNIX file lock to prevent other attempts to visit this sbatch script
 	
@@ -122,14 +126,15 @@ def generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list, job_
 	return
 
 
-def get_sbatch_options_list(sbatch_script_path: str, num_jobs: int,
-							job: str, smac: bool = True) -> List[str]:
+def get_sbatch_options_list(sbatch_script_path: Path, num_jobs: int,
+							job: str, smac: bool = True) -> list[str]:
+	"""Return and write output paths for a list of standardised Slurm batch options."""
 	if smac:
 		tmp_dir = 'tmp/'
 	else:
 		tmp_dir = 'Tmp/'
 
-	sbatch_script_name = sfh.get_file_name(sbatch_script_path)
+	sbatch_script_name = sfh.get_file_name(str(sbatch_script_path))
 
 	# Set sbatch options
 	max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
@@ -144,15 +149,19 @@ def get_sbatch_options_list(sbatch_script_path: str, num_jobs: int,
 	sbatch_options_list = [job_name, output, error, array]
 
 	# Log script and output paths
-	sl.add_output(sbatch_script_path, f'Slurm batch script for {job}')
+	sl.add_output(str(sbatch_script_path), f'Slurm batch script for {job}')
 	sl.add_output(sgh.smac_dir + std_out,
 		f'Standard output of Slurm batch script for {job}')
 	sl.add_output(sgh.smac_dir + std_err,
 		f'Error output of Slurm batch script for {job}')
 
 	# Remove possible old output
-	sfh.rmfile(Path(sgh.smac_dir + std_out))
-	sfh.rmfile(Path(sgh.smac_dir + std_err))
+	if smac:
+		sfh.rmfile(Path(sgh.smac_dir + std_out))
+		sfh.rmfile(Path(sgh.smac_dir + std_err))
+	else:
+		sfh.rmfile(Path(std_out))
+		sfh.rmfile(Path(std_err))
 
 	return sbatch_options_list
 
@@ -172,7 +181,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 	# Get sbatch options
 	num_jobs = 3
 	job = 'validation'
-	sbatch_options_list = get_sbatch_options_list(sbatch_script_path, num_jobs, job)
+	sbatch_options_list = get_sbatch_options_list(Path(sbatch_script_path), num_jobs, job)
 
 	scenario_dir = 'example_scenarios/' + solver_name + "_" + instance_set_train_name;
 
