@@ -25,8 +25,6 @@ if __name__ == r"__main__":
     # Log command call
     sl.log_command(sys.argv)
 
-
-
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
