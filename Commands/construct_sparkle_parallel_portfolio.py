@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-'''
-
 import sys
 import argparse
 from pathlib import Path
@@ -18,7 +14,7 @@ from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
-if __name__ == r'__main__':
+if __name__ == '__main__':
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -43,7 +39,7 @@ if __name__ == r'__main__':
                              'portfolio containing 25 variations of PbO-CCSAT-Generic.')
     parser.add_argument("--overwrite",
                         default=sgh.settings.DEFAULT_parallel_portfolio_overwriting,
-                        action=ac.SetByUser,
+                        action=ac.SetByUser, type=bool,
                         help='Allows overwriting of the directory, default true, when '
                              'constructing a portfolio with a name of an already '
                              'existing portfolio will throw an error if --overwrite '
@@ -68,16 +64,13 @@ if __name__ == r'__main__':
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     if ac.set_by_user(args, 'overwrite'):
-        if(args.overwrite != 'True'):
-            args.overwrite = False
-
         sgh.settings.set_parallel_portfolio_overwriting_flag(args.overwrite,
                                                              SettingState.CMD_LINE)
 
     overwrite = args.overwrite
 
     if portfolio_str is not None:
-        portfolio_path = "Sparkle_Parallel_Portfolio/" + portfolio_str
+        portfolio_path = f'Sparkle_Parallel_Portfolio/{portfolio_str}'
     else:
         portfolio_path = sgh.sparkle_parallel_portfolio_path
 
@@ -87,8 +80,8 @@ if __name__ == r'__main__':
                                                         list_of_solvers)
 
     if success:
-        print('c Sparkle portfolio constructed!')
-        print('c Sparkle portfolio located at ' + str(Path(portfolio_path)))
+        print('c Sparkle parallel portfolio located at ' + str(Path(portfolio_path)))
+        print('c Sparkle parallel portfolio construction done!')
 
         # Update latest scenario
         sgh.latest_scenario.set_parallel_portfolio_path(Path(portfolio_path))

@@ -81,8 +81,11 @@ if __name__ == r"__main__":
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
     solver_variations = args.solver_variations
+
     if solver_variations < 1:
-        solver_variations = 1
+        print(f'ERROR: Invalid number of solver variations given ({solver_variations}), '
+              'a postive integer must be used. Stopping execution.')
+        sys.exit(0)
 
     # Start add solver
     last_level_directory = r""
