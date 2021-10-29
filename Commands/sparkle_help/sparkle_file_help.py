@@ -44,7 +44,7 @@ def get_current_directory_name(filepath):
 		filepath = get_last_level_directory_name(filepath)
 	return filepath
 
-def get_last_level_directory_name(filepath):
+def get_last_level_directory_name(filepath: str) -> str:
 	if filepath[-1] == r'/': filepath = filepath[0:-1]
 	right_index = filepath.rfind(r'/')
 	if right_index<0: pass
