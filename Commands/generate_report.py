@@ -178,7 +178,7 @@ if __name__ == r"__main__":
     elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLELPORTFOLIO:
         # Reporting for parallel portfolio
         sgrfpph.generate_report(str(parallel_portfolio_path), pap_instance_list)
-        print(r'c Parallel portfolio report generated ...')
+        print('c Parallel portfolio report generated ...')
     else:
         # Reporting for algorithm configuration
         solver_name = sfh.get_last_level_directory_name(solver)

@@ -97,3 +97,6 @@ Commands/test/construct_sparkle_parallel_portfolio.sh
 
 # Test run parallel portfolio
 Commands/test/run_sparkle_parallel_portfolio.sh
+
+# Test generate report for parallel portfolio
+Commands/test/generate_report_parallel_portfolio.sh
