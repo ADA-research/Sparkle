@@ -70,9 +70,16 @@ if __name__ == r'__main__':
                         action=ac.SetByUser,
                         help='The duration the portfolio will run before the solvers '
                              'within the portfolio will be stopped')
+    parser.add_argument('--settings-file', type=Path,
+                        default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser,
+                        help='specify the settings file to use instead of the default')
 
     # Process command line arguments
     args = parser.parse_args()
+
+    # Do first, so other command line options can override settings from the file
+    if ac.set_by_user(args, 'settings_file'):
+        sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     if ac.set_by_user(args, 'portfolio_name'):
 
