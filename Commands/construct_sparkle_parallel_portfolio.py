@@ -28,23 +28,21 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--nickname", type=str,
+    parser.add_argument('--nickname', type=Path,
                         help='Give a nickname to the portfolio. The default name of a '
                              'portfolio is sparkle_parallel_portfolio.')
-    parser.add_argument("--solver", required=False, metavar='N', nargs="+", type=str,
+    parser.add_argument('--solver', required=False, metavar='N', nargs='+', type=str,
                         help='Specify the list of solvers, add '
                              '\",<#solver_variations>\" to the end of a path to add '
                              'multiple instances of a single solver. For example '
                              '--solver Solver/PbO-CCSAT-Generic,25 to construct a '
                              'portfolio containing 25 variations of PbO-CCSAT-Generic.')
-    parser.add_argument("--overwrite",
+    parser.add_argument('--overwrite',
                         default=sgh.settings.DEFAULT_parallel_portfolio_overwriting,
                         action=ac.SetByUser, type=bool,
-                        help='Allows overwriting of the directory, default true, when '
-                             'constructing a portfolio with a name of an already '
-                             'existing portfolio will throw an error if --overwrite '
-                             'False is used. Otherwise the previously constructed '
-                             'portfolio will be overwritten.')
+                        help='When set to True an existing parallel portfolio with the '
+                             'same name will be overwritten, when False an error will '
+                             'be thrown instead.')
     parser.add_argument('--settings-file', type=Path,
                         default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser,
                         help='Specify the settings file to use in case you want to use '
@@ -52,7 +50,7 @@ if __name__ == '__main__':
 
     # Process command line arguments;
     args = parser.parse_args()
-    portfolio_str = args.nickname
+    portfolio_name = args.nickname
     list_of_solvers = args.solver
 
     # If no solvers are given all previously added solvers are used
@@ -69,29 +67,28 @@ if __name__ == '__main__':
 
     overwrite = args.overwrite
 
-    if portfolio_str is not None:
-        portfolio_path = f'Sparkle_Parallel_Portfolio/{portfolio_str}'
-    else:
-        portfolio_path = sgh.sparkle_parallel_portfolio_path
+    if portfolio_name is None:
+        portfolio_name = sgh.sparkle_parallel_portfolio_name
+
+    portfolio_path = sgh.sparkle_parallel_portfolio_dir / portfolio_name
 
     print('c Start constructing Sparkle parallel portfolio ...')
 
-    success = scpp.construct_sparkle_parallel_portfolio(Path(portfolio_path), overwrite,
+    success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, overwrite,
                                                         list_of_solvers)
 
     if success:
-        print('c Sparkle parallel portfolio located at ' + str(Path(portfolio_path)))
+        print(f'c Sparkle parallel portfolio located at {str(portfolio_path)}')
         print('c Sparkle parallel portfolio construction done!')
 
         # Update latest scenario
         sgh.latest_scenario.set_parallel_portfolio_path(Path(portfolio_path))
-        sgh.latest_scenario.set_latest_scenario(Scenario.PARALLELPORTFOLIO)
-        # Set to default to overwrite possible old instance used
-        sgh.latest_scenario.set_parallel_portfolio_instance()
+        sgh.latest_scenario.set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
+        # Set to default to overwrite instance from possible previous run
+        sgh.latest_scenario.set_parallel_portfolio_instance_list()
     else:
         print('c An unexpected error occurred when constructing the portfolio, please '
               'check your input and try again.')
-        pass
 
     # Write used settings to file
     sgh.settings.write_used_settings()

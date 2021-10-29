@@ -11,24 +11,15 @@ except ImportError:
 	import sparkle_global_help as sgh
 
 
-class Scenario(Enum):
-	NONE = 0
-	SELECTION = 1
-	CONFIGURATION = 2
-	PARALLELPORTFOLIO = 3
+class Scenario(str, Enum):
+	NONE = 'NONE'
+	SELECTION = 'SELECTION'
+	CONFIGURATION = 'CONFIGURATION'
+	PARALLEL_PORTFOLIO = 'PARALLEL_PORTFOLIO'
 
 
 	def from_str(scenario):
-		if scenario == 'NONE':
-			scenario = Scenario.NONE
-		elif scenario == 'SELECTION':
-			scenario = Scenario.SELECTION
-		elif scenario == 'CONFIGURATION':
-			scenario = Scenario.CONFIGURATION
-		elif scenario == 'PARALLELPORTFOLIO':
-			scenario = Scenario.PARALLELPORTFOLIO
-
-		return scenario
+		return Scenario(scenario)
 
 
 class ReportingScenario:
@@ -44,7 +35,7 @@ class ReportingScenario:
 	DEFAULT_selection_test_case_directory = Path('')
 
 	DEFAULT_parallel_portfolio_path = Path('')
-	DEFAULT_parallel_portfolio_instance = Path('')
+	DEFAULT_parallel_portfolio_instance_list = []
 
 	DEFAULT_config_solver = Path('')
 	DEFAULT_config_instance_set_train = Path('')
@@ -68,7 +59,7 @@ class ReportingScenario:
 			self.set_selection_portfolio_path()
 			self.set_selection_test_case_directory()
 			self.set_parallel_portfolio_path()
-			self.set_parallel_portfolio_instance()
+			self.set_parallel_portfolio_instance_list()
 			self.set_config_solver()
 			self.set_config_instance_set_train()
 			self.set_config_instance_set_test()
@@ -125,7 +116,7 @@ class ReportingScenario:
 					self.set_config_instance_set_test(value)
 					file_scenario.remove_option(section, option)
 			
-			section = 'parallel'
+			section = 'parallel_portfolio'
 			option_names = ('portfolio_path',) # Comma so python understands it's a tuple...
 			for option in option_names:
 				if file_scenario.has_option(section, option):
@@ -133,12 +124,12 @@ class ReportingScenario:
 					self.set_parallel_portfolio_path(value)
 					file_scenario.remove_option(section, option)
 
-			section = 'parallel'
-			option_names = ('instance',) # Comma so python understands it's a tuple...
+			section = 'parallel_portfolio'
+			option_names = ('instance_list',) # Comma so python understands it's a tuple...
 			for option in option_names:
 				if file_scenario.has_option(section, option):
 					value = Path(file_scenario.get(section, option))
-					self.set_parallel_portfolio_instance(value)
+					self.set_parallel_portfolio_instance_list(value)
 					file_scenario.remove_option(section, option)
 
 			# Report on any unknown settings that were read
@@ -178,6 +169,17 @@ class ReportingScenario:
 
 
 	def path_setter(self, section: str, name: str, value: Path):
+		if value != None:
+			self.__init_section(section)
+			self.__scenario[section][name] = str(value)
+
+		self.write_scenario_ini()
+
+		return
+
+
+	def list_setter(self, section: str, name: str, value: list):
+		"""Write generic lists to the scenario file."""
 		if value != None:
 			self.__init_section(section)
 			self.__scenario[section][name] = str(value)
@@ -248,11 +250,12 @@ class ReportingScenario:
 
 		return self.none_if_empty_path(Path(path))
 
-	### parallel portfolio settings ###
+	### Parallel portfolio settings ###
 
 
 	def set_parallel_portfolio_path(self, value: Path = DEFAULT_parallel_portfolio_path):
-		section = 'parallel'
+		"""Set the path to the parallel portfolio."""
+		section = 'parallel_portfolio'
 		name = 'portfolio_path'
 		self.path_setter(section, name, value)
 
@@ -260,24 +263,28 @@ class ReportingScenario:
 
 
 	def get_parallel_portfolio_path(self) -> Path:
-		return Path(self.__scenario['parallel']['portfolio_path'])
+		"""Return the path to the parallel portfolio."""
+		return Path(self.__scenario['parallel_portfolio']['portfolio_path'])
 
 
-	def set_parallel_portfolio_instance(self, value: Path = DEFAULT_parallel_portfolio_instance):
-		section = 'parallel'
-		name = 'instance'
-		self.path_setter(section, name, value)
+	def set_parallel_portfolio_instance_list(
+			self, value: list[str] = DEFAULT_parallel_portfolio_instance_list):
+		"""Set the instance list used with the parallel portfolio."""
+		section = 'parallel_portfolio'
+		name = 'instance_list'
+		self.list_setter(section, name, value)
 
 		return
 
 
-	def get_parallel_portfolio_instance(self) -> Path:
+	def get_parallel_portfolio_instance_list(self) -> list[str]:
+		"""Return the instance list used with the parallel portfolio."""
 		try:
-			path = self.__scenario['parallel']['instance']
+			instance_list = [self.__scenario['parallel_portfolio']['instance_list']]
 		except KeyError:
-			path = ''
+			instance_list = []
 
-		return self.none_if_empty_path(Path(path))
+		return instance_list
 
 	### Configuration settings ###
 

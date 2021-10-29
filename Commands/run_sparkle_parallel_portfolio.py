@@ -143,7 +143,7 @@ if __name__ == r'__main__':
     succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path)
 
     if succes:
-        sgh.latest_scenario.set_parallel_portfolio_instance(instance_paths)
+        sgh.latest_scenario.set_parallel_portfolio_instance_list(instance_paths)
         print('c Running Sparkle parallel portfolio is done!')
 
         # Write used settings to file

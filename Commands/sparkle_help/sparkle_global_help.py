@@ -91,13 +91,10 @@ global sparkle_portfolio_selector_path
 sparkle_portfolio_selector_path = sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name
 
 global sparkle_parallel_portfolio_dir
-sparkle_parallel_portfolio_dir = 'Sparkle_Parallel_Portfolio/'
+sparkle_parallel_portfolio_dir = Path('Sparkle_Parallel_Portfolio/')
 
 global sparkle_parallel_portfolio_name
-sparkle_parallel_portfolio_name = 'sparkle_parallel_portfolio'
-
-global sparkle_parallel_portfolio_path
-sparkle_parallel_portfolio_path = sparkle_parallel_portfolio_dir + sparkle_parallel_portfolio_name
+sparkle_parallel_portfolio_name = Path('sparkle_parallel_portfolio/')
 
 global sparkle_marginal_contribution_perfect_path
 sparkle_marginal_contribution_perfect_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_perfect.csv')
@@ -144,11 +141,13 @@ global feature_data_csv_path
 global feature_data_id_path
 global performance_data_csv_path
 global performance_data_id_path
+global pap_performance_data_tmp_path
 
 feature_data_csv_path = r'Feature_Data/sparkle_feature_data.csv'
 feature_data_id_path = 'Feature_Data/sparkle_feature_data.id'
 performance_data_csv_path = r'Performance_Data/sparkle_performance_data.csv'
 performance_data_id_path = 'Performance_Data/sparkle_performance_data.id'
+pap_performance_data_tmp_path = Path('Performance_Data/Tmp_PaP/')
 
 global reference_list_dir
 global extractor_nickname_list_path

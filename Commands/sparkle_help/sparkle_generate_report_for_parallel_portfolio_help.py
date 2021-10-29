@@ -55,13 +55,16 @@ def get_solverList(parallel_portfolio_path: str):
 			str_value += r'\item[] With seeds: ' + seed_number + '\n'
 	return str_value
 
-def get_numInstanceClasses(instances: list):
+
+def get_num_instance_classes(instance_list: list[str]) -> str:
 	list_instance_class = []
-	instance_list = eval(str(instances[0]))
+
 	for instance_path in instance_list:
 		instance_class = sfh.get_current_directory_name(instance_path)
+
 		if not (instance_class in list_instance_class):
 			list_instance_class.append(instance_class)
+
 	str_value = str(len(list_instance_class))
 
 	if int(str_value) < 1:
@@ -279,7 +282,7 @@ def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_
 	return table_string
 
 
-def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
+def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list[str]):
 	mydict = {}
 
 	variable = r'customCommands'
@@ -299,7 +302,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	mydict[variable] = str_value
 
 	variable = r'numInstanceClasses'
-	str_value = get_numInstanceClasses(instances)
+	str_value = get_num_instance_classes(instances)
 	mydict[variable] = str_value
 	
 	variable = r'instanceClassList'
@@ -331,7 +334,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list):
 	return mydict
 
 
-def generate_report(parallel_portfolio_path: str, instances: list):
+def generate_report(parallel_portfolio_path: str, instances: list[str]):
 
 	latex_report_filename = r'Sparkle_Report'
 	dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path, instances)

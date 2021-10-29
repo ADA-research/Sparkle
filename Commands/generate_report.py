@@ -139,11 +139,9 @@ if __name__ == r"__main__":
             solver = str(sgh.latest_scenario.get_config_solver())
             instance_set_train = sgh.latest_scenario.get_config_instance_set_train()
             instance_set_test = sgh.latest_scenario.get_config_instance_set_test()
-        elif scenario == Scenario.PARALLELPORTFOLIO:
+        elif scenario == Scenario.PARALLEL_PORTFOLIO:
             parallel_portfolio_path = sgh.latest_scenario.get_parallel_portfolio_path()
-            pap_instance = sgh.latest_scenario.get_parallel_portfolio_instance()
-            pap_instance_list = []
-            pap_instance_list.append(str(pap_instance))
+            pap_instance_list = sgh.latest_scenario.get_parallel_portfolio_instance_list()
 
     flag_instance_set_train = False if instance_set_train is None else True
     flag_instance_set_test = False if instance_set_test is None else True
@@ -175,7 +173,7 @@ if __name__ == r"__main__":
             print(r"c Report for test generated ...")
 
         delete_task_run_status()
-    elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLELPORTFOLIO:
+    elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
         sgrfpph.generate_report(str(parallel_portfolio_path), pap_instance_list)
         print('c Parallel portfolio report generated ...')
