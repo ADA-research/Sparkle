@@ -5,56 +5,38 @@ from pathlib import Path
 from sparkle_help import sparkle_file_help as sfh
 
 
-# Creates a file containing the list of solvers within the given portfolio path
 def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list) -> bool:
-    empty_file = str(sparkle_parallel_portfolio_path) + "/solvers.txt"
-    sfh.create_new_empty_file(empty_file)
+    """Creates a file containing the list of solvers within the given portfolio path."""
+    empty_file = f'{sparkle_parallel_portfolio_path}/solvers.txt'
+    sfh.create_new_empty_file(str(empty_file))
 
     for solver in solver_list:
         if solver.rfind(',') >= 0:
-            solver = solver[:solver.rfind(',')] + r' ' + solver[solver.rfind(',')+1:]
+            solver_name = solver[:solver.rfind(',')]
+            solver_n_instances = solver[solver.rfind(',')+1:]
+            solver = f'{solver_name} {solver_n_instances}'
         sfh.append_string_to_file(empty_file, solver)
+
     return True
-
-
-# Creates the portfolio path
-def make_directory(sparkle_parallel_portfolio_path: Path) -> bool:
-    try:
-        sparkle_parallel_portfolio_path.mkdir(mode=0o777, parents=True, exist_ok=False)
-    except FileExistsError:
-        print(f'c The directory at {sparkle_parallel_portfolio_path} already exists, '
-              'nothing was done.')
-
-        return False
-    else:
-        print('c Directory created')
-
-        return True
-
-
-# Checks if the directory of the portfolio path already exists
-def directory_exists(sparkle_parallel_portfolio_path: Path) -> bool:
-    exists = sparkle_parallel_portfolio_path.is_dir()
-
-    return exists
 
 
 def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
                                          overwrite: bool, list_of_solvers: list) -> bool:
-    if(directory_exists(Path(sparkle_parallel_portfolio_path)) and overwrite is False):
-        print('c directory already exists')
-        print('c use \'--overwrite\' or give the portfolio a different name')
-        return False
-    else:
-        if(overwrite):
-            sfh.rmtree(Path(sparkle_parallel_portfolio_path))
+    """Create the parallel portfolio by preparing a directory and the solver list."""
+    if sparkle_parallel_portfolio_path.is_dir():
+        if overwrite:
+            sfh.rmtree(sparkle_parallel_portfolio_path)
+        else:
+            print('c directory already exists')
+            print('c use "--overwrite" or give the portfolio a different name')
 
-        if(make_directory(Path(sparkle_parallel_portfolio_path)) is False):
             return False
+
+    sparkle_parallel_portfolio_path.mkdir(parents=True, exist_ok=False)
 
     # Directory is now created (and cleaned)
     # Add a file which specifies the location of the solvers.
-    if(add_solvers(Path(sparkle_parallel_portfolio_path), list_of_solvers) is False):
+    if add_solvers(sparkle_parallel_portfolio_path, list_of_solvers) is False:
         print('c An error occured when adding the solvers to the portfolio')
 
     return True

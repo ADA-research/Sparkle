@@ -24,10 +24,12 @@ except ImportError:
 	import sparkle_global_help as sgh
 
 
-def create_new_empty_file(filepath):
+def create_new_empty_file(filepath: str):
+	"""Create a new empty file given a filepath string."""
 	fo = open(filepath, "w+")
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.close()
+
 	return
 
 def checkout_directory(path, make_if_not_exist=True):
