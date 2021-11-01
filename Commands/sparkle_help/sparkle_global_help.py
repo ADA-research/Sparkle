@@ -29,7 +29,7 @@ global latest_scenario
 flag_first_call = True
 
 global sparkle_version
-sparkle_version = r'1.0.0'
+sparkle_version = '0.2'
 
 global sparkle_maximum_int
 sparkle_maximum_int = 2147483647
@@ -142,12 +142,16 @@ global feature_data_id_path
 global performance_data_csv_path
 global performance_data_id_path
 global pap_performance_data_tmp_path
+global pap_sbatch_tmp_path
+global run_solvers_sbatch_tmp_path
 
 feature_data_csv_path = r'Feature_Data/sparkle_feature_data.csv'
 feature_data_id_path = 'Feature_Data/sparkle_feature_data.id'
 performance_data_csv_path = r'Performance_Data/sparkle_performance_data.csv'
 performance_data_id_path = 'Performance_Data/sparkle_performance_data.id'
 pap_performance_data_tmp_path = Path('Performance_Data/Tmp_PaP/')
+pap_sbatch_tmp_path = Path(f'{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/')
+run_solvers_sbatch_tmp_path = Path(f'{sparkle_tmp_path}SBATCH_Solver_Jobs/')
 
 global reference_list_dir
 global extractor_nickname_list_path

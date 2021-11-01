@@ -15,7 +15,7 @@ from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help import argparse_custom as ac
-from sparkle_help.sparkle_settings import SettingState, processMonitoring
+from sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help.sparkle_settings import PerformanceMeasure
@@ -50,7 +50,7 @@ if __name__ == r'__main__':
                              'location is Sparkle_Parallel_Portfolio/. If the option is '
                              'not specified, the latest constructed portfolio will be '
                              'selected.')
-    parser.add_argument('--process-monitoring', choices=processMonitoring.__members__,
+    parser.add_argument('--process-monitoring', choices=ProcessMonitoring.__members__,
                         default=sgh.settings.get_parallel_portfolio_process_monitoring(),
                         action=ac.SetByUser,
                         help='Specify whether the monitoring of the portfolio should '
@@ -88,7 +88,7 @@ if __name__ == r'__main__':
         else:
             portfolio_path = Path('Sparkle_Parallel_Portfolio/' + args.portfolio_name)
 
-            if(not os.path.isdir(portfolio_path)):
+            if not portfolio_path.is_dir():
                 sys.exit("c Portfolio not found, aborting the process")
     else:
         portfolio_path = args.portfolio_name

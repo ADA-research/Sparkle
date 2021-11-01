@@ -4,9 +4,10 @@ import sys
 import argparse
 import random
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_global_help as sgh
 
 __description__ = "Platform for evaluating empirical algorithms/solvers"
-__version__ = "0.2"
+__version__ = sgh.sparkle_version
 __licence__ = "MIT"
 __authors__ = ["Chuan Luo",
                "Koen van der Blom",

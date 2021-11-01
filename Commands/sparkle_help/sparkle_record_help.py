@@ -18,6 +18,7 @@ import shutil
 import fcntl
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_file_help as sfh
 
 
 global record_log_file_path
@@ -32,7 +33,9 @@ def detect_current_sparkle_platform_exists():
 	if os.path.exists(r'Performance_Data/'): my_flag_anyone = True
 	if os.path.exists(r'Reference_Lists/'): my_flag_anyone = True
 	if os.path.exists(r'Sparkle_Portfolio_Selector/'): my_flag_anyone = True
-	if os.path.exists(r'Sparkle_Parallel_Portfolio/'): my_flag_anyone = True
+	if sgh.sparkle_parallel_portfolio_dir.exists():
+		my_flag_anyone = True
+
 	return my_flag_anyone
 
 
@@ -53,7 +56,8 @@ def save_current_sparkle_platform(my_record_filename):
 	if os.path.exists(r'Performance_Data/'): my_flag_performance_data = True
 	if os.path.exists(r'Reference_Lists/'): my_flag_reference_lists = True
 	if os.path.exists(r'Sparkle_Portfolio_Selector/'): my_flag_sparkle_portfolio_selector = True
-	if os.path.exists(r'Sparkle_Parallel_Portfolio/'): my_flag_sparkle_parallel_portfolio = True
+	if sgh.sparkle_parallel_portfolio_dir.exists():
+		my_flag_sparkle_parallel_portfolio = True
 	
 	if not os.path.exists(r'Tmp/'):
 		output = os.mkdir(r'Tmp/')
@@ -125,13 +129,16 @@ def save_current_sparkle_platform(my_record_filename):
 	if not my_record_filename_exist:
 		if my_flag_sparkle_parallel_portfolio:
 			my_record_filename_exist = True
-			print(r'c Now recording current Sparkle platform in file ' + my_record_filename + r' ...')
-			output = os.system(r'zip -r ' + my_record_filename + r' Sparkle_Parallel_Portfolio/' + " >> " + record_log_file_path)
+			print(f'c Now recording current Sparkle platform in file {my_record_filename} ...')
+			output = os.system(f'zip -r {my_record_filename} '
+				f'{sgh.sparkle_parallel_portfolio_dir}/ >> {record_log_file_path}')
 	else:
 		if my_flag_sparkle_parallel_portfolio:
-			output = os.system(r'zip -g -r ' + my_record_filename + r' Sparkle_Parallel_Portfolio/' + " >> " + record_log_file_path)
-	
+			output = os.system(f'zip -g -r {my_record_filename} '
+				f'{sgh.sparkle_parallel_portfolio_dir}/ >> {record_log_file_path}')
+
 	os.system(r'rm -f ' + record_log_file_path)
+
 	return
 	
 
@@ -143,7 +150,8 @@ def cleanup_current_sparkle_platform():
 	if os.path.exists(r'Performance_Data/'): shutil.rmtree(r'Performance_Data/')
 	if os.path.exists(r'Reference_Lists/'): shutil.rmtree(r'Reference_Lists/')
 	if os.path.exists(r'Sparkle_Portfolio_Selector'): shutil.rmtree(r'Sparkle_Portfolio_Selector/')
-	if os.path.exists(r'Sparkle_Parallel_Portfolio'): shutil.rmtree(r'Sparkle_Parallel_Portfolio/')
+	if sgh.sparkle_parallel_portfolio_dir.exists():
+		sfh.rmtree(sgh.sparkle_parallel_portfolio_dir)
 	ablation_scenario_dir = sgh.ablation_dir + "scenarios/"
 	if os.path.exists(ablation_scenario_dir): shutil.rmtree(ablation_scenario_dir)
 	return

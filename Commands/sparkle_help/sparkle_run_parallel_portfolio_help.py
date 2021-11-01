@@ -16,7 +16,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_logging as slog
 from sparkle_help import sparkle_job_help as sjh
 from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help.sparkle_settings import PerformanceMeasure, processMonitoring
+from sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
 
 
 def add_log_statement_to_file(logging_file: str, line: str, jobtime: str):
@@ -156,7 +156,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
         # If option extended is used some jobs are not directly cancelled to allow all
         # jobs to compute for at least the same running time.
         if (sgh.settings.get_parallel_portfolio_process_monitoring()
-                == processMonitoring.EXTENDED):
+                == ProcessMonitoring.EXTENDED):
             # If a job in a portfolio with a finished solver starts running its timelimit
             # needs to be updated.
             if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
@@ -181,7 +181,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
                 if (sgh.settings.get_parallel_portfolio_process_monitoring()
-                        == processMonitoring.EXTENDED):
+                        == ProcessMonitoring.EXTENDED):
                     # Update the cutofftime of the to be cancelled job, if job if
                     # already past that it automatically stops.
                     newCutoffTime = find_finished_time_finished_solver(
@@ -293,7 +293,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
                 if (sgh.settings.get_parallel_portfolio_process_monitoring() ==
-                        processMonitoring.EXTENDED):
+                        ProcessMonitoring.EXTENDED):
                     if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
                         # Job is in a portfolio with a solver that already has finished
                         # and has to be cancelled in the finishing time of that solver

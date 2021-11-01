@@ -4,6 +4,7 @@
 import os
 import sys
 from pathlib import PurePath
+from pathlib import Path
 
 from datetime import datetime, timedelta
 from sparkle_help import sparkle_global_help as sgh
@@ -13,11 +14,11 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_generate_report_help as sgrh
-from sparkle_help.sparkle_settings import PerformanceMeasure, processMonitoring
+from sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
 import compute_marginal_contribution as cmc
 
 
-def get_numSolvers(parallel_portfolio_path: str):
+def get_numSolvers(parallel_portfolio_path: Path):
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
 	num_solvers = len(solver_list)
 	# If a solver contains multiple solver_variations.
@@ -33,7 +34,7 @@ def get_numSolvers(parallel_portfolio_path: str):
 
 	return str_value
 
-def get_solverList(parallel_portfolio_path: str):
+def get_solverList(parallel_portfolio_path: Path):
 	str_value = r''
 	
 	solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
@@ -93,12 +94,13 @@ def get_instanceClassList(instances: list):
 		nr_of_instances += int(dict_number_of_instances_in_instance_class[instance_class])
 	return str_value, str(nr_of_instances)
 
+
 def get_results():
-	solutions_dir  = r'Performance_Data/Tmp_PaP/'
-	results = sfh.get_list_all_result_filename(solutions_dir)
+	solutions_dir = sgh.pap_performance_data_tmp_path
+	results = sfh.get_list_all_result_filename(str(solutions_dir))
 	results_dict = dict()
 	for result in results:
-		result_path = solutions_dir + str(result)
+		result_path = f'{str(solutions_dir)}/{str(result)}'
 		with open(result_path, "r") as result_file:
 			lines = result_file.readlines()
 			
@@ -149,7 +151,7 @@ def get_solversWithSolution():
 
 	return str_value, solver_dict, unsolved_instances
 
-def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: str, instances: list):
+def get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path: Path, instances: list):
 	mydict = {}
 	# This is for the single best solver!! so count everything for every solver!!
 	cutoff_time = sgh.settings.get_general_target_cutoff_time()
@@ -227,7 +229,7 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances: 
 	
 	return mydict
 
-def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, instances: list):
+def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path, instances: list):
 	str_value = r''
 	dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances)
 	dict_actual_parallel_portfolio_penalty_time_on_each_instance = get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances)
@@ -253,7 +255,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: str, i
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_parallel_portfolio_sparkle_vs_sbs_filename)
 	return str_value, dict_all_solvers, dict_actual_parallel_portfolio_penalty_time_on_each_instance
 
-def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_portfolio: dict, solver_with_solutions: dict, unsolved_instances: str, instances: str):
+def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: Path, dict_portfolio: dict, solver_with_solutions: dict, unsolved_instances: str, instances: str):
 	portfolio_PAR10 = 0.0
 	for instance in dict_portfolio:
 		portfolio_PAR10 += dict_portfolio[instance]
@@ -262,7 +264,7 @@ def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_
 	table_string = "\\caption *{\\textbf{Portfolio results}} \\label{tab:portfolio_results} "
 	table_string += "\\begin{tabular}{rrrrr}"
 	table_string += "\\textbf{Portfolio nickname} & \\textbf{PAR10} & \\textbf{\\#Timeouts} & \\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline "
-	table_string += sgrh.underscore_for_latex(sfh.get_last_level_directory_name(parallel_portfolio_path)) + " & " + str(round(portfolio_PAR10,2)) + " & " + str(unsolved_instances) + " & 0" + " & " + str(int(instances)-int(unsolved_instances)) + " \\\\ "
+	table_string += sgrh.underscore_for_latex(parallel_portfolio_path.name) + " & " + str(round(portfolio_PAR10,2)) + " & " + str(unsolved_instances) + " & 0" + " & " + str(int(instances)-int(unsolved_instances)) + " \\\\ "
 	table_string += "\\end{tabular}"
 	table_string += "\\bigskip"
 	# Table 2: Solver results
@@ -282,7 +284,7 @@ def get_resultsTable(dict_all_solvers: dict, parallel_portfolio_path: str, dict_
 	return table_string
 
 
-def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list[str]):
+def get_dict_variable_to_value(parallel_portfolio_path: Path, instances: list[str]):
 	mydict = {}
 
 	variable = r'customCommands'
@@ -334,7 +336,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: str, instances: list[str
 	return mydict
 
 
-def generate_report(parallel_portfolio_path: str, instances: list[str]):
+def generate_report(parallel_portfolio_path: Path, instances: list[str]):
 
 	latex_report_filename = r'Sparkle_Report'
 	dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path, instances)

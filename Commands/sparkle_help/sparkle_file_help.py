@@ -45,6 +45,7 @@ def get_current_directory_name(filepath):
 	return filepath
 
 def get_last_level_directory_name(filepath: str) -> str:
+	"""Return the final path component for a given string; similar to Path.name."""
 	if filepath[-1] == r'/': filepath = filepath[0:-1]
 	right_index = filepath.rfind(r'/')
 	if right_index<0: pass
@@ -105,14 +106,15 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 
 	return instance_list
 
-def get_solver_list_from_parallel_portfolio(portfolio_path: Path)->List[str]:
+
+def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
+	"""Return a list of solvers for a parallel portfolio specified by its path."""
 	portfolio_solver_list = []
-	portfolio_solvers_path_str = str(portfolio_path)
 	solvers_path_str = 'Solvers/'
 
-	#read used instances from file
-	portfolio_solvers_file_path = Path(portfolio_solvers_path_str + '/solvers.txt')
-	
+	# Read the included solvers (or solver instances) from file
+	portfolio_solvers_file_path = Path(portfolio_path / 'solvers.txt')
+
 	with portfolio_solvers_file_path.open('r') as infile:
 		lines = infile.readlines()
 
@@ -123,7 +125,9 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path)->List[str]:
 				continue
 			elif line.strip().startswith(solvers_path_str):
 				portfolio_solver_list.append(line.strip())
+
 	return portfolio_solver_list
+
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
 	if os.path.isfile(path):
@@ -243,11 +247,15 @@ def add_new_instance_into_file(filepath):
 	fo.close()
 	return
 
-def add_new_solver_into_file(filepath, deterministic='0',solver_variations='1'):
+
+def add_new_solver_into_file(filepath: str, deterministic: int = 0,
+							solver_variations: int = 1):
+	"""Add a solver to an existing file listing solvers and their details."""
 	fo = open(sgh.solver_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	fo.write(filepath + r' ' + deterministic + r' ' + str(solver_variations) + '\n')
+	fo.write(f'{filepath} {str(deterministic)} {str(solver_variations)}\n')
 	fo.close()
+
 	return
 
 
@@ -327,39 +335,6 @@ def remove_from_solver_list(filepath):
 
 	return
 
-def change_solver_variations_from_solver_list(filepath, solver_variations, add=False):
-	newlines = []
-
-	# Store lines that do not contain filepath
-	with open(sgh.solver_list_path, 'r') as infile:
-		for line in infile:
-			if not filepath in line:
-				newlines.append(line)
-			else:
-				right_index = line.rfind(r' ')
-				if add:
-					solver_variations = str(int(line[right_index+1:]) + int(solver_variations))
-				updatedLine = line[:right_index+1] + str(solver_variations)
-				newlines.append(updatedLine)
-
-	# Overwrite the file with stored lines
-	with open(sgh.solver_list_path, 'w') as outfile:
-		for line in newlines:
-			outfile.write(line)
-
-	return
-
-def get_solver_variations_from_solver_list(filepath):
-	# Default value (only needed for outdated solver_lists)
-	solver_variations = '1'
-
-	with open(sgh.solver_list_path, 'r') as infile:
-		for line in infile:
-			if filepath in line:
-				right_index = line.rfind(r' ')
-				solver_variations = line[right_index+1:]
-
-	return solver_variations
 
 def write_solver_nickname_mapping():
 	fout = open(sgh.solver_nickname_list_path, 'w+')

@@ -741,7 +741,7 @@ def generate_report_for_configuration_common(configuration_reports_directory, di
 	os.system(compile_command)
 	os.system(compile_command)
 	
-	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux'
+	compile_command = f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux'
 	os.system(compile_command)
 	os.system(compile_command)
 	

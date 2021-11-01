@@ -77,13 +77,14 @@ if __name__ == r"__main__":
         print(r"c Solver path " + "'" + solver_source + "'" + r" does not exist!")
         sys.exit()
 
-    deterministic = str(args.deterministic)
+    deterministic = args.deterministic
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
     solver_variations = args.solver_variations
 
     if solver_variations < 1:
-        print(f'ERROR: Invalid number of solver variations given ({solver_variations}), '
+        print('ERROR: Invalid number of solver variations given '
+              f'({str(solver_variations)}), '
               'a postive integer must be used. Stopping execution.')
         sys.exit(0)
 

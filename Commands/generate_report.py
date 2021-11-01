@@ -141,7 +141,8 @@ if __name__ == r"__main__":
             instance_set_test = sgh.latest_scenario.get_config_instance_set_test()
         elif scenario == Scenario.PARALLEL_PORTFOLIO:
             parallel_portfolio_path = sgh.latest_scenario.get_parallel_portfolio_path()
-            pap_instance_list = sgh.latest_scenario.get_parallel_portfolio_instance_list()
+            pap_instance_list = (
+                sgh.latest_scenario.get_parallel_portfolio_instance_list())
 
     flag_instance_set_train = False if instance_set_train is None else True
     flag_instance_set_test = False if instance_set_test is None else True
@@ -175,7 +176,7 @@ if __name__ == r"__main__":
         delete_task_run_status()
     elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
-        sgrfpph.generate_report(str(parallel_portfolio_path), pap_instance_list)
+        sgrfpph.generate_report(parallel_portfolio_path, pap_instance_list)
         print('c Parallel portfolio report generated ...')
     else:
         # Reporting for algorithm configuration

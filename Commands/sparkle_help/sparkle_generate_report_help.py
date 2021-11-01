@@ -21,16 +21,17 @@ from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
 
 
-def underscore_for_latex(value: str):
+def underscore_for_latex(value: str) -> str:
 	list_of_chars = list(value)
-	updated_string = r''
+	updated_string = ''
 
-	for i,chars in enumerate(list_of_chars):
+	for i, chars in enumerate(list_of_chars):
 		if chars == '_':
 			updated_string += '\\'
 		updated_string += chars
 
 	return updated_string
+
 
 def get_customCommands():
 	str_value = r''
@@ -489,7 +490,7 @@ def generate_report(test_case_directory: str = None):
 	os.system(compile_command)
 	os.system(compile_command)
 
-	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux'
+	compile_command = f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux'
 	os.system(compile_command)
 	os.system(compile_command)
 
