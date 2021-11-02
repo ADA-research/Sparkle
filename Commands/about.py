@@ -8,16 +8,16 @@ from sparkle_help import sparkle_logging as sl
 __description__ = "Platform for evaluating empirical algorithms/solvers"
 __version__ = "0.2"
 __licence__ = "MIT"
-__authors__ = ["Chuan Luo",
-               "Koen van der Blom",
-               "Richard Middelkoop",
-               "Jeroen Rook",
-               "Jeremie Gobeil",
-               "Holger H. Hoos",
-               ]
-__contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
+__authors__ = [
+    "Koen van der Blom",
+    "Jeremie Gobeil",
+    "Holger H. Hoos",
+    "Chuan Luo",
+    "Richard Middelkoop",
+    "Jeroen Rook",
+]
 
-random.shuffle(__authors__)
+__contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
 
 if __name__ == r"__main__":
     # Log command call
