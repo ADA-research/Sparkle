@@ -58,3 +58,6 @@ Notable changes to Sparkle will be documented in this file.
 - Updated documentation, examples and tests for new behaviour of --run-solver-later and --run-extrator-later
 - Improve integration tests so all launched jobs are cancelled upon test completion
 
+### Fixed
+- Removed the unneeded globals in sparkle\_global\_help.py 
+
