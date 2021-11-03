@@ -2,13 +2,13 @@
 
 import sys
 import argparse
-import random
 from sparkle_help import sparkle_logging as sl
 
 __description__ = "Platform for evaluating empirical algorithms/solvers"
 __version__ = "0.2"
 __licence__ = "MIT"
 __authors__ = [
+    # Alphabetical order on family name first
     "Koen van der Blom",
     "Jeremie Gobeil",
     "Holger H. Hoos",
