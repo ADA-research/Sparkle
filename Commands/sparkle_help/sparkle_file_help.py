@@ -206,7 +206,7 @@ def get_list_all_csv_filename(filepath):
 			csv_list.append(list_all_items[i])
 	return csv_list
 
-def get_list_all_result_filename(filepath):
+def get_list_all_result_filename(filepath) -> list[str]:
 	result_list = []
 	if not os.path.exists(filepath):
 		return result_list

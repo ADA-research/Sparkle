@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-'''
-
 import sys
 import os
 import argparse

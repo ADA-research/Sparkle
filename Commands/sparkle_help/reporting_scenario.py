@@ -128,7 +128,9 @@ class ReportingScenario:
 			option_names = ('instance_list',) # Comma so python understands it's a tuple...
 			for option in option_names:
 				if file_scenario.has_option(section, option):
-					value = Path(file_scenario.get(section, option))
+					value = file_scenario.get(section, option)
+					# Convert to list
+					value = value.split(',')
 					self.set_parallel_portfolio_instance_list(value)
 					file_scenario.remove_option(section, option)
 
@@ -182,7 +184,9 @@ class ReportingScenario:
 		"""Write generic lists to the scenario file."""
 		if value != None:
 			self.__init_section(section)
-			self.__scenario[section][name] = str(value)
+			# Convert to string
+			value = ','.join(str(element) for element in value)
+			self.__scenario[section][name] = value
 
 		self.write_scenario_ini()
 
@@ -280,7 +284,7 @@ class ReportingScenario:
 	def get_parallel_portfolio_instance_list(self) -> list[str]:
 		"""Return the instance list used with the parallel portfolio."""
 		try:
-			instance_list = [self.__scenario['parallel_portfolio']['instance_list']]
+			instance_list = self.__scenario['parallel_portfolio']['instance_list'].split(',')
 		except KeyError:
 			instance_list = []
 

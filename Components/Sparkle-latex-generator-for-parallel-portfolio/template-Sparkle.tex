@@ -21,8 +21,8 @@
 
 \makeatletter
 
-\newif\ifdes
-@@testBool@@
+\newif\ifdecision
+@@decisionBool@@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
 %% Because html converters don't know tabularnewline
@@ -73,13 +73,18 @@ There are @@numInstanceClasses@@ instance set(s) included in @@sparkle@@, as lis
 
 The experimental setup is described below.
 
-\ifdes \textbf{Performance computation:} @@sparkle@@ runs the portfolio one time on each instance. The cutoff time for the computation run is set to @@cutoffTime@@ seconds. The outcome of the computation is listed below. The scores of the outcomes are calculated according to PAR10, this means that for each instance the solver which solved the instance is scored its runtime and the remaining solvers are scored the runtime times ten. If however the portfolio reaches the cutofftime, which means that no solvers solved the instance, all solvers are scored the cutofftime times ten.
-\else \textbf{Optimization results:} @@sparkle@@ runs the portfolio one time on each instance. The cutoff time for the computation run is set to @@cutoffTime@@ seconds. The outcome of the computation is listed below. \fi
+\ifdecision \textbf{Performance computation:}
+\else \textbf{Optimisation results:}
+\fi
+@@sparkle@@ runs the portfolio one time on each instance. The cutoff time for the computation run is set to @@cutoffTime@@ seconds. The outcome of the computation is listed below.
+\ifdecision
+The scores of the outcomes are calculated according to PAR10, this means that for each instance the solver which solved the instance is scored its runtime and the remaining solvers are scored the runtime times ten. If however the portfolio reaches the cutofftime, which means that no solvers solved the instance, all solvers are scored the cutofftime times ten.
+\fi
 
 \begin{enumerate}
 @@solversWithSolution@@
 \end{enumerate}
-\ifdes
+\ifdecision
 In the table below the computed PAR10 scores of all solvers have been listed aswell as the portfolio itself.
 \begin{table}[ht]
 @@resultsTable@@
