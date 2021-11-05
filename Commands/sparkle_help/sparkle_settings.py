@@ -322,6 +322,19 @@ class Settings:
 		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
 
 
+	def get_performance_metric_for_report(self) -> str:
+		"""Return a string describing the full performance metric, e.g. PAR10."""
+		performance_measure = self.get_general_performance_measure()
+
+		if performance_measure is PerformanceMeasure.RUNTIME:
+			penalty_multiplier_str = str(self.get_general_penalty_multiplier())
+			performance_measure_str = f'PAR{penalty_multiplier_str}'
+		else:
+			performance_measure_str = performance_measure.name
+
+		return performance_measure_str
+
+
 	def set_general_penalty_multiplier(self, value: int = DEFAULT_general_penalty_multiplier, origin: SettingState = SettingState.DEFAULT):
 		section = 'general'
 		name = 'penalty_multiplier'

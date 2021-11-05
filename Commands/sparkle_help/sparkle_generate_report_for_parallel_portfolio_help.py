@@ -315,11 +315,12 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
     fout.close()
 
     penalised_time_str = str(sgh.settings.get_penalised_time())
+    performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
     gnuplot_command = (
         f'cd {latex_directory_path}; python auto_gen_plot.py {data_filename} '
         f'{penalised_time_str} \'SBS ({sgrh.underscore_for_latex(sbs_solver)})\' '
-        f'Parallel-Portfolio {figure_filename}')
+        f'Parallel-Portfolio {figure_filename} {performance_metric_str}')
 
     os.system(gnuplot_command)
 
@@ -335,6 +336,7 @@ def get_resultsTable(results: dict[str, float], parallel_portfolio_path: Path,
                      n_unsolved_instances: int, n_instances: int) -> str:
     """Return a string containing LaTeX code for a table with the portfolio results."""
     portfolio_PAR10 = 0.0
+    performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
     for instance in dict_portfolio:
         portfolio_PAR10 += dict_portfolio[instance]
@@ -344,7 +346,9 @@ def get_resultsTable(results: dict[str, float], parallel_portfolio_path: Path,
         '\\caption *{\\textbf{Portfolio results}} \\label{tab:portfolio_results} ')
     table_string += '\\begin{tabular}{rrrrr}'
     table_string += (
-        '\\textbf{Portfolio nickname} & \\textbf{PAR10} & \\textbf{\\#Timeouts} & '
+        '\\textbf{Portfolio nickname} & \\textbf{'
+        f'{performance_metric_str}'
+        '} & \\textbf{\\#Timeouts} & '
         '\\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline ')
     table_string += (
         f'{sgrh.underscore_for_latex(parallel_portfolio_path.name)} & '
@@ -361,7 +365,9 @@ def get_resultsTable(results: dict[str, float], parallel_portfolio_path: Path,
 
         if i == 0:
             table_string += (
-                '\\textbf{Solver} & \\textbf{PAR10} & \\textbf{\\#Timeouts} & '
+                '\\textbf{Solver} & \\textbf{'
+                f'{performance_metric_str}'
+                '} & \\textbf{\\#Timeouts} & '
                 '\\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline ')
 
         if solver_name not in solver_with_solutions:
@@ -438,6 +444,10 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     if(sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE):
         str_value = r'\decisionfalse'
+    mydict[variable] = str_value
+
+    variable = 'performanceMetric'
+    str_value = sgh.settings.get_performance_metric_for_report()
     mydict[variable] = str_value
 
     return mydict
