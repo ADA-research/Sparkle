@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
-
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-
-Authors: 	Chuan Luo, chuanluosaber@gmail.com
-			Holger H. Hoos, hh@liacs.nl
-
-Contact: 	Chuan Luo, chuanluosaber@gmail.com
-'''
-
 import os
 import fcntl
 from pathlib import Path
@@ -21,22 +10,16 @@ def get_seed():
 	return 1
 
 
-flag_first_call = True
-
 sparkle_maximum_int = 2147483647
-
-sparkle_special_string = r'__@@SPARKLE@@__'
-
 sparkle_missing_value = -(sparkle_maximum_int-1)
-
 sparkle_minimum_int = -(sparkle_maximum_int-2)
 
-python_executable = r'python3'
+sparkle_special_string = '__@@SPARKLE@@__'
+
+python_executable = 'python3'
 
 sparkle_default_settings_path = r'Settings/sparkle_default_settings.txt'
-
 sparkle_smac_settings_path = r'Settings/sparkle_smac_settings.txt'
-
 sparkle_slurm_settings_path = r'Settings/sparkle_slurm_settings.txt'
 
 sparkle_global_output_dir = Path('Output')
@@ -51,7 +34,6 @@ sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_lo
 sparkle_tmp_path = 'Tmp/'
 
 sparkle_log_path = sparkle_tmp_path + r'sparkle_log.out'
-
 sparkle_err_path = sparkle_tmp_path + r'sparkle_log.err'
 
 sparkle_system_log_path = r'Log/sparkle_system_log_path.txt'
