@@ -108,18 +108,6 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 	return instance_list
 
 
-def get_instance_list_from_path(path: Path) -> list[str]:
-	"""Return a list of instance name strings located in a given path."""
-	# Multi-file instances
-	if sih._check_existence_of_instance_list_file(str(path)):
-		list_all_filename = sih._get_list_instance(str(path))
-	# Single file instances
-	else:
-		list_all_filename = get_list_all_cnf_filename(str(path))
-
-	return list_all_filename
-
-
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
 	if os.path.isfile(path):
 		# TODO: Possibly add extension check back when we get this information from the user

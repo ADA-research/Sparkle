@@ -44,4 +44,4 @@ if __name__ == r'__main__':
     sgh.latest_scenario = ReportingScenario()
 
     # Run configured solver
-    srcsh.call_configured_solver_for_instance(instance_path)
+    srcsh.call_configured_solver_sequential([instance_path])

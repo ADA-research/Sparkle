@@ -632,13 +632,13 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 	configured_results_train_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/'
 	default_results_train_dir = smac_solver_dir + 'outdir_train_default/'
 
-	if not os.path.exists(configured_results_train_dir) and os.path.exists(default_results_train_dir):
+	if not os.path.exists(configured_results_train_dir):
 		err_str += (' configured parameter results on the training set not found in '
 					f'{configured_results_train_dir};')
 		all_good = False
 	if not os.path.exists(default_results_train_dir):
 		err_str += (' default parameter results on the training set not found in '
-					f'{configured_results_train_dir};')
+					f'{default_results_train_dir};')
 		all_good = False
 
 	if instance_set_test_name is not None:

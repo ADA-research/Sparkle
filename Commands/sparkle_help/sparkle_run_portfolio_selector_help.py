@@ -304,7 +304,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 
 	total_job_list = []
 
-	list_all_filename = sfh.get_instance_list_from_path(Path(instance_directory_path))
+	list_all_filename = sih.get_instance_list_from_path(Path(instance_directory_path))
 
 	for filename in list_all_filename:
 		paths = []

@@ -12,6 +12,7 @@ try:
     from sparkle_help import sparkle_configure_solver_help as scsh
     from sparkle_help import sparkle_basic_help as sbh
     from sparkle_help import sparkle_slurm_help as ssh
+    from sparkle_help import sparkle_instances_help as sih
 except ImportError:
     import sparkle_file_help as sfh
     import sparkle_global_help as sgh
@@ -20,20 +21,51 @@ except ImportError:
     import sparkle_configure_solver_help as scsh
     import sparkle_basic_help as sbh
     import sparkle_slurm_help as ssh
+    import sparkle_instances_help as sih
 
 
-def call_configured_solver_for_instance(instance_path_list: list[Path]):
-    """Prepare to run the latest configured solver on the given instance."""
-    # Use original path for output string
-    instance_path_str = ' '.join([str(path) for path in instance_path_list])
+def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> str:
+    """Create list of instance path lists, and call solver in parallel or sequential."""
+    job_id_str = None
 
-    # Extend paths to work from execution directory under Tmp/
-    instance_path_list = ['../../' / instance for instance in instance_path_list]
+    # If directory, get instance list from directory as list[list[Path]]
+    if len(instance_path_list) == 1 and instance_path_list[0].is_dir():
+        instance_directory_path = instance_path_list[0]
+        list_all_filename = sih.get_instance_list_from_path(instance_directory_path)
 
-    # Run the configured solver
-    print(f'c Start running the latest configured solver to solve instance '
-          f'{instance_path_str} ...')
-    run_configured_solver(instance_path_list)
+        # Create an instance list keeping in mind possible multi-file instances
+        instances_list = []
+
+        for filename_str in list_all_filename:
+            instances_list.append([instance_directory_path / name
+                                  for name in filename_str.split()])
+    # Else single instance turn it into list[list[Path]]
+    else:
+        instances_list = [instance_path_list]
+
+    # If parallel, pass instances list to parallel function
+    if parallel:
+        job_id_str = call_configured_solver_parallel(instances_list)
+    # Else, pass instances list to sequential function
+    else:
+        call_configured_solver_sequential(instances_list)
+
+    return job_id_str
+
+
+def call_configured_solver_sequential(instances_list: list[list[Path]]):
+    """Prepare to run and run the latest configured solver sequentially on instances."""
+    for instance_path_list in instances_list:
+        # Use original path for output string
+        instance_path_str = ' '.join([str(path) for path in instance_path_list])
+
+        # Extend paths to work from execution directory under Tmp/
+        instance_path_list = ['../../' / instance for instance in instance_path_list]
+
+        # Run the configured solver
+        print(f'c Start running the latest configured solver to solve instance '
+              f'{instance_path_str} ...')
+        run_configured_solver(instance_path_list)
 
     return
 
@@ -71,16 +103,13 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
     return sbatch_script_path
 
 
-def call_configured_solver_for_instance_directory(instance_directory_path: Path) -> str:
-    """Run the latest configured solver in parallel on all instances in the directory."""
-    list_all_filename = sfh.get_instance_list_from_path(instance_directory_path)
-
-    # Create an instance list keeping in mind possible multi-file instances
+def call_configured_solver_parallel(instances_list: list[list[Path]]) -> str:
+    """Run the latest configured solver in parallel on all given instances."""
+    # Create an instance list[str] keeping in mind possible multi-file instances
     instance_list = []
 
-    for filename_str in list_all_filename:
-        instance_list.append(' '.join([str(instance_directory_path / name)
-                                      for name in filename_str.split()]))
+    for instance_path_list in instances_list:
+        instance_list.append(' '.join([str(path) for path in instance_path_list]))
 
     # Prepare batch script
     num_jobs = len(instance_list)

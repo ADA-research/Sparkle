@@ -61,13 +61,13 @@ fi
 
 # Run configured solver on an instance directory
 output_true="c Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
-output=$(Commands/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --parallel | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] run_configured_solver on instance directory test succeeded"
+	echo "[success] run_configured_solver in parallel on instance directory test succeeded"
 else              
-	echo "[failure] run_configured_solver on instance directory test failed with output:"
+	echo "[failure] run_configured_solver in parallel on instance directory test failed with output:"
 	echo $output
 fi
 
