@@ -2,25 +2,25 @@
 
 import sys
 import argparse
-import random
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_global_help as sgh
 
 __description__ = "Platform for evaluating empirical algorithms/solvers"
 __version__ = sgh.sparkle_version
 __licence__ = "MIT"
-__authors__ = ["Chuan Luo",
-               "Koen van der Blom",
-               "Richard Middelkoop",
-               "Jeroen Rook",
-               "Jeremie Gobeil",
-               "Holger H. Hoos",
-               ]
+__authors__ = [
+    # Alphabetical order on family name first
+    "Koen van der Blom",
+    "Jeremie Gobeil",
+    "Holger H. Hoos",
+    "Chuan Luo",
+    "Richard Middelkoop",
+    "Jeroen Rook",
+]
+
 __contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
 
-random.shuffle(__authors__)
-
-if __name__ == r"__main__":
+if __name__ == "__main__":
     # Log command call
     sl.log_command(sys.argv)
 
