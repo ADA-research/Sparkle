@@ -10,7 +10,6 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from sparkle_help.sparkle_settings import PerformanceMeasure
@@ -18,11 +17,9 @@ from sparkle_help.sparkle_settings import PerformanceMeasure
 
 if __name__ == '__main__':
     # Initialise settings
-    global settings
     sgh.settings = sparkle_settings.Settings()
 
     # Initialise latest scenario
-    global latest_scenario
     sgh.latest_scenario = ReportingScenario()
 
     # Log command call
@@ -31,55 +28,61 @@ if __name__ == '__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--instance-paths', metavar='PATH',
-                        nargs='+', type=str, action=ac.SetByUser, required=True,
+                        nargs='+', type=str, required=True,
                         help='Specify the instance_path(s) on which the portfolio will '
                              'run. This can be a space-separated list of instances '
                              'contain instance sets and/or singular instances. For '
                              'example --instance-paths Instances/PTN/Ptn-7824-b01.cnf '
                              'Instances/PTN2/')
-    parser.add_argument('--portfolio-name',
-                        default=sgh.latest_scenario.get_parallel_portfolio_path(),
-                        type=Path, action=ac.SetByUser,
+    parser.add_argument('--portfolio-name', type=Path,
                         help='Specify the name of the portfolio. If the portfolio is not'
                              ' in the standard directory, use its full path, the default'
-                             f' directory is {sgh.sparkle_parallel_portfolio_dir}. '
-                             'If the option is '
-                             'not specified, the latest constructed portfolio will be '
-                             'used.')
+                             f' directory is {sgh.sparkle_parallel_portfolio_dir}.'
+                             ' (default: use the latest constructed portfolio)'
+                             ' (current latest: '
+                             f'{sgh.latest_scenario.get_parallel_portfolio_path()})')
     parser.add_argument('--process-monitoring', choices=ProcessMonitoring.__members__,
-                        default=sgh.settings.get_parallel_portfolio_process_monitoring(),
-                        action=ac.SetByUser,
                         help='Specify whether the monitoring of the portfolio should '
                              'cancel all solvers within a portfolio once a solver '
                              'finishes (REALISTIC). Or allow all solvers within a '
                              'portfolio to get an equal chance to have the shortest '
                              'running time on an instance (EXTENDED), e.g., when this '
-                             'information is needed in an experiment.')
+                             'information is needed in an experiment.'
+                             ' (default: '
+                             f'{sgh.settings.DEFAULT_paraport_process_monitoring})'
+                             ' (current value: '
+                             f'{sgh.settings.get_paraport_process_monitoring()})')
     parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__,
-                        default=sgh.settings.get_general_performance_measure(),
-                        action=ac.SetByUser,
                         help='The performance measure, e.g., RUNTIME (for decision '
                              'algorithms) or QUALITY_ABSOLUTE (for optimisation '
-                             'algorithms)')
-    parser.add_argument('--cutoff-time',
-                        default=sgh.settings.get_general_target_cutoff_time(), type=int,
-                        action=ac.SetByUser,
+                             'algorithms)'
+                             ' (default: '
+                             f'{sgh.settings.DEFAULT_general_performance_measure.name})'
+                             ' (current value: '
+                             f'{sgh.settings.get_general_performance_measure().name})')
+    parser.add_argument('--cutoff-time', type=int,
                         help='The duration the portfolio will run before the solvers '
-                             'within the portfolio will be stopped')
+                             'within the portfolio will be stopped'
+                             ' (default: '
+                             f'{sgh.settings.DEFAULT_general_target_cutoff_time})'
+                             ' (current value: '
+                             f'{sgh.settings.get_general_target_cutoff_time()})')
     parser.add_argument('--settings-file', type=Path,
-                        default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser,
-                        help='Specify the settings file to use instead of the default')
+                        help='Specify the settings file to use instead of the default'
+                             f' (default: {sgh.settings.DEFAULT_settings_path}')
 
     # Process command line arguments
     args = parser.parse_args()
 
     # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, 'settings_file'):
+    if args.settings_file is not None:
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     portfolio_path = args.portfolio_name
 
-    if ac.set_by_user(args, 'portfolio_name') and not portfolio_path.is_dir():
+    if args.portfolio_name is None:
+        portfolio_path = sgh.latest_scenario.get_parallel_portfolio_path()
+    elif not portfolio_path.is_dir():
         portfolio_path = Path(sgh.sparkle_parallel_portfolio_dir / args.portfolio_name)
 
         if not portfolio_path.is_dir():
@@ -102,15 +105,15 @@ if __name__ == '__main__':
                 item_with_dir = f'{instance}/{item}'
                 instance_paths.append(item_with_dir)
 
-    if ac.set_by_user(args, 'cutoff_time'):
+    if args.cutoff_time is not None:
         sgh.settings.set_general_target_cutoff_time(args.cutoff_time,
                                                     SettingState.CMD_LINE)
 
-    if ac.set_by_user(args, 'process_monitoring'):
-        sgh.settings.set_parallel_portfolio_process_monitoring(args.process_monitoring,
-                                                               SettingState.CMD_LINE)
+    if args.process_monitoring is not None:
+        sgh.settings.set_paraport_process_monitoring(args.process_monitoring,
+                                                     SettingState.CMD_LINE)
 
-    if ac.set_by_user(args, 'performance_measure'):
+    if args.performance_measure is not None:
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
 

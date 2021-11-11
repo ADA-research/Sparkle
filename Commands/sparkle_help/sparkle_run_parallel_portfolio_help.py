@@ -155,7 +155,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
         jobstatus = jobs.strip().split()[4]
         # If option extended is used some jobs are not directly cancelled to allow all
         # jobs to compute for at least the same running time.
-        if (sgh.settings.get_parallel_portfolio_process_monitoring()
+        if (sgh.settings.get_paraport_process_monitoring()
                 == ProcessMonitoring.EXTENDED):
             # If a job in a portfolio with a finished solver starts running its timelimit
             # needs to be updated.
@@ -180,7 +180,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
                     == int(int(finished_job)/int(portfolio_size))):
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
-                if (sgh.settings.get_parallel_portfolio_process_monitoring()
+                if (sgh.settings.get_paraport_process_monitoring()
                         == ProcessMonitoring.EXTENDED):
                     # Update the cutofftime of the to be cancelled job, if job if
                     # already past that it automatically stops.
@@ -292,7 +292,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str, solver_array_list: 
                 jobstatus = jobs.strip().split()[4]
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
-                if (sgh.settings.get_parallel_portfolio_process_monitoring() ==
+                if (sgh.settings.get_paraport_process_monitoring() ==
                         ProcessMonitoring.EXTENDED):
                     if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
                         # Job is in a portfolio with a solver that already has finished

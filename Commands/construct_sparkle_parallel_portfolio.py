@@ -9,18 +9,15 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
 from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
 if __name__ == '__main__':
     # Initialise settings
-    global settings
     sgh.settings = sparkle_settings.Settings()
 
     # Initialise latest scenario
-    global latest_scenario
     sgh.latest_scenario = ReportingScenario()
 
     # Log command call
@@ -29,24 +26,24 @@ if __name__ == '__main__':
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--nickname', type=Path,
-                        help='Give a nickname to the portfolio. The default name of a '
-                             'portfolio is sparkle_parallel_portfolio.')
-    parser.add_argument('--solver', required=False, metavar='N', nargs='+', type=str,
+                        help='Give a nickname to the portfolio.'
+                             f' (default: {sgh.sparkle_parallel_portfolio_name})')
+    parser.add_argument('--solver', required=False, nargs='+', type=str,
                         help='Specify the list of solvers, add '
                              '\",<#solver_variations>\" to the end of a path to add '
                              'multiple instances of a single solver. For example '
                              '--solver Solver/PbO-CCSAT-Generic,25 to construct a '
                              'portfolio containing 25 variations of PbO-CCSAT-Generic.')
-    parser.add_argument('--overwrite',
-                        default=sgh.settings.DEFAULT_parallel_portfolio_overwriting,
-                        action=ac.SetByUser, type=bool,
+    parser.add_argument('--overwrite', type=bool,
                         help='When set to True an existing parallel portfolio with the '
                              'same name will be overwritten, when False an error will '
-                             'be thrown instead.')
+                             'be thrown instead.'
+                             ' (default: '
+                             f'{sgh.settings.DEFAULT_paraport_overwriting})')
     parser.add_argument('--settings-file', type=Path,
-                        default=sgh.settings.DEFAULT_settings_path, action=ac.SetByUser,
                         help='Specify the settings file to use in case you want to use '
-                             'one other than the default')
+                             'one other than the default'
+                             f' (default: {sgh.settings.DEFAULT_settings_path}')
 
     # Process command line arguments;
     args = parser.parse_args()
@@ -58,14 +55,11 @@ if __name__ == '__main__':
         list_of_solvers = sgh.solver_list
 
     # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, 'settings_file'):
+    if args.settings_file is not None:
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
-    if ac.set_by_user(args, 'overwrite'):
-        sgh.settings.set_parallel_portfolio_overwriting_flag(args.overwrite,
-                                                             SettingState.CMD_LINE)
-
-    overwrite = args.overwrite
+    if args.overwrite is not None:
+        sgh.settings.set_paraport_overwriting_flag(args.overwrite, SettingState.CMD_LINE)
 
     if portfolio_name is None:
         portfolio_name = sgh.sparkle_parallel_portfolio_name
@@ -74,7 +68,7 @@ if __name__ == '__main__':
 
     print('c Start constructing Sparkle parallel portfolio ...')
 
-    success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, overwrite,
+    success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
 
     if success:
