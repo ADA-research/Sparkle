@@ -350,31 +350,36 @@ def write_instance_list():
 	fout.close()
 	return
 
-def write_string_to_file(file_path, string_value):
-	fout = open(file_path, 'w+')
-	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	fout.write(string_value.strip()+'\n')
-	fout.close()
-	return
 
-def append_string_to_file(file_path, string_value):
-	fout = open(file_path, 'a+')
-	while True:
+def write_string_to_file(filepath, string, append=False, maxtry=5):
+	""" Write 'txt' to the file 'filepath' using a lock and creating the parents path
+	if needed. If append is True, the 'txt' will be appended to the file, otherwise the
+	content of the file will be overwrite. Try a maximum of 'maxtry' to acquire the
+	lock (with a random wait time (min 0.2s, max 1.0s) between each try.
+	"""
+	# Create the full path if needed
+	Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+
+	for i in range(maxtry):
 		try:
-			fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-			fout.write(string_value.strip()+'\n')
-			#fcntl.flock(fout.fileno(), fcntl.LOCK_UN)
-			fout.close()
-			break
-		except:
-			time.sleep(random.randint(1, 5))
-	'''
-	fout = open(file_path, 'a+')
-	fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-	fout.write(string_value.strip()+'\n')
-	fout.close()
-	'''
-	return
+			with open(filepath, 'a' if append else 'w') as fout:
+				fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+				fout.write(string + '\n')
+				fcntl.flock(fout.fileno(), fcntl.LOCK_UN)
+			return
+		except OSError as e:
+			print(f"c Warning: locking file {filepath} failed (try #{i})")
+			time.sleep(random.randint(1, 5)/5)
+			if i == (maxtry - 1):
+				raise e
+
+
+def append_string_to_file(filepath, string, maxtry=5):
+	""" Append 'txt' to the file 'filepath'. Use a lock and creates the parents path
+	if needed. Try a maximum of 'maxtry' to acquire the
+	lock.
+	"""
+	return write_string_to_file(filepath, string, append=True, maxtry=maxtry)
 
 
 def rmtree(directory: Path):

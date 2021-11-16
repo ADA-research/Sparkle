@@ -10,6 +10,7 @@ Authors: 	Chuan Luo, chuanluosaber@gmail.com
 Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
+
 import os
 import sys
 from sparkle_help import sparkle_global_help as sgh
@@ -23,6 +24,8 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help.sparkle_command_help import CommandName
 from sparkle_help import sparkle_job_help as sjh
 
+from sparkle.slurm_parsing import SlurmBatch
+import runrunner
 
 def generate_running_solvers_sbatch_shell_script(total_job_num: int, num_job_in_parallel: int, total_job_list) -> (str, str, str):
 	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sbh.get_time_pid_random_string() + r'.sh'
@@ -54,39 +57,50 @@ def generate_running_solvers_sbatch_shell_script(total_job_num: int, num_job_in_
 	return sbatch_script_path, std_out_path, std_err_path
 
 
-def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mode):
-	####
-	# This function is used for running solvers in parallel.
-	# The 1st argument (performance_data_csv_path) specifies the path of the csv file where the resulting performance data would be placed.
-	# The 2nd argument (num_job_in_parallel) specifies the number of jobs that will be executing in parallel.
-	# The 3nd argument (mode) specifies the mode of computation. It has 2 possible values (1 or 2). If this value is 1, it means that this function will compute the remaining jobs for performance computation. Otherwise (if this value is 2), it means that this function will re-compute all jobs for performance computation.
-	####
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path) # open the csv file in terms of performance data
-	if mode == 1: list_performance_computation_job = performance_data_csv.get_list_remaining_performance_computation_job() # the value of mode is 1, so the list of computation jobs is the list of the remaining jobs
-	elif mode == 2: list_performance_computation_job = performance_data_csv.get_list_recompute_performance_computation_job() # the value of mode is 2, so the list of computation jobs is the list of all jobs (recomputing)
-	else: # the abnormal case, exit
-		print('c Running solvers mode error!')
-		print('c Do not run solvers')
-		sys.exit()
+def running_solvers_parallel(
+		performance_data_csv_path: str,
+		num_job_in_parallel: int,
+		recompute: bool = False,
+		run_on: str = None
+):
+	""" Run the solvers in parallel.
+
+	Parameters
+	----------
+	performance_data_csv_path: str
+		The path the the performance data file
+	num_job_in_parallel: int
+		The maximum number of jobs to run in parallel
+	recompute: bool
+		Compute only solver not already run (False) or recompute all perf. data (True)
+		False = compute the remaining jobs for performance computation
+		True = re-compute all jobs for performance computation
+	run_on: str
+		Where to execute the solvers. Available: ['slurm', 'local']. Default: 'slurm'.
+	"""
+	# open the csv file in terms of performance data
+	csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+
+	# list of jobs to do
+	jobs = sjh.expand_total_job_from_list(
+		csv.get_list_recompute_performance_computation_job() if recompute
+		else csv.get_list_remaining_performance_computation_job()
+	)
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-	print('c Cutoff time for each run on solving an instance is set to ' + cutoff_time_str + ' seconds') # print the information about the cutoff time
-	
-	####
-	# expand the job list
-	total_job_num = sjh.get_num_of_total_job_from_list(list_performance_computation_job)
-	print('c The number of total running jobs: ' + str(total_job_num))
-	total_job_list = sjh.expand_total_job_from_list(list_performance_computation_job)
-	####
+
+	print(f"c Cutoff time for each solver run: {cutoff_time_str} seconds")
+	print(f"c The number of total running jobs: {len(jobs)}")
 
 	# If there are no jobs, stop
-	if len(total_job_list) == 0:
+	if len(jobs) == 0:
 		return ''
 	# If there are jobs update performance data ID
 	else:
 		srs.update_performance_data_id()
 
-	sbatch_script_path, std_out_path, std_err_path = generate_running_solvers_sbatch_shell_script(total_job_num, num_job_in_parallel, total_job_list)
+	sbatch_script_path, std_out_path, std_err_path = generate_running_solvers_sbatch_shell_script(
+		len(jobs), num_job_in_parallel, jobs)
 	command_line = 'sbatch ' + sbatch_script_path
 	####
 
@@ -95,14 +109,25 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
 	sl.add_output(std_out_path, 'Standard output of Slurm batch script to run solvers in parallel')
 	sl.add_output(std_err_path, 'Error output of Slurm batch script to run solvers in parallel')
 
-	#os.system(command_line) # execute the sbatch script via slurm
-	output_list = os.popen(command_line).readlines()
-	if len(output_list) > 0 and len(output_list[0].strip().split())>0:
-		run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
-		# Add job to active job CSV
-		sjh.write_active_job(run_solvers_parallel_jobid, CommandName.RUN_SOLVERS)
+	batch = SlurmBatch(sbatch_script_path)
+
+	if run_on == "local":
+		print("c Running the solvers locally")
+		return runrunner.local.add_to_queue(cmd=[
+			f"{batch.cmd} {param}" for param in batch.params
+		], name="run_solvers")
+	elif run_on == "slurm":
+		print("c Running the solvers on the clusters")
+		output_list = os.popen(command_line).readlines()
+
+		if len(output_list) > 0 and len(output_list[0].strip().split())>0:
+			run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
+			# Add job to active job CSV
+			sjh.write_active_job(run_solvers_parallel_jobid, CommandName.RUN_SOLVERS)
+		else:
+			run_solvers_parallel_jobid = ''
+		return run_solvers_parallel_jobid
 	else:
-		run_solvers_parallel_jobid = ''
-
-	return run_solvers_parallel_jobid
-
+		# TODO: Print error message
+		print("c '{run_on}' not a valid target to execute the code")
+		exit(1)

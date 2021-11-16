@@ -241,7 +241,7 @@ if __name__ == r"__main__":
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
             srsp.running_solvers_parallel(
-                sgh.performance_data_csv_path, num_job_in_parallel, 1
+                sgh.performance_data_csv_path, num_job_in_parallel, recompute=False
             )
             print("c Running solvers in parallel ...")
 
