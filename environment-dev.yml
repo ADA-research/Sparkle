@@ -9,6 +9,8 @@ dependencies:
   - gnuplot
   - pip
   - pip:
+    - -e .  # self install !
+    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@dev#egg=runrunner
     # For Sparkle
     - numpy
     - pandas
