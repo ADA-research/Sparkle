@@ -25,7 +25,7 @@ from sparkle_help.sparkle_command_help import CommandName
 from sparkle_help import sparkle_job_help as sjh
 
 from sparkle.slurm_parsing import SlurmBatch
-import runrunner
+import runrunner as rrr
 
 def generate_running_solvers_sbatch_shell_script(total_job_num: int, num_job_in_parallel: int, total_job_list) -> (str, str, str):
 	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sbh.get_time_pid_random_string() + r'.sh'
@@ -113,7 +113,7 @@ def running_solvers_parallel(
 
 	if run_on == "local":
 		print("c Running the solvers locally")
-		return runrunner.local.add_to_queue(cmd=[
+		return rrr.add_to_local_queue(cmd=[
 			f"{batch.cmd} {param}" for param in batch.params
 		], name="run_solvers")
 	elif run_on == "slurm":

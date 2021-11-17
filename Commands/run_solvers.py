@@ -67,16 +67,16 @@ def run_solvers_on_instances(
     # Update performance data csv after the last job is done
     if run_on == "local":
 
-        last_job = merge_job = rrr.local.add_to_queue(
+        last_job = merge_job = rrr.add_to_local_queue(
             cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
             depends=solver_jobs)
 
         if also_construct_selector_and_report:
-            selector_job = rrr.local.add_to_queue(
+            selector_job = rrr.add_to_local_queue(
                 cmd="Commands/construct_sparkle_portfolio_selector.py",
                 depends=merge_job)
 
-            last_job = rrr.local.add_to_queue(
+            last_job = rrr.add_to_local_queue(
                 cmd="Commands/generate_report.py",
                 depends=selector_job)
 
