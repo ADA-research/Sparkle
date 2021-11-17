@@ -8,7 +8,6 @@ from pathlib import Path
 from sparkle_help import sparkle_record_help as srh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_run_solvers_help as srs
 from sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from sparkle_help import sparkle_job_parallel_help as sjph
 from sparkle_help import sparkle_logging as sl
@@ -16,7 +15,6 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SolutionVerifier
 from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
 
 import runrunner as rrr
@@ -80,7 +78,7 @@ def run_solvers_on_instances(
                 cmd="Commands/generate_report.py",
                 depends=selector_job)
 
-        print(f"c Waiting for the calculations to finish.")
+        print("c Waiting for the calculations to finish.")
         last_job.wait()
 
     elif run_on == "slurm":
@@ -170,7 +168,7 @@ if __name__ == r"__main__":
     parser.add_argument(
         "--run-on",
         default="slurm",
-        help=("On which computer/cluster to execute the calculation." 
+        help=("On which computer/cluster to execute the calculation."
               "Available:  local, slurm. Default: slurm"),
     )
 
@@ -216,4 +214,3 @@ if __name__ == r"__main__":
         also_construct_selector_and_report=args.also_construct_selector_and_report,
         run_on=args.run_on,
     )
-
