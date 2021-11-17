@@ -18,12 +18,15 @@
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
-instances_path="Examples/Resources/Instances/PTN/"
-solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
+examples_path="Examples/Resources/"
+instances_path="Instances/PTN/"
+solver_path="Solvers/PbO-CCSAT-Generic/"
+instances_src_path="${examples_path}${instances_path}"
+solver_src_path="${examples_path}${solver_path}"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
+Commands/add_instances.py $instances_src_path > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
 # Configure solver
 output=$(Commands/configure_solver.py --validate --ablation --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path | tail -1)
@@ -38,7 +41,7 @@ if [ ! -f "$validationcallbackfile" ]; then
 elif [ ! -f "$ablationcallbackfile" ]; then
     echo "[failure] $ablationcallbackfile does not exist for configure_solver_validation."
     kill_started_jobs_slurm
-elif [[ $output =~ [^$output_true] ]]; then
+elif [[ $output =~ "${output_true}" ]]; then
 	echo "[success] configure_solver_validation test succeeded"
     jobid=${output##* }
 	scancel $jobid

@@ -51,6 +51,7 @@ Notable changes to Sparkle will be documented in this file.
 ## Added
 - New option --run-solver-now in add\_solver.py and add\_instances.py
 - New option --run-extractor-now in add\_instances.py and add\_feature\_extractor.py
+- New command run\_configured\_solver.py to run the last configured solver with its configured parameters on new instances
 
 ### Changed
 - Default to --run-solver-later in add\_solver.py and add\_instances.py

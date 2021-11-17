@@ -177,3 +177,5 @@ if __name__ == r"__main__":
 
     # Write used settings to file
     sgh.settings.write_used_settings()
+    # Write used scenario to file
+    sgh.latest_scenario.write_scenario_ini()
