@@ -60,3 +60,6 @@ Notable changes to Sparkle will be documented in this file.
 - Improve integration tests so all launched jobs are cancelled upon test completion
 - Change the list of authors in about.py to be in alphebetical order
 
+### Fixed
+- Removed the unneeded globals in sparkle\_global\_help.py 
+
