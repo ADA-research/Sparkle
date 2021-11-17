@@ -51,6 +51,7 @@ Notable changes to Sparkle will be documented in this file.
 ## Added
 - New option --run-solver-now in add\_solver.py and add\_instances.py
 - New option --run-extractor-now in add\_instances.py and add\_feature\_extractor.py
+- New command run\_configured\_solver.py to run the last configured solver with its configured parameters on new instances
 - New option --run-on in run\_solvers.py 
 - Integration with runrunner to run the solvers and related code on the local machine
 
@@ -59,4 +60,8 @@ Notable changes to Sparkle will be documented in this file.
 - Default to --run-extractor-later in add\_instances.py and add\_feature\_extractor.py
 - Updated documentation, examples and tests for new behaviour of --run-solver-later and --run-extrator-later
 - Improve integration tests so all launched jobs are cancelled upon test completion
+- Change the list of authors in about.py to be in alphebetical order
+
+### Fixed
+- Removed the unneeded globals in sparkle\_global\_help.py 
 

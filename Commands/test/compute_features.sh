@@ -41,7 +41,7 @@ fi
 output_true="c Computing features in parallel. Waiting for Slurm job(s) with id(s): "
 output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
-if [[ $output =~ [^$output_true] ]];
+if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] compute_features --parallel test succeeded"
     jobid=${output##* }

@@ -92,3 +92,5 @@ Commands/test/validate_configured_vs_default.sh
 # Test ablation run configured vs default
 Commands/test/run_ablation.sh
 
+# Test run configured solver
+Commands/test/run_configured_solver.sh
