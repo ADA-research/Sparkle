@@ -62,4 +62,5 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Fixed
 - Removed the unneeded globals in sparkle\_global\_help.py 
+- Changed solver and instance paths in Examples/configuration_quality.sh and Examples/configuration_quality.md
 
