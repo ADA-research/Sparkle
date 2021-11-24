@@ -19,7 +19,7 @@ Commands/add_instances.py Examples/Resources/CVRP/Instances/X-11-20/
 
 # The solver directory should contain the solver executable, the `sparkle_smac_wrapper.py` wrapper, and a `.pcs` file describing the configurable parameters
 
-Commands/add_solver.py --deterministic 0 --run-solver-later Examples/Resources/CVRP/Solvers/VRP_SISRs/
+Commands/add_solver.py --deterministic 0 Examples/Resources/CVRP/Solvers/VRP_SISRs/
 
 # If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
 
