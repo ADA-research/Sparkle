@@ -8,8 +8,8 @@
 
 Add train, and optionally test, instances (in this case for the VRP) in a given directory, without running solvers or feature extractors yet
 
-`Commands/add_instances.py Examples/Resources/Instances/X-1-10/`
-`Commands/add_instances.py Examples/Resources/Instances/X-11-20/`
+`Commands/add_instances.py Examples/Resources/CVRP/Instances/X-1-10/`
+`Commands/add_instances.py Examples/Resources/CVRP/Instances/X-11-20/`
 
 ## Add a configurable solver
 
@@ -17,7 +17,7 @@ Add a configurable solver (here for vehicle routing) with a wrapper containing t
 
 The solver directory should contain the solver executable, the `sparkle_smac_wrapper.py` wrapper, and a `.pcs` file describing the configurable parameters
 
-`Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/VRP_SISRs/`
+`Commands/add_solver.py --deterministic 0 --run-solver-later Examples/Resources/CVRP/Solvers/VRP_SISRs/`
 
 If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
 
@@ -43,7 +43,7 @@ Wait for validation to be completed
 
 `Commands/sparkle_wait.py`
 
-Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `VRP_SISRs_X-1-10/Sparkle-latex-generator-for-configuration/`. We again set the performance measure to absolute quality.
+Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `VRP_SISRs_X-1-10_X-11-20/Sparkle-latex-generator-for-configuration/`. We again set the performance measure to absolute quality.
 
 `Commands/generate_report.py --performance-measure QUALITY_ABSOLUTE`
 
