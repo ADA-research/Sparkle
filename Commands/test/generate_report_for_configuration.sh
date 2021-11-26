@@ -21,18 +21,23 @@ cp $slurm_settings_test $slurm_settings_path # Activate test settings
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
-instances_path_train="Examples/Resources/Instances/PTN/"
-instances_path_test="Examples/Resources/Instances/PTN2/"
-solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
+examples_path="Examples/Resources/"
+instances_path_train="Instances/PTN/"
+instances_path_test="Instances/PTN2/"
+solver_path="Solvers/PbO-CCSAT-Generic/"
+instances_src_path_train="${examples_path}${instances_path_train}"
+instances_src_path_test="${examples_path}${instances_path_test}"
+solver_src_path="${examples_path}${solver_path}"
+
 configuration_results_path="Commands/test/test_files/results/"
-validation_results_path="Commands/test/test_files/PbO-CCSAT-Generic/"
+validation_results_path="Commands/test/test_files/PbO-CCSAT-Generic_PTN/"
 smac_path="Components/smac-v2.10.03-master-778/"
 smac_validation_results_path="$smac_path/example_scenarios/"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path_train > /dev/null
-Commands/add_instances.py $instances_path_test > /dev/null
-Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
+Commands/add_instances.py $instances_src_path_train > /dev/null
+Commands/add_instances.py $instances_src_path_test > /dev/null
+Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
 # Copy configuration results to simulate the configuration command
 cp -r $configuration_results_path $smac_path

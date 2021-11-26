@@ -29,7 +29,6 @@ except ImportError:
 	import sparkle_basic_help as sbh
 	import sparkle_file_help as sfh
 	import sparkle_performance_data_csv_help as spdcsv
-	import sparkle_experiments_related_help as ser
 	import sparkle_job_help as sjh
 	from sparkle_settings import PerformanceMeasure
 	from sparkle_settings import SolutionVerifier
@@ -71,45 +70,127 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
 		cutoff_time_str = str(custom_cutoff)
 
 	if not Path(solver_wrapper_path).is_file():
-		print('c ERROR: Wrapper named \'' + solver_wrapper_path + '\' not found, stopping execution!')
+		print(f'c ERROR: Wrapper named \'{solver_wrapper_path}\' not found, stopping '
+			'execution!')
 		sys.exit()
 
 	# Get the solver call command from the wrapper
 	cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path,
 													seed_str)
 
+	run_solver_on_instance_with_cmd(Path(solver_path), cmd_solver_call,
+									Path(raw_result_path),
+									Path(runsolver_values_path), custom_cutoff)
+
+	return
+
+
+def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
+									raw_result_path: Path, runsolver_values_path: Path,
+									custom_cutoff: int = None,
+									is_configured: bool = False) -> Path:
+	"""Run the solver on the given instance, with a given command line call."""
+	if custom_cutoff is None:
+		cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+	else:
+		cutoff_time_str = str(custom_cutoff)
+
 	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
-	runsolver_option = r'--timestamp --use-pty --add-eof'
-	cutoff_time_each_run_option = r'-C ' + cutoff_time_str
-	runsolver_values_log = '-v ' + runsolver_values_path
-	runsolver_watch_data_path = runsolver_values_path.replace('val', 'log')
-	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
-	raw_result_path_option = r'-o ' + raw_result_path
+	runsolver_option = '--timestamp --use-pty --add-eof'
+	cutoff_time_each_run_option = f'-C {cutoff_time_str}'
+	runsolver_values_log = f'-v {str(runsolver_values_path)}'
+	runsolver_watch_data_path = str(runsolver_values_path).replace('val', 'log')
+	runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'
+	raw_result_path_option = f'-o {str(raw_result_path)}'
+
+	# For configured solvers change the directory to accommodate sparkle_smac_wrapper
+	original_path = os.getcwd()
+
+	if is_configured:
+		# Change paths to accommodate configured execution directory
+		runsolver_path = f'../../{sgh.runsolver_path}'
+		runsolver_values_log = f'-v ../../{str(runsolver_values_path)}'
+		runsolver_values_path = '../../' / runsolver_values_path
+		runsolver_watch_data_path = str(runsolver_values_path).replace('val', 'log')
+		runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'
+		raw_result_path_option = f'-o ../../{str(raw_result_path)}'
+
+		# Copy to execution directory
+		exec_path = str(raw_result_path).replace('.rawres', '_exec_dir/')
+		Path(exec_path).mkdir(parents=True)
+		cmd_copy_solver = f'cp -r {str(solver_path)}/* {exec_path}'
+		os.system(cmd_copy_solver)
+
+		# Change to execution directory
+		cmd_cd = f'cd {exec_path}'
+
+		# Return to original directory
+		cmd_cd_back = f'cd {original_path}'
 
 	# Finalise command
-	command_line_run_solver = runsolver_path + r' ' + runsolver_option + r' ' + cutoff_time_each_run_option + r' ' + runsolver_watch_data_path_option + r' ' + runsolver_values_log + r' ' + raw_result_path_option + r' ' + solver_path + '/' + cmd_solver_call
+	command_line_run_solver = (f'{runsolver_path} {runsolver_option} '
+		f'{cutoff_time_each_run_option} {runsolver_watch_data_path_option} '
+		f'{runsolver_values_log} {raw_result_path_option} {str(solver_path)}/'
+		f'{cmd_solver_call}')
+
+	if is_configured:
+		command_line_run_solver = (f'{cmd_cd} ; {runsolver_path} {runsolver_option} '
+			f'{cutoff_time_each_run_option} {runsolver_watch_data_path_option} '
+			f'{runsolver_values_log} {raw_result_path_option} ./{cmd_solver_call} ; '
+			f'{cmd_cd_back}')
 
 	# Execute command
 	try:
 		os.system(command_line_run_solver)
 	except:
-		# TODO: Replace by error? Why create an empty file if the command fails?
-		if not os.path.exists(raw_result_path):
-			sfh.create_new_empty_file(raw_result_path)
+		print('WARNING: Solver execution seems to have failed!')
+		print(f'The used command was: {command_line_run_solver}')
+
+		# TODO: Why create an empty file if the command fails?
+		if not raw_result_path.exists():
+			sfh.create_new_empty_file(str(raw_result_path))
+	else:
+		# Clean up on success
+		if is_configured:
+			# Move .rawres file from tmp/ directory in the execution directory
+			# to raw_result_path + '_solver'
+			tmp_raw_res = f'{exec_path}tmp/'
+			tmp_paths = list(Path(tmp_raw_res).glob('*.rawres'))
+			raw_result_solver_path = str(raw_result_path).replace('.rawres', '.rawres_solver')
+
+			# Only one result should exist
+			if len(tmp_paths) < 1:
+				print(f'WARNING: Raw result not found in {tmp_raw_res}, assuming '
+					'timeout...')
+				sfh.create_new_empty_file(raw_result_solver_path)
+			else:
+				raw_result_solver_src_path, *rest = tmp_paths
+				raw_result_solver_src_path.rename(Path(raw_result_solver_path))
+			# Remove execution directory (should contain nothing of interest on succes
+			# after moving the .rawres file)
+			sfh.rmtree(Path(exec_path))
+			# Check .rawres_solver output
+			check_solver_output_for_errors(Path(raw_result_solver_path))
+
+		sfh.rmfile(Path(runsolver_watch_data_path))
 
 	# Check for known errors/issues
-	check_solver_output_for_errors(Path(raw_result_path))
+	check_solver_output_for_errors(raw_result_path)
 
-	#command_line = 'rm -f ' + runsolver_watch_data_path
-	#os.system(command_line)
-
-	return
+	if is_configured:
+		return raw_result_solver_path
+	else:
+		return raw_result_path
 
 
 def check_solver_output_for_errors(raw_result_path: Path):
-	error_lines = \
-		["libstdc++.so.6: version `GLIBCXX"] # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found
+	error_lines = [ \
+		# /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found:
+		"libstdc++.so.6: version `GLIBCXX",
+		# For e.g. invalid solver path:
+		"No such file or directory"
+		]
 
 	# Find lines containing an error
 	with raw_result_path.open('r') as infile:

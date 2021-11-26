@@ -175,8 +175,6 @@ class ReportingScenario:
 			self.__init_section(section)
 			self.__scenario[section][name] = str(value)
 
-		self.write_scenario_ini()
-
 		return
 
 
@@ -213,8 +211,6 @@ class ReportingScenario:
 		if value != None:
 			self.__init_section(section)
 			self.__scenario[section][name] = value.name
-
-		self.write_scenario_ini()
 
 		return
 

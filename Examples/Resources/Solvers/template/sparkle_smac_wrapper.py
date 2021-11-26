@@ -5,6 +5,7 @@ import os
 import time
 import random
 import sys
+import Path
 # TODO: Add imports required by your changes
 
 def get_time_pid_random_string():
@@ -90,6 +91,13 @@ for line in output_list:
 		status = r'TIMEOUT'
 		break
 
+# Output results in the format SMAC requires
 print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', ' + str(run_length) + r', ' + str(quality) + ', ' + str(seed))
 
+# Write raw solver output to file for Sparkle when calling run_configured_solver.py
+if specifics == 'rawres':
+	raw_result_path = Path(runsolver_watch_data_path.replace('.log', '.rawres'))
 
+	with raw_result_path.open('w') as outfile:
+		for line in output_list:
+			outfile.write(line)

@@ -20,8 +20,10 @@ from typing import List
 
 try:
 	from sparkle_help import sparkle_global_help as sgh
+	from sparkle_help import sparkle_instances_help as sih
 except ImportError:
 	import sparkle_global_help as sgh
+	import sparkle_instances_help as sih
 
 
 def create_new_empty_file(filepath: str):

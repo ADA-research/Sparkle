@@ -290,6 +290,8 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 	# Update latest scenario
 	sgh.latest_scenario.set_selection_test_case_directory(Path(test_case_directory_path))
 	sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
+	# Write used scenario to file
+	sgh.latest_scenario.write_scenario_ini()
 
 	if not os.path.exists('Test_Cases/'):
 		os.system('mkdir Test_Cases/')
@@ -303,12 +305,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 
 	total_job_list = []
 
-	# Multi-file instances
-	if sih._check_existence_of_instance_list_file(instance_directory_path):
-		list_all_filename = sih._get_list_instance(instance_directory_path)
-	# Single file instances
-	else:
-		list_all_filename = sfh.get_list_all_cnf_filename(instance_directory_path)
+	list_all_filename = sih.get_instance_list_from_path(Path(instance_directory_path))
 
 	for filename in list_all_filename:
 		paths = []

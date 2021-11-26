@@ -605,18 +605,28 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name, instan
 
 def check_results_exist(solver_name, instance_set_train_name, instance_set_test_name=None):
 	all_good = True
+	err_str = ''
+
 	# Check train instance dir exists
 	instance_train_dir = sgh.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_train_name + '/'
 
 	if not os.path.exists(instance_train_dir):
 		all_good = False
+		err_str += (' training set not found in configuration directory '
+					f'{instance_train_dir};')
 
 	# Check train results exist: configured+default
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name  + '/'
 	configured_results_train_dir = smac_solver_dir + 'outdir_train_configuration/' + solver_name + '_' + instance_set_train_name + '_scenario/'
 	default_results_train_dir = smac_solver_dir + 'outdir_train_default/'
 
-	if not (os.path.exists(configured_results_train_dir) and os.path.exists(default_results_train_dir)):
+	if not os.path.exists(configured_results_train_dir):
+		err_str += (' configured parameter results on the training set not found in '
+					f'{configured_results_train_dir};')
+		all_good = False
+	if not os.path.exists(default_results_train_dir):
+		err_str += (' default parameter results on the training set not found in '
+					f'{default_results_train_dir};')
 		all_good = False
 
 	if instance_set_test_name is not None:
@@ -624,17 +634,28 @@ def check_results_exist(solver_name, instance_set_train_name, instance_set_test_
 		instance_test_dir = sgh.smac_dir + '/example_scenarios/' + 'instances/' + instance_set_test_name + '/'
 		if not os.path.exists(instance_test_dir):
 			all_good = False
+			err_str += (' testing set not found in configuration directory '
+						f'{instance_test_dir};')
 
 		# Check test results exist: configured+default
 		smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name  + '/'
 		configured_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/'
 		default_results_test_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/'
 
-		if not (os.path.exists(configured_results_test_dir) and os.path.exists(default_results_test_dir)):
+		if not os.path.exists(configured_results_test_dir):
+			err_str += (' configured parameter results on the testing set not found in '
+						f'{configured_results_test_dir};')
+			all_good = False
+		if not os.path.exists(default_results_test_dir):
+			err_str += (' default parameter results on the testing set not found in '
+						f'{default_results_test_dir};')
 			all_good = False
 
 	if not all_good:
-		print('c Error: Results not found for the given solver and instance set(s) combination. Make sure the \'configure_solver\' and \'validate_configured_vs_default\' commands were correctly executed.')
+		print('c Error: Results not found for the given solver and instance set(s) '
+			'combination. Make sure the \'configure_solver\' and '
+			'\'validate_configured_vs_default\' commands were correctly executed. '
+			f'Detected errors:{err_str}')
 		sys.exit()
 
 	return

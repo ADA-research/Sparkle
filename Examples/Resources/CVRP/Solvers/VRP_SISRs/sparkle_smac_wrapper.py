@@ -6,6 +6,7 @@ import os
 import time
 import random
 import sys
+import Path
 
 def get_time_pid_random_string():
 	my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
@@ -72,3 +73,10 @@ for line in output_list:
 	quality = line.strip()
 
 print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', 0,'+str(quality) +r', '+ str(seed))
+
+if specifics == 'rawres':
+	raw_result_path = Path(runsolver_watch_data_path.replace('.log', '.rawres'))
+
+	with raw_result_path.open('w') as outfile:
+		for line in output_list:
+			outfile.write(line)
