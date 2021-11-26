@@ -49,6 +49,7 @@ exclude =
     Commands/sparkle_help/sparkle_file_help.py,
     Commands/test,
     Components,
+    Configuration_Reports,
     Examples,
     Extractors,
     Feature_Data,
