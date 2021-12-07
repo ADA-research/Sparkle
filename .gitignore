@@ -9,7 +9,6 @@ Feature_Data/*
 Performance_Data/*
 LOG/*
 TMP/*
-Feature_Data/*
 Sparkle_Portfolio_Selector/*
 Tmp/*
 Log/*
@@ -24,22 +23,7 @@ Components/smac-v2.10.03-master-778/example_scenarios/instances/*
 Components/smac-v2.10.03-master-778/example_scenarios/instances_test/*
 Components/smac-v2.10.03-master-778/example_scenarios/*/
 Components/smac-v2.10.03-master-778/example_scenarios/*.txt
-Components/smac-v2.10.03-master-778/*sbatch.sh
 Components/ablationAnalysis-0.9.4/scenarios
-
-# Exclude intermediate files generated when compiling latex
-*.aux
-*.log
-*.out
-*.blg
-*.eps
-Components/Sparkle-latex-generator/Sparkle_Report.pdf
-Components/Sparkle-latex-generator/Sparkle_Report.tex
-Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_sbs_filename.dat
-Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_vbs_filename.dat
-Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
-Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
-Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
@@ -57,6 +41,17 @@ Documentation/source/_generated/
 
 
 # LaTeX stuffs
+
+# Exclude intermediate files generated when compiling latex
+*.eps
+Components/Sparkle-latex-generator/Sparkle_Report.pdf
+Components/Sparkle-latex-generator/Sparkle_Report.tex
+Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_sbs_filename.dat
+Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_vbs_filename.dat
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
+Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -74,14 +69,6 @@ Documentation/source/_generated/
 ## Intermediate documents:
 *.dvi
 *.xdv
-*-converted-to.*
-# these rules might exclude image files for figures etc.
-# *.ps
-# *.eps
-# *.pdf
-
-## Generated if empty string is given at "Please type another file name for output:"
-.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
