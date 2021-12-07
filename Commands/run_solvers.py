@@ -58,7 +58,7 @@ def run_solvers_on_instances(
     solver_jobs = srsp.running_solvers_parallel(
         performance_data_csv_path=sgh.performance_data_csv_path,
         num_job_in_parallel=num_job_in_parallel,
-        recompute=recompute,
+        rerun=recompute,
         run_on=run_on
     )
 

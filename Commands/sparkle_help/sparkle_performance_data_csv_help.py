@@ -35,7 +35,16 @@ class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
 		scsv.Sparkle_CSV.__init__(self, csv_filepath)
 		self.solver_list = sgh.solver_list
 		return
-	
+
+	def get_job_list(self, rerun: bool = False) -> list[tuple[str, str]]:
+		""" Get a list of tuple[instance, solver] to run from the performance data
+		csv file. If rerun is False (default), get only the tuple that don't have a
+		value in the table, else (True) get all the tuples.	"""
+		df = self.dataframe.stack(dropna=False)
+		if not rerun:
+			df = df[df.isnull()]
+		return df.index.tolist()
+
 	def get_list_recompute_performance_computation_job(self):
 		list_recompute_performance_computation_job = []
 		list_row_name = self.list_rows()

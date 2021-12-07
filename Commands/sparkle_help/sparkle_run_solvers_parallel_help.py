@@ -1,18 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-
-Authors: 	Chuan Luo, chuanluosaber@gmail.com
-			Holger H. Hoos, hh@liacs.nl
-
-Contact: 	Chuan Luo, chuanluosaber@gmail.com
-'''
-
-
 import os
-import sys
+
+import runrunner.local
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_file_help as sfh
@@ -25,7 +16,9 @@ from sparkle_help.sparkle_command_help import CommandName
 from sparkle_help import sparkle_job_help as sjh
 
 from sparkle.slurm_parsing import SlurmBatch
+from sparkle.runners import Runners
 import runrunner as rrr
+
 
 def generate_running_solvers_sbatch_shell_script(total_job_num: int, num_job_in_parallel: int, total_job_list) -> (str, str, str):
 	sbatch_script_name = r'running_solvers_sbatch_shell_script_' + sbh.get_time_pid_random_string() + r'.sh'
@@ -60,9 +53,8 @@ def generate_running_solvers_sbatch_shell_script(total_job_num: int, num_job_in_
 def running_solvers_parallel(
 		performance_data_csv_path: str,
 		num_job_in_parallel: int,
-		recompute: bool = False,
-		run_on: str = None
-):
+		rerun: bool = False,
+		run_on: Runners = Runners.SLURM):
 	""" Run the solvers in parallel.
 
 	Parameters
@@ -71,29 +63,34 @@ def running_solvers_parallel(
 		The path the the performance data file
 	num_job_in_parallel: int
 		The maximum number of jobs to run in parallel
-	recompute: bool
-		Compute only solver not already run (False) or recompute all perf. data (True)
-		False = compute the remaining jobs for performance computation
-		True = re-compute all jobs for performance computation
-	run_on: str
-		Where to execute the solvers. Available: ['slurm', 'local']. Default: 'slurm'.
-	"""
-	# open the csv file in terms of performance data
-	csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+	rerun: bool
+		Run only solvers for which no data is available yet (False) or (re)run all
+		solvers to get (new) performance data for them (True)
+	run_on: Runners
+		Where to execute the solvers. For available values see sparkle.runners.Runners
+		enum. Default: 'slurm'.
 
-	# list of jobs to do
-	jobs = sjh.expand_total_job_from_list(
-		csv.get_list_recompute_performance_computation_job() if recompute
-		else csv.get_list_remaining_performance_computation_job()
-	)
+	Returns
+	-------
+	run: str or runrunner.local.QueuedRun
+		If the run is local return a QueuedRun object with the information concerning
+		the run. If the run is executed on Slurm, return the ID of the run.
+
+	"""
+	# Open the csv file in terms of performance data
+	performance_data_cdv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+
+	# List of jobs to do
+	jobs = performance_data_cdv.get_job_list(rerun=rerun)
+	num_jobs = len(jobs)
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 
 	print(f"c Cutoff time for each solver run: {cutoff_time_str} seconds")
-	print(f"c The number of total running jobs: {len(jobs)}")
+	print(f"c Total number of jobs to run: {num_jobs}")
 
 	# If there are no jobs, stop
-	if len(jobs) == 0:
+	if num_jobs == 0:
 		return ''
 	# If there are jobs update performance data ID
 	else:
@@ -111,23 +108,19 @@ def running_solvers_parallel(
 
 	batch = SlurmBatch(sbatch_script_path)
 
-	if run_on == "local":
+	if run_on == Runners.LOCAL:
 		print("c Running the solvers locally")
-		return rrr.add_to_local_queue(cmd=[
-			f"{batch.cmd} {param}" for param in batch.params
-		], name="run_solvers")
-	elif run_on == "slurm":
-		print("c Running the solvers on the clusters")
+		cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+		return rrr.add_to_local_queue(cmd=cmd_list, name="run_solvers")
+
+	elif run_on == Runners.SLURM:
+		print("c Running the solvers thriugh Slurm")
 		output_list = os.popen(command_line).readlines()
 
-		if len(output_list) > 0 and len(output_list[0].strip().split())>0:
+		if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
 			run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
 			# Add job to active job CSV
 			sjh.write_active_job(run_solvers_parallel_jobid, CommandName.RUN_SOLVERS)
 		else:
 			run_solvers_parallel_jobid = ''
 		return run_solvers_parallel_jobid
-	else:
-		# TODO: Print error message
-		print("c '{run_on}' not a valid target to execute the code")
-		exit(1)

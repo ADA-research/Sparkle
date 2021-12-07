@@ -353,35 +353,38 @@ def write_instance_list():
 	return
 
 
-def write_string_to_file(filepath, string, append=False, maxtry=5):
-	""" Write 'txt' to the file 'filepath' using a lock and creating the parents path
-	if needed. If append is True, the 'txt' will be appended to the file, otherwise the
-	content of the file will be overwrite. Try a maximum of 'maxtry' to acquire the
-	lock (with a random wait time (min 0.2s, max 1.0s) between each try.
+def write_string_to_file(file: Path, string: str, append: bool = False, maxtry: int = 5):
+	""" Write 'string' to the file 'file' using a lock and creating the parents path
+	if needed. If append is True, the 'string' will be appended to the file, otherwise
+	the content of the file will be overwritten. Try a maximum of 'maxtry' times to
+	acquire the lock, with a random wait time (min 0.2s, max 1.0s) between each try.
+	Raise an OSError exception if it fail to acquire the lock maxtry times.
 	"""
 	# Create the full path if needed
-	Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+	Path(file).parent.mkdir(parents=True, exist_ok=True)
 
 	for i in range(maxtry):
 		try:
-			with open(filepath, 'a' if append else 'w') as fout:
+			with open(file, 'a' if append else 'w') as fout:
 				fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-				fout.write(string + '\n')
+				fout.write(string)
 				fcntl.flock(fout.fileno(), fcntl.LOCK_UN)
 			return
 		except OSError as e:
-			print(f"c Warning: locking file {filepath} failed (try #{i})")
-			time.sleep(random.randint(1, 5)/5)
-			if i == (maxtry - 1):
+			print(f"c Warning: locking file {file} failed (try #{i})")
+			if i < maxtry:
+				time.sleep(random.randint(1, 5) / 5)
+			else:
 				raise e
+	return
 
 
-def append_string_to_file(filepath, string, maxtry=5):
-	""" Append 'txt' to the file 'filepath'. Use a lock and creates the parents path
-	if needed. Try a maximum of 'maxtry' to acquire the
-	lock.
+def append_string_to_file(file: Path, string: str, maxtry: int=5):
+	""" Append 'string' to the file 'file'. Use a lock and creates the parents path
+	if needed. Try a maximum of 'maxtry' to acquire the lock.
+	Raise an OSError exception if it fail to acquire the lock maxtry times.
 	"""
-	return write_string_to_file(filepath, string, append=True, maxtry=maxtry)
+	write_string_to_file(file, string, append=True, maxtry=maxtry)
 
 
 def rmtree(directory: Path):
