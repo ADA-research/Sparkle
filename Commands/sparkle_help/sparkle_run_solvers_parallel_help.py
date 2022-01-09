@@ -16,8 +16,8 @@ from sparkle_help.sparkle_command_help import CommandName
 from sparkle_help import sparkle_job_help as sjh
 
 from sparkle.slurm_parsing import SlurmBatch
-from sparkle.runners import Runners
 import runrunner as rrr
+from runrunner.base import Runner
 
 
 def generate_running_solvers_sbatch_shell_script(total_job_num: int, num_job_in_parallel: int, total_job_list) -> (str, str, str):
@@ -54,7 +54,7 @@ def running_solvers_parallel(
 		performance_data_csv_path: str,
 		num_job_in_parallel: int,
 		rerun: bool = False,
-		run_on: Runners = Runners.SLURM):
+		run_on: Runner = Runner.SLURM):
 	""" Run the solvers in parallel.
 
 	Parameters
@@ -66,9 +66,9 @@ def running_solvers_parallel(
 	rerun: bool
 		Run only solvers for which no data is available yet (False) or (re)run all
 		solvers to get (new) performance data for them (True)
-	run_on: Runners
-		Where to execute the solvers. For available values see sparkle.runners.Runners
-		enum. Default: 'slurm'.
+	run_on: Runner
+		Where to execute the solvers. For available values see runrunner.base.Runner 
+		enum. Default: 'Runner.SLURM'.
 
 	Returns
 	-------
@@ -108,19 +108,19 @@ def running_solvers_parallel(
 
 	batch = SlurmBatch(sbatch_script_path)
 
-	if run_on == Runners.LOCAL:
+	if run_on == Runner.LOCAL:
 		print("c Running the solvers locally")
-		cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-		return rrr.add_to_local_queue(cmd=cmd_list, name="run_solvers")
 
-	elif run_on == Runners.SLURM:
-		print("c Running the solvers thriugh Slurm")
-		output_list = os.popen(command_line).readlines()
+	elif run_on == Runner.SLURM:
+		print("c Running the solvers through Slurm")
 
-		if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-			run_solvers_parallel_jobid = output_list[0].strip().split()[-1]
-			# Add job to active job CSV
-			sjh.write_active_job(run_solvers_parallel_jobid, CommandName.RUN_SOLVERS)
-		else:
-			run_solvers_parallel_jobid = ''
-		return run_solvers_parallel_jobid
+	cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+	return rrr.add_to_queue(
+ 		runner=run_on,
+ 		cmd=cmd_list, 
+ 		name="run_solvers", 
+ 		base_dir="Tmp",
+ 		sbatch_options=batch.sbatch_options,
+ 		srun_options=batch.srun_options,
+ 		)
+

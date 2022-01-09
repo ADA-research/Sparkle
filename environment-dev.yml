@@ -10,7 +10,7 @@ dependencies:
   - pip
   - pip:
     - --editable .  # self install !
-    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@dev#egg=runrunner
+    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@656e23b612393be4aff81c4a9009064d350f86da#egg=runrunner
     # For Sparkle
     - numpy
     - pandas

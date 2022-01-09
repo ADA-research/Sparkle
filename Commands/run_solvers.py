@@ -55,54 +55,45 @@ def run_solvers_on_instances(
         num_job_in_parallel = 1
 
     # Run the solvers
-    solver_jobs = srsp.running_solvers_parallel(
+    runs = [srsp.running_solvers_parallel(
         performance_data_csv_path=sgh.performance_data_csv_path,
         num_job_in_parallel=num_job_in_parallel,
         rerun=recompute,
         run_on=run_on
-    )
+    )]
 
     # Update performance data csv after the last job is done
+    runs.append(rrr.add_to_queue(
+        runner=run_on,
+        cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
+        name="spkr_csv_merge",
+        dependencies=runs[-1],
+        base_dir="Tmp"
+    ))
+
+    if also_construct_selector_and_report:
+        runs.append(rrr.add_to_local_queue(
+            runner=run_on,
+            cmd="Commands/construct_sparkle_portfolio_selector.py",
+            name="spkr_portfolio_selector",
+            dependencies=runs[-1],
+            base_dir="Tmp"
+        ))
+
+        runs.append(rrr.add_to_local_queue(
+            runner=run_on,
+            cmd="Commands/generate_report.py",
+            name="spkl_report",
+            dependencies=runs[-1],
+            base_dir="Tmp"
+        ))
+
     if run_on == "local":
-
-        last_job = merge_job = rrr.add_to_local_queue(
-            cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-            depends=solver_jobs)
-
-        if also_construct_selector_and_report:
-            selector_job = rrr.add_to_local_queue(
-                cmd="Commands/construct_sparkle_portfolio_selector.py",
-                depends=merge_job)
-
-            last_job = rrr.add_to_local_queue(
-                cmd="Commands/generate_report.py",
-                depends=selector_job)
-
-        print("c Waiting for the calculations to finish.")
-        last_job.wait()
-
+        print("c Waiting for the local calculations to finish.")
+        runs[-1].wait()
     elif run_on == "slurm":
-        csv_job = sjph.running_job_parallel(
-            "Commands/sparkle_help/sparkle_csv_merge_help.py",
-            solver_jobs, CommandName.RUN_SOLVERS
-        )
-        # TODO: Check output (files) for error messages, e.g.:
-        # error: unrecognized arguments
-        # srun: error:
-        # TODO: Check performance data CSV for missing values
-
-        # Only do selector construction and report generation if the flag is set;
-        # Default behaviour is not to run them, like the sequential run_solvers command
-
-        if also_construct_selector_and_report:
-            jobs = [*solver_jobs, csv_job, construct_selector_and_report([csv_job])]
-        else:
-            jobs = [*solver_jobs, csv_job]
-
-        print(f"c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-              f"{','.join(jobs)}")
-    else:
-        print(f"c {run_on} is not a valid computer/cluster target")
+        print("c Running solvers on Slurm. Waiting for job(s) with id(s): "
+              f"{','.join(r.run_id for r in runs)}")
 
 
 def construct_selector_and_report(dependency_jobid_list: List[str] = []):
