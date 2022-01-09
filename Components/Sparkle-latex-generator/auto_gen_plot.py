@@ -15,8 +15,8 @@ if __name__ == r'__main__':
 	
 	data_portfolio_selector_sparkle_vs_vbs_filename = sys.argv[1]
 	penalty_time = sys.argv[2]
-	vbs_name = sys.argv[3]
-	portfolio_selector_sparkle_name = sys.argv[4]
+	vbs_name = sys.argv[3].replace("_", "\\_")
+	portfolio_selector_sparkle_name = sys.argv[4].replace("_", "\\_")
 	figure_portfolio_selector_sparkle_vs_vbs_filename = sys.argv[5]
 	
 	output_eps_file = figure_portfolio_selector_sparkle_vs_vbs_filename + r'.eps'
