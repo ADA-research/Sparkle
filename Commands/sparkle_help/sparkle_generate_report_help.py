@@ -533,10 +533,9 @@ def generate_report(test_case_directory: str = None):
 		magnitude: Increases the order of magnitude(10) of the min/max values in the points
 	limit_min, limit_max: values used to compute the limits
 	output: filepath to save the figure
+	penalty_time: Acts a the maximum value the figure takes in consideration for computing the figure limits
 	cwd: working directory to place the figure 
 '''
-
-
 def generate_comparison_plot(points,
 							 output_file,
 							 xlabel: str = "default",
@@ -547,6 +546,7 @@ def generate_comparison_plot(points,
 							 limit_min: float = 0.2,
 							 limit_max: float = 0.2,
 							 penalty_time = None,
+							 magnitude_lines = sgh.sparkle_maximum_int,
 							 cwd=None):
 
 	pwd = os.getcwd()
@@ -607,19 +607,31 @@ def generate_comparison_plot(points,
 	if scale == "log":
 		fout.write("set logscale x\n")
 		fout.write("set logscale y\n")
-	fout.write("set grid\n")
+	fout.write("set grid lc rgb '#CCCCCC' lw 2\n")
 	fout.write("set size square\n")
 	fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value} nohead lc rgb 'black'\n")
-	#TODO magnitude lines
+	#TODO magnitude lines for linear scale
+	if magnitude_lines > 0 and scale == "log":
+		for order in range(magnitude_lines):
+			order += 1
+			min_shift = min_value * 10 ** order
+			max_shift = 10**(np.log10(max_value)-order)
+
+			if min_shift >= max_value: #Outside plot
+				break
+
+			fout.write(f"set arrow from {min_value},{min_shift} to {max_shift},{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n")
+			fout.write(f"set arrow from {min_shift},{min_value} to {max_value},{max_shift} nohead lc rgb '#CCCCCC' dashtype '-'\n")
+
+	if penalty_time is not None:
+		fout.write(f"set arrow from {min_value},{penalty_time} to {max_value},{penalty_time} nohead lc rgb '#AAAAAA'\n")
+		fout.write(f"set arrow from {penalty_time},{min_value} to {penalty_time},{max_value} nohead lc rgb '#AAAAAA'\n")
 
 	# fout.write('set arrow from 0.01,0.01 to %s,%s nohead lc rgb \'black\'' % (penalty_time, penalty_time) + '\n')
 	fout.write("set terminal postscript eps color solid linewidth \"Helvetica\" 20\n")
 	fout.write(f"set output '{output_eps_file}\n")
-	fout.write(f"plot '{output_data_file}'\n")
-	fout.close()
-
-	fout = open(output_gnuplot_script, 'r')
-	print(fout.read())
+	fout.write(f"set style line 1 pt 3 lc rgb 'blue' \n")
+	fout.write(f"plot '{output_data_file}' ls 1\n")
 	fout.close()
 
 	# Make figure
