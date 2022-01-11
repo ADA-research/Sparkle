@@ -289,8 +289,8 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	if performance_measure == 'PAR10':
 		generate_comparison_plot(points,
 								 data_plot_configured_vs_default_on_test_instance_set_filename,
-								 xlabel=f"{performance_measure} (default)",
-								 ylabel=f"{performance_measure} (configured)",
+								 xlabel=f"Default parameters [{performance_measure}]",
+								 ylabel=f"Configured parameters [{performance_measure}]",
 								 limit="magnitude",
 								 limit_min=0.25,
 								 limit_max=0.25,
@@ -299,8 +299,8 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 	else:
 		generate_comparison_plot(points,
 								 data_plot_configured_vs_default_on_test_instance_set_filename,
-								 xlabel=f"{performance_measure} (default)",
-								 ylabel=f"{performance_measure} (configured)",
+								 xlabel=f"Default parameters [{performance_measure}]",
+								 ylabel=f"Configured parameters [{performance_measure}]",
 								 scale="linear",
 								 limit="relative",
 								 limit_min=1.5,
@@ -328,8 +328,8 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	if performance_measure == 'PAR10':
 		generate_comparison_plot(points,
 								 data_plot_configured_vs_default_on_train_instance_set_filename,
-								 xlabel=f"{performance_measure} (default)",
-								 ylabel=f"{performance_measure} (configured)",
+								 xlabel=f"Default parameters [{performance_measure}]",
+								 ylabel=f"Configured parameters [{performance_measure}]",
 								 limit="magnitude",
 								 limit_min=0.25,
 								 limit_max=0.25,
@@ -338,8 +338,8 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 	else:
 		generate_comparison_plot(points,
 								 data_plot_configured_vs_default_on_train_instance_set_filename,
-								 xlabel=f"{performance_measure} (default)",
-								 ylabel=f"{performance_measure} (configured)",
+								 xlabel=f"Default parameters [{performance_measure}]",
+								 ylabel=f"Configured parameters [{performance_measure}]",
 								 scale="linear",
 								 limit="relative",
 								 limit_min=1.25,
