@@ -258,30 +258,33 @@ def get_ablationBool(solver_name, instance_train_name, instance_test_name):
 	return ablation_bool
 
 
+def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float):
+	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, smac_each_run_cutoff_time)
+	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
+
+	instances = dict_instance_to_par10_default.keys() & dict_instance_to_par10_configured.keys()
+	assert (len(dict_instance_to_par10_default) == len(instances))
+	points = []
+	for instance in instances:
+		point = [dict_instance_to_par10_default[instance], dict_instance_to_par10_configured[instance]]
+		points.append(point)
+
+	return points
+
+
 def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_set_train_name, instance_set_test_name, smac_each_run_cutoff_time: float) -> str:
 	configured_results_file = 'validationObjectiveMatrix-configuration_for_validation-walltime.csv'
 	default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
 	smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '_' + instance_set_train_name + '/'
 	configured_results_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/' + configured_results_file
 	default_results_dir = smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/' + default_results_file
-	#dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
-	#dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, smac_each_run_cutoff_time)
 
 	configuration_reports_directory = 'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '_' + instance_set_test_name + '/'
 	latex_directory_path = configuration_reports_directory + 'Sparkle-latex-generator-for-configuration/'
 	data_plot_configured_vs_default_on_test_instance_set_filename = 'data_' + solver_name + '_configured_vs_default_on_' + instance_set_test_name + '_test'
-	#data_plot_configured_vs_default_on_test_instance_set_path = latex_directory_path + data_plot_configured_vs_default_on_test_instance_set_filename + '.dat'
-	#min_value, max_value = write_data_for_plot_and_find_min_and_max(configured_results_dir, default_results_dir, smac_each_run_cutoff_time, data_plot_configured_vs_default_on_test_instance_set_path)
 	points = get_data_for_plot(configured_results_dir, default_results_dir, smac_each_run_cutoff_time)
 
 	performance_measure = get_performance_measure()
-	# gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_test_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_test_instance_set_filename, performance_measure)
-
-	# For QUALITY performance give the desired bounds for the plot
-	# if performance_measure != 'PAR10':
-	# 	gnuplot_command += get_quality_plot_bounds_str(min_value, max_value)
-
-	#os.system(gnuplot_command)
 
 	if performance_measure == 'PAR10':
 		generate_comparison_plot(points,
@@ -308,71 +311,6 @@ def get_figure_configured_vs_default_on_test_instance_set(solver_name, instance_
 
 	return str_value
 
-def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float):
-	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, smac_each_run_cutoff_time)
-	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
-
-	instances = dict_instance_to_par10_default.keys() & dict_instance_to_par10_configured.keys()
-	assert (len(dict_instance_to_par10_default) == len(instances))
-	points = []
-	for instance in instances:
-		point = [dict_instance_to_par10_default[instance], dict_instance_to_par10_configured[instance]]
-		points.append(point)
-
-	return points
-
-# def write_data_for_plot_and_find_min_and_max(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float, data_plot_configured_vs_default_path: str) -> Tuple[float, float]:
-# 	dict_instance_to_par10_configured = get_dict_instance_to_performance(configured_results_dir, smac_each_run_cutoff_time)
-# 	dict_instance_to_par10_default = get_dict_instance_to_performance(default_results_dir, smac_each_run_cutoff_time)
-#
-# 	fout = open(data_plot_configured_vs_default_path, 'w+')
-# 	# Write PAR10 values for configured and default to file, and find the min and max values
-# 	min_value = sgh.sparkle_maximum_int
-# 	max_value = sgh.sparkle_minimum_int
-#
-# 	# Detect zeros to avoid issues for the log-scale plots
-# 	zero_found = False
-# 	for instance in dict_instance_to_par10_configured:
-# 		configured_par10_value = dict_instance_to_par10_configured[instance]
-# 		default_par10_value = dict_instance_to_par10_default[instance]
-# 		fout.write(str(default_par10_value) + ' ' + str(configured_par10_value) + '\n')
-#
-# 		if configured_par10_value == 0:
-# 			zero_found = True
-# 		elif configured_par10_value < min_value:
-# 			min_value = configured_par10_value
-#
-# 		if default_par10_value == 0:
-# 			zero_found = True
-# 		elif default_par10_value < min_value:
-# 			min_value = default_par10_value
-#
-# 		if configured_par10_value > max_value:
-# 			max_value = configured_par10_value
-#
-# 		if default_par10_value > max_value:
-# 			max_value = default_par10_value
-# 	fout.close()
-#
-# 	# When zeros are found not all points will be shown since the log scale cannot start from zero
-# 	if zero_found:
-# 		print('WARNING: Values that are zero detected! Not all results may be visible in the generated plots!')
-#
-# 	return min_value, max_value
-
-
-def get_quality_plot_bounds_str(min_value: float, max_value: float) -> str:
-	if min_value > 0.0:
-		lower_bound = 10**math.floor(math.log10(min_value))
-	else:
-		lower_bound = 0.0000000001
-		print('WARNING: Values that are zero or negative detected! Not all results may be visible in the generated plots!')
-	upper_bound = 10**math.ceil(math.log10(max_value))
-
-	bounds_str = ' ' + str(lower_bound) + ' \'' + str(upper_bound) + '\''
-
-	return bounds_str
-
 
 def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance_set_train_name, configuration_reports_directory, smac_each_run_cutoff_time: float) -> str:
 	optimised_configuration_str, optimised_configuration_performance_par10, optimised_configuration_seed = scsh.get_optimised_configuration(solver_name, instance_set_train_name)
@@ -384,18 +322,9 @@ def get_figure_configured_vs_default_on_train_instance_set(solver_name, instance
 
 	latex_directory_path = configuration_reports_directory + 'Sparkle-latex-generator-for-configuration/'
 	data_plot_configured_vs_default_on_train_instance_set_filename = 'data_' + solver_name + '_configured_vs_default_on_' + instance_set_train_name + '_train'
-	#data_plot_configured_vs_default_on_train_instance_set_path = latex_directory_path + data_plot_configured_vs_default_on_train_instance_set_filename + '.dat'
-	#min_value, max_value = write_data_for_plot_and_find_min_and_max(configured_results_dir, default_results_dir, smac_each_run_cutoff_time, data_plot_configured_vs_default_on_train_instance_set_path)
 	points = get_data_for_plot(configured_results_dir, default_results_dir, smac_each_run_cutoff_time)
 
 	performance_measure = get_performance_measure()
-	# gnuplot_command = 'cd \'%s\' ; python auto_gen_plot.py \'%s\' %d \'%s\' \'%s\' \'%s\' \'%s\'' % (latex_directory_path, data_plot_configured_vs_default_on_train_instance_set_filename + '.dat', int(float(smac_each_run_cutoff_time)*10), solver_name + ' (default)', solver_name + ' (configured)', data_plot_configured_vs_default_on_train_instance_set_filename, performance_measure)
-
-	# For QUALITY performance give the desired bounds for the plot
-	# if performance_measure != 'PAR10':
-	# 	gnuplot_command += get_quality_plot_bounds_str(min_value, max_value)
-	#
-	# os.system(gnuplot_command)
 	if performance_measure == 'PAR10':
 		generate_comparison_plot(points,
 								 data_plot_configured_vs_default_on_train_instance_set_filename,

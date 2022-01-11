@@ -532,6 +532,8 @@ def generate_report(test_case_directory: str = None):
 	limit_min, limit_max: values used to compute the limits
 	output: filepath to save the figure
 	penalty_time: Acts a the maximum value the figure takes in consideration for computing the figure limits
+	drop_zeros: Remove points with a value of 0
+	magnitude_lines: Draw magnitude lines (only supported for log scale)
 	cwd: working directory to place the figure 
 '''
 def generate_comparison_plot(points,
@@ -576,9 +578,8 @@ def generate_comparison_plot(points,
 		min_value = limit_min
 		max_value = limit_max
 	elif limit == "relative":
-		# TODO check for negative values
-		min_value = min_point_value * (1 / limit_min)
-		max_value = max_point_value * limit_max
+		min_value = min_point_value * (1 / limit_min) if min_point_value > 0 else min_point_value * limit_min
+		max_value = max_point_value * limit_max if max_point_value > 0 else max_point_value * (1 / limit_max)
 	elif limit == "magnitude":
 		min_value = 10 ** (np.floor(np.log10(min_point_value))-limit_min)
 		max_value = 10 ** (np.ceil(np.log10(max_point_value))+limit_max)
@@ -602,7 +603,7 @@ def generate_comparison_plot(points,
 	fout.write(f"set xlabel '{xlabel}'\n")
 	fout.write(f"set ylabel '{ylabel}'\n")
 	fout.write(f"set title '{title}'\n")
-	fout.write("unset key\n")  # TODO check purpose
+	fout.write("unset key\n")
 	fout.write(f"set xrange [{min_value}:{max_value}]\n")
 	fout.write(f"set yrange [{min_value}:{max_value}]\n")
 	if scale == "log":
