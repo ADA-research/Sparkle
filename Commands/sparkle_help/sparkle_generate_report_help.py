@@ -259,7 +259,6 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 
 
 def get_figure_portfolio_selector_sparkle_vs_sbs():
-	str_value = r''
 	dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 
@@ -292,7 +291,6 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 
 
 def get_figure_portfolio_selector_sparkle_vs_vbs():
-	str_value = r''
 	dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 
@@ -545,7 +543,8 @@ def generate_comparison_plot(points,
 							 limit: str = "magnitude",
 							 limit_min: float = 0.2,
 							 limit_max: float = 0.2,
-							 penalty_time = None,
+							 penalty_time: float = None,
+							 drop_zeros: bool= True,
 							 magnitude_lines = sgh.sparkle_maximum_int,
 							 cwd=None):
 
@@ -555,14 +554,16 @@ def generate_comparison_plot(points,
 		print("Changed cwd to {}".format(os.getcwd()))
 
 	points = np.array(points)
+	if drop_zeros:
+		check_zeros = np.count_nonzero(points, axis=1) == 2
+		if np.count_nonzero(np.invert(check_zeros)) != 0:
+			print("WARNING: Zero valued performance detected. These instances fall outside the figure.")
+		points = points[check_zeros]
 
 	# process labels
 	# TODO handle other special characters like $^
 	xlabel = xlabel.replace("_", "\\_")  # LaTeX save formatting
 	ylabel = ylabel.replace("_", "\\_")  # LaTeX save formatting
-	if scale == "log":
-		xlabel += " [log]"
-		ylabel += " [log]"
 
 	# process range values
 	min_point_value = np.min(points)
