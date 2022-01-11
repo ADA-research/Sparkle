@@ -125,6 +125,7 @@ def get_solverPerfectRankingList():
 
 	for i in range(0, len(rank_list)):
 		solver = rank_list[i][0]
+		solver = sfh.get_file_name(solver)
 		marginal_contribution = str(rank_list[i][1])
 		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
@@ -136,6 +137,7 @@ def get_solverActualRankingList():
 
 	for i in range(0, len(rank_list)):
 		solver = rank_list[i][0]
+		solver = sfh.get_file_name(solver)
 		marginal_contribution = str(rank_list[i][1])
 		str_value += r'\item \textbf{' + solver + r'}, marginal contribution: ' + marginal_contribution + '\n'
 	return str_value
@@ -148,6 +150,7 @@ def get_PAR10RankingList():
 	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	
 	for solver, this_penalty_time in solver_penalty_time_ranking_list:
+		solver = sfh.get_file_name(solver)
 		str_value += r'\item \textbf{' + solver + r'}, PAR10: ' + str(this_penalty_time) + '\n'
 	
 	return str_value
@@ -166,57 +169,6 @@ def get_actualPAR10():
 	performance_dict = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 	mean_performance = sum(performance_dict.values()) / len(performance_dict)
 	return str(mean_performance)
-	# str_value = r''
-	# actual_penalty_time = 0.0
-	# actual_count = 0
-	#
-	# performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
-	# feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
-	# actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
-	# cutoff_time = sgh.settings.get_general_target_cutoff_time()
-	# penalty_time_each_run = sgh.settings.get_penalised_time()
-	#
-	# for instance in performance_data_csv.list_rows():
-	# 	list_predict_schedule = scmch.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
-	# 	used_time_for_this_instance = 0
-	# 	flag_successfully_solving = False
-	# 	for i in range(0, len(list_predict_schedule)):
-	# 		if used_time_for_this_instance >= cutoff_time:
-	# 			flag_successfully_solving = False
-	# 			break
-	# 		solver = list_predict_schedule[i][0]
-	# 		scheduled_cutoff_time_this_run = list_predict_schedule[i][1]
-	# 		required_time_this_run = performance_data_csv.get_value(instance, solver)
-	# 		if required_time_this_run <= scheduled_cutoff_time_this_run:
-	# 			used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
-	# 			if used_time_for_this_instance > cutoff_time:
-	# 				flag_successfully_solving = False
-	# 			else: flag_successfully_solving = True
-	# 			break
-	# 		else:
-	# 			used_time_for_this_instance = used_time_for_this_instance + scheduled_cutoff_time_this_run
-	# 			continue
-	# 	if flag_successfully_solving:
-	# 		actual_penalty_time = actual_penalty_time + used_time_for_this_instance
-	# 	else:
-	# 		actual_penalty_time = actual_penalty_time + penalty_time_each_run
-	# 	actual_count += 1
-	#
-	# actual_penalty_time = actual_penalty_time / actual_count
-	# str_value = str(actual_penalty_time)
-	#
-	# # FOR DEBUGGING
-	# # if os.path.isfile("cache.pickle"):
-	# # 	fh = open("cache.pickle", "rb")
-	# # 	str_value = pickle.load(fh)
-	# # 	fh.close()
-	# # 	return str_value
-	# #
-	# # fh = open("cache.pickle", "wb")
-	# # pickle.dump(str_value)
-	# # fh.close()
-	#
-	# return str_value
 
 
 def get_dict_sbs_penalty_time_on_each_instance():
@@ -275,12 +227,13 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
+	sbs_solver = sfh.get_file_name(sbs_solver)
 
 	generate_comparison_plot(points,
 							 figure_portfolio_selector_sparkle_vs_sbs_filename,
 							 xlabel=f"SBS ({sbs_solver}), PAR10",
 							 ylabel="Sparkle Selector, PAR10",
-							 title=f"Sparkle Selector vs SBS ({sbs_solver})",
+							 #title=f"Sparkle Selector vs SBS ({sbs_solver})",
 							 limit="magnitude",
 							 limit_min=0.25,
 							 limit_max=0.25,
@@ -309,7 +262,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs():
 							 figure_portfolio_selector_sparkle_vs_vbs_filename,
 							 xlabel=f"VBS, PAR10",
 							 ylabel="Sparkle Selector, PAR10",
-							 title=f"Sparkle Selector vs VBS",
+							 #title=f"Sparkle Selector vs VBS",
 							 limit="magnitude",
 							 limit_min=0.25,
 							 limit_max=0.25,
