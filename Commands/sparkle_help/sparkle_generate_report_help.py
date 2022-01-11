@@ -12,6 +12,9 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 
 import os
 import sys
+import pickle
+import numpy as np
+from shutil import which
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -160,45 +163,60 @@ def get_VBSPAR10():
 
 
 def get_actualPAR10():
-	str_value = r''
-	actual_penalty_time = 0.0
-	actual_count = 0
-	
-	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
-	feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
-	actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
-	cutoff_time = sgh.settings.get_general_target_cutoff_time()
-	penalty_time_each_run = sgh.settings.get_penalised_time()
-	
-	for instance in performance_data_csv.list_rows():
-		list_predict_schedule = scmch.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
-		used_time_for_this_instance = 0
-		flag_successfully_solving = False
-		for i in range(0, len(list_predict_schedule)):
-			if used_time_for_this_instance >= cutoff_time:
-				flag_successfully_solving = False
-				break
-			solver = list_predict_schedule[i][0]
-			scheduled_cutoff_time_this_run = list_predict_schedule[i][1]
-			required_time_this_run = performance_data_csv.get_value(instance, solver)
-			if required_time_this_run <= scheduled_cutoff_time_this_run:
-				used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
-				if used_time_for_this_instance > cutoff_time:
-					flag_successfully_solving = False
-				else: flag_successfully_solving = True
-				break
-			else:
-				used_time_for_this_instance = used_time_for_this_instance + scheduled_cutoff_time_this_run
-				continue
-		if flag_successfully_solving:
-			actual_penalty_time = actual_penalty_time + used_time_for_this_instance
-		else:
-			actual_penalty_time = actual_penalty_time + penalty_time_each_run
-		actual_count += 1
-	
-	actual_penalty_time = actual_penalty_time / actual_count
-	str_value = str(actual_penalty_time)
-	return str_value
+	performance_dict = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
+	mean_performance = sum(performance_dict.values()) / len(performance_dict)
+	return str(mean_performance)
+	# str_value = r''
+	# actual_penalty_time = 0.0
+	# actual_count = 0
+	#
+	# performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
+	# feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+	# actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+	# cutoff_time = sgh.settings.get_general_target_cutoff_time()
+	# penalty_time_each_run = sgh.settings.get_penalised_time()
+	#
+	# for instance in performance_data_csv.list_rows():
+	# 	list_predict_schedule = scmch.get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv, instance)
+	# 	used_time_for_this_instance = 0
+	# 	flag_successfully_solving = False
+	# 	for i in range(0, len(list_predict_schedule)):
+	# 		if used_time_for_this_instance >= cutoff_time:
+	# 			flag_successfully_solving = False
+	# 			break
+	# 		solver = list_predict_schedule[i][0]
+	# 		scheduled_cutoff_time_this_run = list_predict_schedule[i][1]
+	# 		required_time_this_run = performance_data_csv.get_value(instance, solver)
+	# 		if required_time_this_run <= scheduled_cutoff_time_this_run:
+	# 			used_time_for_this_instance = used_time_for_this_instance + required_time_this_run
+	# 			if used_time_for_this_instance > cutoff_time:
+	# 				flag_successfully_solving = False
+	# 			else: flag_successfully_solving = True
+	# 			break
+	# 		else:
+	# 			used_time_for_this_instance = used_time_for_this_instance + scheduled_cutoff_time_this_run
+	# 			continue
+	# 	if flag_successfully_solving:
+	# 		actual_penalty_time = actual_penalty_time + used_time_for_this_instance
+	# 	else:
+	# 		actual_penalty_time = actual_penalty_time + penalty_time_each_run
+	# 	actual_count += 1
+	#
+	# actual_penalty_time = actual_penalty_time / actual_count
+	# str_value = str(actual_penalty_time)
+	#
+	# # FOR DEBUGGING
+	# # if os.path.isfile("cache.pickle"):
+	# # 	fh = open("cache.pickle", "rb")
+	# # 	str_value = pickle.load(fh)
+	# # 	fh.close()
+	# # 	return str_value
+	# #
+	# # fh = open("cache.pickle", "wb")
+	# # pickle.dump(str_value)
+	# # fh.close()
+	#
+	# return str_value
 
 
 def get_dict_sbs_penalty_time_on_each_instance():
@@ -244,30 +262,31 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 	str_value = r''
 	dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
-	
+
+	instances = dict_sbs_penalty_time_on_each_instance.keys() & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys()
+	assert (len(dict_sbs_penalty_time_on_each_instance) == len(instances))
+	points = []
+	for instance in instances:
+		point = [dict_sbs_penalty_time_on_each_instance[instance], dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]]
+		points.append(point)
+
 	latex_directory_path = r'Components/Sparkle-latex-generator/'
 	figure_portfolio_selector_sparkle_vs_sbs_filename = r'figure_portfolio_selector_sparkle_vs_sbs'
-	data_portfolio_selector_sparkle_vs_sbs_filename = r'data_portfolio_selector_sparkle_vs_sbs_filename.dat'
-	data_portfolio_selector_sparkle_vs_sbs_filepath = latex_directory_path + data_portfolio_selector_sparkle_vs_sbs_filename
-	
-	fout = open(data_portfolio_selector_sparkle_vs_sbs_filepath, 'w+')
-	for instance in dict_sbs_penalty_time_on_each_instance:
-		sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
-		sparkle_penalty_time = dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]
-		fout.write(str(sbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
-	fout.close()
 	
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 	solver_penalty_time_ranking_list = performance_data_csv.get_solver_penalty_time_ranking_list()
 	sbs_solver = solver_penalty_time_ranking_list[0][0]
-	penalised_time_str = str(sgh.settings.get_penalised_time())
-	
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_sbs_filename + r' ' + penalised_time_str + r' ' + '\'SBS (' + sbs_solver + ')\' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_sbs_filename
-	
-	#print(gnuplot_command)
-	
-	os.system(gnuplot_command)
-	
+
+	generate_comparison_plot(points,
+							 figure_portfolio_selector_sparkle_vs_sbs_filename,
+							 xlabel=f"SBS ({sbs_solver}), PAR10",
+							 ylabel="Sparkle Selector, PAR10",
+							 title=f"Sparkle Selector vs SBS ({sbs_solver})",
+							 limit="magnitude",
+							 limit_min=0.25,
+							 limit_max=0.25,
+							 penalty_time=sgh.settings.get_penalised_time(),
+							 cwd=latex_directory_path)
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_sbs_filename)
 	return str_value
 
@@ -276,24 +295,29 @@ def get_figure_portfolio_selector_sparkle_vs_vbs():
 	str_value = r''
 	dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
+
+	instances = dict_vbs_penalty_time_on_each_instance.keys() & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys()
+	assert (len(dict_vbs_penalty_time_on_each_instance) == len(instances))
+	points = []
+	for instance in instances:
+		point = [dict_vbs_penalty_time_on_each_instance[instance],
+				 dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]]
+		points.append(point)
 	
 	latex_directory_path = r'Components/Sparkle-latex-generator/'
 	figure_portfolio_selector_sparkle_vs_vbs_filename = r'figure_portfolio_selector_sparkle_vs_vbs'
-	data_portfolio_selector_sparkle_vs_vbs_filename = r'data_portfolio_selector_sparkle_vs_vbs_filename.dat'
-	data_portfolio_selector_sparkle_vs_vbs_filepath = latex_directory_path + data_portfolio_selector_sparkle_vs_vbs_filename
-	
-	fout = open(data_portfolio_selector_sparkle_vs_vbs_filepath, 'w+')
-	for instance in dict_vbs_penalty_time_on_each_instance:
-		vbs_penalty_time = dict_vbs_penalty_time_on_each_instance[instance]
-		sparkle_penalty_time = dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]
-		fout.write(str(vbs_penalty_time) + r' ' + str(sparkle_penalty_time) + '\n')
-	fout.close()
 
-	penalised_time_str = str(sgh.settings.get_penalised_time())
-	gnuplot_command = r'cd ' + latex_directory_path + r'; python auto_gen_plot.py ' + data_portfolio_selector_sparkle_vs_vbs_filename + r' ' + penalised_time_str + r' ' + r'VBS' + r' ' + r'Sparkle_Selector' + r' ' + figure_portfolio_selector_sparkle_vs_vbs_filename
-	
-	os.system(gnuplot_command)
-	
+	generate_comparison_plot(points,
+							 figure_portfolio_selector_sparkle_vs_vbs_filename,
+							 xlabel=f"VBS, PAR10",
+							 ylabel="Sparkle Selector, PAR10",
+							 title=f"Sparkle Selector vs VBS",
+							 limit="magnitude",
+							 limit_min=0.25,
+							 limit_max=0.25,
+							 penalty_time=sgh.settings.get_penalised_time(),
+							 cwd=latex_directory_path)
+
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_vbs_filename)
 	return str_value
 
@@ -492,3 +516,121 @@ def generate_report(test_case_directory: str = None):
 
 	return
 
+
+'''
+	Helper function to create comparison plots between two different solvers/portfolios
+
+	Arguments:
+	points: list of points which represents with the performance results of (solverA, solverB)
+	xlabel: Name of solverA (default: default)
+	ylabel: Name of solverB (default: optimised)
+	title: Display title in the image (default: None)
+	scale: [linear, log] (default: linear)
+
+	limit: Approach of choosing limits for the figure [absolute, relative, magnitude] (default: relative)
+		absolute: Takes the absolute value as min/max
+		relative: Multiplies the min/max value from the points and divides/multiplies the value with those for min/max
+		magnitude: Increases the order of magnitude(10) of the min/max values in the points
+	limit_min, limit_max: values used to compute the limits
+	output: filepath to save the figure
+	cwd: working directory to place the figure 
+'''
+
+
+def generate_comparison_plot(points,
+							 output_file,
+							 xlabel: str = "default",
+							 ylabel: str = "optimised",
+							 title: str = "",
+							 scale: str = "log",
+							 limit: str = "magnitude",
+							 limit_min: float = 0.2,
+							 limit_max: float = 0.2,
+							 penalty_time = None,
+							 cwd=None):
+
+	pwd = os.getcwd()
+	if cwd is not None:
+		os.chdir(cwd)
+		print("Changed cwd to {}".format(os.getcwd()))
+
+	points = np.array(points)
+
+	# process labels
+	# TODO handle other special characters like $^
+	xlabel = xlabel.replace("_", "\\_")  # LaTeX save formatting
+	ylabel = ylabel.replace("_", "\\_")  # LaTeX save formatting
+	if scale == "log":
+		xlabel += " [log]"
+		ylabel += " [log]"
+
+	# process range values
+	min_point_value = np.min(points)
+	max_point_value = np.max(points)
+	if penalty_time is not None:
+		assert penalty_time >= max_point_value
+		max_point_value = penalty_time
+
+	if limit == "absolute":
+		min_value = limit_min
+		max_value = limit_max
+	elif limit == "relative":
+		# TODO check for negative values
+		min_value = min_point_value * (1 / limit_min)
+		max_value = max_point_value * limit_max
+	elif limit == "magnitude":
+		min_value = 10 ** (np.floor(np.log10(min_point_value))-limit_min)
+		max_value = 10 ** (np.ceil(np.log10(max_point_value))+limit_max)
+
+	# TODO deal with zero and negative values on log-scale
+	if scale == "log" and np.min(points) <= 0:
+		raise Exception("Cannot plot negative and zero values on a log scales")
+
+	output_data_file = f"{output_file}.dat"
+	output_gnuplot_script = f"{output_file}.plt"
+	output_eps_file = f"{output_file}.eps"
+
+	# Create data file
+	fout = open(output_data_file, 'w')
+	for point in points:
+		fout.write(" ".join([str(c) for c in point]) + "\n")
+	fout.close()
+
+	# Generate plots script
+	fout = open(output_gnuplot_script, 'w')
+	fout.write(f"set xlabel '{xlabel}'\n")
+	fout.write(f"set ylabel '{ylabel}'\n")
+	fout.write(f"set title '{title}'\n")
+	fout.write("unset key\n")  # TODO check purpose
+	fout.write(f"set xrange [{min_value}:{max_value}]\n")
+	fout.write(f"set yrange [{min_value}:{max_value}]\n")
+	if scale == "log":
+		fout.write("set logscale x\n")
+		fout.write("set logscale y\n")
+	fout.write("set grid\n")
+	fout.write("set size square\n")
+	fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value} nohead lc rgb 'black'\n")
+	#TODO magnitude lines
+
+	# fout.write('set arrow from 0.01,0.01 to %s,%s nohead lc rgb \'black\'' % (penalty_time, penalty_time) + '\n')
+	fout.write("set terminal postscript eps color solid linewidth \"Helvetica\" 20\n")
+	fout.write(f"set output '{output_eps_file}\n")
+	fout.write(f"plot '{output_data_file}'\n")
+	fout.close()
+
+	fout = open(output_gnuplot_script, 'r')
+	print(fout.read())
+	fout.close()
+
+	# Make figure
+	cmd = "gnuplot \'%s\'" % (output_gnuplot_script)
+	os.system(cmd)
+
+	# Some systems are missing epstopdf so a copy is included
+	epsbackup = os.path.join(os.path.abspath(pwd), "Components/epstopdf.pl")
+	epstopdf = which("epstopdf") or epsbackup
+	os.system(f"{epstopdf} '{output_eps_file}'")
+
+	os.system(f"rm -f '{output_gnuplot_script}'")
+
+	os.chdir(pwd)
