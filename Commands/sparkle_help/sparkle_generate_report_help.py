@@ -231,8 +231,8 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 
 	generate_comparison_plot(points,
 							 figure_portfolio_selector_sparkle_vs_sbs_filename,
-							 xlabel=f"SBS ({sbs_solver}), PAR10",
-							 ylabel="Sparkle Selector, PAR10",
+							 xlabel=f"SBS ({sbs_solver}) [PAR10]",
+							 ylabel="Sparkle Selector, [PAR10]",
 							 #title=f"Sparkle Selector vs SBS ({sbs_solver})",
 							 limit="magnitude",
 							 limit_min=0.25,
@@ -260,8 +260,8 @@ def get_figure_portfolio_selector_sparkle_vs_vbs():
 
 	generate_comparison_plot(points,
 							 figure_portfolio_selector_sparkle_vs_vbs_filename,
-							 xlabel=f"VBS, PAR10",
-							 ylabel="Sparkle Selector, PAR10",
+							 xlabel=f"VBS [PAR10]",
+							 ylabel="Sparkle Selector [PAR10]",
 							 #title=f"Sparkle Selector vs VBS",
 							 limit="magnitude",
 							 limit_min=0.25,
