@@ -195,6 +195,16 @@ def get_dict_vbs_penalty_time_on_each_instance():
 
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
+	# FOR DEBUGGING
+	if os.path.isfile("cache.pickle"):
+		try:
+			fh = open("cache.pickle", "rb")
+			mydict = pickle.load(fh)
+			fh.close()
+			return mydict
+		except:
+			pass
+
 	mydict = {}
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 	actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
@@ -206,6 +216,11 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 			mydict[instance] = used_time_for_this_instance
 		else:
 			mydict[instance] = sgh.settings.get_penalised_time()
+
+	# FOR DEBUGGING
+	fh = open("cache.pickle", "wb")
+	pickle.dump(mydict, fh)
+	fh.close()
 
 	return mydict
 
@@ -232,8 +247,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 	generate_comparison_plot(points,
 							 figure_portfolio_selector_sparkle_vs_sbs_filename,
 							 xlabel=f"SBS ({sbs_solver}) [PAR10]",
-							 ylabel="Sparkle Selector, [PAR10]",
-							 #title=f"Sparkle Selector vs SBS ({sbs_solver})",
+							 ylabel="Sparkle Selector [PAR10]",
 							 limit="magnitude",
 							 limit_min=0.25,
 							 limit_max=0.25,
@@ -262,7 +276,6 @@ def get_figure_portfolio_selector_sparkle_vs_vbs():
 							 figure_portfolio_selector_sparkle_vs_vbs_filename,
 							 xlabel=f"VBS [PAR10]",
 							 ylabel="Sparkle Selector [PAR10]",
-							 #title=f"Sparkle Selector vs VBS",
 							 limit="magnitude",
 							 limit_min=0.25,
 							 limit_max=0.25,
@@ -510,10 +523,11 @@ def generate_comparison_plot(points,
 
 	points = np.array(points)
 	if drop_zeros:
-		check_zeros = np.count_nonzero(points, axis=1) == 2
-		if np.count_nonzero(np.invert(check_zeros)) != 0:
-			print("WARNING: Zero valued performance detected. These instances fall outside the figure.")
-		points = points[check_zeros]
+		zero_runtime = 0.000001 #microsecond
+		check_zeros = np.count_nonzero(points <= 0)
+		if check_zeros != 0:
+			print(f"WARNING: Zero or negative valued performance values detected. Setting these values to {zero_runtime}.")
+		points[points == 0] = zero_runtime
 
 	# process labels
 	# TODO handle other special characters like $^
@@ -537,7 +551,6 @@ def generate_comparison_plot(points,
 		min_value = 10 ** (np.floor(np.log10(min_point_value))-limit_min)
 		max_value = 10 ** (np.ceil(np.log10(max_point_value))+limit_max)
 
-	# TODO deal with zero and negative values on log-scale
 	if scale == "log" and np.min(points) <= 0:
 		raise Exception("Cannot plot negative and zero values on a log scales")
 
