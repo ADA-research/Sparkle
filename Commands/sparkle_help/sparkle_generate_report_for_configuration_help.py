@@ -417,11 +417,27 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 
 def get_ablation_table(solver_name, instance_set_train_name, instance_set_test_name=None):
 	results = sah.get_ablation_table(solver_name, instance_set_train_name, instance_set_test_name)
-	table_string = "\\begin{tabular}{rp{0.3\linewidth}rrr}"
-	for i,line in enumerate(results):
+	table_string = "\\begin{tabular}{rp{0.25\linewidth}rrr}"
+	#"Round", "Flipped parameter", "Source value", "Target value", "Validation result"
+	for i, line in enumerate(results):
+		assert len(line) == 5 #If this fails something has changed in the representation of ablation tables
 		if i == 0:
 			line = ["\\textbf{{{0}}}".format(word) for word in line]
-		table_string += " & ".join(line) + " \\\\ "
+
+		#Put multiple variable changes in one round on a seperate line
+		if len(line[1].split(",")) > 1 and len(line[1].split(",")) == len(line[2].split(",")) and len(line[1].split(",")) == len(line[3].split(",")):
+			params = line[1].split(",")
+			default_values = line[2].split(",")
+			flipped_values = line[3].split(",")
+
+			sublines = len(params)
+			for subline in range(sublines):
+				round = "" if subline != 0 else line[0]
+				result = "" if subline+1 != sublines else line[-1]
+				printline = [round, params[subline], default_values[subline], flipped_values[subline], result]
+				table_string += " & ".join(printline) + " \\\\ "
+		else:
+			table_string += " & ".join(line) + " \\\\ "
 		if i == 0:
 			table_string += "\\hline "
 	table_string += "\\end{tabular}"
