@@ -195,15 +195,15 @@ def get_dict_vbs_penalty_time_on_each_instance():
 
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
-	# FOR DEBUGGING
-	if os.path.isfile("cache.pickle"):
-		try:
-			fh = open("cache.pickle", "rb")
-			mydict = pickle.load(fh)
-			fh.close()
-			return mydict
-		except:
-			pass
+	# # FOR DEBUGGING
+	# if os.path.isfile("cache.pickle"):
+	# 	try:
+	# 		fh = open("cache.pickle", "rb")
+	# 		mydict = pickle.load(fh)
+	# 		fh.close()
+	# 		return mydict
+	# 	except:
+	# 		pass
 
 	mydict = {}
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
@@ -218,9 +218,9 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 			mydict[instance] = sgh.settings.get_penalised_time()
 
 	# FOR DEBUGGING
-	fh = open("cache.pickle", "wb")
-	pickle.dump(mydict, fh)
-	fh.close()
+	# fh = open("cache.pickle", "wb")
+	# pickle.dump(mydict, fh)
+	# fh.close()
 
 	return mydict
 
