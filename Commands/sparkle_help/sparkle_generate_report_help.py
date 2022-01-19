@@ -577,7 +577,7 @@ def generate_comparison_plot(points,
 		fout.write("set logscale y\n")
 	fout.write("set grid lc rgb '#CCCCCC' lw 2\n")
 	fout.write("set size square\n")
-	fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value} nohead lc rgb 'black'\n")
+	fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value} nohead lc rgb '#AAAAAA'\n")
 	#TODO magnitude lines for linear scale
 	if magnitude_lines > 0 and scale == "log":
 		for order in range(magnitude_lines):
@@ -598,7 +598,7 @@ def generate_comparison_plot(points,
 	# fout.write('set arrow from 0.01,0.01 to %s,%s nohead lc rgb \'black\'' % (penalty_time, penalty_time) + '\n')
 	fout.write("set terminal postscript eps color solid linewidth \"Helvetica\" 20\n")
 	fout.write(f"set output '{output_eps_file}\n")
-	fout.write(f"set style line 1 pt 3 lc rgb 'blue' \n")
+	fout.write(f"set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n")
 	fout.write(f"plot '{output_data_file}' ls 1\n")
 	fout.close()
 
