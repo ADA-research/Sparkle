@@ -104,7 +104,7 @@ def get_instanceClassList():
 			dict_number_of_instances_in_instance_class[instance_class] += 1
 
 	for instance_class in list_instance_class:
-		str_value += r'\item \textbf{' + instance_class + r'}, number of instances: ' + str(dict_number_of_instances_in_instance_class[instance_class]) + '\n'
+		str_value += r'\item \textbf{' + instance_class + r'}, consisting of ' + str(dict_number_of_instances_in_instance_class[instance_class]) + ' instances\n'
 
 	return str_value
 
