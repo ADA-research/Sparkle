@@ -386,6 +386,8 @@ def append_string_to_file(file: Path, string: str, maxtry: int=5):
 	"""
 	write_string_to_file(file, string, append=True, maxtry=maxtry)
 
+	return
+
 
 def rmtree(directory: Path):
 	if directory.is_dir():

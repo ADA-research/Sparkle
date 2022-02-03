@@ -24,8 +24,7 @@ def run_solvers_on_instances(
         parallel: bool = True,
         recompute: bool = False,
         run_on: str = None,
-        also_construct_selector_and_report: bool = False,
-):
+        also_construct_selector_and_report: bool = False):
     """ Run all the solvers on all the instances that were not not previously run. If
         recompute, rerun everything even if previously run. Where the solvers are
         executed can be controlled with 'run_on'.
@@ -35,13 +34,13 @@ def run_solvers_on_instances(
         parallel: bool
             Run the solvers in parallel or one at a time. Default: True
         recompute: bool
-            If True, recompute all solver-instance pair even if their were run before.
+            If True, recompute all solver-instance pairs even if their were run before.
             Default: False
         run_on: str
             On which computer or clusters to execute the solvers.
             Available: local, slurm. Default: slurm
         also_construct_selector_and_report: bool
-            If True, the selector will be constructed and a report will be produce
+            If True, the selector will be constructed and a report will be produced.
      """
     if recompute:
         spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path).clean_csv()
@@ -103,6 +102,8 @@ def run_solvers_on_instances(
               f"{','.join(jobs)}")
     else:
         print(f"c {run_on} is not a valid computer/cluster target")
+
+    return
 
 
 def construct_selector_and_report(dependency_jobid_list: List[str] = []):
