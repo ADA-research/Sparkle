@@ -406,11 +406,20 @@ def generate_SBATCH_job_list(solver_list, instance_path_list, num_jobs: int):
 def handle_waiting_and_removal_process(instances: list, logging_file: str,
                                        job_id: str, solver_array_list: list,
                                        sbatch_script_path: Path, portfolio_size: int,
-                                       remaining_job_list: list,
-                                       finished_instances_dict: dict,
-                                       pending_job_with_new_cutoff: dict,
-                                       started: bool) -> bool:
-    if len(remaining_job_list):
+                                       remaining_job_list: list = None,
+                                       finished_instances_dict: dict = None,
+                                       pending_job_with_new_cutoff: dict = None,
+                                       started: bool = False) -> bool:
+    if remaining_job_list is None:
+        remaining_job_list = []
+
+    if finished_instances_dict is None:
+        finished_instances_dict = {}
+
+    if pending_job_with_new_cutoff is None:
+        pending_job_with_new_cutoff = {}
+
+    if len(remaining_job_list) > 0:
         print(f'c a job has ended, remaining jobs = {str(len(remaining_job_list))}')
 
     if finished_instances_dict == {}:
@@ -521,8 +530,7 @@ def run_parallel_portfolio(instances: list, portfolio_path: Path) -> bool:
         if(sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_array_list, sbatch_script_path,
-                                               num_jobs/len(instances), [], {}, {},
-                                               False)
+                                               num_jobs/len(instances))
             now = datetime.datetime.now()
             current_time = now.strftime("%H:%M:%S")
 
