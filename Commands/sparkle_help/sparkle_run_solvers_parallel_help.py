@@ -72,7 +72,7 @@ def running_solvers_parallel(
 
 	Returns
 	-------
-	run: str or runrunner.local.QueuedRun
+	run: runrunner.local.QueuedRun or runrunner.slurm.SlurmRun or None
 		If the run is local return a QueuedRun object with the information concerning
 		the run. If the run is executed on Slurm, return the ID of the run.
 
@@ -91,7 +91,7 @@ def running_solvers_parallel(
 
 	# If there are no jobs, stop
 	if num_jobs == 0:
-		return ''
+		return None
 	# If there are jobs update performance data ID
 	else:
 		srs.update_performance_data_id()

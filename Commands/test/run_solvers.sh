@@ -27,7 +27,7 @@ Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run solvers
 output_true="c Running solvers done!"
-output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
 if [[ $output == $output_true ]];
 then
 	echo "[success] run_solvers test succeeded"

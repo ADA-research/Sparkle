@@ -72,7 +72,7 @@ def run_solvers_on_instances(
     ))
 
     if also_construct_selector_and_report:
-        runs.append(rrr.add_to_local_queue(
+        runs.append(rrr.add_to_queue(
             runner=run_on,
             cmd="Commands/construct_sparkle_portfolio_selector.py",
             name="spkr_portfolio_selector",
@@ -80,7 +80,7 @@ def run_solvers_on_instances(
             base_dir="Tmp"
         ))
 
-        runs.append(rrr.add_to_local_queue(
+        runs.append(rrr.add_to_queue(
             runner=run_on,
             cmd="Commands/generate_report.py",
             name="spkl_report",
@@ -91,9 +91,10 @@ def run_solvers_on_instances(
     if run_on == "local":
         print("c Waiting for the local calculations to finish.")
         runs[-1].wait()
+        print("c Running solvers done!")
     elif run_on == "slurm":
-        print("c Running solvers on Slurm. Waiting for job(s) with id(s): "
-              f"{','.join(r.run_id for r in runs)}")
+        print("c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+              f"{','.join(r.run_id for r in runs if r is not None)}")
 
 
 def construct_selector_and_report(dependency_jobid_list: List[str] = []):
