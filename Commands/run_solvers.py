@@ -90,7 +90,8 @@ def run_solvers_on_instances(
 
     if run_on == "local":
         print("c Waiting for the local calculations to finish.")
-        runs[-1].wait()
+        for run in runs:
+            run.wait()
         print("c Running solvers done!")
     elif run_on == "slurm":
         print("c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
