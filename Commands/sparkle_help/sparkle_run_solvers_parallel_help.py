@@ -114,12 +114,18 @@ def running_solvers_parallel(
 		print("c Running the solvers through Slurm")
 
 	cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-	return rrr.add_to_queue(
+	run = rrr.add_to_queue(
  		runner=run_on,
  		cmd=cmd_list, 
  		name="run_solvers", 
  		base_dir="Tmp",
  		sbatch_options=batch.sbatch_options,
  		srun_options=batch.srun_options,
- 		)
+ 		)    
+
+	if run_on == Runner.SLURM:
+		# Add the run to the list of active job.
+		sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
+
+	return run
 
