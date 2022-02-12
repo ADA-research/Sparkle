@@ -37,7 +37,7 @@ else
 fi
 
 # Run solvers parallel
-output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel | tail -1)
+output=$(Commands/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel | tail -1)
 output_true="c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
 
 if [[ $output =~ "${output_true}" ]];
@@ -52,7 +52,7 @@ else
 fi
 
 # Run solvers recompute
-output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
+output=$(Commands/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -66,7 +66,7 @@ else
 fi
 
 # Run solvers with verifier
-output=$(Commands/run_solvers.py --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
+output=$(Commands/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then

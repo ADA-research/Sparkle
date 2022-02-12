@@ -77,7 +77,7 @@ def running_solvers_parallel(
 		the run. If the run is executed on Slurm, return the ID of the run.
 
 	"""
-	# Open the csv file in terms of performance data
+	# Open the performance data csv file
 	performance_data_cdv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 
 	# List of jobs to do
@@ -97,9 +97,8 @@ def running_solvers_parallel(
 		srs.update_performance_data_id()
 
 	sbatch_script_path, std_out_path, std_err_path = generate_running_solvers_sbatch_shell_script(
-		len(jobs), num_job_in_parallel, jobs)
+		num_jobs, num_job_in_parallel, jobs)
 	command_line = 'sbatch ' + sbatch_script_path
-	####
 
 	# Log output paths
 	sl.add_output(sbatch_script_path, 'Slurm batch script to run solvers in parallel')
