@@ -21,23 +21,23 @@ import runrunner as rrr
 
 
 def run_solvers_on_instances(
-        parallel: bool = True,
+        parallel: bool = False,
         recompute: bool = False,
         run_on: str = None,
         also_construct_selector_and_report: bool = False):
     """ Run all the solvers on all the instances that were not not previously run. If
-        recompute, rerun everything even if previously run. Where the solvers are
+        recompute is True, rerun everything even if previously run. Where the solvers are
         executed can be controlled with 'run_on'.
 
         Parameters
         ----------
         parallel: bool
-            Run the solvers in parallel or one at a time. Default: True
+            Run the solvers in parallel or one at a time. Default: False
         recompute: bool
-            If True, recompute all solver-instance pairs even if their were run before.
+            If True, recompute all solver-instance pairs even if they were run before.
             Default: False
         run_on: str
-            On which computer or clusters to execute the solvers.
+            On which computer or cluster environment to run the solvers.
             Available: local, slurm. Default: slurm
         also_construct_selector_and_report: bool
             If True, the selector will be constructed and a report will be produced.
@@ -65,7 +65,7 @@ def run_solvers_on_instances(
     runs.append(rrr.add_to_queue(
         runner=run_on,
         cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-        name="spkr_csv_merge",
+        name="sprkl_csv_merge",
         dependencies=runs[-1],
         base_dir="Tmp"
     ))
@@ -74,7 +74,7 @@ def run_solvers_on_instances(
         runs.append(rrr.add_to_queue(
             runner=run_on,
             cmd="Commands/construct_sparkle_portfolio_selector.py",
-            name="spkr_portfolio_selector",
+            name="sprkl_portfolio_selector",
             dependencies=runs[-1],
             base_dir="Tmp"
         ))
@@ -82,7 +82,7 @@ def run_solvers_on_instances(
         runs.append(rrr.add_to_queue(
             runner=run_on,
             cmd="Commands/generate_report.py",
-            name="spkl_report",
+            name="sprkl_report",
             dependencies=runs[-1],
             base_dir="Tmp"
         ))
@@ -155,6 +155,7 @@ if __name__ == r"__main__":
     )
     parser.add_argument(
         "--verifier",
+        choices=SolutionVerifier.__members__,
         help=("problem specific verifier that should be used to verify solutions found"
               " by a target algorithm"),
     )
@@ -162,8 +163,8 @@ if __name__ == r"__main__":
     parser.add_argument(
         "--run-on",
         default="slurm",
-        help=("On which computer/cluster to execute the calculation."
-              "Available:  local, slurm. Default: slurm"),
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm"),
     )
 
     parser.add_argument(
@@ -196,11 +197,11 @@ if __name__ == r"__main__":
             args.target_cutoff_time, SettingState.CMD_LINE
         )
 
-    print("c Start running solvers ...")
-
     if not srh.detect_current_sparkle_platform_exists():
         print("c No Sparkle platform found; please first run the initialise command")
         exit()
+
+    print("c Start running solvers ...")
 
     run_solvers_on_instances(
         parallel=args.parallel,

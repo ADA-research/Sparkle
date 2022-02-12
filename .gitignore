@@ -40,7 +40,7 @@ Documentation/source/_generated/
 .vscode
 
 
-# LaTeX stuffs
+# LaTeX stuff
 
 # Exclude intermediate files generated when compiling latex
 *.eps
