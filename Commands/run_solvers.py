@@ -18,12 +18,13 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help.sparkle_command_help import CommandName
 
 import runrunner as rrr
+from runrunner.base import Runner
 
 
 def run_solvers_on_instances(
         parallel: bool = False,
         recompute: bool = False,
-        run_on: str = None,
+        run_on: Runner = Runner.SLURM,
         also_construct_selector_and_report: bool = False):
     """ Run all the solvers on all the instances that were not not previously run. If
         recompute is True, rerun everything even if previously run. Where the solvers are
@@ -36,9 +37,9 @@ def run_solvers_on_instances(
         recompute: bool
             If True, recompute all solver-instance pairs even if they were run before.
             Default: False
-        run_on: str
+        run_on: Runner
             On which computer or cluster environment to run the solvers.
-            Available: local, slurm. Default: slurm
+            Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
         also_construct_selector_and_report: bool
             If True, the selector will be constructed and a report will be produced.
      """
@@ -92,13 +93,13 @@ def run_solvers_on_instances(
             base_dir="Tmp"
         ))
 
-    if run_on == "local":
+    if run_on == Runner.LOCAL:
         print("c Waiting for the local calculations to finish.")
         for run in runs:
             if run is not None:
                 run.wait()
         print("c Running solvers done!")
-    elif run_on == "slurm":
+    elif run_on == Runner.SLURM:
         print("c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
               f"{','.join(r.run_id for r in runs if r is not None)}")
 
@@ -168,7 +169,7 @@ if __name__ == r"__main__":
 
     parser.add_argument(
         "--run-on",
-        default="slurm",
+        default=Runner.SLURM,
         help=("On which computer or cluster environment to execute the calculation."
               "Available: local, slurm. Default: slurm"),
     )
