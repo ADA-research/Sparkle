@@ -55,7 +55,6 @@ Notable changes to Sparkle will be documented in this file.
 - New option --run-on in run\_solvers.py 
 - Integration with runrunner to run the solvers and related code on the local machine
 - Integration with runrunner to run the solvers on a Slurm clusters
-- Added a --wait option to run\_solvers
 
 ### Changed
 - Default to --run-solver-later in add\_solver.py and add\_instances.py
