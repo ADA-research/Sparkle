@@ -78,10 +78,10 @@ def running_solvers_parallel(
 
 	"""
 	# Open the performance data csv file
-	performance_data_cdv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
 
 	# List of jobs to do
-	jobs = performance_data_cdv.get_job_list(rerun=rerun)
+	jobs = performance_data_csv.get_job_list(rerun=rerun)
 	num_jobs = len(jobs)
 
 	cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
