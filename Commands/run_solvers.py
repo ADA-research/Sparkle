@@ -61,6 +61,11 @@ def run_solvers_on_instances(
         run_on=run_on
     )]
 
+    # If there are no jobs return
+    if all(run is None for run in runs):
+        print("c Running solvers done!")
+        return
+
     # Update performance data csv after the last job is done
     runs.append(rrr.add_to_queue(
         runner=run_on,
