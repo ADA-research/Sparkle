@@ -598,7 +598,7 @@ class Settings:
 
 
 	def set_paraport_process_monitoring(
-		self, value: PerformanceMeasure = DEFAULT_paraport_process_monitoring,
+		self, value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
 		origin: SettingState = SettingState.DEFAULT):
 		"""Set the parallel portfolio process monitoring state."""
 		section = 'parallel_portfolio'

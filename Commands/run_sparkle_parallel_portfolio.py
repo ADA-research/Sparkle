@@ -42,6 +42,7 @@ if __name__ == '__main__':
                              ' (current latest: '
                              f'{sgh.latest_scenario.get_parallel_portfolio_path()})')
     parser.add_argument('--process-monitoring', choices=ProcessMonitoring.__members__,
+                        type=ProcessMonitoring,
                         help='Specify whether the monitoring of the portfolio should '
                              'cancel all solvers within a portfolio once a solver '
                              'finishes (REALISTIC). Or allow all solvers within a '
