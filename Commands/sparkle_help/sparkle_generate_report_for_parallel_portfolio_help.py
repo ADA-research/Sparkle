@@ -13,24 +13,25 @@ from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
-def get_numSolvers(parallel_portfolio_path: Path):
+def get_numSolvers(parallel_portfolio_path: Path) -> str:
+    """Return the number of solvers as string, counting each solver-seed combination."""
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     num_solvers = len(solver_list)
+
     # If a solver contains multiple solver_variations.
     for solver in solver_list:
         if ' ' in solver:
             num_solvers += int(solver[solver.rfind(' ')+1:]) - 1
 
-    str_value = str(num_solvers)
-
-    if int(str_value) < 1:
+    if num_solvers < 1:
         print('ERROR: No solvers found, report generation failed!')
         sys.exit()
 
-    return str_value
+    return str(num_solvers)
 
 
-def get_solverList(parallel_portfolio_path: Path):
+def get_solverList(parallel_portfolio_path: Path) -> str:
+    """Return the list of solvers as string, including each solver-seed combination."""
     str_value = ''
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
 
@@ -62,58 +63,63 @@ def get_solverList(parallel_portfolio_path: Path):
                 if instances != solver_variations:
                     seed_number += ','
 
-            str_value += r'\item[] With seeds: ' + seed_number + '\n'
+            str_value += r'\item[]' + f'With seeds: {seed_number}\n'
 
     return str_value
 
 
-def get_num_instance_classes(instance_list: list[str]) -> str:
-    list_instance_class = []
+def get_num_instance_sets(instance_list: list[str]) -> str:
+    """Return the number of instance sets as a string."""
+    list_instance_sets = []
 
     for instance_path in instance_list:
-        instance_class = sfh.get_current_directory_name(instance_path)
+        instance_set = sfh.get_current_directory_name(instance_path)
 
-    if not (instance_class in list_instance_class):
-        list_instance_class.append(instance_class)
+    if not (instance_set in list_instance_sets):
+        list_instance_sets.append(instance_set)
 
-    str_value = str(len(list_instance_class))
+    n_sets = len(list_instance_sets)
 
-    if int(str_value) < 1:
+    if n_sets < 1:
         print('ERROR: No instance sets found, report generation failed!')
         sys.exit()
 
-    return str_value
+    return str(n_sets)
 
 
-def get_instanceClassList(instance_list: list[str]) -> (str, int):
+def get_instance_set_list(instance_list: list[str]) -> (str, int):
+    """Return a list of instance sets and the number of instances in the set as string.
+
+    Also returns the total number of instances.
+    """
     str_value = ''
-    nr_of_instances = 0
-    list_instance_class = []
-    dict_n_instances_in_class = {}
+    n_instances = 0
+    list_instance_sets = []
+    dict_n_instances_in_sets = {}
 
     for instance_path in instance_list:
-        instance_class = sfh.get_current_directory_name(instance_path)
+        instance_set = sfh.get_current_directory_name(instance_path)
 
-        if not (instance_class in list_instance_class):
-            list_instance_class.append(instance_class)
-            dict_n_instances_in_class[instance_class] = 1
+        if not (instance_set in list_instance_sets):
+            list_instance_sets.append(instance_set)
+            dict_n_instances_in_sets[instance_set] = 1
         else:
-            dict_n_instances_in_class[instance_class] += 1
+            dict_n_instances_in_sets[instance_set] += 1
 
-    for instance_class in list_instance_class:
-        str_value += (r'\item \textbf{' + sgrh.underscore_for_latex(instance_class)
+    for instance_set in list_instance_sets:
+        str_value += (r'\item \textbf{' + sgrh.underscore_for_latex(instance_set)
                       + '}, number of instances: '
-                      + str(dict_n_instances_in_class[instance_class]) + '\n')
-        nr_of_instances += int(dict_n_instances_in_class[instance_class])
+                      + str(dict_n_instances_in_sets[instance_set]) + '\n')
+        n_instances += dict_n_instances_in_sets[instance_set]
 
-    return str_value, nr_of_instances
+    return str_value, n_instances
 
 
 def get_results() -> dict[str, list[str, str]]:
     """Returns a dict with the performance results on each instance.
 
     The dict consists of a string indicating the instance name, and a list which contains
-    the solver name followed by the performance.
+    the solver name followed by the performance (both as string).
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(str(solutions_dir))
@@ -141,9 +147,15 @@ def get_results() -> dict[str, list[str, str]]:
 
 
 def get_solversWithSolution() -> (str, dict[str, int], int):
+    """Return a string with the number of instances solved per successful solver.
+
+    solver_dict contains the same information as dict.
+    unsolved_instances is an int indicating the number of unsolved instances.
+    """
     results_on_instances = get_results()
     str_value = ''
 
+    # Count the number of solved instances per solver, and the unsolved instances
     if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME:
         solver_dict = dict()
         unsolved_instances = 0
@@ -164,7 +176,6 @@ def get_solversWithSolution() -> (str, dict[str, int], int):
 
     if(sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE):
-        # TODO: Assign values to solver_dict and unsolved_instances ?!
         for instances in results_on_instances:
             str_value += (r'\item \textbf{' + sgrh.underscore_for_latex(instances)
                           + '}, was scored by: ' + r'\textbf{'
@@ -271,6 +282,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
         instance_list: list[str]) -> dict[str, float]:
+    """Return a dict of instance names and the penalised running time of the PaP."""
     mydict = {}
 
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
@@ -291,7 +303,15 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
-                                                 instances: list[str]):
+                                                 instances: list[str]) -> (
+                                                 str,
+                                                 dict[str, float], dict[str, float]):
+    """Generate PaP vs SBS figure and return a string to include it in LaTeX.
+
+    dict_all_solvers is a dict containing the penalised average run time per solver.
+    dict_actual_parallel_portfolio_penalty_time_on_each_instance is a dict with instance
+    names and the penalised running time of the PaP.
+    """
     str_value = ''
     dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = (
         get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances))
@@ -302,17 +322,15 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
     figure_filename = (
         'figure_parallel_portfolio_sparkle_vs_sbs')
     data_filename = (
-        'data_parallel_portfolio_sparkle_vs_sbs_filename.dat')
+        'data_parallel_portfolio_sparkle_vs_sbs.dat')
     data_filepath = latex_directory_path + data_filename
 
-    fout = open(data_filepath, 'w+')
-
-    for instance in dict_sbs_penalty_time_on_each_instance:
-        sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
-        sparkle_penalty_time = (
-            dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance])
-        fout.write(str(sbs_penalty_time) + ' ' + str(sparkle_penalty_time) + '\n')
-    fout.close()
+    with open(data_filepath, 'w+') as outfile:
+        for instance in dict_sbs_penalty_time_on_each_instance:
+            sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
+            sparkle_penalty_time = (
+                dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance])
+            outfile.write(str(sbs_penalty_time) + ' ' + str(sparkle_penalty_time) + '\n')
 
     penalised_time_str = str(sgh.settings.get_penalised_time())
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
@@ -410,11 +428,11 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     mydict[variable] = str_value
 
     variable = 'numInstanceClasses'
-    str_value = get_num_instance_classes(instances)
+    str_value = get_num_instance_sets(instances)
     mydict[variable] = str_value
 
     variable = 'instanceClassList'
-    str_value, nr_of_instances = get_instanceClassList(instances)
+    str_value, nr_of_instances = get_instance_set_list(instances)
     mydict[variable] = str_value
 
     variable = 'cutoffTime'

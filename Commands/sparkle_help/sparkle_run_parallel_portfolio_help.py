@@ -40,6 +40,11 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str):
         now = now + datetime.timedelta(seconds=sleep_seconds)
         job_running_time = job_running_time + datetime.timedelta(seconds=sleep_seconds)
         job_nr = line[line.rfind(';')+2:]
+    else:
+        # TODO: Not sure what the intend of checking job numbers in this function was.
+        # TODO: Writing a warning as job_nr for now, since this is a logging function,
+        # TODO: this issue should be of no harm to the functionality.
+        job_nr = 'WARNING: No job_nr found in function add_log_statement_to_file'
 
     current_time = now.strftime("%H:%M:%S")
     job_starting_time = now - job_running_time
@@ -70,7 +75,7 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str):
 
 def remove_temp_files_unfinished_solvers(solver_array_list: list[str],
                                          sbatch_script_path: Path,
-                                         temp_solvers: list[dict]):
+                                         temp_solvers: list[str]):
     """Remove temporary files and directories, and move result files."""
     tmp_dir = sgh.sparkle_tmp_path
 
@@ -132,19 +137,18 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list[str],
     return
 
 
-# TODO: Investigate finished_job_array_nr, it is indicated to be an int, but also treated
-# as str internally
 def find_finished_time_finished_solver(solver_array_list: list[str],
-                                       finished_job_array_nr: int) -> str:
+                                       finished_job_array_nr: str) -> str:
+    """Return a formatted string with the finishing time of a solver."""
     # If there is a solver that ended but did not make a result file this means that it
     # was manually cancelled or it gave an error the template will ensure that all
     # solver on that instance will be cancelled.
     time_in_format_str = '-1:00'
-    solutions_dir = str(sgh.pap_performance_data_tmp_path)
+    solutions_dir = str(sgh.pap_performance_data_tmp_path) + '/'
     results = sfh.get_list_all_result_filename(solutions_dir)
 
     for result in results:
-        if '_' in str(finished_job_array_nr):
+        if '_' in finished_job_array_nr:
             finished_job_array_nr = finished_job_array_nr[
                 finished_job_array_nr.rfind('_')+1:]
 
@@ -159,9 +163,18 @@ def find_finished_time_finished_solver(solver_array_list: list[str],
     return time_in_format_str
 
 
-def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: list,
+def cancel_remaining_jobs(logging_file: str, job_id: str,
+                          finished_solver_id_list: list[str],
                           portfolio_size: int, solver_array_list: list[str],
-                          pending_job_with_new_cutoff: dict = {}):
+                          pending_job_with_new_cutoff: dict[str, int] = {}) -> (
+                          dict[str, list[str]], dict[str, int]):
+    """Cancel jobs past the cutoff, update cutoff time for jobs that should continue.
+
+    The remaining_jobs dict is returned, containing a jobid str as key, and a (two
+    element) list of str with the jobtime and jobstatus.
+    Additionally the dict pending_job_with_new_cutoff is returned with jobid str as key,
+    and cutoff_seconds int as value.
+    """
     # Find all job_array_numbers that are currently running
     # This is specifically for Grace
     result = subprocess.run(['squeue', '--array', '--jobs', job_id], capture_output=True,
@@ -181,8 +194,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
             # needs to be updated.
             if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
                 current_seconds = jobtime_to_seconds(jobtime)
-                sleep_time = (int(pending_job_with_new_cutoff[jobid])
-                              - int(current_seconds))
+                sleep_time = pending_job_with_new_cutoff[jobid] - current_seconds
                 command_line = f'sleep {str(sleep_time)}; scancel {str(jobid)}'
                 add_log_statement_to_file(logging_file, command_line, jobtime)
                 pending_job_with_new_cutoff.pop(jobid)
@@ -193,10 +205,10 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
     for job in remaining_jobs:
         # Update all jobs in the same array segment as the finished job with its
         # finishing time
-        for finished_job in finished_job_array:
+        for finished_solver_id in finished_solver_id_list:
             # if job in the same array segment
-            if (int(int(job[job.find('_')+1:])/int(portfolio_size))
-                    == int(int(finished_job)/int(portfolio_size))):
+            if (int(int(job[job.find('_')+1:])/portfolio_size)
+                    == int(int(finished_solver_id)/portfolio_size)):
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
                 if (sgh.settings.get_paraport_process_monitoring()
@@ -204,7 +216,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
                     # Update the cutofftime of the to be cancelled job, if job if
                     # already past that it automatically stops.
                     newCutoffTime = find_finished_time_finished_solver(
-                        solver_array_list, finished_job)
+                        solver_array_list, finished_solver_id)
                     current_seconds = jobtime_to_seconds(remaining_jobs[job][0])
                     cutoff_seconds = jobtime_to_seconds(newCutoffTime)
                     actual_cutofftime = sgh.settings.get_general_target_cutoff_time()
@@ -239,12 +251,22 @@ def cancel_remaining_jobs(logging_file: str, job_id: str, finished_job_array: li
 
 def wait_for_finished_solver(logging_file: str, job_id: str,
                              solver_array_list: list[str],
-                             remaining_job_list: list,
-                             pending_job_with_new_cutoff=dict, started=bool):
-    number_of_solvers = len(remaining_job_list)
+                             remaining_job_dict: dict[str, list[str]],
+                             pending_job_with_new_cutoff: dict[str, int], started: bool,
+                             portfolio_size: int) -> (list[str], dict[str, int], bool):
+    """Wait for a solver to finish, then return which finished and which may still run.
+
+    Return finished_solver_list, pending_job_with_new_cutoff, started.
+    finished_solver_list is a list of str typed job IDs of finished solvers.
+    pending_job_with_new_cutoff is a dict with jobid str as key, and cutoff_seconds int
+    as value.
+    started is a bool indicating whether the portfolio has started running.
+    """
+    number_of_solvers = len(remaining_job_dict) if remaining_job_dict else portfolio_size
     n_seconds = 1
     done = False
-    current_solver_list = remaining_job_list
+    # TODO: Fix weird situation. This starts as dict, later becomes a list...
+    current_solver_list = remaining_job_dict
     finished_solver_list = list()
 
     while not done:
@@ -276,7 +298,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
             for jobs in result.stdout.strip().split('\n'):
                 jobid = jobs.strip().split()[0]
 
-                if jobid.startswith(str(job_id)):
+                if jobid.startswith(job_id):
                     unfinished_solver_list.append(jobid[jobid.find('_')+1:])
 
             finished_solver_list = [item for item in current_solver_list
@@ -325,20 +347,21 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                         # Job is in a portfolio with a solver that already has finished
                         # and has to be cancelled in the finishing time of that solver
                         current_seconds = jobtime_to_seconds(jobtime)
-                        sleep_time = (int(pending_job_with_new_cutoff[jobid])
-                                      - int(current_seconds))
+                        sleep_time = pending_job_with_new_cutoff[jobid] - current_seconds
                         command_line = f'sleep {str(sleep_time)}; scancel {str(jobid)}'
                         add_log_statement_to_file(logging_file, command_line, jobtime)
                         pending_job_with_new_cutoff.pop(jobid)
 
-                if(jobid.startswith(str(job_id))):
+                if(jobid.startswith(job_id)):
                     # add the job to the current solver list
                     current_solver_list.append(jobid[jobid.find('_')+1:])
 
     return finished_solver_list, pending_job_with_new_cutoff, started
 
 
-def generate_parallel_portfolio_sbatch_script(parameters, num_jobs) -> Path:
+def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: int) -> (
+        Path):
+    """Generate an sbatch script for the PAP and return the path to it."""
     # Set script name and path
     sbatch_script_name = (f'parallel_portfolio_sbatch_shell_script_{str(num_jobs)}_'
                           f'{sbh.get_time_pid_random_string()}.sh')
@@ -370,8 +393,12 @@ def generate_parallel_portfolio_sbatch_script(parameters, num_jobs) -> Path:
     return sbatch_script_path
 
 
-def generate_SBATCH_job_list(solver_list, instance_path_list, num_jobs: int) -> (
-        list[str], int, list[str], list[dict]):
+def generate_SBATCH_job_list(solver_list: list[str], instance_path_list: list[str],
+                             num_jobs: int) -> (list[str], int, list[str], list[str]):
+    """Generates a list of jobs to be executed in the sbatch script.
+
+    Returns parameters, new_num_jobs, solver_array_list, temp_solvers
+    """
     # The function generates the parameters used in the SBATCH script of the portfolio
     parameters = list()
     new_num_jobs = num_jobs
@@ -406,19 +433,23 @@ def generate_SBATCH_job_list(solver_list, instance_path_list, num_jobs: int) -> 
                                f'{performance_measure.name}')
                 parameters.append(str(commandline))
 
-    return (parameters, new_num_jobs, solver_array_list,
-            list(dict.fromkeys(tmp_solver_instances)))
+    temp_solvers = list(dict.fromkeys(tmp_solver_instances))
+
+    return (parameters, new_num_jobs, solver_array_list, temp_solvers)
 
 
 def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                                        job_id: str, solver_array_list: list[str],
                                        sbatch_script_path: Path, portfolio_size: int,
-                                       remaining_job_list: list = None,
-                                       finished_instances_dict: dict = None,
-                                       pending_job_with_new_cutoff: dict = None,
+                                       remaining_job_dict: dict[str, list[str]] = None,
+                                       finished_instances_dict: dict[str, list[str, int]]
+                                       = None,
+                                       pending_job_with_new_cutoff: dict[str, int]
+                                       = None,
                                        started: bool = False) -> bool:
-    if remaining_job_list is None:
-        remaining_job_list = list()
+    """Wait for solvers to finish running, and clean up after them."""
+    if remaining_job_dict is None:
+        remaining_job_dict = dict()
 
     if finished_instances_dict is None:
         finished_instances_dict = {}
@@ -426,8 +457,8 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
     if pending_job_with_new_cutoff is None:
         pending_job_with_new_cutoff = {}
 
-    if len(remaining_job_list) > 0:
-        print(f'c a job has ended, remaining jobs = {str(len(remaining_job_list))}')
+    if len(remaining_job_dict) > 0:
+        print(f'c a job has ended, remaining jobs = {str(len(remaining_job_dict))}')
 
     if finished_instances_dict == {}:
         for instance in instances:
@@ -487,21 +518,22 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                           f'time of {str(content[2].strip())} seconds!')
 
     # Monitors the running jobs waiting for a solver that finishes
-    finished_jobs, pending_job_with_new_cutoff, started = wait_for_finished_solver(
-        logging_file, job_id, solver_array_list, remaining_job_list,
-        pending_job_with_new_cutoff, started)
+    finished_solver_id_list, pending_job_with_new_cutoff, started = (
+        wait_for_finished_solver(
+            logging_file, job_id, solver_array_list, remaining_job_dict,
+            pending_job_with_new_cutoff, started, portfolio_size))
 
     # Handles the updating of all jobs within the portfolios of which contain a finished
     # job
-    remaining_job_list, pending_job_with_new_cutoff = cancel_remaining_jobs(
-        logging_file, job_id, finished_jobs, portfolio_size, solver_array_list,
+    remaining_job_dict, pending_job_with_new_cutoff = cancel_remaining_jobs(
+        logging_file, job_id, finished_solver_id_list, portfolio_size, solver_array_list,
         pending_job_with_new_cutoff)
 
     # If there are still unfinished jobs recursively handle the remaining jobs.
-    if len(remaining_job_list) > 0:
+    if len(remaining_job_dict) > 0:
         handle_waiting_and_removal_process(instances, logging_file, job_id,
                                            solver_array_list, sbatch_script_path,
-                                           portfolio_size, remaining_job_list,
+                                           portfolio_size, remaining_job_dict,
                                            finished_instances_dict,
                                            pending_job_with_new_cutoff, started)
 
@@ -509,6 +541,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
 
 
 def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
+    """Run the parallel algorithm portfolio and return whether this was successful."""
     solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
     num_jobs = len(solver_list) * len(instances)
 
