@@ -7,6 +7,8 @@ import os
 import subprocess
 import datetime
 import fcntl
+import glob
+import sys
 from pathlib import Path
 from pathlib import PurePath
 
@@ -73,15 +75,15 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str):
     return
 
 
-def remove_temp_files_unfinished_solvers(solver_array_list: list[str],
+def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                                          sbatch_script_path: Path,
                                          temp_solvers: list[str]):
     """Remove temporary files and directories, and move result files."""
     tmp_dir = sgh.sparkle_tmp_path
 
     # Removes statusinfo files
-    for solver_instance in solver_array_list:
-        commandline = (f'rm -rf {tmp_dir}/SBATCH_Parallel_Portfolio_Jobs/'
+    for solver_instance in solver_instance_list:
+        commandline = (f'rm -rf {sgh.pap_sbatch_tmp_path}/'
                        f'{solver_instance}*')
         os.system(commandline)
 
@@ -94,7 +96,7 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list[str],
         for directories in os.listdir(tmp_dir):
             directories_path = f'{tmp_dir}{directories}'
 
-            for solver_instance in solver_array_list:
+            for solver_instance in solver_instance_list:
                 if (os.path.isdir(directories_path)
                         and directories.startswith(
                             solver_instance[:len(temp_solver)+1])):
@@ -124,27 +126,28 @@ def remove_temp_files_unfinished_solvers(solver_array_list: list[str],
     for file in to_be_moved:
         if '.val' in file:
             path_from = f'{tmp_dir}{file}'
-            path_to = f'{str(sgh.pap_performance_data_tmp_path)}{file}'
+            path_to = f'{str(sgh.pap_performance_data_tmp_path)}/{file}'
 
             try:
                 shutil.move(path_from, path_to)
             except shutil.Error:
-                print('c the {str(pap_performance_data_tmp_path)} directory already '
+                print('c the {str(sgh.pap_performance_data_tmp_path)} directory already '
                       'contains a file with the same name, it will be skipped')
+
             commandline = f'rm -rf {path_from}'
             os.system(commandline)
 
     return
 
 
-def find_finished_time_finished_solver(solver_array_list: list[str],
+def find_finished_time_finished_solver(solver_instance_list: list[str],
                                        finished_job_array_nr: str) -> str:
     """Return a formatted string with the finishing time of a solver."""
     # If there is a solver that ended but did not make a result file this means that it
     # was manually cancelled or it gave an error the template will ensure that all
     # solver on that instance will be cancelled.
     time_in_format_str = '-1:00'
-    solutions_dir = str(sgh.pap_performance_data_tmp_path) + '/'
+    solutions_dir = 'f{str(sgh.pap_performance_data_tmp_path)}/'
     results = sfh.get_list_all_result_filename(solutions_dir)
 
     for result in results:
@@ -152,7 +155,7 @@ def find_finished_time_finished_solver(solver_array_list: list[str],
             finished_job_array_nr = finished_job_array_nr[
                 finished_job_array_nr.rfind('_')+1:]
 
-        if result.startswith(str(solver_array_list[int(finished_job_array_nr)])):
+        if result.startswith(solver_instance_list[int(finished_job_array_nr)]):
             result_file_path = solutions_dir + result
 
             with open(result_file_path, 'r') as result_file:
@@ -165,7 +168,7 @@ def find_finished_time_finished_solver(solver_array_list: list[str],
 
 def cancel_remaining_jobs(logging_file: str, job_id: str,
                           finished_solver_id_list: list[str],
-                          portfolio_size: int, solver_array_list: list[str],
+                          portfolio_size: int, solver_instance_list: list[str],
                           pending_job_with_new_cutoff: dict[str, int] = {}) -> (
                           dict[str, list[str]], dict[str, int]):
     """Cancel jobs past the cutoff, update cutoff time for jobs that should continue.
@@ -216,7 +219,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                     # Update the cutofftime of the to be cancelled job, if job if
                     # already past that it automatically stops.
                     newCutoffTime = find_finished_time_finished_solver(
-                        solver_array_list, finished_solver_id)
+                        solver_instance_list, finished_solver_id)
                     current_seconds = jobtime_to_seconds(remaining_jobs[job][0])
                     cutoff_seconds = jobtime_to_seconds(newCutoffTime)
                     actual_cutofftime = sgh.settings.get_general_target_cutoff_time()
@@ -250,7 +253,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
 
 
 def wait_for_finished_solver(logging_file: str, job_id: str,
-                             solver_array_list: list[str],
+                             solver_instance_list: list[str],
                              remaining_job_dict: dict[str, list[str]],
                              pending_job_with_new_cutoff: dict[str, int], started: bool,
                              portfolio_size: int) -> (list[str], dict[str, int], bool):
@@ -305,11 +308,11 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                                     if item not in unfinished_solver_list]
 
             for finished_solver in finished_solver_list:
-                newCutoffTime = find_finished_time_finished_solver(solver_array_list,
+                newCutoffTime = find_finished_time_finished_solver(solver_instance_list,
                                                                    finished_solver)
 
                 if newCutoffTime != '-1:00':
-                    log_statement = (f'{str(finished_solver)} finished succesfully or '
+                    log_statement = (f'{finished_solver} finished succesfully or '
                                      'has reached the cutoff time')
                     add_log_statement_to_file(logging_file, log_statement,
                                               str(newCutoffTime))
@@ -383,7 +386,7 @@ def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: i
 
     # Create target call
     target_call_str = ('Commands/sparkle_help/run_solvers_core.py --run-status-path '
-                       'Tmp/SBATCH_Parallel_Portfolio_Jobs/')
+                       f'{str(sgh.pap_sbatch_tmp_path)}')
 
     # Generate script
     ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,
@@ -397,12 +400,14 @@ def generate_SBATCH_job_list(solver_list: list[str], instance_path_list: list[st
                              num_jobs: int) -> (list[str], int, list[str], list[str]):
     """Generates a list of jobs to be executed in the sbatch script.
 
-    Returns parameters, new_num_jobs, solver_array_list, temp_solvers
+    Returns parameters, new_num_jobs, solver_instance_list, temp_solvers
+    solver_instance_list is a list of str containing the solver (including seed
+    variations) and instance combinations to run.
     """
     # The function generates the parameters used in the SBATCH script of the portfolio
     parameters = list()
     new_num_jobs = num_jobs
-    solver_array_list = list()
+    solver_instance_list = list()
     tmp_solver_instances = list()
     performance_measure = sgh.settings.get_general_performance_measure()
 
@@ -419,27 +424,27 @@ def generate_SBATCH_job_list(solver_list: list[str], instance_path_list: list[st
                     commandline = (f' --instance {str(instance_path)} --solver '
                                    f'{str(solver_path)} --performance-measure '
                                    f'{performance_measure.name} --seed {str(instance)}')
-                    parameters.append(str(commandline))
+                    parameters.append(commandline)
                     instance_name = Path(instance_path).name
-                    solver_array_list.append(
+                    solver_instance_list.append(
                         f'{solver_name}_seed_{str(instance)}_{instance_name}')
             else:
                 solver_path = Path(solver)
                 solver_name = solver_path.name
                 instance_name = Path(instance_path).name
-                solver_array_list.append(f'{solver_name}_{instance_name}')
+                solver_instance_list.append(f'{solver_name}_{instance_name}')
                 commandline = (f' --instance {str(instance_path)} --solver '
                                f'{str(solver_path)} --performance-measure '
                                f'{performance_measure.name}')
-                parameters.append(str(commandline))
+                parameters.append(commandline)
 
     temp_solvers = list(dict.fromkeys(tmp_solver_instances))
 
-    return (parameters, new_num_jobs, solver_array_list, temp_solvers)
+    return (parameters, new_num_jobs, solver_instance_list, temp_solvers)
 
 
 def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
-                                       job_id: str, solver_array_list: list[str],
+                                       job_id: str, solver_instance_list: list[str],
                                        sbatch_script_path: Path, portfolio_size: int,
                                        remaining_job_dict: dict[str, list[str]] = None,
                                        finished_instances_dict: dict[str, list[str, int]]
@@ -465,10 +470,22 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
             instance = sfh.get_last_level_directory_name(instance)
             finished_instances_dict[instance] = ['UNSOLVED', 0]
 
-    for finished_solver_files in os.listdir('Performance_Data/Tmp_PaP/'):
-        for instance in finished_instances_dict:
-            if str(instance) in str(finished_solver_files):
-                file_path = f'Performance_Data/Tmp_PaP/{str(finished_solver_files)}'
+    perf_data_tmp_path = sgh.pap_performance_data_tmp_path
+
+    # For each finished instance
+    for instance in finished_instances_dict:
+        # Check results for each solver
+        for solver_instance in solver_instance_list:
+            finished_solver_files = glob.glob(f'{str(perf_data_tmp_path)}/*'
+                                              f'{solver_instance}*result')
+            # If there is more than one result file for this solver-instance combination
+            # something went wrong (probably during cleanup).
+            if len(finished_solver_files) > 1:
+                print(f'ERROR: {str(len(finished_solver_files))} result files found for'
+                      f' {solver_instance} while there should be only one!')
+                sys.exit()
+            for finished_solver_file in finished_solver_files:
+                file_path = finished_solver_file
 
                 with open(file_path, 'r') as infile:
                     content = infile.readlines()
@@ -485,13 +502,14 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                         print(f'c {str(instance)} has been solved in '
                               f'{str(content[2].strip())} seconds!')
 
-                        for temp_files in os.listdir('Tmp/'):
+                        for temp_files in os.listdir(sgh.sparkle_tmp_path):
                             temp_file_match = str(sfh.get_file_name(content[1].strip()))
 
                             if (temp_file_match in str(temp_files.strip()) and
                                     sfh.get_file_least_extension(str(temp_files.strip()))
                                     == 'rawres'):
-                                rawres_file_path = 'Tmp/' + str(temp_files.strip())
+                                rawres_file_path = (sgh.sparkle_tmp_path
+                                                    + str(temp_files.strip()))
 
                                 with open(rawres_file_path, 'r') as rawres_file:
                                     raw_content = rawres_file.readlines()
@@ -520,19 +538,19 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
     # Monitors the running jobs waiting for a solver that finishes
     finished_solver_id_list, pending_job_with_new_cutoff, started = (
         wait_for_finished_solver(
-            logging_file, job_id, solver_array_list, remaining_job_dict,
+            logging_file, job_id, solver_instance_list, remaining_job_dict,
             pending_job_with_new_cutoff, started, portfolio_size))
 
     # Handles the updating of all jobs within the portfolios of which contain a finished
     # job
     remaining_job_dict, pending_job_with_new_cutoff = cancel_remaining_jobs(
-        logging_file, job_id, finished_solver_id_list, portfolio_size, solver_array_list,
-        pending_job_with_new_cutoff)
+        logging_file, job_id, finished_solver_id_list, portfolio_size,
+        solver_instance_list, pending_job_with_new_cutoff)
 
     # If there are still unfinished jobs recursively handle the remaining jobs.
     if len(remaining_job_dict) > 0:
         handle_waiting_and_removal_process(instances, logging_file, job_id,
-                                           solver_array_list, sbatch_script_path,
+                                           solver_instance_list, sbatch_script_path,
                                            portfolio_size, remaining_job_dict,
                                            finished_instances_dict,
                                            pending_job_with_new_cutoff, started)
@@ -540,13 +558,28 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
     return True
 
 
+def remove_result_files(instances: list[str]):
+    """Remove existing results for given instances."""
+    for instance in instances:
+        instance = Path(instance).name
+        cmd_line = f'rm -f {str(sgh.pap_performance_data_tmp_path)}/*_{instance}_*'
+        os.system(cmd_line)
+        cmd_line = f'rm -f {str(sgh.sparkle_tmp_path)}*_{instance}_*'
+        os.system(cmd_line)
+
+    return
+
+
 def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     """Run the parallel algorithm portfolio and return whether this was successful."""
+    # Remove existing result files
+    remove_result_files(instances)
+
     solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
     num_jobs = len(solver_list) * len(instances)
 
     # Makes SBATCH scripts for all individual solvers in a list
-    parameters, num_jobs, solver_array_list, temp_solvers = generate_SBATCH_job_list(
+    parameters, num_jobs, solver_instance_list, temp_solvers = generate_SBATCH_job_list(
         solver_list, instances, num_jobs)
 
     # Generates a SBATCH script which uses the created parameters
@@ -569,7 +602,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
 
         if(sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
-                                               solver_array_list, sbatch_script_path,
+                                               solver_instance_list, sbatch_script_path,
                                                num_jobs/len(instances))
             now = datetime.datetime.now()
             current_time = now.strftime("%H:%M:%S")
@@ -580,8 +613,9 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
 
             # After all jobs have finished remove/extract the files in temp only needed
             # for the running of the portfolios.
-            # remove_temp_files_unfinished_solvers(solver_array_list, sbatch_script_path,
-            #                                      temp_solvers)
+            remove_temp_files_unfinished_solvers(solver_instance_list,
+                                                 sbatch_script_path,
+                                                 temp_solvers)
         else:
             done = False
             wait_cutoff_time = False
@@ -616,11 +650,11 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
             instance = sfh.get_last_level_directory_name(instance)
             finished_instances_dict[instance] = ['UNSOLVED', 0]
 
-        for finished_solver_files in os.listdir('Performance_Data/Tmp_PaP/'):
+        tmp_res_files = glob.glob(f'{str(sgh.pap_performance_data_tmp_path)}/*.result')
+        for finished_solver_files in tmp_res_files:
             for instance in finished_instances_dict:
                 if str(instance) in str(finished_solver_files):
-                    file_path = (str('Performance_Data/Tmp_PaP/')
-                                 + str(finished_solver_files))
+                    file_path = (f'{str(finished_solver_files)}')
 
                     with open(file_path, 'r') as infile:
                         content = infile.readlines()
