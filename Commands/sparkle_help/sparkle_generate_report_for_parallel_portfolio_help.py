@@ -517,7 +517,7 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
     os.system(compile_command)
     os.system(compile_command)
 
-    report_path = Path(f'{latex_directory_path}{latex_report_filename}.pdf')
+    report_path = Path(f'{latex_directory_path}/{latex_report_filename}.pdf')
     print(f'c Report is placed at: {report_path}')
     sl.add_output(str(report_path), 'Sparkle parallel portfolio report')
 

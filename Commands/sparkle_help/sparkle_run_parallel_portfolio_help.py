@@ -562,9 +562,9 @@ def remove_result_files(instances: list[str]):
     """Remove existing results for given instances."""
     for instance in instances:
         instance = Path(instance).name
-        cmd_line = f'rm -f {str(sgh.pap_performance_data_tmp_path)}/*_{instance}_*'
+        cmd_line = f'rm -f {str(sgh.pap_performance_data_tmp_path)}/*_{instance}_*.*'
         os.system(cmd_line)
-        cmd_line = f'rm -f {str(sgh.sparkle_tmp_path)}*_{instance}_*'
+        cmd_line = f'rm -f {str(sgh.sparkle_tmp_path)}*_{instance}_*.*'
         os.system(cmd_line)
 
     return
