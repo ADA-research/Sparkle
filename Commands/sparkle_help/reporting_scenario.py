@@ -178,7 +178,7 @@ class ReportingScenario:
 		return
 
 
-	def list_setter(self, section: str, name: str, value: list):
+	def list_setter(self, section: str, name: str, value: list[str]):
 		"""Write generic lists to the scenario file."""
 		if value != None:
 			self.__init_section(section)

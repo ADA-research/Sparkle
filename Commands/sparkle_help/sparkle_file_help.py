@@ -208,7 +208,8 @@ def get_list_all_csv_filename(filepath):
 			csv_list.append(list_all_items[i])
 	return csv_list
 
-def get_list_all_result_filename(filepath) -> list[str]:
+def get_list_all_result_filename(filepath: str) -> list[str]:
+	"""Return a list of result files in a given path."""
 	result_list = []
 	if not os.path.exists(filepath):
 		return result_list
@@ -216,7 +217,7 @@ def get_list_all_result_filename(filepath) -> list[str]:
 	list_all_items = os.listdir(filepath)
 	for i in range(0, len(list_all_items)):
 		file_extension = get_file_least_extension(list_all_items[i])
-		if file_extension == r'result':
+		if file_extension == 'result':
 			result_list.append(list_all_items[i])
 	return result_list
 

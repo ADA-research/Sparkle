@@ -5,7 +5,7 @@ from pathlib import Path
 from sparkle_help import sparkle_file_help as sfh
 
 
-def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list) -> bool:
+def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -> bool:
     """Creates a file containing the list of solvers within the given portfolio path."""
     empty_file = f'{sparkle_parallel_portfolio_path}/solvers.txt'
     sfh.create_new_empty_file(str(empty_file))
@@ -21,7 +21,8 @@ def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list) -> boo
 
 
 def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
-                                         overwrite: bool, list_of_solvers: list) -> bool:
+                                         overwrite: bool,
+                                         list_of_solvers: list[str]) -> bool:
     """Create the parallel portfolio by preparing a directory and the solver list."""
     if sparkle_parallel_portfolio_path.is_dir():
         if overwrite:
