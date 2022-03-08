@@ -165,7 +165,12 @@ def get_VBSPAR10():
 	return str_value
 
 
-def get_actualPAR10():
+def get_actualPAR10() -> str:
+	"""
+	Computes the mean performance over the individual performances over a set of instances.
+
+	@return string formatted mean performance.
+	"""
 	performance_dict = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 	mean_performance = sum(performance_dict.values()) / len(performance_dict)
 	return str(mean_performance)
@@ -194,17 +199,12 @@ def get_dict_vbs_penalty_time_on_each_instance():
 	return mydict
 
 
-def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
-	# # FOR DEBUGGING
-	# if os.path.isfile("cache.pickle"):
-	# 	try:
-	# 		fh = open("cache.pickle", "rb")
-	# 		mydict = pickle.load(fh)
-	# 		fh.close()
-	# 		return mydict
-	# 	except:
-	# 		pass
+def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict:
+	"""
+	Makes a dictionary with the performance of the portfolio selector on each instance
 
+	@return A dictionary with for each instance the portfolio selector's performance
+	"""
 	mydict = {}
 	performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path)
 	actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
@@ -216,16 +216,14 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance():
 			mydict[instance] = used_time_for_this_instance
 		else:
 			mydict[instance] = sgh.settings.get_penalised_time()
-
-	# FOR DEBUGGING
-	# fh = open("cache.pickle", "wb")
-	# pickle.dump(mydict, fh)
-	# fh.close()
-
 	return mydict
 
 
-def get_figure_portfolio_selector_sparkle_vs_sbs():
+def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
+	"""
+	Creates a comparison plot of performance between the portfolio selector and the single best solver for each instance.
+	@return the LaTeX code to include the figure.
+	"""
 	dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 
@@ -252,12 +250,17 @@ def get_figure_portfolio_selector_sparkle_vs_sbs():
 							 limit_min=0.25,
 							 limit_max=0.25,
 							 penalty_time=sgh.settings.get_penalised_time(),
+							 replace_zeros=True,
 							 cwd=latex_directory_path)
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_sbs_filename)
 	return str_value
 
 
-def get_figure_portfolio_selector_sparkle_vs_vbs():
+def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
+	"""
+	Creates a comparison plot of performance between the portfolio selector and the virtual best solver for each instance.
+	@return the LaTeX code to include the figure.
+	"""
 	dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
 	dict_actual_portfolio_selector_penalty_time_on_each_instance = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 
@@ -280,6 +283,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs():
 							 limit_min=0.25,
 							 limit_max=0.25,
 							 penalty_time=sgh.settings.get_penalised_time(),
+							 replace_zeros=True,
 							 cwd=latex_directory_path)
 
 	str_value = '\\includegraphics[width=0.6\\textwidth]{%s}' % (figure_portfolio_selector_sparkle_vs_vbs_filename)
@@ -481,29 +485,8 @@ def generate_report(test_case_directory: str = None):
 	return
 
 
-'''
-	Helper function to create comparison plots between two different solvers/portfolios
-
-	Arguments:
-	points: list of points which represents with the performance results of (solverA, solverB)
-	xlabel: Name of solverA (default: default)
-	ylabel: Name of solverB (default: optimised)
-	title: Display title in the image (default: None)
-	scale: [linear, log] (default: linear)
-
-	limit: Approach of choosing limits for the figure [absolute, relative, magnitude] (default: relative)
-		absolute: Takes the absolute value as min/max
-		relative: Multiplies the min/max value from the points and divides/multiplies the value with those for min/max
-		magnitude: Increases the order of magnitude(10) of the min/max values in the points
-	limit_min, limit_max: values used to compute the limits
-	output: filepath to save the figure
-	penalty_time: Acts a the maximum value the figure takes in consideration for computing the figure limits
-	drop_zeros: Remove points with a value of 0
-	magnitude_lines: Draw magnitude lines (only supported for log scale)
-	cwd: working directory to place the figure 
-'''
-def generate_comparison_plot(points,
-							 output_file,
+def generate_comparison_plot(points: list,
+							 figure_filename: str,
 							 xlabel: str = "default",
 							 ylabel: str = "optimised",
 							 title: str = "",
@@ -512,9 +495,32 @@ def generate_comparison_plot(points,
 							 limit_min: float = 0.2,
 							 limit_max: float = 0.2,
 							 penalty_time: float = None,
-							 drop_zeros: bool= True,
-							 magnitude_lines = sgh.sparkle_maximum_int,
+							 replace_zeros: bool= True,
+							 magnitude_lines: int = sgh.sparkle_maximum_int,
 							 cwd=None):
+	"""
+	Helper function to create comparison plots between two different solvers/portfolios
+
+	Arguments:
+	points: list of points which represents with the performance results of (solverA, solverB)
+	figure_filename: filename without filetype (e.g., .jpg) to save the figure to.
+	xlabel: Name of solverA (default: default)
+	ylabel: Name of solverB (default: optimised)
+	title: Display title in the image (default: None)
+	scale: [linear, log] (default: linear)
+	limit: The method to compute the axis limits in the figure [absolute, relative, magnitude] (default: relative)
+		absolute: Uses the limit_min/max values as absolute values
+		relative: Decreases/increases relatively to the min/max values found in the points.
+					(e.g., min/limit_min and max*limit_max)
+		magnitude: Increases the order of magnitude(10) of the min/max values in the points
+					(e.g., 10**floor(log10(min)-limit_min) and 10**ceil(log10(max)+limit_max) )
+	limit_min, limit_max: values used to compute the limits
+	penalty_time: Acts as the maximum value the figure takes in consideration for computing the figure limits. This is
+					only relevant for runtime objectives
+	replace_zeros: Replaces zeros valued performances to a very small value to make plotting on log-scale possible
+	magnitude_lines: Draw magnitude lines (only supported for log scale)
+	cwd: directory path to place the figure and its intermediate files in (default: current working directory)
+	"""
 
 	pwd = os.getcwd()
 	if cwd is not None:
@@ -522,7 +528,7 @@ def generate_comparison_plot(points,
 		print("Changed cwd to {}".format(os.getcwd()))
 
 	points = np.array(points)
-	if drop_zeros:
+	if replace_zeros:
 		zero_runtime = 0.000001 #microsecond
 		check_zeros = np.count_nonzero(points <= 0)
 		if check_zeros != 0:
@@ -530,9 +536,8 @@ def generate_comparison_plot(points,
 		points[points == 0] = zero_runtime
 
 	# process labels
-	# TODO handle other special characters like $^
-	xlabel = xlabel.replace("_", "\\_")  # LaTeX save formatting
-	ylabel = ylabel.replace("_", "\\_")  # LaTeX save formatting
+	xlabel = xlabel.replace("_", "\\_").replace("$", "\\$").replace("^", "\\^")  # LaTeX safe formatting
+	ylabel = ylabel.replace("_", "\\_").replace("$", "\\$").replace("^", "\\^")  # LaTeX safe formatting
 
 	# process range values
 	min_point_value = np.min(points)
@@ -554,56 +559,55 @@ def generate_comparison_plot(points,
 	if scale == "log" and np.min(points) <= 0:
 		raise Exception("Cannot plot negative and zero values on a log scales")
 
-	output_data_file = f"{output_file}.dat"
-	output_gnuplot_script = f"{output_file}.plt"
-	output_eps_file = f"{output_file}.eps"
+	output_data_file = f"{figure_filename}.dat"
+	output_gnuplot_script = f"{figure_filename}.plt"
+	output_eps_file = f"{figure_filename}.eps"
 
 	# Create data file
-	fout = open(output_data_file, 'w')
-	for point in points:
-		fout.write(" ".join([str(c) for c in point]) + "\n")
-	fout.close()
+	with open(output_data_file, 'w') as fout:
+		for point in points:
+			fout.write(" ".join([str(c) for c in point]) + "\n")
+		fout.close()
 
-	# Generate plots script
-	fout = open(output_gnuplot_script, 'w')
-	fout.write(f"set xlabel '{xlabel}'\n")
-	fout.write(f"set ylabel '{ylabel}'\n")
-	fout.write(f"set title '{title}'\n")
-	fout.write("unset key\n")
-	fout.write(f"set xrange [{min_value}:{max_value}]\n")
-	fout.write(f"set yrange [{min_value}:{max_value}]\n")
-	if scale == "log":
-		fout.write("set logscale x\n")
-		fout.write("set logscale y\n")
-	fout.write("set grid lc rgb '#CCCCCC' lw 2\n")
-	fout.write("set size square\n")
-	fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value} nohead lc rgb '#AAAAAA'\n")
-	#TODO magnitude lines for linear scale
-	if magnitude_lines > 0 and scale == "log":
-		for order in range(magnitude_lines):
-			order += 1
-			min_shift = min_value * 10 ** order
-			max_shift = 10**(np.log10(max_value)-order)
+	# Generate plot script
+	with open(output_gnuplot_script, 'w') as fout:
+		fout.write(f"set xlabel '{xlabel}'\n")
+		fout.write(f"set ylabel '{ylabel}'\n")
+		fout.write(f"set title '{title}'\n")
+		fout.write("unset key\n")
+		fout.write(f"set xrange [{min_value}:{max_value}]\n")
+		fout.write(f"set yrange [{min_value}:{max_value}]\n")
+		if scale == "log":
+			fout.write("set logscale x\n")
+			fout.write("set logscale y\n")
+		fout.write("set grid lc rgb '#CCCCCC' lw 2\n")
+		fout.write("set size square\n")
+		fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value} nohead lc rgb '#AAAAAA'\n")
+		#TODO magnitude lines for linear scale
+		if magnitude_lines > 0 and scale == "log":
+			for order in range(magnitude_lines):
+				order += 1
+				min_shift = min_value * 10 ** order
+				max_shift = 10**(np.log10(max_value)-order)
+				if min_shift >= max_value: #Outside plot
+					#Only print magnitude lines if the fall within the visible plotting area.
+					break
 
-			if min_shift >= max_value: #Outside plot
-				break
+				fout.write(f"set arrow from {min_value},{min_shift} to {max_shift},{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n")
+				fout.write(f"set arrow from {min_shift},{min_value} to {max_value},{max_shift} nohead lc rgb '#CCCCCC' dashtype '-'\n")
 
-			fout.write(f"set arrow from {min_value},{min_shift} to {max_shift},{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n")
-			fout.write(f"set arrow from {min_shift},{min_value} to {max_value},{max_shift} nohead lc rgb '#CCCCCC' dashtype '-'\n")
+		if penalty_time is not None:
+			fout.write(f"set arrow from {min_value},{penalty_time} to {max_value},{penalty_time} nohead lc rgb '#AAAAAA'\n")
+			fout.write(f"set arrow from {penalty_time},{min_value} to {penalty_time},{max_value} nohead lc rgb '#AAAAAA'\n")
 
-	if penalty_time is not None:
-		fout.write(f"set arrow from {min_value},{penalty_time} to {max_value},{penalty_time} nohead lc rgb '#AAAAAA'\n")
-		fout.write(f"set arrow from {penalty_time},{min_value} to {penalty_time},{max_value} nohead lc rgb '#AAAAAA'\n")
-
-	# fout.write('set arrow from 0.01,0.01 to %s,%s nohead lc rgb \'black\'' % (penalty_time, penalty_time) + '\n')
-	fout.write("set terminal postscript eps color solid linewidth \"Helvetica\" 20\n")
-	fout.write(f"set output '{output_eps_file}\n")
-	fout.write(f"set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n")
-	fout.write(f"plot '{output_data_file}' ls 1\n")
-	fout.close()
+		fout.write("set terminal postscript eps color solid linewidth \"Helvetica\" 20\n")
+		fout.write(f"set output '{output_eps_file}\n")
+		fout.write(f"set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n")
+		fout.write(f"plot '{output_data_file}' ls 1\n")
+		fout.close()
 
 	# Make figure
-	cmd = "gnuplot \'%s\'" % (output_gnuplot_script)
+	cmd = f"gnuplot \'{output_gnuplot_script}\'"
 	os.system(cmd)
 
 	# Some systems are missing epstopdf so a copy is included
