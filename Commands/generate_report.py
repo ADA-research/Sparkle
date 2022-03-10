@@ -159,7 +159,6 @@ if __name__ == r"__main__":
 
         print(r"c Generating report ...")
         generate_task_run_status()
-
         if test_case_directory is None:
             sgrh.generate_report()
             print(r"c Report generated ...")
