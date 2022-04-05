@@ -133,7 +133,8 @@ if __name__ == r"__main__":
                 if row.empty:
                     print("c no feature data exists for the given training set, please run add_feature_extractor.py, then compute_features.py")
                     sys.exit()
-                data_dict[label] = row
+                newLabel = '../../instances/' + set_name + '/' + os.path.split(label)[1]
+                data_dict[newLabel] = row
 
         feature_data_df = DataFrame.from_dict(data_dict, orient='index',columns=feature_data_df.columns)
         if feature_data_df.isnull().values.any():
@@ -200,7 +201,7 @@ if __name__ == r"__main__":
     )
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver_name, instance_set_train_name)
-        feature_file_name = smac_solver_dir + '_' + instance_set_train_name + '_features.csv'
+        feature_file_name = smac_solver_dir +  instance_set_train_name + '_' + 'features.csv'
         feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
 
     scsh.handle_file_instance(
