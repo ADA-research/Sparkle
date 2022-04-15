@@ -35,7 +35,7 @@ if __name__ == r"__main__":
     args = parser.parse_args()
 
     if args.job_id is not None:
-        sjh.wait_for_job(job_id)
+        sjh.wait_for_job(args.job_id)
     elif args.command is not None:
         command = CommandName.from_str(args.command)
         sjh.wait_for_dependencies(command)
