@@ -33,12 +33,11 @@ if __name__ == r"__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    job_id = args.job_id
-    command = CommandName.from_str(args.command)
 
-    if job_id is not None:
+    if args.job_id is not None:
         sjh.wait_for_job(job_id)
-    elif command is not None:
+    elif args.command is not None:
+        command = CommandName.from_str(args.command)
         sjh.wait_for_dependencies(command)
     else:
         sjh.wait_for_all_jobs()
