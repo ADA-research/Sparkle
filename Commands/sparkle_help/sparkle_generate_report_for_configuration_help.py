@@ -258,14 +258,15 @@ def get_ablationBool(solver_name, instance_train_name, instance_test_name):
 
     return ablation_bool
 
+# checks the scenario file for if a feature file is given
 def get_featuresBool(solver_name, instance_set_train_name):
     scenario_file = get_smac_solver_dir(solver_name, instance_set_train_name) + solver_name + r'_' + instance_set_train_name + r'_scenario.txt'
-    featuresBool = False
+    features_bool = r'\featuresfalse'
     with open(scenario_file, 'r') as f:
         for line in f.readlines():
             if line.split(' ')[0] == 'feature_file':
-                featuresBool = True
-    return featuresBool
+                features_bool = r'\featurestrue'
+    return features_bool
 
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float) -> list:
@@ -608,7 +609,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
     common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name, ablation_validation_name)
     
     variable = r'featuresBool'
-    common_dict[variable] = get_featuresBool(solver_name, instance_set_train_name, ablation_validation_name)
+    common_dict[variable] = get_featuresBool(solver_name, instance_set_train_name)
 
     return common_dict
 
