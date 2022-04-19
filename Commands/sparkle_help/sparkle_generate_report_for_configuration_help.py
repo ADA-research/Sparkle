@@ -289,6 +289,9 @@ def get_featureExtractorList():
 		str_value += r'\item \textbf{' + extractor_name + r'}' + '\n'
 	return str_value
 
+def get_featureComputationCutoffTime():
+	str_value = str(sgh.settings.get_general_extractor_cutoff_time())
+	return str_value
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float) -> list:
     """
@@ -531,6 +534,10 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 
         variable = r'featureExtractorList'
         str_value = get_featureExtractorList()
+        full_dict[variable] = str_value
+
+        variable = r'featureComputationCutoffTime'
+        str_value = get_featureComputationCutoffTime()
         full_dict[variable] = str_value
 
     return full_dict
