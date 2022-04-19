@@ -14,6 +14,8 @@ import os
 import sys
 from pathlib import Path
 
+from numpy import full
+
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
@@ -268,6 +270,25 @@ def get_featuresBool(solver_name, instance_set_train_name):
                 features_bool = r'\featurestrue'
     return features_bool
 
+def get_numFeatureExtractors():
+	num_feature_extractors = len(sgh.extractor_list)
+	str_value = str(num_feature_extractors)
+
+	if int(str_value) < 1:
+		print('ERROR: No feature extractors found, report generation failed!')
+		sys.exit()
+
+	return str_value
+
+
+def get_featureExtractorList():
+	str_value = r''
+	extractor_list = sgh.extractor_list
+	for extractor_path in extractor_list:
+		extractor_name = sfh.get_file_name(extractor_path)
+		str_value += r'\item \textbf{' + extractor_name + r'}' + '\n'
+	return str_value
+
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float) -> list:
     """
@@ -502,6 +523,15 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
 
     if not ablation:
         full_dict["ablationBool"] = r'\ablationfalse'
+
+    if full_dict[r"featuresBool"]:
+        variable = r'numFeatureExtractors'
+        str_value = get_numFeatureExtractors()
+        full_dict[variable] = str_value
+
+        variable = r'featureExtractorList'
+        str_value = get_featureExtractorList()
+        full_dict[variable] = str_value
 
     return full_dict
 

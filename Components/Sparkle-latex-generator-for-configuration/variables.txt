@@ -26,3 +26,5 @@
 @@ablationBool@@
 @@ablationPath@@
 @@featuresBool@@
+@@featureExtractorList@@
+@@numFeatureExtractors@@
