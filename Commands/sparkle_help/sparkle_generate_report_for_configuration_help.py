@@ -20,6 +20,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_run_ablation_help as sah
 from sparkle_help.sparkle_generate_report_help import generate_comparison_plot
+from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
 
 def get_customCommands():
@@ -256,6 +257,15 @@ def get_ablationBool(solver_name, instance_train_name, instance_test_name):
         ablation_bool = r'\ablationfalse'
 
     return ablation_bool
+
+def get_featuresBool(solver_name, instance_set_train_name):
+    scenario_file = get_smac_solver_dir(solver_name, instance_set_train_name) + solver_name + r'_' + instance_set_train_name + r'_scenario.txt'
+    featuresBool = False
+    with open(scenario_file, 'r') as f:
+        for line in f.readlines():
+            if line.split(' ')[0] == 'feature_file':
+                featuresBool = True
+    return featuresBool
 
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float) -> list:
@@ -596,6 +606,9 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
 
     variable = r'ablationPath'
     common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name, ablation_validation_name)
+    
+    variable = r'featuresBool'
+    common_dict[variable] = get_featuresBool(solver_name, instance_set_train_name, ablation_validation_name)
 
     return common_dict
 
