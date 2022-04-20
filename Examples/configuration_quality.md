@@ -9,6 +9,7 @@
 Add train, and optionally test, instances (in this case for the VRP) in a given directory, without running solvers or feature extractors yet
 
 `Commands/add_instances.py Examples/Resources/CVRP/Instances/X-1-10/`
+
 `Commands/add_instances.py Examples/Resources/CVRP/Instances/X-11-20/`
 
 ## Add a configurable solver

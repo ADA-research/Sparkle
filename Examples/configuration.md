@@ -9,6 +9,7 @@
 Add train, and optionally test, instances (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
 
 `Commands/add_instances.py Examples/Resources/Instances/PTN/`
+
 `Commands/add_instances.py Examples/Resources/Instances/PTN2/`
 
 ## Add a configurable solver
