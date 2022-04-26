@@ -31,7 +31,7 @@ The rest of the dependencies can installed and activated with
   $ conda activate sparkle
 ```
 
-For detailed instalation instructions see the documentation: https://sparkle-ai.readthedocs.io/
+For detailed installation instructions see the documentation: https://sparkle-ai.readthedocs.io/
 
 ## Examples
 
