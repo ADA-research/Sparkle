@@ -117,8 +117,11 @@ status = 'CRASHED'
 for line in output_list:
     line = line.strip()
 
-    if (line == 's SATISFIABLE') or (line == 's UNSATISFIABLE'):
-        status = 'SUCCESS'
+    if (line == 's SATISFIABLE'):
+        status = 'SAT'
+        break
+    elif  (line == 's UNSATISFIABLE'):
+        status = 'UNSAT'
         break
     elif line.startswith('c the file does not exist:'):
         status = 'CRASHED'
