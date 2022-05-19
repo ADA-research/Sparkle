@@ -17,13 +17,9 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_command_help import CommandName
 
 def parser_function():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "solver_path",
-        metavar="solver-path",
-        type=str,
-        help="path to the solver"
-    )
+    parser = argparse.ArgumentParser(
+        description="Add a solver to the Sparkle platform.",
+        epilog="")
     parser.add_argument(
         "--deterministic",
         required=True,
@@ -53,6 +49,12 @@ def parser_function():
         "--parallel",
         action="store_true",
         help="run the solver on multiple instances in parallel",
+    )
+    parser.add_argument(
+        "solver_path",
+        metavar="solver-path",
+        type=str,
+        help="path to the solver"
     )
 
     return parser

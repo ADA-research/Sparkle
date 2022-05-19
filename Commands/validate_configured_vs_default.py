@@ -19,7 +19,9 @@ from sparkle_help.reporting_scenario import Scenario
 from sparkle_help.sparkle_command_help import CommandName
 
 def parser_function():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Test the performance of the configured solver and the default solver by doing validation \
+        experiments on the training and test sets.")
     parser.add_argument(
         "--solver",
         required=True,

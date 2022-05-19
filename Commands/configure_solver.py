@@ -19,7 +19,9 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
 def parser_function():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Configure a solver in the Sparkle platform.",
+        epilog="Note that the test instance set is only used if the ``-–ablation`` or ``–-validation`` flags are given.")
     parser.add_argument(
         "--validate",
         required=False,

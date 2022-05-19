@@ -18,7 +18,10 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
 
 def parser_function():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Runs parameter importance between the default and configured parametersn with ablation. This \
+        command requires a finished configuration for the solver instance pair.",
+        epilog="Note that if no test instance set is given, the validation is performed on the training set.")
     parser.add_argument("--solver", required=False, type=str, help="path to solver")
     parser.add_argument(
         "--instance-set-train",
