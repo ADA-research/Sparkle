@@ -13,6 +13,7 @@ Sparkle's documentation!
 
    userguide/userguide
    examples/examples
+..
    _generated/modules
 
 .. 
