@@ -17,16 +17,7 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_instances_help as sih
 
-
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "instances_path",
@@ -70,6 +61,19 @@ if __name__ == r"__main__":
         action="store_true",
         help="run the solvers and feature extractor on multiple instances in parallel",
     )
+
+    return parser
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

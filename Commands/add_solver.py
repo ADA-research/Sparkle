@@ -16,16 +16,7 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_command_help import CommandName
 
-
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "solver_path",
@@ -37,7 +28,7 @@ if __name__ == r"__main__":
         "--deterministic",
         required=True,
         type=int,
-        choices=range(0, 2),
+        choices=["0", "1"],
         help="indicate whether the solver is deterministic or not",
     )
     group_solver_run = parser.add_mutually_exclusive_group()
@@ -63,6 +54,19 @@ if __name__ == r"__main__":
         action="store_true",
         help="run the solver on multiple instances in parallel",
     )
+
+    return parser
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

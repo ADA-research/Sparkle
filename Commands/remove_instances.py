@@ -11,12 +11,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_instances_help as sih
 
-
-if __name__ == r"__main__":
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "instances_path",
@@ -29,6 +24,15 @@ if __name__ == r"__main__":
         action="store_true",
         help="if given instances_path is used as a nickname for the instance set",
     )
+    return parser
+
+
+if __name__ == r"__main__":
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

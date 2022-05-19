@@ -15,6 +15,43 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 
 
+def parser_function():
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--perfect",
+        action="store_true",
+        help="compute the marginal contribution for the perfect selector",
+    )
+    group.add_argument(
+        "--actual",
+        action="store_true",
+        help="compute the marginal contribution for the actual selector",
+    )
+    parser.add_argument(
+        "--recompute",
+        action="store_true",
+        help=("force marginal contribution to be recomputed even when it already exists"
+              " in file for for the current selector"),
+    )
+    parser.add_argument(
+        "--performance-measure",
+        choices=PerformanceMeasure.__members__,
+        default=sgh.settings.DEFAULT_general_performance_measure,
+        action=ac.SetByUser,
+        help="the performance measure, e.g. runtime",
+    )
+    parser.add_argument(
+        "--settings-file",
+        type=Path,
+        default=sgh.settings.DEFAULT_settings_path,
+        action=ac.SetByUser,
+        help=("specify the settings file to use in case you want to use one other than"
+              " the default"),
+    )
+
+    return parser
+
 def compute_perfect(flag_recompute: bool = False) -> List[Tuple[str, float]]:
     print(
         r"c Start computing each solver's marginal contribution to perfect selector ..."
@@ -63,39 +100,7 @@ if __name__ == r"__main__":
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "--perfect",
-        action="store_true",
-        help="compute the marginal contribution for the perfect selector",
-    )
-    group.add_argument(
-        "--actual",
-        action="store_true",
-        help="compute the marginal contribution for the actual selector",
-    )
-    parser.add_argument(
-        "--recompute",
-        action="store_true",
-        help=("force marginal contribution to be recomputed even when it already exists"
-              " in file for for the current selector"),
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than"
-              " the default"),
-    )
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

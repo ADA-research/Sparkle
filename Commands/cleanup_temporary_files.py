@@ -5,6 +5,10 @@ import sys
 import argparse
 from sparkle_help import sparkle_logging as sl
 
+def parser_function():
+    parser = argparse.ArgumentParser()
+
+    return parser
 
 def remove_temporary_files():
     command_line = "rm -rf Commands/sparkle_help/*.pyc"
@@ -51,7 +55,7 @@ if __name__ == "__main__":
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = argparse.ArgumentParser()
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

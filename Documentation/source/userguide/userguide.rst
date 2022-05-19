@@ -312,131 +312,139 @@ Currently the commands below are available in Sparkle (listed
 alphabetically). Every command can be called with the ``–help`` option
 to get a description of the required arguments and other options.
 
-*  about.py
-*  add_feature_extractor.py
-*  add_instances.py
-*  :ref:`cmd:add_solver`
-*  cleanup_current_sparkle_platform.py
-*  cleanup_temporary_files.py
-*  compute_features_parallel.py
-*  compute_features.py
-*  compute_marginal_contribution.py
-*  :ref:`cmd:configure_solver`
-*  construct_sparkle_portfolio_selector.py
-*  :ref:`cmd:generate_report`
-*  :ref:`cmd:initialise`
-*  load_record.py
-*  remove_feature_extractor.py
-*  remove_instances.py
-*  remove_record.py
-*  remove_solver.py
-*  run_ablation.py
-*  run_solvers.py
-*  run_sparkle_portfolio_selector.py
-*  run_status.py
-*  save_record.py
-*  system_status.py
-*  :ref:`cmd:validate_configured_vs_default`
+..
+    Commented out!
+    *  about.py
+    *  add_feature_extractor
+    *  add_instances.py
+    *  :ref:`cmd:add_solver`
+    *  cleanup_current_sparkle_platform.py
+    *  cleanup_temporary_files.py
+    *  compute_features_parallel.py
+    *  compute_features.py
+    *  compute_marginal_contribution.py
+    *  :ref:`cmd:configure_solver`
+    *  construct_sparkle_portfolio_selector.py
+    *  :ref:`cmd:generate_report`
+    *  :ref:`cmd:initialise`
+    *  load_record.py
+    *  remove_feature_extractor.py
+    *  remove_instances.py
+    *  remove_record.py
+    *  remove_solver.py
+    *  run_ablation.py
+    *  run_solvers.py
+    *  run_sparkle_portfolio_selector.py
+    *  run_status.py
+    *  save_record.py
+    *  system_status.py
+    *  :ref:`cmd:validate_configured_vs_default`
+
+.. include:: commandlist.rst
 
 Arguments in [square brackets] are optional, arguments without brackets
 are mandatory. Input in <chevrons> indicate required text input, {curly
 brackets} indicate a set of inputs to choose from.
 
-.. _cmd:add_solver:
+.. include:: commandsautoprogram.rst
 
-``add_solver.py``
------------------
+..
+    Commented out
+    .. _cmd:add_solver:
 
-Add a solver to the Sparkle platform.
+    ``add_solver.py``
+    -----------------
 
-Arguments:
+    Add a solver to the Sparkle platform.
 
-*  ``[-–run-solver-later]``
-*  ``[-–run-solver-now]``
-*  ``[-–parallel]``
-*  ``–-deterministic {0, 1}``
-*  ``<solver_source_directory>``
+    Arguments:
 
-.. _cmd:configure_solver:
+    *  ``[-–run-solver-later]``
+    *  ``[-–run-solver-now]``
+    *  ``[-–parallel]``
+    *  ``–-deterministic {0, 1}``
+    *  ``<solver_source_directory>``
 
-``configure_solver.py``
------------------------
+    .. _cmd:configure_solver:
 
-Configure a solver in the Sparkle platform.
+    ``configure_solver.py``
+    -----------------------
 
-Arguments:
+    Configure a solver in the Sparkle platform.
 
-*  ``–-solver <solver>``
-*  ``–-instance-set-train <instance-set-train>``
-*  ``[-–instance-set-test <instance-set-test>]``
-*  ``–-validate``
-*  ``–-ablation``
+    Arguments:
 
-Note that the test instance set is only used if the ``-–ablation`` or
-``–-validation`` flags are given.
+    *  ``–-solver <solver>``
+    *  ``–-instance-set-train <instance-set-train>``
+    *  ``[-–instance-set-test <instance-set-test>]``
+    *  ``–-validate``
+    *  ``–-ablation``
 
-.. _cmd:generate_report:
+    Note that the test instance set is only used if the ``-–ablation`` or
+    ``–-validation`` flags are given.
 
-``generate_report.py``
-----------------------
+    .. _cmd:generate_report:
 
-Without any arguments a report for the most recent algorithm selection
-or algorithm configuration procedure is generated.
+    ``generate_report.py``
+    ----------------------
 
-Generate a configuration report
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Without any arguments a report for the most recent algorithm selection
+    or algorithm configuration procedure is generated.
 
-Generate a report describing the configuration results for a solver and
-specific instance sets in the Sparkle platform.
+    Generate a configuration report
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Arguments:
+    Generate a report describing the configuration results for a solver and
+    specific instance sets in the Sparkle platform.
 
-*  ``-–solver <solver>``
-*  ``[-–instance-set-train <instance-set-train>]``
-*  ``[-–instance-set-test <instance-set-test>]``
+    Arguments:
 
-Note that if a test instance set is given, the training instance set
-must also be given.
+    *  ``-–solver <solver>``
+    *  ``[-–instance-set-train <instance-set-train>]``
+    *  ``[-–instance-set-test <instance-set-test>]``
 
-.. _cmd:initialise:
+    Note that if a test instance set is given, the training instance set
+    must also be given.
 
-``initialise.py``
------------------
+    .. _cmd:initialise:
 
-Initialise the Sparkle platform, this command does not have any
-arguments.
+    ``initialise.py``
+    -----------------
 
-.. _cmd:run_ablation:
+    Initialise the Sparkle platform, this command does not have any
+    arguments.
 
-``run_ablation.py``
--------------------
+    .. _cmd:run_ablation:
 
-Runs parameter importance between the default and configured parameters
-with ablation. This command requires a finished configuration for the
-solver instance pair.
+    ``run_ablation.py``
+    -------------------
 
-Arguments:
+    Runs parameter importance between the default and configured parameters
+    with ablation. This command requires a finished configuration for the
+    solver instance pair.
 
-*  ``–-solver <solver>``
-*  ``[-–instance-set-train <instance-set-train>]``
-*  ``[-–instance-set-test <instance-set-test>]``
+    Arguments:
 
-Note that if no test instance set is given, the validation is performed
-on the training set.
+    *  ``–-solver <solver>``
+    *  ``[-–instance-set-train <instance-set-train>]``
+    *  ``[-–instance-set-test <instance-set-test>]``
 
-.. _cmd:validate_configured_vs_default:
+    Note that if no test instance set is given, the validation is performed
+    on the training set.
 
-``validate_configured_vs_default.py``
--------------------------------------
+    .. _cmd:validate_configured_vs_default:
 
-Test the performance of the configured solver and the default solver by
-doing validation experiments on the training and test sets.
+    ``validate_configured_vs_default.py``
+    -------------------------------------
 
-Arguments:
+    Test the performance of the configured solver and the default solver by
+    doing validation experiments on the training and test sets.
 
-*  ``-–solver <solver>``
-*  ``-–instance-set-train <instance-set-train>``
-*  ``[-–instance-set-test <instance-set-test>]``
+    Arguments:
+
+    *  ``-–solver <solver>``
+    *  ``-–instance-set-train <instance-set-train>``
+    *  ``[-–instance-set-test <instance-set-test>]``
 
 Sparkle settings
 ================
