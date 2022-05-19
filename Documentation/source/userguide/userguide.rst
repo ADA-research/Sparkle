@@ -91,6 +91,8 @@ the purpose of testing whether your configuration setup works with
 Sparkle, it is advised to primarily use instances that are solved
 (relatively) quickly even with the default parameters.
 
+.. note:: See the :doc:`example </examples/configuration>` page for a walk-through on how to perform configuration with Sparkle.
+
 
 .. _quick:config_wrapper:
 
@@ -138,6 +140,8 @@ the purpose of testing whether your selection setup works with Sparkle,
 it is advised to primarily use instances that are solved (relatively)
 quickly.
 
+.. note:: See the :doc:`example </examples/selection>` page for a walk-through on how to perform selection with Sparkle.
+
 .. _quick:select_wrapper:
 
 Creating a wrapper for your algorithm
@@ -154,7 +158,7 @@ changes are needed.
 .. _quick:execute_commands:
 
 Executing commands
-------------------
+===================
 
 Executing commands in Sparkle is as simple as running them in the top
 directory of Sparkle, for example:
@@ -164,12 +168,12 @@ directory of Sparkle, for example:
      Commands/initialise.py
 
 Do note that when running on a cluster additional arguments may be
-needed, for instance under Slurm the above command would change to
+needed, for instance under the Slurm workload manager the above command would change to
 something like:
 
 ::
 
-     srun -N1 -n1 -p graceTST Commands/initialise.py
+     srun -N1 -n1 -c1 Commands/initialise.py
 
 In the ``Examples/`` directory a number of common command sequences are
 given. For instance, for configuration with specified training and
@@ -204,9 +208,9 @@ An instance directory should look something like this:
 This directory simply contains a collection of instances, as example
 here SAT instances in the CNF format are given.
 
-For instances consisting of multiple files one additional file should be
+For instances consisting of multiple files one additional file called ``sparkle_instance_list.txt`` should be
 included in the ``Example_Instance_Set`` directory, describing which
-files together form an instance. The format is a signle instance per
+files together form an instance. The format is a single instance per
 line with each file separated by a space, as shown below.
 
 ::
@@ -342,9 +346,9 @@ to get a description of the required arguments and other options.
 
 .. include:: commandlist.rst
 
-Arguments in [square brackets] are optional, arguments without brackets
-are mandatory. Input in <chevrons> indicate required text input, {curly
-brackets} indicate a set of inputs to choose from.
+.. note:: Arguments in [square brackets] are optional, arguments without brackets
+    are mandatory. Input in <chevrons> indicate required text input, {curly
+    brackets} indicate a set of inputs to choose from.
 
 .. include:: commandsautoprogram.rst
 
@@ -492,18 +496,24 @@ Names and possible values
 ``performance_measure``
    | aliases: ``smac_run_obj``
    | values: ``{RUNTIME, QUALITY_ABSOLUTE`` (also: ``QUALITY``)\ ``}``
+   | description: The type of performance measure that sparkle uses. ``RUNTIME`` focuses on runtime the solver requires,
+     ``QUALITY_ABSOLUTE`` focuses on the average absolute improvements on the instances and ``QUALITY`` does the same a the former.
 
 ``target_cutoff_time``
    | aliases: ``smac_each_run_cutoff_time``, ``cutoff_time_each_performance_computation``
    | values: integer
+   | description: The time a solver is allowed to run before it is terminated.
 
 ``extractor_cutoff_time``
    | aliases: ``cutoff_time_each_feature_computation``
    | values: integer
+   | description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature
+     extractors this budget is divided equally.
 
 ``penalty_multiplier``
    | aliases: ``penalty_number``
    | values: integer
+   | description: In case of not solving an instance within the cutoff time the runtime is set to be the ``penalty_multiplier * cutoff_time``.
 
 ``solution_verifier``
    | aliases: N/A
@@ -515,10 +525,12 @@ Names and possible values
 ``budget_per_run``
    | aliases: ``smac_whole_time_budget``
    | values: integer
+   | description: The wallclock time one configuration run is allowed to use for finding configurations.
 
 ``number_of_runs``
    | aliases: ``num_of_smac_runs``
    | values: integer
+   | description: The number of separate configurations runs.
 
 **[smac]**
 
@@ -531,6 +543,7 @@ Names and possible values
 ``racing``
    | aliases: ``ablation_racing``
    | values: boolean
+   | description: Use racing when performing the ablation analysis between the default and configured parameters
 
 **[slurm]**
 
@@ -538,17 +551,20 @@ Names and possible values
 
    | aliases: ``smac_run_obj``
    | values: integer
+   | description: The number of configuration runs that can run in parallel.
 
 ``clis_per_node``
    | aliases: N/A
    | values: integer
    | note: Not really a Slurm option, will likely be moved to another
      section.
+   | description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores
+     and each solver uses 2 cores, the ``cli_per_node`` is at most 16.
 
 Priorities
 ----------
 
-Settings provided through different channels have different priorities
+Sparkle has a large flexibility with passing along settings. Settings provided through different channels have different priorities
 as follows:
 
 *  Default –- Default values will be overwritten if a value is given

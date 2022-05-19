@@ -1,5 +1,7 @@
 ### Use Sparkle for algorithm selection
 
+These steps can also be found as a Bash script in `Examples/selection.sh`
+
 #### Initialise the Sparkle platform
 
 `Commands/initialise.py`

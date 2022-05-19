@@ -1,5 +1,7 @@
 # Use Sparkle for algorithm configuration
 
+These steps can also be found as a Bash script in `Examples/configuration_qualty.sh`
+
 ## Initialise the Sparkle platform
 
 `Commands/initialise.py`
