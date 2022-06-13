@@ -353,6 +353,4 @@ def check_selector_status(solver_name):
 	if not selector.exists() or not selector.is_file():
 		print("ERROR: The portfolio selector could not be found. Please make sure to first construct a portfolio selector.")
 		sys.exit()
-	else:
-		print("Selector exists")
 
