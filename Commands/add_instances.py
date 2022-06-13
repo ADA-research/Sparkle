@@ -17,6 +17,7 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_instances_help as sih
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -63,6 +64,7 @@ def parser_function():
     )
 
     return parser
+
 
 if __name__ == r"__main__":
     # Initialise settings

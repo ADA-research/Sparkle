@@ -5,6 +5,7 @@ import sys
 import argparse
 from sparkle_help import sparkle_logging as sl
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(

@@ -52,6 +52,7 @@ def parser_function():
 
     return parser
 
+
 def compute_perfect(flag_recompute: bool = False) -> List[Tuple[str, float]]:
     print(
         r"c Start computing each solver's marginal contribution to perfect selector ..."

@@ -25,55 +25,6 @@
 #include <vector>
 using namespace std;
 
-// see man proc (/proc/[number]/stat)
-struct statData
-{
-  int pid;
-  char comm[64]; // ???
-  char state;
-  int ppid;
-  int pgrp;
-  int session;
-  int tty_nr;
-  int tpgid;
-  unsigned long int flags;
-  unsigned long int minflt;
-  unsigned long int cminflt;
-  unsigned long int majflt;
-  unsigned long int cmajflt;
-  unsigned long int utime;
-  unsigned long int stime;
-  long int cutime;
-  long int cstime;
-  long int priority;
-  long int nice;
-  long int zero;
-  long int itrealvalue;
-  unsigned long int starttime;
-  unsigned long int vsize;
-  long int rss;
-  unsigned long int rlim;
-  unsigned long int startcode;
-  unsigned long int endcode;
-  unsigned long int startstack;
-  unsigned long int kstkesp;
-  unsigned long int kstkeip;
-  unsigned long int signal;
-  unsigned long int blocked;
-  unsigned long int sigignore;
-  unsigned long int sigcatch;
-  unsigned long int wchan;
-  unsigned long int nswap;
-  unsigned long int cnswap;
-  int exit_signal;
-  int processor;
-  unsigned long int rtprio;
-  unsigned long int sched;
-
-  // extra
-  bool valid;
-};
-
 /**
  * The information we keep on a process
  */
@@ -91,6 +42,8 @@ private:
   unsigned long int utime,stime,cutime,cstime;
   unsigned long int starttime;
   unsigned long int vsize;
+
+  unsigned long int rss,swap; // in kB, see /proc/[pid]/status
 
   vector<pid_t> children;
 
@@ -122,17 +75,24 @@ public:
 
   ProcessData(const ProcessData &pd)
   {
+    valid=false;
+
     uid=pd.uid;
     gid=pd.gid;
 
     pid=pd.pid;
     tid=pd.tid;
     ppid=pd.ppid;
+    pgrp=pd.pgrp;
     utime=pd.utime;
     stime=pd.stime;
     cutime=pd.cutime;
     cstime=pd.cstime;
+    starttime=pd.starttime;
     vsize=pd.vsize;
+
+    statLine[0]=0;
+    statmLine[0]=0;
 
     for(size_t i=0;i<pd.children.size();++i)
       children.push_back(pd.children[i]);
@@ -143,7 +103,8 @@ public:
   }
 
   /*
-   * return false iff the process doesn't exit any more
+   * return false iff the process doesn't exit any more or we failed
+   * to read the data
    */
   bool read(pid_t pid, pid_t tid=0)
   {
@@ -154,6 +115,7 @@ public:
     this->pid=pid;
     this->tid=tid;
 
+    valid=false;
 
     if (tid)
       snprintf(fileName,sizeof(fileName),"/proc/%d/task/%d/stat",pid,tid);
@@ -178,7 +140,7 @@ public:
 	strcpy(statLine,"-- couldn't read stat file --");
 	fclose(file);
 
-	return false;
+	return valid=false;
       }
       
       fclose(file);
@@ -190,7 +152,8 @@ public:
 #endif
 
       strcpy(statLine,"-- couldn't open stat file --");
-      return false;
+
+      return valid=false;
     }
 
     nbFields=sscanf(statLine,
@@ -225,12 +188,14 @@ public:
 		    &vsize
 		    );
 
-    valid=(nbFields==8);
-
+    if(nbFields!=8)
+    {
 #ifdef debug
-    if(!valid)
-      cout << "FAILED TO READ EACH FIELD\n";
+      cout << "FAILED TO READ EACH FIELD (got " << nbFields << " fields)\n";
 #endif
+
+      return valid=false;      
+    }
     
     if (!tid)
     {
@@ -247,7 +212,7 @@ public:
 	  strcpy(statmLine,"-- couldn't read statm file --");
 	  fclose(file);
 
-	  return false;
+	  return valid=false;
 	}
 
 	fclose(file);
@@ -262,9 +227,44 @@ public:
       }
     }
 
+    if (!tid)
+    {
+      // read /proc/%d/status
+      snprintf(fileName,sizeof(fileName),"/proc/%d/status",pid);
+      ifstream in(fileName);
+      string tmp;
+      int nbFieldsToRead=2;
+      
+      while(in.good() && nbFieldsToRead>0)
+      {
+        in >> tmp;
+        if(tmp=="VmRSS:")
+        {
+          in >> rss;
+          --nbFieldsToRead;
+        }
+        else
+          if(tmp=="VmSwap:")
+          {
+            in >> swap;
+            --nbFieldsToRead;
+          }
+        getline(in,tmp);
+      }
+      
+      if(nbFieldsToRead!=0)
+      {
+#ifdef debug
+        cout << "FAILED TO READ EACH FIELD in /proc/" << pid << "/status\n";
+#endif
+
+        return valid=false;      
+      }
+    }
+
     getAllocatedCores();
 
-    return true;
+    return valid=true;
   }
 
   /**
@@ -277,6 +277,11 @@ public:
     return read(pid,tid);
   }
 
+  /**
+   * do we have valid data?
+   */
+  bool isValid() const {return valid;}
+  
   /**
    * return the % of CPU used by this process (and its children when
    * withChildren is true). The result is between 0 and 1
@@ -299,89 +304,17 @@ public:
   }
 
 
-  void readProcessData(statData &s)
-  {
-    int nbFields;
-
-    memset(&s,0,sizeof(statData));
-
-    nbFields=sscanf(statLine,
-#if WSIZE==32
-		    "%d "
-		    "%s "
-		    "%c "
-		    "%d %d %d %d %d "
-		    "%lu %lu %lu %lu %lu "
-		    "%Lu %Lu %Lu %Lu "  /* utime stime cutime cstime */
-		    "%ld %ld "
-		    "%d "
-		    "%ld "
-		    "%Lu "  /* start_time */
-		    "%lu "
-		    "%ld "
-		    "%lu %lu %lu %lu %lu %lu "
-		    "%*s %*s %*s %*s " /* discard, no RT signals & Linux 2.1 used hex */
-		    "%lu %*u %*u " // lu lu lu
-		    "%d %d "
-		    "%lu %lu",
-#else
-		    "%d "
-		    "%s "
-		    "%c "
-		    "%d %d %d %d %d "
-		    "%lu %lu %lu %lu %lu "
-		    "%lu %lu %lu %lu "  /* utime stime cutime cstime */
-		    "%ld %ld "
-		    "%ld "
-		    "%ld "
-		    "%lu "  /* start_time */
-		    "%lu "
-		    "%ld "
-		    "%lu %lu %lu %lu %lu %lu "
-		    "%*s %*s %*s %*s " /* discard, no RT signals & Linux 2.1 used hex */
-		    "%lu %*u %*u " // lu lu lu
-		    "%d %d "
-		    "%lu %lu",
-#endif
-		    &s.pid,
-		    s.comm,
-		    &s.state,
-		    &s.ppid, &s.pgrp, &s.session, &s.tty_nr, &s.tpgid,
-		    &s.flags, &s.minflt, &s.cminflt, 
-		    &s.majflt, &s.cmajflt,
-		    &s.utime, &s.stime, &s.cutime, &s.cstime,
-		    &s.priority, &s.nice,
-		    &s.zero,
-		    &s.itrealvalue,
-		    &s.starttime,
-		    &s.vsize,
-		    &s.rss,
-		    &s.rlim, &s.startcode, &s.endcode, 
-		    &s.startstack, &s.kstkesp, &s.kstkeip,
-		    /*     s.signal, s.blocked, s.sigignore, s.sigcatch,   */ /* can't use */
-		    &s.wchan, 
-		    /* &s.nswap, &s.cnswap, */  
-		    /* nswap and cnswap dead for 2.4.xx and up */
-		    /* -- Linux 2.0.35 ends here -- */
-		    &s.exit_signal, &s.processor,  
-		    /* 2.2.1 ends with "exit_signal" */
-		    /* -- Linux 2.2.8 to 2.5.17 end here -- */
-		    &s.rtprio, &s.sched  /* both added to 2.5.18 */
-		    );
-
-    s.valid=(nbFields==35);
-
-#ifdef debug
-    if(!s.valid)
-      cout << "FAILED TO READ EACH FIELD OF STAT DATA\n";
-#endif
-  }
-
   bool isTask() const
   {
     return tid!=0;
   }
 
+
+  const vector<pid_t> &getChildren() const
+  {
+    return children;
+  }
+  
   void addChild(pid_t child)
   {
     children.push_back(child);
@@ -463,7 +396,7 @@ public:
   }
 
   /**
-   * return the current vsize in Kb
+   * return the current vsize in kB
    */
   long getVSize() const
   {
@@ -471,15 +404,26 @@ public:
   }
 
   /**
+   * return the current memory consumption in kB
+   */
+  long getMemory() const
+  {
+    return rss+swap;
+  }
+
+  /**
    * get the list of cores allocated to this process
    */
   void getAllocatedCores()
   {
+    //return; // ???
+    
     cpu_set_t mask;
     allocatedCores.clear();
   
     sched_getaffinity(pid,sizeof(cpu_set_t),&mask);
 
+#warning "don't watse time converting to a vector, just keep the cpu_set_t"
     for(int i=0;i<CPU_SETSIZE;++i)
       if(CPU_ISSET(i,&mask))
 	allocatedCores.push_back(i);
@@ -491,6 +435,7 @@ public:
    */
   void printAllocatedCores(ostream &s) const
   {
+    //return; // ???
     size_t end;
 
     for(size_t beg=0;beg<allocatedCores.size();beg=end)
@@ -522,6 +467,7 @@ ostream &operator <<(ostream &out, const ProcessData &data)
 
   out << "] ppid=" << data.ppid 
       << " vsize=" << data.vsize/1024 
+      << " memory=" << data.getMemory() 
       << " CPUtime=" << data.getOverallCPUTime()
       << " cores=";
 

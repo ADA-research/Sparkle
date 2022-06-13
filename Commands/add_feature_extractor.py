@@ -27,6 +27,7 @@ def _check_existence_of_test_instance_list_file(extractor_directory: str):
     else:
         return False
 
+
 def parser_function():
     # Define command line arguments
     parser = argparse.ArgumentParser()

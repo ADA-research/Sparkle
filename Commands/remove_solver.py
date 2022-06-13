@@ -8,6 +8,7 @@ from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_logging as sl
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -22,6 +23,7 @@ def parser_function():
         help="if set to True solver_path is used as a nickname for the solver",
     )
     return parser
+
 
 if __name__ == r"__main__":
     # Log command call

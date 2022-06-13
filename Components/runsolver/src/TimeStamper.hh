@@ -157,6 +157,8 @@ public:
 
       if(result<0)
       {
+	cout << "timestamper::select: " << strerror(errno) << endl; // ???
+
         if(++watchDog<10)
           continue;
         else

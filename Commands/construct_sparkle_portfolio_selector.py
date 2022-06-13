@@ -20,6 +20,7 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(

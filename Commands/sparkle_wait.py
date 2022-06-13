@@ -7,6 +7,7 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_job_help as sjh
 from sparkle_help.sparkle_command_help import CommandName
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
@@ -26,6 +27,7 @@ def parser_function():
               "command to be completed"),
     )
     return parser
+
 
 if __name__ == r"__main__":
     # Log command call

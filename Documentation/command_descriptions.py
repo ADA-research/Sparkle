@@ -15,7 +15,8 @@ if __name__ == "__main__":
 
     sphinx_file = open("source/userguide/commandlist.rst", "w")
     for command in commands:
-        sphinx_file.write("*  :ref:`cmd:{name}`\n".format(name=command.replace(".py", "")))
+        sphinx_file.write(
+            "*  :ref:`cmd:{name}`\n".format(name=command.replace(".py", "")))
     sphinx_file.close()
 
     string = """

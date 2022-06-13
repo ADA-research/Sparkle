@@ -13,6 +13,7 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -37,6 +38,7 @@ def parser_function():
     )
 
     return parser
+
 
 if __name__ == r"__main__":
     # Initialise settings

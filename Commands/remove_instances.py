@@ -11,6 +11,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_instances_help as sih
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
