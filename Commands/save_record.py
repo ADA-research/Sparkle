@@ -6,9 +6,11 @@ from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_logging as sl
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     return parser
+
 
 if __name__ == r"__main__":
     # Log command call

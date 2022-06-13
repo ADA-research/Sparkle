@@ -12,6 +12,7 @@ from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help import sparkle_run_configured_solver_help as srcsh
 from sparkle_help.reporting_scenario import ReportingScenario
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -35,6 +36,7 @@ def parser_function():
         action="store_true",
         help="run the solver on multiple instances in parallel")
     return parser
+
 
 if __name__ == "__main__":
     # Initialise settings

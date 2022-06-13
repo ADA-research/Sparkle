@@ -16,6 +16,7 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_command_help import CommandName
 
+
 def parser_function():
     parser = argparse.ArgumentParser(
         description="Add a solver to the Sparkle platform.",
@@ -58,6 +59,7 @@ def parser_function():
     )
 
     return parser
+
 
 if __name__ == r"__main__":
     # Initialise settings

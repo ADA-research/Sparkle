@@ -15,6 +15,7 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
 
+
 def parser_function():
     sgh.settings = sparkle_settings.Settings()
     parser = argparse.ArgumentParser()
@@ -37,6 +38,7 @@ def parser_function():
               "the default"),
     )
     return parser
+
 
 def compute_features_parallel(my_flag_recompute):
     if my_flag_recompute:

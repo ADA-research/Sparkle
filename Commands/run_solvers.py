@@ -19,6 +19,7 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -68,6 +69,7 @@ def parser_function():
               " the default"),
     )
     return parser
+
 
 def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report=False):
     num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()

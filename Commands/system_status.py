@@ -6,6 +6,7 @@ from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_logging as sl
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -15,6 +16,7 @@ def parser_function():
         help="output system status in verbose mode",
     )
     return parser
+
 
 if __name__ == r"__main__":
     # Log command call

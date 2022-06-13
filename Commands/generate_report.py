@@ -17,11 +17,13 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
+
 def parser_function():
     parser = argparse.ArgumentParser(
-        description="Without any arguments a report for the most recent algorithm selection or algorithm configuration \
-        procedure is generated.",
-        epilog="Note that if a test instance set is given, the training instance set must also be given.")
+        description=("Without any arguments a report for the most recent algorithm "
+                     "selection or algorithm configuration procedure is generated."),
+        epilog=("Note that if a test instance set is given, the training instance set "
+                "must also be given."))
     # Configuration arguments
     parser.add_argument(
         "--solver",
