@@ -6,12 +6,7 @@ from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_logging as sl
 
-
-if __name__ == r"__main__":
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--verbose",
@@ -19,6 +14,14 @@ if __name__ == r"__main__":
         action="store_true",
         help="output system status in verbose mode",
     )
+    return parser
+
+if __name__ == r"__main__":
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

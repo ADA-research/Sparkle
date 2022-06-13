@@ -2,3 +2,4 @@
 recommonmark
 Sphinx
 sphinxcontrib-jsmath
+sphinxcontrib-autoprogram

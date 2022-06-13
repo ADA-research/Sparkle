@@ -8,12 +8,7 @@ from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_logging as sl
 
-
-if __name__ == r"__main__":
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "extractor_path",
@@ -27,6 +22,15 @@ if __name__ == r"__main__":
         help=("if set to True extractor_path is used as a nickname for the feature "
               "extractor"),
     )
+    return parser
+
+
+if __name__ == r"__main__":
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

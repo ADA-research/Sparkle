@@ -4,7 +4,6 @@ Examples
 .. toctree::
    :maxdepth: 1
 
-   
    configuration.md
    configuration_quality.md
    selection.md

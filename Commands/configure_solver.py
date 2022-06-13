@@ -18,20 +18,10 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
-
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    # Initialise latest scenario
-    global latest_scenario
-    sgh.latest_scenario = ReportingScenario()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
-    parser = argparse.ArgumentParser()
+def parser_function():
+    parser = argparse.ArgumentParser(
+        description="Configure a solver in the Sparkle platform.",
+        epilog="Note that the test instance set is only used if the ``-–ablation`` or ``–-validation`` flags are given.")
     parser.add_argument(
         "--validate",
         required=False,
@@ -97,6 +87,22 @@ if __name__ == r"__main__":
         action=ac.SetByUser,
         help="specify the settings file to use instead of the default",
     )
+    return parser
+
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Initialise latest scenario
+    global latest_scenario
+    sgh.latest_scenario = ReportingScenario()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()
