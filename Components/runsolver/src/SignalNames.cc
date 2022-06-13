@@ -18,6 +18,7 @@
  */
 
 
+#include <string>
 
 #include "SignalNames.hh"
 
@@ -62,4 +63,22 @@ const char *getSignalName(int sig)
     return signalNames[sig];
   else
     return "???";
+}
+
+int getSignalNum(const char *name)
+{
+  std::string uc=name,ucsig;
+
+  for(char &c: uc)
+    c=toupper(c);
+
+  ucsig="SIG"+uc;
+
+  int nbSig=sizeof(signalNames)/sizeof(char *);
+
+  for(int i=0;i<nbSig;++i)
+    if(signalNames[i]==uc || signalNames[i]==ucsig)
+      return i;
+
+  return -1;
 }
