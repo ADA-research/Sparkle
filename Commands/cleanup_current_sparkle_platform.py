@@ -8,10 +8,12 @@ from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_logging as sl
 import cleanup_temporary_files as ctf
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
 
     return parser
+
 
 if __name__ == "__main__":
     # Log command call

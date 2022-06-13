@@ -16,6 +16,7 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_command_help import CommandName
 
+
 def parser_function():
     parser = argparse.ArgumentParser(
         description="Add a solver to the Sparkle platform.",
@@ -24,7 +25,7 @@ def parser_function():
         "--deterministic",
         required=True,
         type=int,
-        choices=["0", "1"],
+        choices=[0, 1],
         help="indicate whether the solver is deterministic or not",
     )
     group_solver_run = parser.add_mutually_exclusive_group()
@@ -58,6 +59,7 @@ def parser_function():
     )
 
     return parser
+
 
 if __name__ == r"__main__":
     # Initialise settings

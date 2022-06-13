@@ -9,8 +9,11 @@ from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_logging as sl
 
+
 def parser_function():
-    parser = argparse.ArgumentParser(description="Initialise the Sparkle platform, this command does not have any arguments.")
+    parser = argparse.ArgumentParser(
+        description=("Initialise the Sparkle platform, this command does not have any "
+                     "arguments."))
     return parser
 
 

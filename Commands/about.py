@@ -19,9 +19,11 @@ __authors__ = [
 
 __contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     return parser
+
 
 if __name__ == r"__main__":
     # Log command call

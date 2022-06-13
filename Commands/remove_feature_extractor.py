@@ -8,6 +8,7 @@ from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_logging as sl
 
+
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
