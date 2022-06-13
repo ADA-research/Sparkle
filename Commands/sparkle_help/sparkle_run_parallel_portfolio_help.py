@@ -21,6 +21,9 @@ from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
 from sparkle_help.sparkle_command_help import CommandName
 
+import functools
+print = functools.partial(print, flush=True)
+
 
 def jobtime_to_seconds(jobtime: str) -> int:
     """Convert a jobtime string to an integer number of seconds."""
@@ -284,8 +287,8 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                 done = True  # No jobs are remaining
                 break
             sjh.sleep(n_seconds)  # No jobs have started yet;
-        # If the results are less than the number of solvers then this means that the are
-        # finished solvers(+1 becuase of the header of results)
+        # If the results are less than the number of solvers then this means that there
+        # are finished solvers(+1 becuase of the header of results)
         elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
             if started is False:  # Log starting time
                 now = datetime.datetime.now()
@@ -589,10 +592,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     # end of the cutoff_time
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
-    file_path_output2 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
-                            / "Log/logging2.txt"))
     sfh.create_new_empty_file(file_path_output1)
-    sfh.create_new_empty_file(file_path_output2)
 
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
@@ -632,17 +632,15 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                     if len(result.stdout.strip().split('\n')) == 1:
                         done = True  # No jobs are remaining
                         break
-
-                    sjh.sleep(n_seconds)  # No jobs have started yet;
                 else:
                     # Wait until the last few seconds before checking often
                     if not wait_cutoff_time:
-                        n_seconds = int(sgh.settings.get_general_target_cutoff_time())-6
+                        n_seconds = sgh.settings.get_general_target_cutoff_time()-6
                         sjh.sleep(n_seconds)
                         wait_cutoff_time = True
                         n_seconds = 1  # Start checking often
 
-                    sjh.sleep(n_seconds)
+                sjh.sleep(n_seconds)
 
         finished_instances_dict = {}
 
@@ -654,7 +652,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
         for finished_solver_files in tmp_res_files:
             for instance in finished_instances_dict:
                 if str(instance) in str(finished_solver_files):
-                    file_path = (f'{str(finished_solver_files)}')
+                    file_path = f'{str(finished_solver_files)}'
 
                     with open(file_path, 'r') as infile:
                         content = infile.readlines()
