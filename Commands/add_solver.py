@@ -24,7 +24,7 @@ def parser_function():
         "--deterministic",
         required=True,
         type=int,
-        choices=["0", "1"],
+        choices=[0, 1],
         help="indicate whether the solver is deterministic or not",
     )
     group_solver_run = parser.add_mutually_exclusive_group()
