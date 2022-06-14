@@ -47,7 +47,7 @@ except ImportError:
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
 	runsolver_path = sgh.runsolver_path
 
-	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
+	cutoff_time_each_run_option = r'--cpu-limit ' + str(cutoff_time_each_extractor_run)
 	err_path = result_path.replace(r'.rawres', r'.err')
 	runsolver_watch_data_path = result_path.replace(r'.rawres', r'.log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path

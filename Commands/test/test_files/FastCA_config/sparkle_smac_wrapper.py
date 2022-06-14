@@ -88,7 +88,7 @@ instance_constr_name = get_last_level_directory_name(inst_constr)
 solver_name = get_last_level_directory_name(solver_binary)
 runsolver_watch_data_path = tmp_directory + solver_name + '_' + instance_model_name + '_' + get_time_pid_random_string() + '.log'
 
-command = runsolver_binary + ' -w ' + runsolver_watch_data_path + ' -W ' + str(cutoff_time) + r' ' + solver_binary + ' ' + inst_model + ' ' + inst_constr + ' ' + str(cutoff_time)
+command = runsolver_binary + ' -w ' + runsolver_watch_data_path + ' --cpu-limit ' + str(cutoff_time) + r' ' + solver_binary + ' ' + inst_model + ' ' + inst_constr + ' ' + str(cutoff_time)
 
 i = 6 # Start with first argument after 'seed'
 while i < len(sys.argv):

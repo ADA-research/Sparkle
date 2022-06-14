@@ -51,7 +51,7 @@ def computing_features_parallel(feature_data_csv_path, mode):
 		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
 	else:
 		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
-	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
+	cutoff_time_each_run_option = r'--cpu-limit ' + str(cutoff_time_each_extractor_run)
 	print('c Cutoff time for each run on computing features is set to ' + str(cutoff_time_each_extractor_run) + ' seconds') # print the information about the cutoff time
 	####
 	
