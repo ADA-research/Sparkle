@@ -6,16 +6,6 @@ import sys
 sys.path.append('../../../../Commands')
 from sparkle_help import sparkle_slurm_help
 
-#real_solver_name = 'PbO-CCSAT'
-#solver_name = r'each_pbo-ccsat_run_core.sh'
-#solver_path = r'./' + solver_name
-#runsolver_path = r'./runsolver'
-#runsolver_cpu_cutoff_time = 5000
-#cmd_runsolver_prefix = runsolver_path + r' --timestamp --use-pty -C ' + str(runsolver_cpu_cutoff_time)
-
-#cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
-
-
 def get_last_level_directory_name(filepath):
 	filepath = get_file_directory(filepath)
 	if filepath[-1] == r'/': filepath = filepath[0:-1]
@@ -84,7 +74,7 @@ def generate_sbatch_script(sbatch_script_path, executable_wrapper_name, cnf_dire
 	
 	executable_wrapper_path = r'./' + executable_wrapper_name
 	runsolver_path = r'./runsolver'
-	cmd_runsolver_prefix = runsolver_path + r' --timestamp --use-pty -C ' + str(cutoff_time_each_run) + r' -o '
+	cmd_runsolver_prefix = runsolver_path + r' --timestamp --use-pty --cpu-limit ' + str(cutoff_time_each_run) + r' -o '
 	#cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
 	cmd_srun_prefix = r'srun -N1 -n1 '
 	cmd_srun_prefix += sparkle_slurm_help.get_slurm_srun_user_options_str(path_modifier)
