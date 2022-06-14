@@ -60,7 +60,7 @@ while i<len_argv:
 	i += 1
 
 # TODO: Change call to solver
-command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' -W ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + instance + r' -seed ' + str(seed) + param_str
+command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + instance + r' -seed ' + str(seed) + param_str
 
 #print(command)
 

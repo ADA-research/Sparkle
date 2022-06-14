@@ -60,7 +60,7 @@ if __name__ == r'__main__':
 	else:
 		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
 
-	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
+	cutoff_time_each_run_option = r'--cpu-limit ' + str(cutoff_time_each_extractor_run)
 
 	key_str = sfh.get_last_level_directory_name(extractor_path) + r'_' + sfh.get_last_level_directory_name(instance_path) + r'_' + sparkle_basic_help.get_time_pid_random_string()
 	result_path = r'Feature_Data/Tmp/' + key_str + r'.csv'

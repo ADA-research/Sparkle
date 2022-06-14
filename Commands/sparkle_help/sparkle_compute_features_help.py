@@ -56,7 +56,7 @@ def computing_features(feature_data_csv_path, mode):
 		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
 	else:
 		cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list)
-	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
+	cutoff_time_each_run_option = r'--cpu-limit ' + str(cutoff_time_each_extractor_run)
 	print('c Cutoff time for each run on computing features is set to ' + str(cutoff_time_each_extractor_run) + ' seconds')
 	
 	total_job_num = sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job)
