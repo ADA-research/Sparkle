@@ -21,6 +21,32 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
 
+def parser_function():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--recompute-portfolio-selector",
+        action="store_true",
+        help=("force the construction of a new portfolio selector even when it already "
+              "exists for the current feature and performance data. NOTE: This will "
+              "also result in the computation of the marginal contributions of solvers "
+              "to the new portfolio selector."),
+    )
+    parser.add_argument(
+        "--recompute-marginal-contribution",
+        action="store_true",
+        help=("force marginal contribution to be recomputed even when it already exists "
+              "in file for the current selector"),
+    )
+    parser.add_argument(
+        "--performance-measure",
+        choices=PerformanceMeasure.__members__,
+        default=sgh.settings.DEFAULT_general_performance_measure,
+        action=ac.SetByUser,
+        help="the performance measure, e.g. runtime",
+    )
+    return parser
+
+
 def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path):
     feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
     list_feature_computation_job = (
@@ -90,28 +116,7 @@ if __name__ == r"__main__":
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--recompute-portfolio-selector",
-        action="store_true",
-        help=("force the construction of a new portfolio selector even when it already "
-              "exists for the current feature and performance data. NOTE: This will "
-              "also result in the computation of the marginal contributions of solvers "
-              "to the new portfolio selector."),
-    )
-    parser.add_argument(
-        "--recompute-marginal-contribution",
-        action="store_true",
-        help=("force marginal contribution to be recomputed even when it already exists "
-              "in file for the current selector"),
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

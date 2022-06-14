@@ -18,15 +18,13 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
 
 
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    sl.log_command(sys.argv)
-
-    # Load solver and test instances
-    parser = argparse.ArgumentParser()
+def parser_function():
+    parser = argparse.ArgumentParser(
+        description=("Runs parameter importance between the default and configured "
+                     "parameters with ablation. This command requires a finished "
+                     "configuration for the solver instance pair."),
+        epilog=("Note that if no test instance set is given, the validation is performed"
+                " on the training set."))
     parser.add_argument("--solver", required=False, type=str, help="path to solver")
     parser.add_argument(
         "--instance-set-train",
@@ -91,6 +89,20 @@ if __name__ == r"__main__":
               "the default"),
     )
     parser.set_defaults(ablation_settings_help=False)
+    return parser
+
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
+
+    # Process command line arguments
     args = parser.parse_args()
 
     if args.ablation_settings_help:

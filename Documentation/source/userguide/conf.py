@@ -51,6 +51,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinxcontrib.autoprogram',
     # 'sphinx.ext.autosectionlabel',
     'recommonmark',
 ]

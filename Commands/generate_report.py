@@ -18,35 +18,12 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
 
-def generate_task_run_status():
-    key_str = "generate_report"
-    task_run_status_path = r"Tmp/SBATCH_Report_Jobs/" + key_str + r".statusinfo"
-    status_info_str = "Status: Running\n"
-    sfh.write_string_to_file(task_run_status_path, status_info_str)
-    return
-
-
-def delete_task_run_status():
-    key_str = "generate_report"
-    task_run_status_path = r"Tmp/SBATCH_Report_Jobs/" + key_str + r".statusinfo"
-    os.system(r"rm -rf " + task_run_status_path)
-    return
-
-
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    # Initialise latest scenario
-    global latest_scenario
-    sgh.latest_scenario = ReportingScenario()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
-    parser = argparse.ArgumentParser()
+def parser_function():
+    parser = argparse.ArgumentParser(
+        description=("Without any arguments a report for the most recent algorithm "
+                     "selection or algorithm configuration procedure is generated."),
+        epilog=("Note that if a test instance set is given, the training instance set "
+                "must also be given."))
     # Configuration arguments
     parser.add_argument(
         "--solver",
@@ -106,6 +83,38 @@ if __name__ == r"__main__":
         help=("specify the settings file to use in case you want to use one other than"
               " the default"),
     )
+    return parser
+
+
+def generate_task_run_status():
+    key_str = "generate_report"
+    task_run_status_path = r"Tmp/SBATCH_Report_Jobs/" + key_str + r".statusinfo"
+    status_info_str = "Status: Running\n"
+    sfh.write_string_to_file(task_run_status_path, status_info_str)
+    return
+
+
+def delete_task_run_status():
+    key_str = "generate_report"
+    task_run_status_path = r"Tmp/SBATCH_Report_Jobs/" + key_str + r".statusinfo"
+    os.system(r"rm -rf " + task_run_status_path)
+    return
+
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Initialise latest scenario
+    global latest_scenario
+    sgh.latest_scenario = ReportingScenario()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()
