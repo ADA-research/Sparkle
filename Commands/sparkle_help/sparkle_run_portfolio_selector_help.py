@@ -11,6 +11,7 @@ Contact: 	Chuan Luo, chuanluosaber@gmail.com
 '''
 
 import os
+import pathlib
 import sys
 import fcntl
 from pathlib import Path
@@ -46,7 +47,7 @@ except ImportError:
 def get_list_feature_vector(extractor_path, instance_path, result_path, cutoff_time_each_extractor_run):
 	runsolver_path = sgh.runsolver_path
 
-	cutoff_time_each_run_option = r'-C ' + str(cutoff_time_each_extractor_run)
+	cutoff_time_each_run_option = r'--cpu-limit ' + str(cutoff_time_each_extractor_run)
 	err_path = result_path.replace(r'.rawres', r'.err')
 	runsolver_watch_data_path = result_path.replace(r'.rawres', r'.log')
 	runsolver_watch_data_path_option = r'-w ' + runsolver_watch_data_path
@@ -134,6 +135,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
 
 	if performance_data_csv_path is not None:
 		solver_name = 'Sparkle_Portfolio_Selector'
+		check_selector_status(solver_name)
 		fo = open(performance_data_csv_path, 'r+')
 		fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 		performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
@@ -319,6 +321,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 		total_job_list.append([filepath])
 
 	solver_name = 'Sparkle_Portfolio_Selector'
+	check_selector_status(solver_name)
 	test_performance_data_csv.add_column(solver_name)
 
 	test_performance_data_csv.update_csv()
@@ -340,4 +343,15 @@ def call_sparkle_portfolio_selector_solve_instance_directory(instance_directory_
 		jobid = ''
 
 	return
+
+
+def check_selector_status(solver_name):
+	"""
+	Checks if there is an selector at the given path.
+	If it does not exist the function will terminate the whole program.
+	"""
+	selector = pathlib.Path(solver_name+"/sparkle_portfolio_selector__@@SPARKLE@@__")
+	if not selector.exists() or not selector.is_file():
+		print("ERROR: The portfolio selector could not be found. Please make sure to first construct a portfolio selector.")
+		sys.exit()
 

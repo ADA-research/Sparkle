@@ -1,5 +1,7 @@
 # Use Sparkle for algorithm configuration
 
+These steps can also be found as a Bash script in `Examples/configuration.sh`
+
 ## Initialise the Sparkle platform
 
 `Commands/initialise.py`
@@ -9,6 +11,7 @@
 Add train, and optionally test, instances (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
 
 `Commands/add_instances.py Examples/Resources/Instances/PTN/`
+
 `Commands/add_instances.py Examples/Resources/Instances/PTN2/`
 
 ## Add a configurable solver

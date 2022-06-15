@@ -17,27 +17,15 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_command_help import CommandName
 
 
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "solver_path",
-        metavar="solver-path",
-        type=str,
-        help="path to the solver"
-    )
+def parser_function():
+    parser = argparse.ArgumentParser(
+        description="Add a solver to the Sparkle platform.",
+        epilog="")
     parser.add_argument(
         "--deterministic",
         required=True,
         type=int,
-        choices=range(0, 2),
+        choices=[0, 1],
         help="indicate whether the solver is deterministic or not",
     )
     group_solver_run = parser.add_mutually_exclusive_group()
@@ -69,6 +57,26 @@ if __name__ == r"__main__":
         type=int,
         help=('Use this option to add multiple variations of the solver by using a '
               'different random seed for each varation.'))
+    parser.add_argument(
+        "solver_path",
+        metavar="solver-path",
+        type=str,
+        help="path to the solver"
+    )
+
+    return parser
+
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

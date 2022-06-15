@@ -14,15 +14,7 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "instance_path",
@@ -44,6 +36,20 @@ if __name__ == r"__main__":
         action=ac.SetByUser,
         help="the performance measure, e.g. runtime",
     )
+
+    return parser
+
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

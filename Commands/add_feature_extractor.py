@@ -28,14 +28,7 @@ def _check_existence_of_test_instance_list_file(extractor_directory: str):
         return False
 
 
-if __name__ == r"__main__":
-    # Initialise settings
-    global settings
-    sgh.settings = sparkle_settings.Settings()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
+def parser_function():
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -69,6 +62,18 @@ if __name__ == r"__main__":
         action="store_true",
         help="run the feature extractor on multiple instances in parallel",
     )
+    return parser
+
+
+if __name__ == r"__main__":
+    # Initialise settings
+    global settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

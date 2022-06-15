@@ -20,6 +20,57 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
 
 
+def parser_function():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--recompute",
+        action="store_true",
+        help="recompute the performance of all solvers on all instances",
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="run the solver on multiple instances in parallel",
+    )
+    parser.add_argument(
+        "--performance-measure",
+        choices=PerformanceMeasure.__members__,
+        default=sgh.settings.DEFAULT_general_performance_measure,
+        action=ac.SetByUser,
+        help="the performance measure, e.g. runtime",
+    )
+    parser.add_argument(
+        "--target-cutoff-time",
+        type=int,
+        default=sgh.settings.DEFAULT_general_target_cutoff_time,
+        action=ac.SetByUser,
+        help="cutoff time per target algorithm run in seconds",
+    )
+    parser.add_argument(
+        "--also-construct-selector-and-report",
+        action="store_true",
+        help=("after running the solvers also construct the selector and generate"
+              " the report"),
+    )
+    parser.add_argument(
+        "--verifier",
+        choices=SolutionVerifier.__members__,
+        default=sgh.settings.DEFAULT_general_solution_verifier,
+        action=ac.SetByUser,
+        help=("problem specific verifier that should be used to verify solutions found"
+              " by a target algorithm"),
+    )
+    parser.add_argument(
+        "--settings-file",
+        type=Path,
+        default=sgh.settings.DEFAULT_settings_path,
+        action=ac.SetByUser,
+        help=("specify the settings file to use in case you want to use one other than"
+              " the default"),
+    )
+    return parser
+
+
 def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report=False):
     num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
 
@@ -93,53 +144,7 @@ if __name__ == r"__main__":
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--recompute",
-        action="store_true",
-        help="recompute the performance of all solvers on all instances",
-    )
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the solver on multiple instances in parallel",
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--target-cutoff-time",
-        type=int,
-        default=sgh.settings.DEFAULT_general_target_cutoff_time,
-        action=ac.SetByUser,
-        help="cutoff time per target algorithm run in seconds",
-    )
-    parser.add_argument(
-        "--also-construct-selector-and-report",
-        action="store_true",
-        help=("after running the solvers also construct the selector and generate"
-              " the report"),
-    )
-    parser.add_argument(
-        "--verifier",
-        choices=SolutionVerifier.__members__,
-        default=sgh.settings.DEFAULT_general_solution_verifier,
-        action=ac.SetByUser,
-        help=("problem specific verifier that should be used to verify solutions found"
-              " by a target algorithm"),
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than"
-              " the default"),
-    )
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

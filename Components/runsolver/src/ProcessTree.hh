@@ -27,6 +27,7 @@
 #include <signal.h>
 #include <errno.h>
 
+#include <cassert>
 #include <iostream>
 #include <cctype>
 #include <map>
@@ -42,45 +43,37 @@ private:
   typedef map<pid_t,ProcessData *> ProcMap;
   
   ProcMap tree;
-  pid_t currentRootPID;
+  vector<pid_t> roots; // root processes of the solver
 
-  char loadavgLine[1024]; // ???
+  string loadavgLine;
   long memTotal,memFree,swapTotal,swapFree; // data from /proc/meminfo
 
   float elapsed; // number of seconds elapsed since the start of the program
 
   float uptime; // up time of the host (in seconds)
 
-  bool treeHasAllProcesses;
+  float completedCPUTime=0; // CPU time of completed processes
+  
+  bool treeHasAllProcesses=false;
 
-  // process groups of the solver
-  set<pid_t> solverProcessGroups;
-
-  // process group id of runsolver itself
-  pid_t runsolverGroupId;
-
+  pid_t runsolverPID=-1;
 public:
   ProcessTree()
   {
-    currentRootPID=0;
-    treeHasAllProcesses=false;
-
-    runsolverGroupId=getpgrp();
   }
 
-  ProcessTree(const ProcessTree &pt)
+  ProcessTree(const ProcessTree &pt): roots(pt.roots), completedCPUTime(pt.completedCPUTime), runsolverPID(pt.runsolverPID)
   {
-    currentRootPID=pt.currentRootPID;
-    treeHasAllProcesses=false;
-
+    treeHasAllProcesses=pt.treeHasAllProcesses;
+    
     elapsed=pt.elapsed;
     memTotal=pt.memTotal;
     memFree=pt.memFree;
     swapTotal=pt.swapTotal;
     swapFree=pt.swapFree;
+    loadavgLine=pt.loadavgLine;
 
-    clone(pt,currentRootPID);
-    strncpy(loadavgLine,pt.loadavgLine,sizeof(pt.loadavgLine));
+    clone(pt);
   }
 
   ~ProcessTree()
@@ -94,11 +87,12 @@ public:
       delete (*it).second;
 
     tree.clear();
+    roots.clear();
   }
 
-  void setDefaultRootPID(pid_t pid)
+  void setRunsolverPID(pid_t pid)
   {
-    currentRootPID=pid;
+    runsolverPID=pid;
   }
 
 
@@ -107,70 +101,22 @@ public:
     elapsed=timeSinceStartOfProgram;
   }
 
+  void setCompletedCPUTime(float cpuTime)
+  {
+    completedCPUTime=cpuTime;
+  }
+
   float getElapsedTime() const
   {
     return elapsed;
   }
 
   /**
-   * gather informations on all processes (to determine all children
-   * of the watched process)
-   */
-  void readProcesses()
-  {
-    readProcesses(currentRootPID);
-  }
-
-  /**
-   * update informations on processes which are a child of the current
-   * root.
-   *
-   * doesn't attempt to identify new children processes
-   */
-  void updateProcessesData()
-  {
-    updateProcessesData(currentRootPID);
-  }
-
-  /**
    * return true when the main process has ended
    */
-  bool rootProcessEnded()
+  bool solverEnded()
   {
-    ProcMap::iterator it=tree.find(currentRootPID);
-
-    if (it!=tree.end() && (*it).second!=NULL)
-      return false; // no, still running
-
-#if 0
-    // the main process terminated, but some children may still be
-    // running. Look for a new root process (with init as parent and
-    // the process group id given to the solver)
-
-    // get a fresh list of processes
-    readProcesses();
-
-    for(ProcMap::iterator it=tree.begin();it!=tree.end();++it)
-    {
-      ProcessData *data=(*it).second;
-
-      if (!data)
-      {
-	//cout << "Ooops ! No data available on process " << (*it).first << endl;
-	continue;
-      }
-
-      if (data->getppid()==1 && data->getProcessGroupId()==currentRootPID)
-      {
-	// we have found the new root
-	currentRootPID=(*it).first;
-	cout << "New process root " << currentRootPID << endl;
-	return false;
-      }
-    }
-#endif
-
-    return true;
+    return roots.empty();
   }
 
   /**
@@ -178,16 +124,15 @@ public:
    * of the watched process)
    *
    */
-  void readProcesses(pid_t root)
+  void readProcesses()
   {
     DIR *procfs=opendir("/proc");
     struct dirent *dirEntry;
     pid_t pid;
 
+    //cout << "??? runsolverPID=" << runsolverPID << endl;
+    
     clear();
-    solverProcessGroups.clear();
-
-    currentRootPID=root;
 
     readGlobalData();
 
@@ -203,7 +148,18 @@ public:
       //cout << "process " << dirEntry->d_name << endl;
 
       pid=atoi(dirEntry->d_name);
-      tree[pid]=new ProcessData(pid);
+      ProcessData *pd=new ProcessData(pid);
+
+      if(pd->isValid())
+      {
+	//cout << "pid=" << pid << " ppid=" << pd->getppid() << endl;
+	
+        tree[pid]=pd;
+	if(pd->getppid()==runsolverPID)
+	  roots.push_back(pid);
+      }
+      else
+        delete pd;
     }
 
     closedir(procfs);
@@ -212,35 +168,26 @@ public:
 
     identifyChildren();
 
-    readTasksRec(root);
+    for(pid_t root: roots)
+      readTasksRec(root);
   }
   
   /**
-   * update informations on processes which are a child of root.
+   * update informations on processes which are a child of runsolver.
    *
    * doesn't attempt to identify new children processes
    */
-  void updateProcessesData(pid_t root)
+  void updateProcessesData()
   {
-    ProcessData *data=tree[root];
+    bool allRootsOK=true;
+    
+    for(pid_t root: roots)
+      allRootsOK=allRootsOK && updateProcessesDataRec(root);
 
-    if (!data) // no data on this process
-      return;
-
-    if (!data->update())
-    {
-      // this process doesn't exist any more
-      tree.erase(root);
-      return;
-    }
-
-    for(int i=0;i<data->getNbChildren();++i)
-    {
-      pid_t childpid=data->getPIDChild(i);
-      updateProcessesData(childpid);
-    }
-
+    if(!allRootsOK) // lost some roots?
+      readProcesses(); // find the new roots
   }
+
   /**
    *
    * list heavy processes running on the system. must be called right
@@ -264,7 +211,7 @@ public:
     {
       ProcessData *data=(*it).second;
 
-      if (!data)
+      if (!data || !data->isValid())
       {
 	cout << "Ooops ! No data available on process " << (*it).first << endl;
 	continue;
@@ -293,7 +240,9 @@ public:
   float currentCPUTime()
   {
     float userTime=0,systemTime=0;
-    currentCPUTimeRec(currentRootPID,userTime,systemTime);
+
+    for(pid_t root: roots)
+      currentCPUTimeRec(root,userTime,systemTime);
 
     return userTime+systemTime;
   }
@@ -302,12 +251,25 @@ public:
   {
     userTime=0;
     systemTime=0;
-    currentCPUTimeRec(currentRootPID,userTime,systemTime);
+    for(pid_t root: roots)
+      currentCPUTimeRec(root,userTime,systemTime);
   }
 
   long currentVSize()
   {
-    return currentVSizeRec(currentRootPID);
+    long sum=0;
+    for(pid_t root: roots)
+      sum+=currentVSizeRec(root);
+    
+    return sum;
+  }
+
+  long currentMemory()
+  {
+    long sum=0;
+    for(pid_t root: roots)
+      sum+=currentMemoryRec(root);
+    return sum;
   }
 
   /**
@@ -315,34 +277,49 @@ public:
    */
   void listProcesses(set<pid_t> &list)
   {
-    listProcessesRec(list,currentRootPID);
+    for(pid_t root: roots)
+      listProcessesRec(list,root);
   }
 
   void dumpProcessTree(ostream &out)
   {
-    cout << "\n[startup+" << elapsed << " s]" << endl;
+    cout << "\n[startup+" << elapsed << " s]";
+    if(treeHasAllProcesses)
+      cout << '*';
+    cout << endl;
 
+    //cout << "nbRoots=" << roots.size() << endl; // ???
     dumpGlobalData(out);
 
-    dumpProcessTreeRec(out,currentRootPID);
+    for(pid_t root: roots)
+      dumpProcessTreeRec(out,root);
   }
 
   void dumpCPUTimeAndVSize(ostream &out)
   {
-    float userTime,systemTime,VSize;
+    float userTime,systemTime;
+    long VSize,mem;
     VSize=currentVSize();
+    mem=currentMemory();
     currentCPUTime(userTime,systemTime);
-    dumpCPUTimeAndVSize(out,userTime+systemTime,VSize);
+    dumpCPUTimeAndVSize(out,userTime+systemTime,VSize,mem);
   }
 
   void dumpCPUTimeAndVSize(ostream &out, 
-			   float currentCPUTime, float currentVSize)
+			   float currentCPUTime, long currentVSize, long currentMemory)
   {
-    cout << "Current children cumulated CPU time (s) " 
-	 << currentCPUTime << endl;
+    if(completedCPUTime!=0)
+      out << "Current cumulated CPU time of completed processes: "
+	  << completedCPUTime << " s\n";
 
-    cout << "Current children cumulated vsize (KiB) " 
-	 << static_cast<long>(currentVSize+0.5) << endl;
+    out << "Current children cumulated CPU time: " 
+	<< currentCPUTime << " s\n";
+
+    out << "Current children cumulated vsize: " 
+	 << currentVSize << " KiB\n";
+
+    out << "Current children cumulated memory: " 
+	<< currentMemory << " KiB" << endl;
   }
 
   /**
@@ -350,24 +327,14 @@ public:
    */
   void sendSignalNow(int sig)
   {
-    if(currentRootPID)
-      sendSignalNowRec(currentRootPID,sig);
-  }
-
-  /**
-   * send a signal to the whole process tree without delay
-   */
-  void sendSignalToProcessGroups(int sig)
-  {
-    for(set<pid_t>::iterator it=solverProcessGroups.begin();
-	it!=solverProcessGroups.end();++it)
-      kill(-(*it),sig);
+    for(pid_t root: roots)
+      sendSignalNowRec(root,sig);
   }
 
   void sendSignalBottomUp(int sig)
   {
-    if(currentRootPID)
-      sendSignalBottomUpRec(currentRootPID,sig);
+    for(pid_t root: roots)
+      sendSignalBottomUpRec(root,sig);
   }
 
   void sendSignalBottomUp(pid_t pid, int sig)
@@ -378,59 +345,52 @@ public:
 protected:
   void readGlobalData()
   {
-    FILE *file;
+    ifstream in;
+    string key;
+    long value;
+    
+    in.open("/proc/loadavg");
+    if(in.good())
+      getline(in,loadavgLine);
+    in.close();
 
-    if ((file=fopen("/proc/loadavg","r"))!=NULL)
+    in.open("/proc/meminfo");
+    int fieldsToRead=4;
+    while(fieldsToRead>0)
     {
-      fgets(loadavgLine,sizeof(loadavgLine),file);
-      fclose(file);
+      in >> key >> value;
+      if(in.fail())
+	break;
+
+      if(key=="MemTotal:")
+      {
+	memTotal=value;
+	--fieldsToRead;
+      }
+      else if(key=="MemFree:")
+      {
+	memFree=value;
+	--fieldsToRead;
+      }
+      else if(key=="SwapTotal:")
+      {
+	swapTotal=value;
+	--fieldsToRead;
+      }
+      else if(key=="SwapFree:")
+      {
+	swapFree=value;
+	--fieldsToRead;
+      }
+      
+      getline(in,key);
     }
+    in.close();
 
-    if ((file=fopen("/proc/meminfo","r"))!=NULL)
-    {
-      fscanf(file,
-#if WSIZE==32
-	     "%*s%d%*s"  // MemTotal:      1033624 kB
-	     "%*s%d%*s"  // MemFree:         13196 kB
-	     "%*s%*d%*s"   // Buffers:          8084 kB
-	     "%*s%*d%*s"   // Cached:         343436 kB
-	     "%*s%*d%*s"   // SwapCached:          0 kB
-	     "%*s%*d%*s"   // Active:         803400 kB
-	     "%*s%*d%*s"   // Inactive:       154436 kB
-	     "%*s%*d%*s"   // HighTotal:      130240 kB
-	     "%*s%*d%*s"   // HighFree:          120 kB
-	     "%*s%*d%*s"   // LowTotal:       903384 kB
-	     "%*s%*d%*s"   // LowFree:         13076 kB
-	     "%*s%d%*s"  // SwapTotal:     2048248 kB
-	     "%*s%d%*s"  // SwapFree:      2041076 kB
-#else
-	     "%*s%ld%*s"  // MemTotal:      1033624 kB
-	     "%*s%ld%*s"  // MemFree:         13196 kB
-	     "%*s%*d%*s"   // Buffers:          8084 kB
-	     "%*s%*d%*s"   // Cached:         343436 kB
-	     "%*s%*d%*s"   // SwapCached:          0 kB
-	     "%*s%*d%*s"   // Active:         803400 kB
-	     "%*s%*d%*s"   // Inactive:       154436 kB
-	     "%*s%*d%*s"   // HighTotal:      130240 kB
-	     "%*s%*d%*s"   // HighFree:          120 kB
-	     "%*s%*d%*s"   // LowTotal:       903384 kB
-	     "%*s%*d%*s"   // LowFree:         13076 kB
-	     "%*s%ld%*s"  // SwapTotal:     2048248 kB
-	     "%*s%ld%*s"  // SwapFree:      2041076 kB
-#endif
-	     ,&memTotal,&memFree,&swapTotal,&swapFree);
-
-      fclose(file);
-    }
-
-    if ((file=fopen("/proc/uptime","r"))!=NULL)
-    {
-      fscanf(file,
-	     "%g"  // uptime
-	     ,&uptime);
-
-      fclose(file);
-    }
+    in.open("/proc/uptime");
+    if(in.good())
+      in >> uptime;
+    in.close();
   }
 
   void identifyChildren()
@@ -440,7 +400,7 @@ protected:
     {
       ProcessData *data=(*it).second;
 
-      if (!data)
+      if (!data || !data->isValid())
       {
 	cout << "Ooops ! No data available on process " << (*it).first << endl;
 	continue;
@@ -467,9 +427,32 @@ protected:
   }
 
 
+  /**
+   * returns false if the process <root> does not exist
+   */
+  bool updateProcessesDataRec(pid_t root)
+  {
+    ProcessData *data=tree[root];
+
+    if (!data) // no data on this process
+      return false;
+
+    if (!data->update())
+    {
+      // this process doesn't exist any more
+      tree.erase(root);
+      return false;
+    }
+
+    for(pid_t childpid: data->getChildren())
+      updateProcessesDataRec(childpid);
+
+    return true;
+  }
+
   void dumpGlobalData(ostream &out)
   {
-    out << "/proc/loadavg: " << loadavgLine;
+    out << "/proc/loadavg: " << loadavgLine << "\n";
     out << "/proc/meminfo: memFree=" << memFree << "/" << memTotal
 	<< " swapFree=" << swapFree << "/" << swapTotal << endl;
   }
@@ -478,56 +461,64 @@ protected:
   {
     ProcessData *data=tree[pid];
 
-    if (!data) // no data on this process
+    if (!data || !data->isValid()) // no data on this process
       return;
 
     userTime+=data->getOverallUserTime();
     systemTime+=data->getOverallSystemTime();
 
-    for(int i=0;i<data->getNbChildren();++i)
-    {
-      pid_t childpid=data->getPIDChild(i);
+    for(pid_t childpid: data->getChildren())
       if (tree[childpid] && !tree[childpid]->isTask())
 	currentCPUTimeRec(childpid,userTime,systemTime);
-    }
   }
 
   long currentVSizeRec(pid_t pid)
   {
     ProcessData *data=tree[pid];
 
-    if (!data) // no data on this process
+    if (!data || !data->isValid()) // no data on this process
       return 0;
 
     long size=data->getVSize();
 
-    for(int i=0;i<data->getNbChildren();++i)
-    {
-      pid_t childpid=data->getPIDChild(i);
+    for(pid_t childpid: data->getChildren())
       if (tree[childpid] && !tree[childpid]->isTask())
 	size+=currentVSizeRec(childpid);
-    }
 
     return size;
+  }
+
+  long currentMemoryRec(pid_t pid)
+  {
+    ProcessData *data=tree[pid];
+
+    if (!data || !data->isValid()) // no data on this process
+      return 0;
+
+    long mem=data->getMemory();
+
+    for(pid_t childpid: data->getChildren())
+      if (tree[childpid] && !tree[childpid]->isTask())
+	mem+=currentMemoryRec(childpid);
+
+    return mem;
   }
 
   void sendSignalNowRec(pid_t pid, int sig)
   {
     ProcessData *data=tree[pid];
 
-    if (!data) // no data on this process
+    if (!data || !data->isValid()) // no data on this process
       return;
-
+    
     if (data->getNbChildren()!=0)
     {
-      for(int i=0;i<data->getNbChildren();++i)
-      {
-	pid_t childpid=data->getPIDChild(i);
+      for(pid_t childpid: data->getChildren())
 	if (tree[childpid] && !tree[childpid]->isTask())
 	  sendSignalNowRec(childpid,sig);
-      }
     }
 
+    cout << "??? kill " << pid << " sig " << sig << endl;
     kill(pid,sig);
   }
 
@@ -535,17 +526,14 @@ protected:
   {
     ProcessData *data=tree[pid];
 
-    if (!data) // no data on this process
+    if (!data || !data->isValid()) // no data on this process
       return;
 
     if (data->getNbChildren()!=0)
     {
-      for(int i=0;i<data->getNbChildren();++i)
-      {
-	pid_t childpid=data->getPIDChild(i);
+      for(pid_t childpid: data->getChildren())
 	if (tree[childpid] && !tree[childpid]->isTask())
 	  sendSignalBottomUpRec(childpid,sig);
-      }
 
       // give some time to the father to wait for its children
       struct timespec delay={0,020000000}; // 20 ms
@@ -561,23 +549,14 @@ protected:
   {
     ProcessData *data=tree[pid];
 
-    if (!data) // no data on this process
+    if (!data || !data->isValid()) // no data on this process
       return;
-
-    pid_t groupId=data->getProcessGroupId();
-
-    if(groupId!=runsolverGroupId)
-      solverProcessGroups.insert(groupId);
 
     readProcessTasks(pid);
 
-    int nb=data->getNbChildren();
-    for(int i=0;i<nb;++i)
-    {
-      int childpid=data->getPIDChild(i);
+    for(pid_t childpid: data->getChildren())
       if (tree[childpid] && !tree[childpid]->isTask())
 	readTasksRec(childpid);
-    }
   }
 
   void readProcessTasks(pid_t pid)
@@ -590,7 +569,7 @@ protected:
 
     data=tree[pid];
 
-    if (!data)
+    if (!data || !data->isValid())
       return;
 
     snprintf(processdir,sizeof(processdir),"/proc/%d/task",pid);
@@ -622,10 +601,17 @@ protected:
       //cout << "task " << dirEntry->d_name 
       //     << " (pid=" << pid << ")" << endl;
 
-      tree[tid]=new ProcessData(pid,tid);
+      ProcessData *pd=new ProcessData(pid,tid);
 
-      // add a link from the father to the task
-      data->addChild(tid);
+      if(pd->isValid())
+      {
+        tree[tid]=pd;
+
+        // add a link from the father to the task
+        data->addChild(tid);
+      }
+      else
+        delete pd;
     }
 
     closedir(procfs);
@@ -635,44 +621,50 @@ protected:
   {
     ProcessData *data=tree[pid];
     
-    if (!data)
+    if (!data || !data->isValid())
       return;
 
     list.insert(pid);
 
-    for(int i=0;i<data->getNbChildren();++i)
-      listProcessesRec(list,data->getPIDChild(i));
+    for(pid_t childpid: data->getChildren())
+      listProcessesRec(list,childpid);
   }
 
   void dumpProcessTreeRec(ostream &out,pid_t pid)
   {
     ProcessData *data=tree[pid];
     
-    if (!data)
+    if (!data || !data->isValid())
       return;
 
     out << *data;
-    for(int i=0;i<data->getNbChildren();++i)
-      dumpProcessTreeRec(out,data->getPIDChild(i));
+    for(pid_t childpid: data->getChildren())
+      dumpProcessTreeRec(out,childpid);
   }
 
-  void clone(const ProcessTree &pt, pid_t pid)
+  void clone(const ProcessTree &pt)
   {
     treeHasAllProcesses=false; // we only copy the solver processes
 
+    for(pid_t root: pt.roots)
+      cloneRec(pt,root);
+  }
+  
+  void cloneRec(const ProcessTree &pt, pid_t pid)
+  {
     ProcMap::const_iterator it=pt.tree.find(pid);
     if (it==pt.tree.end())
       return;
 
     ProcessData *data=(*it).second;
     
-    if (!data)
+    if (!data || !data->isValid())
       return;
 
     tree[pid]=new ProcessData(*data);
 
-    for(int i=0;i<data->getNbChildren();++i)
-      clone(pt,data->getPIDChild(i));
+    for(pid_t childpid: data->getChildren())
+      cloneRec(pt,childpid);
   }
 
   void dumpCmdLine(ostream &s, pid_t pid)

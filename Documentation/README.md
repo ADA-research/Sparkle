@@ -30,7 +30,7 @@ Consult the [Sphinx documentation](https://www.sphinx-doc.org) on how to use Sph
 
 ## Build the pdf User Guide
 
-A user guide is also availible in the file `sparkle-userguide.pdf`. To regenete the file, use  
+A user guide is also available in the file `sparkle-userguide.pdf`. To generate the file, use  
 ```bash
 make userguide
 ```

@@ -16,6 +16,30 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
 
 
+def parser_function():
+    sgh.settings = sparkle_settings.Settings()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--recompute",
+        action="store_true",
+        help="re-run feature extractor for instances with previously computed features",
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="run the feature extractor on multiple instances in parallel",
+    )
+    parser.add_argument(
+        "--settings-file",
+        type=Path,
+        default=sgh.settings.DEFAULT_settings_path,
+        action=ac.SetByUser,
+        help=("specify the settings file to use in case you want to use one other than "
+              "the default"),
+    )
+    return parser
+
+
 def compute_features_parallel(my_flag_recompute):
     if my_flag_recompute:
         feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
@@ -56,25 +80,7 @@ if __name__ == r"__main__":
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--recompute",
-        action="store_true",
-        help="re-run feature extractor for instances with previously computed features",
-    )
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the feature extractor on multiple instances in parallel",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than "
-              "the default"),
-    )
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()

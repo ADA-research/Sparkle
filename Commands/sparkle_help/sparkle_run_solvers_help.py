@@ -97,8 +97,8 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
 	# Prepare runsolver call
 	runsolver_path = sgh.runsolver_path
-	runsolver_option = '--timestamp --use-pty --add-eof'
-	cutoff_time_each_run_option = f'-C {cutoff_time_str}'
+	runsolver_option = '--timestamp --use-pty'
+	cutoff_time_each_run_option = f'--cpu-limit {cutoff_time_str}'
 	runsolver_values_log = f'-v {str(runsolver_values_path)}'
 	runsolver_watch_data_path = str(runsolver_values_path).replace('val', 'log')
 	runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'

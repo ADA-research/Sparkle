@@ -1,18 +1,24 @@
-VERSION=3.3.4
+VERSION=3.4.0
 #SVNVERSION=`svnversion .`
-SVNVERSION=$(word 2,$$Rev: 1649 $$)
-#DEBUG=-g
-DEBUG=-O3
+SVNVERSION=$(word 2,$$Rev: 3018 $$)
+DEBUG=-g
+#DEBUG=-O3 -g
 
 STATIC=
-#STATIC=-static
+#STATIC=-static 
 
 WSIZE:=$(shell if [ `uname -m` = 'x86_64' ] ; then echo 64; else echo 32; fi )
-SYSCALLINCFILE:=$(shell  for f in /usr/include/asm/unistd_$(WSIZE).h /usr/include/`uname -m`-linux-gnu/asm/unistd_$(WSIZE).h ; do if [ -e $$f ] ; then echo $$f ; break ; fi ; done )
 
-CFLAGS=-Dtmpdebug -Wall -DVERSION=\"$(VERSION)\" -DSVNVERSION=\"$(SVNVERSION)\" -DWSIZE=$(WSIZE)
+CFLAGS=-std=c++11 -DWITH_NUMA -Dtmpdebug -Wall -DVERSION=\"$(VERSION)\" -DSVNVERSION=\"$(SVNVERSION)\" -DWSIZE=$(WSIZE)
+LDFLAGS= $(STATIC) -Wl,--build-id
+LIBS=-lnuma
 
-SRC=runsolver.cc SignalNames.cc SyscallNames.cc
+ifneq ($(findstring alineos.net,$(HOSTNAME)),)
+# if needed, path to the dynamic library we use
+LDFLAGS+=-Wl,-rpath,$(HOME)/tools-centos7/lib64
+endif
+
+SRC=runsolver.cc SignalNames.cc
 OBJ=$(SRC:.cc=.o)
 
 all:runsolver
@@ -26,19 +32,13 @@ include $(SRC:.cc=.d)
 	g++ $(CFLAGS) $(DEBUG) -c $*.cc
 
 runsolver: $(OBJ)
-	g++  $(STATIC) $(DEBUG) -o $@ $^ -lpthread
+	g++  $(LDFLAGS) $(DEBUG) -o $@ $^ -pthread $(LIBS)
 
 testlimit: testlimit.cc
 	g++ -o testlimit testlimit.cc
 
 testthread: testthread.cc
-	g++ -o testthread testthread.cc -lpthread
-
-SyscallNames.cc SyscallNames.hh: CreateSyscallsNames.cc $(SYSCALLINCFILE)
-	grep '#define[[:space:]]*__NR' $(SYSCALLINCFILE) | grep -v '^/' | awk '{print $$2}' | sed -e 's/^__NR_//' | awk '{printf "list[__NR_%s]=\"%s\";\n",$$1,$$1}' > tmpSyscallList.cc
-	g++ -o CreateSyscallsNames CreateSyscallsNames.cc
-	./CreateSyscallsNames
-	rm tmpSyscallList.cc CreateSyscallsNames 
+	g++ -o testthread testthread.cc -pthread
 
 .PHONY: clean realclean archive
 
@@ -59,7 +59,7 @@ clean:
 	rm -f runsolver $(OBJ) *.class testlimit testtimestamper vlineSplitter testProcessTree runtestlimit testthread
 
 realclean: clean
-	rm -f *.d *~ SyscallNames.*
+	rm -f *.d *~
 
 
 %.d: %.cc

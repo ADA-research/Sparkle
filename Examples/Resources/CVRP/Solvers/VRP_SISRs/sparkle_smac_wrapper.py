@@ -44,7 +44,7 @@ instance_name = get_last_level_directory_name(instance)
 solver_name = get_last_level_directory_name(solver_binary)
 runsolver_watch_data_path = tmp_directory + solver_name + r'_' + instance_name + r'_' + get_time_pid_random_string() + r'.log'
 
-command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' -W ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + instance + r' -seed ' + str(seed)
+command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + instance + r' -seed ' + str(seed)
 #r: raw string, arguments get passed to algorithm only from solver_binary onwards!
 len_argv = len(sys.argv)
 i = 6

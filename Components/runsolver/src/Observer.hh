@@ -21,7 +21,6 @@
 
 #ifndef _Observer_hh_
 #define _Observer_hh_
-#endif
 
 /**
  * a class to watch file descriptors and wait for data to become
