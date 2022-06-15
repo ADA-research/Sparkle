@@ -120,6 +120,9 @@ if __name__ == '__main__':
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
 
+    # Write settings to file before starting, since they are used in callback scripts
+    sgh.settings.write_used_settings()
+
     print('c Sparkle parallel portfolio is running ...')
     # instance_paths = list of paths to all instances
     # portfolio_path = Path to the portfolio containing the solvers
