@@ -477,8 +477,10 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
 
     # For each finished instance
     for instance in finished_instances_dict:
+        # Only look at solvers for this instance
+        current_sol_inst_list = [si for si in solver_instance_list if instance in si]
         # Check results for each solver
-        for solver_instance in solver_instance_list:
+        for solver_instance in current_sol_inst_list:
             finished_solver_files = glob.glob(f'{str(perf_data_tmp_path)}/*'
                                               f'{solver_instance}*result')
             # If there is more than one result file for this solver-instance combination
@@ -493,50 +495,45 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                 with open(file_path, 'r') as infile:
                     content = infile.readlines()
 
+                solving_time = float(content[2].strip())
+
                 # A new instance is solved
                 if (finished_instances_dict[instance][1] == float(0)):
-                    if (float(content[2].strip()) >
+                    finished_instances_dict[instance][1] = solving_time
+
+                    if (solving_time >
                             float(sgh.settings.get_general_target_cutoff_time())):
                         print(f'c {str(instance)} has reached the cutoff time without '
                               'being solved.')
-                        finished_instances_dict[instance][1] = float(content[2].strip())
                     else:
-                        finished_instances_dict[instance][1] = float(content[2].strip())
                         print(f'c {str(instance)} has been solved in '
-                              f'{str(content[2].strip())} seconds!')
+                              f'{str(solving_time)} seconds!')
 
-                        for temp_files in os.listdir(sgh.sparkle_tmp_path):
-                            temp_file_match = str(sfh.get_file_name(content[1].strip()))
+                        temp_files = glob.glob(f'{sgh.sparkle_tmp_path}{solver_instance}'
+                                               f'*.rawres')
 
-                            if (temp_file_match in str(temp_files.strip()) and
-                                    sfh.get_file_least_extension(str(temp_files.strip()))
-                                    == 'rawres'):
-                                rawres_file_path = (sgh.sparkle_tmp_path
-                                                    + str(temp_files.strip()))
+                        for rawres_file_path in temp_files:
+                            with open(rawres_file_path, 'r') as rawres_file:
+                                raw_content = rawres_file.readlines()
 
-                                with open(rawres_file_path, 'r') as rawres_file:
-                                    raw_content = rawres_file.readlines()
+                            nr_of_lines_raw_content = len(raw_content)
 
-                                nr_of_lines_raw_content = len(raw_content)
-
-                                for lines in range(0, nr_of_lines_raw_content):
-                                    if '\ts ' in raw_content[
-                                            nr_of_lines_raw_content-lines-1]:
-                                        results_line = raw_content[
-                                            nr_of_lines_raw_content-lines-1]
-                                        print('c result = ' + str(results_line[
-                                            results_line.find('s')+2:].strip()))
-                                        finished_instances_dict[instance][0] = str(
-                                            results_line[
-                                                results_line.find('s')+2:].strip())
-                                        break
+                            for lines in range(0, nr_of_lines_raw_content):
+                                if '\ts ' in raw_content[
+                                        nr_of_lines_raw_content-lines-1]:
+                                    results_line = raw_content[
+                                        nr_of_lines_raw_content-lines-1]
+                                    print('c result = ' + str(results_line[
+                                        results_line.find('s')+2:].strip()))
+                                    finished_instances_dict[instance][0] = str(
+                                        results_line[results_line.find('s')+2:].strip())
+                                    break
 
                 # A solver has an improved performance time on an instance
-                elif (float(finished_instances_dict[instance][1])
-                        > float(content[2].strip())):
-                    finished_instances_dict[instance][1] = float(content[2].strip())
+                elif (float(finished_instances_dict[instance][1]) > solving_time):
+                    finished_instances_dict[instance][1] = solving_time
                     print(f'c {str(instance)} has been solved with an improved solving '
-                          f'time of {str(content[2].strip())} seconds!')
+                          f'time of {str(solving_time)} seconds!')
 
     # Monitors the running jobs waiting for a solver that finishes
     finished_solver_id_list, pending_job_with_new_cutoff, started = (
