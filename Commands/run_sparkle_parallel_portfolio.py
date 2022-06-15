@@ -93,6 +93,8 @@ if __name__ == '__main__':
     instance_paths = []
 
     for instance in args.instance_paths:
+        if not Path(instance).exists():
+            sys.exit(f'c Instance "{instance}" not found, aborting the process.')
         if os.path.isfile(instance):
             print(f'c Running on instance {instance}')
             instance_paths.append(instance)
