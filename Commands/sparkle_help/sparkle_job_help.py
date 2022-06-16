@@ -1,20 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-
-Authors: 	Chuan Luo, chuanluosaber@gmail.com
-			Holger H. Hoos, hh@liacs.nl
-
-Contact: 	Chuan Luo, chuanluosaber@gmail.com
-'''
-
 from typing import List
 from typing import Dict
 from pathlib import Path
 import subprocess
 import csv
+import time
 
 try:
 	from sparkle_help.sparkle_command_help import CommandName
@@ -88,7 +80,8 @@ def check_job_is_done_slurm(job_id: str) -> bool:
 
 
 def sleep(n_seconds: int):
-	subprocess.run(['sleep', str(n_seconds)])
+	if n_seconds > 0:
+		time.sleep(n_seconds)
 
 	return
 
