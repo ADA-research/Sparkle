@@ -1,22 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-
-Authors: 	Chuan Luo, chuanluosaber@gmail.com
-			Holger H. Hoos, hh@liacs.nl
-
-Contact: 	Chuan Luo, chuanluosaber@gmail.com
-'''
-
 import os
-import time
-import random
 import sys
-import shutil
-import fcntl
-from sparkle_help import sparkle_basic_help
+from pathlib import Path
+
+from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 
@@ -143,17 +132,17 @@ def save_current_sparkle_platform(my_record_filename):
 	
 
 def cleanup_current_sparkle_platform():
-	if os.path.exists(r'Instances/'): shutil.rmtree(r'Instances/')
-	if os.path.exists(r'Solvers/'): shutil.rmtree(r'Solvers/')
-	if os.path.exists(r'Extractors/'): shutil.rmtree(r'Extractors/')
-	if os.path.exists(r'Feature_Data/'): shutil.rmtree(r'Feature_Data/')
-	if os.path.exists(r'Performance_Data/'): shutil.rmtree(r'Performance_Data/')
-	if os.path.exists(r'Reference_Lists/'): shutil.rmtree(r'Reference_Lists/')
-	if os.path.exists(r'Sparkle_Portfolio_Selector'): shutil.rmtree(r'Sparkle_Portfolio_Selector/')
+	if os.path.exists(r'Instances/'): sfh.rmtree(Path(r'Instances/'))
+	if os.path.exists(r'Solvers/'): sfh.rmtree(Path(r'Solvers/'))
+	if os.path.exists(r'Extractors/'): sfh.rmtree(Path(r'Extractors/'))
+	if os.path.exists(r'Feature_Data/'): sfh.rmtree(Path(r'Feature_Data/'))
+	if os.path.exists(r'Performance_Data/'): sfh.rmtree(Path(r'Performance_Data/'))
+	if os.path.exists(r'Reference_Lists/'): sfh.rmtree(Path(r'Reference_Lists/'))
+	if os.path.exists(r'Sparkle_Portfolio_Selector'): sfh.rmtree(Path(r'Sparkle_Portfolio_Selector/'))
 	if sgh.sparkle_parallel_portfolio_dir.exists():
 		sfh.rmtree(sgh.sparkle_parallel_portfolio_dir)
 	ablation_scenario_dir = sgh.ablation_dir + "scenarios/"
-	if os.path.exists(ablation_scenario_dir): shutil.rmtree(ablation_scenario_dir)
+	if os.path.exists(ablation_scenario_dir): sfh.rmtree(Path(ablation_scenario_dir))
 	return
 
 
@@ -161,7 +150,7 @@ def extract_sparkle_record(my_record_filename):
 	if not os.path.exists(my_record_filename):
 		sys.exit()
 	
-	my_suffix = sparkle_basic_help.get_time_pid_random_string()
+	my_suffix = sbh.get_time_pid_random_string()
 	my_tmp_directory = r'tmp_directory_' + my_suffix
 	
 	if not os.path.exists(r'Tmp/'):
@@ -169,10 +158,7 @@ def extract_sparkle_record(my_record_filename):
 	
 	os.system(r'unzip -o ' + my_record_filename + r' -d ' + my_tmp_directory + " >> " + record_log_file_path)
 	os.system(r'cp -r ' + my_tmp_directory + '/* ' + './')
-	shutil.rmtree(my_tmp_directory)
+	sfh.rmtree(Path(my_tmp_directory))
 	os.system(r'rm -f ' + record_log_file_path)
 	return
-
-
-
 
