@@ -537,7 +537,8 @@ def generate_comparison_plot(points: list,
 	pwd = os.getcwd()
 	if cwd is not None:
 		os.chdir(cwd)
-		print("Changed cwd to {}".format(os.getcwd()))
+		# TODO: Add back as debug output
+		#print("Changed cwd to {}".format(os.getcwd()))
 
 	points = np.array(points)
 	if replace_zeros:
