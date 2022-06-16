@@ -17,7 +17,6 @@ exclude =
     Commands/sparkle_help/sparkle_slurm_help.py,
     Commands/sparkle_help/sparkle_add_solver_help.py,
     Commands/sparkle_help/sparkle_feature_data_csv_help.py,
-    Commands/sparkle_help/sparkle_record_help.py,
     Commands/sparkle_help/sparkle_global_help.py,
     Commands/sparkle_help/sparkle_construct_portfolio_selector_help.py,
     Commands/sparkle_help/sparkle_csv_merge_help.py,
