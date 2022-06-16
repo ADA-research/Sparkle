@@ -9,7 +9,7 @@
 Add instances (in this case for the portfolio) in a given directory, without running solvers or feature extractors
 Note that you should use the full path to the directory containing the instance(s)
 
-`Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN/`
+`Commands/add_instances.py Examples/Resources/Instances/PTN/`
 
 ## Add solvers
 Add a solver without running the solver yet
@@ -18,9 +18,9 @@ The path used should be the full path to the solver directory and should contain
 If needed solvers can also include additional files or scripts in their directory, but try to keep additional files to a minimum as it speeds up copying.
 Use the `--solver-variations` option to set the default number of solver variations of a solver which will be used when a portfolio is constructed. E.g. `--solver-variations 5`
 
-`Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/CSCCSat/`  
-`Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/MiniSAT/`  
-`Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/`
+`Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/CSCCSat/`  
+`Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/MiniSAT/`  
+`Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/`
 
 ## Construct the portfolio
 
