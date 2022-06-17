@@ -504,7 +504,7 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
     if not ablation:
         full_dict["ablationBool"] = r'\ablationfalse'
 
-    if full_dict['featuresBool']:
+    if full_dict['featuresBool'] == r'\featurestrue':
         variable = 'numFeatureExtractors'
         str_value = sgrh.get_numFeatureExtractors()
         full_dict[variable] = str_value
