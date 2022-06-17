@@ -15,6 +15,7 @@ dependencies:
     # Testing
     - pytest
     - flake8
+    - flake8-quotes
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost

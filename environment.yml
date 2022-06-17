@@ -18,6 +18,7 @@ dependencies:
     - dask==2021.7.0
     - distributed==2021.7.0
     - flake8==3.9.2
+    - flake8-quotes==3.3.1
     - fsspec==2021.7.0
     - HeapDict==1.0.1
     - iniconfig==1.1.1

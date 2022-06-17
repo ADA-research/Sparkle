@@ -15,7 +15,7 @@
 Commands/initialise.py > /dev/null
 
 # Save record
-output_true="c For more details see README.md"
+output_true="For more details see README.md"
 output=$(Commands/about.py | tail -1)
 
 if [[ $output == $output_true ]];

@@ -337,7 +337,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
 
     gnuplot_command = (
         f'cd {latex_directory_path}; python auto_gen_plot.py {data_filename} '
-        f'{penalised_time_str} \'SBS ({sgrh.underscore_for_latex(sbs_solver)})\' '
+        f"{penalised_time_str} 'SBS ({sgrh.underscore_for_latex(sbs_solver)})' "
         f'Parallel-Portfolio {figure_filename} {performance_metric_str}')
 
     os.system(gnuplot_command)

@@ -21,7 +21,7 @@ Commands/add_solver.py --deterministic 0 $solver_source > /dev/null
 
 # Remove solver
 solver_path="Solvers/$solver_name"
-output_true="c Removing solver $solver_name done!"
+output_true="Removing solver $solver_name done!"
 output=$(Commands/remove_solver.py $solver_path | tail -1)
 
 if [[ $output == $output_true ]];

@@ -12,7 +12,7 @@ def parser_function():
     return parser
 
 
-if __name__ == r"__main__":
+if __name__ == '__main__':
     # Log command call
     sl.log_command(sys.argv)
 
@@ -23,8 +23,8 @@ if __name__ == r"__main__":
     args = parser.parse_args()
 
     my_suffix = sparkle_basic_help.get_time_pid_random_string()
-    my_record_filename = "Records/My_Record_" + my_suffix + ".zip"
+    my_record_filename = f'Records/My_Record_{my_suffix}.zip'
 
     sparkle_record_help.save_current_sparkle_platform(my_record_filename)
 
-    print(r"c Record file " + my_record_filename + r" saved successfully!")
+    print(f'Record file {my_record_filename} saved successfully!')

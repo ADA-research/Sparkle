@@ -67,3 +67,6 @@ Documentation/source/_generated/
 
 #OS created files
 *.DS_Store
+
+*.tmp
+*.swp

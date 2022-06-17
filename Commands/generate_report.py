@@ -21,88 +21,88 @@ from sparkle_help import sparkle_generate_report_for_parallel_portfolio_help as 
 
 def parser_function():
     parser = argparse.ArgumentParser(
-        description=("Without any arguments a report for the most recent algorithm "
-                     "selection or algorithm configuration procedure is generated."),
-        epilog=("Note that if a test instance set is given, the training instance set "
-                "must also be given."))
+        description=('Without any arguments a report for the most recent algorithm '
+                     'selection or algorithm configuration procedure is generated.'),
+        epilog=('Note that if a test instance set is given, the training instance set '
+                'must also be given.'))
     # Configuration arguments
     parser.add_argument(
-        "--solver",
+        '--solver',
         required=False,
         type=str,
         default=None,
-        help="path to solver for an algorithm configuration report",
+        help='path to solver for an algorithm configuration report',
     )
     parser.add_argument(
-        "--instance-set-train",
+        '--instance-set-train',
         required=False,
         type=str,
-        help=("path to training instance set included in Sparkle for an algorithm"
-              " configuration report"),
+        help=('path to training instance set included in Sparkle for an algorithm'
+              ' configuration report'),
     )
     parser.add_argument(
-        "--instance-set-test",
+        '--instance-set-test',
         required=False,
         type=str,
-        help=("path to testing instance set included in Sparkle for an algorithm"
-              " configuration report"),
+        help=('path to testing instance set included in Sparkle for an algorithm'
+              ' configuration report'),
     )
     parser.add_argument(
-        "--no-ablation",
+        '--no-ablation',
         required=False,
-        dest="flag_ablation",
+        dest='flag_ablation',
         default=True,
         const=False,
-        nargs="?",
-        help="turn off reporting on ablation for an algorithm configuration report",
+        nargs='?',
+        help='turn off reporting on ablation for an algorithm configuration report',
     )
     # Selection arguments
     parser.add_argument(
-        "--selection",
-        action="store_true",
-        help="set to generate a normal selection report",
+        '--selection',
+        action='store_true',
+        help='set to generate a normal selection report',
     )
     parser.add_argument(
-        "--test-case-directory",
+        '--test-case-directory',
         type=str,
         default=None,
-        help="Path to test case directory of an instance set for a selection report",
+        help='Path to test case directory of an instance set for a selection report',
     )
     # Common arguments
     parser.add_argument(
-        "--performance-measure",
+        '--performance-measure',
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
         action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
+        help='the performance measure, e.g. runtime',
     )
     parser.add_argument(
-        "--settings-file",
+        '--settings-file',
         type=Path,
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than"
-              " the default"),
+        help=('specify the settings file to use in case you want to use one other than'
+              ' the default'),
     )
     return parser
 
 
 def generate_task_run_status():
-    key_str = "generate_report"
-    task_run_status_path = r"Tmp/SBATCH_Report_Jobs/" + key_str + r".statusinfo"
-    status_info_str = "Status: Running\n"
+    key_str = 'generate_report'
+    task_run_status_path = 'Tmp/SBATCH_Report_Jobs/' + key_str + '.statusinfo'
+    status_info_str = 'Status: Running\n'
     sfh.write_string_to_file(task_run_status_path, status_info_str)
     return
 
 
 def delete_task_run_status():
-    key_str = "generate_report"
-    task_run_status_path = r"Tmp/SBATCH_Report_Jobs/" + key_str + r".statusinfo"
-    os.system(r"rm -rf " + task_run_status_path)
+    key_str = 'generate_report'
+    task_run_status_path = 'Tmp/SBATCH_Report_Jobs/' + key_str + '.statusinfo'
+    os.system('rm -rf ' + task_run_status_path)
     return
 
 
-if __name__ == r"__main__":
+if __name__ == '__main__':
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -127,11 +127,11 @@ if __name__ == r"__main__":
     instance_set_test = args.instance_set_test
 
     # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "settings_file"):
+    if ac.set_by_user(args, 'settings_file'):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "performance_measure"):
+    if ac.set_by_user(args, 'performance_measure'):
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
@@ -162,24 +162,24 @@ if __name__ == r"__main__":
             sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE
         ):
-            print("ERROR: The generate_report command is not yet implemented for the"
-                  " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
+            print('ERROR: The generate_report command is not yet implemented for the'
+                  ' QUALITY_ABSOLUTE performance measure! (functionality coming soon)')
             sys.exit()
 
         if not os.path.isfile(sgh.sparkle_portfolio_selector_path):
-            print("c Before generating a Sparkle report, please first construct the "
-                  "Sparkle portfolio selector!")
-            print("c Not generating a Sparkle report, stopping execution!")
+            print('Before generating a Sparkle report, please first construct the '
+                  'Sparkle portfolio selector!')
+            print('Not generating a Sparkle report, stopping execution!')
             sys.exit()
 
-        print(r"c Generating report ...")
+        print('Generating report ...')
         generate_task_run_status()
         if test_case_directory is None:
             sgrh.generate_report()
-            print(r"c Report generated ...")
+            print('Report generated ...')
         else:
             sgrh.generate_report(str(test_case_directory))
-            print(r"c Report for test generated ...")
+            print('Report for test generated ...')
 
         delete_task_run_status()
     elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
@@ -202,10 +202,10 @@ if __name__ == r"__main__":
 
         # If only the testing set is given return an error
         elif not flag_instance_set_train and flag_instance_set_test:
-            print("c Argument Error! Only a testing set was provided, please also "
-                  "provide a training set")
-            print(f"c Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
-                  "<instance-set-train>] [--instance-set-test <instance-set-test>]")
+            print('Argument Error! Only a testing set was provided, please also '
+                  'provide a training set')
+            print(f'Usage: {sys.argv[0]} --solver <solver> [--instance-set-train '
+                  '<instance-set-train>] [--instance-set-test <instance-set-test>]')
             sys.exit(-1)
 
         # Generate a report depending on which instance sets are provided
@@ -234,8 +234,8 @@ if __name__ == r"__main__":
                 solver_name, instance_set_train_name, ablation=args.flag_ablation
             )
         else:
-            print("c Error: No results from validate_configured_vs_default found that "
-                  "can be used in the report!")
+            print('Error: No results from validate_configured_vs_default found that '
+                  'can be used in the report!')
             sys.exit(-1)
 
     # Write used settings to file

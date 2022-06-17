@@ -51,7 +51,7 @@ mv $smac_results_path $smac_results_path_tmp &> /dev/null # Save user results
 
 # Configure solver
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation | tail -1)
-output_true="c Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -69,7 +69,7 @@ cp -r $configuration_results_path $smac_path # Place test results
 
 # Run ablation on train set
 output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
-output_true="c Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+output_true="Ablation analysis running. Waiting for Slurm job(s) with id(s): "
 
 if [[ $output =~ "${output_true}" ]];
 then

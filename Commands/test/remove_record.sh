@@ -17,7 +17,7 @@ record_dir="Records/"
 record_file="${record_dir}test_record.zip"
 mkdir $record_dir &> /dev/null
 cp $record_file_origin $record_file
-output_true="c Record file $record_file removed!"
+output_true="Record file $record_file removed!"
 output=$(Commands/remove_record.py $record_file | tail -1)
 
 if [[ $output == $output_true ]];

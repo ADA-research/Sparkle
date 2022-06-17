@@ -5,6 +5,9 @@ max-doc-length = 89
 indent-size = 4
 statistics = True
 
+multiline-quotes = '''
+docstring-quotes = '''
+
 # Cyclomatic complexity desactivated
 # max-complexity = 15 
 

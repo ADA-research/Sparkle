@@ -9,15 +9,15 @@ from sparkle_help import sparkle_logging as sl
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="output run status in verbose mode"
+        '--verbose',
+        '-v',
+        action='store_true',
+        help='output run status in verbose mode'
     )
     return parser
 
 
-if __name__ == r"__main__":
+if __name__ == '__main__':
     # Log command call
     sl.log_command(sys.argv)
 
@@ -33,9 +33,9 @@ if __name__ == r"__main__":
     else:
         mode = 1
 
-    print(r"c Reporting current running status of Sparkle ...")
+    print('Reporting current running status of Sparkle ...')
     sparkle_run_status_help.print_running_extractor_jobs(mode)
     sparkle_run_status_help.print_running_solver_jobs(mode)
     sparkle_run_status_help.print_running_portfolio_selector_jobs()
     sparkle_run_status_help.print_running_report_jobs()
-    print(r"c Current running status of Sparkle reported!")
+    print('Current running status of Sparkle reported!')

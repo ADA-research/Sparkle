@@ -25,7 +25,7 @@ except ImportError:
 
 
 def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> str:
-    """Create list of instance path lists, and call solver in parallel or sequential."""
+    '''Create list of instance path lists, and call solver in parallel or sequential.'''
     job_id_str = None
 
     # If directory, get instance list from directory as list[list[Path]]
@@ -54,7 +54,7 @@ def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> st
 
 
 def call_configured_solver_sequential(instances_list: list[list[Path]]):
-    """Prepare to run and run the latest configured solver sequentially on instances."""
+    '''Prepare to run and run the latest configured solver sequentially on instances.'''
     for instance_path_list in instances_list:
         # Use original path for output string
         instance_path_str = ' '.join([str(path) for path in instance_path_list])
@@ -72,7 +72,7 @@ def call_configured_solver_sequential(instances_list: list[list[Path]]):
 
 def generate_sbatch_script_for_configured_solver(num_jobs: int,
                                                  instance_list: list[str]) -> Path:
-    """Return the path to a Slurm batch script to run the solver on all instances."""
+    '''Return the path to a Slurm batch script to run the solver on all instances.'''
     # Set script name and path
     solver_name, _ = get_latest_configured_solver_and_configuration()
     sbatch_script_name = (f'run_{solver_name}_configured_sbatch_'
@@ -104,7 +104,7 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
 
 
 def call_configured_solver_parallel(instances_list: list[list[Path]]) -> str:
-    """Run the latest configured solver in parallel on all given instances."""
+    '''Run the latest configured solver in parallel on all given instances.'''
     # Create an instance list[str] keeping in mind possible multi-file instances
     instance_list = []
 
@@ -129,7 +129,7 @@ def call_configured_solver_parallel(instances_list: list[list[Path]]) -> str:
 
 
 def get_latest_configured_solver_and_configuration() -> (str, str):
-    """Return the name and parameter string of the latest configured solver."""
+    '''Return the name and parameter string of the latest configured solver.'''
     # Get latest configured solver + instance set
     solver_name = sfh.get_last_level_directory_name(
         str(sgh.latest_scenario.get_config_solver()))
@@ -148,7 +148,7 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
 
 
 def run_configured_solver(instance_path_list: list[Path]):
-    """Run the latest configured solver on the given instance."""
+    '''Run the latest configured solver on the given instance.'''
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
 
@@ -187,7 +187,7 @@ def run_configured_solver(instance_path_list: list[Path]):
 
                 # Check the result line has the correct number of words
                 if len(words) != 9:
-                    print('ERROR: Invalid number of words in \'result for SMAC\' line.')
+                    print('ERROR: Invalid number of words in "result for SMAC" line.')
                     results_good = False
                     break
 

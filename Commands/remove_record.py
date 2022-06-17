@@ -9,15 +9,15 @@ from sparkle_help import sparkle_logging as sl
 def parser_function():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "record_file_path",
-        metavar="record-file-path",
+        'record_file_path',
+        metavar='record-file-path',
         type=str,
-        help="path to the record file",
+        help='path to the record file',
     )
     return parser
 
 
-if __name__ == r"__main__":
+if __name__ == '__main__':
     # Log command call
     sl.log_command(sys.argv)
 
@@ -28,10 +28,10 @@ if __name__ == r"__main__":
     args = parser.parse_args()
     record_file_name = args.record_file_path
     if not os.path.exists(record_file_name):
-        print(r"c Record file " + record_file_name + r" does not exist!")
+        print('Record file ' + record_file_name + ' does not exist!')
         sys.exit()
 
-    print(r"c Removing record file " + record_file_name + " ...")
-    command_line = r"rm -rf " + record_file_name
+    print('Removing record file ' + record_file_name + ' ...')
+    command_line = 'rm -rf ' + record_file_name
     os.system(command_line)
-    print(r"c Record file " + record_file_name + r" removed!")
+    print('Record file ' + record_file_name + ' removed!')
