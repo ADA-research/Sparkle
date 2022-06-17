@@ -164,7 +164,8 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
 	smac_outdir = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + 'outdir_train_configuration/'
 	smac_instance_file = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + instance_set_name + '_train.txt'
 	smac_test_instance_file = smac_instance_file
-	smac_feature_file = 'example_scenarios/' + solver_name + '_' + instance_set_name + r'/' + instance_set_name + '_features.csv'
+	smac_feature_file = (f'example_scenarios/{solver_name}_{instance_set_name}/'
+		f'{instance_set_name}_features.csv')
 
 	fout = open(smac_file_scenario, 'w')
 	fout.write('algo = ./' + sgh.sparkle_smac_wrapper + '\n')
@@ -179,7 +180,7 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
 	fout.write('instance_file = ' + smac_instance_file + '\n')
 	fout.write('test_instance_file = ' + smac_test_instance_file + '\n')
 	if use_features:
-		fout.write('feature_file = ' + smac_feature_file + '\n')
+		fout.write(f'feature_file = {smac_feature_file}\n')
 	fout.write('validation = true' + '\n')
 	fout.close()
 

@@ -101,9 +101,9 @@ if __name__ == r"__main__":
         help="specify the settings file to use instead of the default",
     )
     parser.add_argument(
-        "--use-features",
+        '--use-features',
         required=False,
-        action="store_true",
+        action='store_true',
         help="use the training set's features for configuration",
     )
 
@@ -119,34 +119,37 @@ if __name__ == r"__main__":
 
     if use_features:
         feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
-        if not os.path.isdir(instance_set_train):  # Path has to be a directory
-            print("c given training set path is not an existing directory")
+
+        if not Path(instance_set_train).is_dir():  # Path has to be a directory
+            print('given training set path is not an existing directory')
             sys.exit()
 
         # Takes folder/instance set name from training set path
         set_name = os.path.split(os.path.split(instance_set_train)[0])[1]
         data_dict = {}
         feature_data_df = feature_data_csv.dataframe
+
         for label, row in feature_data_df.iterrows():
             # os.path.split(os.path.split(label)[0])[1] gives the dir/instance set name
             if os.path.split(os.path.split(label)[0])[1] == set_name:
                 if row.empty:
-                    print("c no feature data exists for the given training set, please "
-                          "run add_feature_extractor.py, then compute_features.py")
+                    print('No feature data exists for the given training set, please '
+                          'run add_feature_extractor.py, then compute_features.py')
                     sys.exit()
-                newLabel = '../../instances/' + set_name + '/' + os.path.split(label)[1]
-                data_dict[newLabel] = row
+
+                new_label = f'../../instances/{set_name}/{os.path.split(label)[1]}'
+                data_dict[new_label] = row
 
         feature_data_df = DataFrame.from_dict(data_dict, orient='index',
                                               columns=feature_data_df.columns)
+
         if feature_data_df.isnull().values.any():
-            print("c you have unfinished feature computation jobs, please run "
-                  "compute_features.py")
+            print('You have unfinished feature computation jobs, please run '
+                  'compute_features.py')
             sys.exit()
 
         for index, column in enumerate(feature_data_df):
-            # feature_data_df.rename(column_name, f"Feature{index + 1}")
-            feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
+            feature_data_df.rename(columns={column: f'Feature{index+1}'}, inplace=True)
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
@@ -205,7 +208,7 @@ if __name__ == r"__main__":
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver_name, instance_set_train_name)
         feature_file_name = f'{smac_solver_dir}{instance_set_train_name}_features.csv'
-        feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
+        feature_data_df.to_csv(feature_file_name, index_label='INSTANCE_NAME')
 
     scsh.handle_file_instance(
         solver_name, instance_set_train_name, instance_set_train_name, "train"

@@ -1,19 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-
-Authors: 	Chuan Luo, chuanluosaber@gmail.com
-			Holger H. Hoos, hh@liacs.nl
-
-Contact: 	Chuan Luo, chuanluosaber@gmail.com
-'''
-
 import os
 import sys
 from pathlib import Path
-
 from numpy import full
 
 from sparkle_help import sparkle_configure_solver_help as scsh
@@ -21,6 +11,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_run_ablation_help as sah
+from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help.sparkle_generate_report_help import generate_comparison_plot
 from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
@@ -260,38 +251,24 @@ def get_ablationBool(solver_name, instance_train_name, instance_test_name):
 
     return ablation_bool
 
-# checks the scenario file for if a feature file is given
-def get_featuresBool(solver_name, instance_set_train_name):
-    scenario_file = get_smac_solver_dir(solver_name, instance_set_train_name) + solver_name + r'_' + instance_set_train_name + r'_scenario.txt'
+
+def get_featuresBool(solver_name: str, instance_set_train_name: str) -> str:
+    '''
+    Returns a bool string for latex indicating whether features were used.
+
+    True if a feature file is given in the scenario file, false otherwise.
+    '''
+    scenario_file = (f'{get_smac_solver_dir(solver_name, instance_set_train_name)}'
+                     f'{solver_name}_{instance_set_train_name}_scenario.txt')
     features_bool = r'\featuresfalse'
+
     with open(scenario_file, 'r') as f:
         for line in f.readlines():
             if line.split(' ')[0] == 'feature_file':
                 features_bool = r'\featurestrue'
+
     return features_bool
 
-def get_numFeatureExtractors():
-	num_feature_extractors = len(sgh.extractor_list)
-	str_value = str(num_feature_extractors)
-
-	if int(str_value) < 1:
-		print('ERROR: No feature extractors found, report generation failed!')
-		sys.exit()
-
-	return str_value
-
-
-def get_featureExtractorList():
-	str_value = r''
-	extractor_list = sgh.extractor_list
-	for extractor_path in extractor_list:
-		extractor_name = sfh.get_file_name(extractor_path)
-		str_value += r'\item \textbf{' + extractor_name + r'}' + '\n'
-	return str_value
-
-def get_featureComputationCutoffTime():
-	str_value = str(sgh.settings.get_general_extractor_cutoff_time())
-	return str_value
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float) -> list:
     """
@@ -527,17 +504,17 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
     if not ablation:
         full_dict["ablationBool"] = r'\ablationfalse'
 
-    if full_dict[r"featuresBool"]:
-        variable = r'numFeatureExtractors'
-        str_value = get_numFeatureExtractors()
+    if full_dict['featuresBool']:
+        variable = 'numFeatureExtractors'
+        str_value = sgrh.get_numFeatureExtractors()
         full_dict[variable] = str_value
 
-        variable = r'featureExtractorList'
-        str_value = get_featureExtractorList()
+        variable = 'featureExtractorList'
+        str_value = sgrh.get_featureExtractorList()
         full_dict[variable] = str_value
 
-        variable = r'featureComputationCutoffTime'
-        str_value = get_featureComputationCutoffTime()
+        variable = 'featureComputationCutoffTime'
+        str_value = sgrh.get_featureComputationCutoffTime()
         full_dict[variable] = str_value
 
     return full_dict
@@ -645,7 +622,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
     variable = r'ablationPath'
     common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name, ablation_validation_name)
     
-    variable = r'featuresBool'
+    variable = 'featuresBool'
     common_dict[variable] = get_featuresBool(solver_name, instance_set_train_name)
 
     return common_dict
