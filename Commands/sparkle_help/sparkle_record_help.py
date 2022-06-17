@@ -70,7 +70,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_instances:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(f'zip -r {my_record_filename} Instances/ >> '
                       f'{record_log_file_path}')
@@ -82,7 +82,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_solvers:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(f'zip -r {my_record_filename} Solvers/ >> '
                       f'{record_log_file_path}')
@@ -94,7 +94,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_extractors:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(f'zip -r {my_record_filename} Extractors/ >> '
                       f'{record_log_file_path}')
@@ -106,7 +106,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_feature_data:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(f'zip -r {my_record_filename} Feature_Data/ >> '
                       f'{record_log_file_path}')
@@ -118,7 +118,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_performance_data:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(f'zip -r {my_record_filename} Performance_Data/ >> '
                       f'{record_log_file_path}')
@@ -130,7 +130,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_reference_lists:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(f'zip -r {my_record_filename} Reference_Lists/ >> '
                       f'{record_log_file_path}')
@@ -142,7 +142,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_sparkle_portfolio_selector:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(f'zip -r {my_record_filename} Sparkle_Portfolio_Selector/ >> '
                       f'{record_log_file_path}')
@@ -154,7 +154,7 @@ def save_current_sparkle_platform(my_record_filename):
     if not my_record_filename_exist:
         if my_flag_sparkle_parallel_portfolio:
             my_record_filename_exist = True
-            print('c Now recording current Sparkle platform in file '
+            print('Now recording current Sparkle platform in file '
                   f'{my_record_filename} ...')
             os.system(
                 f'zip -r {my_record_filename} '

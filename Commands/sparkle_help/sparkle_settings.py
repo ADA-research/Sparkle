@@ -42,9 +42,14 @@ class SolutionVerifier(Enum):
 
 
 class ProcessMonitoring(str, Enum):
+    # Cancel all solvers within a portfolio once one solver finishes with an instance
 	REALISTIC = 'REALISTIC'
+    # Cancel all solvers within a portfolio once one solver finishes with an instance,
+    # after they have run equally long as the fastest solver on this instance so far.
+    # This makes it possible to measure which solver would be fastest when they are
+    # not able to start at the same time due to, e.g., insufficient CPU cores to start
+    # all solvers at the same time.
 	EXTENDED = 'EXTENDED'
-	#COMPLETE = 'COMPLETE'  # TODO: Add when this functionality is implemented
 
 
 	def from_str(process_monitoring):
@@ -323,7 +328,7 @@ class Settings:
 
 
 	def get_performance_metric_for_report(self) -> str:
-		"""Return a string describing the full performance metric, e.g. PAR10."""
+		'''Return a string describing the full performance metric, e.g. PAR10.'''
 		performance_measure = self.get_general_performance_measure()
 
 		if performance_measure is PerformanceMeasure.RUNTIME:
@@ -576,7 +581,7 @@ class Settings:
 	def set_paraport_overwriting_flag(
 		self, value: bool = DEFAULT_paraport_overwriting,
 		origin: SettingState = SettingState.DEFAULT):
-		"""Set the parallel portfolio overwriting flag to a given value."""
+		'''Set the parallel portfolio overwriting flag to a given value.'''
 		section = 'parallel_portfolio'
 		name = 'overwriting'
 
@@ -590,7 +595,7 @@ class Settings:
 
 
 	def get_paraport_overwriting_flag(self) -> bool:
-		"""Return the parallel portfolio overwriting flag state."""
+		'''Return the parallel portfolio overwriting flag state.'''
 		if self.__paraport_overwriting_flag_set == SettingState.NOT_SET:
 			self.set_paraport_overwriting_flag()
 		
@@ -600,7 +605,7 @@ class Settings:
 	def set_paraport_process_monitoring(
 		self, value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
 		origin: SettingState = SettingState.DEFAULT):
-		"""Set the parallel portfolio process monitoring state."""
+		'''Set the parallel portfolio process monitoring state.'''
 		section = 'parallel_portfolio'
 		name = 'process_monitoring'
 
@@ -614,7 +619,7 @@ class Settings:
 
 
 	def get_paraport_process_monitoring(self) -> ProcessMonitoring:
-		"""Return the parallel portfolio process monitoring state."""
+		'''Return the parallel portfolio process monitoring state.'''
 		if self.__paraport_process_monitoring_set == SettingState.NOT_SET:
 			self.set_paraport_process_monitoring()
 

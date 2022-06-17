@@ -26,7 +26,7 @@ print = functools.partial(print, flush=True)
 
 
 def jobtime_to_seconds(jobtime: str) -> int:
-    """Convert a jobtime string to an integer number of seconds."""
+    '''Convert a jobtime string to an integer number of seconds.'''
     seconds = int(sum(int(x) * 60 ** i for i, x in enumerate(
         reversed(jobtime.split(':')))))
 
@@ -34,7 +34,7 @@ def jobtime_to_seconds(jobtime: str) -> int:
 
 
 def add_log_statement_to_file(log_file: str, line: str, jobtime: str):
-    """Log the starting time, end time and job number to a given file."""
+    '''Log the starting time, end time and job number to a given file.'''
     now = datetime.datetime.now()
     job_duration_seconds = jobtime_to_seconds(jobtime)
     job_running_time = datetime.timedelta(seconds=job_duration_seconds)
@@ -51,9 +51,9 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str):
         # TODO: this issue should be of no harm to the functionality.
         job_nr = 'WARNING: No job_nr found in function add_log_statement_to_file'
 
-    current_time = now.strftime("%H:%M:%S")
+    current_time = now.strftime('%H:%M:%S')
     job_starting_time = now - job_running_time
-    start_time_formatted = job_starting_time.strftime("%H:%M:%S")
+    start_time_formatted = job_starting_time.strftime('%H:%M:%S')
 
     with open(log_file, 'a+') as outfile:
         fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
@@ -64,7 +64,7 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str):
 
 
 def log_computation_time(log_file: str, job_nr: str, job_duration: str):
-    """Log the job number and job duration."""
+    '''Log the job number and job duration.'''
     if ':' in job_duration:
         job_duration = str(jobtime_to_seconds(job_duration))
 
@@ -81,7 +81,7 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str):
 def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                                          sbatch_script_path: Path,
                                          temp_solvers: list[str]):
-    """Remove temporary files and directories, and move result files."""
+    '''Remove temporary files and directories, and move result files.'''
     tmp_dir = sgh.sparkle_tmp_path
 
     # Removes statusinfo files
@@ -145,7 +145,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
 
 def find_finished_time_finished_solver(solver_instance_list: list[str],
                                        finished_job_array_nr: str) -> str:
-    """Return a formatted string with the finishing time of a solver."""
+    '''Return a formatted string with the finishing time of a solver.'''
     # If there is a solver that ended but did not make a result file this means that it
     # was manually cancelled or it gave an error the template will ensure that all
     # solver on that instance will be cancelled.
@@ -174,13 +174,13 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                           portfolio_size: int, solver_instance_list: list[str],
                           pending_job_with_new_cutoff: dict[str, int] = {}) -> (
                           dict[str, list[str]], dict[str, int]):
-    """Cancel jobs past the cutoff, update cutoff time for jobs that should continue.
+    '''Cancel jobs past the cutoff, update cutoff time for jobs that should continue.
 
     The remaining_jobs dict is returned, containing a jobid str as key, and a (two
     element) list of str with the jobtime and jobstatus.
     Additionally the dict pending_job_with_new_cutoff is returned with jobid str as key,
     and cutoff_seconds int as value.
-    """
+    '''
     # Find all job_array_numbers that are currently running
     # This is specifically for Grace
     result = subprocess.run(['squeue', '--array', '--jobs', job_id], capture_output=True,
@@ -239,7 +239,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                             add_log_statement_to_file(logging_file, command_line,
                                                       remaining_jobs[job][0])
                             logging_file2 = (
-                                f"{logging_file[:logging_file.rfind('.')]}2.txt")
+                                f'{logging_file[:logging_file.rfind('.')]}2.txt')
                             log_computation_time(logging_file2, job, cutoff_seconds)
                         subprocess.Popen(command_line, shell=True)
                     else:
@@ -260,14 +260,14 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                              remaining_job_dict: dict[str, list[str]],
                              pending_job_with_new_cutoff: dict[str, int], started: bool,
                              portfolio_size: int) -> (list[str], dict[str, int], bool):
-    """Wait for a solver to finish, then return which finished and which may still run.
+    '''Wait for a solver to finish, then return which finished and which may still run.
 
     Return finished_solver_list, pending_job_with_new_cutoff, started.
     finished_solver_list is a list of str typed job IDs of finished solvers.
     pending_job_with_new_cutoff is a dict with jobid str as key, and cutoff_seconds int
     as value.
     started is a bool indicating whether the portfolio has started running.
-    """
+    '''
     number_of_solvers = len(remaining_job_dict) if remaining_job_dict else portfolio_size
     n_seconds = 1
     done = False
@@ -292,7 +292,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
         elif len(result.stdout.strip().split('\n')) < (1 + number_of_solvers):
             if started is False:  # Log starting time
                 now = datetime.datetime.now()
-                current_time = now.strftime("%H:%M:%S")
+                current_time = now.strftime('%H:%M:%S')
 
                 with open(logging_file, 'a+') as outfile:
                     fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
@@ -327,7 +327,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
         else:
             if started is False:  # Log starting time
                 now = datetime.datetime.now()
-                current_time = now.strftime("%H:%M:%S")
+                current_time = now.strftime('%H:%M:%S')
 
                 with open(logging_file, 'a+') as outfile:
                     fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
@@ -367,7 +367,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
 
 def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: int) -> (
         Path):
-    """Generate an sbatch script for the PAP and return the path to it."""
+    '''Generate an sbatch script for the PAP and return the path to it.'''
     # Set script name and path
     sbatch_script_name = (f'parallel_portfolio_sbatch_shell_script_{str(num_jobs)}_'
                           f'{sbh.get_time_pid_random_string()}.sh')
@@ -401,12 +401,12 @@ def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: i
 
 def generate_SBATCH_job_list(solver_list: list[str], instance_path_list: list[str],
                              num_jobs: int) -> (list[str], int, list[str], list[str]):
-    """Generates a list of jobs to be executed in the sbatch script.
+    '''Generates a list of jobs to be executed in the sbatch script.
 
     Returns parameters, new_num_jobs, solver_instance_list, temp_solvers
     solver_instance_list is a list of str containing the solver (including seed
     variations) and instance combinations to run.
-    """
+    '''
     # The function generates the parameters used in the SBATCH script of the portfolio
     parameters = list()
     new_num_jobs = num_jobs
@@ -417,7 +417,7 @@ def generate_SBATCH_job_list(solver_list: list[str], instance_path_list: list[st
     # Adds all the jobs of instances and their portfolio to the parameter list
     for instance_path in instance_path_list:
         for solver in solver_list:
-            if " " in solver:
+            if ' ' in solver:
                 solver_path, seed = solver.strip().split()
                 solver_name = Path(solver_path).name
                 tmp_solver_instances.append(f'{solver_name}_seed_')
@@ -455,7 +455,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                                        pending_job_with_new_cutoff: dict[str, int]
                                        = None,
                                        started: bool = False) -> bool:
-    """Wait for solvers to finish running, and clean up after them."""
+    '''Wait for solvers to finish running, and clean up after them.'''
     if remaining_job_dict is None:
         remaining_job_dict = dict()
 
@@ -559,7 +559,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
 
 
 def remove_result_files(instances: list[str]):
-    """Remove existing results for given instances."""
+    '''Remove existing results for given instances.'''
     for instance in instances:
         instance = Path(instance).name
         cmd_line = f'rm -f {str(sgh.pap_performance_data_tmp_path)}/*_{instance}_*.*'
@@ -571,7 +571,7 @@ def remove_result_files(instances: list[str]):
 
 
 def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
-    """Run the parallel algorithm portfolio and return whether this was successful."""
+    '''Run the parallel algorithm portfolio and return whether this was successful.'''
     # Remove existing result files
     remove_result_files(instances)
 
@@ -588,7 +588,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     # Runs the script and cancels the remaining scripts if a script finishes before the
     # end of the cutoff_time
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
-                            / "Log/logging.txt"))
+                            / 'Log/logging.txt'))
     sfh.create_new_empty_file(file_path_output1)
 
     try:
@@ -602,7 +602,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs/len(instances))
             now = datetime.datetime.now()
-            current_time = now.strftime("%H:%M:%S")
+            current_time = now.strftime('%H:%M:%S')
 
             with open(file_path_output1, 'a+') as outfile:
                 fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)

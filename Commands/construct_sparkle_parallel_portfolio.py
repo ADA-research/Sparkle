@@ -66,14 +66,14 @@ if __name__ == '__main__':
 
     portfolio_path = sgh.sparkle_parallel_portfolio_dir / portfolio_name
 
-    print('c Start constructing Sparkle parallel portfolio ...')
+    print('Start constructing Sparkle parallel portfolio ...')
 
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
 
     if success:
-        print(f'c Sparkle parallel portfolio located at {str(portfolio_path)}')
-        print('c Sparkle parallel portfolio construction done!')
+        print(f'Sparkle parallel portfolio located at {str(portfolio_path)}')
+        print('Sparkle parallel portfolio construction done!')
 
         # Update latest scenario
         sgh.latest_scenario.set_parallel_portfolio_path(Path(portfolio_path))
@@ -81,7 +81,7 @@ if __name__ == '__main__':
         # Set to default to overwrite instance from possible previous run
         sgh.latest_scenario.set_parallel_portfolio_instance_list()
     else:
-        print('c An unexpected error occurred when constructing the portfolio, please '
+        print('An unexpected error occurred when constructing the portfolio, please '
               'check your input and try again.')
 
     # Write used settings to file

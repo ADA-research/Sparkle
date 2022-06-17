@@ -24,14 +24,8 @@ from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
 
 
-def underscore_for_latex(value: str) -> str:
-	list_of_chars = list(value)
-	updated_string = ''
-
-	for i, chars in enumerate(list_of_chars):
-		if chars == '_':
-			updated_string += '\\'
-		updated_string += chars
+def underscore_for_latex(string: str) -> str:
+	updated_string = string.replace('_', '\\_')
 
 	return updated_string
 
@@ -537,8 +531,6 @@ def generate_comparison_plot(points: list,
 	pwd = os.getcwd()
 	if cwd is not None:
 		os.chdir(cwd)
-		# TODO: Add back as debug output
-		#print("Changed cwd to {}".format(os.getcwd()))
 
 	points = np.array(points)
 	if replace_zeros:

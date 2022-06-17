@@ -87,22 +87,22 @@ if __name__ == '__main__':
         portfolio_path = Path(sgh.sparkle_parallel_portfolio_dir / args.portfolio_name)
 
         if not portfolio_path.is_dir():
-            sys.exit(f'c Portfolio "{portfolio_path}" not found, aborting the process.')
+            sys.exit(f'Portfolio "{portfolio_path}" not found, aborting the process.')
 
     # Create list of instance paths
     instance_paths = []
 
     for instance in args.instance_paths:
         if not Path(instance).exists():
-            sys.exit(f'c Instance "{instance}" not found, aborting the process.')
-        if os.path.isfile(instance):
-            print(f'c Running on instance {instance}')
+            sys.exit(f'Instance "{instance}" not found, aborting the process.')
+        if Path(instance).is_file():
+            print(f'Running on instance {instance}')
             instance_paths.append(instance)
-        elif not os.path.isdir(instance):
+        elif not Path(instance).is_dir():
             instance = f'Instances/{instance}'
 
-        if os.path.isdir(instance):
-            print(f'c Running on {str(len(os.listdir(instance)))} instance(s) from '
+        if Path(instance).is_dir():
+            print(f'Running on {str(len(os.listdir(instance)))} instance(s) from '
                   f'directory {instance}')
             for item in os.listdir(instance):
                 item_with_dir = f'{instance}/{item}'
@@ -123,16 +123,16 @@ if __name__ == '__main__':
     # Write settings to file before starting, since they are used in callback scripts
     sgh.settings.write_used_settings()
 
-    print('c Sparkle parallel portfolio is running ...')
+    print('Sparkle parallel portfolio is running ...')
     # instance_paths = list of paths to all instances
     # portfolio_path = Path to the portfolio containing the solvers
     succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path)
 
     if succes:
         sgh.latest_scenario.set_parallel_portfolio_instance_list(instance_paths)
-        print('c Running Sparkle parallel portfolio is done!')
+        print('Running Sparkle parallel portfolio is done!')
 
         # Write used settings to file
         sgh.settings.write_used_settings()
     else:
-        print('c An unexpected error occurred, please check your input an try again.')
+        print('An unexpected error occurred, please check your input an try again.')

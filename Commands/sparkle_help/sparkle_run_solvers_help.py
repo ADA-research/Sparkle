@@ -39,7 +39,7 @@ print = functools.partial(print, flush=True)
 
 def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
 								seed_str: str = None) -> str:
-	"""Return the command line call string retrieved from the solver wrapper."""
+	'''Return the command line call string retrieved from the solver wrapper.'''
 	if seed_str is None:
 		seed_str = str(sgh.get_seed())
 
@@ -63,7 +63,7 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
 							instance_path: str, raw_result_path: str,
 							runsolver_values_path: str, seed_str: str = None,
 							custom_cutoff: int = None):
-	"""Prepare for execution, run the solver on an instance, check output for errors."""
+	'''Prepare for execution, run the solver on an instance, check output for errors.'''
 	if custom_cutoff is None:
 		cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	else:
@@ -89,7 +89,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 									raw_result_path: Path, runsolver_values_path: Path,
 									custom_cutoff: int = None,
 									is_configured: bool = False) -> Path:
-	"""Run the solver on the given instance, with a given command line call."""
+	'''Run the solver on the given instance, with a given command line call.'''
 	if custom_cutoff is None:
 		cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
 	else:
@@ -206,7 +206,7 @@ def check_solver_output_for_errors(raw_result_path: Path):
 def run_solver_on_instance_and_process_results(
 	solver_path: str, instance_path: str, seed_str: str = None,
 	custom_cutoff: int = None) -> (float, float, float, list[float], str, str):
-	"""Prepare and run a given the solver and instance, and process output."""
+	'''Prepare and run a given the solver and instance, and process output.'''
 	# Prepare paths
 	# TODO: Fix result path for multi-file instances (only a single file is part of the result path)
 	raw_result_path = sgh.sparkle_tmp_path + sfh.get_last_level_directory_name(solver_path) + '_' + sfh.get_last_level_directory_name(instance_path) + '_' + sbh.get_time_pid_random_string() + '.rawres'
