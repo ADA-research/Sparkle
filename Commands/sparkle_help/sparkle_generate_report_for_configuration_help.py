@@ -1,25 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-'''
-Software: 	Sparkle (Platform for evaluating empirical algorithms/solvers)
-
-Authors: 	Chuan Luo, chuanluosaber@gmail.com
-			Holger H. Hoos, hh@liacs.nl
-
-Contact: 	Chuan Luo, chuanluosaber@gmail.com
-'''
-
 import os
 import sys
 from pathlib import Path
+from numpy import full
 
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_run_ablation_help as sah
+from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help.sparkle_generate_report_help import generate_comparison_plot
+from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
 
 def get_customCommands():
@@ -258,6 +252,24 @@ def get_ablationBool(solver_name, instance_train_name, instance_test_name):
     return ablation_bool
 
 
+def get_featuresBool(solver_name: str, instance_set_train_name: str) -> str:
+    '''
+    Returns a bool string for latex indicating whether features were used.
+
+    True if a feature file is given in the scenario file, false otherwise.
+    '''
+    scenario_file = (f'{get_smac_solver_dir(solver_name, instance_set_train_name)}'
+                     f'{solver_name}_{instance_set_train_name}_scenario.txt')
+    features_bool = r'\featuresfalse'
+
+    with open(scenario_file, 'r') as f:
+        for line in f.readlines():
+            if line.split(' ')[0] == 'feature_file':
+                features_bool = r'\featurestrue'
+
+    return features_bool
+
+
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str, smac_each_run_cutoff_time: float) -> list:
     """
     Creates a nested list of performance values algorithm runs with default and configured parameters on instances in
@@ -492,6 +504,19 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name, instance_se
     if not ablation:
         full_dict["ablationBool"] = r'\ablationfalse'
 
+    if full_dict['featuresBool'] == r'\featurestrue':
+        variable = 'numFeatureExtractors'
+        str_value = sgrh.get_numFeatureExtractors()
+        full_dict[variable] = str_value
+
+        variable = 'featureExtractorList'
+        str_value = sgrh.get_featureExtractorList()
+        full_dict[variable] = str_value
+
+        variable = 'featureComputationCutoffTime'
+        str_value = sgrh.get_featureComputationCutoffTime()
+        full_dict[variable] = str_value
+
     return full_dict
 
 
@@ -596,6 +621,9 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
 
     variable = r'ablationPath'
     common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name, ablation_validation_name)
+    
+    variable = 'featuresBool'
+    common_dict[variable] = get_featuresBool(solver_name, instance_set_train_name)
 
     return common_dict
 
