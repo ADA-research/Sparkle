@@ -27,7 +27,7 @@ except ImportError:
 
 
 def create_new_empty_file(filepath: str):
-	"""Create a new empty file given a filepath string."""
+	'''Create a new empty file given a filepath string.'''
 	fo = open(filepath, "w+")
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.close()
@@ -49,7 +49,7 @@ def get_current_directory_name(filepath):
 	return filepath
 
 def get_last_level_directory_name(filepath: str) -> str:
-	"""Return the final path component for a given string; similar to Path.name."""
+	'''Return the final path component for a given string; similar to Path.name.'''
 	if filepath[-1] == r'/': filepath = filepath[0:-1]
 	right_index = filepath.rfind(r'/')
 	if right_index<0: pass
@@ -112,7 +112,7 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 
 
 def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
-	"""Return a list of solvers for a parallel portfolio specified by its path."""
+	'''Return a list of solvers for a parallel portfolio specified by its path.'''
 	portfolio_solver_list = []
 	solvers_path_str = 'Solvers/'
 
@@ -209,7 +209,7 @@ def get_list_all_csv_filename(filepath):
 	return csv_list
 
 def get_list_all_result_filename(filepath: str) -> list[str]:
-	"""Return a list of result files in a given path."""
+	'''Return a list of result files in a given path.'''
 	result_list = []
 	if not os.path.exists(filepath):
 		return result_list
@@ -255,7 +255,7 @@ def add_new_instance_into_file(filepath):
 
 def add_new_solver_into_file(filepath: str, deterministic: int = 0,
 							solver_variations: int = 1):
-	"""Add a solver to an existing file listing solvers and their details."""
+	'''Add a solver to an existing file listing solvers and their details.'''
 	fo = open(sgh.solver_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.write(f'{filepath} {str(deterministic)} {str(solver_variations)}\n')

@@ -179,7 +179,7 @@ class ReportingScenario:
 
 
 	def list_setter(self, section: str, name: str, value: list[str]):
-		"""Write generic lists to the scenario file."""
+		'''Write generic lists to the scenario file.'''
 		if value != None:
 			self.__init_section(section)
 			# Convert to string
@@ -254,7 +254,7 @@ class ReportingScenario:
 
 
 	def set_parallel_portfolio_path(self, value: Path = DEFAULT_parallel_portfolio_path):
-		"""Set the path to the parallel portfolio."""
+		'''Set the path to the parallel portfolio.'''
 		section = 'parallel_portfolio'
 		name = 'portfolio_path'
 		self.path_setter(section, name, value)
@@ -263,13 +263,13 @@ class ReportingScenario:
 
 
 	def get_parallel_portfolio_path(self) -> Path:
-		"""Return the path to the parallel portfolio."""
+		'''Return the path to the parallel portfolio.'''
 		return Path(self.__scenario['parallel_portfolio']['portfolio_path'])
 
 
 	def set_parallel_portfolio_instance_list(
 			self, value: list[str] = DEFAULT_parallel_portfolio_instance_list):
-		"""Set the instance list used with the parallel portfolio."""
+		'''Set the instance list used with the parallel portfolio.'''
 		section = 'parallel_portfolio'
 		name = 'instance_list'
 		self.list_setter(section, name, value)
@@ -278,7 +278,7 @@ class ReportingScenario:
 
 
 	def get_parallel_portfolio_instance_list(self) -> list[str]:
-		"""Return the instance list used with the parallel portfolio."""
+		'''Return the instance list used with the parallel portfolio.'''
 		try:
 			instance_list = self.__scenario['parallel_portfolio']['instance_list'].split(',')
 		except KeyError:
