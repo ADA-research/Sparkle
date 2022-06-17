@@ -30,7 +30,7 @@ Commands/construct_sparkle_parallel_portfolio.py > /dev/null
 Commands/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path > /dev/null
 
 # Generate report for parallel portfolio on a single instance
-output_true="c Parallel portfolio report generated ..."
+output_true="Parallel portfolio report generated ..."
 output=$(Commands/generate_report.py --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];

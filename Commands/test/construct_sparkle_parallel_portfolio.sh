@@ -25,7 +25,7 @@ Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
 Commands/add_solver.py --deterministic 0 $solverC_path > /dev/null
 
 # Construct sparkle parallel portfolio
-output_true="c Sparkle parallel portfolio construction done!"
+output_true="Sparkle parallel portfolio construction done!"
 output=$(Commands/construct_sparkle_parallel_portfolio.py | tail -1)
 
 if [[ $output == $output_true ]];

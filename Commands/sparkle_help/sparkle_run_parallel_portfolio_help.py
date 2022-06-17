@@ -239,7 +239,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                             add_log_statement_to_file(logging_file, command_line,
                                                       remaining_jobs[job][0])
                             logging_file2 = (
-                                f'{logging_file[:logging_file.rfind('.')]}2.txt')
+                                f'{logging_file[:logging_file.rfind(".")]}2.txt')
                             log_computation_time(logging_file2, job, cutoff_seconds)
                         subprocess.Popen(command_line, shell=True)
                     else:

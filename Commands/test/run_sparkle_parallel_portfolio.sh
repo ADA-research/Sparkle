@@ -29,7 +29,7 @@ Commands/add_solver.py --deterministic 0 $solverC_path > /dev/null
 Commands/construct_sparkle_parallel_portfolio.py > /dev/null
 
 # Run sparkle parallel portfolio on a single instance
-output_true="c Running Sparkle parallel portfolio is done!"
+output_true="Running Sparkle parallel portfolio is done!"
 output=$(Commands/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path | tail -1)
 
 if [[ $output == $output_true ]];
