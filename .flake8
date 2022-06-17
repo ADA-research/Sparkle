@@ -5,6 +5,9 @@ max-doc-length = 89
 indent-size = 4
 statistics = True
 
+multiline-quotes = '''
+docstring-quotes = '''
+
 # Cyclomatic complexity desactivated
 # max-complexity = 15 
 
@@ -17,7 +20,6 @@ exclude =
     Commands/sparkle_help/sparkle_slurm_help.py,
     Commands/sparkle_help/sparkle_add_solver_help.py,
     Commands/sparkle_help/sparkle_feature_data_csv_help.py,
-    Commands/sparkle_help/sparkle_record_help.py,
     Commands/sparkle_help/sparkle_global_help.py,
     Commands/sparkle_help/sparkle_construct_portfolio_selector_help.py,
     Commands/sparkle_help/sparkle_csv_merge_help.py,
@@ -33,7 +35,6 @@ exclude =
     Commands/sparkle_help/sparkle_command_help.py,
     Commands/sparkle_help/sparkle_run_ablation_help.py,
     Commands/sparkle_help/sparkle_compute_features_help.py,
-    Commands/sparkle_help/sparkle_job_help.py,
     Commands/sparkle_help/run_solvers_core.py,
     Commands/sparkle_help/sparkle_settings.py,
     Commands/sparkle_help/sparkle_compute_marginal_contribution_help.py,

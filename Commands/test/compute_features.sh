@@ -26,7 +26,7 @@ Commands/add_instances.py $instances_path > /dev/null
 Commands/add_feature_extractor.py $extractor_path > /dev/null
 
 # Compute features
-output_true="c Computing features done!"
+output_true="Computing features done!"
 output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
@@ -38,7 +38,7 @@ else
 fi
 
 # Compute features parallel
-output_true="c Computing features in parallel. Waiting for Slurm job(s) with id(s): "
+output_true="Computing features in parallel. Waiting for Slurm job(s) with id(s): "
 output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];

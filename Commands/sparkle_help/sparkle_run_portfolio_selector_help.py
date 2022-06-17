@@ -125,8 +125,9 @@ def print_solution(raw_result_path):
 
 
 def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: str, cutoff_time: int, performance_data_csv_path: str = None):
-	_, _, cpu_time_penalised, _, status, raw_result_path = srs.run_solver_on_instance_and_process_results(solver_path, instance_path, cutoff_time)
-
+	_, _, cpu_time_penalised, _, status, raw_result_path = (
+		srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
+														custom_cutoff=cutoff_time))
 	flag_solved = False
 
 	if status == 'SUCCESS' or status == 'SAT' or status == 'UNSAT':

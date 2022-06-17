@@ -48,7 +48,7 @@ Commands/initialise.py > /dev/null
 Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run configured solver on a single instance
-output_true="c Running configured solver done!"
+output_true="Running configured solver done!"
 output=$(Commands/run_configured_solver.py $instance_path_test --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
@@ -60,7 +60,7 @@ else
 fi
 
 # Run configured solver on an instance directory
-output_true="c Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
+output_true="Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
 output=$(Commands/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --parallel | tail -1)
 
 if [[ $output =~ "${output_true}" ]];

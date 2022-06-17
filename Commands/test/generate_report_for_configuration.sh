@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 
 # Execute this script from the Sparkle directory
 
@@ -33,6 +33,9 @@ configuration_results_path="Commands/test/test_files/results/"
 validation_results_path="Commands/test/test_files/PbO-CCSAT-Generic_PTN/"
 smac_path="Components/smac-v2.10.03-master-778/"
 smac_validation_results_path="$smac_path/example_scenarios/"
+scenario_path="Output/latest_scenario.ini"
+scenario_tmp="${scenario_path}_tmp"
+scenario_test="Commands/test/test_files/latest_scenario.ini"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py $instances_src_path_train > /dev/null
@@ -44,6 +47,9 @@ cp -r $configuration_results_path $smac_path
 # Copy validation results to simulate the validation command
 mkdir -p $smac_validation_results_path # Make sure directory exists
 cp -r $validation_results_path $smac_validation_results_path
+# Copy scenario to simulate configuration
+mv $scenario_path $scenario_tmp
+cp $scenario_test $scenario_path
 
 # Test generate report for configuration with both train and test sets
 output_true="c Generating report for configuration done!"
@@ -70,4 +76,5 @@ fi
 
 # Restore original settings
 mv $slurm_settings_tmp $slurm_settings_path
-
+# Restore original scenario
+mv $scenario_tmp $scenario_path

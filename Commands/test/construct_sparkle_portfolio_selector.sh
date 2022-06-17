@@ -41,7 +41,7 @@ cp $feature_data_test $feature_data_path
 cp $performance_data_test $performance_data_path
 
 # Construct sparkle portfolio selector
-output_true="c Marginal contribution (actual selector) computing done!"
+output_true="Marginal contribution (actual selector) computing done!"
 output=$(Commands/construct_sparkle_portfolio_selector.py | tail -1)
 
 if [[ $output == $output_true ]];

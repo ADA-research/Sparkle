@@ -49,7 +49,7 @@ cp $performance_data_test $performance_data_path
 cp $selector_test $selector_path
 
 # Compute marginal contribution for the perfect selector
-output_true="c Marginal contribution (perfect selector) computing done!"
+output_true="Marginal contribution (perfect selector) computing done!"
 output=$(Commands/compute_marginal_contribution.py --perfect --settings-file $settings_file | tail -1)
 
 if [[ $output == $output_true ]];
@@ -61,7 +61,7 @@ else
 fi
 
 # Compute marginal contribution for the actual selector
-output_true="c Marginal contribution (actual selector) computing done!"
+output_true="Marginal contribution (actual selector) computing done!"
 output=$(Commands/compute_marginal_contribution.py --actual --settings-file $settings_file | tail -1)
 
 if [[ $output == $output_true ]];

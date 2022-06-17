@@ -10,25 +10,11 @@ from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_instances_help as sih
+from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help import sparkle_run_ablation_help as sah
 from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help.sparkle_generate_report_help import generate_comparison_plot
 from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
-
-
-def get_customCommands():
-    str_value = r''
-    return str_value
-
-
-def get_sparkle():
-    str_value = r'\emph{Sparkle}'
-    return str_value
-
-
-def get_sparkleVersion():
-    str_value = r'1.0.0'
-    return str_value
 
 
 def get_numInstanceInInstanceSet_smacDir(instance_set_name: str) -> str:
@@ -534,11 +520,11 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
     common_dict[variable] = str_value
 
     variable = r'customCommands'
-    str_value = get_customCommands()
+    str_value = sgrh.get_customCommands()
     common_dict[variable] = str_value
 
     variable = r'sparkle'
-    str_value = get_sparkle()
+    str_value = sgrh.get_sparkle()
     common_dict[variable] = str_value
 
     variable = r'solver'
@@ -550,7 +536,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name, inst
     common_dict[variable] = str_value
 
     variable = r'sparkleVersion'
-    str_value = get_sparkleVersion()
+    str_value = sgh.sparkle_version
     common_dict[variable] = str_value
 
     variable = r'numInstanceInTrainingInstanceSet'
@@ -848,7 +834,7 @@ def generate_report_for_configuration_common(configuration_reports_directory, di
     os.system(compile_command)
     os.system(compile_command)
 
-    compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux 1> /dev/null 2>&1'
+    compile_command = f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux 1> /dev/null 2>&1'
     os.system(compile_command)
     os.system(compile_command)
 

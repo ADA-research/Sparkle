@@ -41,6 +41,21 @@ class SolutionVerifier(Enum):
 		return verifier
 
 
+class ProcessMonitoring(str, Enum):
+    # Cancel all solvers within a portfolio once one solver finishes with an instance
+	REALISTIC = 'REALISTIC'
+    # Cancel all solvers within a portfolio once one solver finishes with an instance,
+    # after they have run equally long as the fastest solver on this instance so far.
+    # This makes it possible to measure which solver would be fastest when they are
+    # not able to start at the same time due to, e.g., insufficient CPU cores to start
+    # all solvers at the same time.
+	EXTENDED = 'EXTENDED'
+
+
+	def from_str(process_monitoring):
+		return ProcessMonitoring(process_monitoring)
+
+
 class SettingState(Enum):
 	NOT_SET = 0
 	DEFAULT = 1
@@ -71,6 +86,9 @@ class Settings:
 
 	DEFAULT_ablation_racing = False
 
+	DEFAULT_paraport_overwriting = False
+	DEFAULT_paraport_process_monitoring = ProcessMonitoring.REALISTIC
+
 
 	def __init__(self, file_path: PurePath = None):
 		# Settings 'dictionary' in configparser format
@@ -93,6 +111,9 @@ class Settings:
 		self.__smac_target_cutoff_length_set = SettingState.NOT_SET
 
 		self.__ablation_racing_flag_set = SettingState.NOT_SET
+
+		self.__paraport_overwriting_flag_set = SettingState.NOT_SET
+		self.__paraport_process_monitoring_set = SettingState.NOT_SET
 
 		if file_path == None:
 			# Initialise settings from default file path
@@ -194,6 +215,24 @@ class Settings:
 					self.set_ablation_racing_flag(value, state)
 					file_settings.remove_option(section, option)
 
+
+			section = 'parallel_portfolio'
+			option_names = ('overwriting', )
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = file_settings.getboolean(section, option)
+					self.set_paraport_overwriting_flag(value, state)
+					file_settings.remove_option(section, option)
+
+			section = 'parallel_portfolio'
+			option_names = ('process_monitoring', )
+			for option in option_names:
+				if file_settings.has_option(section, option):
+					value = ProcessMonitoring.from_str(file_settings.get(section, option))
+					self.set_paraport_process_monitoring(value, state)
+					file_settings.remove_option(section, option)
+
+
 			# TODO: Report on any unknown settings that were read
 			sections = file_settings.sections()
 
@@ -286,6 +325,19 @@ class Settings:
 			self.set_general_performance_measure()
 
 		return PerformanceMeasure.from_str(self.__settings['general']['performance_measure'])
+
+
+	def get_performance_metric_for_report(self) -> str:
+		'''Return a string describing the full performance metric, e.g. PAR10.'''
+		performance_measure = self.get_general_performance_measure()
+
+		if performance_measure is PerformanceMeasure.RUNTIME:
+			penalty_multiplier_str = str(self.get_general_penalty_multiplier())
+			performance_measure_str = f'PAR{penalty_multiplier_str}'
+		else:
+			performance_measure_str = performance_measure.name
+
+		return performance_measure_str
 
 
 	def set_general_penalty_multiplier(self, value: int = DEFAULT_general_penalty_multiplier, origin: SettingState = SettingState.DEFAULT):
@@ -523,3 +575,53 @@ class Settings:
 
 		return bool(self.__settings['ablation']['racing'])
 
+
+	### Parallel Portfolio settings ###
+
+	def set_paraport_overwriting_flag(
+		self, value: bool = DEFAULT_paraport_overwriting,
+		origin: SettingState = SettingState.DEFAULT):
+		'''Set the parallel portfolio overwriting flag to a given value.'''
+		section = 'parallel_portfolio'
+		name = 'overwriting'
+
+		if value != None and self.__check_setting_state(
+				self.__paraport_overwriting_flag_set, origin, name):
+			self.__init_section(section)
+			self.__paraport_overwriting_flag_set = origin
+			self.__settings[section][name] = str(value)
+
+		return
+
+
+	def get_paraport_overwriting_flag(self) -> bool:
+		'''Return the parallel portfolio overwriting flag state.'''
+		if self.__paraport_overwriting_flag_set == SettingState.NOT_SET:
+			self.set_paraport_overwriting_flag()
+		
+		return bool(self.__settings['parallel_portfolio']['overwriting'])
+
+
+	def set_paraport_process_monitoring(
+		self, value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
+		origin: SettingState = SettingState.DEFAULT):
+		'''Set the parallel portfolio process monitoring state.'''
+		section = 'parallel_portfolio'
+		name = 'process_monitoring'
+
+		if value != None and self.__check_setting_state(
+				self.__paraport_overwriting_flag_set, origin, name):
+			self.__init_section(section)
+			self.__paraport_process_monitoring_set = origin
+			self.__settings[section][name] = value.name
+
+		return
+
+
+	def get_paraport_process_monitoring(self) -> ProcessMonitoring:
+		'''Return the parallel portfolio process monitoring state.'''
+		if self.__paraport_process_monitoring_set == SettingState.NOT_SET:
+			self.set_paraport_process_monitoring()
+
+		return ProcessMonitoring.from_str(
+			self.__settings['parallel_portfolio']['process_monitoring'])

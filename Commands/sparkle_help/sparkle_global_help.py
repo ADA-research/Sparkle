@@ -10,6 +10,8 @@ def get_seed():
 	return 1
 
 
+sparkle_version = '0.2'
+
 sparkle_maximum_int = 2147483647
 sparkle_missing_value = -(sparkle_maximum_int-1)
 sparkle_minimum_int = -(sparkle_maximum_int-2)
@@ -44,6 +46,9 @@ sparkle_portfolio_selector_name = 'sparkle_portfolio_selector' + sparkle_special
 
 sparkle_portfolio_selector_path = sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name
 
+sparkle_parallel_portfolio_dir = Path('Sparkle_Parallel_Portfolio/')
+sparkle_parallel_portfolio_name = Path('sparkle_parallel_portfolio/')
+
 sparkle_marginal_contribution_perfect_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_perfect.csv')
 
 sparkle_marginal_contribution_actual_path = Path(sparkle_portfolio_selector_dir + 'margi_contr_actual.csv')
@@ -71,11 +76,13 @@ sparkle_smac_wrapper = r'sparkle_smac_wrapper.py'
 
 ablation_dir = r"Components/ablationAnalysis-0.9.4/"
 
-
 feature_data_csv_path = r'Feature_Data/sparkle_feature_data.csv'
 feature_data_id_path = 'Feature_Data/sparkle_feature_data.id'
 performance_data_csv_path = r'Performance_Data/sparkle_performance_data.csv'
 performance_data_id_path = 'Performance_Data/sparkle_performance_data.id'
+pap_performance_data_tmp_path = Path('Performance_Data/Tmp_PaP/')
+pap_sbatch_tmp_path = Path(f'{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/')
+run_solvers_sbatch_tmp_path = Path(f'{sparkle_tmp_path}SBATCH_Solver_Jobs/')
 
 
 reference_list_dir = Path('Reference_Lists/')

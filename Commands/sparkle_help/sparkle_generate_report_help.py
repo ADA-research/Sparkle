@@ -24,6 +24,12 @@ from sparkle_help import sparkle_logging as sl
 import compute_marginal_contribution as cmc
 
 
+def underscore_for_latex(string: str) -> str:
+	updated_string = string.replace('_', '\\_')
+
+	return updated_string
+
+
 def get_customCommands():
 	str_value = r''
 	return str_value
@@ -470,7 +476,7 @@ def generate_report(test_case_directory: str = None):
 	os.system(compile_command)
 	os.system(compile_command)
 
-	compile_command = r'cd ' + latex_directory_path + r'; bibtex ' + latex_report_filename + r'.aux 1> /dev/null 2>&1'
+	compile_command = f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux'
 	os.system(compile_command)
 	os.system(compile_command)
 
@@ -525,7 +531,6 @@ def generate_comparison_plot(points: list,
 	pwd = os.getcwd()
 	if cwd is not None:
 		os.chdir(cwd)
-		print("Changed cwd to {}".format(os.getcwd()))
 
 	points = np.array(points)
 	if replace_zeros:

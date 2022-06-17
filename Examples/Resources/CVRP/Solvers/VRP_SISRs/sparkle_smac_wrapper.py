@@ -6,7 +6,7 @@ import os
 import time
 import random
 import sys
-import Path
+from pathlib import Path
 
 def get_time_pid_random_string():
 	my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))

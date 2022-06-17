@@ -26,10 +26,12 @@ except ImportError:
 	import sparkle_instances_help as sih
 
 
-def create_new_empty_file(filepath):
+def create_new_empty_file(filepath: str):
+	'''Create a new empty file given a filepath string.'''
 	fo = open(filepath, "w+")
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
 	fo.close()
+
 	return
 
 def checkout_directory(path, make_if_not_exist=True):
@@ -46,7 +48,8 @@ def get_current_directory_name(filepath):
 		filepath = get_last_level_directory_name(filepath)
 	return filepath
 
-def get_last_level_directory_name(filepath):
+def get_last_level_directory_name(filepath: str) -> str:
+	'''Return the final path component for a given string; similar to Path.name.'''
 	if filepath[-1] == r'/': filepath = filepath[0:-1]
 	right_index = filepath.rfind(r'/')
 	if right_index<0: pass
@@ -106,6 +109,28 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 				instance_list.append(line.strip())
 
 	return instance_list
+
+
+def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
+	'''Return a list of solvers for a parallel portfolio specified by its path.'''
+	portfolio_solver_list = []
+	solvers_path_str = 'Solvers/'
+
+	# Read the included solvers (or solver instances) from file
+	portfolio_solvers_file_path = Path(portfolio_path / 'solvers.txt')
+
+	with portfolio_solvers_file_path.open('r') as infile:
+		lines = infile.readlines()
+
+		for line in lines:
+			words = line.strip().split()
+
+			if len(words) <= 0:
+				continue
+			elif line.strip().startswith(solvers_path_str):
+				portfolio_solver_list.append(line.strip())
+
+	return portfolio_solver_list
 
 
 def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
@@ -183,7 +208,8 @@ def get_list_all_csv_filename(filepath):
 			csv_list.append(list_all_items[i])
 	return csv_list
 
-def get_list_all_result_filename(filepath):
+def get_list_all_result_filename(filepath: str) -> list[str]:
+	'''Return a list of result files in a given path.'''
 	result_list = []
 	if not os.path.exists(filepath):
 		return result_list
@@ -191,7 +217,7 @@ def get_list_all_result_filename(filepath):
 	list_all_items = os.listdir(filepath)
 	for i in range(0, len(list_all_items)):
 		file_extension = get_file_least_extension(list_all_items[i])
-		if file_extension == r'result':
+		if file_extension == 'result':
 			result_list.append(list_all_items[i])
 	return result_list
 
@@ -227,11 +253,14 @@ def add_new_instance_into_file(filepath):
 	return
 
 
-def add_new_solver_into_file(filepath, deterministic='0'):
+def add_new_solver_into_file(filepath: str, deterministic: int = 0,
+							solver_variations: int = 1):
+	'''Add a solver to an existing file listing solvers and their details.'''
 	fo = open(sgh.solver_list_path, 'a+')
 	fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-	fo.write(filepath + r' ' + deterministic + '\n')
+	fo.write(f'{filepath} {str(deterministic)} {str(solver_variations)}\n')
 	fo.close()
+
 	return
 
 

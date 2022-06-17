@@ -13,7 +13,7 @@
 
 # Initialise
 record_file="Commands/test/test_files/test_record.zip"
-output_true="c Record file $record_file loaded successfully!"
+output_true="Record file $record_file loaded successfully!"
 output=$(Commands/load_record.py $record_file | tail -1)
 
 if [[ $output == $output_true ]];

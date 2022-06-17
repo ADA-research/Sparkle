@@ -49,7 +49,7 @@ cp $configuration_files_path $smac_configuration_files_path
 
 # Test configured solver and default solver with both train and test sets
 output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
-output_true="c Running validation in parallel. Waiting for Slurm job with id: "
+output_true="Running validation in parallel. Waiting for Slurm job with id: "
 
 if [[ $output =~ "${output_true}" ]];
 then
