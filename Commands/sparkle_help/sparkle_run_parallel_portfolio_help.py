@@ -134,7 +134,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             try:
                 shutil.move(path_from, path_to)
             except shutil.Error:
-                print('c the {str(sgh.pap_performance_data_tmp_path)} directory already '
+                print('the {str(sgh.pap_performance_data_tmp_path)} directory already '
                       'contains a file with the same name, it will be skipped')
 
             commandline = f'rm -rf {path_from}'
@@ -466,7 +466,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
         pending_job_with_new_cutoff = {}
 
     if len(remaining_job_dict) > 0:
-        print(f'c a job has ended, remaining jobs = {str(len(remaining_job_dict))}')
+        print(f'a job has ended, remaining jobs = {str(len(remaining_job_dict))}')
 
     if finished_instances_dict == {}:
         for instance in instances:
@@ -503,10 +503,10 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
 
                     if (solving_time >
                             float(sgh.settings.get_general_target_cutoff_time())):
-                        print(f'c {str(instance)} has reached the cutoff time without '
+                        print(f'{str(instance)} has reached the cutoff time without '
                               'being solved.')
                     else:
-                        print(f'c {str(instance)} has been solved in '
+                        print(f'{str(instance)} has been solved in '
                               f'{str(solving_time)} seconds!')
 
                         temp_files = glob.glob(f'{sgh.sparkle_tmp_path}{solver_instance}'
@@ -523,7 +523,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                                         nr_of_lines_raw_content-lines-1]:
                                     results_line = raw_content[
                                         nr_of_lines_raw_content-lines-1]
-                                    print('c result = ' + str(results_line[
+                                    print('result = ' + str(results_line[
                                         results_line.find('s')+2:].strip()))
                                     finished_instances_dict[instance][0] = str(
                                         results_line[results_line.find('s')+2:].strip())
@@ -532,7 +532,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                 # A solver has an improved performance time on an instance
                 elif (float(finished_instances_dict[instance][1]) > solving_time):
                     finished_instances_dict[instance][1] = solving_time
-                    print(f'c {str(instance)} has been solved with an improved solving '
+                    print(f'{str(instance)} has been solved with an improved solving '
                           f'time of {str(solving_time)} seconds!')
 
     # Monitors the running jobs waiting for a solver that finishes
@@ -667,10 +667,10 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                     and float(finished_instances_dict[instances][1]) > 0):
                 # To filter out constraint files
                 if 'e' not in str(finished_instances_dict[instances][1]):
-                    print(f'c {str(instances)} was solved with a results: '
+                    print(f'{str(instances)} was solved with a results: '
                           f'{str(finished_instances_dict[instances][1])}')
             else:
-                print(f'c {str(instances)} was not solved in the given cutoff-time')
+                print(f'{str(instances)} was not solved in the given cutoff-time')
     except Exception as except_msg:
         print(except_msg)
 

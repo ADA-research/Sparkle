@@ -109,7 +109,7 @@ def wait_for_job(job_id: str):
         sleep(n_seconds)
         done = check_job_is_done(job_id)
 
-    print('Job with ID', job_id, 'done!')
+    print('Job with ID', job_id, 'done!', flush=True)
 
     return
 
@@ -117,7 +117,7 @@ def wait_for_job(job_id: str):
 def wait_for_all_jobs():
     remaining_jobs = cleanup_active_jobs()
     n_seconds = 10
-    print('Waiting for', remaining_jobs, 'jobs...')
+    print('Waiting for', remaining_jobs, 'jobs...', flush=True)
 
     while remaining_jobs > 0:
         sleep(n_seconds)

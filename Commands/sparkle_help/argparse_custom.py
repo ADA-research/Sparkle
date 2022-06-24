@@ -10,15 +10,14 @@ class SetByUser(argparse.Action):
 
 
 def user_set_state(args, arg_name: str) -> SettingState:
-	if hasattr(args, arg_name + '_nondefault'):
-		return SettingState.CMD_LINE
-	else:
-		return SettingState.DEFAULT
+    if hasattr(args, arg_name + '_nondefault'):
+        return SettingState.CMD_LINE
+    else:
+        return SettingState.DEFAULT
 
 
 def set_by_user(args, arg_name: str) -> bool:
-	if hasattr(args, arg_name + '_nondefault'):
-		return True
-	else:
-		return False
-
+    if hasattr(args, arg_name + '_nondefault'):
+        return True
+    else:
+        return False
