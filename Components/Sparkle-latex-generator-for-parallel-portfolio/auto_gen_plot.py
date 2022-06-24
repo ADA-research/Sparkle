@@ -30,10 +30,10 @@ if __name__ == '__main__':
     output_gnuplot_script = f'{parallel_portfolio_sparkle_name}_vs_{sbs_name}.plt'
 
     with open(output_gnuplot_script, 'w+') as outfile:
-        outfile.write(f'set xlabel \'{sbs_name}, {performance_measure}\'\n')
-        outfile.write(f'set ylabel \'{parallel_portfolio_sparkle_name}, '
-                      f'{performance_measure}\'\n')
-        outfile.write(f'set title \'{parallel_portfolio_sparkle_name} vs {sbs_name}\'\n')
+        outfile.write(f"set xlabel '{sbs_name}, {performance_measure}'\n")
+        outfile.write(f"set ylabel '{parallel_portfolio_sparkle_name}, "
+                      f"{performance_measure}'\n")
+        outfile.write(f"set title '{parallel_portfolio_sparkle_name} vs {sbs_name}'\n")
 
         outfile.write('unset key\n')
         outfile.write(f'set xrange [{lower_bound}:{upper_bound}]\n')
@@ -45,26 +45,26 @@ if __name__ == '__main__':
 
         outfile.write('set size square\n')
         outfile.write(f'set arrow from {lower_bound},{lower_bound} to {upper_bound},'
-                      f'{upper_bound} nohead lc rgb \'black\'\n')
+                      f"{upper_bound} nohead lc rgb 'black'\n")
 
         if performance_measure == 'PAR10':
             # Cutoff time x axis
             outfile.write(f'set arrow from {penalty_time},{lower_bound} to '
-                          f'{penalty_time},{upper_bound} nohead lc rgb \'black\' lt 2\n')
+                          f"{penalty_time},{upper_bound} nohead lc rgb 'black' lt 2\n")
             # Cutoff time y axis
             outfile.write(f'set arrow from {lower_bound},{penalty_time} to {upper_bound}'
-                          f',{penalty_time} nohead lc rgb \'black\' lt 2\n')
+                          f",{penalty_time} nohead lc rgb 'black' lt 2\n")
 
-        outfile.write('set terminal postscript eps color dashed linewidth \"Helvetica\"'
+        outfile.write('set terminal postscript eps color dashed linewidth "Helvetica"'
                       ' 20\n')
-        outfile.write(f'set output \'{output_eps_file}\'\n')
-        outfile.write(f'plot \'{data_parallel_portfolio_sparkle_vs_sbs_filename}\' with '
+        outfile.write(f"set output '{output_eps_file}'\n")
+        outfile.write(f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
                       'points pt 2 ps 2\n')
 
-    cmd = f'gnuplot \'{output_gnuplot_script}\''
+    cmd = f"gnuplot '{output_gnuplot_script}'"
     os.system(cmd)
 
-    cmd = f'epstopdf \'{output_eps_file}\''
+    cmd = f"epstopdf '{output_eps_file}'"
     os.system(cmd)
 
-    os.system('rm -f \'{output_gnuplot_script}\'')
+    os.system("rm -f '{output_gnuplot_script}'")
