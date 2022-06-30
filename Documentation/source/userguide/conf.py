@@ -155,6 +155,14 @@ latex_documents = [
      'ADA Research Group, LIACS', 'howto'),
 ]
 
+# Manually installed sty files not easily available from conda
+# Note that although texlive-core is available from conda (containing at least some
+# packages), it can cause conflicts with exiting texlive installations.
+latex_additional_files = ['../tex_sty/fncychap.sty','../tex_sty/wrapfig.sty',
+                          '../tex_sty/capt-of.sty','../tex_sty/framed.sty',
+                          '../tex_sty/upquote.sty','../tex_sty/needspace.sty',
+                          '../tex_sty/tabulary.sty','../tex_sty/titlesec.sty']
+
 
 # -- Options for manual page output ------------------------------------------
 
