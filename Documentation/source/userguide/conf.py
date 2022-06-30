@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('../../..'))
 sys.path.insert(0, os.path.abspath('../../../Commands'))
 print('sys.path: ', sys.path)
 
-from sparkle import about
+from sparkle import about  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -160,10 +160,10 @@ latex_documents = [
 # Manually installed sty files not easily available from conda
 # Note that although texlive-core is available from conda (containing at least some
 # packages), it can cause conflicts with exiting texlive installations.
-latex_additional_files = ['../tex_sty/fncychap.sty','../tex_sty/wrapfig.sty',
-                          '../tex_sty/capt-of.sty','../tex_sty/framed.sty',
-                          '../tex_sty/upquote.sty','../tex_sty/needspace.sty',
-                          '../tex_sty/tabulary.sty','../tex_sty/titlesec.sty']
+latex_additional_files = ['../tex_sty/fncychap.sty', '../tex_sty/wrapfig.sty',
+                          '../tex_sty/capt-of.sty', '../tex_sty/framed.sty',
+                          '../tex_sty/upquote.sty', '../tex_sty/needspace.sty',
+                          '../tex_sty/tabulary.sty', '../tex_sty/titlesec.sty']
 
 
 # -- Options for manual page output ------------------------------------------
