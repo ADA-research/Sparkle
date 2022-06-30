@@ -16,10 +16,12 @@ import os
 import sys
 
 # Add path to sparkle root
+sys.path.insert(0, os.path.abspath('../../../..'))
 sys.path.insert(0, os.path.abspath('../../..'))
-sys.path.insert(0, os.path.abspath('../..'))
-sys.path.insert(0, os.path.abspath('../../Commands'))
+sys.path.insert(0, os.path.abspath('../../../Commands'))
 print('sys.path: ', sys.path)
+
+from sparkle import about  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -28,9 +30,9 @@ copyright = '2021, ADA Research Group, LIACS'
 author = 'ADA Research Group, LIACS'
 
 # The short X.Y version
-version = '0.0'
+version = str(about.about_info['version'])
 # The full version, including alpha/beta/rc tags
-release = '0.0'
+release = str(about.about_info['version'])
 
 
 # -- General configuration ---------------------------------------------------
@@ -72,7 +74,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en-gb'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -154,6 +156,14 @@ latex_documents = [
     (master_doc, 'sparkle-userguide.tex', 'Sparkle User Guide',
      'ADA Research Group, LIACS', 'howto'),
 ]
+
+# Manually installed sty files not easily available from conda
+# Note that although texlive-core is available from conda (containing at least some
+# packages), it can cause conflicts with exiting texlive installations.
+latex_additional_files = ['../tex_sty/fncychap.sty', '../tex_sty/wrapfig.sty',
+                          '../tex_sty/capt-of.sty', '../tex_sty/framed.sty',
+                          '../tex_sty/upquote.sty', '../tex_sty/needspace.sty',
+                          '../tex_sty/tabulary.sty', '../tex_sty/titlesec.sty']
 
 
 # -- Options for manual page output ------------------------------------------
