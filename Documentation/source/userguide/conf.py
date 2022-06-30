@@ -21,6 +21,8 @@ sys.path.insert(0, os.path.abspath('../../..'))
 sys.path.insert(0, os.path.abspath('../../../Commands'))
 print('sys.path: ', sys.path)
 
+from sparkle import about
+
 # -- Project information -----------------------------------------------------
 
 project = 'Sparkle'
@@ -28,9 +30,9 @@ copyright = '2021, ADA Research Group, LIACS'
 author = 'ADA Research Group, LIACS'
 
 # The short X.Y version
-version = '0.0'
+version = str(about.about_info['version'])
 # The full version, including alpha/beta/rc tags
-release = '0.0'
+release = str(about.about_info['version'])
 
 
 # -- General configuration ---------------------------------------------------
