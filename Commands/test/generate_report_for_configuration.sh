@@ -52,7 +52,7 @@ mv $scenario_path $scenario_tmp
 cp $scenario_test $scenario_path
 
 # Test generate report for configuration with both train and test sets
-output_true="c Generating report for configuration done!"
+output_true="Generating report for configuration done!"
 output=$(Commands/generate_report.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
