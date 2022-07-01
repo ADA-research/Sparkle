@@ -54,8 +54,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'sphinxcontrib.autoprogram',
-    # 'sphinx.ext.autosectionlabel',
-    'recommonmark',
+    'myst_parser',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -64,7 +63,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
+source_suffix = ['.md']
 
 # The master toctree document.
 master_doc = 'index'
@@ -79,7 +78,7 @@ language = 'en-gb'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['userguide/index.rst', 'userguide/commandsautoprogram.rst']
+exclude_patterns = ['userguide/index.md', 'userguide/commandsautoprogram.md']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None

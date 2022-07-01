@@ -1,5 +1,5 @@
 # Requirements for Sparkle documentation
-recommonmark
+myst-parser
 Sphinx
 sphinxcontrib-jsmath
 sphinxcontrib-autoprogram
