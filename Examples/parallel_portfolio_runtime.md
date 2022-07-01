@@ -1,5 +1,5 @@
-### Example usage of Sparkle for parallel algorithm portfolio
-### The example illustrates the use of a decision algorithm and measures runtime performance
+# Use Sparkle for a parallel algorithm portfolio with runtime objective
+The example illustrates the use of a decision algorithm and measures runtime performance
 
 ## Initialise the Sparkle platform
 

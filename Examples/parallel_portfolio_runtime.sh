@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### Example usage of Sparkle for parallel algorithm portfolio
+### Use Sparkle for a parallel algorithm portfolio with runtime objective
 ### The example illustrates the use of a decision algorithm and measures runtime performance
 
 #### Initialise the Sparkle platform

@@ -1,5 +1,5 @@
-### Example usage of Sparkle for parallel algorithm portfolio
-### The example illustrates the use of an optimisation algorithm and measures quality performance
+# Use Sparkle for a parallel algorithm portfolio with quality objective
+The example illustrates the use of an optimisation algorithm and measures quality performance
 
 ## Initialise the Sparkle platform
 
