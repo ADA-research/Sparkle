@@ -1,163 +1,215 @@
+(cmd-about)=
 
-.. _cmd:about:
-
+```{eval-rst}
 .. autoprogram:: about:parser_function()
    :prog: about.py
 
-    
-.. _cmd:add_feature_extractor:
+```
 
+(cmd-add-feature-extractor)=
+
+```{eval-rst}
 .. autoprogram:: add_feature_extractor:parser_function()
    :prog: add_feature_extractor.py
 
-    
-.. _cmd:add_instances:
+```
 
+(cmd-add-instances)=
+
+```{eval-rst}
 .. autoprogram:: add_instances:parser_function()
    :prog: add_instances.py
 
-    
-.. _cmd:add_solver:
+```
 
+(cmd-add-solver)=
+
+```{eval-rst}
 .. autoprogram:: add_solver:parser_function()
    :prog: add_solver.py
 
-    
-.. _cmd:cleanup_current_sparkle_platform:
+```
 
+(cmd-cleanup-current-sparkle-platform)=
+
+```{eval-rst}
 .. autoprogram:: cleanup_current_sparkle_platform:parser_function()
    :prog: cleanup_current_sparkle_platform.py
 
-    
-.. _cmd:cleanup_temporary_files:
+```
 
+(cmd-cleanup-temporary-files)=
+
+```{eval-rst}
 .. autoprogram:: cleanup_temporary_files:parser_function()
    :prog: cleanup_temporary_files.py
 
-    
-.. _cmd:compute_features:
+```
 
+(cmd-compute-features)=
+
+```{eval-rst}
 .. autoprogram:: compute_features:parser_function()
    :prog: compute_features.py
 
-    
-.. _cmd:compute_features_parallel:
+```
 
+(cmd-compute-features-parallel)=
+
+```{eval-rst}
 .. autoprogram:: compute_features_parallel:parser_function()
    :prog: compute_features_parallel.py
 
-    
-.. _cmd:compute_marginal_contribution:
+```
 
+(cmd-compute-marginal-contribution)=
+
+```{eval-rst}
 .. autoprogram:: compute_marginal_contribution:parser_function()
    :prog: compute_marginal_contribution.py
 
-    
-.. _cmd:configure_solver:
+```
 
+(cmd-configure-solver)=
+
+```{eval-rst}
 .. autoprogram:: configure_solver:parser_function()
    :prog: configure_solver.py
 
-    
-.. _cmd:construct_sparkle_portfolio_selector:
+```
 
+(cmd-construct-sparkle-portfolio-selector)=
+
+```{eval-rst}
 .. autoprogram:: construct_sparkle_portfolio_selector:parser_function()
    :prog: construct_sparkle_portfolio_selector.py
 
-    
-.. _cmd:generate_report:
+```
 
+(cmd-generate-report)=
+
+```{eval-rst}
 .. autoprogram:: generate_report:parser_function()
    :prog: generate_report.py
 
-    
-.. _cmd:initialise:
+```
 
+(cmd-initialise)=
+
+```{eval-rst}
 .. autoprogram:: initialise:parser_function()
    :prog: initialise.py
 
-    
-.. _cmd:load_record:
+```
 
+(cmd-load-record)=
+
+```{eval-rst}
 .. autoprogram:: load_record:parser_function()
    :prog: load_record.py
 
-    
-.. _cmd:remove_feature_extractor:
+```
 
+(cmd-remove-feature-extractor)=
+
+```{eval-rst}
 .. autoprogram:: remove_feature_extractor:parser_function()
    :prog: remove_feature_extractor.py
 
-    
-.. _cmd:remove_instances:
+```
 
+(cmd-remove-instances)=
+
+```{eval-rst}
 .. autoprogram:: remove_instances:parser_function()
    :prog: remove_instances.py
 
-    
-.. _cmd:remove_record:
+```
 
+(cmd-remove-record)=
+
+```{eval-rst}
 .. autoprogram:: remove_record:parser_function()
    :prog: remove_record.py
 
-    
-.. _cmd:remove_solver:
+```
 
+(cmd-remove-solver)=
+
+```{eval-rst}
 .. autoprogram:: remove_solver:parser_function()
    :prog: remove_solver.py
 
-    
-.. _cmd:run_ablation:
+```
 
+(cmd-run-ablation)=
+
+```{eval-rst}
 .. autoprogram:: run_ablation:parser_function()
    :prog: run_ablation.py
 
-    
-.. _cmd:run_configured_solver:
+```
 
+(cmd-run-configured-solver)=
+
+```{eval-rst}
 .. autoprogram:: run_configured_solver:parser_function()
    :prog: run_configured_solver.py
 
-    
-.. _cmd:run_solvers:
+```
 
+(cmd-run-solvers)=
+
+```{eval-rst}
 .. autoprogram:: run_solvers:parser_function()
    :prog: run_solvers.py
 
-    
-.. _cmd:run_sparkle_portfolio_selector:
+```
 
+(cmd-run-sparkle-portfolio-selector)=
+
+```{eval-rst}
 .. autoprogram:: run_sparkle_portfolio_selector:parser_function()
    :prog: run_sparkle_portfolio_selector.py
 
-    
-.. _cmd:run_status:
+```
 
+(cmd-run-status)=
+
+```{eval-rst}
 .. autoprogram:: run_status:parser_function()
    :prog: run_status.py
 
-    
-.. _cmd:save_record:
+```
 
+(cmd-save-record)=
+
+```{eval-rst}
 .. autoprogram:: save_record:parser_function()
    :prog: save_record.py
 
-    
-.. _cmd:sparkle_wait:
+```
 
+(cmd-sparkle-wait)=
+
+```{eval-rst}
 .. autoprogram:: sparkle_wait:parser_function()
    :prog: sparkle_wait.py
 
-    
-.. _cmd:system_status:
+```
 
+(cmd-system-status)=
+
+```{eval-rst}
 .. autoprogram:: system_status:parser_function()
    :prog: system_status.py
 
-    
-.. _cmd:validate_configured_vs_default:
+```
 
+(cmd-validate-configured-vs-default)=
+
+```{eval-rst}
 .. autoprogram:: validate_configured_vs_default:parser_function()
    :prog: validate_configured_vs_default.py
 
-    
+```

@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     commands = sorted(commands)
 
-    sphinx_file = open('source/userguide/commandlist.rst', 'w')
+    sphinx_file = open('source/userguide/commandlist.md', 'w')
     for command in commands:
         sphinx_file.write(
             '*  :ref:`cmd:{name}`\n'.format(name=command.replace('.py', '')))
@@ -26,7 +26,7 @@ if __name__ == '__main__':
    :prog: {name}.py
 
     '''
-    sphinx_file = open('source/userguide/commandsautoprogram.rst', 'w')
+    sphinx_file = open('source/userguide/commandsautoprogram.md', 'w')
     for command in commands:
         sphinx_file.write(string.format(name=command.replace('.py', '')))
     sphinx_file.close()
