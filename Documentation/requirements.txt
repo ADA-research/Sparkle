@@ -3,3 +3,4 @@ myst-parser
 Sphinx
 sphinxcontrib-jsmath
 sphinxcontrib-autoprogram
+pandas # Also in environment.yml but needed for readthedocs
