@@ -8,9 +8,9 @@ Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), and does not wo
 
 Follow these steps:
 
-1. {ref}`Install Sparkle <quick:install>`
-2. Prepare an {ref}`algorithm configuration <quick:config_environment>` or an {ref}`algorithm selection <quick:select_environment>`.
-3. {ref}`Execute commands <quick:execute_commands>`
+1. {ref}`Install Sparkle <quick-install>`
+2. Prepare an {ref}`algorithm configuration <quick-config-environment>` or an {ref}`algorithm selection <quick-select-environment>`.
+3. {ref}`Execute commands <quick-execute-commands>`
 
 (quick-install)=
 
@@ -78,7 +78,7 @@ This should be fast as both `conda` and `pip` use local cache for the packages.
 ## Algorithm Configuration
 
 Configuring an algorithm has the following minimal requirements for the
-algorithm (for an example of a solver directory see {numref}`dir:solvers`):
+algorithm (for an example of a solver directory see {numref}`dir-solvers`):
 
 - A working solver executable
 - An algorithm wrapper called `sprakle_smac_wrapper.py`
@@ -86,7 +86,7 @@ algorithm (for an example of a solver directory see {numref}`dir:solvers`):
 - The runsolver binary (e.g. from `Examples/Resources/Solvers/PbO-CCSAT-Generic/`)
 
 Further, training and testing instance sets are needed (for an example
-of an instances directory see {numref}`dir:instances`). For
+of an instances directory see {numref}`dir-instances`). For
 the purpose of testing whether your configuration setup works with
 Sparkle, it is advised to primarily use instances that are solved
 (relatively) quickly even with the default parameters.
@@ -126,13 +126,13 @@ included in the PCS file.
 
 Creating a portfolio selector requires multiple algorithms with the
 following minimal requirements (for an example of a solver directory see
-{numref}`dir:solvers_selection`):
+{numref}`dir-solvers-selection`):
 
 - A working solver executable
 - An algorithm wrapper called `sprakle_run_default_wrapper.py`
 
 Further, training and testing instance sets are needed (for an example
-of an instances directory see {numref}`dir:instances`). For
+of an instances directory see {numref}`dir-instances`). For
 the purpose of testing whether your selection setup works with Sparkle,
 it is advised to primarily use instances that are solved (relatively)
 quickly.
@@ -453,7 +453,7 @@ brackets} indicate a set of inputs to choose from.
 
 Most settings can be controlled through
 `Settings/sparkle_settings.ini`. Possible settings are summarised per
-category in {numref}`sect:settings_details`. For any settings
+category in {numref}`settings-details`. For any settings
 that are not provided the defaults will be used. Meaning, in the extreme
 case, that if the settings file is empty (and nothing is set through the
 command line) everything will run with default values.
@@ -483,7 +483,7 @@ number_of_runs = 25
 number_of_runs_in_parallel = 25
 ```
 
-(sect-settings-details)=
+(settings-details)=
 
 ### Names and possible values
 
