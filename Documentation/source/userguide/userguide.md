@@ -490,152 +490,92 @@ number_of_runs_in_parallel = 25
 **\[general\]**
 
 `performance_measure`
-: aliases: 
-
-  `smac_run_obj`
-
-  values: 
-
-  `{RUNTIME, QUALITY_ABSOLUTE`
-
-   (also: 
-
-  `QUALITY`
-
-  )
-
-  `}`
-
-  description: The type of performance measure that sparkle uses. 
-
-  `RUNTIME`
-
-   focuses on runtime the solver requires,
-
-
-  `QUALITY_ABSOLUTE`
-
-   focuses on the average absolute improvements on the instances and 
-
-  `QUALITY`
-
-   does the same a the former.
+> aliases: `smac_run_obj`
+>
+> values: `{RUNTIME, QUALITY_ABSOLUTE` (also: `QUALITY}`)
+> > `RUNTIME` focuses on runtime the solver requires,
+> >
+> > `QUALITY_ABSOLUTE` and `QUALITY` focuses on the average absolute improvements on the instances
+>
+> description: The type of performance measure that sparkle uses. 
 
 `target_cutoff_time`
-: aliases: 
-
-  `smac_each_run_cutoff_time`
-
-  , 
-
-  `cutoff_time_each_performance_computation`
-
-  values: integer
-
-  description: The time a solver is allowed to run before it is terminated.
+> aliases: `smac_each_run_cutoff_time`, `cutoff_time_each_performance_computation`
+>
+> values: integer
+>
+> description: The time a solver is allowed to run before it is terminated.
 
 `extractor_cutoff_time`
-: aliases: 
-
-  `cutoff_time_each_feature_computation`
-
-  values: integer
-
-  description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature
-  extractors this budget is divided equally.
+> aliases: `cutoff_time_each_feature_computation`
+>
+> values: integer
+>
+> description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature extractors this budget is divided equally.
 
 `penalty_multiplier`
-: aliases: 
-
-  `penalty_number`
-
-  values: integer
-
-  description: In case of not solving an instance within the cutoff time the runtime is set to be the 
-
-  `penalty_multiplier * cutoff_time`
-
-  .
+> aliases: `penalty_number`
+>
+> values: integer
+>
+> description: In case of not solving an instance within the cutoff time the runtime is set to be the `penalty_multiplier * cutoff_time`.
 
 `solution_verifier`
-: aliases: N/A
-
-  values: 
-
-  `{NONE, SAT}`
-
-  note: Only available for SAT solving.
+> aliases: N/A
+>
+> values: `{NONE, SAT}`
+>
+> note: Only available for SAT solving.
 
 **\[configuration\]**
 
 `budget_per_run`
-: aliases: 
-
-  `smac_whole_time_budget`
-
-  values: integer
-
-  description: The wallclock time one configuration run is allowed to use for finding configurations.
+> aliases: `smac_whole_time_budget`
+>
+> values: integer
+>
+> description: The wallclock time one configuration run is allowed to use for finding configurations.
 
 `number_of_runs`
-: aliases: 
-
-  `num_of_smac_runs`
-
-  values: integer
-
-  description: The number of separate configurations runs.
+> aliases: `num_of_smac_runs`
+>
+> values: integer
+>
+> description: The number of separate configurations runs.
 
 **\[smac\]**
 
 `target_cutoff_length`
-: aliases: 
-
-  `smac_each_run_cutoff_length`
-
-  values: 
-
-  `{max}`
-
-   (other values: whatever is allowed by SMAC)
+> aliases: `smac_each_run_cutoff_length`
+>
+> values: `{max}` (other values: whatever is allowed by SMAC)
 
 **\[ablation\]**
 
 `racing`
-: aliases: 
-
-  `ablation_racing`
-
-  values: boolean
-
-  description: Use racing when performing the ablation analysis between the default and configured parameters
+> aliases: `ablation_racing`
+>
+> values: boolean
+>
+> description: Use racing when performing the ablation analysis between the default and configured parameters
 
 **\[slurm\]**
 
 `number_of_runs_in_parallel`
-
-> aliases: 
->
-> `smac_run_obj`
+> aliases: `smac_run_obj`
 >
 > values: integer
 >
-> description: The number of configuration runs that can run in parallel.
+> description: The number of configuration runs that can run in parallel. 
 
 `clis_per_node`
-: aliases: N/A
-
-  values: integer
-
-  note: Not really a Slurm option, will likely be moved to another
-  section.
-
-  description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores
-  and each solver uses 2 cores, the 
-
-  `cli_per_node`
-
-   is at most 16.
+> aliases: N/A
+>
+> values: integer
+>
+> note: Not really a Slurm option, will likely be moved to another section.
+>
+> description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the `cli_per_node` is at most 16.
 
 ### Priorities
 
