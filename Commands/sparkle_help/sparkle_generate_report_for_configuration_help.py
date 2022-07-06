@@ -331,6 +331,7 @@ def get_figure_configure_vs_default(configured_results_dir: str,
         plot_params['limit_min'] = 0.25
         plot_params['limit_max'] = 0.25
         plot_params['limit'] = 'magnitude'
+        plot_params['penalty_time'] = sgh.settings.get_penalised_time()
         plot_params['replace_zeros'] = True
 
     generate_comparison_plot(points,
