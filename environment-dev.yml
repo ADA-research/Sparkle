@@ -17,6 +17,7 @@ dependencies:
     - pytest
     - flake8
     - flake8-quotes
+    - pep8-naming
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost
