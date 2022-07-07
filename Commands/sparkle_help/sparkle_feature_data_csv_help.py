@@ -12,14 +12,14 @@ except ImportError:
     import sparkle_csv_help as scsv
 
 
-class Sparkle_Feature_Data_CSV(scsv.Sparkle_CSV):
+class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
     def test(self):
         print('just a test')
         return
 
     def __init__(self, csv_filepath):
-        scsv.Sparkle_CSV.__init__(self, csv_filepath)
+        scsv.SparkleCSV.__init__(self, csv_filepath)
         self.extractor_list = sparkle_global_help.extractor_list
         return
 

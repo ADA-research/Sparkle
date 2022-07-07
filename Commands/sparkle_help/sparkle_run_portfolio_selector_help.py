@@ -56,13 +56,13 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
             sfh.create_new_empty_file(result_path)
 
     try:
-        sfdcsv.Sparkle_Feature_Data_CSV(result_path)
+        sfdcsv.SparkleFeatureDataCSV(result_path)
     except Exception:
         print(f'****** WARNING: Feature vector computing on instance {instance_path}'
               ' failed! ******')
         print('****** WARNING: The feature vector of this instance will be imputed as '
               'the mean value of all other non-missing values! ******')
-        feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
     else:
         fin = open(result_path, 'r+')
@@ -147,7 +147,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
         check_selector_status(solver_name)
         fo = open(performance_data_csv_path, 'r+')
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
         performance_data_csv.set_value(instance_path, solver_name, cpu_time_penalised)
         performance_data_csv.dataframe.to_csv(performance_data_csv_path)
@@ -353,8 +353,8 @@ def call_sparkle_portfolio_selector_solve_instance_directory(
     test_performance_data_csv_name = 'sparkle_performance_data.csv'
     test_performance_data_csv_path = (
         test_case_directory_path + test_performance_data_csv_name)
-    spdcsv.Sparkle_Performance_Data_CSV.create_empty_csv(test_performance_data_csv_path)
-    test_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+    spdcsv.SparklePerformanceDataCSV.create_empty_csv(test_performance_data_csv_path)
+    test_performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_performance_data_csv_path)
 
     total_job_list = []

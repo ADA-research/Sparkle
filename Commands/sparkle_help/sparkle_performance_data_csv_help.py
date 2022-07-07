@@ -9,14 +9,14 @@ except ImportError:
     import sparkle_csv_help as scsv
 
 
-class Sparkle_Performance_Data_CSV(scsv.Sparkle_CSV):
+class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
     def test(self):
         print('just a test')
         return
 
     def __init__(self, csv_filepath):
-        scsv.Sparkle_CSV.__init__(self, csv_filepath)
+        scsv.SparkleCSV.__init__(self, csv_filepath)
         self.solver_list = sgh.solver_list
         return
 

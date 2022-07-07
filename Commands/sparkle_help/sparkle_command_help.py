@@ -34,6 +34,7 @@ class CommandName(str, Enum):
     CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO = 'CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO'
     RUN_SPARKLE_PARALLEL_PORTFOLIO = 'RUN_SPARKLE_PARALLEL_PORTFOLIO'
 
+    @staticmethod
     def from_str(command_name: str):
         return CommandName(command_name)
 

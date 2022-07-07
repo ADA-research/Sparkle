@@ -63,7 +63,7 @@ def running_solvers_parallel(performance_data_csv_path, num_job_in_parallel, mod
     ####
 
     # Open the csv file in terms of performance data
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 
     if mode == 1:
         # The value of mode is 1, so the list of computation jobs is the list of the

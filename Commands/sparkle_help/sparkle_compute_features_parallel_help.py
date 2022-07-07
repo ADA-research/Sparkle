@@ -31,7 +31,7 @@ def computing_features_parallel(feature_data_csv_path, mode):
     '''
 
     # Open the csv file in terms of feature data
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
 
     if mode == 1:
         # The value of mode is 1, so the list of computation jobs is the list of the

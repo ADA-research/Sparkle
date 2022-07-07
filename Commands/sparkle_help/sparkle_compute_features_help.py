@@ -20,8 +20,8 @@ except ImportError:
 
 def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path,
                                                      extractor_path, result_path):
-    sfdcsv.Sparkle_Feature_Data_CSV.create_empty_csv(result_path)
-    zero_value_csv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
+    sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
+    zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
 
     for column_name in feature_data_csv.list_columns():
         zero_value_csv.add_column(column_name)
@@ -35,7 +35,7 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_
 
 
 def computing_features(feature_data_csv_path, mode):
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     if mode == 1:
         list_feature_computation_job = (
             feature_data_csv.get_list_remaining_feature_computation_job())
@@ -103,7 +103,7 @@ def computing_features(feature_data_csv_path, mode):
                     sfh.create_new_empty_file(result_path)
 
             try:
-                tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
+                tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
             except Exception:
                 print('****** WARNING: Feature vector computing on instance '
                       f'{instance_path} failed! ******')

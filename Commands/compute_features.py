@@ -42,7 +42,7 @@ def parser_function():
 
 def compute_features_parallel(my_flag_recompute):
     if my_flag_recompute:
-        feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         feature_data_csv.clean_csv()
         compute_features_parallel_jobid = scfp.computing_features_parallel(
             sgh.feature_data_csv_path, 2
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     if not my_flag_parallel:
         if my_flag_recompute:
-            feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(
+            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
                 sgh.feature_data_csv_path
             )
             feature_data_csv.clean_csv()

@@ -46,7 +46,7 @@ if __name__ == '__main__':
     extractor_path = args.extractor
     feature_data_csv_path = args.feature_csv
 
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     runsolver_path = sgh.runsolver_path
 
     if len(sgh.extractor_list) == 0:
@@ -92,7 +92,7 @@ if __name__ == '__main__':
             sfh.create_new_empty_file(result_path)
 
     try:
-        tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
+        tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
         result_string = 'Successful'
     except Exception:
         print(f'****** WARNING: Feature vector computing on instance {instance_path}'

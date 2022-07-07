@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     os.system('cp -r ' + solver_source + '/* ' + solver_directory)
 
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
     )
     performance_data_csv.add_column(solver_directory)

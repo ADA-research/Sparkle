@@ -170,9 +170,9 @@ if __name__ == '__main__':
         )
         os.system(command_line)
 
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
-    tmp_fdcsv = sfdcsv.Sparkle_Feature_Data_CSV(result_path)
+    tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
     list_columns = tmp_fdcsv.list_columns()
     for column_name in list_columns:
         feature_data_csv.add_column(column_name)

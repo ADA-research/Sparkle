@@ -10,6 +10,7 @@ class Scenario(str, Enum):
     CONFIGURATION = 'CONFIGURATION'
     PARALLEL_PORTFOLIO = 'PARALLEL_PORTFOLIO'
 
+    @staticmethod
     def from_str(scenario):
         return Scenario(scenario)
 

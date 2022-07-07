@@ -127,7 +127,7 @@ if __name__ == '__main__':
     use_features = args.use_features
 
     if use_features:
-        feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
             print('given training set path is not an existing directory')

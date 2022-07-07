@@ -12,7 +12,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help.sparkle_performance_data_csv_help import Sparkle_Performance_Data_CSV
+from sparkle_help.sparkle_performance_data_csv_help import SparklePerformanceDataCSV
 from sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_logging as sl
@@ -41,7 +41,7 @@ def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]
                       'Marginal contributions to the portfolio selector per solver.')
 
 
-def get_capvalue_list(performance_data_csv: Sparkle_Performance_Data_CSV) -> List[float]:
+def get_capvalue_list(performance_data_csv: SparklePerformanceDataCSV) -> List[float]:
     performance_measure = sgh.settings.get_general_performance_measure()
 
     # If QUALITY_ABSOLUTE is the performance measure, use the maximum performance per
@@ -71,7 +71,7 @@ def compute_perfect_selector_marginal_contribution(
     print(f'In this calculation, cutoff time for each run is {cutoff_time_str} seconds')
 
     rank_list = []
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     num_instances = performance_data_csv.get_row_size()
     num_solvers = performance_data_csv.get_column_size()
     capvalue_list = get_capvalue_list(performance_data_csv)
@@ -88,7 +88,7 @@ def compute_perfect_selector_marginal_contribution(
     for solver in performance_data_csv.list_columns():
         print('Computing virtual best performance for portfolio selector excluding '
               f'solver {sfh.get_last_level_directory_name(solver)} ...')
-        tmp_performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+        tmp_performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
         tmp_performance_data_csv.delete_column(solver)
         tmp_virtual_best_performance = (
@@ -164,7 +164,7 @@ def compute_actual_selector_performance(
         actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path,
         num_instances: int, num_solvers: int, capvalue_list: List[float] = None):
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 
     actual_selector_performance = 0
 
@@ -199,8 +199,8 @@ def compute_actual_selector_performance(
 
 def compute_actual_performance_for_instance(
         actual_portfolio_selector_path: str, instance: str, feature_data_csv_path: str,
-        performance_data_csv: Sparkle_Performance_Data_CSV) -> Tuple[float, bool]:
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+        performance_data_csv: SparklePerformanceDataCSV) -> Tuple[float, bool]:
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)
     performance_this_instance = sgh.sparkle_maximum_int
@@ -219,8 +219,8 @@ def compute_actual_performance_for_instance(
 
 def compute_actual_used_time_for_instance(
         actual_portfolio_selector_path: str, instance: str, feature_data_csv_path: str,
-        performance_data_csv: Sparkle_Performance_Data_CSV) -> Tuple[float, bool]:
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+        performance_data_csv: SparklePerformanceDataCSV) -> Tuple[float, bool]:
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
@@ -272,7 +272,7 @@ def compute_actual_selector_marginal_contribution(
     rank_list = []
 
     # Get values from CSV while all solvers and instances are included
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     num_instances = performance_data_csv.get_row_size()
     num_solvers = performance_data_csv.get_column_size()
     capvalue_list = get_capvalue_list(performance_data_csv)
@@ -313,7 +313,7 @@ def compute_actual_selector_marginal_contribution(
         print('Computing actual performance for portfolio selector excluding solver '
               f'{solver_name} ...')
         tmp_performance_data_csv = (
-            spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path))
+            spdcsv.SparklePerformanceDataCSV(performance_data_csv_path))
         tmp_performance_data_csv.delete_column(solver)
         tmp_performance_data_csv_file = (
             f'tmp_performance_data_csv_without_{solver_name}_'

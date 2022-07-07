@@ -48,7 +48,7 @@ def parser_function():
 
 
 def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path):
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_feature_computation_job = (
         feature_data_csv.get_list_remaining_feature_computation_job()
     )
@@ -59,7 +59,7 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
     if total_job_num > 0:
         return True
 
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         performance_data_csv_path
     )
     list_performance_computation_job = (

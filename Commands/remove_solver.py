@@ -64,7 +64,7 @@ if __name__ == '__main__':
         sfh.write_solver_nickname_mapping()
 
     if os.path.exists(sparkle_global_help.performance_data_csv_path):
-        performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sparkle_global_help.performance_data_csv_path
         )
         for column_name in performance_data_csv.list_columns():

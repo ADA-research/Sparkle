@@ -13,7 +13,7 @@ from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
-def get_numSolvers(parallel_portfolio_path: Path) -> str:
+def get_num_solvers(parallel_portfolio_path: Path) -> str:
     '''Return the number of solvers as string, counting each solver-seed combination.'''
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     num_solvers = len(solver_list)
@@ -30,7 +30,7 @@ def get_numSolvers(parallel_portfolio_path: Path) -> str:
     return str(num_solvers)
 
 
-def get_solverList(parallel_portfolio_path: Path) -> str:
+def get_solver_list(parallel_portfolio_path: Path) -> str:
     '''Return the list of solvers as string, including each solver-seed combination.'''
     str_value = ''
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
@@ -146,7 +146,7 @@ def get_results() -> dict[str, list[str, str]]:
     return results_dict
 
 
-def get_solversWithSolution() -> (str, dict[str, int], int):
+def get_solvers_with_solution() -> (str, dict[str, int], int):
     '''Return a string with the number of instances solved per successful solver.
 
     solver_dict contains the same information as dict.
@@ -348,16 +348,16 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
             dict_actual_parallel_portfolio_penalty_time_on_each_instance)
 
 
-def get_resultsTable(results: dict[str, float], parallel_portfolio_path: Path,
-                     dict_portfolio: dict[str, float],
-                     solver_with_solutions: dict[str, int],
-                     n_unsolved_instances: int, n_instances: int) -> str:
+def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
+                      dict_portfolio: dict[str, float],
+                      solver_with_solutions: dict[str, int],
+                      n_unsolved_instances: int, n_instances: int) -> str:
     '''Return a string containing LaTeX code for a table with the portfolio results.'''
-    portfolio_PAR10 = 0.0
+    portfolio_par10 = 0.0
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
     for instance in dict_portfolio:
-        portfolio_PAR10 += dict_portfolio[instance]
+        portfolio_par10 += dict_portfolio[instance]
 
     # Table 1: Portfolio results
     table_string = (
@@ -370,7 +370,7 @@ def get_resultsTable(results: dict[str, float], parallel_portfolio_path: Path,
         '\\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline ')
     table_string += (
         f'{sgrh.underscore_for_latex(parallel_portfolio_path.name)} & '
-        f'{str(round(portfolio_PAR10,2))} & {str(n_unsolved_instances)} & 0 & '
+        f'{str(round(portfolio_par10,2))} & {str(n_unsolved_instances)} & 0 & '
         f'{str(n_instances-n_unsolved_instances)} \\\\ ')
     table_string += '\\end{tabular}'
     table_string += '\\bigskip'
@@ -412,7 +412,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     mydict = {}
 
     variable = 'customCommands'
-    str_value = sgrh.get_customCommands()
+    str_value = sgrh.get_custom_commands()
     mydict[variable] = str_value
 
     variable = 'sparkle'
@@ -420,11 +420,11 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     mydict[variable] = str_value
 
     variable = 'numSolvers'
-    str_value = get_numSolvers(parallel_portfolio_path)
+    str_value = get_num_solvers(parallel_portfolio_path)
     mydict[variable] = str_value
 
     variable = 'solverList'
-    str_value = get_solverList(parallel_portfolio_path)
+    str_value = get_solver_list(parallel_portfolio_path)
     mydict[variable] = str_value
 
     variable = 'numInstanceClasses'
@@ -440,7 +440,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     mydict[variable] = str_value
 
     variable = 'solversWithSolution'
-    str_value, solvers_with_solution, unsolved_instances = get_solversWithSolution()
+    str_value, solvers_with_solution, unsolved_instances = get_solvers_with_solution()
     mydict[variable] = str_value
 
     variable = 'figure-parallel-portfolio-sparkle-vs-sbs'
@@ -450,7 +450,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     mydict[variable] = str_value
 
     variable = 'resultsTable'
-    str_value = get_resultsTable(
+    str_value = get_results_table(
         dict_all_solvers, parallel_portfolio_path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
         solvers_with_solution, unsolved_instances, nr_of_instances)
