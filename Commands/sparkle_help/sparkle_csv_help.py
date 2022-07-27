@@ -7,7 +7,7 @@ import numpy as np
 import fcntl
 
 
-class Sparkle_CSV:
+class SparkleCSV:
 
     empty_column_name = r'""'
 
@@ -19,7 +19,7 @@ class Sparkle_CSV:
             return
         fo = open(csv_filepath, 'w+')
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(Sparkle_CSV.empty_column_name)
+        fo.write(SparkleCSV.empty_column_name)
         fo.close()
         return
 

@@ -58,7 +58,7 @@ def print_instance_list(mode: int = 1):
 
 def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: int = 1):
     try:
-        feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
         list_feature_computation_job = (
             feature_data_csv.get_list_remaining_feature_computation_job())
     except Exception:
@@ -90,7 +90,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: in
 def print_list_remaining_performance_computation_job(performance_data_csv_path,
                                                      mode: int = 1):
     try:
-        performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
         list_performance_computation_job = (
             performance_data_csv.get_list_remaining_performance_computation_job())

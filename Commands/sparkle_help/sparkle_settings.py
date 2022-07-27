@@ -17,6 +17,7 @@ class PerformanceMeasure(Enum):
     QUALITY = 1  # If not specified, assume ABSOLUTE QUALITY
     # QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
 
+    @staticmethod
     def from_str(performance_measure):
         if performance_measure == 'RUNTIME':
             performance_measure = PerformanceMeasure.RUNTIME
@@ -31,6 +32,7 @@ class SolutionVerifier(Enum):
     NONE = 0
     SAT = 1
 
+    @staticmethod
     def from_str(verifier):
         if verifier == 'NONE':
             verifier = SolutionVerifier.NONE
@@ -50,6 +52,7 @@ class ProcessMonitoring(str, Enum):
     # all solvers at the same time.
     EXTENDED = 'EXTENDED'
 
+    @staticmethod
     def from_str(process_monitoring):
         return ProcessMonitoring(process_monitoring)
 

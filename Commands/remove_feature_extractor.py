@@ -73,7 +73,7 @@ if __name__ == '__main__':
         sfh.write_extractor_nickname_mapping()
 
     if os.path.exists(sparkle_global_help.feature_data_csv_path):
-        feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
             sparkle_global_help.feature_data_csv_path
         )
         for column_name in feature_data_csv.list_columns():

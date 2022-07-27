@@ -53,8 +53,8 @@ if __name__ == '__main__':
     list_all_filename = sfh.get_list_all_filename(instances_path)
     list_instances = sfh.get_instance_list_from_reference(instances_path)
 
-    feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
     )
 

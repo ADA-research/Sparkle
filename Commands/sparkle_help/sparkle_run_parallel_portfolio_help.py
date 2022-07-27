@@ -221,10 +221,10 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                         == ProcessMonitoring.EXTENDED):
                     # Update the cutofftime of the to be cancelled job, if job if
                     # already past that it automatically stops.
-                    newCutoffTime = find_finished_time_finished_solver(
+                    new_cutoff_time = find_finished_time_finished_solver(
                         solver_instance_list, finished_solver_id)
                     current_seconds = jobtime_to_seconds(remaining_jobs[job][0])
-                    cutoff_seconds = jobtime_to_seconds(newCutoffTime)
+                    cutoff_seconds = jobtime_to_seconds(new_cutoff_time)
                     actual_cutofftime = sgh.settings.get_general_target_cutoff_time()
 
                     if (remaining_jobs[job][1] == 'R'
@@ -311,16 +311,16 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                                     if item not in unfinished_solver_list]
 
             for finished_solver in finished_solver_list:
-                newCutoffTime = find_finished_time_finished_solver(solver_instance_list,
-                                                                   finished_solver)
+                new_cutoff_time = find_finished_time_finished_solver(
+                    solver_instance_list, finished_solver)
 
-                if newCutoffTime != '-1:00':
+                if new_cutoff_time != '-1:00':
                     log_statement = (f'{finished_solver} finished succesfully or '
                                      'has reached the cutoff time')
                     add_log_statement_to_file(logging_file, log_statement,
-                                              str(newCutoffTime))
+                                              str(new_cutoff_time))
                     logging_file2 = logging_file[:logging_file.rfind('.')] + r'2.txt'
-                    log_computation_time(logging_file2, finished_solver, newCutoffTime)
+                    log_computation_time(logging_file2, finished_solver, new_cutoff_time)
 
             done = True
         # No jobs have finished but some jobs are running
@@ -399,7 +399,7 @@ def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: i
     return sbatch_script_path
 
 
-def generate_SBATCH_job_list(solver_list: list[str], instance_path_list: list[str],
+def generate_sbatch_job_list(solver_list: list[str], instance_path_list: list[str],
                              num_jobs: int) -> (list[str], int, list[str], list[str]):
     '''Generates a list of jobs to be executed in the sbatch script.
 
@@ -579,7 +579,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     num_jobs = len(solver_list) * len(instances)
 
     # Makes SBATCH scripts for all individual solvers in a list
-    parameters, num_jobs, solver_instance_list, temp_solvers = generate_SBATCH_job_list(
+    parameters, num_jobs, solver_instance_list, temp_solvers = generate_sbatch_job_list(
         solver_list, instances, num_jobs)
 
     # Generates a SBATCH script which uses the created parameters

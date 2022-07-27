@@ -19,7 +19,7 @@ def underscore_for_latex(string: str) -> str:
     return updated_string
 
 
-def get_customCommands():
+def get_custom_commands():
     str_value = r''
     return str_value
 
@@ -29,7 +29,7 @@ def get_sparkle():
     return str_value
 
 
-def get_numSolvers():
+def get_num_solvers():
     num_solvers = len(sgh.solver_list)
     str_value = str(num_solvers)
 
@@ -40,7 +40,7 @@ def get_numSolvers():
     return str_value
 
 
-def get_solverList():
+def get_solver_list():
     str_value = r''
     solver_list = sgh.solver_list
     for solver_path in solver_list:
@@ -49,7 +49,7 @@ def get_solverList():
     return str_value
 
 
-def get_numFeatureExtractors():
+def get_num_feature_extractors():
     num_feature_extractors = len(sgh.extractor_list)
     str_value = str(num_feature_extractors)
 
@@ -60,7 +60,7 @@ def get_numFeatureExtractors():
     return str_value
 
 
-def get_featureExtractorList():
+def get_feature_extractor_list():
     str_value = r''
     extractor_list = sgh.extractor_list
     for extractor_path in extractor_list:
@@ -69,7 +69,7 @@ def get_featureExtractorList():
     return str_value
 
 
-def get_numInstanceClasses():
+def get_num_instance_classes():
     list_instance_class = []
     instance_list = sgh.instance_list
     for instance_path in instance_list:
@@ -85,7 +85,7 @@ def get_numInstanceClasses():
     return str_value
 
 
-def get_instanceClassList():
+def get_instance_class_list():
     str_value = r''
     list_instance_class = []
     dict_number_of_instances_in_instance_class = {}
@@ -106,17 +106,17 @@ def get_instanceClassList():
     return str_value
 
 
-def get_featureComputationCutoffTime():
+def get_feature_computation_cutoff_time():
     str_value = str(sgh.settings.get_general_extractor_cutoff_time())
     return str_value
 
 
-def get_performanceComputationCutoffTime():
+def get_performance_computation_cutoff_time():
     str_value = str(sgh.settings.get_general_target_cutoff_time())
     return str_value
 
 
-def get_solverPerfectRankingList():
+def get_solver_perfect_ranking_list():
     rank_list = cmc.compute_perfect()
     str_value = r''
 
@@ -129,7 +129,7 @@ def get_solverPerfectRankingList():
     return str_value
 
 
-def get_solverActualRankingList():
+def get_solver_actual_ranking_list():
     rank_list = cmc.compute_actual()
     str_value = r''
 
@@ -142,10 +142,10 @@ def get_solverActualRankingList():
     return str_value
 
 
-def get_PAR10RankingList():
+def get_par10_ranking_list():
     str_value = ''
     performance_data_csv = (
-        spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path))
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
 
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
@@ -158,17 +158,17 @@ def get_PAR10RankingList():
     return str_value
 
 
-def get_VBSPAR10():
+def get_vbs_par10():
     str_value = r''
     performance_data_csv = (
-        spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path))
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     vbs_penalty_time = performance_data_csv.calc_vbs_penalty_time()
 
     str_value = str(vbs_penalty_time)
     return str_value
 
 
-def get_actualPAR10() -> str:
+def get_actual_par10() -> str:
     '''
     Computes the mean performance over the individual performances over a set of
     instances.
@@ -183,7 +183,7 @@ def get_actualPAR10() -> str:
 def get_dict_sbs_penalty_time_on_each_instance():
     mydict = {}
     performance_data_csv = (
-        spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path))
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
 
     solver_penalty_time_ranking_list = (
@@ -201,7 +201,7 @@ def get_dict_sbs_penalty_time_on_each_instance():
 
 def get_dict_vbs_penalty_time_on_each_instance():
     performance_data_csv = (
-        spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path))
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
     return mydict
 
@@ -214,7 +214,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict:
     '''
     mydict = {}
     performance_data_csv = (
-        spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path))
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
 
     for instance in performance_data_csv.list_rows():
@@ -254,7 +254,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
         'figure_portfolio_selector_sparkle_vs_sbs')
 
     performance_data_csv = (
-        spdcsv.Sparkle_Performance_Data_CSV(sgh.performance_data_csv_path))
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
     sbs_solver = solver_penalty_time_ranking_list[0][0]
@@ -315,23 +315,23 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
     return str_value
 
 
-def get_testInstanceClass(test_case_directory: str):
+def get_test_instance_class(test_case_directory: str):
     str_value = sfh.get_last_level_directory_name(test_case_directory)
     str_value = r'\textbf{' + str_value + r'}'
     return str_value
 
 
-def get_numInstanceInTestInstanceClass(test_case_directory: str):
+def get_num_instance_in_test_instance_class(test_case_directory: str):
     str_value = ''
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + 'sparkle_performance_data.csv')
     str_value = str(len(performance_data_csv.list_rows()))
     return str_value
 
 
-def get_testActualPAR10(test_case_directory: str):
+def get_test_actual_par10(test_case_directory: str):
     str_value = ''
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + 'sparkle_performance_data.csv')
     solver = performance_data_csv.list_columns()[0]
 
@@ -357,7 +357,7 @@ def get_dict_variable_to_value(test_case_directory: str = None):
     mydict = {}
 
     variable = 'customCommands'
-    str_value = get_customCommands()
+    str_value = get_custom_commands()
     mydict[variable] = str_value
 
     variable = 'sparkle'
@@ -365,55 +365,55 @@ def get_dict_variable_to_value(test_case_directory: str = None):
     mydict[variable] = str_value
 
     variable = 'numSolvers'
-    str_value = get_numSolvers()
+    str_value = get_num_solvers()
     mydict[variable] = str_value
 
     variable = 'solverList'
-    str_value = get_solverList()
+    str_value = get_solver_list()
     mydict[variable] = str_value
 
     variable = 'numFeatureExtractors'
-    str_value = get_numFeatureExtractors()
+    str_value = get_num_feature_extractors()
     mydict[variable] = str_value
 
     variable = r'featureExtractorList'
-    str_value = get_featureExtractorList()
+    str_value = get_feature_extractor_list()
     mydict[variable] = str_value
 
     variable = r'numInstanceClasses'
-    str_value = get_numInstanceClasses()
+    str_value = get_num_instance_classes()
     mydict[variable] = str_value
 
     variable = r'instanceClassList'
-    str_value = get_instanceClassList()
+    str_value = get_instance_class_list()
     mydict[variable] = str_value
 
     variable = r'featureComputationCutoffTime'
-    str_value = get_featureComputationCutoffTime()
+    str_value = get_feature_computation_cutoff_time()
     mydict[variable] = str_value
 
     variable = r'performanceComputationCutoffTime'
-    str_value = get_performanceComputationCutoffTime()
+    str_value = get_performance_computation_cutoff_time()
     mydict[variable] = str_value
 
     variable = r'solverPerfectRankingList'
-    str_value = get_solverPerfectRankingList()
+    str_value = get_solver_perfect_ranking_list()
     mydict[variable] = str_value
 
     variable = r'solverActualRankingList'
-    str_value = get_solverActualRankingList()
+    str_value = get_solver_actual_ranking_list()
     mydict[variable] = str_value
 
     variable = r'PAR10RankingList'
-    str_value = get_PAR10RankingList()
+    str_value = get_par10_ranking_list()
     mydict[variable] = str_value
 
     variable = r'VBSPAR10'
-    str_value = get_VBSPAR10()
+    str_value = get_vbs_par10()
     mydict[variable] = str_value
 
     variable = r'actualPAR10'
-    str_value = get_actualPAR10()
+    str_value = get_actual_par10()
     mydict[variable] = str_value
 
     variable = r'figure-portfolio-selector-sparkle-vs-sbs'
@@ -431,15 +431,15 @@ def get_dict_variable_to_value(test_case_directory: str = None):
     # Train and test
     if test_case_directory is not None:
         variable = r'testInstanceClass'
-        str_value = get_testInstanceClass(test_case_directory)
+        str_value = get_test_instance_class(test_case_directory)
         mydict[variable] = str_value
 
         variable = r'numInstanceInTestInstanceClass'
-        str_value = get_numInstanceInTestInstanceClass(test_case_directory)
+        str_value = get_num_instance_in_test_instance_class(test_case_directory)
         mydict[variable] = str_value
 
         variable = 'testActualPAR10'
-        str_value = get_testActualPAR10(test_case_directory)
+        str_value = get_test_actual_par10(test_case_directory)
         mydict[variable] = str_value
 
         variable = r'testBool'

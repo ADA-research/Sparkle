@@ -15,7 +15,7 @@ from sparkle_help.sparkle_generate_report_help import generate_comparison_plot
 from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
 
-def get_numInstanceInInstanceSet_smacDir(instance_set_name: str) -> str:
+def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
     str_value = ''
 
     # For multi-file instances count based on the reference list
@@ -31,7 +31,7 @@ def get_numInstanceInInstanceSet_smacDir(instance_set_name: str) -> str:
     return str_value
 
 
-def get_PAR10_performance(results_file, cutoff):
+def get_par10_performance(results_file, cutoff):
     list_instance_and_par10 = construct_list_instance_and_performance(results_file,
                                                                       cutoff)
     sum_par10 = 0.0
@@ -46,8 +46,8 @@ def get_PAR10_performance(results_file, cutoff):
     return mean_par10
 
 
-def get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_name,
-                                                      smac_each_run_cutoff_time):
+def get_optimised_configuration_testing_performance_par10(solver_name, instance_set_name,
+                                                          smac_each_run_cutoff_time):
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     configured_results_dir = (
@@ -61,8 +61,8 @@ def get_optimisedConfigurationTestingPerformancePAR10(solver_name, instance_set_
     return str_value
 
 
-def get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_name,
-                                                    smac_each_run_cutoff_time):
+def get_default_configuration_testing_performance_par10(solver_name, instance_set_name,
+                                                        smac_each_run_cutoff_time):
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     default_results_dir = (f'{smac_solver_dir}results/{sgh.sparkle_run_default_wrapper}_'
@@ -75,8 +75,9 @@ def get_defaultConfigurationTestingPerformancePAR10(solver_name, instance_set_na
     return str_value
 
 
-def get_optimisedConfigurationTrainingPerformancePAR10(solver_name, instance_set_name,
-                                                       smac_each_run_cutoff_time):
+def get_optimised_configuration_training_performance_par10(solver_name,
+                                                           instance_set_name,
+                                                           smac_each_run_cutoff_time):
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     configured_results_dir = (
@@ -90,8 +91,8 @@ def get_optimisedConfigurationTrainingPerformancePAR10(solver_name, instance_set
     return str_value
 
 
-def get_defaultConfigurationTrainingPerformancePAR10(solver_name, instance_set_name,
-                                                     smac_each_run_cutoff_time):
+def get_default_configuration_training_performance_par10(solver_name, instance_set_name,
+                                                         smac_each_run_cutoff_time):
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     default_results_dir = (f'{smac_solver_dir}results_train/'
@@ -231,7 +232,7 @@ def get_performance_measure():
     return performance_measure
 
 
-def get_runtimeBool():
+def get_runtime_bool():
     runtime_bool = ''
 
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
@@ -244,7 +245,7 @@ def get_runtimeBool():
     return runtime_bool
 
 
-def get_ablationBool(solver_name, instance_train_name, instance_test_name):
+def get_ablation_bool(solver_name, instance_train_name, instance_test_name):
     ablation_bool = ''
 
     if sah.check_for_ablation(solver_name, instance_train_name, instance_test_name):
@@ -255,7 +256,7 @@ def get_ablationBool(solver_name, instance_train_name, instance_test_name):
     return ablation_bool
 
 
-def get_featuresBool(solver_name: str, instance_set_train_name: str) -> str:
+def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
     '''
     Returns a bool string for latex indicating whether features were used.
 
@@ -559,15 +560,15 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name,
 
     if full_dict['featuresBool'] == r'\featurestrue':
         variable = 'numFeatureExtractors'
-        str_value = sgrh.get_numFeatureExtractors()
+        str_value = sgrh.get_num_feature_extractors()
         full_dict[variable] = str_value
 
         variable = 'featureExtractorList'
-        str_value = sgrh.get_featureExtractorList()
+        str_value = sgrh.get_feature_extractor_list()
         full_dict[variable] = str_value
 
         variable = 'featureComputationCutoffTime'
-        str_value = sgrh.get_featureComputationCutoffTime()
+        str_value = sgrh.get_feature_computation_cutoff_time()
         full_dict[variable] = str_value
 
     return full_dict
@@ -584,11 +585,11 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     common_dict[variable] = str_value
 
     variable = 'runtimeBool'
-    str_value = get_runtimeBool()
+    str_value = get_runtime_bool()
     common_dict[variable] = str_value
 
     variable = 'customCommands'
-    str_value = sgrh.get_customCommands()
+    str_value = sgrh.get_custom_commands()
     common_dict[variable] = str_value
 
     variable = 'sparkle'
@@ -608,7 +609,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     common_dict[variable] = str_value
 
     variable = 'numInstanceInTrainingInstanceSet'
-    str_value = get_numInstanceInInstanceSet_smacDir(instance_set_train_name)
+    str_value = get_num_instance_in_instance_set_smac_dir(instance_set_train_name)
     common_dict[variable] = str_value
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
@@ -646,7 +647,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     configured_results_train_dir = (f'{smac_solver_dir}outdir_train_configuration/'
                                     f'{solver_name}_{instance_set_train_name}_scenario/'
                                     f'{configured_results_train_file}')
-    str_value = get_PAR10_performance(configured_results_train_dir,
+    str_value = get_par10_performance(configured_results_train_dir,
                                       smac_each_run_cutoff_time)
     common_dict[variable] = str(str_value)
 
@@ -654,7 +655,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     default_results_train_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
     default_results_train_dir = (
         smac_solver_dir + 'outdir_train_default/' + default_results_train_file)
-    str_value = get_PAR10_performance(default_results_train_dir,
+    str_value = get_par10_performance(default_results_train_dir,
                                       smac_each_run_cutoff_time)
     common_dict[variable] = str(str_value)
 
@@ -682,15 +683,15 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     ablation_validation_name = (instance_set_test_name
                                 if instance_set_test_name is not None
                                 else instance_set_train_name)
-    common_dict[variable] = get_ablationBool(solver_name, instance_set_train_name,
-                                             ablation_validation_name)
+    common_dict[variable] = get_ablation_bool(solver_name, instance_set_train_name,
+                                              ablation_validation_name)
 
     variable = 'ablationPath'
     common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,
                                                ablation_validation_name)
 
     variable = 'featuresBool'
-    common_dict[variable] = get_featuresBool(solver_name, instance_set_train_name)
+    common_dict[variable] = get_features_bool(solver_name, instance_set_train_name)
 
     return common_dict
 
@@ -705,7 +706,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
     test_dict[variable] = str_value
 
     variable = 'numInstanceInTestingInstanceSet'
-    str_value = get_numInstanceInInstanceSet_smacDir(instance_set_test_name)
+    str_value = get_num_instance_in_instance_set_smac_dir(instance_set_test_name)
     test_dict[variable] = str_value
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
@@ -720,7 +721,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
         'validationObjectiveMatrix-configuration_for_validation-walltime.csv')
     configured_results_test_dir = (f'{smac_solver_dir}outdir_{instance_set_test_name}'
                                    f'_test_configured/{configured_results_test_file}')
-    str_value = get_PAR10_performance(configured_results_test_dir,
+    str_value = get_par10_performance(configured_results_test_dir,
                                       smac_each_run_cutoff_time)
     test_dict[variable] = str(str_value)
 
@@ -728,7 +729,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
     default_results_test_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
     default_results_test_dir = (f'{smac_solver_dir}outdir_{instance_set_test_name}'
                                 f'_test_default/{default_results_test_file}')
-    str_value = get_PAR10_performance(default_results_test_dir,
+    str_value = get_par10_performance(default_results_test_dir,
                                       smac_each_run_cutoff_time)
     test_dict[variable] = str(str_value)
 
@@ -753,8 +754,8 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
     test_dict[variable] = str(overlapping_timeouts_test)
 
     variable = 'ablationBool'
-    test_dict[variable] = get_ablationBool(solver_name, instance_set_train_name,
-                                           instance_set_test_name)
+    test_dict[variable] = get_ablation_bool(solver_name, instance_set_train_name,
+                                            instance_set_test_name)
 
     variable = 'ablationPath'
     test_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,

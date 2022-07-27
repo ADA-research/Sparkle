@@ -64,7 +64,7 @@ sparkle_last_configuration_file_name = 'last_configuration.txt'
 sparkle_report_path = 'Components/Sparkle-latex-generator/Sparkle_Report.pdf'
 
 runsolver_path = 'Components/runsolver/src/runsolver'
-SAT_verifier_path = 'Components/Sparkle-SAT-verifier/SAT'
+sat_verifier_path = 'Components/Sparkle-SAT-verifier/SAT'
 autofolio_path = 'Components/AutoFolio-master/scripts/autofolio'
 
 smac_dir = 'Components/smac-v2.10.03-master-778/'

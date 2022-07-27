@@ -96,8 +96,8 @@ if __name__ == '__main__':
         sih._copy_instance_list_to_reference(Path(instances_source))
         list_instance = sih._get_list_instance(instances_source)
 
-        feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
-        performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sgh.performance_data_csv_path)
 
         num_inst = len(list_instance)
@@ -132,8 +132,8 @@ if __name__ == '__main__':
         list_source_all_directory = sfh.get_list_all_directory(instances_source)
         list_target_all_filename = sfh.get_list_all_filename(instances_directory)
 
-        feature_data_csv = sfdcsv.Sparkle_Feature_Data_CSV(sgh.feature_data_csv_path)
-        performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sgh.performance_data_csv_path)
 
         num_inst = len(list_source_all_filename)

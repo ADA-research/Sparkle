@@ -226,7 +226,7 @@ def run_solver_on_instance_and_process_results(
 def running_solvers(performance_data_csv_path, mode):
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     performance_measure = sgh.settings.get_general_performance_measure()
-    performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     if mode == 1:
         list_performance_computation_job = (
             performance_data_csv.get_list_remaining_performance_computation_job())
@@ -588,13 +588,13 @@ def sat_get_verify_string(tmp_verify_result_path):
 
 
 def sat_judge_correctness_raw_result(instance_path, raw_result_path):
-    SAT_verifier_path = sgh.SAT_verifier_path
+    sat_verifier_path = sgh.sat_verifier_path
     tmp_verify_result_path = (
-        f'Tmp/{sfh.get_last_level_directory_name(SAT_verifier_path)}_'
+        f'Tmp/{sfh.get_last_level_directory_name(sat_verifier_path)}_'
         f'{sfh.get_last_level_directory_name(raw_result_path)}_'
         f'{sbh.get_time_pid_random_string()}.vryres')
     # TODO: Log output file
-    command_line = (f'{SAT_verifier_path} {instance_path} {raw_result_path} > '
+    command_line = (f'{sat_verifier_path} {instance_path} {raw_result_path} > '
                     f'{tmp_verify_result_path}')
     print('Run SAT verifier')
     os.system(command_line)

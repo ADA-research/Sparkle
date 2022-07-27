@@ -75,7 +75,7 @@ def run_solvers_parallel(flag_recompute, flag_also_construct_selector_and_report
     num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
 
     if flag_recompute:
-        performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sgh.performance_data_csv_path
         )
         performance_data_csv.clean_csv()
@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
     if not flag_parallel:
         if flag_recompute:
-            performance_data_csv = spdcsv.Sparkle_Performance_Data_CSV(
+            performance_data_csv = spdcsv.SparklePerformanceDataCSV(
                 sgh.performance_data_csv_path
             )
             performance_data_csv.clean_csv()
