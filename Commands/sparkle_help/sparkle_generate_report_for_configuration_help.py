@@ -11,6 +11,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_generate_report_help as sgrh
 from sparkle_help import sparkle_run_ablation_help as sah
+from sparkle_help import sparkle_tex_help as stex
 from sparkle_help.sparkle_generate_report_help import generate_comparison_plot
 from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
@@ -947,22 +948,15 @@ def generate_report_for_configuration_common(configuration_reports_directory,
     fout.close()
 
     # Compile the report
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> /dev/null 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    if stex.check_tex_commands_exist() is False:
+        print('Error: It seems like latex is not available on your system.\n'
+        f'You can find all source files in {latex_directory_path}\n'
+        'Copy these on your local machine to generate the report.')
+        return
 
-    compile_command = (f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux '
-                       '1> /dev/null 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> /dev/null 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
-
-    print(f'Report is placed at: {latex_directory_path}{latex_report_filename}.pdf')
+    print(f'Report is placed at: {report_path}')
     print('Generating report for configuration done!')
 
     return

@@ -10,6 +10,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_tex_help as stex
 import compute_marginal_contribution as cmc
 
 
@@ -491,22 +492,15 @@ def generate_report(test_case_directory: str = None):
     fout.write(report_content)
     fout.close()
 
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> /dev/null 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    if stex.check_tex_commands_exist() is False:
+        print('Error: It seems like latex is not available on your system.\n'
+        f'You can find all source files in {latex_directory_path}\n'
+        'Copy these on your local machine to generate the report.')
+        return
 
-    compile_command = f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux'
-    os.system(compile_command)
-    os.system(compile_command)
+    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> /dev/null 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
-
-    report_path = latex_directory_path + latex_report_filename + r'.pdf'
-    print(r'Report is placed at: ' + report_path)
+    print(f'Report is placed at: {report_path}')
     sl.add_output(report_path, 'Sparkle portfolio selector report')
 
     return
