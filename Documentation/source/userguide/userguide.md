@@ -73,9 +73,14 @@ $ conda activate sparkle
 
 This should be fast as both `conda` and `pip` use local cache for the packages.
 
-(quick-config-environment)=
+### Configure Sparkle/Slurm
+
+Before running Sparkle, you probably want to have a look at the settings described in {numref}`settings`.
+In particular, slurm settings have to be adapted to the specific cluster Sparkle is running on, if it is not the default (Grace at University Leiden).
 
 ## Algorithm Configuration
+
+(quick-config-environment)=
 
 Configuring an algorithm has the following minimal requirements for the
 algorithm (for an example of a solver directory see {numref}`dir-solvers`):
@@ -449,6 +454,8 @@ brackets} indicate a set of inputs to choose from.
 % *  ``-–instance-set-train <instance-set-train>``
 % *  ``[-–instance-set-test <instance-set-test>]``
 
+(settings)=
+
 ## Sparkle settings
 
 Most settings can be controlled through
@@ -601,6 +608,9 @@ are inserted *as is* in any `srun` or `sbatch` calls done by
 Sparkle. This means that any options exclusive to one or the other
 currently should not be used (see
 {numref}`slurm-disallowed`).
+
+To overwrite the default settings specific to the cluster Grace in Leiden, you should set the option "--partition" with a valid value on your cluster.
+Also, you might have to adapt "--mem-per-cpu" to your system.
 
 #### Tested options
 
