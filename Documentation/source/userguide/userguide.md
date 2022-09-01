@@ -78,9 +78,9 @@ This should be fast as both `conda` and `pip` use local cache for the packages.
 Before running Sparkle, you probably want to have a look at the settings described in {numref}`settings`.
 In particular, slurm settings have to be adapted to the specific cluster Sparkle is running on, if it is not the default (Grace at University Leiden).
 
-## Algorithm Configuration
-
 (quick-config-environment)=
+
+## Algorithm Configuration
 
 Configuring an algorithm has the following minimal requirements for the
 algorithm (for an example of a solver directory see {numref}`dir-solvers`):
