@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import os
+import sys
 import time
 import random
 import fcntl
@@ -458,3 +459,11 @@ def rmfile(file_name: Path):
     file_name.unlink(missing_ok=True)
 
     return
+
+
+def check_file_executable(file_name: Path):
+    if not os.access(file_name, os.X_OK):
+        print()
+        sys.exit()
+    
+    return       
