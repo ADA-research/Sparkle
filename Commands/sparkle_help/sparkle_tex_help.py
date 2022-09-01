@@ -21,6 +21,6 @@ def compile_pdf(latex_directory_path, latex_report_filename):
     os.system(pdflatex_command)
     os.system(pdflatex_command)
 
-    report_path = latex_directory_path + latex_report_filename + r'.pdf'
+    report_path = f'{latex_directory_path}{latex_report_filename}.pdf'
 
     return report_path
