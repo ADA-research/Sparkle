@@ -503,11 +503,11 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
                                 / 'Log/latex.txt')
     sfh.create_new_empty_file(file_path_output)
     file_path_output = Path('../../' / file_path_output)
-    
+
     if stex.check_tex_commands_exist() is False:
         print('Error: It seems like latex is not available on your system.\n'
-        f'You can find all source files in {latex_directory_path}\n'
-        'Copy these on your local machine to generate the report.')
+              f'You can find all source files in {latex_directory_path}\n'
+              'Copy these on your local machine to generate the report.')
         return
 
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
