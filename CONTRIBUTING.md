@@ -8,6 +8,15 @@ The development is done on the `development` branch.
 To make changes to Sparkle, please create a branch from `development`, give it a descriptive name and add your code there.
 When ready, create a pull request towards the `development` branch.
 
+## Release protocol
+When releasing a new version of Sparkle to the main branch, the protocol below should be followed:
+ 1. Make sure the code style rules pass by running `flake8` (make sure the `sparkle` conda environment is installed and active). If not everything passes, fix it and then start again from point 1. of the release protocol.
+ 2. Make sure the integration tests pass by running `Commands/test/all.sh` (make sure the `sparkle` conda environment is installed and active). If not everything passes, fix it and then start again from point 1. of the release protocol.
+ 3. Make sure the examples in `Examples/` execute correctly (all `.sh` files). If not everything passes, fix it and then start again from point 1. of the release protocol.
+ 4. Create a branch with the version number of the release from the development branch
+ 5. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
+ 6. Merge the new version branch into both development and main, DO NOT delete the version branch!
+
 ## CHANGELOG
 
 The file `CHANGELOG.md` aims to track changes between versions. 
