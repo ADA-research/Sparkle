@@ -50,7 +50,7 @@ def print_output(terminal_output_file: str):
         words = line.strip().split()
         if len(words) <= 0:
             continue
-        if(len(words) >= 4 and words[1] == 'c' and words[2] == 'Arguments'
+        if (len(words) >= 4 and words[1] == 'c' and words[2] == 'Arguments'
            and words[3] == 'Error!'):
             status = 'CRASHED'  # Update status based on output
             break
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     cutoff_time_str = args.cutoff_time
 
     # Call function based on arguments
-    if(instance_file is not None):
+    if (instance_file is not None):
         print_command(instance_file, seed_str, cutoff_time_str)
-    elif(terminal_output_file is not None):
+    elif (terminal_output_file is not None):
         print_output(terminal_output_file)

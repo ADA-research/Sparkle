@@ -37,7 +37,7 @@ class SparkleCSV:
 
     def is_empty(self):
         ret = False
-        if(self.dataframe.empty and self.get_column_size() == 0
+        if (self.dataframe.empty and self.get_column_size() == 0
            and self.get_row_size() == 0):
             ret = True
         return ret

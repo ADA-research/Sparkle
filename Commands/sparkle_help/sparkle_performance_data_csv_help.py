@@ -156,7 +156,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             vbs_count += 1
             for solver in self.list_columns():
                 this_run_time = self.get_value(instance, solver)
-                if(vbs_penalty_time_on_this_instance < 0
+                if (vbs_penalty_time_on_this_instance < 0
                    or vbs_penalty_time_on_this_instance > this_run_time):
                     vbs_penalty_time_on_this_instance = this_run_time
             if vbs_penalty_time_on_this_instance > cutoff_time:

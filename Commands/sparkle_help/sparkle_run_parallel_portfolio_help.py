@@ -358,7 +358,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                         add_log_statement_to_file(logging_file, command_line, jobtime)
                         pending_job_with_new_cutoff.pop(jobid)
 
-                if(jobid.startswith(job_id)):
+                if (jobid.startswith(job_id)):
                     # add the job to the current solver list
                     current_solver_list.append(jobid[jobid.find('_')+1:])
 
@@ -597,7 +597,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
         job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
                                           execution_dir)
 
-        if(sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME):
+        if (sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs/len(instances))

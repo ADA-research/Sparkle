@@ -21,7 +21,7 @@ class PerformanceMeasure(Enum):
     def from_str(performance_measure):
         if performance_measure == 'RUNTIME':
             performance_measure = PerformanceMeasure.RUNTIME
-        elif(performance_measure == 'QUALITY_ABSOLUTE'
+        elif (performance_measure == 'QUALITY_ABSOLUTE'
              or performance_measure == 'QUALITY'):
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
 
@@ -304,7 +304,7 @@ class Settings:
             change_setting_ok = False
             print(f'Warning: Attempting to overwrite setting for {name} with default '
                   'value; keeping the value read from file!')
-        elif(current_state == SettingState.CMD_LINE
+        elif (current_state == SettingState.CMD_LINE
              and new_state == SettingState.DEFAULT):
             change_setting_ok = False
             print(f'Warning: Attempting to overwrite setting for {name} with default '

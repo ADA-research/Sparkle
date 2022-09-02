@@ -100,7 +100,7 @@ def get_solver_deterministic(solver_name):
         myline = myline.strip()
         mylist = myline.split()
 
-        if(mylist[0] == target_solver_path):
+        if (mylist[0] == target_solver_path):
             deterministic = mylist[1]
             break
 
@@ -640,7 +640,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                 # Skip 14 words leading up to the performance value
                 this_configuration_performance = float(mylist[14][:-1])
 
-                if(optimised_configuration_performance < 0
+                if (optimised_configuration_performance < 0
                    or this_configuration_performance
                    < optimised_configuration_performance):
                     optimised_configuration_performance = this_configuration_performance

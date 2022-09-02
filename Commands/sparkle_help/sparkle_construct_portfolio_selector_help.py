@@ -105,7 +105,7 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
 
     # If the selector exists and the data didn't change, do nothing; unless the recompute
     # flag is set
-    if(selector_exists(selector_path) and data_unchanged(selector_path)
+    if (selector_exists(selector_path) and data_unchanged(selector_path)
        and not flag_recompute):
         print('Portfolio selector already exists for the current feature and performance'
               ' data.')

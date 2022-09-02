@@ -482,7 +482,7 @@ def generate_report(test_case_directory: str = None):
 
     for variable_key, str_value in dict_variable_to_value.items():
         variable = r'@@' + variable_key + r'@@'
-        if(variable_key != r'figure-portfolio-selector-sparkle-vs-sbs'
+        if (variable_key != r'figure-portfolio-selector-sparkle-vs-sbs'
            and variable_key != r'figure-portfolio-selector-sparkle-vs-vbs'):
             str_value = str_value.replace(r'_', r'\textunderscore ')
         report_content = report_content.replace(variable, str_value)
