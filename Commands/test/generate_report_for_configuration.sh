@@ -15,7 +15,8 @@
 slurm_settings_path="Settings/sparkle_slurm_settings.txt"
 slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
 slurm_settings_test="Commands/test/test_files/sparkle_slurm_settings.txt"
-mv $slurm_settings_path $slurm_settings_tmp # Save user settings
+# Save user settings if any
+mv $slurm_settings_path $slurm_settings_tmp 2> /dev/null
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
@@ -48,7 +49,7 @@ cp -r $configuration_results_path $smac_path
 mkdir -p $smac_validation_results_path # Make sure directory exists
 cp -r $validation_results_path $smac_validation_results_path
 # Copy scenario to simulate configuration
-mv $scenario_path $scenario_tmp
+mv $scenario_path $scenario_tmp 2> /dev/null
 cp $scenario_test $scenario_path
 
 # Test generate report for configuration with both train and test sets
@@ -74,7 +75,7 @@ else
 	echo $output
 fi
 
-# Restore original settings
-mv $slurm_settings_tmp $slurm_settings_path
-# Restore original scenario
-mv $scenario_tmp $scenario_path
+# Restore original data if any
+mv $slurm_settings_tmp $slurm_settings_path 2> /dev/null
+# OR true to get success exit code even when no user data was stored in the tmp file
+mv $scenario_tmp $scenario_path 2> /dev/null || true
