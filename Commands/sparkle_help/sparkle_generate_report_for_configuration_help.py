@@ -824,7 +824,7 @@ def check_results_exist(solver_name, instance_set_train_name,
         print('Error: Results not found for the given solver and instance set(s) '
               'combination. Make sure the "configure_solver" and '
               '"validate_configured_vs_default" commands were correctly executed. '
-              f'Detected errors:{err_str}')
+              f'\nDetected errors:\n{err_str}')
         sys.exit()
 
     return
