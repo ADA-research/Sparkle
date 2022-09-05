@@ -9,16 +9,20 @@ To make changes to Sparkle, please create a branch from `development`, give it a
 When ready, create a pull request towards the `development` branch.
 
 ## Release protocol
-When releasing a new version of Sparkle to the main branch, the protocol below should be followed:
+When releasing a new version of Sparkle to the main branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
+### Checks
 1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml`
-2. Make sure the code style rules pass by running `flake8` (make sure the `sparkle` conda environment is installed and active). If not everything passes, fix it and then start again from point 1. of the release protocol.
-3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active). If not everything passes, fix it and then start again from point 1. of the release protocol.
-4. Make sure the integration tests pass by running `Commands/test/all.sh` (make sure the `sparkle` conda environment is installed and active). If not everything passes, fix it and then start again from point 1. of the release protocol.
-5. Make sure the examples in `Examples/` execute correctly (all `.sh` files). If not everything passes, fix it and then start again from point 1. of the release protocol.
-6. Create a branch with the version number of the release from the development branch
-7. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
-8. Merge the new version branch into both development and main, DO NOT delete the version branch!
+2. Make sure the code style rules pass by running `flake8` (make sure the `sparkle` conda environment is installed and active).
+3. Make sure the unit tests pass by running `pytest` (make sure the `sparkle` conda environment is installed and active).
+4. Make sure the integration tests pass by running `Commands/test/all.sh` (make sure the `sparkle` conda environment is installed and active).
+5. Make sure the examples in `Examples/` execute correctly (all `.sh` files).
+6. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
+
+### Release
+1. Create a branch with the version number of the release from the development branch
+2. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
+3. Merge the new version branch into both development and main, DO NOT delete the version branch!
 
 ## CHANGELOG
 
