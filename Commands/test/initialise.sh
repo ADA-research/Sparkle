@@ -12,7 +12,7 @@
 #SBATCH --nodes=1
 
 # Initialise
-output_true="c New Sparkle platform initialised!"
+output_true="New Sparkle platform initialised!"
 output=$(Commands/initialise.py | tail -1)
 
 if [[ $output == $output_true ]];

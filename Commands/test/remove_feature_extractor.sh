@@ -17,11 +17,11 @@ Commands/initialise.py > /dev/null
 # Add feature extractor
 extractor_name="SAT-features-competition2012_revised_without_SatELite_sparkle"
 extractor_source="Examples/Resources/Extractors/$extractor_name"
-Commands/add_feature_extractor.py --run-extractor-later $extractor_source > /dev/null
+Commands/add_feature_extractor.py $extractor_source > /dev/null
 
 # Remove feature extractor
 extractor_path="Extractors/$extractor_name"
-output_true="c Removing feature extractor $extractor_name done!"
+output_true="Removing feature extractor $extractor_name done!"
 output=$(Commands/remove_feature_extractor.py $extractor_path | tail -1)
 
 if [[ $output == $output_true ]];

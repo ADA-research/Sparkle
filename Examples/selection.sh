@@ -10,7 +10,7 @@ Commands/initialise.py
 
 # Add instance files (in this case in CNF format) in a given directory, without running solvers or feature extractors yet
 
-Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/Instances/PTN/
+Commands/add_instances.py Examples/Resources/Instances/PTN/
 
 #### Add solvers
 
@@ -18,17 +18,17 @@ Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Reso
 
 # Each solver directory should contain the solver executable and a wrapper
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/CSCCSat/
+Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/CSCCSat/
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
+Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/Solvers/MiniSAT/
+Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/MiniSAT/
 
 #### Add feature extractor
 
 # Similarly, add a feature extractor, without immediately running it on the instances
 
-Commands/add_feature_extractor.py --run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+Commands/add_feature_extractor.py Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
 
 #### Compute features
 

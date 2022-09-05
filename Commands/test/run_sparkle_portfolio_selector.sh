@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/run_sparkle_portfolio_selector.sh
-#SBATCH --output=TMP/run_sparkle_portfolio_selector.sh.txt
-#SBATCH --error=TMP/run_sparkle_portfolio_selector.sh.err
+#SBATCH --output=Tmp/run_sparkle_portfolio_selector.sh.txt
+#SBATCH --error=Tmp/run_sparkle_portfolio_selector.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -31,16 +31,16 @@ solverB_path="Examples/Resources/Solvers/MiniSAT/"
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
-Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
+Commands/add_instances.py $instances_path > /dev/null
+Commands/add_feature_extractor.py $extractor_path > /dev/null
+Commands/add_solver.py --deterministic 0 $solverA_path > /dev/null
+Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $selector_test $selector_path
 
 # Run portfolio selector on a single instance
-output_true="c Running Sparkle portfolio selector done!"
+output_true="Running Sparkle portfolio selector done!"
 output=$(Commands/run_sparkle_portfolio_selector.py $instance_path_test --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
@@ -52,7 +52,7 @@ else
 fi
 
 # Run portfolio selector on an instance directory
-output_true="c Sparkle portfolio selector is running ..."
+output_true="Sparkle portfolio selector is running ..."
 output=$(Commands/run_sparkle_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];

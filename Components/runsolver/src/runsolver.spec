@@ -1,6 +1,6 @@
 Name:		runsolver
 Summary:	run a solver and tightly control the ressources it uses
-Version:	3.3.4
+Version:	3.4.0
 Release:	1
 License:	GPLv3
 Group: 		Applications/System

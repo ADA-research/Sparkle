@@ -7,6 +7,7 @@ dependencies:
   - python=3.9
   - swig=3.0
   - gnuplot
+  - latexmk
   - pip
   - pip:
     # For Sparkle
@@ -15,6 +16,8 @@ dependencies:
     # Testing
     - pytest
     - flake8
+    - flake8-quotes
+    - pep8-naming
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost

@@ -7,18 +7,23 @@ from sparkle_help import sparkle_system_status_help
 from sparkle_help import sparkle_logging as sl
 
 
-if __name__ == r"__main__":
+def parser_function():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='store_true',
+        help='output system status in verbose mode',
+    )
+    return parser
+
+
+if __name__ == '__main__':
     # Log command call
     sl.log_command(sys.argv)
 
     # Define command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="output system status in verbose mode",
-    )
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()
@@ -29,7 +34,7 @@ if __name__ == r"__main__":
     else:
         mode = 1
 
-    print(r"c Reporting current system status of Sparkle ...")
+    print('Reporting current system status of Sparkle ...')
     sparkle_system_status_help.print_solver_list(mode)
     sparkle_system_status_help.print_extractor_list(mode)
     sparkle_system_status_help.print_instance_list(mode)
@@ -41,4 +46,4 @@ if __name__ == r"__main__":
     )
     sparkle_system_status_help.print_portfolio_selector_info()
     sparkle_system_status_help.print_report_info()
-    print(r"c Current system status of Sparkle reported!")
+    print('Current system status of Sparkle reported!')

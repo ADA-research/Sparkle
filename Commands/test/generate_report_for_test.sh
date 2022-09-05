@@ -3,8 +3,8 @@
 # Execute this script from the Sparkle directory
 
 #SBATCH --job-name=test/generate_report_for_test.sh
-#SBATCH --output=TMP/generate_report_for_test.sh.txt
-#SBATCH --error=TMP/generate_report_for_test.sh.err
+#SBATCH --output=Tmp/generate_report_for_test.sh.txt
+#SBATCH --error=Tmp/generate_report_for_test.sh.err
 #SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
@@ -47,10 +47,10 @@ solverB_path="Examples/Resources/Solvers/MiniSAT/"
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
 Commands/initialise.py > /dev/null
-Commands/add_instances.py --run-solver-later --run-extractor-later $instances_path > /dev/null
-Commands/add_feature_extractor.py --run-extractor-later $extractor_path > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solverA_path > /dev/null
-Commands/add_solver.py --run-solver-later --deterministic 0 $solverB_path > /dev/null
+Commands/add_instances.py $instances_path > /dev/null
+Commands/add_feature_extractor.py $extractor_path > /dev/null
+Commands/add_solver.py --deterministic 0 $solverA_path > /dev/null
+Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers, construct_sparkle_portfolio_selector and run_sparkle_portfolio_selector commands
 cp $feature_data_test $feature_data_path
@@ -59,7 +59,7 @@ cp $selector_test $selector_path
 cp -r $test_results_test ./
 
 # Run generate report for tetst
-output_true="c Report for test generated ..."
+output_true="Report for test generated ..."
 output=$(Commands/generate_report.py --test-case-directory $test_results_dir | tail -1)
 # --settings-file $sparkle_test_settings_path
 

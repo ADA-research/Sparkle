@@ -25,3 +25,7 @@
 @@performanceMeasure@@
 @@ablationBool@@
 @@ablationPath@@
+@@featuresBool@@
+@@featureExtractorList@@
+@@numFeatureExtractors@@
+@@featureComputationCutoffTime@@

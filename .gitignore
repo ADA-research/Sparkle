@@ -1,4 +1,5 @@
 *.pyc
+*.egg-info
 Components/smac-v2.10.03-master-778/*sbatch.sh
 Reference_Lists/*
 Solvers/*
@@ -11,6 +12,7 @@ LOG/*
 TMP/*
 Feature_Data/*
 Sparkle_Portfolio_Selector/*
+Sparkle_Parallel_Portfolio/*
 Tmp/*
 Log/*
 Output/*
@@ -33,13 +35,25 @@ Components/ablationAnalysis-0.9.4/scenarios
 *.out
 *.blg
 *.eps
+*.bbl
 Components/Sparkle-latex-generator/Sparkle_Report.pdf
 Components/Sparkle-latex-generator/Sparkle_Report.tex
 Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_sbs_filename.dat
 Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_vbs_filename.dat
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.dat
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.dat
 Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
 Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
 Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
+
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.pdf
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.bbl
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.tex
+Components/Sparkle-latex-generator-for-parallel-portfolio/data_parallel_portfolio_sparkle_vs_sbs_filename.dat
+Components/Sparkle-latex-generator-for-parallel-portfolio/data_parallel_portfolio_sparkle_vs_sbs.dat
+Components/Sparkle-latex-generator-for-parallel-portfolio/figure_parallel_portfolio_sparkle_vs_sbs.pdf
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report_for_Test.*
+Components/Sparkle-latex-generator-for-parallel-portfolio/*.plt
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/
@@ -50,3 +64,9 @@ Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 # Generated documentation 
 Documentation/build/
 Documentation/source/_generated/
+
+#OS created files
+*.DS_Store
+
+*.tmp
+*.swp

@@ -10,7 +10,7 @@ Commands/initialise.py
 
 # Add instance files in a given directory, without running solvers or feature extractors yet. In addition to the instance files, the directory should contain a file `sparkle_instance_list.txt` where each line contains a space separated list of files that together form an instance.
 
-Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Resources/CCAG/Instances/CCAG/
+Commands/add_instances.py Examples/Resources/CCAG/Instances/CCAG/
 
 #### Add solvers
 
@@ -18,15 +18,15 @@ Commands/add_instances.py --run-solver-later --run-extractor-later Examples/Reso
 
 # Each solver directory should contain the solver executable and a wrapper
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/
+Commands/add_solver.py --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/
 
-Commands/add_solver.py --run-solver-later --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/
+Commands/add_solver.py --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/
 
 #### Add feature extractor
 
 # Similarly, add a feature extractor, without immediately running it on the instances
 
-Commands/add_feature_extractor.py --run-extractor-later Examples/Resources/CCAG/Extractors/CCAG-features_sparkle/
+Commands/add_feature_extractor.py Examples/Resources/CCAG/Extractors/CCAG-features_sparkle/
 
 #### Compute features
 

@@ -1,4 +1,4 @@
-"""Test functionalities related to the about commmand"""
+'''Test functionalities related to the about commmand'''
 
 from sparkle import about
 

@@ -23,7 +23,7 @@ pipelines:
             name: Lint code
             script:
               # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
-              - pip install flake8
+              - pip install flake8==4.0.1
               - flake8
               
 definitions:

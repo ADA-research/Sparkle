@@ -15,7 +15,7 @@
 Commands/initialise.py > /dev/null
 
 # Cleanup current sparkle platform
-output_true="c Existing Sparkle platform cleaned!"
+output_true="Existing Sparkle platform cleaned!"
 output=$(Commands/cleanup_current_sparkle_platform.py | tail -1)
 
 if [[ $output == $output_true ]];

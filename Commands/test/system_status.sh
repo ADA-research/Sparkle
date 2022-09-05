@@ -12,7 +12,7 @@
 #SBATCH --nodes=1
 
 # System status
-output_true="c Current system status of Sparkle reported!"
+output_true="Current system status of Sparkle reported!"
 output=$(Commands/system_status.py | tail -1)
 
 if [[ $output == $output_true ]];
