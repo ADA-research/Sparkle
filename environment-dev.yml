@@ -7,16 +7,20 @@ dependencies:
   - python=3.9
   - swig=3.0
   - gnuplot
+  - latexmk
   - pip
   - pip:
     - --editable .  # self install !
-    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
+    #- runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
+    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@slurm-dependencies-fix#egg=runrunner
     # For Sparkle
     - numpy
     - pandas
     # Testing
     - pytest
     - flake8
+    - flake8-quotes
+    - pep8-naming
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost
@@ -24,5 +28,6 @@ dependencies:
     - ConfigSpace
     - smac
     - scipy==1.6.3  # 1.7.x removed a private function used by smac
+    - pynisher<1.0  # smac requirement
     # To build documentation
     - -r Documentation/requirements.txt

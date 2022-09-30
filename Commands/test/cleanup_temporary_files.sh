@@ -15,7 +15,7 @@
 Commands/initialise.py > /dev/null
 
 # Cleanup temporary files
-output_true="c Temporary files cleaned!"
+output_true="Temporary files cleaned!"
 output=$(Commands/cleanup_temporary_files.py | tail -1)
 
 if [[ $output == $output_true ]];

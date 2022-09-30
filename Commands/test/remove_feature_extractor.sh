@@ -21,7 +21,7 @@ Commands/add_feature_extractor.py $extractor_source > /dev/null
 
 # Remove feature extractor
 extractor_path="Extractors/$extractor_name"
-output_true="c Removing feature extractor $extractor_name done!"
+output_true="Removing feature extractor $extractor_name done!"
 output=$(Commands/remove_feature_extractor.py $extractor_path | tail -1)
 
 if [[ $output == $output_true ]];

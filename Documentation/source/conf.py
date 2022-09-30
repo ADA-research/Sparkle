@@ -16,10 +16,11 @@ import os
 import sys
 
 # Add path to sparkle root
-sys.path.insert(0, os.path.abspath('../../..'))
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('../../Commands'))
-print("sys.path: ", sys.path)
+print('sys.path: ', sys.path)
+
+from sparkle import about  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -28,9 +29,9 @@ copyright = '2021, ADA Research Group, LIACS'
 author = 'ADA Research Group, LIACS'
 
 # The short X.Y version
-version = '0.0'
+version = str(about.about_info['version'])
 # The full version, including alpha/beta/rc tags
-release = '0.0'
+release = str(about.about_info['version'])
 
 
 # -- General configuration ---------------------------------------------------
@@ -51,8 +52,8 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    # 'sphinx.ext.autosectionlabel',
-    'recommonmark',
+    'sphinxcontrib.autoprogram',
+    'myst_parser',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -61,7 +62,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
+source_suffix = ['.md']
 
 # The master toctree document.
 master_doc = 'index'
@@ -71,12 +72,12 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en-gb'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["userguide/index.rst", ]
+exclude_patterns = ['userguide/index.md', 'userguide/commandsautoprogram.md']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -98,7 +99,7 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -145,6 +146,13 @@ latex_documents = [
      'ADA Research Group, LIACS', 'manual'),
 ]
 
+# Manually installed sty files not easily available from conda
+# Note that although texlive-core is available from conda (containing at least some
+# packages), it can cause conflicts with exiting texlive installations.
+latex_additional_files = ['tex_sty/fncychap.sty', 'tex_sty/wrapfig.sty',
+                          'tex_sty/capt-of.sty', 'tex_sty/framed.sty',
+                          'tex_sty/upquote.sty', 'tex_sty/needspace.sty',
+                          'tex_sty/tabulary.sty', 'tex_sty/titlesec.sty']
 
 # -- Options for manual page output ------------------------------------------
 

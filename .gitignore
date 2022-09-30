@@ -1,4 +1,5 @@
 *.pyc
+*.egg-info
 Reference_Lists/*
 Solvers/*
 Extractors/*
@@ -9,6 +10,7 @@ Performance_Data/*
 LOG/*
 TMP/*
 Sparkle_Portfolio_Selector/*
+Sparkle_Parallel_Portfolio/*
 Tmp/*
 Log/*
 Output/*
@@ -30,7 +32,6 @@ Examples/Resources/CCAG/Solvers/FastCA/src/
 Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 *.json
 
-
 # Generated documentation 
 Documentation/build/
 Documentation/source/_generated/
@@ -39,15 +40,17 @@ Documentation/source/_generated/
 .idea
 .vscode
 
-
 # LaTeX stuff
 
 # Exclude intermediate files generated when compiling latex
 *.eps
+*.bbl
 Components/Sparkle-latex-generator/Sparkle_Report.pdf
 Components/Sparkle-latex-generator/Sparkle_Report.tex
 Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_sbs_filename.dat
 Components/Sparkle-latex-generator/data_portfolio_selector_sparkle_vs_vbs_filename.dat
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.dat
+Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.dat
 Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
 Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
 Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
@@ -65,6 +68,14 @@ Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
 *.cb
 *.cb2
 .*.lb
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.pdf
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.bbl
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.tex
+Components/Sparkle-latex-generator-for-parallel-portfolio/data_parallel_portfolio_sparkle_vs_sbs_filename.dat
+Components/Sparkle-latex-generator-for-parallel-portfolio/data_parallel_portfolio_sparkle_vs_sbs.dat
+Components/Sparkle-latex-generator-for-parallel-portfolio/figure_parallel_portfolio_sparkle_vs_sbs.pdf
+Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report_for_Test.*
+Components/Sparkle-latex-generator-for-parallel-portfolio/*.plt
 
 ## Intermediate documents:
 *.dvi
@@ -85,3 +96,9 @@ Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
 *.synctex.gz
 *.synctex.gz(busy)
 *.pdfsync
+
+#OS created files
+*.DS_Store
+
+*.tmp
+*.swp

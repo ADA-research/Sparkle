@@ -26,8 +26,9 @@ Commands/add_instances.py $instances_path > /dev/null
 Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run solvers
-output_true="c Running solvers done!"
+output_true="Running solvers done!"
 output=$(Commands/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
+
 if [[ $output == $output_true ]];
 then
 	echo "[success] run_solvers test succeeded"
@@ -37,7 +38,7 @@ else
 fi
 
 # Run solvers recompute and parallel
-output_true="c Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+output_true="Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
 output=$(Commands/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];

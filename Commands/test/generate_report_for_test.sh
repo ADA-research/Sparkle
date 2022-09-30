@@ -59,7 +59,7 @@ cp $selector_test $selector_path
 cp -r $test_results_test ./
 
 # Run generate report for tetst
-output_true="c Report for test generated ..."
+output_true="Report for test generated ..."
 output=$(Commands/generate_report.py --test-case-directory $test_results_dir | tail -1)
 # --settings-file $sparkle_test_settings_path
 

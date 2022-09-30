@@ -1,0 +1,12 @@
+algo = ./sparkle_smac_wrapper.py
+execdir = example_scenarios/PbO-CCSAT-Generic_PTN/
+deterministic = 0
+run_obj = RUNTIME
+wallclock-limit = 10
+cutoffTime = 2
+cutoff_length = max
+paramfile = example_scenarios/PbO-CCSAT-Generic_PTN/PbO-CCSAT-params_test.pcs
+outdir = example_scenarios/PbO-CCSAT-Generic_PTN/outdir_train_configuration/
+instance_file = example_scenarios/PbO-CCSAT-Generic_PTN/PTN_train.txt
+test_instance_file = example_scenarios/PbO-CCSAT-Generic_PTN/PTN_train.txt
+validation = true

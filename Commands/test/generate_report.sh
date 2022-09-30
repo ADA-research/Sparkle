@@ -48,7 +48,7 @@ cp $performance_data_test $performance_data_path
 cp $selector_test $selector_path
 
 # Generate report
-output_true="c Report generated ..."
+output_true="Report generated ..."
 output=$(Commands/generate_report.py --selection | tail -1)
 
 if [[ $output == $output_true ]];

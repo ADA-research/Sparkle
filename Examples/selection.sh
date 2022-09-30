@@ -28,7 +28,7 @@ Commands/add_solver.py --deterministic 0 Examples/Resources/Solvers/MiniSAT/
 
 # Similarly, add a feature extractor, without immediately running it on the instances
 
-Commands/add_feature_extractor.py --run-extractor-later Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
+Commands/add_feature_extractor.py Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/
 
 #### Compute features
 

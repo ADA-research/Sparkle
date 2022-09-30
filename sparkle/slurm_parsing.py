@@ -1,20 +1,20 @@
-""" This module contains a tool to parse a Slurm sbatch file to get the information
-contained in the file in a structured way."""
+''' This module contains a tool to parse a Slurm sbatch file to get the information
+contained in the file in a structured way.'''
 
 # Standard libs
 import re
 from pathlib import Path
 
 # Precompiled regex
-re_sbatch = re.compile("#SBATCH (.*)")
-re_params_all = re.compile(r"params=\( \\\n(?:(.*))\)", re.DOTALL)
+re_sbatch = re.compile('#SBATCH (.*)')
+re_params_all = re.compile(r'params=\( \\\n(?:(.*))\)', re.DOTALL)
 re_params_items = re.compile(r"'(.*)'")
-re_srun_all = re.compile(r"srun (.*)")
-re_srun_split = re.compile(r" (?!-)")
+re_srun_all = re.compile(r'srun (.*)')
+re_srun_split = re.compile(r' (?!-)')
 
 
 class SlurmBatch:
-    """ Simple class to parse a Slurm batch file and get the info.
+    ''' Simple class to parse a Slurm batch file and get the info.
 
     Attributes
     ----------
@@ -28,10 +28,10 @@ class SlurmBatch:
         A list of arguments to pass to srun. Ex.: ['-n1', '--nodes=1']
     file: Path
         The loaded file Path
-    """
+    '''
 
     def __init__(self, srcfile: Path):
-        """ Parse the data contained in srcfile and localy store the information. """
+        ''' Parse the data contained in srcfile and localy store the information. '''
         self.file = Path(srcfile)
 
         with open(self.file) as f:
@@ -48,4 +48,4 @@ class SlurmBatch:
         srun_args, cmd = re_srun_split.split(srun, maxsplit=1)
 
         self.srun_options = srun_args.split()
-        self.cmd = cmd.replace("${params[$SLURM_ARRAY_TASK_ID]}", "").strip()
+        self.cmd = cmd.replace('${params[$SLURM_ARRAY_TASK_ID]}', '').strip()

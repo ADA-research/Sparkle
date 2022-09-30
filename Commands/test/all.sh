@@ -94,3 +94,12 @@ Commands/test/run_ablation.sh
 
 # Test run configured solver
 Commands/test/run_configured_solver.sh
+
+# Test construct parallel portfolio
+Commands/test/construct_sparkle_parallel_portfolio.sh
+
+# Test run parallel portfolio
+Commands/test/run_sparkle_parallel_portfolio.sh
+
+# Test generate report for parallel portfolio
+Commands/test/generate_report_parallel_portfolio.sh
