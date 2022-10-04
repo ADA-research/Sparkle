@@ -29,5 +29,6 @@ dependencies:
     - smac
     - scipy==1.6.3  # 1.7.x removed a private function used by smac
     - pynisher<1.0  # smac requirement
+    - scikit-learn<1.1.0  # 1.1.0 contains a fix for SimpleImputer that breaks AutoFolio
     # To build documentation
     - -r Documentation/requirements.txt
