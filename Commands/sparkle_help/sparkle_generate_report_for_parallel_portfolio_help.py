@@ -174,7 +174,7 @@ def get_solvers_with_solution() -> (str, dict[str, int], int):
             else:
                 unsolved_instances += 1
 
-    if(sgh.settings.get_general_performance_measure()
+    if (sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE):
         for instances in results_on_instances:
             str_value += (r'\item \textbf{' + sgrh.underscore_for_latex(instances)
@@ -240,7 +240,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
                 for solver in full_solver_list:
                     # in because the solver name contains the instance name as well,
                     # or the solver can have an additional '/' at the end of the path
-                    if(solver in results[instance_name][0]
+                    if (solver in results[instance_name][0]
                             or results[instance_name][0] in solver):
                         if solver in all_solvers_dict:
                             all_solvers_dict[solver] += run_time
@@ -459,7 +459,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     variable = 'decisionBool'
     str_value = r'\decisiontrue'
 
-    if(sgh.settings.get_general_performance_measure()
+    if (sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE):
         str_value = r'\decisionfalse'
     mydict[variable] = str_value

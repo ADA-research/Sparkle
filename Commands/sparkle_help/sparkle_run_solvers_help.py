@@ -275,7 +275,7 @@ def running_solvers(performance_data_csv_path, mode):
 
             # Handle timeouts
             penalised_str = ''
-            if(performance_measure == PerformanceMeasure.RUNTIME
+            if (performance_measure == PerformanceMeasure.RUNTIME
                and (status == 'TIMEOUT' or status == 'UNKNOWN')):
                 penalised_str = ' (penalised)'
 
@@ -358,7 +358,7 @@ def process_results(raw_result_path: str, solver_wrapper_path: str,
     first_line = result_lines[0]
     first_line_parts = first_line.strip().split()
 
-    if(len(first_line_parts) == 4 and first_line_parts[0].lower() == 'use'
+    if (len(first_line_parts) == 4 and first_line_parts[0].lower() == 'use'
        and first_line_parts[1].lower() == 'sparkle'):
         if first_line_parts[2].lower() == 'sat':
             quality = []  # Not defined for SAT

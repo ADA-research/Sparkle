@@ -37,7 +37,7 @@ class SparkleCSV:
 
     def is_empty(self):
         ret = False
-        if(self.dataframe.empty and self.get_column_size() == 0
+        if (self.dataframe.empty and self.get_column_size() == 0
            and self.get_row_size() == 0):
             ret = True
         return ret
@@ -163,7 +163,7 @@ class SparkleCSV:
             value_list = [None]*self.get_column_size()
         if value_list == []:
             df = pd.DataFrame([], index=[row_name])
-            self.dataframe = pd.concat([self.dataframe, df], axis = 1)
+            self.dataframe = pd.concat([self.dataframe, df], axis=1)
         else:
             self.dataframe.loc[row_name] = value_list
 

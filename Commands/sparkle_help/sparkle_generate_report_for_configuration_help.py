@@ -437,7 +437,7 @@ def get_timeouts_test(solver_name, instance_set_train_name, instance_set_name, c
             configured_timeouts += 1
         if default_par10_value == timeout_value:
             default_timeouts += 1
-        if(configured_par10_value == timeout_value
+        if (configured_par10_value == timeout_value
            and default_par10_value == timeout_value):
             overlapping_timeouts += 1
 
@@ -478,7 +478,7 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
             configured_timeouts += 1
         if default_par10_value == timeout_value:
             default_timeouts += 1
-        if(configured_par10_value == timeout_value
+        if (configured_par10_value == timeout_value
            and default_par10_value == timeout_value):
             overlapping_timeouts += 1
 
@@ -504,7 +504,7 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
             line = ['\\textbf{{{0}}}'.format(word) for word in line]
 
         # Put multiple variable changes in one round on a seperate line
-        if(len(line[1].split(',')) > 1
+        if (len(line[1].split(',')) > 1
            and len(line[1].split(',')) == len(line[2].split(','))
            and len(line[1].split(',')) == len(line[3].split(','))):
             params = line[1].split(',')
