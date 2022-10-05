@@ -25,7 +25,7 @@ except ImportError:
     import sparkle_settings
 
 
-if __name__ == r'__main__':
+if __name__ == '__main__':
     # Initialise settings
     global settings
     settings_dir = Path('Settings')
@@ -74,7 +74,7 @@ if __name__ == r'__main__':
     if run_status_path == sgh.pap_sbatch_tmp_path:
         processed_result_path = f'{sgh.pap_performance_data_tmp_path}/{key_str}.result'
 
-    task_run_status_path = f'{str(run_status_path)}{key_str}.statusinfo'
+    task_run_status_path = f'{str(run_status_path)}/{key_str}.statusinfo'
     status_info_str = (
         f'Status: Running\nSolver: {sfh.get_last_level_directory_name(solver_path)}\n'
         f'Instance: {sfh.get_last_level_directory_name(instance_path)}\n')

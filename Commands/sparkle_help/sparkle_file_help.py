@@ -30,15 +30,24 @@ def checkout_directory(path, make_if_not_exist=True):
     return os.path.isdir(path)
 
 
-def get_current_directory_name(filepath):
+def get_current_directory_name(filepath: str) -> str:
+    '''Return the name of the current directory as str.'''
+    if filepath == '':
+        print('ERROR: Empty filepath given to get_current_directory_name(), stopping '
+              'execution!')
+        exit(-1)
+
     if filepath[-1] == '/':
         filepath = filepath[0:-1]
+
     right_index = filepath.rfind('/')
+
     if right_index < 0:
         pass
     else:
         filepath = filepath[0:right_index]
         filepath = get_last_level_directory_name(filepath)
+
     return filepath
 
 
@@ -46,11 +55,14 @@ def get_last_level_directory_name(filepath: str) -> str:
     '''Return the final path component for a given string; similar to Path.name.'''
     if filepath[-1] == '/':
         filepath = filepath[0:-1]
+
     right_index = filepath.rfind('/')
+
     if right_index < 0:
         pass
     else:
         filepath = filepath[right_index+1:]
+
     return filepath
 
 
@@ -409,6 +421,9 @@ def write_string_to_file(file: Path, string: str, append: bool = False, maxtry: 
     the content of the file will be overwritten. Try a maximum of 'maxtry' times to
     acquire the lock, with a random wait time (min 0.2s, max 1.0s) between each try.
     Raise an OSError exception if it fail to acquire the lock maxtry times.
+
+    WARNING: This function does not add line breaks, if those are desired they have to
+    be added manually as part of the string.
     '''
     # Create the full path if needed
     Path(file).parent.mkdir(parents=True, exist_ok=True)
