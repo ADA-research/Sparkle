@@ -492,11 +492,7 @@ def generate_report(test_case_directory: str = None):
     fout.write(report_content)
     fout.close()
 
-    if stex.check_tex_commands_exist() is False:
-        print('Error: It seems like latex is not available on your system.\n'
-              f'You can find all source files in {latex_directory_path}\n'
-              'Copy these on your local machine to generate the report.')
-        return
+    stex.check_tex_commands_exist(latex_directory_path)
 
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 

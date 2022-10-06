@@ -1,14 +1,21 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+
 from shutil import which
+from pathlib import Path
 import os
 
 
-def check_tex_commands_exist():
+# Raise an exception if one of the latex commands is not present
+def check_tex_commands_exist(latex_directory_path):
     if which('bibtex') is None or which('pdflatex') is None:
-        return False
-    else:
-        return True
+        raise Exception('Error: It seems like latex is not available on your system.\n'
+                        'You can install latex and run the command again, '
+                        f'or copy the source files in {latex_directory_path} on your '
+                        'local machine to generate the report.')
 
 
+# Compile the given latex files to a PDF
 def compile_pdf(latex_directory_path, latex_report_filename):
     pdflatex_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
                         f'{latex_report_filename}.tex 1> /dev/null 2>&1')
