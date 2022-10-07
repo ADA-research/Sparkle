@@ -152,6 +152,9 @@ def run_configured_solver(instance_path_list: list[Path]):
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
 
+    # Check permissions for sparkle_smac_wrapper
+    sfh.check_file_executable(sgh.sparkle_smac_wrapper)
+
     # a) Create cmd_solver_call that could call sparkle_smac_wrapper
     instance_path_str = ' '.join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
@@ -170,6 +173,10 @@ def run_configured_solver(instance_path_list: list[Path]):
     raw_result_path = Path(f'{sgh.sparkle_tmp_path}{solver_path.name}_'
                            f'{instance_name}_{sbh.get_time_pid_random_string()}.rawres')
     runsolver_values_path = Path(str(raw_result_path).replace('.rawres', '.val'))
+
+    # Check permissions for solver executable
+    sfh.check_file_executable(solver_path)
+
     # b) Run the solver
     rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
                                                          raw_result_path,

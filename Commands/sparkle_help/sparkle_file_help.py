@@ -463,7 +463,6 @@ def rmfile(file_name: Path):
 
 def check_file_executable(file_name: Path):
     if not os.access(file_name, os.X_OK):
-        print()
-        sys.exit()
-    
-    return       
+        raise PermissionError(f"The file {file_name} is not executable.")
+
+    return
