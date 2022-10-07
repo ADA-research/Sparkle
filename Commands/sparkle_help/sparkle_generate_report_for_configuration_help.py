@@ -914,10 +914,10 @@ def generate_report_for_configuration(solver_name, instance_set_train_name,
 
 def generate_report_for_configuration_common(configuration_reports_directory,
                                              dict_variable_to_value):
-    latex_directory_path = (
+    latex_directory_path = Path(
         f'{configuration_reports_directory}Sparkle-latex-generator-for-configuration/')
     latex_template_filename = 'template-Sparkle-for-configuration.tex'
-    latex_report_filename = 'Sparkle_Report_for_Configuration'
+    latex_report_filename = Path('Sparkle_Report_for_Configuration')
 
     # Read in the report template from file
     latex_template_filepath = latex_directory_path + latex_template_filename

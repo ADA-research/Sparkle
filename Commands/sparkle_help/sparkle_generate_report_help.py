@@ -5,6 +5,8 @@ import os
 import sys
 import numpy as np
 from shutil import which
+from pathlib import Path
+
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -460,14 +462,14 @@ def generate_report(test_case_directory: str = None):
         if test_case_directory[-1] != r'/':
             test_case_directory += r'/'
 
-        latex_report_filename = r'Sparkle_Report_for_Test'
+        latex_report_filename = Path('Sparkle_Report_for_Test')
         dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
     # Only look at the training instance set(s)
     else:
-        latex_report_filename = r'Sparkle_Report'
+        latex_report_filename = Path('Sparkle_Report')
         dict_variable_to_value = get_dict_variable_to_value()
 
-    latex_directory_path = r'Components/Sparkle-latex-generator/'
+    latex_directory_path = Path('Components/Sparkle-latex-generator/')
     latex_template_filename = 'template-Sparkle.tex'
 
     latex_template_filepath = latex_directory_path + latex_template_filename
