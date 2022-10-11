@@ -223,20 +223,20 @@ def run_solver_on_instance_and_process_results(
     return cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path
 
 
-def running_solvers(performance_data_csv_path, mode):
+def running_solvers(performance_data_csv_path: str, rerun: bool):
+    '''Run solvers on all instances.
+
+    If rerun is True, rerun for instances with existing performance data.
+    '''
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     performance_measure = sgh.settings.get_general_performance_measure()
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-    if mode == 1:
+    if rerun == False:
         list_performance_computation_job = (
             performance_data_csv.get_list_remaining_performance_computation_job())
-    elif mode == 2:
+    elif rerun == True:
         list_performance_computation_job = (
             performance_data_csv.get_list_recompute_performance_computation_job())
-    else:
-        print('Running solvers mode error!')
-        print('Do not run solvers')
-        sys.exit()
 
     print('The cutoff time per algorithm run to solve an instance is set to '
           f'{cutoff_time_str} seconds')
