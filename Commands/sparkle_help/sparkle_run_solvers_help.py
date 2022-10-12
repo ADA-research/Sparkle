@@ -231,10 +231,11 @@ def running_solvers(performance_data_csv_path: str, rerun: bool):
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     performance_measure = sgh.settings.get_general_performance_measure()
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-    if rerun == False:
+
+    if rerun is False:
         list_performance_computation_job = (
             performance_data_csv.get_list_remaining_performance_computation_job())
-    elif rerun == True:
+    elif rerun is True:
         list_performance_computation_job = (
             performance_data_csv.get_list_recompute_performance_computation_job())
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+import os
+
 import runrunner.local
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_basic_help as sbh
@@ -21,7 +23,7 @@ def generate_running_solvers_sbatch_shell_script(total_job_num: int,
                                                  ) -> (str, str, str):
     sbatch_script_name = ('running_solvers_sbatch_shell_script_'
                           f'{sbh.get_time_pid_random_string()}.sh')
-    sbatch_script_path = 'Tmp/' + sbatch_script_name
+    sbatch_script_path = f'{sgh.sparkle_tmp_path}{sbatch_script_name}'
     job_name = '--job-name=' + sbatch_script_name
     std_out_path = sbatch_script_path + '.txt'
     std_err_path = sbatch_script_path + '.err'
@@ -92,7 +94,7 @@ def running_solvers_parallel(
 
     # If there are no jobs, stop
     if num_jobs == 0:
-        return None
+        return '' if run_on == Runner.SLURM else None
     # If there are jobs update performance data ID
     else:
         srs.update_performance_data_id()
@@ -112,20 +114,33 @@ def running_solvers_parallel(
 
     if run_on == Runner.LOCAL:
         print('Running the solvers locally')
-
     elif run_on == Runner.SLURM:
         print('Running the solvers through Slurm')
 
-    cmd_list = [f'{batch.cmd} {param}' for param in batch.cmd_params]
-    run = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd_list,
-        name='run_solvers',
-        base_dir='Tmp',
-        sbatch_options=batch.sbatch_options,
-        srun_options=batch.srun_options)
-
+    # NOTE: Remove everything under the if once Slurm through runrunner works
+    # satisfactorily. Keep everything in the else.
     if run_on == Runner.SLURM:
+        # Execute the sbatch script via slurm
+        command_line = f'sbatch {sbatch_script_path}'
+        output_list = os.popen(command_line).readlines()
+
+        if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
+            run = output_list[0].strip().split()[-1]
+            # Add job to active job CSV
+            sjh.write_active_job(run, CommandName.RUN_SOLVERS)
+        else:
+            run = ''
+    else:
+        cmd_list = [f'{batch.cmd} {param}' for param in batch.cmd_params]
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name='run_solvers',
+            base_dir='Tmp',
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+
+    if run_on == Runner.SLURM_RR:  # Change to SLURM once runrunner works satisfactorily
         # Add the run to the list of active job.
         sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
 
