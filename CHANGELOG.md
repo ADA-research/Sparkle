@@ -70,7 +70,7 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 - New option --run-on in run\_solvers.py 
 - Integration with runrunner to run the solvers and related code on the local machine
-- Integration with runrunner to run the solvers on a Slurm clusters
+- Experimental implementation for integration with runrunner to run the solvers on a Slurm clusters. Old style Slurm use is still the default, but optionally Slurm can be used through runrunner with --run-on=slurm_rr
 
 ### Changed
 
