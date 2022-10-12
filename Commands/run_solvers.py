@@ -139,6 +139,10 @@ def run_solvers_on_instances(
             rerun=recompute,
             run_on=run_on)]
 
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+
         # If there are no jobs return
         if all(run is None for run in runs):
             print('Running solvers done!')
@@ -167,6 +171,10 @@ def run_solvers_on_instances(
                 name='sprkl_report',
                 dependencies=runs[-1],
                 base_dir='Tmp'))
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
 
         if run_on == Runner.LOCAL:
             print('Waiting for the local calculations to finish.')

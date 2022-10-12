@@ -131,6 +131,10 @@ def running_solvers_parallel(
         else:
             run = ''
     else:
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+
         cmd_list = [f'{batch.cmd} {param}' for param in batch.cmd_params]
         run = rrr.add_to_queue(
             runner=run_on,
@@ -139,6 +143,10 @@ def running_solvers_parallel(
             base_dir='Tmp',
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
 
     if run_on == Runner.SLURM_RR:  # Change to SLURM once runrunner works satisfactorily
         # Add the run to the list of active job.
