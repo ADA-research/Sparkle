@@ -499,11 +499,6 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
         for line in report_content:
             outfile.write(line)
 
-    file_path_output = PurePath(sgh.sparkle_global_output_dir / sl.caller_out_dir
-                                / 'Log/latex.txt')
-    sfh.create_new_empty_file(file_path_output)
-    file_path_output = Path('../../' / file_path_output)
-
     stex.check_tex_commands_exist(latex_directory_path)
 
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
