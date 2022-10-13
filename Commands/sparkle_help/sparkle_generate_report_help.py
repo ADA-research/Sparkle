@@ -472,7 +472,7 @@ def generate_report(test_case_directory: str = None):
     latex_directory_path = Path('Components/Sparkle-latex-generator/')
     latex_template_filename = 'template-Sparkle.tex'
 
-    latex_template_filepath = latex_directory_path + latex_template_filename
+    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ''
     fin = open(latex_template_filepath, 'r')
     while True:
@@ -489,7 +489,8 @@ def generate_report(test_case_directory: str = None):
             str_value = str_value.replace(r'_', r'\textunderscore ')
         report_content = report_content.replace(variable, str_value)
 
-    latex_report_filepath = latex_directory_path + latex_report_filename + r'.tex'
+    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
+    latex_report_filepath = latex_report_filepath.with_suffix('.tex')
     fout = open(latex_report_filepath, 'w+')
     fout.write(report_content)
     fout.close()

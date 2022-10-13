@@ -920,7 +920,7 @@ def generate_report_for_configuration_common(configuration_reports_directory,
     latex_report_filename = Path('Sparkle_Report_for_Configuration')
 
     # Read in the report template from file
-    latex_template_filepath = latex_directory_path + latex_template_filename
+    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ''
     fin = open(latex_template_filepath, 'r')
 
@@ -942,7 +942,8 @@ def generate_report_for_configuration_common(configuration_reports_directory,
     # print(report_content)
 
     # Write the completed report to a tex file
-    latex_report_filepath = latex_directory_path + latex_report_filename + '.tex'
+    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
+    latex_report_filepath = latex_report_filepath.with_suffix('.tex')
     fout = open(latex_report_filepath, 'w+')
     fout.write(report_content)
     fout.close()
