@@ -3,7 +3,6 @@
 
 import os
 import sys
-from pathlib import PurePath
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
