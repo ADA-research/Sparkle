@@ -128,7 +128,7 @@ def get_results() -> dict[str, list[str, str]]:
 
     if len(results) == 0:
         print('ERROR: No result files found for parallel portfolio! Stopping execution.')
-        exit(-1)
+        sys.exit(-1)
 
     results_dict = dict()
 

@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import os
+import sys
 import time
 import random
 import fcntl
@@ -35,7 +36,7 @@ def get_current_directory_name(filepath: str) -> str:
     if filepath == '':
         print('ERROR: Empty filepath given to get_current_directory_name(), stopping '
               'execution!')
-        exit(-1)
+        sys.exit(-1)
 
     if filepath[-1] == '/':
         filepath = filepath[0:-1]

@@ -95,7 +95,7 @@ def check_sbatch_for_errors(sbatch_script_path: Path):
                     print(f'ERROR detected in {sbatch_script_path}\n'
                           f'involving {current_line}\n'
                           'Stopping execution!')
-                    exit(-1)
+                    sys.exit(-1)
 
 
 def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
