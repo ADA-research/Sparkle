@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
     if not srh.detect_current_sparkle_platform_exists():
         print('No Sparkle platform found; please first run the initialise command')
-        exit()
+        sys.exit()
 
     print('Start running solvers ...')
 
