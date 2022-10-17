@@ -56,7 +56,7 @@ def parse_output(output_list) -> (str, float):
             # If no actual solution is found, we probably reach the cutoff time before
             # finding a solution
             status = 'TIMEOUT'
-        if(len(words) == 3 and _is_a_number(words[0]) and _is_a_number(words[1])
+        if (len(words) == 3 and _is_a_number(words[0]) and _is_a_number(words[1])
            and _is_a_number(words[2])):
             temp_solution_quality = int(words[1])
             if temp_solution_quality < solution_quality:
