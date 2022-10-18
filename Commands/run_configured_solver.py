@@ -64,7 +64,7 @@ if __name__ == '__main__':
     sgh.latest_scenario = ReportingScenario()
 
     # Validate input (is directory, or single instance (single-file or multi-file))
-    if((len(instance_path) == 1 and instance_path[0].is_dir())
+    if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Call the configured solver
         job_id_str = srcsh.call_configured_solver(args.instance_path, args.parallel)

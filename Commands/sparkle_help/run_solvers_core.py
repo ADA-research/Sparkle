@@ -25,7 +25,7 @@ except ImportError:
     import sparkle_settings
 
 
-if __name__ == r'__main__':
+if __name__ == '__main__':
     # Initialise settings
     global settings
     settings_dir = Path('Settings')
@@ -74,7 +74,7 @@ if __name__ == r'__main__':
     if run_status_path == sgh.pap_sbatch_tmp_path:
         processed_result_path = f'{sgh.pap_performance_data_tmp_path}/{key_str}.result'
 
-    task_run_status_path = f'{str(run_status_path)}{key_str}.statusinfo'
+    task_run_status_path = f'{str(run_status_path)}/{key_str}.statusinfo'
     status_info_str = (
         f'Status: Running\nSolver: {sfh.get_last_level_directory_name(solver_path)}\n'
         f'Instance: {sfh.get_last_level_directory_name(instance_path)}\n')
@@ -95,7 +95,7 @@ if __name__ == r'__main__':
     description_str = (f'[Solver: {sfh.get_last_level_directory_name(solver_path)}, '
                        f'Instance: {sfh.get_last_level_directory_name(instance_path)}]')
     start_time_str = (
-        "[Start Time: {time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time))}]")
+        f"[Start Time: {time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time))}]")
     end_time_str = ('[End Time (after completing run time + processing time): '
                     f"{time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))}]")
     run_time_str = '[Actual Run Time (wall clock): ' + str(wc_time) + ' second(s)]'
@@ -104,8 +104,8 @@ if __name__ == r'__main__':
                              f'{str(cpu_time_penalised)} second(s)]')
     status_str = '[Run Status: ' + status + ']'
 
-    log_str = (f'{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, '
-               f'{recorded_run_time_str}, {status_str}')
+    log_str = (f'{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, '
+               f'{run_time_str}, {recorded_run_time_str}, {status_str}')
 
     sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
     os.system('rm -f ' + task_run_status_path)

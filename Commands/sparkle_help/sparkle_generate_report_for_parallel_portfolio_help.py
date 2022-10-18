@@ -3,13 +3,13 @@
 
 import os
 import sys
-from pathlib import PurePath
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_generate_report_help as sgrh
+from sparkle_help import sparkle_tex_help as stex
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
@@ -75,14 +75,16 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
     for instance_path in instance_list:
         instance_set = sfh.get_current_directory_name(instance_path)
 
-    if not (instance_set in list_instance_sets):
-        list_instance_sets.append(instance_set)
+        if not (instance_set in list_instance_sets):
+            list_instance_sets.append(instance_set)
 
     n_sets = len(list_instance_sets)
 
     if n_sets < 1:
-        print('ERROR: No instance sets found, report generation failed!')
-        sys.exit()
+        print('ERROR: No instance sets found, report generation failed!\n'
+              'Please execute run_sparkle_parallel_portfolio.py before generating a '
+              'parallel portfolio report.')
+        sys.exit(-1)
 
     return str(n_sets)
 
@@ -123,6 +125,11 @@ def get_results() -> dict[str, list[str, str]]:
     '''
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(str(solutions_dir))
+
+    if len(results) == 0:
+        print('ERROR: No result files found for parallel portfolio! Stopping execution.')
+        sys.exit(-1)
+
     results_dict = dict()
 
     for result in results:
@@ -174,7 +181,7 @@ def get_solvers_with_solution() -> (str, dict[str, int], int):
             else:
                 unsolved_instances += 1
 
-    if(sgh.settings.get_general_performance_measure()
+    if (sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE):
         for instances in results_on_instances:
             str_value += (r'\item \textbf{' + sgrh.underscore_for_latex(instances)
@@ -240,7 +247,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
                 for solver in full_solver_list:
                     # in because the solver name contains the instance name as well,
                     # or the solver can have an additional '/' at the end of the path
-                    if(solver in results[instance_name][0]
+                    if (solver in results[instance_name][0]
                             or results[instance_name][0] in solver):
                         if solver in all_solvers_dict:
                             all_solvers_dict[solver] += run_time
@@ -272,10 +279,13 @@ def get_dict_sbs_penalty_time_on_each_instance(
     for instance in instance_list:
         instance_name = sfh.get_last_level_directory_name(instance)
 
-        if sbs_name in results[instance_name][0]:
-            sbs_dict[instance_name] = results[instance_name][1]
+        if instance_name in results:
+            if sbs_name in results[instance_name][0]:
+                sbs_dict[instance_name] = results[instance_name][1]
+            else:
+                sbs_dict[instance_name] = sgh.settings.get_penalised_time()
         else:
-            sbs_dict[instance_name] = sgh.settings.get_penalised_time()
+            print(f'WARNING: No result found for instance: {instance_name}')
 
     return sbs_dict, sbs_name, all_solvers_dict
 
@@ -319,10 +329,8 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
         get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances))
 
     latex_directory_path = 'Components/Sparkle-latex-generator-for-parallel-portfolio/'
-    figure_filename = (
-        'figure_parallel_portfolio_sparkle_vs_sbs')
-    data_filename = (
-        'data_parallel_portfolio_sparkle_vs_sbs.dat')
+    figure_filename = 'figure_parallel_portfolio_sparkle_vs_sbs'
+    data_filename = 'data_parallel_portfolio_sparkle_vs_sbs.dat'
     data_filepath = latex_directory_path + data_filename
 
     with open(data_filepath, 'w+') as outfile:
@@ -459,7 +467,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     variable = 'decisionBool'
     str_value = r'\decisiontrue'
 
-    if(sgh.settings.get_general_performance_measure()
+    if (sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE):
         str_value = r'\decisionfalse'
     mydict[variable] = str_value
@@ -498,26 +506,10 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
         for line in report_content:
             outfile.write(line)
 
-    file_path_output = PurePath(sgh.sparkle_global_output_dir / sl.caller_out_dir
-                                / 'Log/latex.txt')
-    sfh.create_new_empty_file(file_path_output)
-    file_path_output = Path('../../' / file_path_output)
-    compile_command = (f'cd {latex_directory_path}; pdflatex {latex_report_filename}.tex'
-                       f' 1> {file_path_output} 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    stex.check_tex_commands_exist(latex_directory_path)
 
-    compile_command = (f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux '
-                       f'1> {file_path_output} 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
-    compile_command = (f'cd {latex_directory_path}; pdflatex {latex_report_filename}.tex'
-                       f' 1> {file_path_output} 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
-
-    report_path = Path(f'{latex_directory_path}/{latex_report_filename}.pdf')
     print(f'Report is placed at: {report_path}')
     sl.add_output(str(report_path), 'Sparkle parallel portfolio report')
 

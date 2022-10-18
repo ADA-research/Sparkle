@@ -13,11 +13,6 @@ except ImportError:
 
 
 class SparkleFeatureDataCSV(scsv.SparkleCSV):
-
-    def test(self):
-        print('just a test')
-        return
-
     def __init__(self, csv_filepath):
         scsv.SparkleCSV.__init__(self, csv_filepath)
         self.extractor_list = sparkle_global_help.extractor_list

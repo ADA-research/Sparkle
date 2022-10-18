@@ -10,6 +10,8 @@ dependencies:
   - latexmk
   - pip
   - pip:
+    - --editable .  # self install !
+    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
     # For Sparkle
     - numpy
     - pandas
@@ -25,5 +27,7 @@ dependencies:
     - ConfigSpace
     - smac
     - scipy==1.6.3  # 1.7.x removed a private function used by smac
+    - pynisher<1.0  # smac requirement
+    - scikit-learn<1.1.0  # 1.1.0 contains a fix for SimpleImputer that breaks AutoFolio
     # To build documentation
     - -r Documentation/requirements.txt

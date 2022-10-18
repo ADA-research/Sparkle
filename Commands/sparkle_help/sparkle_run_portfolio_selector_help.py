@@ -92,16 +92,17 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
     return list_feature_vector
 
 
-def print_predict_schedule(predict_schedule_result_path):
+def print_predict_schedule(predict_schedule_result_path: str):
     fin = open(predict_schedule_result_path, 'r+')
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
     myline = fin.readline().strip()
     print(myline)
     fin.close()
+
     return
 
 
-def get_list_predict_schedule_from_file(predict_schedule_result_path):
+def get_list_predict_schedule_from_file(predict_schedule_result_path: str):
     list_predict_schedule = []
     prefix_string = 'Selected Schedule [(algorithm, budget)]: '
     fin = open(predict_schedule_result_path, 'r+')
@@ -110,7 +111,9 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path):
 
     if predict_schedule == '':
         print('ERROR: Failed to get schedule from algorithm portfolio. Stopping '
-              'execution!')
+              'execution!\n'
+              f'Schedule file appears to be empty: {predict_schedule_result_path}\n'
+              f'Selector error output path: {sgh.sparkle_err_path}')
         sys.exit(-1)
 
     predict_schedule_string = predict_schedule[len(prefix_string):]
