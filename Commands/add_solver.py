@@ -144,7 +144,7 @@ if __name__ == '__main__':
     if args.run_solver_now:
         if not my_flag_parallel:
             print('Start running solvers ...')
-            srs.running_solvers(sgh.performance_data_csv_path, 1)
+            srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
             print(
                 'Performance data file '
                 + sgh.performance_data_csv_path
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
             run_solvers_parallel_jobid = srsp.running_solvers_parallel(
-                sgh.performance_data_csv_path, num_job_in_parallel, 1
+                sgh.performance_data_csv_path, num_job_in_parallel, rerun=False
             )
             print('Running solvers in parallel ...')
             dependency_jobid_list = []
