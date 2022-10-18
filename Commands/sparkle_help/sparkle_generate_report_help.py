@@ -5,11 +5,14 @@ import os
 import sys
 import numpy as np
 from shutil import which
+from pathlib import Path
+
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_tex_help as stex
 import compute_marginal_contribution as cmc
 
 
@@ -459,17 +462,17 @@ def generate_report(test_case_directory: str = None):
         if test_case_directory[-1] != r'/':
             test_case_directory += r'/'
 
-        latex_report_filename = r'Sparkle_Report_for_Test'
+        latex_report_filename = Path('Sparkle_Report_for_Test')
         dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
     # Only look at the training instance set(s)
     else:
-        latex_report_filename = r'Sparkle_Report'
+        latex_report_filename = Path('Sparkle_Report')
         dict_variable_to_value = get_dict_variable_to_value()
 
-    latex_directory_path = r'Components/Sparkle-latex-generator/'
+    latex_directory_path = Path('Components/Sparkle-latex-generator/')
     latex_template_filename = 'template-Sparkle.tex'
 
-    latex_template_filepath = latex_directory_path + latex_template_filename
+    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ''
     fin = open(latex_template_filepath, 'r')
     while True:
@@ -486,27 +489,17 @@ def generate_report(test_case_directory: str = None):
             str_value = str_value.replace(r'_', r'\textunderscore ')
         report_content = report_content.replace(variable, str_value)
 
-    latex_report_filepath = latex_directory_path + latex_report_filename + r'.tex'
+    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
+    latex_report_filepath = latex_report_filepath.with_suffix('.tex')
     fout = open(latex_report_filepath, 'w+')
     fout.write(report_content)
     fout.close()
 
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> /dev/null 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    stex.check_tex_commands_exist(latex_directory_path)
 
-    compile_command = f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux'
-    os.system(compile_command)
-    os.system(compile_command)
+    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> /dev/null 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
-
-    report_path = latex_directory_path + latex_report_filename + r'.pdf'
-    print(r'Report is placed at: ' + report_path)
+    print(f'Report is placed at: {report_path}')
     sl.add_output(report_path, 'Sparkle portfolio selector report')
 
     return

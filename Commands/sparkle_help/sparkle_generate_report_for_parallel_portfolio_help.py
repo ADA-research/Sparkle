@@ -3,13 +3,13 @@
 
 import os
 import sys
-from pathlib import PurePath
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_generate_report_help as sgrh
+from sparkle_help import sparkle_tex_help as stex
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
@@ -506,26 +506,10 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
         for line in report_content:
             outfile.write(line)
 
-    file_path_output = PurePath(sgh.sparkle_global_output_dir / sl.caller_out_dir
-                                / 'Log/latex.txt')
-    sfh.create_new_empty_file(file_path_output)
-    file_path_output = Path('../../' / file_path_output)
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> {file_path_output} 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    stex.check_tex_commands_exist(latex_directory_path)
 
-    compile_command = (f'cd {latex_directory_path}; bibtex {latex_report_filename}.aux '
-                       f'1> {file_path_output} 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
+    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
-    compile_command = (f'cd {latex_directory_path}; pdflatex -interaction=nonstopmode '
-                       f'{latex_report_filename}.tex 1> {file_path_output} 2>&1')
-    os.system(compile_command)
-    os.system(compile_command)
-
-    report_path = Path(f'{latex_directory_path}/{latex_report_filename}.pdf')
     print(f'Report is placed at: {report_path}')
     sl.add_output(str(report_path), 'Sparkle parallel portfolio report')
 
