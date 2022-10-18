@@ -49,7 +49,7 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
     command_line = (f'{runsolver_path} {cutoff_time_each_run_option} '
                     f'{runsolver_watch_data_path_option} '
                     f'{runsolver_value_data_path_option} {extractor_path}/'
-                    f'{sgh.sparkle_run_default_wrapper} {extractor_path}/'
+                    f'{sgh.sparkle_run_default_wrapper} {extractor_path}/ '
                     f'{instance_path} {result_path} 2> {err_path}')
 
     try:
