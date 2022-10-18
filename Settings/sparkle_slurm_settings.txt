@@ -1,4 +1,2 @@
---mem-per-cpu=3000
---partition=graceCPU
---exclude=
---nodelist=
+--mem-per-cpu=500
+--partition=debug

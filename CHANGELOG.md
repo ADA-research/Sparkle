@@ -1,6 +1,25 @@
 # Changelog for Sparkle
 
 Notable changes to Sparkle will be documented in this file.
+## [0.3] - 2022/09/05
+### Added
+- New option --run-solver-now in add\_solver.py and add\_instances.py
+- New option --run-extractor-now in add\_instances.py and add\_feature\_extractor.py
+- New command run\_configured\_solver.py to run the last configured solver with its configured parameters on new instances
+- Parallel algorithm portfolios with the commands construct\_sparkle\_parallel\_portfolio.py and run\_sparkle\_parallel\_portfolio.py
+
+### Changed
+- Default to --run-solver-later in add\_solver.py and add\_instances.py
+- Default to --run-extractor-later in add\_instances.py and add\_feature\_extractor.py
+- Updated documentation, examples and tests for new behaviour of --run-solver-later and --run-extrator-later
+- Improve integration tests so all launched jobs are cancelled upon test completion
+- Change the list of authors in about.py to be in alphebetical order
+- Update runsolver version to 3.4
+
+### Fixed
+- Removed the unneeded globals in sparkle\_global\_help.py
+- Changed solver and instance paths in Examples/configuration_quality.sh and Examples/configuration_quality.md
+- Updated generate_report_for_configuration.sh test to new internal configuration scenario directory naming convention
 
 ## [0.2] - 2021/09/08
 ### Added
@@ -49,21 +68,11 @@ Notable changes to Sparkle will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- New option --run-solver-now in add\_solver.py and add\_instances.py
-- New option --run-extractor-now in add\_instances.py and add\_feature\_extractor.py
-- New command run\_configured\_solver.py to run the last configured solver with its configured parameters on new instances
-- Parallel algorithm portfolios with the commands construct\_sparkle\_parallel\_portfolio.py and run\_sparkle\_parallel\_portfolio.py
+- New option --run-on in run\_solvers.py 
+- Integration with runrunner to run the solvers and related code on the local machine
+- Experimental implementation for integration with runrunner to run the solvers on a Slurm clusters. Old style Slurm use is still the default, but optionally Slurm can be used through runrunner with --run-on=slurm_rr
 
 ### Changed
-- Default to --run-solver-later in add\_solver.py and add\_instances.py
-- Default to --run-extractor-later in add\_instances.py and add\_feature\_extractor.py
-- Updated documentation, examples and tests for new behaviour of --run-solver-later and --run-extrator-later
-- Improve integration tests so all launched jobs are cancelled upon test completion
-- Change the list of authors in about.py to be in alphebetical order
-- Update runsolver version to 3.4
 
 ### Fixed
-- Removed the unneeded globals in sparkle\_global\_help.py 
-- Changed solver and instance paths in Examples/configuration_quality.sh and Examples/configuration_quality.md
-- Updated generate_report_for_configuration.sh test to new internal configuration scenario directory naming convention
 

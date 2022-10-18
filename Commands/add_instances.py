@@ -198,14 +198,14 @@ if __name__ == '__main__':
     if args.run_solver_now:
         if not my_flag_parallel:
             print('Start running solvers ...')
-            srs.running_solvers(sgh.performance_data_csv_path, 1)
+            srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
             print(f'Performance data file {sgh.performance_data_csv_path} has been '
                   'updated!')
             print('Running solvers done!')
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
             srsp.running_solvers_parallel(
-                sgh.performance_data_csv_path, num_job_in_parallel, 1)
+                sgh.performance_data_csv_path, num_job_in_parallel, rerun=False)
             print('Running solvers in parallel ...')
 
     # Write used settings to file
