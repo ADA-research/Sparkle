@@ -78,6 +78,26 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str):
     return
 
 
+def check_sbatch_for_errors(sbatch_script_path: Path):
+    '''Check sbatch files for errors. If found, stop execution.'''
+    error_lines = [ \
+        # ERROR: [...] not found [...]
+        'ERROR: ',
+        ]
+
+    sbatch_script_path.with_suffix('.txt')
+
+    # Find lines containing an error
+    with sbatch_script_path.open('r') as infile:
+        for current_line in infile:
+            for error in error_lines:
+                if error in current_line:
+                    print(f'ERROR detected in {sbatch_script_path}\n'
+                          f'involving {current_line}\n'
+                          'Stopping execution!')
+                    sys.exit(-1)
+
+
 def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                                          sbatch_script_path: Path,
                                          temp_solvers: list[str]):
@@ -89,6 +109,9 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
         commandline = (f'rm -rf {sgh.pap_sbatch_tmp_path}/'
                        f'{solver_instance}*')
         os.system(commandline)
+
+    # Validate no known errors occurred in the sbatch
+    check_sbatch_for_errors(sbatch_script_path)
 
     # Removes the generated sbatch files
     commandline = f'rm -rf {sbatch_script_path}*'
@@ -367,7 +390,10 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
 
 def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: int) -> (
         Path):
-    '''Generate an sbatch script for the PAP and return the path to it.'''
+    '''Generate an sbatch script for the PAP and return the path to it.
+
+    Takes as input a list of str parameters, and the number of jobs.
+    '''
     # Set script name and path
     sbatch_script_name = (f'parallel_portfolio_sbatch_shell_script_{str(num_jobs)}_'
                           f'{sbh.get_time_pid_random_string()}.sh')
@@ -581,11 +607,10 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     # Makes SBATCH scripts for all individual solvers in a list
     parameters, num_jobs, solver_instance_list, temp_solvers = generate_sbatch_job_list(
         solver_list, instances, num_jobs)
-
     # Generates a SBATCH script which uses the created parameters
     sbatch_script_path = generate_parallel_portfolio_sbatch_script(parameters, num_jobs)
 
-    # Runs the script and cancels the remaining scripts if a script finishes before the
+    # Run the script and cancel the remaining solvers if a solver finishes before the
     # end of the cutoff_time
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / 'Log/logging.txt'))
@@ -668,10 +693,10 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                     and float(finished_instances_dict[instances][1]) > 0):
                 # To filter out constraint files
                 if 'e' not in str(finished_instances_dict[instances][1]):
-                    print(f'{str(instances)} was solved with a results: '
+                    print(f'{str(instances)} was solved with the result: '
                           f'{str(finished_instances_dict[instances][1])}')
             else:
-                print(f'{str(instances)} was not solved in the given cutoff-time')
+                print(f'{str(instances)} was not solved in the given cutoff-time.')
     except Exception as except_msg:
         print(except_msg)
 

@@ -163,7 +163,7 @@ class SparkleCSV:
             value_list = [None]*self.get_column_size()
         if value_list == []:
             df = pd.DataFrame([], index=[row_name])
-            self.dataframe = self.dataframe.append(df)
+            self.dataframe = pd.concat([self.dataframe, df], axis=1)
         else:
             self.dataframe.loc[row_name] = value_list
 

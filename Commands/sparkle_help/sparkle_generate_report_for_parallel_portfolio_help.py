@@ -75,14 +75,16 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
     for instance_path in instance_list:
         instance_set = sfh.get_current_directory_name(instance_path)
 
-    if not (instance_set in list_instance_sets):
-        list_instance_sets.append(instance_set)
+        if not (instance_set in list_instance_sets):
+            list_instance_sets.append(instance_set)
 
     n_sets = len(list_instance_sets)
 
     if n_sets < 1:
-        print('ERROR: No instance sets found, report generation failed!')
-        sys.exit()
+        print('ERROR: No instance sets found, report generation failed!\n'
+              'Please execute run_sparkle_parallel_portfolio.py before generating a '
+              'parallel portfolio report.')
+        sys.exit(-1)
 
     return str(n_sets)
 
@@ -123,6 +125,11 @@ def get_results() -> dict[str, list[str, str]]:
     '''
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(str(solutions_dir))
+
+    if len(results) == 0:
+        print('ERROR: No result files found for parallel portfolio! Stopping execution.')
+        sys.exit(-1)
+
     results_dict = dict()
 
     for result in results:
@@ -272,10 +279,13 @@ def get_dict_sbs_penalty_time_on_each_instance(
     for instance in instance_list:
         instance_name = sfh.get_last_level_directory_name(instance)
 
-        if sbs_name in results[instance_name][0]:
-            sbs_dict[instance_name] = results[instance_name][1]
+        if instance_name in results:
+            if sbs_name in results[instance_name][0]:
+                sbs_dict[instance_name] = results[instance_name][1]
+            else:
+                sbs_dict[instance_name] = sgh.settings.get_penalised_time()
         else:
-            sbs_dict[instance_name] = sgh.settings.get_penalised_time()
+            print(f'WARNING: No result found for instance: {instance_name}')
 
     return sbs_dict, sbs_name, all_solvers_dict
 
@@ -319,10 +329,8 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
         get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances))
 
     latex_directory_path = 'Components/Sparkle-latex-generator-for-parallel-portfolio/'
-    figure_filename = (
-        'figure_parallel_portfolio_sparkle_vs_sbs')
-    data_filename = (
-        'data_parallel_portfolio_sparkle_vs_sbs.dat')
+    figure_filename = 'figure_parallel_portfolio_sparkle_vs_sbs'
+    data_filename = 'data_parallel_portfolio_sparkle_vs_sbs.dat'
     data_filepath = latex_directory_path + data_filename
 
     with open(data_filepath, 'w+') as outfile:

@@ -8,6 +8,8 @@ dependencies:
   - gnuplot
   - pip
   - pip:
+    - --editable .  # self install !
+    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario@9ce38dd43dc6e2834cb8ef44cd837514e950a9c5
     - attrs==21.2.0
     - certifi==2021.5.30
@@ -17,7 +19,7 @@ dependencies:
     - Cython==0.29.24
     - dask==2021.7.0
     - distributed==2021.7.0
-    - flake8==3.9.2
+    - flake8==4.0.1
     - flake8-quotes==3.3.1
     - pep8-naming==0.12.1
     - fsspec==2021.7.0
@@ -36,8 +38,8 @@ dependencies:
     - pluggy==0.13.1
     - psutil==5.8.0
     - py==1.10.0
-    - pycodestyle==2.7.0
-    - pyflakes==2.3.1
+    - pycodestyle==2.8.0
+    - pyflakes==2.4.0
     - pynisher==0.6.4
     - pyparsing==2.4.7
     - pyrfr==0.8.2
