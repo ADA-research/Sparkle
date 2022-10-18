@@ -43,14 +43,21 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
     err_path = result_path.replace('.rawres', '.err')
     runsolver_watch_data_path = result_path.replace('.rawres', '.log')
     runsolver_watch_data_path_option = '-w ' + runsolver_watch_data_path
+    runsolver_value_data_path = result_path.replace('.rawres', '.val')
+    runsolver_value_data_path_option = '-v ' + runsolver_value_data_path
 
     command_line = (f'{runsolver_path} {cutoff_time_each_run_option} '
-                    f'{runsolver_watch_data_path_option} {extractor_path}/'
-                    f'{sgh.sparkle_run_default_wrapper} {extractor_path}/ '
+                    f'{runsolver_watch_data_path_option} '
+                    f'{runsolver_value_data_path_option} {extractor_path}/'
+                    f'{sgh.sparkle_run_default_wrapper} {extractor_path}/'
                     f'{instance_path} {result_path} 2> {err_path}')
 
     try:
         os.system(command_line)
+        with open(runsolver_value_data_path) as file:
+            if 'TIMEOUT=true' in file.read():
+                print(f'****** WARNING: Feature vector computing on instance/'
+                      f'{instance_path} timed out! ******')
     except Exception:
         if not os.path.exists(result_path):
             sfh.create_new_empty_file(result_path)
@@ -78,6 +85,8 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
     command_line = 'rm -f ' + err_path
     os.system(command_line)
     command_line = 'rm -f ' + runsolver_watch_data_path
+    os.system(command_line)
+    command_line = 'rm -f ' + runsolver_value_data_path
     os.system(command_line)
 
     return list_feature_vector
