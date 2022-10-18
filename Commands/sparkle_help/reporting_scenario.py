@@ -257,12 +257,17 @@ class ReportingScenario:
         return
 
     def get_parallel_portfolio_instance_list(self) -> list[str]:
-        '''Return the instance list used with the parallel portfolio.'''
-        try:
-            instance_list = (
-                self.__scenario['parallel_portfolio']['instance_list'].split(','))
-        except KeyError:
+        '''Return the instance list used with the parallel portfolio.
+        If instance list is empty return an empty list.
+        '''
+        if self.__scenario['parallel_portfolio']['instance_list'] == '':
             instance_list = []
+        else:
+            try:
+                instance_list = (
+                    self.__scenario['parallel_portfolio']['instance_list'].split(','))
+            except KeyError:
+                instance_list = []
 
         return instance_list
 

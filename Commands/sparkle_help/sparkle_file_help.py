@@ -31,15 +31,24 @@ def checkout_directory(path, make_if_not_exist=True):
     return os.path.isdir(path)
 
 
-def get_current_directory_name(filepath):
+def get_current_directory_name(filepath: str) -> str:
+    '''Return the name of the current directory as str.'''
+    if filepath == '':
+        print('ERROR: Empty filepath given to get_current_directory_name(), stopping '
+              'execution!')
+        sys.exit(-1)
+
     if filepath[-1] == '/':
         filepath = filepath[0:-1]
+
     right_index = filepath.rfind('/')
+
     if right_index < 0:
         pass
     else:
         filepath = filepath[0:right_index]
         filepath = get_last_level_directory_name(filepath)
+
     return filepath
 
 
@@ -47,11 +56,14 @@ def get_last_level_directory_name(filepath: str) -> str:
     '''Return the final path component for a given string; similar to Path.name.'''
     if filepath[-1] == '/':
         filepath = filepath[0:-1]
+
     right_index = filepath.rfind('/')
+
     if right_index < 0:
         pass
     else:
         filepath = filepath[right_index+1:]
+
     return filepath
 
 
@@ -404,31 +416,43 @@ def write_instance_list():
     return
 
 
-def write_string_to_file(file_path, string_value):
-    fout = open(file_path, 'w+')
-    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-    fout.write(string_value.strip()+'\n')
-    fout.close()
+def write_string_to_file(file: Path, string: str, append: bool = False, maxtry: int = 5):
+    ''' Write 'string' to the file 'file' using a lock and creating the parents path
+    if needed. If append is True, the 'string' will be appended to the file, otherwise
+    the content of the file will be overwritten. Try a maximum of 'maxtry' times to
+    acquire the lock, with a random wait time (min 0.2s, max 1.0s) between each try.
+    Raise an OSError exception if it fail to acquire the lock maxtry times.
+
+    WARNING: This function does not add line breaks, if those are desired they have to
+    be added manually as part of the string.
+    '''
+    # Create the full path if needed
+    Path(file).parent.mkdir(parents=True, exist_ok=True)
+
+    for i in range(maxtry):
+        try:
+            with open(file, 'a' if append else 'w') as fout:
+                fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fout.write(string)
+                fcntl.flock(fout.fileno(), fcntl.LOCK_UN)
+            return
+        except OSError as e:
+            print(f'Warning: locking file {file} failed (try #{i})')
+            if i < maxtry:
+                time.sleep(random.randint(1, 5) / 5)
+            else:
+                raise e
+
     return
 
 
-def append_string_to_file(file_path, string_value):
-    fout = open(file_path, 'a+')
-    while True:
-        try:
-            fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            fout.write(string_value.strip()+'\n')
-            # fcntl.flock(fout.fileno(), fcntl.LOCK_UN)
-            fout.close()
-            break
-        except OSError:
-            time.sleep(random.randint(1, 5))
+def append_string_to_file(file: Path, string: str, maxtry: int = 5):
+    ''' Append 'string' to the file 'file'. Use a lock and creates the parents path
+    if needed. Try a maximum of 'maxtry' to acquire the lock.
+    Raise an OSError exception if it fail to acquire the lock maxtry times.
     '''
-    fout = open(file_path, 'a+')
-    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-    fout.write(string_value.strip()+'\n')
-    fout.close()
-    '''
+    write_string_to_file(file, string, append=True, maxtry=maxtry)
+
     return
 
 

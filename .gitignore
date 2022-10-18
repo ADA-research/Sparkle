@@ -1,6 +1,5 @@
 *.pyc
 *.egg-info
-Components/smac-v2.10.03-master-778/*sbatch.sh
 Reference_Lists/*
 Solvers/*
 Extractors/*
@@ -10,7 +9,6 @@ Feature_Data/*
 Performance_Data/*
 LOG/*
 TMP/*
-Feature_Data/*
 Sparkle_Portfolio_Selector/*
 Sparkle_Parallel_Portfolio/*
 Tmp/*
@@ -29,11 +27,22 @@ Components/smac-v2.10.03-master-778/example_scenarios/*.txt
 Components/smac-v2.10.03-master-778/*sbatch.sh
 Components/ablationAnalysis-0.9.4/scenarios
 
+Examples/Resources/CCAG/Solvers/TCA/src/
+Examples/Resources/CCAG/Solvers/FastCA/src/
+Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
+*.json
+
+# Generated documentation 
+Documentation/build/
+Documentation/source/_generated/
+
+# Common IDE
+.idea
+.vscode
+
+# LaTeX stuff
+
 # Exclude intermediate files generated when compiling latex
-*.aux
-*.log
-*.out
-*.blg
 *.eps
 *.bbl
 Components/Sparkle-latex-generator/Sparkle_Report.pdf
@@ -46,6 +55,19 @@ Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_sbs.pdf
 Components/Sparkle-latex-generator/figure_portfolio_selector_sparkle_vs_vbs.pdf
 Components/Sparkle-latex-generator/Sparkle_Report_for_Test.*
 
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
 Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.pdf
 Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.bbl
 Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.tex
@@ -55,15 +77,25 @@ Components/Sparkle-latex-generator-for-parallel-portfolio/figure_parallel_portfo
 Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report_for_Test.*
 Components/Sparkle-latex-generator-for-parallel-portfolio/*.plt
 
-Examples/Resources/CCAG/Solvers/TCA/src/
-Examples/Resources/CCAG/Solvers/FastCA/src/
-Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
-*.json
+## Intermediate documents:
+*.dvi
+*.xdv
 
+## Bibliography auxiliary files (bibtex/biblatex/biber):
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
 
-# Generated documentation 
-Documentation/build/
-Documentation/source/_generated/
+## Build tool auxiliary files:
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
 
 #OS created files
 *.DS_Store

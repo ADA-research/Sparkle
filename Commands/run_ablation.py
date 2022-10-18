@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
     if args.ablation_settings_help:
         sah.print_ablation_help()
-        exit()
+        sys.exit()
 
     solver = args.solver
     instance_set_train = args.instance_set_train
