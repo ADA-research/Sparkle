@@ -123,13 +123,13 @@ def computing_features(feature_data_csv_path, mode):
 
             feature_data_csv.combine(tmp_fdcsv)
 
-            command_line = 'rm -f ' + result_path
+            command_line = f'rm -f {result_path}'
             os.system(command_line)
-            command_line = 'rm -f ' + err_path
+            command_line = f'rm -f {err_path}'
             os.system(command_line)
-            command_line = 'rm -f ' + runsolver_watch_data_path
+            command_line = f'rm -f {runsolver_watch_data_path}'
             os.system(command_line)
-            command_line = 'rm -f ' + runsolver_value_data_path
+            command_line = f'rm -f {runsolver_value_data_path}'
             os.system(command_line)
 
             print(f'Executing Progress: {str(current_job_num)} out of '

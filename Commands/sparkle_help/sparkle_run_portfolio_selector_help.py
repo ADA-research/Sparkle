@@ -80,13 +80,13 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
         del list_feature_vector[0]
         fin.close()
 
-    command_line = 'rm -f ' + result_path
+    command_line = f'rm -f {result_path}'
     os.system(command_line)
-    command_line = 'rm -f ' + err_path
+    command_line = f'rm -f {err_path}'
     os.system(command_line)
-    command_line = 'rm -f ' + runsolver_watch_data_path
+    command_line = f'rm -f {runsolver_watch_data_path}'
     os.system(command_line)
-    command_line = 'rm -f ' + runsolver_value_data_path
+    command_line = f'rm -f {runsolver_value_data_path}'
     os.system(command_line)
 
     return list_feature_vector
