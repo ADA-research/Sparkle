@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-
+'''Helper functions to run solvers.'''
 import os
 import sys
 import fcntl
 from pathlib import Path
-from typing import List
 
 try:
     from sparkle_help import sparkle_global_help as sgh
@@ -57,7 +56,6 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
                            runsolver_values_path: str, seed_str: str = None,
                            custom_cutoff: int = None):
     '''Prepare for execution, run the solver on an instance, check output for errors.'''
-
     if not Path(solver_wrapper_path).is_file():
         print(f'ERROR: Wrapper named "{solver_wrapper_path}" not found, stopping '
               'execution!')
@@ -177,12 +175,12 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
 
 def check_solver_output_for_errors(raw_result_path: Path):
+    '''Check solver output for known errors.'''
     error_lines = [ \
         # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found:
         'libstdc++.so.6: version `GLIBCXX',
         # For e.g. invalid solver path:
-        'No such file or directory'
-        ]
+        'No such file or directory']
 
     # Find lines containing an error
     with raw_result_path.open('r') as infile:
@@ -313,6 +311,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool):
 
 def handle_timeouts(runtime: float, status: str,
                     custom_cutoff: int = None) -> (float, str):
+    '''Check if there is a timeout and return the status and penalised runtime.'''
     if custom_cutoff is None:
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
     else:
@@ -329,6 +328,7 @@ def handle_timeouts(runtime: float, status: str,
 
 
 def verify(instance_path, raw_result_path, solver_path, status):
+    '''Run a solution verifier on the solution and update the status if needed.'''
     verifier = sgh.settings.get_general_solution_verifier()
 
     # Use verifier if one is given and the solver did not time out
@@ -339,7 +339,8 @@ def verify(instance_path, raw_result_path, solver_path, status):
 
 
 def process_results(raw_result_path: str, solver_wrapper_path: str,
-                    runsolver_values_path: str) -> (float, float, List[float], str):
+                    runsolver_values_path: str) -> (float, float, list[float], str):
+    '''Process results from raw output, the wrapper, and runsolver.'''
     # By default runtime comes from runsolver, may be overwritten by user wrapper
     cpu_time, wc_time = get_runtime_from_runsolver(runsolver_values_path)
 
@@ -402,7 +403,8 @@ def process_results(raw_result_path: str, solver_wrapper_path: str,
 
 # quality -- comma separated list of quality measurements; [required when one or more
 # quality objectives are used, optional otherwise]
-def get_quality_from_wrapper(result_list: List[str]) -> List[float]:
+def get_quality_from_wrapper(result_list: list[str]) -> list[float]:
+    '''Return a list based on the quality performances returned from by the wrapper.'''
     quality = []
     start_index = 1  # 0 is the keyword 'quality'
 
@@ -412,10 +414,8 @@ def get_quality_from_wrapper(result_list: List[str]) -> List[float]:
     return quality
 
 
-# status [optional, SUCCESS assumed]
-# In: List of words
-# Out: String
 def get_status_from_wrapper(result: str) -> str:
+    '''Return the status reported by the wrapper as standardised str.'''
     status_list = '<SUCCESS/TIMEOUT/CRASHED/SAT/UNSAT/WRONG/UNKNOWN>'
     status = 'SUCCESS'
 
@@ -441,16 +441,15 @@ def get_status_from_wrapper(result: str) -> str:
     return status
 
 
-# runtime -- in seconds, will overwrite Sparkle's own measurement (through runsolver) if
-# given [optional]
 def get_runtime_from_wrapper(result: str) -> float:
+    '''Return the runtime str reported by the wrapper as float.'''
     runtime = float(result)
 
     return runtime
 
 
-# Read runtime in CPU and WC time from runsolver values file
 def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
+    '''Return the CPU and wallclock time reported by runsolver.'''
     cpu_time = float(-1)
     wc_time = float(-1)
 
@@ -478,6 +477,10 @@ def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
 
 
 def sparkle_sat_parser(raw_result_path: str, runtime: float) -> str:
+    '''Parse SAT results with Sparkle's internal parser.
+
+    NOTE: This parser probably does not work for all SAT solvers.
+    '''
     if runtime > sgh.settings.get_general_target_cutoff_time():
         status = 'TIMEOUT'
     else:
@@ -486,9 +489,11 @@ def sparkle_sat_parser(raw_result_path: str, runtime: float) -> str:
     return status
 
 
-# In: Path to solver, path to instance it failed on
-# Out: N/A
-def remove_faulty_solver(solver_path, instance_path):
+def remove_faulty_solver(solver_path, instance_path) -> None:
+    '''Remove a faulty solver from Sparkle.
+
+    Input: Path to solver, path to instance it failed on
+    '''
     print(f'Warning: Solver {sfh.get_last_level_directory_name(solver_path)} reports '
           'the wrong answer on instance '
           f'{sfh.get_last_level_directory_name(instance_path)}!')
@@ -510,6 +515,7 @@ def remove_faulty_solver(solver_path, instance_path):
 
 
 def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:
+    '''Run a SAT verifier and return its status.'''
     status = sat_judge_correctness_raw_result(instance_path, raw_result_path)
 
     if status != 'SAT' and status != 'UNSAT' and status != 'WRONG':
@@ -526,6 +532,7 @@ def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> st
 
 
 def sat_get_result_status(raw_result_path: str) -> str:
+    '''Return the result status reported by a SAT solver.'''
     # If no result is reported in the result file something went wrong or the solver
     # timed out
     status = 'UNKNOWN'
@@ -555,7 +562,10 @@ def sat_get_result_status(raw_result_path: str) -> str:
 
 
 def sat_get_verify_string(tmp_verify_result_path):
-    # 4 return values: 'SAT', 'UNSAT', 'WRONG', 'UNKNOWN'
+    '''Return the status of the SAT verifier.
+
+    Four statuses are possible: 'SAT', 'UNSAT', 'WRONG', 'UNKNOWN'
+    '''
     ret = 'UNKNOWN'
     fin = open(tmp_verify_result_path, 'r+')
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
@@ -564,22 +574,22 @@ def sat_get_verify_string(tmp_verify_result_path):
         myline = myline.strip()
         if not myline:
             break
-        if myline == r'Solution verified.':
+        if myline == 'Solution verified.':
             myline2 = fin.readline()
             myline2 = fin.readline().strip()
-            if myline2 == r'11':
-                ret = r'SAT'
+            if myline2 == '11':
+                ret = 'SAT'
                 break
-        elif myline == r'Solver reported unsatisfiable. I guess it must be right!':
+        elif myline == 'Solver reported unsatisfiable. I guess it must be right!':
             myline2 = fin.readline()
             myline2 = fin.readline().strip()
-            if myline2 == r'10':
-                ret = r'UNSAT'
+            if myline2 == '10':
+                ret = 'UNSAT'
                 break
-        elif myline == r'Wrong solution.':
+        elif myline == 'Wrong solution.':
             myline2 = fin.readline()
             myline2 = fin.readline().strip()
-            if myline2 == r'0':
+            if myline2 == '0':
                 ret = 'WRONG'
                 break
         else:
@@ -589,6 +599,7 @@ def sat_get_verify_string(tmp_verify_result_path):
 
 
 def sat_judge_correctness_raw_result(instance_path, raw_result_path):
+    '''Run a SAT verifier to determine correctness of a result.'''
     sat_verifier_path = sgh.sat_verifier_path
     tmp_verify_result_path = (
         f'Tmp/{sfh.get_last_level_directory_name(sat_verifier_path)}_'
@@ -610,6 +621,7 @@ def sat_judge_correctness_raw_result(instance_path, raw_result_path):
 
 
 def update_performance_data_id():
+    '''Update the performance data ID.'''
     # Get current pd_id
     pd_id = get_performance_data_id()
 
@@ -626,6 +638,7 @@ def update_performance_data_id():
 
 
 def get_performance_data_id() -> int:
+    '''Return the current performance data ID.'''
     pd_id = -1
     pd_id_path = sgh.performance_data_id_path
 

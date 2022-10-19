@@ -24,6 +24,7 @@ pipelines:
             script:
               # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
               - pip install flake8==4.0.1
+              - pip install flake8-docstrings==1.6.0
               - flake8
               
 definitions:

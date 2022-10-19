@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for parallel portfolio report generation.'''
 
 import os
 import sys
@@ -21,7 +22,7 @@ def get_num_solvers(parallel_portfolio_path: Path) -> str:
     # If a solver contains multiple solver_variations.
     for solver in solver_list:
         if ' ' in solver:
-            num_solvers += int(solver[solver.rfind(' ')+1:]) - 1
+            num_solvers += int(solver[solver.rfind(' ') + 1:]) - 1
 
     if num_solvers < 1:
         print('ERROR: No solvers found, report generation failed!')
@@ -39,7 +40,7 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
         solver_variations = 0
 
         if ' ' in solver_path:
-            solver_variations = int(solver_path[solver_path.rfind(' ')+1:])
+            solver_variations = int(solver_path[solver_path.rfind(' ') + 1:])
             solver_path = solver_path[:solver_path.rfind(' ')]
 
         solver_name = sfh.get_file_name(solver_path)
@@ -57,7 +58,7 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
         if solver_variations > 1:
             seed_number = ''
 
-            for instances in range(1, solver_variations+1):
+            for instances in range(1, solver_variations + 1):
                 seed_number += str(instances)
 
                 if instances != solver_variations:
@@ -118,7 +119,7 @@ def get_instance_set_list(instance_list: list[str]) -> (str, int):
 
 
 def get_results() -> dict[str, list[str, str]]:
-    '''Returns a dict with the performance results on each instance.
+    '''Return a dict with the performance results on each instance.
 
     The dict consists of a string indicating the instance name, and a list which contains
     the solver name followed by the performance (both as string).
@@ -173,7 +174,7 @@ def get_solvers_with_solution() -> (str, dict[str, int], int):
 
             if results_on_instances[instances][1] != cutoff_time:
                 if '_seed_' in solver_name:
-                    solver_name = solver_name[:solver_name.rfind('_seed_')+7]
+                    solver_name = solver_name[:solver_name.rfind('_seed_') + 7]
                 if solver_name in solver_dict:
                     solver_dict[solver_name] = solver_dict[solver_name] + 1
                 else:
@@ -217,7 +218,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
     for lines in solver_list:
         if ' ' in lines:
-            for solver_variations in range(1, int(lines[lines.rfind(' ')+1:])+1):
+            for solver_variations in range(1, int(lines[lines.rfind(' ') + 1:]) + 1):
                 solver_path = Path(lines[:lines.rfind(' ')])
                 solver_variant_name = solver_path.name
 
@@ -312,10 +313,9 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     return mydict
 
 
-def get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path: Path,
-                                                 instances: list[str]) -> (
-                                                 str,
-                                                 dict[str, float], dict[str, float]):
+def get_figure_parallel_portfolio_sparkle_vs_sbs(
+        parallel_portfolio_path: Path, instances: list[str]) -> (
+        str, dict[str, float], dict[str, float]):
     '''Generate PaP vs SBS figure and return a string to include it in LaTeX.
 
     dict_all_solvers is a dict containing the penalised average run time per solver.
