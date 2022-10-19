@@ -39,12 +39,12 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
                             cutoff_time_each_extractor_run):
     runsolver_path = sgh.runsolver_path
 
-    cutoff_time_each_run_option = '--cpu-limit ' + str(cutoff_time_each_extractor_run)
+    cutoff_time_each_run_option = f'--cpu-limit {str(cutoff_time_each_extractor_run)}'
     err_path = result_path.replace('.rawres', '.err')
     runsolver_watch_data_path = result_path.replace('.rawres', '.log')
-    runsolver_watch_data_path_option = '-w ' + runsolver_watch_data_path
+    runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'
     runsolver_value_data_path = result_path.replace('.rawres', '.val')
-    runsolver_value_data_path_option = '-v ' + runsolver_value_data_path
+    runsolver_value_data_path_option = f'-v {runsolver_value_data_path}'
 
     command_line = (f'{runsolver_path} {cutoff_time_each_run_option} '
                     f'{runsolver_watch_data_path_option} '
@@ -56,7 +56,7 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
         os.system(command_line)
         with open(runsolver_value_data_path) as file:
             if 'TIMEOUT=true' in file.read():
-                print(f'****** WARNING: Feature vector computing on instance/'
+                print(f'****** WARNING: Feature vector computing on instance '
                       f'{instance_path} timed out! ******')
     except Exception:
         if not os.path.exists(result_path):

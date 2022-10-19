@@ -81,12 +81,12 @@ def computing_features(feature_data_csv_path, mode):
             basic_part = (f'Tmp/{sfh.get_last_level_directory_name(extractor_path)}_'
                           f'{sfh.get_last_level_directory_name(instance_path)}_'
                           f'{sparkle_basic_help.get_time_pid_random_string()}')
-            result_path = basic_part + r'.rawres'
-            err_path = basic_part + r'.err'
-            runsolver_watch_data_path = basic_part + r'.log'
-            runsolver_watch_data_path_option = '-w ' + runsolver_watch_data_path
+            result_path = f'{basic_part}.rawres'
+            err_path = f'{basic_part}.err'
+            runsolver_watch_data_path = f'{basic_part}.log'
+            runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'
             runsolver_value_data_path = result_path.replace('.rawres', '.val')
-            runsolver_value_data_path_option = '-v ' + runsolver_value_data_path
+            runsolver_value_data_path_option = f'-v {runsolver_value_data_path}'
 
             command_line = (f'{runsolver_path} {cutoff_time_each_run_option} '
                             f'{runsolver_watch_data_path_option} '
@@ -103,7 +103,7 @@ def computing_features(feature_data_csv_path, mode):
                 os.system(command_line)
                 with open(runsolver_value_data_path) as file:
                     if 'TIMEOUT=true' in file.read():
-                        print(f'****** WARNING: Feature vector computing on instance/'
+                        print(f'****** WARNING: Feature vector computing on instance '
                               f'{instance_path} timed out! ******')
             except Exception:
                 if not os.path.exists(result_path):
