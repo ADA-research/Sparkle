@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for parallel execution of solvers.'''
 
 import os
 
@@ -21,6 +22,7 @@ from runrunner.base import Runner
 def generate_running_solvers_sbatch_shell_script(total_job_num: int,
                                                  num_job_in_parallel: int, total_job_list
                                                  ) -> (str, str, str):
+    '''Generate a Slurm shell script to run the solvers.'''
     sbatch_script_name = ('running_solvers_sbatch_shell_script_'
                           f'{sbh.get_time_pid_random_string()}.sh')
     sbatch_script_path = f'{sgh.sparkle_tmp_path}{sbatch_script_name}'
@@ -29,7 +31,7 @@ def generate_running_solvers_sbatch_shell_script(total_job_num: int,
     std_err_path = sbatch_script_path + '.err'
     output = '--output=' + std_out_path
     error = '--error=' + std_err_path
-    array = '--array=0-' + str(total_job_num-1) + '%' + str(num_job_in_parallel)
+    array = '--array=0-' + str(total_job_num - 1) + '%' + str(num_job_in_parallel)
 
     sbatch_options_list = [job_name, output, error, array]
     sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
@@ -59,7 +61,7 @@ def running_solvers_parallel(
         num_job_in_parallel: int,
         rerun: bool = False,
         run_on: Runner = Runner.SLURM):
-    ''' Run the solvers in parallel.
+    '''Run the solvers in parallel.
 
     Parameters
     ----------
