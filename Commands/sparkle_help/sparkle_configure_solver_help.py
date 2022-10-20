@@ -37,7 +37,7 @@ class InstanceType(Enum):
 
 
 def get_smac_run_obj() -> str:
-    # Get smac_run_obj from general settings
+    '''Get smac_run_obj from general settings'''
     smac_run_obj = sgh.settings.get_general_performance_measure()
 
     # Convert to SMAC format
@@ -64,10 +64,10 @@ def get_smac_settings():
             smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel)
 
 
-# Copy file with the specified postfix listing instances from the instance directory to
-# the solver directory
 def handle_file_instance(solver_name: str, instance_set_train_name: str,
                          instance_set_target_name: str, instance_type: str):
+    '''Copy file with the specified postfix listing instances from the instance
+    directory to the solver directory'''
     file_postfix = '_{}.txt'.format(instance_type)
 
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
@@ -107,11 +107,11 @@ def get_solver_deterministic(solver_name):
     return deterministic
 
 
-# Create a file with the configuration scenario to be used for smac validation in the
-# solver directory
 def create_file_scenario_validate(solver_name: str, instance_set_train_name: str,
                                   instance_set_val_name: str,
                                   instance_type: InstanceType, default: bool) -> str:
+    '''Create a file with the configuration scenario to be used for smac validation in
+    the solver directory'''
     if instance_type is InstanceType.TRAIN:
         inst_type = 'train'
     else:
@@ -164,9 +164,9 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     return scenario_file_name
 
 
-# Create a file with the configuration scenario in the solver directory
 def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
                                        use_features: bool = False):
+    '''Create a file with the configuration scenario in the solver directory'''
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
     smac_file_scenario = (
         f'{smac_solver_dir}{solver_name}_{instance_set_name}_scenario.txt')
@@ -449,9 +449,9 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) 
     return jobid
 
 
-# Check the results directory for this solver and instance set combination exists
-# NOTE: This function assumes SMAC output
 def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
+    '''Check the results directory for this solver and instance set combination exists
+    NOTE: This function assumes SMAC output'''
     # Check the results directory exists
     smac_results_dir = Path(
         sgh.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/')
@@ -467,7 +467,7 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
 
 
 def check_instance_list_file_exist(solver_name: str, instance_set_name: str):
-    # Check the instance list file exists
+    '''Check the instance list file exists'''
     file_name = Path(instance_set_name + '_train.txt')
     instance_list_file_path = Path(PurePath(Path(sgh.smac_dir)
                                    / Path('example_scenarios')
@@ -511,8 +511,8 @@ def check_validation_prerequisites(solver_name: str, instance_set_name: str):
     return
 
 
-# Write optimised configuration string to file
 def write_optimised_configuration_str(solver_name, instance_set_name):
+    '''Write optimised configuration string to file'''
     optimised_configuration_str, _, _ = get_optimised_configuration(
         solver_name, instance_set_name)
     latest_configuration_str_path = sgh.sparkle_tmp_path + 'latest_configuration.txt'
@@ -526,8 +526,8 @@ def write_optimised_configuration_str(solver_name, instance_set_name):
     return
 
 
-# Write optimised configuration to a new PCS file
 def write_optimised_configuration_pcs(solver_name, instance_set_name):
+    '''Write optimised configuration to a new PCS file'''
     # Read optimised configuration and convert to dict
     optimised_configuration_str, _, _ = get_optimised_configuration(
         solver_name, instance_set_name)
@@ -597,7 +597,7 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name):
 
 
 def check_optimised_configuration_params(params: str):
-    # Check if a valid configuration was found
+    '''Check if a valid configuration was found'''
     if params == '':
         print(f'ERROR: Invalid optimised_configuration_str: {params}; '
               'Stopping execution!')
@@ -607,7 +607,7 @@ def check_optimised_configuration_params(params: str):
 
 
 def check_optimised_configuration_performance(performance: str):
-    # Check if a valid seed was found
+    '''Check if a valid seed was found'''
     if performance == -1:
         print('ERROR: Invalid optimised_configuration_performance; Stopping execution!')
         sys.exit(-1)
@@ -616,7 +616,7 @@ def check_optimised_configuration_performance(performance: str):
 
 
 def check_optimised_configuration_seed(seed: str):
-    # Check if a valid seed was found
+    '''Check if a valid seed was found'''
     if seed == -1:
         print('ERROR: Invalid optimised_configuration_seed; Stopping execution!')
         sys.exit(-1)
