@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Execute Sparkle portfolio, only for internal calls from Sparkle.'''
 
 import argparse
 from pathlib import Path
@@ -15,7 +16,7 @@ except ImportError:
     import sparkle_run_portfolio_selector_help as srpsh
 
 
-if __name__ == r'__main__':
+if __name__ == '__main__':
     # Initialise settings
     global settings
     settings_dir = Path('Settings')
