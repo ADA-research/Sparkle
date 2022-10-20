@@ -174,9 +174,6 @@ def run_configured_solver(instance_path_list: list[Path]):
                            f'{instance_name}_{sbh.get_time_pid_random_string()}.rawres')
     runsolver_values_path = Path(str(raw_result_path).replace('.rawres', '.val'))
 
-    # Check permissions for solver executable
-    sfh.check_file_executable(solver_path)
-
     # b) Run the solver
     rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
                                                          raw_result_path,
