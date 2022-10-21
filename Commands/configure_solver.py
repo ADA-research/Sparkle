@@ -189,10 +189,10 @@ if __name__ == '__main__':
         instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
 
     # Check if solver has pcs file and is configurable
-    solverDirectory = sash.get_solver_directory(solver_name)
-    if not sash.check_adding_solver_contain_pcs_file(solverDirectory):
+    solver_directory = sash.get_solver_directory(solver_name)
+    if not sash.check_adding_solver_contain_pcs_file(solver_directory):
         print(
-            "None or multiple .pcs files found. Solver is not valid for configuration."
+            'None or multiple .pcs files found. Solver is not valid for configuration.'
         )
         sys.exit()
 
