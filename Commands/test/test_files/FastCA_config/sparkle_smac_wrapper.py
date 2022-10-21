@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Sparkle SMAC wrapper fro FastCA algorithm.'''
+'''Sparkle SMAC wrapper for the FastCA algorithm.'''
 
 import os
 import time
