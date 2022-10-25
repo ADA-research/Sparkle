@@ -11,7 +11,7 @@ When ready, create a pull request towards the `development` branch.
 ## Pull requests, review, and merge protocol
 1. Before a pull request is reviewed, the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
-3. Once all reviewers have approved the pull request it can be merged.
+3. Once all reviewers have approved the pull request it can be merged. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches.
 
 ### General
 1. Ensure the branch to be merged is up-to-date with the target branch.
