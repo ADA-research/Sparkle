@@ -8,6 +8,31 @@ The development is done on the `development` branch.
 To make changes to Sparkle, please create a branch from `development`, give it a descriptive name and add your code there.
 When ready, create a pull request towards the `development` branch.
 
+## Pull requests, review, and merge protocol
+1. Before a pull request is reviewed, the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied.
+2. Pull requests should be reviewed by at least one member of the Sparkle development team.
+3. Once all reviewers have approved the pull request it can be merged.
+
+### General
+1. Ensure the branch to be merged is up-to-date with the target branch.
+2. Ensure the pipelines run successfully.
+3. Ensure a useful and accurate entry to the `CHANGELOG.md` is included.
+4. In case of changes to the `environment.yml` make sure it installs correctly. Since the environment can affect all code, make sure ALL tests, examples, etc. run correctly.
+5. Make sure the `sparkle` conda environment is installed and active when running checks and tests.
+
+### Code style
+1. Ensure the code is easily readable and understandable.
+2. Ensure comments explain code that cannot be written in an easily readable and understandable way.
+3. Make sure the code style rules pass by running `flake8`.
+4. Ensure useful and accurate docstrings are included.
+5. Ensure useful and accurate type hints are included.
+6. Use fstrings over other string formatting.
+
+### Testing
+1. Make sure the unit tests pass by running `pytest`.
+2. Make sure the integration tests (see `Commands/test/`) relevant for the commands affected by the changes pass by running them. Optionally run all of them with `Commands/test/all.sh`.
+3. Make sure the examples relevant to the changes execute correctly (see the `.sh` files in `Examples/`).
+
 ## Release protocol
 When releasing a new version of Sparkle to the main branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
