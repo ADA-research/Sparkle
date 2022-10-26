@@ -19,7 +19,8 @@ When ready, create a pull request towards the `development` branch.
 3. Ensure a useful and accurate entry to the `CHANGELOG.md` is included.
 4. Ensure tests are adapted or new ones are created to cover possible new functionalities.
 5. In case of changes to the `environment.yml` make sure it installs correctly. Since the environment can affect all code, make sure ALL tests, examples, etc. run correctly.
-6. Make sure the `sparkle` conda environment is installed and active when running checks and tests.
+6. Carefully check any changes to files in the `Settings/` directory. Are they truly needed?
+7. Make sure the `sparkle` conda environment is installed and active when running checks and tests.
 
 ### Code style
 The coding style consistency is a work in progress, and existing code may not adhere to the points below. Please favour the style discussed here over the style of whatever existing code you are working on, so we can gradually move to a consistent code base.
