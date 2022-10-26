@@ -11,22 +11,26 @@ When ready, create a pull request towards the `development` branch.
 ## Pull requests, review, and merge protocol
 1. Before a pull request is reviewed, the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
-3. Once all reviewers have approved the pull request it can be merged. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches.
+3. Once all reviewers have approved the pull request it can be merged. In principle the last reviewer to approve should do the merge immediately. However, if this does not work because, e.g., a final (minor) change is requested, or they forget, someone else can take over the responsibility. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches.
 
 ### General
 1. Ensure the branch to be merged is up-to-date with the target branch.
 2. Ensure the pipelines run successfully.
 3. Ensure a useful and accurate entry to the `CHANGELOG.md` is included.
-4. In case of changes to the `environment.yml` make sure it installs correctly. Since the environment can affect all code, make sure ALL tests, examples, etc. run correctly.
-5. Make sure the `sparkle` conda environment is installed and active when running checks and tests.
+4. Ensure tests are adapted or new ones are created to cover possible new functionalities.
+5. In case of changes to the `environment.yml` make sure it installs correctly. Since the environment can affect all code, make sure ALL tests, examples, etc. run correctly.
+6. Make sure the `sparkle` conda environment is installed and active when running checks and tests.
 
 ### Code style
+The coding style consistency is a work in progress, and existing code may not adhere to the points below. Please favour the style discussed here over the style of whatever existing code you are working on, so we can gradually move to a consistent code base.
 1. Ensure the code is easily readable and understandable.
 2. Ensure comments explain code that cannot be written in an easily readable and understandable way.
 3. Make sure the code style rules pass by running `flake8`.
 4. Ensure useful and accurate docstrings are included.
 5. Ensure useful and accurate type hints are included.
 6. Use fstrings over other string formatting.
+7. Use pathlib over other path manipulators.
+8. Prefer interpretable function names over shorter ones.
 
 ### Testing
 1. Make sure the unit tests pass by running `pytest`.
