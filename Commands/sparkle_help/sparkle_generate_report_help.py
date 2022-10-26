@@ -530,7 +530,7 @@ def generate_report(test_case_directory: str = None):
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
     print(f'Report is placed at: {report_path}')
-    sl.add_output(report_path, 'Sparkle portfolio selector report')
+    sl.add_output(str(report_path), 'Sparkle portfolio selector report')
 
     return
 
