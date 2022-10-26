@@ -1,2 +1,4 @@
---mem-per-cpu=500
---partition=debug
+--mem-per-cpu=
+--partition=
+--exclude=
+--nodelist=
