@@ -73,6 +73,8 @@ Notable changes to Sparkle will be documented in this file.
 - Experimental implementation for integration with runrunner to run the solvers on a Slurm clusters. Old style Slurm use is still the default, but optionally Slurm can be used through runrunner with --run-on=slurm_rr
 
 ### Changed
+- Include linting for docstrings with `flake8-docstrings` and make the code comply.
 
 ### Fixed
+- Fix an issue with the default partition in the Slurm settings causing execution with Slurm to fail on systems where this partition does not exist.
 
