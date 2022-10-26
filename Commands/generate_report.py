@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to generate a report for an executed experiment.'''
 
 import os
 import sys
@@ -20,6 +21,7 @@ from sparkle_help import sparkle_generate_report_for_parallel_portfolio_help as 
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser(
         description=('Without any arguments a report for the most recent algorithm '
                      'selection or algorithm configuration procedure is generated.'),
@@ -88,17 +90,21 @@ def parser_function():
 
 
 def generate_task_run_status():
+    '''Generate run status info files for report generation Slurm batch jobs.'''
     key_str = 'generate_report'
     task_run_status_path = 'Tmp/SBATCH_Report_Jobs/' + key_str + '.statusinfo'
     status_info_str = 'Status: Running\n'
     sfh.write_string_to_file(task_run_status_path, status_info_str)
+
     return
 
 
 def delete_task_run_status():
+    '''Remove run status info files for report generation Slurm batch jobs.'''
     key_str = 'generate_report'
     task_run_status_path = 'Tmp/SBATCH_Report_Jobs/' + key_str + '.statusinfo'
     os.system('rm -rf ' + task_run_status_path)
+
     return
 
 

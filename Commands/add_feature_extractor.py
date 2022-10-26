@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to add a feature extractor to the Sparkle platform.'''
 
 import os
 import sys
@@ -14,6 +15,7 @@ from sparkle_help import sparkle_settings
 
 
 def _check_existence_of_test_instance_list_file(extractor_directory: str):
+    '''Check whether a file exists with the list of test instances.'''
     if not os.path.isdir(extractor_directory):
         return False
 
@@ -29,6 +31,7 @@ def _check_existence_of_test_instance_list_file(extractor_directory: str):
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(

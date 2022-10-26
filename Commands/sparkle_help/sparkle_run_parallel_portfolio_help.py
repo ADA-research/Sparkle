@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-
+'''Helper functions for the execution of a parallel portfolio.'''
 
 import shutil
 import os
@@ -41,10 +41,10 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str):
 
     if line.rfind(';') != -1:
         sleep_seconds = line[:line.rfind(';')]
-        sleep_seconds = int(sleep_seconds[sleep_seconds.rfind(' ')+1:])
+        sleep_seconds = int(sleep_seconds[sleep_seconds.rfind(' ') + 1:])
         now = now + datetime.timedelta(seconds=sleep_seconds)
         job_running_time = job_running_time + datetime.timedelta(seconds=sleep_seconds)
-        job_nr = line[line.rfind(';')+2:]
+        job_nr = line[line.rfind(';') + 2:]
     else:
         # TODO: Not sure what the intend of checking job numbers in this function was.
         # TODO: Writing a warning as job_nr for now, since this is a logging function,
@@ -69,7 +69,7 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str):
         job_duration = str(jobtime_to_seconds(job_duration))
 
     if '_' in job_nr:
-        job_nr = job_nr[job_nr.rfind('_')+1:]
+        job_nr = job_nr[job_nr.rfind('_') + 1:]
 
     with open(log_file, 'a+') as outfile:
         fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
@@ -82,8 +82,7 @@ def check_sbatch_for_errors(sbatch_script_path: Path):
     '''Check sbatch files for errors. If found, stop execution.'''
     error_lines = [ \
         # ERROR: [...] not found [...]
-        'ERROR: ',
-        ]
+        'ERROR: ']
 
     sbatch_script_path.with_suffix('.txt')
 
@@ -125,7 +124,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             for solver_instance in solver_instance_list:
                 if (os.path.isdir(directories_path)
                         and directories.startswith(
-                            solver_instance[:len(temp_solver)+1])):
+                            solver_instance[:len(temp_solver) + 1])):
                     shutil.rmtree(directories_path)
 
     # Removes or moves all remaining files
@@ -179,7 +178,7 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
     for result in results:
         if '_' in finished_job_array_nr:
             finished_job_array_nr = finished_job_array_nr[
-                finished_job_array_nr.rfind('_')+1:]
+                finished_job_array_nr.rfind('_') + 1:]
 
         if result.startswith(solver_instance_list[int(finished_job_array_nr)]):
             result_file_path = solutions_dir + result
@@ -195,8 +194,8 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
 def cancel_remaining_jobs(logging_file: str, job_id: str,
                           finished_solver_id_list: list[str],
                           portfolio_size: int, solver_instance_list: list[str],
-                          pending_job_with_new_cutoff: dict[str, int] = {}) -> (
-                          dict[str, list[str]], dict[str, int]):
+                          pending_job_with_new_cutoff: dict[str, int] = {}
+                          ) -> (dict[str, list[str]], dict[str, int]):
     '''Cancel jobs past the cutoff, update cutoff time for jobs that should continue.
 
     The remaining_jobs dict is returned, containing a jobid str as key, and a (two
@@ -236,8 +235,8 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
         # finishing time
         for finished_solver_id in finished_solver_id_list:
             # if job in the same array segment
-            if (int(int(job[job.find('_')+1:])/portfolio_size)
-                    == int(int(finished_solver_id)/portfolio_size)):
+            if (int(int(job[job.find('_') + 1:]) / portfolio_size)
+                    == int(int(finished_solver_id) / portfolio_size)):
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
                 if (sgh.settings.get_paraport_process_monitoring()
@@ -328,7 +327,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                 jobid = jobs.strip().split()[0]
 
                 if jobid.startswith(job_id):
-                    unfinished_solver_list.append(jobid[jobid.find('_')+1:])
+                    unfinished_solver_list.append(jobid[jobid.find('_') + 1:])
 
             finished_solver_list = [item for item in current_solver_list
                                     if item not in unfinished_solver_list]
@@ -370,8 +369,8 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
 
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
-                if (sgh.settings.get_paraport_process_monitoring() ==
-                        ProcessMonitoring.EXTENDED):
+                if (sgh.settings.get_paraport_process_monitoring()
+                        == ProcessMonitoring.EXTENDED):
                     if jobid in pending_job_with_new_cutoff and jobstatus == 'R':
                         # Job is in a portfolio with a solver that already has finished
                         # and has to be cancelled in the finishing time of that solver
@@ -383,7 +382,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
 
                 if (jobid.startswith(job_id)):
                     # add the job to the current solver list
-                    current_solver_list.append(jobid[jobid.find('_')+1:])
+                    current_solver_list.append(jobid[jobid.find('_') + 1:])
 
     return finished_solver_list, pending_job_with_new_cutoff, started
 
@@ -427,7 +426,7 @@ def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: i
 
 def generate_sbatch_job_list(solver_list: list[str], instance_path_list: list[str],
                              num_jobs: int) -> (list[str], int, list[str], list[str]):
-    '''Generates a list of jobs to be executed in the sbatch script.
+    '''Generate a list of jobs to be executed in the sbatch script.
 
     Returns parameters, new_num_jobs, solver_instance_list, temp_solvers
     solver_instance_list is a list of str containing the solver (including seed
@@ -449,7 +448,7 @@ def generate_sbatch_job_list(solver_list: list[str], instance_path_list: list[st
                 tmp_solver_instances.append(f'{solver_name}_seed_')
                 new_num_jobs = new_num_jobs + int(seed) - 1
 
-                for instance in range(1, int(seed)+1):
+                for instance in range(1, int(seed) + 1):
                     commandline = (f' --instance {str(instance_path)} --solver '
                                    f'{str(solver_path)} --performance-measure '
                                    f'{performance_measure.name} --seed {str(instance)}')
@@ -527,8 +526,8 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                 if (finished_instances_dict[instance][1] == float(0)):
                     finished_instances_dict[instance][1] = solving_time
 
-                    if (solving_time >
-                            float(sgh.settings.get_general_target_cutoff_time())):
+                    if (solving_time
+                            > float(sgh.settings.get_general_target_cutoff_time())):
                         print(f'{str(instance)} has reached the cutoff time without '
                               'being solved.')
                     else:
@@ -546,13 +545,14 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
 
                             for lines in range(0, nr_of_lines_raw_content):
                                 if '\ts ' in raw_content[
-                                        nr_of_lines_raw_content-lines-1]:
+                                        nr_of_lines_raw_content - lines - 1]:
                                     results_line = raw_content[
-                                        nr_of_lines_raw_content-lines-1]
+                                        nr_of_lines_raw_content - lines - 1]
                                     print('result = ' + str(results_line[
-                                        results_line.find('s')+2:].strip()))
+                                        results_line.find('s') + 2:].strip()))
                                     finished_instances_dict[instance][0] = str(
-                                        results_line[results_line.find('s')+2:].strip())
+                                        results_line[results_line.find('s') + 2:].strip()
+                                    )
                                     break
 
                 # A solver has an improved performance time on an instance
@@ -626,7 +626,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                 == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
-                                               num_jobs/len(instances))
+                                               num_jobs / len(instances))
             now = datetime.datetime.now()
             current_time = now.strftime('%H:%M:%S')
 
@@ -658,7 +658,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                 else:
                     # Wait until the last few seconds before checking often
                     if not wait_cutoff_time:
-                        n_seconds = sgh.settings.get_general_target_cutoff_time()-6
+                        n_seconds = sgh.settings.get_general_target_cutoff_time() - 6
                         sjh.sleep(n_seconds)
                         wait_cutoff_time = True
                         n_seconds = 1  # Start checking often
