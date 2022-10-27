@@ -122,6 +122,8 @@ if __name__ == '__main__':
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
         print('one pcs file detected, this is a configurable solver')
 
+    sfh.check_file_is_executable(Path(solver_directory, sgh.sparkle_smac_wrapper))
+
     print(f'Adding solver {sfh.get_last_level_directory_name(solver_directory)} '
           'done!')
 

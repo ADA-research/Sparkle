@@ -485,8 +485,12 @@ def rmfile(file_name: Path):
     return
 
 
-def check_file_is_executable(file_name: Path) -> bool:
-    if os.access(file_name, os.X_OK):
-        return True
+def check_file_is_executable(file_name: Path):
+    if not os.access(file_name, os.X_OK):
+        print(
+            f'Error: The smac wrapper file {sgh.sparkle_smac_wrapper} is not '
+            'executable.\nAdd execution permissions to the file to run the configurator.'
+        )
+        sys.exit()
 
-    return False
+    return

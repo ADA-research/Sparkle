@@ -196,16 +196,6 @@ if __name__ == '__main__':
         )
         sys.exit()
 
-    # Check if smac wrapper file is executable
-    if not sfh.check_file_is_executable(
-        Path(solver_directory, sgh.sparkle_smac_wrapper)
-    ):
-        print(
-            f'Error: The smac wrapper file {sgh.sparkle_smac_wrapper} is not '
-            'executable.\nAdd execution permissions to the file to run the configurator.'
-        )
-        sys.exit()
-
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
     scsh.clean_configuration_directory(solver_name, instance_set_train_name)
