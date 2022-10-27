@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Command names and dependency associations.'''
 
 from enum import Enum
 
 
 class CommandName(str, Enum):
+    '''Enum of all command names.'''
+
     ABOUT = 'ABOUT'
     ADD_FEATURE_EXTRACTOR = 'ADD_FEATURE_EXTRACTOR'
     ADD_INSTANCES = 'ADD_INSTANCES'
@@ -36,6 +39,7 @@ class CommandName(str, Enum):
 
     @staticmethod
     def from_str(command_name: str):
+        '''Convert a given str to a CommandName.'''
         return CommandName(command_name)
 
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for parallel job execution.'''
 
 import os
 from sparkle_help import sparkle_global_help as sgh

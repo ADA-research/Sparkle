@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to remove an instance set from the Sparkle platform.'''
 
 import os
 import sys
@@ -13,6 +14,7 @@ from sparkle_help import sparkle_instances_help as sih
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'instances_path',
@@ -25,6 +27,7 @@ def parser_function():
         action='store_true',
         help='if given instances_path is used as a nickname for the instance set',
     )
+
     return parser
 
 

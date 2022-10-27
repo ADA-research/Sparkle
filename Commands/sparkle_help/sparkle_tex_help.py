@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for LaTeX and bibTeX.'''
 
 from shutil import which
 from pathlib import Path
