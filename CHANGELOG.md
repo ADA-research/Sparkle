@@ -78,3 +78,5 @@ Notable changes to Sparkle will be documented in this file.
 ### Fixed
 - Fix an issue with the default partition in the Slurm settings causing execution with Slurm to fail on systems where this partition does not exist.
 
+### Removed
+- Removed dead code.
