@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command for the computation of the marginal contributions.'''
 
 import sys
 import argparse
@@ -16,6 +17,7 @@ from sparkle_help import argparse_custom as ac
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -54,6 +56,7 @@ def parser_function():
 
 
 def compute_perfect(flag_recompute: bool = False) -> List[Tuple[str, float]]:
+    '''Compute the marginal contribution for the perfect portfolio selector.'''
     print(
         "Start computing each solver's marginal contribution to perfect selector ..."
     )
@@ -67,6 +70,7 @@ def compute_perfect(flag_recompute: bool = False) -> List[Tuple[str, float]]:
 
 
 def compute_actual(flag_recompute: bool = False) -> List[Tuple[str, float]]:
+    '''Compute the marginal contribution for the actual portfolio selector.'''
     print(
         "Start computing each solver's marginal contribution to actual selector ..."
     )
@@ -80,8 +84,9 @@ def compute_actual(flag_recompute: bool = False) -> List[Tuple[str, float]]:
 
 
 def compute_marginal_contribution(
-    flag_compute_perfect: bool, flag_compute_actual: bool, flag_recompute: bool
-):
+        flag_compute_perfect: bool, flag_compute_actual: bool,
+        flag_recompute: bool) -> None:
+    '''Compute the marginal contribution.'''
     if flag_compute_perfect:
         compute_perfect(flag_recompute)
     elif flag_compute_actual:

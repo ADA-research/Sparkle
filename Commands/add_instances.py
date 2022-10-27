@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to add an instance set to the Sparkle platform.'''
 
 import os
 import sys
@@ -19,6 +20,7 @@ from sparkle_help import sparkle_instances_help as sih
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'instances_path',

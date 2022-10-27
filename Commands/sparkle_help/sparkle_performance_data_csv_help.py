@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Module to manage performance data CSV files and common operations on them.'''
 
 try:
     from sparkle_help import sparkle_global_help as sgh
@@ -10,13 +11,18 @@ except ImportError:
 
 
 class SparklePerformanceDataCSV(scsv.SparkleCSV):
-    def __init__(self, csv_filepath):
+    '''Class to manage performance data CSV files and common operations on them.'''
+
+    def __init__(self, csv_filepath) -> None:
+        '''Initialise a SparklePerformanceDataCSV object.'''
         scsv.SparkleCSV.__init__(self, csv_filepath)
         self.solver_list = sgh.solver_list
         return
 
     def get_job_list(self, rerun: bool = False) -> list[tuple[str, str]]:
-        ''' Get a list of tuple[instance, solver] to run from the performance data
+        '''Return a list of performance computation jobs thare are to be done.
+
+        Get a list of tuple[instance, solver] to run from the performance data
         csv file. If rerun is False (default), get only the tuples that don't have a
         value in the table, else (True) get all the tuples.
         '''
@@ -28,6 +34,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return df.index.tolist()
 
     def get_list_recompute_performance_computation_job(self):
+        '''Return a list of performance computations to re-do per instance and solver.'''
         list_recompute_performance_computation_job = []
         list_row_name = self.list_rows()
         list_column_name = self.list_columns()
@@ -39,6 +46,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return list_recompute_performance_computation_job
 
     def get_list_remaining_performance_computation_job(self):
+        '''Return a list of needed performance computations per instance and solver.'''
         list_remaining_performance_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
         for row_name in self.list_rows():
@@ -52,6 +60,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return list_remaining_performance_computation_job
 
     def get_list_processed_performance_computation_job(self):
+        '''Return a list of existing performance values per instance and solver.'''
         list_processed_performance_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
         for row_name in self.list_rows():
@@ -65,6 +74,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return list_processed_performance_computation_job
 
     def get_maximum_performance_per_instance(self) -> list[float]:
+        '''Return a list with the highest performance per isntance.'''
         scores = []
 
         for instance in self.list_rows():
@@ -83,6 +93,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def calc_score_of_solver_on_instance(self, solver: str, instance: str,
                                          num_instances: int, num_solvers: int,
                                          capvalue: float = None) -> float:
+        '''Return the performance of a solver on an instance.'''
         if capvalue is None:
             capvalue = sgh.settings.get_general_target_cutoff_time()
 
@@ -101,6 +112,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def calc_virtual_best_score_of_portfolio_on_instance(
             self, instance: str, num_instances: int, num_solvers: int,
             capvalue: float = None) -> float:
+        '''Return the VBS performance for a specific instance.'''
         # If capvalue is not set the objective is RUNTIME, so use the cutoff time as
         # capvalue
         if capvalue is None:
@@ -123,6 +135,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def calc_virtual_best_performance_of_portfolio(
             self, num_instances: int, num_solvers: int,
             capvalue_list: list[float] = None) -> float:
+        '''Return the overall VBS performance.'''
         virtual_best_performance = 0
 
         for instance_idx in range(0, len(self.list_rows())):
@@ -140,6 +153,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return virtual_best_performance
 
     def get_dict_vbs_penalty_time_on_each_instance(self):
+        '''Return a dictionary of penalised runtimes and instances for the VBS.'''
         mydict = {}
         for instance in self.list_rows():
             vbs_penalty_time = sgh.settings.get_penalised_time()
@@ -152,6 +166,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return mydict
 
     def calc_vbs_penalty_time(self):
+        '''Return the penalised performance of the VBS.'''
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
 
@@ -176,6 +191,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return vbs_penalty_time
 
     def get_solver_penalty_time_ranking_list(self):
+        '''Return a list with solvers ranked by penalised runtime.'''
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
 
@@ -192,7 +208,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
                     this_penalty_time += this_run_time
                 else:
                     this_penalty_time += penalty_time_each_run
-            this_penalty_time = this_penalty_time/this_count
+            this_penalty_time = this_penalty_time / this_count
             solver_penalty_time_ranking_list.append([solver, this_penalty_time])
 
         solver_penalty_time_ranking_list.sort(

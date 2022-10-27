@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for report generation.'''
 
 import os
 import sys
@@ -17,22 +18,32 @@ import compute_marginal_contribution as cmc
 
 
 def underscore_for_latex(string: str) -> str:
+    '''Return the input str with the underscores escaped for use in LaTeX.'''
     updated_string = string.replace('_', '\\_')
 
     return updated_string
 
 
 def get_custom_commands():
+    '''Return an empty str.
+
+    NOTE: Re-evaluate the need for this.
+    '''
     str_value = r''
     return str_value
 
 
 def get_sparkle():
+    '''Return Sparkle as LaTeX str.
+
+    NOTE: Consider deprecating, could easily be in the LaTeX tempalte itself.
+    '''
     str_value = r'\emph{Sparkle}'
     return str_value
 
 
-def get_num_solvers():
+def get_num_solvers() -> str:
+    '''Return the number of solvers.'''
     num_solvers = len(sgh.solver_list)
     str_value = str(num_solvers)
 
@@ -44,6 +55,7 @@ def get_num_solvers():
 
 
 def get_solver_list():
+    '''Return the list of solvers as LaTeX str.'''
     str_value = r''
     solver_list = sgh.solver_list
     for solver_path in solver_list:
@@ -52,7 +64,8 @@ def get_solver_list():
     return str_value
 
 
-def get_num_feature_extractors():
+def get_num_feature_extractors() -> str:
+    '''Return the number of feature extractors.'''
     num_feature_extractors = len(sgh.extractor_list)
     str_value = str(num_feature_extractors)
 
@@ -64,6 +77,7 @@ def get_num_feature_extractors():
 
 
 def get_feature_extractor_list():
+    '''Return the list of feature extractors as LaTeX str.'''
     str_value = r''
     extractor_list = sgh.extractor_list
     for extractor_path in extractor_list:
@@ -72,7 +86,8 @@ def get_feature_extractor_list():
     return str_value
 
 
-def get_num_instance_classes():
+def get_num_instance_classes() -> str:
+    '''Return the number of instance sets.'''
     list_instance_class = []
     instance_list = sgh.instance_list
     for instance_path in instance_list:
@@ -89,6 +104,7 @@ def get_num_instance_classes():
 
 
 def get_instance_class_list():
+    '''Return the list of instance sets as LaTeX str.'''
     str_value = r''
     list_instance_class = []
     dict_number_of_instances_in_instance_class = {}
@@ -110,16 +126,19 @@ def get_instance_class_list():
 
 
 def get_feature_computation_cutoff_time():
+    '''Return the feature computation ,cutoff time as str.'''
     str_value = str(sgh.settings.get_general_extractor_cutoff_time())
     return str_value
 
 
-def get_performance_computation_cutoff_time():
+def get_performance_computation_cutoff_time() -> str:
+    '''Return the performance computation cutoff time as str.'''
     str_value = str(sgh.settings.get_general_target_cutoff_time())
     return str_value
 
 
 def get_solver_perfect_ranking_list():
+    '''Return solvers in the VBS ranked by marginal contribution as LaTeX str.'''
     rank_list = cmc.compute_perfect()
     str_value = r''
 
@@ -133,6 +152,7 @@ def get_solver_perfect_ranking_list():
 
 
 def get_solver_actual_ranking_list():
+    '''Return solvers in the selector ranked by marginal contribution as LaTeX str.'''
     rank_list = cmc.compute_actual()
     str_value = r''
 
@@ -146,6 +166,7 @@ def get_solver_actual_ranking_list():
 
 
 def get_par10_ranking_list():
+    '''Return the list of solvers ranked by PAR10 as LaTeX str.'''
     str_value = ''
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -162,6 +183,7 @@ def get_par10_ranking_list():
 
 
 def get_vbs_par10():
+    '''Return the PAR10 of the VBS over a set of instances.'''
     str_value = r''
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -173,8 +195,7 @@ def get_vbs_par10():
 
 def get_actual_par10() -> str:
     '''
-    Computes the mean performance over the individual performances over a set of
-    instances.
+    Return the PAR10 of the selector over a set of instances.
 
     @return string formatted mean performance.
     '''
@@ -184,6 +205,7 @@ def get_actual_par10() -> str:
 
 
 def get_dict_sbs_penalty_time_on_each_instance():
+    '''Return a dictionary with the penalised performance of the SBS on each instance.'''
     mydict = {}
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -203,6 +225,7 @@ def get_dict_sbs_penalty_time_on_each_instance():
 
 
 def get_dict_vbs_penalty_time_on_each_instance():
+    '''Return a dictionary with the penalised performance of the VBS on each instance.'''
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
@@ -211,7 +234,7 @@ def get_dict_vbs_penalty_time_on_each_instance():
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict:
     '''
-    Makes a dictionary with the performance of the portfolio selector on each instance
+    Return a dictionary with the performance of the portfolio selector on each instance.
 
     @return A dictionary with for each instance the portfolio selector's performance
     '''
@@ -234,7 +257,8 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict:
 
 
 def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
-    '''
+    '''Create a plot comparing the selector and the SBS and return as LaTeX str.
+
     Creates a comparison plot of performance between the portfolio selector and the
     single best solver for each instance.
     @return the LaTeX code to include the figure.
@@ -280,7 +304,8 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
 
 
 def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
-    '''
+    '''Create a plot comparing the selector and the VBS and return as LaTeX str.
+
     Creates a comparison plot of performance between the portfolio selector and the
     virtual best solver for each instance.
     @return the LaTeX code to include the figure.
@@ -318,13 +343,15 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
     return str_value
 
 
-def get_test_instance_class(test_case_directory: str):
+def get_test_instance_class(test_case_directory: str) -> str:
+    '''Return the name of the test instance set.'''
     str_value = sfh.get_last_level_directory_name(test_case_directory)
     str_value = r'\textbf{' + str_value + r'}'
     return str_value
 
 
-def get_num_instance_in_test_instance_class(test_case_directory: str):
+def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
+    '''Return the number of instances in a test instance set.'''
     str_value = ''
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + 'sparkle_performance_data.csv')
@@ -332,7 +359,8 @@ def get_num_instance_in_test_instance_class(test_case_directory: str):
     return str_value
 
 
-def get_test_actual_par10(test_case_directory: str):
+def get_test_actual_par10(test_case_directory: str) -> str:
+    '''Return the true PAR10 score on a test set.'''
     str_value = ''
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + 'sparkle_performance_data.csv')
@@ -357,6 +385,7 @@ def get_test_actual_par10(test_case_directory: str):
 
 
 def get_dict_variable_to_value(test_case_directory: str = None):
+    '''Return a dict matching variables in the latex template with their values.'''
     mydict = {}
 
     variable = 'customCommands'
@@ -453,6 +482,7 @@ def get_dict_variable_to_value(test_case_directory: str = None):
 
 
 def generate_report(test_case_directory: str = None):
+    '''Generate a report for algorithm selection.'''
     # Include results on the test set if a test case directory is given
     if test_case_directory is not None:
         if not os.path.exists(test_case_directory):
@@ -500,7 +530,7 @@ def generate_report(test_case_directory: str = None):
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
     print(f'Report is placed at: {report_path}')
-    sl.add_output(report_path, 'Sparkle portfolio selector report')
+    sl.add_output(str(report_path), 'Sparkle portfolio selector report')
 
     return
 
@@ -519,7 +549,7 @@ def generate_comparison_plot(points: list,
                              magnitude_lines: int = sgh.sparkle_maximum_int,
                              cwd=None):
     '''
-    Helper function to create comparison plots between two different solvers/portfolios.
+    Create comparison plots between two different solvers/portfolios.
 
     Arguments:
     points: list of points which represents with the performance results of
@@ -545,7 +575,6 @@ def generate_comparison_plot(points: list,
     cwd: directory path to place the figure and its intermediate files in (default:
     current working directory)
     '''
-
     pwd = os.getcwd()
     if cwd is not None:
         os.chdir(cwd)
@@ -580,8 +609,8 @@ def generate_comparison_plot(points: list,
         max_value = (max_point_value * limit_max if max_point_value > 0
                      else max_point_value * (1 / limit_max))
     elif limit == 'magnitude':
-        min_value = 10 ** (np.floor(np.log10(min_point_value))-limit_min)
-        max_value = 10 ** (np.ceil(np.log10(max_point_value))+limit_max)
+        min_value = 10 ** (np.floor(np.log10(min_point_value)) - limit_min)
+        max_value = 10 ** (np.ceil(np.log10(max_point_value)) + limit_max)
 
     if scale == 'log' and np.min(points) <= 0:
         raise Exception('Cannot plot negative and zero values on a log scales')
@@ -616,7 +645,7 @@ def generate_comparison_plot(points: list,
             for order in range(magnitude_lines):
                 order += 1
                 min_shift = min_value * 10 ** order
-                max_shift = 10**(np.log10(max_value)-order)
+                max_shift = 10**(np.log10(max_value) - order)
                 if min_shift >= max_value:  # Outside plot
                     # Only print magnitude lines if the fall within the visible plotting
                     # area.

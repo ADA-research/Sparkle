@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Automatically generate a gnuplot script for algorithm configuration.'''
 
 import os
 from os.path import abspath, dirname, join
@@ -16,7 +17,7 @@ if __name__ == '__main__':
 
     data_solver_configured_vs_default_filename = sys.argv[1]
     penalty_time = sys.argv[2]
-    upper_bound = float(penalty_time)*1.5
+    upper_bound = float(penalty_time) * 1.5
     lower_bound = 0.01
     default_name = sys.argv[3]
     configured_name = sys.argv[4]

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to save the current Sparkle platform in a .zip file.'''
 
 import sys
 import argparse
@@ -8,6 +9,7 @@ from sparkle_help import sparkle_logging as sl
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     return parser
 

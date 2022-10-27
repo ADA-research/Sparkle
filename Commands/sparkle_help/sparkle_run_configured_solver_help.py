@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for the execution of a configured solver.'''
 
 import sys
 from pathlib import Path

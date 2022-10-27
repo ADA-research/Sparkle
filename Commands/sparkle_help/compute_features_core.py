@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Compute features for an instance, only for internal calls from Sparkle.'''
 
 import os
 import time
@@ -114,7 +115,7 @@ if __name__ == '__main__':
         f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}]")
     end_time_str = (
         f"[End Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}]")
-    run_time_str = '[Actual Run Time: ' + str(end_time-start_time) + ' second(s)]'
+    run_time_str = '[Actual Run Time: ' + str(end_time - start_time) + ' second(s)]'
     result_string_str = '[Result String: ' + result_string + ']'
 
     log_str = (f'{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, '

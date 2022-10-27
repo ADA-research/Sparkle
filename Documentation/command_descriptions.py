@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+'''Automatic extraction of command list from their implementations.'''
+
 import os
 
 if __name__ == '__main__':

@@ -23,7 +23,11 @@ pipelines:
             name: Lint code
             script:
               # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
+              # flake8-quotes and pep8-naming are plugins for flake8 that are automatically used when installed
               - pip install flake8==4.0.1
+              - pip install flake8-docstrings==1.6.0
+              - pip install flake8-quotes==3.3.1
+              - pip install pep8-naming==0.12.1
               - flake8
               
 definitions:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Sparkle run default configuration template.'''
 
 # ### Sparkle default wrapper template; used for algorithm selection ###
 
@@ -10,8 +11,8 @@ import fcntl
 import sys
 
 
-# Print a command line call for the target algorithm with a given instance file
 def print_command(instance_file, seed_str: str, cutoff_time_str: str):
+    '''Print a command line call for the target algorithm with a given instance file.'''
     # TODO: Change executable_name to the name of your solver executable
     executable_name = 'MetaVC'
     # TODO: Change param_str to the static parameters for your solver (can be empty)
@@ -31,13 +32,17 @@ def print_command(instance_file, seed_str: str, cutoff_time_str: str):
     print(command_line)
 
 
-# Parse problem specific output and print it for Sparkle; or ask Sparkle to use it's own
-# parser (SAT only)
-# TODO: [if optimising for quality] Process algorithm output to determine the performance
-# TODO: [if optimising for runtime] This function can just print status SUCCESS, but
-# preferably results are parsed to detect and report e.g. CRASHED
-# TODO: [optional] Determine algorithm run status based on output
 def print_output(terminal_output_file: str):
+    '''Parse problem specific output and print it for Sparkle.
+
+    Alternatively ask Sparkle to use it's own parser (SAT only)
+    '''
+    # TODO: [if optimising for quality]
+    # Process algorithm output to determine the performance
+    # TODO: [if optimising for runtime] This function can just print status SUCCESS, but
+    # preferably results are parsed to detect and report e.g. CRASHED
+    # TODO: [optional] Determine algorithm run status based on output
+
     # Read solution quality from file
     infile = open(terminal_output_file, 'r')
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)

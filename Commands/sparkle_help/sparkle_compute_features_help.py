@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for feature data computation.'''
 
 import os
 import sys
@@ -20,6 +21,7 @@ except ImportError:
 
 def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path,
                                                      extractor_path, result_path):
+    '''Create a CSV file with the right number of commas and rows.'''
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
     zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
 
@@ -35,6 +37,7 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_
 
 
 def computing_features(feature_data_csv_path, mode):
+    '''Compute features for all instance and feature extractor combinations.'''
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     if mode == 1:
         list_feature_computation_job = (
@@ -81,13 +84,16 @@ def computing_features(feature_data_csv_path, mode):
             basic_part = (f'Tmp/{sfh.get_last_level_directory_name(extractor_path)}_'
                           f'{sfh.get_last_level_directory_name(instance_path)}_'
                           f'{sparkle_basic_help.get_time_pid_random_string()}')
-            result_path = basic_part + r'.rawres'
-            err_path = basic_part + r'.err'
-            runsolver_watch_data_path = basic_part + r'.log'
-            runsolver_watch_data_path_option = '-w ' + runsolver_watch_data_path
+            result_path = f'{basic_part}.rawres'
+            err_path = f'{basic_part}.err'
+            runsolver_watch_data_path = f'{basic_part}.log'
+            runsolver_watch_data_path_option = f'-w {runsolver_watch_data_path}'
+            runsolver_value_data_path = result_path.replace('.rawres', '.val')
+            runsolver_value_data_path_option = f'-v {runsolver_value_data_path}'
 
             command_line = (f'{runsolver_path} {cutoff_time_each_run_option} '
-                            f'{runsolver_watch_data_path_option} {extractor_path}/'
+                            f'{runsolver_watch_data_path_option} '
+                            f'{runsolver_value_data_path_option} {extractor_path}/'
                             f'{sgh.sparkle_run_default_wrapper} {extractor_path}/ '
                             f'{instance_path} {result_path} 2> {err_path}')
 
@@ -98,6 +104,10 @@ def computing_features(feature_data_csv_path, mode):
 
             try:
                 os.system(command_line)
+                with open(runsolver_value_data_path) as file:
+                    if 'TIMEOUT=true' in file.read():
+                        print(f'****** WARNING: Feature vector computing on instance '
+                              f'{instance_path} timed out! ******')
             except Exception:
                 if not os.path.exists(result_path):
                     sfh.create_new_empty_file(result_path)
@@ -116,11 +126,13 @@ def computing_features(feature_data_csv_path, mode):
 
             feature_data_csv.combine(tmp_fdcsv)
 
-            command_line = 'rm -f ' + result_path
+            command_line = f'rm -f {result_path}'
             os.system(command_line)
-            command_line = 'rm -f ' + err_path
+            command_line = f'rm -f {err_path}'
             os.system(command_line)
-            command_line = 'rm -f ' + runsolver_watch_data_path
+            command_line = f'rm -f {runsolver_watch_data_path}'
+            os.system(command_line)
+            command_line = f'rm -f {runsolver_value_data_path}'
             os.system(command_line)
 
             print(f'Executing Progress: {str(current_job_num)} out of '
@@ -137,6 +149,7 @@ def computing_features(feature_data_csv_path, mode):
 
 
 def update_feature_data_id():
+    '''Update the feature data ID.'''
     # Get current fd_id
     fd_id = get_feature_data_id()
 
@@ -153,6 +166,7 @@ def update_feature_data_id():
 
 
 def get_feature_data_id() -> int:
+    '''Return the current feature data ID.'''
     fd_id = -1
     fd_id_path = sgh.feature_data_id_path
 
