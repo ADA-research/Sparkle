@@ -546,6 +546,7 @@ def rmfile(file_name: Path):
 
 
 def check_file_is_executable(file_name: Path):
+    '''Check if the given file is executable and create an error if not.'''
     if not os.access(file_name, os.X_OK):
         print(
             f'Error: The smac wrapper file {sgh.sparkle_smac_wrapper} is not '

@@ -508,7 +508,7 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
 
 
 def check_configuration_permission_error(solver_name: str, instance_set_name: str):
-    '''Check the files for solver permission errors'''
+    '''Check the files for solver permission errors.'''
     smac_results_dir = Path(f'{sgh.smac_dir}/results/{solver_name}_{instance_set_name}/')
 
     # Get the name of the first file in the directory
