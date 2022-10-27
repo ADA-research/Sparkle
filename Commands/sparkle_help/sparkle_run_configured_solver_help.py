@@ -153,9 +153,6 @@ def run_configured_solver(instance_path_list: list[Path]):
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
 
-    # Check permissions for sparkle_smac_wrapper
-    sfh.check_file_is_executable(sgh.sparkle_smac_wrapper)
-
     # a) Create cmd_solver_call that could call sparkle_smac_wrapper
     instance_path_str = ' '.join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
