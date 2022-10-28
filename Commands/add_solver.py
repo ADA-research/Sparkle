@@ -98,6 +98,8 @@ if __name__ == '__main__':
               'a postive integer must be used. Stopping execution.')
         sys.exit(0)
 
+    sfh.check_file_is_executable(Path(solver_source, sgh.sparkle_smac_wrapper))
+
     # Start add solver
     last_level_directory = ''
     last_level_directory = sfh.get_last_level_directory_name(solver_source)

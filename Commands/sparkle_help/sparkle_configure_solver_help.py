@@ -507,10 +507,31 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
     return
 
 
+def check_configuration_permission_error(solver_name: str, instance_set_name: str):
+    '''Check the files for solver permission errors.'''
+    smac_results_dir = Path(f'{sgh.smac_dir}/results/{solver_name}_{instance_set_name}/')
+
+    # Get the name of the first file in the directory
+    # If there is an error, it will be in all files, so checking one is sufficient
+    filename = next(Path(smac_results_dir / f) for f in os.listdir(smac_results_dir)
+                    if Path(smac_results_dir / f)).is_file()
+
+    with open(filename, 'r') as file:
+        content = file.read()
+        if 'exec failed: Permission denied' in content:
+            print('ERROR: The solver configuration was not succesfull so the validation '
+                  'could not be completed. This is due to missing execution permissions '
+                  'for the solver executable.')
+            sys.exit(-1)
+
+    print(file)
+
+
 def check_validation_prerequisites(solver_name: str, instance_set_name: str) -> None:
     '''Validate prerequisites for validation are available.'''
     check_configuration_exists(solver_name, instance_set_name)
     check_instance_list_file_exist(solver_name, instance_set_name)
+    check_configuration_permission_error(solver_name, instance_set_name)
 
     return
 
