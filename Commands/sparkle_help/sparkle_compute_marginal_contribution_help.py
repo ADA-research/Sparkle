@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for marginal contribution computation.'''
 
 import os
 import csv
 from pathlib import Path
-from typing import List
-from typing import Tuple
 
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_file_help as sfh
@@ -19,7 +18,8 @@ from sparkle_help import sparkle_logging as sl
 from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
-def read_marginal_contribution_csv(path: Path) -> List[Tuple[str, float]]:
+def read_marginal_contribution_csv(path: Path) -> list[tuple[str, float]]:
+    '''Read the marginal contriutions from a CSV file.'''
     content = []
 
     with path.open('r') as input_file:
@@ -31,7 +31,8 @@ def read_marginal_contribution_csv(path: Path) -> List[Tuple[str, float]]:
     return content
 
 
-def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]):
+def write_marginal_contribution_csv(path: Path, content: list[tuple[str, float]]):
+    '''Write the marginal contributions to a CSV file.'''
     with path.open('w') as output_file:
         writer = csv.writer(output_file)
         writer.writerows(content)
@@ -41,7 +42,8 @@ def write_marginal_contribution_csv(path: Path, content: List[Tuple[str, float]]
                       'Marginal contributions to the portfolio selector per solver.')
 
 
-def get_capvalue_list(performance_data_csv: SparklePerformanceDataCSV) -> List[float]:
+def get_capvalue_list(performance_data_csv: SparklePerformanceDataCSV) -> list[float]:
+    '''Return a list of capvalues it the performance measure is QUALITY, else None.'''
     performance_measure = sgh.settings.get_general_performance_measure()
 
     # If QUALITY_ABSOLUTE is the performance measure, use the maximum performance per
@@ -56,7 +58,8 @@ def get_capvalue_list(performance_data_csv: SparklePerformanceDataCSV) -> List[f
 
 def compute_perfect_selector_marginal_contribution(
         performance_data_csv_path=sgh.performance_data_csv_path,
-        flag_recompute: bool = False) -> List[Tuple[str, float]]:
+        flag_recompute: bool = False) -> list[tuple[str, float]]:
+    '''Return the marginal contributions of solvers for the VBS.'''
     perfect_margi_cont_path = sgh.sparkle_marginal_contribution_perfect_path
 
     # If the marginal contribution already exists in file, read it and return
@@ -116,6 +119,7 @@ def compute_perfect_selector_marginal_contribution(
 
 def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv,
                               instance):
+    '''Return the solvers schedule suggested by the selector as a list.'''
     list_predict_schedule = []
     python_executable = sgh.python_executable
     if not os.path.exists('Tmp/'):
@@ -162,7 +166,8 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv,
 
 def compute_actual_selector_performance(
         actual_portfolio_selector_path, performance_data_csv_path, feature_data_csv_path,
-        num_instances: int, num_solvers: int, capvalue_list: List[float] = None):
+        num_instances: int, num_solvers: int, capvalue_list: list[float] = None):
+    '''Return the performance of the selector over all instances.'''
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 
@@ -199,7 +204,8 @@ def compute_actual_selector_performance(
 
 def compute_actual_performance_for_instance(
         actual_portfolio_selector_path: str, instance: str, feature_data_csv_path: str,
-        performance_data_csv: SparklePerformanceDataCSV) -> Tuple[float, bool]:
+        performance_data_csv: SparklePerformanceDataCSV) -> tuple[float, bool]:
+    '''Return the best performance of the selector on a given instance.'''
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)
@@ -219,7 +225,8 @@ def compute_actual_performance_for_instance(
 
 def compute_actual_used_time_for_instance(
         actual_portfolio_selector_path: str, instance: str, feature_data_csv_path: str,
-        performance_data_csv: SparklePerformanceDataCSV) -> Tuple[float, bool]:
+        performance_data_csv: SparklePerformanceDataCSV) -> tuple[float, bool]:
+    '''Return the total time used by the solver schedule on an instance.'''
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)
@@ -255,7 +262,8 @@ def compute_actual_used_time_for_instance(
 def compute_actual_selector_marginal_contribution(
         performance_data_csv_path=sgh.performance_data_csv_path,
         feature_data_csv_path=sgh.feature_data_csv_path,
-        flag_recompute: bool = False) -> List[Tuple[str, float]]:
+        flag_recompute: bool = False) -> list[tuple[str, float]]:
+    '''Compute the marginal contributions of solvers in the selector.'''
     actual_margi_cont_path = sgh.sparkle_marginal_contribution_actual_path
 
     # If the marginal contribution already exists in file, read it and return
@@ -380,6 +388,7 @@ def compute_actual_selector_marginal_contribution(
 
 
 def print_rank_list(rank_list, mode):
+    '''Print the solvers ranked by marginal contribution.'''
     my_string = ''
     if mode == 1:
         my_string = 'perfect selector'

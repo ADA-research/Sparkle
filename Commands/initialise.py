@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Command to initialise a Sparkle platform.'''
 
 import os
 import sys
@@ -13,6 +14,7 @@ from sparkle_help import sparkle_logging as sl
 
 
 def parser_function():
+    '''Parse CLI arguments for the initialise command.'''
     parser = argparse.ArgumentParser(
         description=('Initialise the Sparkle platform, this command does not have any '
                      'arguments.'))

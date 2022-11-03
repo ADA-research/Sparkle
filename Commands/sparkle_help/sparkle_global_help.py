@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+'''Definitions of constants broadly used in Sparkle.'''
+
 import os
 import fcntl
 from pathlib import Path
@@ -7,14 +9,15 @@ from pathlib import PurePath
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
 def get_seed():
+    '''Return a seed.'''
     return 1
 
 
-sparkle_version = '0.2'
+sparkle_version = '0.3'
 
 sparkle_maximum_int = 2147483647
-sparkle_missing_value = -(sparkle_maximum_int-1)
-sparkle_minimum_int = -(sparkle_maximum_int-2)
+sparkle_missing_value = -(sparkle_maximum_int - 1)
+sparkle_minimum_int = -(sparkle_maximum_int - 2)
 
 sparkle_special_string = '__@@SPARKLE@@__'
 

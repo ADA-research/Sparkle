@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to construct a portfolio selector.'''
 
 import os
 import sys
@@ -22,6 +23,7 @@ from sparkle_help.reporting_scenario import Scenario
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--recompute-portfolio-selector',
@@ -44,10 +46,12 @@ def parser_function():
         action=ac.SetByUser,
         help='the performance measure, e.g. runtime',
     )
+
     return parser
 
 
-def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path):
+def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path) -> bool:
+    '''Return whether there are remaining feature or performance computation jobs.'''
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_feature_computation_job = (
         feature_data_csv.get_list_remaining_feature_computation_job()
@@ -75,31 +79,39 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
     return False
 
 
-def generate_task_run_status():
+def generate_task_run_status() -> None:
+    '''Generate run status info files for portfolio selector Slurm batch jobs.'''
     key_str = 'construct_sparkle_portfolio_selector'
     task_run_status_path = 'Tmp/SBATCH_Portfolio_Jobs/' + key_str + '.statusinfo'
     status_info_str = 'Status: Running\n'
     sfh.write_string_to_file(task_run_status_path, status_info_str)
+
     return
 
 
-def delete_task_run_status():
+def delete_task_run_status() -> None:
+    '''Remove run status info files for portfolio selector Slurm batch jobs.'''
     key_str = 'construct_sparkle_portfolio_selector'
     task_run_status_path = 'Tmp/SBATCH_Portfolio_Jobs/' + key_str + '.statusinfo'
     os.system('rm -rf ' + task_run_status_path)
+
     return
 
 
-def delete_log_files():
+def delete_log_files() -> None:
+    '''Remove the log files.'''
     os.system('rm -f ' + sgh.sparkle_log_path)
     os.system('rm -f ' + sgh.sparkle_err_path)
+
     return
 
 
-def print_log_paths():
+def print_log_paths() -> None:
+    '''Print paths to the log files.'''
     print('Consider investigating the log files:')
     print(f'stdout: {sgh.sparkle_log_path}')
     print(f'stderr: {sgh.sparkle_err_path}')
+
     return
 
 

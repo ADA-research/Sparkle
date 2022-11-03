@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions to log which output was created by Sparkle where.'''
 
 import time
 from pathlib import Path
@@ -31,12 +32,13 @@ caller_log_dir = Path('.')
 
 
 def update_caller(argv):
+    '''Update which command is currently active.'''
     global caller
     caller = Path(argv[0]).stem
 
 
-# Create a new file path for the caller with the given timestamp
-def update_caller_file_path(timestamp: str):
+def update_caller_file_path(timestamp: str) -> str:
+    '''Create a new file path for the caller with the given timestamp.'''
     caller_file = caller + '_main_log.txt'
     caller_dir = Path(timestamp + '_' + caller)
     # Set caller directory for other Sparkle functions to use
@@ -64,8 +66,8 @@ def update_caller_file_path(timestamp: str):
     return
 
 
-# Add output location and description to the log of the current command
-def add_output(output_path: str, description: str):
+def add_output(output_path: str, description: str) -> None:
+    '''Add output location and description to the log of the current command.'''
     # Prepare logging information
     timestamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
     output_str = timestamp + '   ' + output_path + '   ' + description + '\n'
@@ -74,10 +76,15 @@ def add_output(output_path: str, description: str):
     with open(str(caller_log_path), 'a') as output_file:
         output_file.write(output_str)
 
+    return
 
-# Write to file which command was executed when, with which arguments, and
-# where details about it's output are stored (if any)
-def log_command(argv):
+
+def log_command(argv) -> None:
+    '''Write to file which command was executed.
+
+    Includes information on when it was executed, with which arguments, and
+    where details about it's output are stored (if any).
+    '''
     # Determine caller
     update_caller(argv)
 

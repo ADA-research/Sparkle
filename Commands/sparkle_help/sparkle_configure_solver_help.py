@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for algorithm configuration.'''
 
 import os
 import sys
@@ -7,7 +8,6 @@ import fcntl
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
-from typing import Tuple
 
 try:
     from sparkle_help import sparkle_file_help as sfh
@@ -32,11 +32,14 @@ except ImportError:
 
 
 class InstanceType(Enum):
+    '''Enum of possible instance types.'''
+
     TRAIN = 1
     TEST = 2
 
 
 def get_smac_run_obj() -> str:
+    '''Return the SMAC run objective.'''
     # Get smac_run_obj from general settings
     smac_run_obj = sgh.settings.get_general_performance_measure()
 
@@ -53,6 +56,7 @@ def get_smac_run_obj() -> str:
 
 
 def get_smac_settings():
+    '''Return the SMAC settings.'''
     smac_each_run_cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     smac_run_obj = get_smac_run_obj()
     smac_whole_time_budget = sgh.settings.get_config_budget_per_run()
@@ -64,10 +68,9 @@ def get_smac_settings():
             smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel)
 
 
-# Copy file with the specified postfix listing instances from the instance directory to
-# the solver directory
 def handle_file_instance(solver_name: str, instance_set_train_name: str,
-                         instance_set_target_name: str, instance_type: str):
+                         instance_set_target_name: str, instance_type: str) -> None:
+    '''Copy file with the specified postfix listing instances to the solver directory.'''
     file_postfix = '_{}.txt'.format(instance_type)
 
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
@@ -85,7 +88,8 @@ def handle_file_instance(solver_name: str, instance_set_train_name: str,
     return
 
 
-def get_solver_deterministic(solver_name):
+def get_solver_deterministic(solver_name: str) -> str:
+    '''Return a str indicating whether a given solver is deterministic or not.'''
     deterministic = ''
     target_solver_path = 'Solvers/' + solver_name
     solver_list_path = sgh.solver_list_path
@@ -107,11 +111,13 @@ def get_solver_deterministic(solver_name):
     return deterministic
 
 
-# Create a file with the configuration scenario to be used for smac validation in the
-# solver directory
 def create_file_scenario_validate(solver_name: str, instance_set_train_name: str,
                                   instance_set_val_name: str,
                                   instance_type: InstanceType, default: bool) -> str:
+    '''Create a file with the configuration scenario to be used for SMAC validation.
+
+    This will be located in the solver directory.
+    '''
     if instance_type is InstanceType.TRAIN:
         inst_type = 'train'
     else:
@@ -164,9 +170,9 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     return scenario_file_name
 
 
-# Create a file with the configuration scenario in the solver directory
 def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
                                        use_features: bool = False):
+    '''Create a file with the configuration scenario in the solver directory.'''
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
     smac_file_scenario = (
         f'{smac_solver_dir}{solver_name}_{instance_set_name}_scenario.txt')
@@ -202,13 +208,14 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
     fout.close()
 
     sl.add_output(smac_file_scenario, 'SMAC configuration scenario on the training set')
-    sl.add_output(sgh.smac_dir+smac_outdir, 'SMAC configuration output on the training '
-                  'set')
+    sl.add_output(f'{sgh.smac_dir}{smac_outdir}',
+                  'SMAC configuration output on the training set')
 
     return
 
 
-def remove_configuration_directory(solver_name: str, instance_set_name: str):
+def remove_configuration_directory(solver_name: str, instance_set_name: str) -> None:
+    '''Remove the configuration directory.'''
     smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
 
     # Remove the solver directory to make sure any possible old files don't interfere
@@ -217,7 +224,8 @@ def remove_configuration_directory(solver_name: str, instance_set_name: str):
     return
 
 
-def clean_configuration_directory(solver_name: str, instance_set_name: str):
+def clean_configuration_directory(solver_name: str, instance_set_name: str) -> None:
+    '''Prepare clean configuration directory.'''
     remove_configuration_directory(solver_name, instance_set_name)
     create_configuration_directory(solver_name, instance_set_name)
 
@@ -225,12 +233,15 @@ def clean_configuration_directory(solver_name: str, instance_set_name: str):
 
 
 def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
+    '''Return the directory of a solver under the SMAC directory.'''
     smac_scenario_dir = sgh.smac_dir + '/' + 'example_scenarios/'
     smac_solver_dir = f'{smac_scenario_dir}/{solver_name}_{instance_set_name}/'
+
     return smac_solver_dir
 
 
 def create_configuration_directory(solver_name: str, instance_set_name: str):
+    '''Create a directory for the configuration of a solver+instance-set combination.'''
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
     sash.create_necessary_files_for_configured_solver(smac_solver_dir)
 
@@ -244,11 +255,12 @@ def create_configuration_directory(solver_name: str, instance_set_name: str):
 
 
 def prepare_smac_execution_directories_configuration(solver_name: str,
-                                                     instance_set_name: str):
+                                                     instance_set_name: str) -> None:
+    '''Create and copy required directories and files for configuration with SMAC.'''
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
-    for i in range(1, num_of_smac_run+1):
+    for i in range(1, num_of_smac_run + 1):
         smac_solver_path_i = smac_solver_dir + str(i)
         # Create directories, -p makes sure any missing parents are also created
         cmd = 'mkdir -p ' + smac_solver_path_i + '/tmp/'
@@ -265,6 +277,7 @@ def remove_validation_directories_execution_or_output(solver_name: str,
                                                       instance_set_train_name: str,
                                                       instance_set_test_name: str,
                                                       exec_or_out: str):
+    '''Remove execution or output directories for validation.'''
     solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name) + exec_or_out
 
     train_default_dir = Path(solver_dir + '_train_default/')
@@ -284,8 +297,9 @@ def remove_validation_directories_execution_or_output(solver_name: str,
 
 def remove_validation_directories(solver_name: str, instance_set_train_name: str,
                                   instance_set_test_name: str):
+    '''Remove validation directories for a solver and instance set(s) combination.'''
     remove_validation_directories_execution_or_output(
-        solver_name,  instance_set_train_name, instance_set_test_name, 'validate')
+        solver_name, instance_set_train_name, instance_set_test_name, 'validate')
     remove_validation_directories_execution_or_output(
         solver_name, instance_set_train_name, instance_set_test_name, 'output')
 
@@ -295,6 +309,10 @@ def remove_validation_directories(solver_name: str, instance_set_train_name: str
 def prepare_smac_execution_directories_validation(solver_name: str,
                                                   instance_set_train_name: str,
                                                   instance_set_test_name: str):
+    '''Create and copy required directories and files for validation with SMAC.
+
+    Remove old directories and files as needed.
+    '''
     # Make sure no old files remain that could interfere
     remove_validation_directories(solver_name, instance_set_train_name,
                                   instance_set_test_name)
@@ -302,7 +320,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
-    for i in range(1, num_of_smac_run+1):
+    for i in range(1, num_of_smac_run + 1):
         solver_diretory = 'Solvers/' + solver_name + '/*'
 
         # Train default
@@ -340,6 +358,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
 
 
 def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str) -> str:
+    '''Generate a Slurm batch script for algorithm configuration with SMAC.'''
     execdir = './example_scenarios/' + solver_name + '_' + instance_set_name
     smac_file_scenario_name = solver_name + '_' + instance_set_name + '_scenario.txt'
     _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
@@ -363,6 +382,7 @@ def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str
 def generate_configuration_sbatch_script(sbatch_script_path, scenario_file,
                                          result_directory, num_job_total,
                                          num_job_in_parallel, smac_execdir):
+    '''Generate a Slurm batch script for algorithm configuration.'''
     job_name = sbatch_script_path
     sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
     num_job_in_parallel = max(num_job_in_parallel, num_job_total)
@@ -389,7 +409,7 @@ def generate_configuration_sbatch_script(sbatch_script_path, scenario_file,
     if not os.path.exists(sgh.smac_dir + 'tmp/'):
         os.system('mkdir -p ' + sgh.smac_dir + 'tmp/')
 
-    fout = open(sgh.smac_dir+sbatch_script_path, 'w+')
+    fout = open(f'{sgh.smac_dir}{sbatch_script_path}', 'w+')
     fout.write('#!/bin/bash' + '\n')
     fout.write('###' + '\n')
     fout.write('#SBATCH --job-name=' + job_name + '\n')
@@ -433,6 +453,7 @@ def generate_configuration_sbatch_script(sbatch_script_path, scenario_file,
 
 
 def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) -> str:
+    '''Submit a Slurm batch script for algorithm configuration with SMAC.'''
     ori_path = os.getcwd()
     command_line = (f'cd {sgh.smac_dir} ; sbatch {smac_configure_sbatch_script_name} ; '
                     f'cd {ori_path}')
@@ -449,9 +470,11 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) 
     return jobid
 
 
-# Check the results directory for this solver and instance set combination exists
-# NOTE: This function assumes SMAC output
 def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
+    '''Check the results directory for this solver and instance set combination exists.
+
+    NOTE: This function assumes SMAC output.
+    '''
     # Check the results directory exists
     smac_results_dir = Path(
         sgh.smac_dir + '/results/' + solver_name + '_' + instance_set_name + '/')
@@ -466,8 +489,8 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
     return all_good
 
 
-def check_instance_list_file_exist(solver_name: str, instance_set_name: str):
-    # Check the instance list file exists
+def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> None:
+    '''Check the instance list file exists.'''
     file_name = Path(instance_set_name + '_train.txt')
     instance_list_file_path = Path(PurePath(Path(sgh.smac_dir)
                                    / Path('example_scenarios')
@@ -484,15 +507,38 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str):
     return
 
 
-def check_validation_prerequisites(solver_name: str, instance_set_name: str):
+def check_configuration_permission_error(solver_name: str, instance_set_name: str):
+    '''Check the files for solver permission errors.'''
+    smac_results_dir = Path(f'{sgh.smac_dir}/results/{solver_name}_{instance_set_name}/')
+
+    # Get the name of the first file in the directory
+    # If there is an error, it will be in all files, so checking one is sufficient
+    filename = next(Path(smac_results_dir / f) for f in os.listdir(smac_results_dir)
+                    if Path(smac_results_dir / f)).is_file()
+
+    with open(filename, 'r') as file:
+        content = file.read()
+        if 'exec failed: Permission denied' in content:
+            print('ERROR: The solver configuration was not succesfull so the validation '
+                  'could not be completed. This is due to missing execution permissions '
+                  'for the solver executable.')
+            sys.exit(-1)
+
+    print(file)
+
+
+def check_validation_prerequisites(solver_name: str, instance_set_name: str) -> None:
+    '''Validate prerequisites for validation are available.'''
     check_configuration_exists(solver_name, instance_set_name)
     check_instance_list_file_exist(solver_name, instance_set_name)
+    check_configuration_permission_error(solver_name, instance_set_name)
 
     return
 
 
 # Write optimised configuration string to file
-def write_optimised_configuration_str(solver_name, instance_set_name):
+def write_optimised_configuration_str(solver_name, instance_set_name) -> None:
+    '''Write the latest optimised configuration parameter str to file.'''
     optimised_configuration_str, _, _ = get_optimised_configuration(
         solver_name, instance_set_name)
     latest_configuration_str_path = sgh.sparkle_tmp_path + 'latest_configuration.txt'
@@ -506,8 +552,8 @@ def write_optimised_configuration_str(solver_name, instance_set_name):
     return
 
 
-# Write optimised configuration to a new PCS file
-def write_optimised_configuration_pcs(solver_name, instance_set_name):
+def write_optimised_configuration_pcs(solver_name, instance_set_name) -> None:
+    '''Write optimised configuration to a new PCS file.'''
     # Read optimised configuration and convert to dict
     optimised_configuration_str, _, _ = get_optimised_configuration(
         solver_name, instance_set_name)
@@ -520,7 +566,7 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name):
         # Remove dashes and spaces from parameter names, and remove quotes and
         # spaces from parameter values before adding them to the dict
         config_dict[optimised_configuration_list[i].strip(' -')] = (
-            optimised_configuration_list[i+1].strip(" '"))
+            optimised_configuration_list[i + 1].strip(" '"))
 
     # Read existing PCS file and create output content
     solver_diretory = 'Solvers/' + solver_name
@@ -576,7 +622,8 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name):
     return
 
 
-def check_optimised_configuration_params(params: str):
+def check_optimised_configuration_params(params: str) -> None:
+    '''Check if a given configuration parameter str appears to be valid.'''
     # Check if a valid configuration was found
     if params == '':
         print(f'ERROR: Invalid optimised_configuration_str: {params}; '
@@ -586,7 +633,8 @@ def check_optimised_configuration_params(params: str):
     return
 
 
-def check_optimised_configuration_performance(performance: str):
+def check_optimised_configuration_performance(performance: str) -> None:
+    '''Check if a given configuration performance str appears to be valid.'''
     # Check if a valid seed was found
     if performance == -1:
         print('ERROR: Invalid optimised_configuration_performance; Stopping execution!')
@@ -595,7 +643,8 @@ def check_optimised_configuration_performance(performance: str):
     return
 
 
-def check_optimised_configuration_seed(seed: str):
+def check_optimised_configuration_seed(seed: str) -> None:
+    '''Check if a given configuration seed str appears to be valid.'''
     # Check if a valid seed was found
     if seed == -1:
         print('ERROR: Invalid optimised_configuration_seed; Stopping execution!')
@@ -605,6 +654,7 @@ def check_optimised_configuration_seed(seed: str):
 
 
 def get_optimised_configuration_params(solver_name: str, instance_set_name: str) -> str:
+    '''Return the optimised configuration parameter str.'''
     optimised_configuration_str, _, _ = get_optimised_configuration_from_file(
         solver_name, instance_set_name)
     check_optimised_configuration_params(optimised_configuration_str)
@@ -613,7 +663,8 @@ def get_optimised_configuration_params(solver_name: str, instance_set_name: str)
 
 
 def get_optimised_configuration_from_file(solver_name: str, instance_set_name: str
-                                          ) -> Tuple[str, str, str]:
+                                          ) -> tuple[str, str, str]:
+    '''Read the optimised configuration, its performance, and seed from file.'''
     optimised_configuration_str = ''
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
@@ -679,10 +730,11 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
 
 
 def get_optimised_configuration(solver_name: str,
-                                instance_set_name: str) -> Tuple[str, str, str]:
+                                instance_set_name: str) -> tuple[str, str, str]:
+    '''Return the optimised configuration str, its performance, and its seed.'''
     (optimised_configuration_str, optimised_configuration_performance,
      optimised_configuration_seed) = get_optimised_configuration_from_file(
-     solver_name, instance_set_name)
+        solver_name, instance_set_name)
     check_optimised_configuration_params(optimised_configuration_str)
     check_optimised_configuration_performance(optimised_configuration_performance)
     check_optimised_configuration_seed(optimised_configuration_seed)
@@ -691,27 +743,10 @@ def get_optimised_configuration(solver_name: str,
             optimised_configuration_seed)
 
 
-def generate_configure_solver_wrapper(solver_name: str, instance_set_name: str,
-                                      optimised_configuration_str: str):
-    smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
-    sparkle_run_configured_wrapper_path = (
-        smac_solver_dir + sgh.sparkle_run_configured_wrapper)
-
-    fout = open(sparkle_run_configured_wrapper_path, 'w+')
-    fout.write('#!/bin/bash' + '\n')
-    fout.write(f'$1/{sgh.sparkle_run_generic_wrapper} $1 $2 '
-               f'{optimised_configuration_str}\n')
-    fout.close()
-
-    command_line = 'chmod a+x ' + sparkle_run_configured_wrapper_path
-    os.system(command_line)
-
-    return
-
-
 def generate_validation_callback_slurm_script(solver: str, instance_set_train: str,
                                               instance_set_test: str,
                                               dependency: str) -> str:
+    '''Generate a callback Slurm batch script for validation.'''
     command_line = 'echo $(pwd) $(date)\n'
     command_line += ('srun -N1 -n1 ./Commands/validate_configured_vs_default.py '
                      '--settings-file Settings/latest.ini')
@@ -730,6 +765,7 @@ def generate_validation_callback_slurm_script(solver: str, instance_set_train: s
 def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str,
                                             instance_set_test: str,
                                             dependency: str) -> str:
+    '''Generate a callback Slurm batch script for ablation.'''
     command_line = 'echo $(pwd) $(date)\n'
     command_line += ('srun -N1 -n1 ./Commands/run_ablation.py --settings-file '
                      'Settings/latest.ini')
@@ -751,6 +787,7 @@ def generate_generic_callback_slurm_script(name: str, solver: str,
                                            instance_set_test: str, dependency: str,
                                            command_line: str,
                                            command_name: CommandName) -> str:
+    '''Generate a callback Slurm batch script.'''
     solver_name = sfh.get_last_level_directory_name(solver)
     instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
     instance_set_test_name = None

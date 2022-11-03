@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to remove a solver from the Sparkle platform.'''
 
 import os
 import sys
@@ -10,6 +11,7 @@ from sparkle_help import sparkle_logging as sl
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'solver_path',

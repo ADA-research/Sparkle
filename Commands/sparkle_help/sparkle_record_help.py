@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions to record and restore a Sparkle platform.'''
 
 import os
 import sys
@@ -14,7 +15,8 @@ global record_log_file_path
 record_log_file_path = sgh.sparkle_err_path
 
 
-def detect_current_sparkle_platform_exists():
+def detect_current_sparkle_platform_exists() -> bool:
+    '''Return whether a Sparkle platform is currently active.'''
     my_flag_anyone = False
     if os.path.exists('Instances/'):
         my_flag_anyone = True
@@ -36,7 +38,8 @@ def detect_current_sparkle_platform_exists():
     return my_flag_anyone
 
 
-def save_current_sparkle_platform(my_record_filename):
+def save_current_sparkle_platform(my_record_filename) -> None:
+    '''Store the current Sparkle platform in a .zip file.'''
     my_flag_instances = False
     my_flag_solvers = False
     my_flag_extractors = False
@@ -170,7 +173,8 @@ def save_current_sparkle_platform(my_record_filename):
     return
 
 
-def cleanup_current_sparkle_platform():
+def cleanup_current_sparkle_platform() -> None:
+    '''Remove the current Sparkle platform.'''
     if os.path.exists('Instances/'):
         sfh.rmtree(Path('Instances/'))
     if os.path.exists('Solvers/'):
@@ -193,7 +197,8 @@ def cleanup_current_sparkle_platform():
     return
 
 
-def extract_sparkle_record(my_record_filename):
+def extract_sparkle_record(my_record_filename) -> None:
+    '''Restore a Sparkle platform from a record.'''
     if not os.path.exists(my_record_filename):
         sys.exit()
 
@@ -208,4 +213,5 @@ def extract_sparkle_record(my_record_filename):
     os.system(r'cp -r ' + my_tmp_directory + '/* ' + './')
     sfh.rmtree(Path(my_tmp_directory))
     os.system(r'rm -f ' + record_log_file_path)
+
     return
