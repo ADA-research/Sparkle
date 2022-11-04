@@ -21,8 +21,7 @@ except ImportError:
 
 
 def computing_features_parallel(feature_data_csv_path, mode):
-    '''
-    Compute features in parallel.
+    '''Compute features in parallel.
 
     The 1st argument (feature_data_csv_path) specifies the path of the csv file where the
     resulting feature data would be placed.
