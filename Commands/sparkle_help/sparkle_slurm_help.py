@@ -77,7 +77,7 @@ def get_slurm_srun_user_options_str(path_modifier=None) -> str:
 
 
 def check_slurm_option_compatibility(srun_option_string: str):
-    '''Check if the given srun_option_string is compatible with the Slurm cluster'''
+    '''Check if the given srun_option_string is compatible with the Slurm cluster.'''
     # Check compatibility of slurm options
     args = shlex.split(srun_option_string)
     kwargs = {}
