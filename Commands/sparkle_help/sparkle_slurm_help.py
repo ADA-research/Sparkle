@@ -86,8 +86,8 @@ def check_slurm_option_compatibility(srun_option_string: str):
         if "=" in arg:
             splitted = arg.split("=")
             kwargs[splitted[0]] = splitted[1]
-        elif i < len(args) and "=" not in args[i+1]:
-            kwargs[arg] = args[i+1]
+        elif i < len(args) and "=" not in args[i + 1]:
+            kwargs[arg] = args[i + 1]
 
     if not ("--partition" in kwargs.keys() or "-p" in kwargs.keys()):
         print("###Could not check slurm compatibility because no partition was "
@@ -110,7 +110,7 @@ def check_slurm_option_compatibility(srun_option_string: str):
 
     if "--mem-per-cpu" in kwargs.keys() or "-m" in kwargs.keys():
         requestedmemory = float(kwargs.get("--mem-per-cpu", kwargs.get("-m", 0))) * \
-                          int(kwargs.get("--cpus-per-task", kwargs.get("-c", cpus)))
+            int(kwargs.get("--cpus-per-task", kwargs.get("-c", cpus)))
         if requestedmemory > memory:
             return False, f"Memory specification {requestedmemory}MB can not be " \
                           f"satisfied for {partition}, only got {memory}MB"
