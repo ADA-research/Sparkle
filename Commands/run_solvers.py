@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to run solvers to get their performance data.'''
 
 import sys
 import argparse
@@ -25,6 +26,7 @@ print = functools.partial(print, flush=True)
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -72,23 +74,24 @@ def run_solvers_on_instances(
         recompute: bool = False,
         run_on: Runner = Runner.SLURM,
         also_construct_selector_and_report: bool = False):
-    ''' Run all the solvers on all the instances that were not not previously run. If
-        recompute is True, rerun everything even if previously run. Where the solvers are
-        executed can be controlled with 'run_on'.
+    '''Run all the solvers on all the instances that were not not previously run.
 
-        Parameters
-        ----------
-        parallel: bool
-            Run the solvers in parallel or one at a time. Default: False
-        recompute: bool
-            If True, recompute all solver-instance pairs even if they were run before.
-            Default: False
-        run_on: Runner
-            On which computer or cluster environment to run the solvers.
-            Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
-        also_construct_selector_and_report: bool
-            If True, the selector will be constructed and a report will be produced.
-     '''
+    If recompute is True, rerun everything even if previously run. Where the solvers are
+    executed can be controlled with 'run_on'.
+
+    Parameters
+    ----------
+    parallel: bool
+        Run the solvers in parallel or one at a time. Default: False
+    recompute: bool
+        If True, recompute all solver-instance pairs even if they were run before.
+        Default: False
+    run_on: Runner
+        On which computer or cluster environment to run the solvers.
+        Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
+    also_construct_selector_and_report: bool
+        If True, the selector will be constructed and a report will be produced.
+    '''
     if recompute:
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path).clean_csv()
 
@@ -191,6 +194,7 @@ def run_solvers_on_instances(
 
 def construct_selector_and_report(dependency_jobid_list: list[str] = []) -> str:
     '''Queue jobs for portfolio construction and report generation.
+
     Returns a Slurm job ID as str.
     '''
     job_script = 'Commands/construct_sparkle_portfolio_selector.py'

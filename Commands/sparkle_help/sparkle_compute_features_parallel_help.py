@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for parallel feature computation.'''
 
 import sys
 
@@ -20,8 +21,8 @@ except ImportError:
 
 
 def computing_features_parallel(feature_data_csv_path, mode):
-    '''
-    This function is used for computing features in parallel.
+    '''Compute features in parallel.
+
     The 1st argument (feature_data_csv_path) specifies the path of the csv file where the
     resulting feature data would be placed.
     The 2nd argument (mode) specifies the mode of computation. It has 2 possible values
@@ -29,7 +30,6 @@ def computing_features_parallel(feature_data_csv_path, mode):
     jobs for feature computation. Otherwise (if this value is 2), it means that this
     function will re-compute all jobs for feature computation.
     '''
-
     # Open the csv file in terms of feature data
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
 

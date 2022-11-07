@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to execute a configured solver.'''
 
 import sys
 import argparse
@@ -14,6 +15,7 @@ from sparkle_help.reporting_scenario import ReportingScenario
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'instance_path',

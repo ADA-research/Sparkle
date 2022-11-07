@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions to communicate run statuses of various commands.'''
 
 import os
 import fcntl
@@ -7,6 +8,7 @@ from sparkle_help import sparkle_file_help as sfh
 
 
 def get_list_running_extractor_jobs():
+    '''Return a list of currently active feature extraction jobs.'''
     list_running_extractor_jobs = []
 
     tmp_directory = 'Tmp/SBATCH_Extractor_Jobs/'
@@ -43,6 +45,7 @@ def get_list_running_extractor_jobs():
 
 
 def print_running_extractor_jobs(mode: int = 1):
+    '''Print whether currently a feature extraction job is active.'''
     job_list = get_list_running_extractor_jobs()
     print('')
     print(
@@ -67,6 +70,7 @@ def print_running_extractor_jobs(mode: int = 1):
 
 
 def get_list_running_solver_jobs():
+    '''Return a list of currently active run solver job.'''
     list_running_solver_jobs = []
 
     tmp_directory = 'Tmp/SBATCH_Solver_Jobs/'
@@ -104,6 +108,7 @@ def get_list_running_solver_jobs():
 
 
 def print_running_solver_jobs(mode: int = 1):
+    '''Print whether currently a run solvers job is active.'''
     job_list = get_list_running_solver_jobs()
     print('')
     print(f'Currently Sparkle has {str(len(job_list))}'
@@ -127,6 +132,7 @@ def print_running_solver_jobs(mode: int = 1):
 
 
 def print_running_portfolio_selector_jobs():
+    '''Print whether currently a portfolio construction job is active.'''
     print('')
     key_str = 'construct_sparkle_portfolio_selector'
     task_run_status_path = 'Tmp/SBATCH_Portfolio_Jobs/' + key_str + '.statusinfo'
@@ -139,6 +145,7 @@ def print_running_portfolio_selector_jobs():
 
 
 def print_running_report_jobs():
+    '''Print whether currently a report generation job is active.'''
     print('')
     key_str = 'generate_report'
     task_run_status_path = 'Tmp/SBATCH_Report_Jobs/' + key_str + '.statusinfo'

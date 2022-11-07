@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Automatically generate a gnuplot script for portfolio selection.'''
 
 import os
 from os.path import abspath, dirname, join

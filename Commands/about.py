@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to show information about Sparkle.'''
 
 import sys
 import argparse
@@ -21,6 +22,7 @@ __contact__ = 'k.van.der.blom@liacs.leidenuniv.nl'
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     return parser
 

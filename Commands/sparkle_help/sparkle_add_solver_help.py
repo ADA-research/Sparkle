@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for adding solvers.'''
 
 import os
 
@@ -10,10 +11,12 @@ except ImportError:
 
 
 def get_solver_directory(solver_name: str) -> str:
+    '''Return the directory a solver is stored at as str.'''
     return 'Solvers/' + solver_name
 
 
 def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
+    '''Return whether the directory of the solver being added contains a PCS file.'''
     list_files = os.listdir(solver_directory)
 
     pcs_count = 0
@@ -27,6 +30,10 @@ def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
 
 
 def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
+    '''Return the name of the PCS file in a solver directory.
+
+    If not found, return an empty str.
+    '''
     list_files = os.listdir(solver_directory)
 
     for file_name in list_files:
@@ -38,7 +45,8 @@ def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
     return ''
 
 
-def create_necessary_files_for_configured_solver(smac_solver_dir: str):
+def create_necessary_files_for_configured_solver(smac_solver_dir: str) -> None:
+    '''Create directories needed for configuration of a solver.'''
     outdir_dir = smac_solver_dir + '/' + 'outdir_train_configuration/'
     command_line = 'mkdir -p ' + outdir_dir
     os.system(command_line)

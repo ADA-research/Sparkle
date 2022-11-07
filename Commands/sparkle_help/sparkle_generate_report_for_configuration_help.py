@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for algorithm configuration report generation.'''
 
 import os
 import sys
@@ -17,6 +18,7 @@ from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
 
 def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
+    '''Return the number of instances for an instance set used by SMAC.'''
     str_value = ''
 
     # For multi-file instances count based on the reference list
@@ -32,7 +34,8 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
     return str_value
 
 
-def get_par10_performance(results_file, cutoff):
+def get_par10_performance(results_file, cutoff) -> float:
+    '''Return the PAR10 score for a given results file and cutoff time.'''
     list_instance_and_par10 = construct_list_instance_and_performance(results_file,
                                                                       cutoff)
     sum_par10 = 0.0
@@ -47,8 +50,9 @@ def get_par10_performance(results_file, cutoff):
     return mean_par10
 
 
-def get_optimised_configuration_testing_performance_par10(solver_name, instance_set_name,
-                                                          smac_each_run_cutoff_time):
+def get_optimised_configuration_testing_performance_par10(
+        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
+    '''Return the PAR10 score of the optimised configuration on the testing set.'''
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     configured_results_dir = (
@@ -62,8 +66,9 @@ def get_optimised_configuration_testing_performance_par10(solver_name, instance_
     return str_value
 
 
-def get_default_configuration_testing_performance_par10(solver_name, instance_set_name,
-                                                        smac_each_run_cutoff_time):
+def get_default_configuration_testing_performance_par10(
+        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
+    '''Return the PAR10 score of the default configuration on the testing set.'''
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     default_results_dir = (f'{smac_solver_dir}results/{sgh.sparkle_run_default_wrapper}_'
@@ -76,9 +81,9 @@ def get_default_configuration_testing_performance_par10(solver_name, instance_se
     return str_value
 
 
-def get_optimised_configuration_training_performance_par10(solver_name,
-                                                           instance_set_name,
-                                                           smac_each_run_cutoff_time):
+def get_optimised_configuration_training_performance_par10(
+        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
+    '''Return the PAR10 score of the optimised configuration on the training set.'''
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     configured_results_dir = (
@@ -92,8 +97,9 @@ def get_optimised_configuration_training_performance_par10(solver_name,
     return str_value
 
 
-def get_default_configuration_training_performance_par10(solver_name, instance_set_name,
-                                                         smac_each_run_cutoff_time):
+def get_default_configuration_training_performance_par10(
+        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
+    '''Return the PAR10 score of the default configuration on the training set.'''
     str_value = ''
     smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
     default_results_dir = (f'{smac_solver_dir}results_train/'
@@ -107,6 +113,7 @@ def get_default_configuration_training_performance_par10(solver_name, instance_s
 
 
 def get_instance_path_from_path(results_dir, path):
+    '''Return the name of an instance.'''
     instance_path = Path(path)
     instance_name = instance_path.name
     # TODO: Check what this was supposed to do, or whehter it can be deleted:
@@ -128,51 +135,10 @@ def get_instance_path_from_path(results_dir, path):
     return instance_name
 
 
-def construct_list_instance_and_par10_recursive(list_instance_and_par10, path, cutoff):
-    if os.path.isfile(path):
-        file_extension = sfh.get_file_least_extension(path)
-        if file_extension == 'res':
-            fin = open(path, 'r')
-            while True:
-                myline = fin.readline()
-                if myline:
-                    mylist = myline.strip().split()
-                    if len(mylist) <= 1:
-                        continue
-                    if mylist[1] == 's':
-                        run_time = float(mylist[0].split('/')[0])
-                        # Minimum runtime. Is lower than this not accurate?
-                        if run_time < 0.01001:
-                            run_time = 0.01001
-                        if run_time > cutoff:
-                            continue
-                        if mylist[2] == 'SATISFIABLE':
-                            list_instance_and_par10.append([path, run_time])
-                            break
-                        elif mylist[2] == 'UNSATISFIABLE':
-                            list_instance_and_par10.append([path, run_time])
-                            break
-                else:
-                    run_time = cutoff * 10
-                    list_instance_and_par10.append([path, run_time])
-                    break
-        return
-
-    elif os.path.isdir(path):
-        if path[-1] != '/':
-            this_path = path + '/'
-        else:
-            this_path = path
-        list_all_items = os.listdir(this_path)
-        for item in list_all_items:
-            construct_list_instance_and_par10_recursive(list_instance_and_par10,
-                                                        this_path + item, cutoff)
-    return
-
-
 # Retrieve instances and corresponding performance values from smac validation objective
 # matrix
 def construct_list_instance_and_performance(result_file, cutoff):
+    '''Return a list of [instance, performance] pairs.'''
     list_instance_and_performance = []
 
     fin = open(result_file, 'r')
@@ -205,8 +171,8 @@ def construct_list_instance_and_performance(result_file, cutoff):
     return list_instance_and_performance
 
 
-# Return a dictionary of instance names and their performance
 def get_dict_instance_to_performance(results_file, cutoff):
+    '''Return a dictionary of instance names and their performance.'''
     list_instance_and_performance = construct_list_instance_and_performance(
         results_file, float(cutoff))
 
@@ -220,7 +186,8 @@ def get_dict_instance_to_performance(results_file, cutoff):
     return dict_instance_to_performance
 
 
-def get_performance_measure():
+def get_performance_measure() -> str:
+    '''Return the performance measure as LaTeX str.'''
     performance_measure = ''
 
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
@@ -233,7 +200,8 @@ def get_performance_measure():
     return performance_measure
 
 
-def get_runtime_bool():
+def get_runtime_bool() -> str:
+    '''Return the runtime bool as LaTeX str.'''
     runtime_bool = ''
 
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
@@ -246,7 +214,8 @@ def get_runtime_bool():
     return runtime_bool
 
 
-def get_ablation_bool(solver_name, instance_train_name, instance_test_name):
+def get_ablation_bool(solver_name, instance_train_name, instance_test_name) -> str:
+    '''Return the ablation bool as LaTeX str.'''
     ablation_bool = ''
 
     if sah.check_for_ablation(solver_name, instance_train_name, instance_test_name):
@@ -258,8 +227,7 @@ def get_ablation_bool(solver_name, instance_train_name, instance_test_name):
 
 
 def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
-    '''
-    Returns a bool string for latex indicating whether features were used.
+    '''Return a bool string for latex indicating whether features were used.
 
     True if a feature file is given in the scenario file, false otherwise.
     '''
@@ -277,7 +245,8 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
                       smac_each_run_cutoff_time: float) -> list:
-    '''
+    '''Return the required data to plot.
+
     Creates a nested list of performance values algorithm runs with default and
     configured parameters on instances in a given instance set.
 
@@ -306,7 +275,8 @@ def get_figure_configure_vs_default(configured_results_dir: str,
                                     configuration_reports_directory: str,
                                     figure_filename: str,
                                     smac_each_run_cutoff_time: float) -> str:
-    '''
+    '''Create a figure comparing the configured and default solver.
+
     Base function to create a comparison plot of a given instance set between the default
     and configured performance.
 
@@ -348,7 +318,8 @@ def get_figure_configure_vs_default(configured_results_dir: str,
 def get_figure_configured_vs_default_on_test_instance_set(
         solver_name: str, instance_set_train_name: str, instance_set_test_name: str,
         smac_each_run_cutoff_time: float) -> str:
-    '''
+    '''Create a figure comparing the configured and default solver on the training set.
+
     Manages the creation of a comparison plot of the instances in a test set for the
     report by gathering the proper files and choosing the plotting parameters based on
     the performance measure.
@@ -380,7 +351,8 @@ def get_figure_configured_vs_default_on_test_instance_set(
 def get_figure_configured_vs_default_on_train_instance_set(
         solver_name: str, instance_set_train_name: str,
         configuration_reports_directory: str, smac_each_run_cutoff_time: float) -> str:
-    '''
+    '''Create a figure comparing the configured and default solver on the training set.
+
     Manages the creation of a comparison plot of the instances in the train instance set
     for the report by gathering the proper files and choosing the plotting parameters
     based on the performance measure.
@@ -408,6 +380,7 @@ def get_figure_configured_vs_default_on_train_instance_set(
 
 
 def get_timeouts_test(solver_name, instance_set_train_name, instance_set_name, cutoff):
+    '''Return the number timeouts by configured, default and both on the testing set.'''
     configured_timeouts = 0
     default_timeouts = 0
     overlapping_timeouts = 0
@@ -446,6 +419,7 @@ def get_timeouts_test(solver_name, instance_set_train_name, instance_set_name, c
 
 
 def get_timeouts_train(solver_name, instance_set_name, cutoff):
+    '''Return the number timeouts by configured, default and both on the training set.'''
     configured_timeouts = 0
     default_timeouts = 0
     overlapping_timeouts = 0
@@ -488,9 +462,9 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 
 def get_ablation_table(solver_name: str, instance_set_train_name: str,
                        instance_set_test_name: str = None) -> str:
-    '''
-    Generates a LaTeX table of the ablation path as a result of the ablation analysis to
-    determine the parameter importance.
+    '''Generate a LaTeX table of the ablation path.
+
+    This is the result of the ablation analysis to determine the parameter importance.
 
     @return A string containing the LaTeX table code of the ablation path
     '''
@@ -530,6 +504,7 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
 
 def get_dict_variable_to_value(solver_name, instance_set_train_name,
                                instance_set_test_name=None, ablation=True):
+    '''Return a dict matching LaTeX variables and their values.'''
     full_dict = {}
 
     if instance_set_test_name is not None:
@@ -575,10 +550,10 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name,
     return full_dict
 
 
-# Retrieve variables relevant to all configuration reports
 def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
                                       instance_set_test_name,
                                       configuration_reports_directory):
+    '''Return a dict matching LaTeX variables and values used for all config. reports.'''
     common_dict = {}
 
     variable = 'performanceMeasure'
@@ -700,6 +675,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
 # Retrieve variables specific to the testing set
 def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
                                     instance_set_test_name):
+    '''Return a dict matching test set specific latex variables with their values.'''
     test_dict = {}
 
     variable = 'instanceSetTest'
@@ -767,6 +743,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
 
 def check_results_exist(solver_name, instance_set_train_name,
                         instance_set_test_name=None):
+    '''Check whether configuration results exist.'''
     all_good = True
     err_str = ''
 
@@ -831,7 +808,8 @@ def check_results_exist(solver_name, instance_set_train_name,
     return
 
 
-def get_most_recent_test_run(solver_name: str):
+def get_most_recent_test_run(solver_name: str) -> (str, str, bool, bool):
+    '''Return the instance sets used most recently to configure a given solver.'''
     instance_set_train = ''
     instance_set_test = ''
     flag_instance_set_train = False
@@ -871,6 +849,7 @@ def get_most_recent_test_run(solver_name: str):
 
 
 def generate_report_for_configuration_prep(configuration_reports_directory):
+    '''Prepare for the generation of an algorithm configuration report.'''
     print('Generating report for configuration ...')
 
     template_latex_directory_path = (
@@ -884,6 +863,7 @@ def generate_report_for_configuration_prep(configuration_reports_directory):
 
 def generate_report_for_configuration_train(solver_name, instance_set_train_name,
                                             ablation=True):
+    '''Generate a report for algorithm configuration with only a training set.'''
     configuration_reports_directory = (f'Configuration_Reports/{solver_name}_'
                                        f'{instance_set_train_name}/')
     generate_report_for_configuration_prep(configuration_reports_directory)
@@ -898,6 +878,7 @@ def generate_report_for_configuration_train(solver_name, instance_set_train_name
 
 def generate_report_for_configuration(solver_name, instance_set_train_name,
                                       instance_set_test_name, ablation=True):
+    '''Generate a report for algorithm configuration.'''
     configuration_reports_directory = (f'Configuration_Reports/{solver_name}_'
                                        f'{instance_set_train_name}_'
                                        f'{instance_set_test_name}/')
@@ -914,6 +895,7 @@ def generate_report_for_configuration(solver_name, instance_set_train_name,
 
 def generate_report_for_configuration_common(configuration_reports_directory,
                                              dict_variable_to_value):
+    '''Generate the common part of all algorithm configuration reports.'''
     latex_directory_path = Path(
         f'{configuration_reports_directory}Sparkle-latex-generator-for-configuration/')
     latex_template_filename = 'template-Sparkle-for-configuration.tex'

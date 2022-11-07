@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to delete a recorded Sparkle platform.'''
 
 import os
 import sys
@@ -7,6 +8,7 @@ from sparkle_help import sparkle_logging as sl
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'record_file_path',
@@ -14,6 +16,7 @@ def parser_function():
         type=str,
         help='path to the record file',
     )
+
     return parser
 
 

@@ -14,6 +14,11 @@ docstring-quotes = '''
 # Ignore the unused import in __init__.py
 per-file-ignores = __init__.py:F401
 
+docstring-convention=google
+# Ignore docstring double quote error
+ignore = D300  # Conflicts with docstring-quotes rule
+         W503  # Will soon be an anti-pattern: https://www.flake8rules.com/rules/W503.html
+
 exclude =
     Components/AutoFolio-master/,
     Components/ablationAnalysis-0.9.4/,

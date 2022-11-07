@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to add a solver to the Sparkle platform.'''
 
 import os
 import sys
@@ -18,6 +19,7 @@ from sparkle_help.sparkle_command_help import CommandName
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser(
         description='Add a solver to the Sparkle platform.',
         epilog='')
@@ -95,6 +97,8 @@ if __name__ == '__main__':
               f'({str(solver_variations)}), '
               'a postive integer must be used. Stopping execution.')
         sys.exit(0)
+
+    sfh.check_file_is_executable(Path(solver_source, sgh.sparkle_smac_wrapper))
 
     # Start add solver
     last_level_directory = ''

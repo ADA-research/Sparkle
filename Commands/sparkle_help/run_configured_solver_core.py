@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Run a configured solver on an instance, only for internal calls from Sparkle.'''
 
 import argparse
 from pathlib import Path

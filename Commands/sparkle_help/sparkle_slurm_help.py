@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+'''Helper functions for interaction with Slurm.'''
 
 import os
 import fcntl
@@ -28,6 +29,7 @@ except ImportError:
 
 
 def get_slurm_options_list(path_modifier=None):
+    '''Return a list with the Slurm options given in the Slurm settings file.'''
     if path_modifier is None:
         path_modifier = ''
 
@@ -48,20 +50,23 @@ def get_slurm_options_list(path_modifier=None):
     return slurm_options_list
 
 
-# Get a list of options to be used with sbatch calls
 def get_slurm_sbatch_user_options_list(path_modifier=None):
+    '''Return a list with Slurm batch options given by the user.'''
     return get_slurm_options_list(path_modifier)
 
 
 def get_slurm_sbatch_default_options_list():
+    '''Return the default list of Slurm batch options.'''
     return ['--partition=graceADA']
 
 
 def get_slurm_srun_user_options_list(path_modifier=None):
+    '''Return a list with the Slurm run options given by the user.'''
     return get_slurm_options_list(path_modifier)
 
 
-def get_slurm_srun_user_options_str(path_modifier=None):
+def get_slurm_srun_user_options_str(path_modifier=None) -> str:
+    '''Return a str with the Slurm run option given by the user.'''
     srun_options_list = get_slurm_srun_user_options_list(path_modifier)
     srun_options_str = ''
 
@@ -118,6 +123,7 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
                                    job_params_list: List[str], srun_options_str: str,
                                    target_call_str: str,
                                    job_output_list: List[str] = None):
+    '''Generate the generic components of a Slurm batch script.'''
     fout = open(sbatch_script_path, 'w+')  # open the file of sbatch script
     # using the UNIX file lock to prevent other attempts to visit this sbatch script
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
@@ -210,6 +216,7 @@ def get_sbatch_options_list(sbatch_script_path: Path, num_jobs: int,
 
 def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_name: str,
                                           instance_set_test_name: str = None) -> str:
+    '''Generate a Slurm batch script for algorithm configuration validation.'''
     # Set script name and path
     if instance_set_test_name is not None:
         sbatch_script_name = (f'{solver_name}_{instance_set_train_name}_'
@@ -344,6 +351,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
 
 def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
                                                    list_jobs):
+    '''Generate a Slurm batch script for feature computation.'''
     # Set script name and path
     sbatch_script_name = (f'computing_features_sbatch_shell_script_{str(n_jobs)}_'
                           f'{sbh.get_time_pid_random_string()}.sh')
@@ -358,7 +366,7 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
     job_name = '--job-name=' + sbatch_script_name
     output = '--output=' + sbatch_script_path + '.txt'
     error = '--error=' + sbatch_script_path + '.err'
-    array = '--array=0-' + str(num_jobs-1) + '%' + str(max_jobs)
+    array = '--array=0-' + str(num_jobs - 1) + '%' + str(max_jobs)
 
     sbatch_options_list = [job_name, output, error, array]
     sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
@@ -391,6 +399,7 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
 
 def submit_sbatch_script(sbatch_script_name: str, command_name: CommandName,
                          execution_dir: str = None) -> str:
+    '''Submit a Slurm batch script.'''
     if execution_dir is None:
         execution_dir = sgh.smac_dir
 

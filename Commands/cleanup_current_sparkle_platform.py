@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+'''Sparkle command to clean up the current Sparkle platform.'''
 
 import os
 import sys
@@ -10,6 +11,7 @@ import cleanup_temporary_files as ctf
 
 
 def parser_function():
+    '''Define the command line arguments.'''
     parser = argparse.ArgumentParser()
 
     return parser
