@@ -227,8 +227,7 @@ def get_ablation_bool(solver_name, instance_train_name, instance_test_name) -> s
 
 
 def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
-    '''
-    Return a bool string for latex indicating whether features were used.
+    '''Return a bool string for latex indicating whether features were used.
 
     True if a feature file is given in the scenario file, false otherwise.
     '''
@@ -246,8 +245,7 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
                       smac_each_run_cutoff_time: float) -> list:
-    '''
-    Return the required data to plot.
+    '''Return the required data to plot.
 
     Creates a nested list of performance values algorithm runs with default and
     configured parameters on instances in a given instance set.
@@ -277,8 +275,7 @@ def get_figure_configure_vs_default(configured_results_dir: str,
                                     configuration_reports_directory: str,
                                     figure_filename: str,
                                     smac_each_run_cutoff_time: float) -> str:
-    '''
-    Create a figure comparing the configured and default solver.
+    '''Create a figure comparing the configured and default solver.
 
     Base function to create a comparison plot of a given instance set between the default
     and configured performance.
@@ -321,8 +318,7 @@ def get_figure_configure_vs_default(configured_results_dir: str,
 def get_figure_configured_vs_default_on_test_instance_set(
         solver_name: str, instance_set_train_name: str, instance_set_test_name: str,
         smac_each_run_cutoff_time: float) -> str:
-    '''
-    Create a figure comparing the configured and default solver on the training set.
+    '''Create a figure comparing the configured and default solver on the training set.
 
     Manages the creation of a comparison plot of the instances in a test set for the
     report by gathering the proper files and choosing the plotting parameters based on
@@ -355,8 +351,7 @@ def get_figure_configured_vs_default_on_test_instance_set(
 def get_figure_configured_vs_default_on_train_instance_set(
         solver_name: str, instance_set_train_name: str,
         configuration_reports_directory: str, smac_each_run_cutoff_time: float) -> str:
-    '''
-    Create a figure comparing the configured and default solver on the training set.
+    '''Create a figure comparing the configured and default solver on the training set.
 
     Manages the creation of a comparison plot of the instances in the train instance set
     for the report by gathering the proper files and choosing the plotting parameters
@@ -467,8 +462,7 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
 
 def get_ablation_table(solver_name: str, instance_set_train_name: str,
                        instance_set_test_name: str = None) -> str:
-    '''
-    Generate a LaTeX table of the ablation path.
+    '''Generate a LaTeX table of the ablation path.
 
     This is the result of the ablation analysis to determine the parameter importance.
 

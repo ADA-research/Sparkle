@@ -194,8 +194,7 @@ def get_vbs_par10():
 
 
 def get_actual_par10() -> str:
-    '''
-    Return the PAR10 of the selector over a set of instances.
+    '''Return the PAR10 of the selector over a set of instances.
 
     @return string formatted mean performance.
     '''
@@ -233,8 +232,7 @@ def get_dict_vbs_penalty_time_on_each_instance():
 
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict:
-    '''
-    Return a dictionary with the performance of the portfolio selector on each instance.
+    '''Return a dictionary with the portfolio selector performance on each instance.
 
     @return A dictionary with for each instance the portfolio selector's performance
     '''
@@ -548,32 +546,33 @@ def generate_comparison_plot(points: list,
                              replace_zeros: bool = True,
                              magnitude_lines: int = sgh.sparkle_maximum_int,
                              cwd=None):
-    '''
-    Create comparison plots between two different solvers/portfolios.
+    '''Create comparison plots between two different solvers/portfolios.
 
-    Arguments:
-    points: list of points which represents with the performance results of
-    (solverA, solverB)
-    figure_filename: filename without filetype (e.g., .jpg) to save the figure to.
-    xlabel: Name of solverA (default: default)
-    ylabel: Name of solverB (default: optimised)
-    title: Display title in the image (default: None)
-    scale: [linear, log] (default: linear)
-    limit: The method to compute the axis limits in the figure
-    [absolute, relative, magnitude] (default: relative)
-        absolute: Uses the limit_min/max values as absolute values
-        relative: Decreases/increases relatively to the min/max values found in the
-        points. E.g., min/limit_min and max*limit_max
-        magnitude: Increases the order of magnitude(10) of the min/max values in the
-        points. E.g., 10**floor(log10(min)-limit_min) and 10**ceil(log10(max)+limit_max)
-    limit_min, limit_max: values used to compute the limits
-    penalty_time: Acts as the maximum value the figure takes in consideration for
-    computing the figure limits. This is only relevant for runtime objectives
-    replace_zeros: Replaces zeros valued performances to a very small value to make
-    plotting on log-scale possible
-    magnitude_lines: Draw magnitude lines (only supported for log scale)
-    cwd: directory path to place the figure and its intermediate files in (default:
-    current working directory)
+    Args:
+        points: list of points which represents with the performance results of
+        (solverA, solverB)
+        figure_filename: filename without filetype (e.g., .jpg) to save the figure to.
+        xlabel: Name of solverA (default: default)
+        ylabel: Name of solverB (default: optimised)
+        title: Display title in the image (default: None)
+        scale: [linear, log] (default: linear)
+        limit: The method to compute the axis limits in the figure
+        [absolute, relative, magnitude] (default: relative)
+            absolute: Uses the limit_min/max values as absolute values
+            relative: Decreases/increases relatively to the min/max values found in the
+            points. E.g., min/limit_min and max*limit_max
+            magnitude: Increases the order of magnitude(10) of the min/max values in the
+            points. E.g., 10**floor(log10(min)-limit_min)
+            and 10**ceil(log10(max)+limit_max)
+        limit_min: Value used to compute the minimum limit
+        limit_max: Value used to compute the maximum limit
+        penalty_time: Acts as the maximum value the figure takes in consideration for
+        computing the figure limits. This is only relevant for runtime objectives
+        replace_zeros: Replaces zeros valued performances to a very small value to make
+        plotting on log-scale possible
+        magnitude_lines: Draw magnitude lines (only supported for log scale)
+        cwd: directory path to place the figure and its intermediate files in (default:
+        current working directory)
     '''
     pwd = os.getcwd()
     if cwd is not None:
