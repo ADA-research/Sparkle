@@ -85,23 +85,30 @@ def check_slurm_option_compatibility(srun_option_string: str):
             kwargs[arg] = args[i+1]
 
     if not ("--partition" in kwargs.keys() or "-p" in kwargs.keys()):
-        print("###Could not check slurm compatibility because no partition was specified; ignoring###")
+        print("###Could not check slurm compatibility because no partition was "
+              "specified; continuing###")
         return True, "Could not Check"
 
     partition = kwargs.get("--partition", kwargs.get("-p", None))
 
-    output = str(subprocess.check_output(['sinfo', '--nohead', '--format', '"%c;%m"', '--partition', partition]))
+    output = str(subprocess.check_output(['sinfo', '--nohead', '--format', '"%c;%m"',
+                                          '--partition', partition]))
     cpus, memory = output[3:-4].split(";")
     cpus = int(cpus)
     memory = float(memory)
 
     if "--cpus-per-task" in kwargs.keys() or "-c" in kwargs.keys():
-        if int(kwargs.get("--cpus-per-task", kwargs.get("-c", 0))) > cpus:
-            return False, "CPU specification cannot be satisfied"
+        requestedcpus = int(kwargs.get("--cpus-per-task", kwargs.get("-c", 0)))
+        if requestedcpus > cpus:
+            return False, f"CPU specification of {requestedcpus} cannot be " \
+                          f"satisfied for {partition}, only got {cpus}"
 
     if "--mem-per-cpu" in kwargs.keys() or "-m" in kwargs.keys():
-        if float(kwargs.get("--mem-per-cpu", kwargs.get("-m", 0))) * int(kwargs.get("--cpus-per-task", kwargs.get("-c", cpus))) > memory:
-            return False, "Memory specification can not be satisfied"
+        requestedmemory = float(kwargs.get("--mem-per-cpu", kwargs.get("-m", 0))) * \
+                          int(kwargs.get("--cpus-per-task", kwargs.get("-c", cpus)))
+        if requestedmemory > memory:
+            return False, f"Memory specification {requestedmemory}MB can not be " \
+                          f"satisfied for {partition}, only got {memory}MB"
 
     return True, "Check successful"
 
