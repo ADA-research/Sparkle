@@ -77,45 +77,46 @@ def get_slurm_srun_user_options_str(path_modifier=None) -> str:
 
 
 def check_slurm_option_compatibility(srun_option_string: str):
+    '''Check if the given srun_option_string is compatible with the Slurm cluster'''
     # Check compatibility of slurm options
     args = shlex.split(srun_option_string)
     kwargs = {}
 
     for i in range(len(args)):
         arg = args[i]
-        if "=" in arg:
-            splitted = arg.split("=")
+        if '=' in arg:
+            splitted = arg.split('=')
             kwargs[splitted[0]] = splitted[1]
-        elif i < len(args) and "=" not in args[i + 1]:
+        elif i < len(args) and '=' not in args[i + 1]:
             kwargs[arg] = args[i + 1]
 
-    if not ("--partition" in kwargs.keys() or "-p" in kwargs.keys()):
-        print("###Could not check slurm compatibility because no partition was "
-              "specified; continuing###")
-        return True, "Could not Check"
+    if not ('--partition' in kwargs.keys() or '-p' in kwargs.keys()):
+        print('###Could not check slurm compatibility because no partition was '
+              'specified; continuing###')
+        return True, 'Could not Check'
 
-    partition = kwargs.get("--partition", kwargs.get("-p", None))
+    partition = kwargs.get('--partition', kwargs.get('-p', None))
 
     output = str(subprocess.check_output(['sinfo', '--nohead', '--format', '"%c;%m"',
                                           '--partition', partition]))
-    cpus, memory = output[3:-4].split(";")
+    cpus, memory = output[3:-4].split(';')
     cpus = int(cpus)
     memory = float(memory)
 
-    if "--cpus-per-task" in kwargs.keys() or "-c" in kwargs.keys():
-        requestedcpus = int(kwargs.get("--cpus-per-task", kwargs.get("-c", 0)))
+    if '--cpus-per-task' in kwargs.keys() or '-c' in kwargs.keys():
+        requestedcpus = int(kwargs.get('--cpus-per-task', kwargs.get('-c', 0)))
         if requestedcpus > cpus:
-            return False, f"CPU specification of {requestedcpus} cannot be " \
-                          f"satisfied for {partition}, only got {cpus}"
+            return False, f'CPU specification of {requestedcpus} cannot be ' \
+                          f'satisfied for {partition}, only got {cpus}'
 
-    if "--mem-per-cpu" in kwargs.keys() or "-m" in kwargs.keys():
-        requestedmemory = float(kwargs.get("--mem-per-cpu", kwargs.get("-m", 0))) * \
-            int(kwargs.get("--cpus-per-task", kwargs.get("-c", cpus)))
+    if '--mem-per-cpu' in kwargs.keys() or '-m' in kwargs.keys():
+        requestedmemory = float(kwargs.get('--mem-per-cpu', kwargs.get('-m', 0))) * \
+            int(kwargs.get('--cpus-per-task', kwargs.get('-c', cpus)))
         if requestedmemory > memory:
-            return False, f"Memory specification {requestedmemory}MB can not be " \
-                          f"satisfied for {partition}, only got {memory}MB"
+            return False, f'Memory specification {requestedmemory}MB can not be ' \
+                          f'satisfied for {partition}, only got {memory}MB'
 
-    return True, "Check successful"
+    return True, 'Check successful'
 
 
 def generate_sbatch_script_generic(sbatch_script_path: str,
@@ -330,7 +331,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
     result, msg = check_slurm_option_compatibility(srun_options_str)
 
     if not result:
-        print(f"Slurm config Error: {msg}")
+        print(f'Slurm config Error: {msg}')
         sys.exit()
 
     # Create target call
