@@ -76,9 +76,8 @@ def get_slurm_srun_user_options_str(path_modifier=None) -> str:
     return srun_options_str
 
 
-def check_slurm_option_compatibility(srun_option_string: str):
+def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str]:
     '''Check if the given srun_option_string is compatible with the Slurm cluster.'''
-    # Check compatibility of slurm options
     args = shlex.split(srun_option_string)
     kwargs = {}
 
@@ -87,7 +86,7 @@ def check_slurm_option_compatibility(srun_option_string: str):
         if '=' in arg:
             splitted = arg.split('=')
             kwargs[splitted[0]] = splitted[1]
-        elif i < len(args) and '=' not in args[i + 1]:
+        elif i < len(args) and '-' not in args[i + 1]:
             kwargs[arg] = args[i + 1]
 
     if not ('--partition' in kwargs.keys() or '-p' in kwargs.keys()):
@@ -99,22 +98,23 @@ def check_slurm_option_compatibility(srun_option_string: str):
 
     output = str(subprocess.check_output(['sinfo', '--nohead', '--format', '"%c;%m"',
                                           '--partition', partition]))
+    # we expect a string of the form b'"{};{}"\n'
     cpus, memory = output[3:-4].split(';')
     cpus = int(cpus)
     memory = float(memory)
 
     if '--cpus-per-task' in kwargs.keys() or '-c' in kwargs.keys():
-        requestedcpus = int(kwargs.get('--cpus-per-task', kwargs.get('-c', 0)))
-        if requestedcpus > cpus:
-            return False, f'CPU specification of {requestedcpus} cannot be ' \
+        requested_cpus = int(kwargs.get('--cpus-per-task', kwargs.get('-c', 0)))
+        if requested_cpus > cpus:
+            return False, f'ERROR: CPU specification of {requested_cpus} cannot be ' \
                           f'satisfied for {partition}, only got {cpus}'
 
     if '--mem-per-cpu' in kwargs.keys() or '-m' in kwargs.keys():
-        requestedmemory = float(kwargs.get('--mem-per-cpu', kwargs.get('-m', 0))) * \
+        requested_memory = float(kwargs.get('--mem-per-cpu', kwargs.get('-m', 0))) * \
             int(kwargs.get('--cpus-per-task', kwargs.get('-c', cpus)))
-        if requestedmemory > memory:
-            return False, f'Memory specification {requestedmemory}MB can not be ' \
-                          f'satisfied for {partition}, only got {memory}MB'
+        if requested_memory > memory:
+            return False, f'ERROR: Memory specification {requested_memory}MB can ' \
+                          f'not be satisfied for {partition}, only got {memory}MB'
 
     return True, 'Check successful'
 
