@@ -514,7 +514,7 @@ def check_configuration_permission_error(solver_name: str, instance_set_name: st
     # Get the name of the first file in the directory
     # If there is an error, it will be in all files, so checking one is sufficient
     filename = next(Path(smac_results_dir / f) for f in os.listdir(smac_results_dir)
-                    if Path(smac_results_dir / f)).is_file()
+                    if Path(smac_results_dir / f).is_file())
 
     with open(filename, 'r') as file:
         content = file.read()
