@@ -123,9 +123,14 @@ if __name__ == '__main__':
 
     validate = args.validate
     ablation = args.ablation
-    solver = args.solver
-    instance_set_train = args.instance_set_train
-    instance_set_test = args.instance_set_test
+    solver = Path(args.solver)
+    solver_name = solver.name
+    instance_set_train = Path(args.instance_set_train)
+    instance_set_train_name = instance_set_train.name
+    if args.instance_set_test is not None:
+        instance_set_test = Path(args.instance_set_test)
+    else:
+        instance_set_test = None
     use_features = args.use_features
 
     if use_features:
@@ -183,16 +188,8 @@ if __name__ == '__main__':
             args.number_of_runs, SettingState.CMD_LINE
         )
 
-    solver_name = sfh.get_last_level_directory_name(solver)
-    instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
-    instance_set_test_name = None
-
-    if instance_set_test is not None:
-        instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
-
     # Check if solver has pcs file and is configurable
-    solver_directory = sash.get_solver_directory(solver_name)
-    if not sash.check_adding_solver_contain_pcs_file(solver_directory):
+    if not sash.check_adding_solver_contain_pcs_file(solver):
         print(
             'None or multiple .pcs files found. Solver is not valid for configuration.'
         )
@@ -204,17 +201,16 @@ if __name__ == '__main__':
     sah.clean_ablation_scenarios(solver_name, instance_set_train_name)
 
     # Copy instances to smac directory
-    instances_directory = 'Instances/' + instance_set_train_name
-    list_all_path = sih.get_list_all_path(instances_directory)
+    list_all_path = sih.get_list_all_path(instance_set_train)
     smac_inst_dir_prefix = (
         sgh.smac_dir
         + '/'
         + 'example_scenarios/'
         + 'instances/'
-        + sfh.get_last_level_directory_name(instances_directory)
+        + instance_set_train.name
     )
     sih.copy_instances_to_smac(
-        list_all_path, instances_directory, smac_inst_dir_prefix, 'train'
+        list_all_path, str(instance_set_train), smac_inst_dir_prefix, 'train'
     )
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver_name, instance_set_train_name)
