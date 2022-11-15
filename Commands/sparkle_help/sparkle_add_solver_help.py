@@ -27,32 +27,3 @@ def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
             pcs_count += 1
 
     return False if pcs_count != 1 else True
-
-
-def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
-    '''Return the name of the PCS file in a solver directory.
-
-    If not found, return an empty str.
-    '''
-    list_files = os.listdir(solver_directory)
-
-    for file_name in list_files:
-        file_extension = sfh.get_file_full_extension(file_name)
-
-        if file_extension == 'pcs':
-            return file_name
-
-    return ''
-
-
-def create_necessary_files_for_configured_solver(smac_solver_dir: str) -> None:
-    '''Create directories needed for configuration of a solver.'''
-    outdir_dir = smac_solver_dir + '/' + 'outdir_train_configuration/'
-    command_line = 'mkdir -p ' + outdir_dir
-    os.system(command_line)
-
-    tmp_dir = smac_solver_dir + '/' + 'tmp/'
-    command_line = 'mkdir -p ' + tmp_dir
-    os.system(command_line)
-
-    return

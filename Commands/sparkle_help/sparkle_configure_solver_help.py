@@ -5,6 +5,7 @@
 import os
 import sys
 import fcntl
+import shutil
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
@@ -13,7 +14,6 @@ try:
     from sparkle_help import sparkle_file_help as sfh
     from sparkle_help import sparkle_global_help as sgh
     from sparkle_help import sparkle_logging as sl
-    from sparkle_help import sparkle_add_solver_help as sash
     from sparkle_help import sparkle_slurm_help as ssh
     from sparkle_help.sparkle_settings import PerformanceMeasure
     from sparkle_help import sparkle_instances_help as sih
@@ -23,7 +23,6 @@ except ImportError:
     import sparkle_file_help as sfh
     import sparkle_global_help as sgh
     import sparkle_logging as sl
-    import sparkle_add_solver_help as sash
     import sparkle_slurm_help as ssh
     from sparkle_settings import PerformanceMeasure
     import sparkle_instances_help as sih
@@ -137,7 +136,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
     smac_paramfile = (f'example_scenarios/{solver_name}_{instance_set_train_name}/'
-                      f'{sash.get_pcs_file_from_solver_directory(smac_solver_dir)}')
+                      f'{get_pcs_file_from_solver_directory(smac_solver_dir)}')
     if instance_type == InstanceType.TRAIN:
         smac_outdir = (f'example_scenarios/{solver_name}_{instance_set_train_name}/'
                        f'outdir_{inst_type}_{config_type}/')
@@ -181,7 +180,7 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
     smac_paramfile = (f'example_scenarios/{solver_name}_{instance_set_name}/'
-                      f'{sash.get_pcs_file_from_solver_directory(smac_solver_dir)}')
+                      f'{get_pcs_file_from_solver_directory(smac_solver_dir)}')
     smac_outdir = (f'example_scenarios/{solver_name}_{instance_set_name}/'
                    'outdir_train_configuration/')
     smac_instance_file = (f'example_scenarios/{solver_name}_{instance_set_name}/'
@@ -214,44 +213,66 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
     return
 
 
-def remove_configuration_directory(solver_name: str, instance_set_name: str) -> None:
-    '''Remove the configuration directory.'''
-    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
-
-    # Remove the solver directory to make sure any possible old files don't interfere
-    sfh.rmtree(smac_solver_dir)
-
-    return
-
-
 def clean_configuration_directory(solver_name: str, instance_set_name: str) -> None:
     '''Prepare clean configuration directory.'''
-    remove_configuration_directory(solver_name, instance_set_name)
-    create_configuration_directory(solver_name, instance_set_name)
+    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
+
+    # Delete directory and then create it new with necessary files
+    shutil.rmtree(smac_solver_dir, ignore_errors=True)
+    create_configuration_directory(smac_solver_dir, solver_name)
 
     return
 
+# Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic_PTN
 
 def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     '''Return the directory of a solver under the SMAC directory.'''
-    smac_scenario_dir = sgh.smac_dir + '/' + 'example_scenarios/'
-    smac_solver_dir = f'{smac_scenario_dir}/{solver_name}_{instance_set_name}/'
+    smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
+    smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
 
     return smac_solver_dir
 
 
-def create_configuration_directory(solver_name: str, instance_set_name: str):
+def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
     '''Create a directory for the configuration of a solver+instance-set combination.'''
-    smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
-    sash.create_necessary_files_for_configured_solver(smac_solver_dir)
+    create_necessary_files_for_configured_solver(smac_solver_dir)
 
     # Copy PCS file to smac_solver_dir
-    solver_diretory = 'Solvers/' + solver_name + '/'
-    pcs_file = solver_diretory + sash.get_pcs_file_from_solver_directory(solver_diretory)
-    command_line = 'cp ' + pcs_file + ' ' + smac_solver_dir
+    solver_diretory = f"Solvers/{solver_name}/"
+    pcs_file = solver_diretory + get_pcs_file_from_solver_directory(solver_diretory)
+    command_line = f"cp {pcs_file} {smac_solver_dir}"
     os.system(command_line)
 
     return
+
+
+def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
+    '''Create directories needed for configuration of a solver.'''
+    outdir_dir = smac_solver_dir / "outdir_train_configuration"
+    command_line = 'mkdir -p ' + str(outdir_dir)
+    os.system(command_line)
+
+    tmp_dir = smac_solver_dir / 'tmp'
+    command_line = f"mkdir -p {tmp_dir}"
+    os.system(command_line)
+
+    return
+
+
+def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
+    '''Return the name of the PCS file in a solver directory.
+
+    If not found, return an empty str.
+    '''
+    list_files = os.listdir(solver_directory)
+
+    for file_name in list_files:
+        file_extension = sfh.get_file_full_extension(file_name)
+
+        if file_extension == 'pcs':
+            return file_name
+
+    return ''
 
 
 def prepare_smac_execution_directories_configuration(solver_name: str,
@@ -570,7 +591,7 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name) -> None:
 
     # Read existing PCS file and create output content
     solver_diretory = 'Solvers/' + solver_name
-    pcs_file = solver_diretory + '/' + sash.get_pcs_file_from_solver_directory(
+    pcs_file = solver_diretory + '/' + get_pcs_file_from_solver_directory(
         solver_diretory)
     pcs_file_out = []
 

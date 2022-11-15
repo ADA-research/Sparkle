@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
-from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_add_solver_help as sash
 from sparkle_help import sparkle_configure_solver_help as scsh
@@ -44,19 +43,19 @@ def parser_function():
     parser.add_argument(
         '--solver',
         required=True,
-        type=str,
+        type=Path,
         help='path to solver'
     )
     parser.add_argument(
         '--instance-set-train',
         required=True,
-        type=str,
+        type=Path,
         help='path to training instance set',
     )
     parser.add_argument(
         '--instance-set-test',
         required=False,
-        type=str,
+        type=Path,
         help='path to testing instance set (only for validating)',
     )
     parser.add_argument(
@@ -123,15 +122,13 @@ if __name__ == '__main__':
 
     validate = args.validate
     ablation = args.ablation
-    solver = Path(args.solver)
-    solver_name = solver.name
-    instance_set_train = Path(args.instance_set_train)
-    instance_set_train_name = instance_set_train.name
-    if args.instance_set_test is not None:
-        instance_set_test = Path(args.instance_set_test)
-    else:
-        instance_set_test = None
+    solver = args.solver
+    instance_set_train = args.instance_set_train
+    instance_set_test = args.instance_set_test
     use_features = args.use_features
+
+    solver_name = solver.name
+    instance_set_train_name = instance_set_train.name
 
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
