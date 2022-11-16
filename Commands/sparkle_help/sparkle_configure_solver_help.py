@@ -227,8 +227,8 @@ def clean_configuration_directory(solver_name: str, instance_set_name: str) -> N
 
 def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     '''Return the directory of a solver under the SMAC directory.'''
-    smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
-    smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
+    smac_scenario_dir = f'{sgh.smac_dir}/example_scenarios'
+    smac_solver_dir = f'{smac_scenario_dir}/{solver_name}_{instance_set_name}/'
 
     return smac_solver_dir
 
@@ -238,9 +238,9 @@ def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
     create_necessary_files_for_configured_solver(smac_solver_dir)
 
     # Copy PCS file to smac_solver_dir
-    solver_diretory = f"Solvers/{solver_name}/"
+    solver_diretory = f'Solvers/{solver_name}/'
     pcs_file = solver_diretory + get_pcs_file_from_solver_directory(solver_diretory)
-    command_line = f"cp {pcs_file} {smac_solver_dir}"
+    command_line = f'cp {pcs_file} {smac_solver_dir}'
     os.system(command_line)
 
     return
@@ -248,12 +248,12 @@ def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
 
 def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
     '''Create directories needed for configuration of a solver.'''
-    outdir_dir = smac_solver_dir / "outdir_train_configuration"
+    outdir_dir = smac_solver_dir / 'outdir_train_configuration'
     command_line = 'mkdir -p ' + str(outdir_dir)
     os.system(command_line)
 
     tmp_dir = smac_solver_dir / 'tmp'
-    command_line = f"mkdir -p {tmp_dir}"
+    command_line = f'mkdir -p {tmp_dir}'
     os.system(command_line)
 
     return
