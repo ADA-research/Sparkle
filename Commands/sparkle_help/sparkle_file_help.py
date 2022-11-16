@@ -26,16 +26,6 @@ def create_new_empty_file(filepath: str):
     return
 
 
-def checkout_directory(path, make_if_not_exist=True):
-    '''Return whether a path is a directory or not.
-
-    Optionally create the directory if it does not exist.
-    '''
-    if (make_if_not_exist) and not os.path.exists(path):
-        Path(path).mkdir(parents=True, exist_ok=True)
-    return os.path.isdir(path)
-
-
 def get_current_directory_name(filepath: str) -> str:
     '''Return the name of the current directory as str.'''
     if filepath == '':

@@ -823,7 +823,7 @@ def generate_generic_callback_slurm_script(name: str, solver: str,
 
     delayed_job_file_name += '_script.sh'
 
-    sfh.checkout_directory(sgh.sparkle_tmp_path)
+    Path(sgh.sparkle_tmp_path).mkdir(parents=True, exist_ok=True)
     delayed_job_file_path = sgh.sparkle_tmp_path + delayed_job_file_name
     delayed_job_output = delayed_job_file_path + '.txt'
     delayed_job_error = delayed_job_file_path + '.err'
