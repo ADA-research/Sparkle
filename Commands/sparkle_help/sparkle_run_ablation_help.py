@@ -5,6 +5,7 @@
 import os
 import sys
 import re
+import shutil
 from pathlib import Path
 from pathlib import PurePath
 
@@ -36,9 +37,9 @@ def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str):
     '''Clean up ablation analysis directory.'''
     ablation_scenario_dir = Path(sgh.ablation_dir + 'scenarios/')
     if ablation_scenario_dir.is_dir():
-        for ablation_scenario in ablation_scenario_dir.glob('{}_{}_*'.format(
-                solver_name, instance_set_train_name)):
-            sfh.rmtree(ablation_scenario)
+        for ablation_scenario in ablation_scenario_dir.glob(
+            f'{solver_name}_{instance_set_train_name}_*'):
+            shutil.rmtree(ablation_scenario, ignore_errors=True)
     return
 
 
