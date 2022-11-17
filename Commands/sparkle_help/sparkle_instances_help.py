@@ -4,6 +4,7 @@
 
 import os
 import sys
+import shutil
 from pathlib import Path
 
 try:
@@ -153,8 +154,8 @@ def _copy_reference_instance_list_to_smac(smac_instance_file: Path,
     return
 
 
-def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str,
-                           smac_instance_dir_prefix: str, train_or_test: str) -> None:
+def copy_instances_to_smac(list_instance_path, instance_dir_prefix: Path,
+                           smac_instance_dir_prefix: Path, train_or_test: str) -> None:
     '''Copy problem instances to be used for configuration to the SMAC directory.'''
     instance_set_name = Path(instance_dir_prefix).name
 
@@ -167,44 +168,36 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str,
         print('Invalid function call of "copy_instances_to_smac"; aborting execution')
         sys.exit()
 
-    smac_instance_file = Path(smac_instance_dir_prefix + file_suffix)
-    smac_instance_dir = Path(sfh.get_directory(smac_instance_dir_prefix))
+    # Concatenating a path with a partial filename to create the full name
+    smac_instance_file = (smac_instance_dir_prefix.parent
+                         / (smac_instance_dir_prefix.name + file_suffix))
+    smac_instance_dir = smac_instance_dir_prefix.parent
 
     # Remove the directory (of this specific instance set) to make sure it is empty
     # and remove the SMAC instance list file to make sure it is empty
-    sfh.rmtree(Path(smac_instance_dir_prefix))
-    sfh.rmfile(smac_instance_file)
+    shutil.rmtree(smac_instance_dir_prefix, ignore_errors=True)
+    smac_instance_file.unlink(missing_ok=True)
 
     # (Re)create the path to the SMAC instance directory for this instance set
     if not smac_instance_dir.is_dir():
         smac_instance_dir.mkdir(parents=True, exist_ok=True)
 
-    if instance_dir_prefix[-1] == '/':
-        instance_dir_prefix = instance_dir_prefix[:-1]
-    if smac_instance_dir_prefix == '/':
-        smac_instance_dir_prefix = smac_instance_dir_prefix[:-1]
-
     fout = smac_instance_file.open('w+')
 
-    for i in range(0, len(list_instance_path)):
-        ori_instance_path = list_instance_path[i]
-        target_instance_path = ori_instance_path.replace(instance_dir_prefix,
-                                                         smac_instance_dir_prefix, 1)
-        target_instance_dir = sfh.get_directory(target_instance_path)
+    for ori_instance_path in list_instance_path:
+        target_instance_path = smac_instance_dir_prefix / Path(ori_instance_path).name
+        target_instance_dir = target_instance_path.parent
 
         if not os.path.exists(target_instance_dir):
-            os.system('mkdir -p ' + target_instance_dir)
-        command_line = 'cp ' + ori_instance_path + ' ' + target_instance_path
+            os.system(f'mkdir -p {str(target_instance_dir)}')
+        command_line = f'cp {ori_instance_path} {target_instance_path}'
         os.system(command_line)
 
         # Only do this when no instance_list file exists for this instance set
         if not check_existence_of_reference_instance_list(instance_set_name):
             # Write instance to SMAC instance file
-            fout.write(target_instance_path.replace(
-                smac_instance_dir_prefix,
-                '../../instances/'
-                f'{sfh.get_last_level_directory_name(smac_instance_dir_prefix)}',
-                1) + '\n')
+            fout.write(f'../../instances/{ori_instance_path.parts[-2]}/'
+                       '{ori_instance_path.name}\n')
 
     fout.close()
 
