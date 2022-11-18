@@ -30,41 +30,41 @@ def parser_function():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--recompute',
-        action='store_true',
-        help='recompute the performance of all solvers on all instances')
+        "--recompute",
+        action="store_true",
+        help="recompute the performance of all solvers on all instances")
     parser.add_argument(
-        '--parallel',
-        action='store_true',
-        help='run the solver on multiple instances in parallel')
+        "--parallel",
+        action="store_true",
+        help="run the solver on multiple instances in parallel")
     parser.add_argument(
-        '--performance-measure',
+        "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        help='the performance measure, e.g. runtime')
+        help="the performance measure, e.g. runtime")
     parser.add_argument(
-        '--target-cutoff-time',
+        "--target-cutoff-time",
         type=int,
-        help='cutoff time per target algorithm run in seconds')
+        help="cutoff time per target algorithm run in seconds")
     parser.add_argument(
-        '--also-construct-selector-and-report',
-        action='store_true',
-        help=('after running the solvers also construct the selector and generate'
-              ' the report'))
+        "--also-construct-selector-and-report",
+        action="store_true",
+        help=("after running the solvers also construct the selector and generate"
+              " the report"))
     parser.add_argument(
-        '--verifier',
+        "--verifier",
         choices=SolutionVerifier.__members__,
-        help=('problem specific verifier that should be used to verify solutions found'
-              ' by a target algorithm'))
+        help=("problem specific verifier that should be used to verify solutions found"
+              " by a target algorithm"))
     parser.add_argument(
-        '--run-on',
+        "--run-on",
         default=Runner.SLURM,
-        help=('On which computer or cluster environment to execute the calculation.'
-              'Available: local, slurm. Default: slurm'))
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm"))
     parser.add_argument(
-        '--settings-file',
+        "--settings-file",
         type=Path,
-        help=('specify the settings file to use in case you want to use one other than'
-              ' the default'))
+        help=("specify the settings file to use in case you want to use one other than"
+              " the default"))
 
     return parser
 
@@ -77,7 +77,7 @@ def run_solvers_on_instances(
     """Run all the solvers on all the instances that were not not previously run.
 
     If recompute is True, rerun everything even if previously run. Where the solvers are
-    executed can be controlled with 'run_on'.
+    executed can be controlled with "run_on".
 
     Parameters
     ----------
@@ -120,7 +120,7 @@ def run_solvers_on_instances(
                 dependency_jobid_list.append(run_solvers_parallel_jobid)
 
             # Update performance data csv after the last job is done
-            job_script = 'Commands/sparkle_help/sparkle_csv_merge_help.py'
+            job_script = "Commands/sparkle_help/sparkle_csv_merge_help.py"
             run_job_parallel_jobid = sjph.running_job_parallel(
                 job_script, dependency_jobid_list, CommandName.RUN_SOLVERS)
             dependency_jobid_list.append(run_job_parallel_jobid)
@@ -131,9 +131,9 @@ def run_solvers_on_instances(
                     dependency_jobid_list)
                 dependency_jobid_list.append(run_job_parallel_jobid)
 
-            job_id_str = ','.join(dependency_jobid_list)
-            print(f'Running solvers in parallel. Waiting for Slurm job(s) with id(s): '
-                  f'{job_id_str}')
+            job_id_str = ",".join(dependency_jobid_list)
+            print(f"Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+                  f"{job_id_str}")
     else:
         # Run the solvers
         runs = [srsph.running_solvers_parallel(
@@ -148,45 +148,45 @@ def run_solvers_on_instances(
 
         # If there are no jobs return
         if all(run is None for run in runs):
-            print('Running solvers done!')
+            print("Running solvers done!")
 
             return
 
         # Update performance data csv after the last job is done
         runs.append(rrr.add_to_queue(
             runner=run_on,
-            cmd='Commands/sparkle_help/sparkle_csv_merge_help.py',
-            name='sprkl_csv_merge',
+            cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
+            name="sprkl_csv_merge",
             dependencies=runs[-1],
-            base_dir='Tmp'))
+            base_dir="Tmp"))
 
         if also_construct_selector_and_report:
             runs.append(rrr.add_to_queue(
                 runner=run_on,
-                cmd='Commands/construct_sparkle_portfolio_selector.py',
-                name='sprkl_portfolio_selector',
+                cmd="Commands/construct_sparkle_portfolio_selector.py",
+                name="sprkl_portfolio_selector",
                 dependencies=runs[-1],
-                base_dir='Tmp'))
+                base_dir="Tmp"))
 
             runs.append(rrr.add_to_queue(
                 runner=run_on,
-                cmd='Commands/generate_report.py',
-                name='sprkl_report',
+                cmd="Commands/generate_report.py",
+                name="sprkl_report",
                 dependencies=runs[-1],
-                base_dir='Tmp'))
+                base_dir="Tmp"))
 
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
 
         if run_on == Runner.LOCAL:
-            print('Waiting for the local calculations to finish.')
+            print("Waiting for the local calculations to finish.")
             for run in runs:
                 if run is not None:
                     run.wait()
-            print('Running solvers done!')
+            print("Running solvers done!")
         elif run_on == Runner.SLURM_RR:
-            print('Running solvers in parallel. Waiting for Slurm job(s) with id(s): '
+            print("Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
                   f'{",".join(r.run_id for r in runs if r is not None)}')
 
     return
@@ -197,7 +197,7 @@ def construct_selector_and_report(dependency_jobid_list: list[str] = []) -> str:
 
     Returns a Slurm job ID as str.
     """
-    job_script = 'Commands/construct_sparkle_portfolio_selector.py'
+    job_script = "Commands/construct_sparkle_portfolio_selector.py"
     run_job_parallel_jobid = sjph.running_job_parallel(
         job_script,
         dependency_jobid_list,
@@ -206,14 +206,14 @@ def construct_selector_and_report(dependency_jobid_list: list[str] = []) -> str:
     if run_job_parallel_jobid:
         dependency_jobid_list.append(run_job_parallel_jobid)
 
-    job_script = 'Commands/generate_report.py'
+    job_script = "Commands/generate_report.py"
     run_job_parallel_jobid = sjph.running_job_parallel(
         job_script, dependency_jobid_list, CommandName.GENERATE_REPORT)
 
     return run_job_parallel_jobid
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -243,13 +243,13 @@ if __name__ == '__main__':
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
 
-    print('Start running solvers ...')
+    print("Start running solvers ...")
 
     if not srh.detect_current_sparkle_platform_exists():
-        print('No Sparkle platform found; please first run the initialise command')
+        print("No Sparkle platform found; please first run the initialise command")
         sys.exit()
 
-    print('Start running solvers ...')
+    print("Start running solvers ...")
 
     # Write settings to file before starting, since they are used in callback scripts
     sgh.settings.write_used_settings()

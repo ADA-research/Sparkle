@@ -14,7 +14,7 @@ import sys
 def print_command(instance_file, seed_str: str, cutoff_time_str: str):
     """Print a command line call for the target algorithm with a given instance file."""
     # TODO: Change executable_name to the name of your solver executable
-    executable_name = 'MetaVC'
+    executable_name = "MetaVC"
     # TODO: Change param_str to the static parameters for your solver (can be empty)
     param_str = ("-opt '0' -print_sol '1' -edge_weight_p_scale '0.5214052710418935' "
                  "-edge_weight_threshold_scale '0.414990365260387' -init_sol '1' "
@@ -27,7 +27,7 @@ def print_command(instance_file, seed_str: str, cutoff_time_str: str):
 
     # TODO: Change command_line to use the appropriate option names for your solver
     command_line = (
-        f'{executable_name} -inst {instance_file} -seed {seed_str} {param_str}')
+        f"{executable_name} -inst {instance_file} -seed {seed_str} {param_str}")
 
     print(command_line)
 
@@ -44,60 +44,60 @@ def print_output(terminal_output_file: str):
     # TODO: [optional] Determine algorithm run status based on output
 
     # Read solution quality from file
-    infile = open(terminal_output_file, 'r')
+    infile = open(terminal_output_file, "r")
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
     solution_quality = sys.maxsize
-    status = 'UNKNOWN'  # Assign default status
+    status = "UNKNOWN"  # Assign default status
     lines = infile.readlines()
 
     for line in lines:
         words = line.strip().split()
         if len(words) <= 0:
             continue
-        if (len(words) >= 4 and words[1] == 'c' and words[2] == 'Arguments'
-           and words[3] == 'Error!'):
-            status = 'CRASHED'  # Update status based on output
+        if (len(words) >= 4 and words[1] == "c" and words[2] == "Arguments"
+           and words[3] == "Error!"):
+            status = "CRASHED"  # Update status based on output
             break
-        if len(words) >= 4 and words[1] == 'c' and words[2] == 'vertex_cover:':
+        if len(words) >= 4 and words[1] == "c" and words[2] == "vertex_cover:":
             temp_solution_quality = int(words[3])
             if solution_quality < 0 or temp_solution_quality < solution_quality:
                 solution_quality = temp_solution_quality  # Assign solution quality
-                status = 'SUCCESS'  # Update status based on output
+                status = "SUCCESS"  # Update status based on output
 
     infile.close()
 
     # [required for quality objective] Print keyword 'quality' followed by a space and
     # the solution quality
-    print('quality ' + str(solution_quality))
+    print("quality " + str(solution_quality))
     # [optional] Print keyword 'status' followed by a space and the run status
-    print('status ' + status)
+    print("status " + status)
 
 
 # ### No editing needed for your own wrapper below this line ###
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Define command line arguments
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--print-command', metavar='INSTANCE_FILE', type=str,
-                       help='print command line call to the target algorithm to stdout '
-                            'given an instance file')
-    group.add_argument('--print-output', metavar='TERMINAL_OUTPUT_FILE', type=str,
-                       help='print target algorithm output in Sparkle format given an '
-                            'output file containing what the algorithm wrote to the '
-                            'terminal')
-    parser.add_argument('--seed', metavar='VALUE', type=str, help='required with '
-                        '--print-command; seed for the target algorithm to use')
-    parser.add_argument('--cutoff-time', metavar='VALUE', type=str, help='optional with '
-                        '--print-command; cutoff time in seconds for the target '
-                        'algorithm')
+    group.add_argument("--print-command", metavar="INSTANCE_FILE", type=str,
+                       help="print command line call to the target algorithm to stdout "
+                            "given an instance file")
+    group.add_argument("--print-output", metavar="TERMINAL_OUTPUT_FILE", type=str,
+                       help="print target algorithm output in Sparkle format given an "
+                            "output file containing what the algorithm wrote to the "
+                            "terminal")
+    parser.add_argument("--seed", metavar="VALUE", type=str, help="required with "
+                        "--print-command; seed for the target algorithm to use")
+    parser.add_argument("--cutoff-time", metavar="VALUE", type=str, help="optional with "
+                        "--print-command; cutoff time in seconds for the target "
+                        "algorithm")
 
     # Process command line arguments
     args = parser.parse_args()
     if args.print_command and args.seed is None:
-        parser.error('--print-command requires --seed')
+        parser.error("--print-command requires --seed")
     instance_file = args.print_command
     terminal_output_file = args.print_output
     seed_str = args.seed

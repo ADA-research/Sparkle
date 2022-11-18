@@ -17,10 +17,10 @@ class SparkleCSV:
     def create_empty_csv(csv_filepath):
         """Create an empty CSV file."""
         if os.path.exists(csv_filepath):
-            print('Path', csv_filepath, 'already exists!')
-            print('Nothing changed!')
+            print("Path", csv_filepath, "already exists!")
+            print("Nothing changed!")
             return
-        fo = open(csv_filepath, 'w+')
+        fo = open(csv_filepath, "w+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         fo.write(SparkleCSV.empty_column_name)
         fo.close()
@@ -50,7 +50,7 @@ class SparkleCSV:
 
     def update_csv(self):
         """Update a CSV file."""
-        fo = open(self.csv_filepath, 'w+')
+        fo = open(self.csv_filepath, "w+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         self.dataframe.to_csv(self.csv_filepath)
         fo.close()
@@ -58,7 +58,7 @@ class SparkleCSV:
 
     def save_csv(self, csv_filepath: str):
         """Write a CSV to the given path."""
-        fo = open(csv_filepath, 'w+')
+        fo = open(csv_filepath, "w+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         self.dataframe.to_csv(csv_filepath)
         fo.close()
@@ -100,8 +100,8 @@ class SparkleCSV:
     def rename_column(self, ori_column_name, mod_column_name):
         """Change the name of a column."""
         if ori_column_name not in self.list_columns():
-            print('Column ' + ori_column_name + ' does not exist!')
-            print('Nothing changed!')
+            print("Column " + ori_column_name + " does not exist!")
+            print("Nothing changed!")
             return
         self.dataframe.rename(columns={ori_column_name: mod_column_name}, inplace=True)
         return
@@ -113,8 +113,8 @@ class SparkleCSV:
     def add_column(self, column_name, value_list=[]):
         """Add a column with the given values."""
         if column_name in self.list_columns():
-            print('Column ' + column_name + ' already exists!')
-            print('Nothing changed!')
+            print("Column " + column_name + " already exists!")
+            print("Nothing changed!")
             return
         if value_list == []:
             value_list = [None] * self.get_row_size()
@@ -129,8 +129,8 @@ class SparkleCSV:
     def delete_column(self, column_name):
         """Delete a specified column."""
         if column_name not in self.list_columns():
-            print('Column ' + column_name + ' does not exist!')
-            print('Nothing changed!')
+            print("Column " + column_name + " does not exist!")
+            print("Nothing changed!")
             return
         self.dataframe = self.dataframe.drop(column_name, axis=1)
         return
@@ -170,8 +170,8 @@ class SparkleCSV:
     def rename_row(self, ori_row_name, mod_row_name):
         """Change the name of a row."""
         if ori_row_name not in self.list_rows():
-            print('Row ' + ori_row_name + ' does not exist!')
-            print('Nothing changed!')
+            print("Row " + ori_row_name + " does not exist!")
+            print("Nothing changed!")
             return
         self.dataframe.rename(index={ori_row_name: mod_row_name}, inplace=True)
         return
@@ -183,8 +183,8 @@ class SparkleCSV:
     def add_row(self, row_name, value_list=[]):
         """Add a row with the given values."""
         if row_name in self.list_rows():
-            print('Row', row_name, 'already exists!')
-            print('Nothing changed!')
+            print("Row", row_name, "already exists!")
+            print("Nothing changed!")
             return
 
         if value_list == []:
@@ -206,8 +206,8 @@ class SparkleCSV:
     def delete_row(self, row_name):
         """Delete a specified row."""
         if row_name not in self.list_rows():
-            print('Row ' + row_name + ' does not exist!')
-            print('Nothing changed!')
+            print("Row " + row_name + " does not exist!")
+            print("Nothing changed!")
             return
         self.dataframe = self.dataframe.drop(row_name, axis=0)
 

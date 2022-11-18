@@ -15,8 +15,8 @@ except ImportError:
     from sparkle_command_help import COMMAND_DEPENDENCIES
 
 
-__active_jobs_path = Path('Output/active_jobs.csv')
-__active_jobs_csv_header = ['job_id', 'command']
+__active_jobs_path = Path("Output/active_jobs.csv")
+__active_jobs_csv_header = ["job_id", "command"]
 
 
 def get_num_of_total_job_from_list(list_jobs):
@@ -66,16 +66,16 @@ def check_job_is_done(job_id: str) -> bool:
 def check_job_is_done_slurm(job_id: str) -> bool:
     """Check whether a Slurm job is done and update the active job file as needed."""
     done = False
-    result = subprocess.run(['squeue', '-j', job_id], capture_output=True, text=True)
+    result = subprocess.run(["squeue", "-j", job_id], capture_output=True, text=True)
 
-    id_not_found_str = 'slurm_load_jobs error: Invalid job id specified'
+    id_not_found_str = "slurm_load_jobs error: Invalid job id specified"
 
     # If the ID is invalid, the job is (long) done
     if result.stderr.strip() == id_not_found_str:
         done = True
     # If there is only one line (the squeue header) without a list of jobs,
     # the job is done
-    elif len(result.stdout.strip().split('\n')) < 2:
+    elif len(result.stdout.strip().split("\n")) < 2:
         done = True
 
     if done:
@@ -116,7 +116,7 @@ def wait_for_job(job_id: str):
         sleep(n_seconds)
         done = check_job_is_done(job_id)
 
-    print('Job with ID', job_id, 'done!', flush=True)
+    print("Job with ID", job_id, "done!", flush=True)
 
     return
 
@@ -125,13 +125,13 @@ def wait_for_all_jobs():
     """Wait for all active jobs to finish executing."""
     remaining_jobs = cleanup_active_jobs()
     n_seconds = 10
-    print('Waiting for', remaining_jobs, 'jobs...', flush=True)
+    print("Waiting for", remaining_jobs, "jobs...", flush=True)
 
     while remaining_jobs > 0:
         sleep(n_seconds)
         remaining_jobs = cleanup_active_jobs()
 
-    print('All jobs done!')
+    print("All jobs done!")
 
     return
 
@@ -142,13 +142,13 @@ def write_active_job(job_id: str, command: CommandName) -> None:
 
     # Write header if the file does not exist
     if not path.is_file():
-        with open(path, 'w', newline='') as outfile:
+        with open(path, "w", newline="") as outfile:
             writer = csv.writer(outfile)
             writer.writerow(__active_jobs_csv_header)
 
     # Write job row if it did not finish yet
     if not check_job_is_done(job_id) and not check_job_exists(job_id, command):
-        with open(path, 'a', newline='') as outfile:
+        with open(path, "a", newline="") as outfile:
             writer = csv.writer(outfile)
             writer.writerow([job_id, command.name])
 
@@ -160,7 +160,7 @@ def check_job_exists(job_id: str, command: CommandName) -> bool:
     jobs_list = read_active_jobs()
 
     for job in jobs_list:
-        if job['job_id'] == job_id and job['command'] == command.name:
+        if job["job_id"] == job_id and job["command"] == command.name:
             return True
 
     return False
@@ -171,7 +171,7 @@ def read_active_jobs() -> list[dict[str, str]]:
     jobs = []
     path = __active_jobs_path
 
-    with open(path, 'r', newline='') as infile:
+    with open(path, "r", newline="") as infile:
         reader = csv.DictReader(infile)
 
         for row in reader:
@@ -186,7 +186,7 @@ def get_active_job_ids() -> list[str]:
     jobs_list = read_active_jobs()
 
     for job in jobs_list:
-        job_ids.append(job['job_id'])
+        job_ids.append(job["job_id"])
 
     return job_ids
 
@@ -197,8 +197,8 @@ def get_job_ids_for_command(command: CommandName) -> list[str]:
     job_ids = []
 
     for job in jobs_list:
-        if job['command'] == command.name:
-            job_ids.append(job['job_id'])
+        if job["command"] == command.name:
+            job_ids.append(job["job_id"])
 
     return job_ids
 
@@ -213,18 +213,18 @@ def delete_active_job(job_id: str):
 def delete_active_jobs(job_ids: list[str]):
     """Remove the specified jobs from the active jobs file."""
     inpath = __active_jobs_path
-    outpath = __active_jobs_path.with_suffix('.tmp')
+    outpath = __active_jobs_path.with_suffix(".tmp")
 
-    with (open(inpath, 'r', newline='') as infile,
-          open(outpath, 'w', newline='') as outfile):
+    with (open(inpath, "r", newline="") as infile,
+          open(outpath, "w", newline="") as outfile):
         writer = csv.writer(outfile)
         writer.writerow(__active_jobs_csv_header)
         reader = csv.DictReader(infile)
 
         for row in reader:
             # Only keep entries with a job ID other than the one to be removed
-            if row['job_id'] not in job_ids:
-                writer.writerow([row['job_id'], row['command']])
+            if row["job_id"] not in job_ids:
+                writer.writerow([row["job_id"], row["command"]])
 
     # Replace the old CSV
     outpath.rename(inpath)
@@ -239,7 +239,7 @@ def cleanup_active_jobs() -> int:
     remaining_jobs = 0
 
     for job in jobs_list:
-        job_id = job['job_id']
+        job_id = job["job_id"]
 
         if check_job_is_done(job_id):
             delete_ids.append(job_id)

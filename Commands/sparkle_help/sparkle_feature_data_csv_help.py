@@ -74,7 +74,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
         index = given_column_name.find(sparkle_special_string)
         length = len(sparkle_special_string)
         extractor_name = given_column_name[index + length:]
-        extractor_path = 'Extractors/' + extractor_name
+        extractor_path = "Extractors/" + extractor_name
 
         return extractor_path
 
@@ -128,7 +128,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
     def reload_and_combine_and_update(self, second_sfdcsv) -> None:
         """Load this CSV from file, combine it with a given CSV and write it to file."""
-        fo = open(self.csv_filepath, 'r+')
+        fo = open(self.csv_filepath, "r+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         self.dataframe = pd.read_csv(self.csv_filepath, index_col=0)
         self.combine(second_sfdcsv)
@@ -139,12 +139,12 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
     def get_feature_vector_string(self, instance) -> str:
         """Return the feature vector of an instance as str."""
-        feature_vector_string = ''
+        feature_vector_string = ""
         row = instance
 
         for column in self.list_columns():
             feature_value = self.get_value(row, column)
-            feature_vector_string = feature_vector_string + str(feature_value) + ' '
+            feature_vector_string = feature_vector_string + str(feature_value) + " "
 
         return feature_vector_string.strip()
 

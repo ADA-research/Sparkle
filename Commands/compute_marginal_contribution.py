@@ -21,35 +21,35 @@ def parser_function():
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
-        '--perfect',
-        action='store_true',
-        help='compute the marginal contribution for the perfect selector',
+        "--perfect",
+        action="store_true",
+        help="compute the marginal contribution for the perfect selector",
     )
     group.add_argument(
-        '--actual',
-        action='store_true',
-        help='compute the marginal contribution for the actual selector',
+        "--actual",
+        action="store_true",
+        help="compute the marginal contribution for the actual selector",
     )
     parser.add_argument(
-        '--recompute',
-        action='store_true',
-        help=('force marginal contribution to be recomputed even when it already exists'
-              ' in file for for the current selector'),
+        "--recompute",
+        action="store_true",
+        help=("force marginal contribution to be recomputed even when it already exists"
+              " in file for for the current selector"),
     )
     parser.add_argument(
-        '--performance-measure',
+        "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
         action=ac.SetByUser,
-        help='the performance measure, e.g. runtime',
+        help="the performance measure, e.g. runtime",
     )
     parser.add_argument(
-        '--settings-file',
+        "--settings-file",
         type=Path,
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
-        help=('specify the settings file to use in case you want to use one other than'
-              ' the default'),
+        help=("specify the settings file to use in case you want to use one other than"
+              " the default"),
     )
 
     return parser
@@ -64,7 +64,7 @@ def compute_perfect(flag_recompute: bool = False) -> List[Tuple[str, float]]:
         flag_recompute=flag_recompute
     )
     scmc.print_rank_list(rank_list, 1)
-    print('Marginal contribution (perfect selector) computing done!')
+    print("Marginal contribution (perfect selector) computing done!")
 
     return rank_list
 
@@ -78,7 +78,7 @@ def compute_actual(flag_recompute: bool = False) -> List[Tuple[str, float]]:
         flag_recompute=flag_recompute
     )
     scmc.print_rank_list(rank_list, 2)
-    print('Marginal contribution (actual selector) computing done!')
+    print("Marginal contribution (actual selector) computing done!")
 
     return rank_list
 
@@ -92,12 +92,12 @@ def compute_marginal_contribution(
     elif flag_compute_actual:
         compute_actual(flag_recompute)
     else:
-        print('ERROR: compute_marginal_contribution called without a flag set to'
-              ' True, stopping execution')
+        print("ERROR: compute_marginal_contribution called without a flag set to"
+              " True, stopping execution")
         sys.exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -114,11 +114,11 @@ if __name__ == '__main__':
     flag_compute_actual = args.actual
     flag_recompute = args.recompute
 
-    if ac.set_by_user(args, 'settings_file'):
+    if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, 'performance_measure'):
+    if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )

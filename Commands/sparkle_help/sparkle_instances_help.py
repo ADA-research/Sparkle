@@ -14,13 +14,13 @@ except ImportError:
     import sparkle_global_help as sgh
 
 
-__sparkle_instance_list_file = 'sparkle_instance_list.txt'
+__sparkle_instance_list_file = "sparkle_instance_list.txt"
 
 
 def get_list_all_path(instances_directory):
     """Return a list with all instance paths."""
     p = Path(instances_directory)
-    return [str(f) for f in p.rglob('*') if f.is_file()]
+    return [str(f) for f in p.rglob("*") if f.is_file()]
 
 
 def _check_existence_of_instance_list_file(instances_source: str) -> bool:
@@ -74,7 +74,7 @@ def _copy_instance_list_to_reference(instances_source: Path) -> None:
     instance_list_path = Path(instances_source / Path(__sparkle_instance_list_file))
     target_path = Path(sgh.reference_list_dir
                        / Path(instances_source.name + sgh.instance_list_postfix))
-    command_line = 'cp ' + str(instance_list_path) + ' ' + str(target_path)
+    command_line = "cp " + str(instance_list_path) + " " + str(target_path)
     os.system(command_line)
 
     return
@@ -87,7 +87,7 @@ def count_instances_in_reference_list(instance_set_name: str) -> int:
                               / Path(instance_set_name + sgh.instance_list_postfix))
 
     # Count instances in instance list file
-    with instance_list_path.open('r') as infile:
+    with instance_list_path.open("r") as infile:
         for line in infile:
             # If the line does not only contain white space, count it
             if line.strip():
@@ -125,19 +125,19 @@ def copy_reference_instance_list(target_file: Path, instance_set_name: str,
     outlines = []
 
     # Add quotes around instances in instance list file
-    with instance_list_path.open('r') as infile:
+    with instance_list_path.open("r") as infile:
         for line in infile:
             outline = '\"'
 
             # Modify path for each instance file
             for word in line.strip().split():
-                outline = outline + path_modifier + word + ' '
+                outline = outline + path_modifier + word + " "
 
             outline = outline + '\"\n'
             outlines.append(outline)
 
     # Write quoted instance list to SMAC instance file
-    with target_file.open('w') as outfile:
+    with target_file.open("w") as outfile:
         for line in outlines:
             outfile.write(line)
 
@@ -147,7 +147,7 @@ def copy_reference_instance_list(target_file: Path, instance_set_name: str,
 def _copy_reference_instance_list_to_smac(smac_instance_file: Path,
                                           instance_set_name: str) -> None:
     """Copy a file with a list of instances to the SMAC directory."""
-    path_modifier = '../../instances/' + instance_set_name + '/'
+    path_modifier = "../../instances/" + instance_set_name + "/"
     copy_reference_instance_list(smac_instance_file, instance_set_name, path_modifier)
 
     return
@@ -158,11 +158,11 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str,
     """Copy problem instances to be used for configuration to the SMAC directory."""
     instance_set_name = Path(instance_dir_prefix).name
 
-    file_suffix = ''
-    if train_or_test == 'train':
-        file_suffix = '_train.txt'
-    elif train_or_test == 'test':
-        file_suffix = '_test.txt'
+    file_suffix = ""
+    if train_or_test == "train":
+        file_suffix = "_train.txt"
+    elif train_or_test == "test":
+        file_suffix = "_test.txt"
     else:
         print('Invalid function call of "copy_instances_to_smac"; aborting execution')
         sys.exit()
@@ -179,12 +179,12 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str,
     if not smac_instance_dir.is_dir():
         smac_instance_dir.mkdir(parents=True, exist_ok=True)
 
-    if instance_dir_prefix[-1] == '/':
+    if instance_dir_prefix[-1] == "/":
         instance_dir_prefix = instance_dir_prefix[:-1]
-    if smac_instance_dir_prefix == '/':
+    if smac_instance_dir_prefix == "/":
         smac_instance_dir_prefix = smac_instance_dir_prefix[:-1]
 
-    fout = smac_instance_file.open('w+')
+    fout = smac_instance_file.open("w+")
 
     for i in range(0, len(list_instance_path)):
         ori_instance_path = list_instance_path[i]
@@ -193,8 +193,8 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str,
         target_instance_dir = sfh.get_directory(target_instance_path)
 
         if not os.path.exists(target_instance_dir):
-            os.system('mkdir -p ' + target_instance_dir)
-        command_line = 'cp ' + ori_instance_path + ' ' + target_instance_path
+            os.system("mkdir -p " + target_instance_dir)
+        command_line = "cp " + ori_instance_path + " " + target_instance_path
         os.system(command_line)
 
         # Only do this when no instance_list file exists for this instance set
@@ -202,9 +202,9 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: str,
             # Write instance to SMAC instance file
             fout.write(target_instance_path.replace(
                 smac_instance_dir_prefix,
-                '../../instances/'
-                f'{sfh.get_last_level_directory_name(smac_instance_dir_prefix)}',
-                1) + '\n')
+                "../../instances/"
+                f"{sfh.get_last_level_directory_name(smac_instance_dir_prefix)}",
+                1) + "\n")
 
     fout.close()
 

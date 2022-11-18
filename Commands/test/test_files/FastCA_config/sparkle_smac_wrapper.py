@@ -10,20 +10,20 @@ import sys
 
 def get_time_pid_random_string() -> str:
     """Return a combination of time, PID, and random str."""
-    my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
+    my_time_str = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     my_pid = os.getpid()
     my_pid_str = str(my_pid)
     my_random = random.randint(1, sys.maxsize)
     my_random_str = str(my_random)
-    my_time_pid_random_str = my_time_str + '_' + my_pid_str + '_' + my_random_str
+    my_time_pid_random_str = my_time_str + "_" + my_pid_str + "_" + my_random_str
     return my_time_pid_random_str
 
 
 def get_last_level_directory_name(filepath):
     """Return the final path component for a given string; similar to Path.name."""
-    if filepath[-1] == '/':
+    if filepath[-1] == "/":
         filepath = filepath[0:-1]
-    right_index = filepath.rfind('/')
+    right_index = filepath.rfind("/")
     if right_index < 0:
         pass
     else:
@@ -47,28 +47,28 @@ def parse_output(output_list) -> (str, float):
     """Parse problem specific output and return it."""
     # Read solution quality from output_list
     solution_quality = sys.maxsize
-    status = 'UNKNOWN'
+    status = "UNKNOWN"
     lines = output_list
 
     for line in lines:
         words = line.strip().split()
         if len(words) <= 0:
             continue
-        if len(words) == 17 and words[0] == 'We' and words[1] == 'recommend':
+        if len(words) == 17 and words[0] == "We" and words[1] == "recommend":
             # First output line is normal, probably no crash
             solution_quality = sys.maxsize - 1
             # If no actual solution is found, we probably reach the cutoff time before
             # finding a solution
-            status = 'TIMEOUT'
+            status = "TIMEOUT"
         if (len(words) == 3 and _is_a_number(words[0]) and _is_a_number(words[1])
            and _is_a_number(words[2])):
             temp_solution_quality = int(words[1])
             if temp_solution_quality < solution_quality:
                 solution_quality = temp_solution_quality
-                status = 'SUCCESS'
+                status = "SUCCESS"
 
     if solution_quality == sys.maxsize:
-        status = 'CRASHED'
+        status = "CRASHED"
 
     return status, solution_quality
 
@@ -84,29 +84,29 @@ seed = int(sys.argv[5])
 
 params = sys.argv[6:]
 
-relative_path = './'
-runsolver_binary = relative_path + 'runsolver'
-solver_binary = relative_path + 'FastCA'
+relative_path = "./"
+runsolver_binary = relative_path + "runsolver"
+solver_binary = relative_path + "FastCA"
 
-tmp_directory = relative_path + 'tmp/'
+tmp_directory = relative_path + "tmp/"
 if not os.path.exists(tmp_directory):
-    os.system('mkdir -p ' + tmp_directory)
+    os.system("mkdir -p " + tmp_directory)
 
 instance_model_name = get_last_level_directory_name(inst_model)
 instance_constr_name = get_last_level_directory_name(inst_constr)
 solver_name = get_last_level_directory_name(solver_binary)
-runsolver_watch_data_path = (f'{tmp_directory}{solver_name}_{instance_model_name}_'
-                             f'{get_time_pid_random_string()}.log')
+runsolver_watch_data_path = (f"{tmp_directory}{solver_name}_{instance_model_name}_"
+                             f"{get_time_pid_random_string()}.log")
 
-command = (f'{runsolver_binary} -w {runsolver_watch_data_path} --cpu-limit '
-           f'{str(cutoff_time)} {solver_binary} {inst_model} {inst_constr} '
-           f'{str(cutoff_time)}')
+command = (f"{runsolver_binary} -w {runsolver_watch_data_path} --cpu-limit "
+           f"{str(cutoff_time)} {solver_binary} {inst_model} {inst_constr} "
+           f"{str(cutoff_time)}")
 
 i = 6  # Start with first argument after 'seed'
 while i < len(sys.argv):
     # Skip the parameter name for positional parameters
     i += 1
-    command += ' ' + sys.argv[i]
+    command += " " + sys.argv[i]
     i += 1
 
 # TODO: Replace with runtime from runsolver
@@ -117,8 +117,8 @@ run_time = end_time - start_time
 if run_time > cutoff_time:
     run_time = cutoff_time
 
-os.system('rm -f ' + runsolver_watch_data_path)
+os.system("rm -f " + runsolver_watch_data_path)
 
 status, quality = parse_output(output_list)
 
-print(f'Result for SMAC: {status}, {str(run_time)}, 0, {str(quality)}, {str(seed)}')
+print(f"Result for SMAC: {status}, {str(run_time)}, 0, {str(quality)}, {str(seed)}")

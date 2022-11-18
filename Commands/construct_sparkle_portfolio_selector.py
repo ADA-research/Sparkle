@@ -26,25 +26,25 @@ def parser_function():
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--recompute-portfolio-selector',
-        action='store_true',
-        help=('force the construction of a new portfolio selector even when it already '
-              'exists for the current feature and performance data. NOTE: This will '
-              'also result in the computation of the marginal contributions of solvers '
-              'to the new portfolio selector.'),
+        "--recompute-portfolio-selector",
+        action="store_true",
+        help=("force the construction of a new portfolio selector even when it already "
+              "exists for the current feature and performance data. NOTE: This will "
+              "also result in the computation of the marginal contributions of solvers "
+              "to the new portfolio selector."),
     )
     parser.add_argument(
-        '--recompute-marginal-contribution',
-        action='store_true',
-        help=('force marginal contribution to be recomputed even when it already exists '
-              'in file for the current selector'),
+        "--recompute-marginal-contribution",
+        action="store_true",
+        help=("force marginal contribution to be recomputed even when it already exists "
+              "in file for the current selector"),
     )
     parser.add_argument(
-        '--performance-measure',
+        "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
         action=ac.SetByUser,
-        help='the performance measure, e.g. runtime',
+        help="the performance measure, e.g. runtime",
     )
 
     return parser
@@ -81,9 +81,9 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
 
 def generate_task_run_status() -> None:
     """Generate run status info files for portfolio selector Slurm batch jobs."""
-    key_str = 'construct_sparkle_portfolio_selector'
-    task_run_status_path = 'Tmp/SBATCH_Portfolio_Jobs/' + key_str + '.statusinfo'
-    status_info_str = 'Status: Running\n'
+    key_str = "construct_sparkle_portfolio_selector"
+    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    status_info_str = "Status: Running\n"
     sfh.write_string_to_file(task_run_status_path, status_info_str)
 
     return
@@ -91,31 +91,31 @@ def generate_task_run_status() -> None:
 
 def delete_task_run_status() -> None:
     """Remove run status info files for portfolio selector Slurm batch jobs."""
-    key_str = 'construct_sparkle_portfolio_selector'
-    task_run_status_path = 'Tmp/SBATCH_Portfolio_Jobs/' + key_str + '.statusinfo'
-    os.system('rm -rf ' + task_run_status_path)
+    key_str = "construct_sparkle_portfolio_selector"
+    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    os.system("rm -rf " + task_run_status_path)
 
     return
 
 
 def delete_log_files() -> None:
     """Remove the log files."""
-    os.system('rm -f ' + sgh.sparkle_log_path)
-    os.system('rm -f ' + sgh.sparkle_err_path)
+    os.system("rm -f " + sgh.sparkle_log_path)
+    os.system("rm -f " + sgh.sparkle_err_path)
 
     return
 
 
 def print_log_paths() -> None:
     """Print paths to the log files."""
-    print('Consider investigating the log files:')
-    print(f'stdout: {sgh.sparkle_log_path}')
-    print(f'stderr: {sgh.sparkle_err_path}')
+    print("Consider investigating the log files:")
+    print(f"stdout: {sgh.sparkle_log_path}")
+    print(f"stderr: {sgh.sparkle_err_path}")
 
     return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -134,12 +134,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     flag_recompute_portfolio = args.recompute_portfolio_selector
     flag_recompute_marg_cont = args.recompute_marginal_contribution
-    if ac.set_by_user(args, 'performance_measure'):
+    if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
 
-    print('Start constructing Sparkle portfolio selector ...')
+    print("Start constructing Sparkle portfolio selector ...")
 
     generate_task_run_status()
 
@@ -148,11 +148,11 @@ if __name__ == '__main__':
     )
 
     if flag_judge_exist_remaining_jobs:
-        print('There remain unperformed feature computation jobs or performance '
-              'computation jobs!')
-        print('Please first execute all unperformed jobs before constructing Sparkle '
-              'portfolio selector')
-        print('Sparkle portfolio selector is not successfully constructed!')
+        print("There remain unperformed feature computation jobs or performance "
+              "computation jobs!")
+        print("Please first execute all unperformed jobs before constructing Sparkle "
+              "portfolio selector")
+        print("Sparkle portfolio selector is not successfully constructed!")
         delete_task_run_status()
         sys.exit()
 
@@ -165,9 +165,9 @@ if __name__ == '__main__':
     )
 
     if success:
-        print('Sparkle portfolio selector constructed!')
-        print('Sparkle portfolio selector located at '
-              f'{sgh.sparkle_portfolio_selector_path}')
+        print("Sparkle portfolio selector constructed!")
+        print("Sparkle portfolio selector located at "
+              f"{sgh.sparkle_portfolio_selector_path}")
 
         # Update latest scenario
         sgh.latest_scenario.set_selection_portfolio_path(

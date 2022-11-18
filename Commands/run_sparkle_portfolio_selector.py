@@ -19,30 +19,30 @@ def parser_function():
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'instance_path',
+        "instance_path",
         type=str,
-        nargs='+',
-        help='Path to instance or instance directory',
+        nargs="+",
+        help="Path to instance or instance directory",
     )
     parser.add_argument(
-        '--settings-file',
+        "--settings-file",
         type=Path,
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
-        help='settings file to use instead of the default',
+        help="settings file to use instead of the default",
     )
     parser.add_argument(
-        '--performance-measure',
+        "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
         action=ac.SetByUser,
-        help='the performance measure, e.g. runtime',
+        help="the performance measure, e.g. runtime",
     )
 
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -55,15 +55,15 @@ if __name__ == '__main__':
 
     # Process command line arguments
     args = parser.parse_args()
-    instance_path = ' '.join(
+    instance_path = " ".join(
         args.instance_path
     )  # Turn multiple instance files into a space separated string
 
-    if ac.set_by_user(args, 'settings_file'):
+    if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, 'performance_measure'):
+    if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
@@ -73,21 +73,21 @@ if __name__ == '__main__':
         == PerformanceMeasure.QUALITY_ABSOLUTE
     ):
         print(
-            'ERROR: The run_sparkle_portfolio_selector command is not yet implemented'
-            ' for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)'
+            "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
+            " for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)"
         )
         sys.exit()
 
     # Directory
     if os.path.isdir(instance_path):
         srps.call_sparkle_portfolio_selector_solve_instance_directory(instance_path)
-        print('Sparkle portfolio selector is running ...')
+        print("Sparkle portfolio selector is running ...")
     # Single instance (single-file or multi-file)
     elif os.path.isfile(instance_path) or os.path.isfile(instance_path.split()[0]):
         srps.call_sparkle_portfolio_selector_solve_instance(instance_path)
-        print('Running Sparkle portfolio selector done!')
+        print("Running Sparkle portfolio selector done!")
     else:
-        print('Input instance or instance directory error!')
+        print("Input instance or instance directory error!")
 
     # Write used settings to file
     sgh.settings.write_used_settings()

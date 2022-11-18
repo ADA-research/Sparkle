@@ -24,10 +24,10 @@ class PerformanceMeasure(Enum):
     @staticmethod
     def from_str(performance_measure):
         """Return a given str as PerformanceMeasure."""
-        if performance_measure == 'RUNTIME':
+        if performance_measure == "RUNTIME":
             performance_measure = PerformanceMeasure.RUNTIME
-        elif (performance_measure == 'QUALITY_ABSOLUTE'
-              or performance_measure == 'QUALITY'):
+        elif (performance_measure == "QUALITY_ABSOLUTE"
+              or performance_measure == "QUALITY"):
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
 
         return performance_measure
@@ -42,9 +42,9 @@ class SolutionVerifier(Enum):
     @staticmethod
     def from_str(verifier):
         """Return a given str as SolutionVerifier."""
-        if verifier == 'NONE':
+        if verifier == "NONE":
             verifier = SolutionVerifier.NONE
-        elif verifier == 'SAT':
+        elif verifier == "SAT":
             verifier = SolutionVerifier.SAT
 
         return verifier
@@ -54,13 +54,13 @@ class ProcessMonitoring(str, Enum):
     """Possible process monitoring approaches."""
 
     # Cancel all solvers within a portfolio once one solver finishes with an instance
-    REALISTIC = 'REALISTIC'
+    REALISTIC = "REALISTIC"
     # Cancel all solvers within a portfolio once one solver finishes with an instance,
     # after they have run equally long as the fastest solver on this instance so far.
     # This makes it possible to measure which solver would be fastest when they are
     # not able to start at the same time due to, e.g., insufficient CPU cores to start
     # all solvers at the same time.
-    EXTENDED = 'EXTENDED'
+    EXTENDED = "EXTENDED"
 
     @staticmethod
     def from_str(process_monitoring):
@@ -81,8 +81,8 @@ class Settings:
     """Read, write, set, and get settings."""
 
     # Settings path names and default
-    __settings_file = Path('sparkle_settings.ini')
-    __settings_dir = Path('Settings')
+    __settings_file = Path("sparkle_settings.ini")
+    __settings_dir = Path("Settings")
     DEFAULT_settings_path = PurePath(__settings_dir / __settings_file)
 
     # Constant default values
@@ -98,7 +98,7 @@ class Settings:
     DEFAULT_slurm_number_of_runs_in_parallel = 25
     DEFAULT_slurm_clis_per_node = 32
 
-    DEFAULT_smac_target_cutoff_length = 'max'
+    DEFAULT_smac_target_cutoff_length = "max"
 
     DEFAULT_ablation_racing = False
 
@@ -150,8 +150,8 @@ class Settings:
         # Set internal settings based on data read from FILE if they were read
         # successfully
         if file_settings.sections() != []:
-            section = 'general'
-            option_names = ('performance_measure', 'smac_run_obj')
+            section = "general"
+            option_names = ("performance_measure", "smac_run_obj")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = PerformanceMeasure.from_str(
@@ -160,95 +160,95 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             # Comma so python understands it's a tuple...
-            option_names = ('solution_verifier',)
+            option_names = ("solution_verifier",)
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = SolutionVerifier.from_str(file_settings.get(section, option))
                     self.set_general_solution_verifier(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ('target_cutoff_time', 'smac_each_run_cutoff_time',
-                            'cutoff_time_each_performance_computation')
+            option_names = ("target_cutoff_time", "smac_each_run_cutoff_time",
+                            "cutoff_time_each_performance_computation")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_target_cutoff_time(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ('penalty_multiplier', 'penalty_number')
+            option_names = ("penalty_multiplier", "penalty_number")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_penalty_multiplier(value, state)
                     file_settings.remove_option(section, option)
 
-            option_names = ('extractor_cutoff_time',
-                            'cutoff_time_each_feature_computation')
+            option_names = ("extractor_cutoff_time",
+                            "cutoff_time_each_feature_computation")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_extractor_cutoff_time(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'configuration'
-            option_names = ('budget_per_run', 'smac_whole_time_budget')
+            section = "configuration"
+            option_names = ("budget_per_run", "smac_whole_time_budget")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_budget_per_run(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'configuration'
-            option_names = ('number_of_runs', 'num_of_smac_runs')
+            section = "configuration"
+            option_names = ("number_of_runs", "num_of_smac_runs")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_number_of_runs(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'slurm'
-            option_names = ('number_of_runs_in_parallel', 'num_of_smac_runs_in_parallel',
-                            'num_job_in_parallel')
+            section = "slurm"
+            option_names = ("number_of_runs_in_parallel", "num_of_smac_runs_in_parallel",
+                            "num_job_in_parallel")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_slurm_number_of_runs_in_parallel(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'slurm'
-            option_names = ('clis_per_node', )
+            section = "slurm"
+            option_names = ("clis_per_node", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_slurm_clis_per_node(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'smac'
-            option_names = ('target_cutoff_length', 'smac_each_run_cutoff_length')
+            section = "smac"
+            option_names = ("target_cutoff_length", "smac_each_run_cutoff_length")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_smac_target_cutoff_length(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'ablation'
-            option_names = ('racing', 'ablation_racing')
+            section = "ablation"
+            option_names = ("racing", "ablation_racing")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getboolean(section, option)
                     self.set_ablation_racing_flag(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'parallel_portfolio'
-            option_names = ('overwriting', )
+            section = "parallel_portfolio"
+            option_names = ("overwriting", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getboolean(section, option)
                     self.set_paraport_overwriting_flag(value, state)
                     file_settings.remove_option(section, option)
 
-            section = 'parallel_portfolio'
-            option_names = ('process_monitoring', )
+            section = "parallel_portfolio"
+            option_names = ("process_monitoring", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = ProcessMonitoring.from_str(
@@ -263,9 +263,9 @@ class Settings:
                 for option in file_settings[section]:
                     # TODO: Quick fix to support partitions and excludes, but should not
                     # allow any option
-                    if section == 'slurm':
+                    if section == "slurm":
                         print(f'Unrecognised SLURM option "{option}" found in '
-                              f'{str(file_path)}. Option is added to any SLURM batches')
+                              f"{str(file_path)}. Option is added to any SLURM batches")
                         value = file_settings.get(section, option)
                         self.add_slurm_extra_option(option, value, state)
                     else:
@@ -274,10 +274,10 @@ class Settings:
 
         # Print error if unable to read the settings
         else:
-            print(f'ERROR: Failed to read settings from {str(file_path)} The file may '
-                  'have been empty, located in a different path, or be in another format'
-                  ' than INI. Settings from different sources will be used (e.g. default'
-                  ' values).')
+            print(f"ERROR: Failed to read settings from {str(file_path)} The file may "
+                  "have been empty, located in a different path, or be in another format"
+                  " than INI. Settings from different sources will be used (e.g. default"
+                  " values).")
 
         return
 
@@ -289,7 +289,7 @@ class Settings:
         self.write_settings_ini(Path(file_path_output))
 
         # Write to latest settings file
-        file_path_latest = PurePath(self.__settings_dir / 'latest.ini')
+        file_path_latest = PurePath(self.__settings_dir / "latest.ini")
         self.write_settings_ini(Path(file_path_latest))
 
         return
@@ -301,11 +301,11 @@ class Settings:
         file_dir.mkdir(parents=True, exist_ok=True)
 
         # Write the settings to file
-        with open(str(file_path), 'w') as settings_file:
+        with open(str(file_path), "w") as settings_file:
             self.__settings.write(settings_file)
 
             # Log the settings file location
-            slog.add_output(str(file_path), 'Settings used by Sparkle for this command')
+            slog.add_output(str(file_path), "Settings used by Sparkle for this command")
 
         return
 
@@ -321,17 +321,17 @@ class Settings:
 
         if current_state == SettingState.FILE and new_state == SettingState.DEFAULT:
             change_setting_ok = False
-            print(f'Warning: Attempting to overwrite setting for {name} with default '
-                  'value; keeping the value read from file!')
+            print(f"Warning: Attempting to overwrite setting for {name} with default "
+                  "value; keeping the value read from file!")
         elif (current_state == SettingState.CMD_LINE
               and new_state == SettingState.DEFAULT):
             change_setting_ok = False
-            print(f'Warning: Attempting to overwrite setting for {name} with default '
-                  'value; keeping the value read from command line!')
+            print(f"Warning: Attempting to overwrite setting for {name} with default "
+                  "value; keeping the value read from command line!")
         elif current_state == SettingState.CMD_LINE and new_state == SettingState.FILE:
             change_setting_ok = False
-            print(f'Warning: Attempting to overwrite setting for {name} with value from '
-                  'file; keeping the value read from command line!')
+            print(f"Warning: Attempting to overwrite setting for {name} with value from "
+                  "file; keeping the value read from command line!")
 
         return change_setting_ok
 
@@ -341,8 +341,8 @@ class Settings:
             self, value: PerformanceMeasure = DEFAULT_general_performance_measure,
             origin: SettingState = SettingState.DEFAULT):
         """Set the performance measure."""
-        section = 'general'
-        name = 'performance_measure'
+        section = "general"
+        name = "performance_measure"
 
         if value is not None and self.__check_setting_state(
                 self.__general_performance_measure_set, origin, name):
@@ -358,7 +358,7 @@ class Settings:
             self.set_general_performance_measure()
 
         return PerformanceMeasure.from_str(
-            self.__settings['general']['performance_measure'])
+            self.__settings["general"]["performance_measure"])
 
     def get_performance_metric_for_report(self) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""
@@ -366,7 +366,7 @@ class Settings:
 
         if performance_measure is PerformanceMeasure.RUNTIME:
             penalty_multiplier_str = str(self.get_general_penalty_multiplier())
-            performance_measure_str = f'PAR{penalty_multiplier_str}'
+            performance_measure_str = f"PAR{penalty_multiplier_str}"
         else:
             performance_measure_str = performance_measure.name
 
@@ -376,8 +376,8 @@ class Settings:
             self, value: int = DEFAULT_general_penalty_multiplier,
             origin: SettingState = SettingState.DEFAULT):
         """Set the penalty multiplier."""
-        section = 'general'
-        name = 'penalty_multiplier'
+        section = "general"
+        name = "penalty_multiplier"
 
         if value is not None and self.__check_setting_state(
                 self.__general_penalty_multiplier_set, origin, name):
@@ -392,7 +392,7 @@ class Settings:
         if self.__general_penalty_multiplier_set == SettingState.NOT_SET:
             self.set_general_penalty_multiplier()
 
-        return int(self.__settings['general']['penalty_multiplier'])
+        return int(self.__settings["general"]["penalty_multiplier"])
 
     def get_penalised_time(self, custom_cutoff: int = None) -> int:
         """Return the penalised time associated with the cutoff time."""
@@ -410,8 +410,8 @@ class Settings:
             self, value: SolutionVerifier = DEFAULT_general_solution_verifier,
             origin: SettingState = SettingState.DEFAULT):
         """Set the solution verifier to use."""
-        section = 'general'
-        name = 'solution_verifier'
+        section = "general"
+        name = "solution_verifier"
 
         if value is not None and self.__check_setting_state(
                 self.__general_solution_verifier_set, origin, name):
@@ -426,14 +426,14 @@ class Settings:
         if self.__general_solution_verifier_set == SettingState.NOT_SET:
             self.set_general_solution_verifier()
 
-        return SolutionVerifier.from_str(self.__settings['general']['solution_verifier'])
+        return SolutionVerifier.from_str(self.__settings["general"]["solution_verifier"])
 
     def set_general_target_cutoff_time(
             self, value: int = DEFAULT_general_target_cutoff_time,
             origin: SettingState = SettingState.DEFAULT):
         """Set the cutoff time in seconds for target algorithms."""
-        section = 'general'
-        name = 'target_cutoff_time'
+        section = "general"
+        name = "target_cutoff_time"
 
         if value is not None and self.__check_setting_state(
                 self.__general_target_cutoff_time_set, origin, name):
@@ -448,14 +448,14 @@ class Settings:
         if self.__general_target_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_target_cutoff_time()
 
-        return int(self.__settings['general']['target_cutoff_time'])
+        return int(self.__settings["general"]["target_cutoff_time"])
 
     def set_general_extractor_cutoff_time(
             self, value: int = DEFAULT_general_extractor_cutoff_time,
             origin: SettingState = SettingState.DEFAULT):
         """Set the cutoff time in seconds for feature extraction."""
-        section = 'general'
-        name = 'extractor_cutoff_time'
+        section = "general"
+        name = "extractor_cutoff_time"
 
         if value is not None and self.__check_setting_state(
                 self.__general_extractor_cutoff_time_set, origin, name):
@@ -470,7 +470,7 @@ class Settings:
         if self.__general_extractor_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_extractor_cutoff_time()
 
-        return int(self.__settings['general']['extractor_cutoff_time'])
+        return int(self.__settings["general"]["extractor_cutoff_time"])
 
     # Configuration settings ###
 
@@ -478,8 +478,8 @@ class Settings:
             self, value: int = DEFAULT_config_budget_per_run,
             origin: SettingState = SettingState.DEFAULT):
         """Set the budget per configuration run in seconds."""
-        section = 'configuration'
-        name = 'budget_per_run'
+        section = "configuration"
+        name = "budget_per_run"
 
         if value is not None and self.__check_setting_state(
                 self.__config_budget_per_run_set, origin, name):
@@ -494,14 +494,14 @@ class Settings:
         if self.__config_budget_per_run_set == SettingState.NOT_SET:
             self.set_config_budget_per_run()
 
-        return int(self.__settings['configuration']['budget_per_run'])
+        return int(self.__settings["configuration"]["budget_per_run"])
 
     def set_config_number_of_runs(
             self, value: int = DEFAULT_config_number_of_runs,
             origin: SettingState = SettingState.DEFAULT):
         """Set the number of configuration runs."""
-        section = 'configuration'
-        name = 'number_of_runs'
+        section = "configuration"
+        name = "number_of_runs"
 
         if value is not None and self.__check_setting_state(
                 self.__config_number_of_runs_set, origin, name):
@@ -516,7 +516,7 @@ class Settings:
         if self.__config_number_of_runs_set == SettingState.NOT_SET:
             self.set_config_number_of_runs()
 
-        return int(self.__settings['configuration']['number_of_runs'])
+        return int(self.__settings["configuration"]["number_of_runs"])
 
     # Configuration: SMAC specific settings ###
 
@@ -524,8 +524,8 @@ class Settings:
             self, value: str = DEFAULT_smac_target_cutoff_length,
             origin: SettingState = SettingState.DEFAULT):
         """Set the target algorithm cutoff length."""
-        section = 'smac'
-        name = 'target_cutoff_length'
+        section = "smac"
+        name = "target_cutoff_length"
 
         if value is not None and self.__check_setting_state(
                 self.__smac_target_cutoff_length_set, origin, name):
@@ -540,7 +540,7 @@ class Settings:
         if self.__smac_target_cutoff_length_set == SettingState.NOT_SET:
             self.set_smac_target_cutoff_length()
 
-        return self.__settings['smac']['target_cutoff_length']
+        return self.__settings["smac"]["target_cutoff_length"]
 
     # Slurm settings ###
 
@@ -548,8 +548,8 @@ class Settings:
             self, value: int = DEFAULT_slurm_number_of_runs_in_parallel,
             origin: SettingState = SettingState.DEFAULT):
         """Set the number of runs Slurm can do in parallel."""
-        section = 'slurm'
-        name = 'number_of_runs_in_parallel'
+        section = "slurm"
+        name = "number_of_runs_in_parallel"
 
         if value is not None and self.__check_setting_state(
                 self.__slurm_number_of_runs_in_parallel_set, origin, name):
@@ -564,13 +564,13 @@ class Settings:
         if self.__slurm_number_of_runs_in_parallel_set == SettingState.NOT_SET:
             self.set_slurm_number_of_runs_in_parallel()
 
-        return int(self.__settings['slurm']['number_of_runs_in_parallel'])
+        return int(self.__settings["slurm"]["number_of_runs_in_parallel"])
 
     def set_slurm_clis_per_node(self, value: int = DEFAULT_slurm_clis_per_node,
                                 origin: SettingState = SettingState.DEFAULT):
         """Set the number of algorithms Slurm can run in parallel per node."""
-        section = 'slurm'
-        name = 'clis_per_node'
+        section = "slurm"
+        name = "clis_per_node"
 
         if value is not None and self.__check_setting_state(
                 self.__slurm_clis_per_node_set, origin, name):
@@ -585,14 +585,14 @@ class Settings:
         if self.__slurm_clis_per_node_set == SettingState.NOT_SET:
             self.set_slurm_clis_per_node()
 
-        return int(self.__settings['slurm']['clis_per_node'])
+        return int(self.__settings["slurm"]["clis_per_node"])
 
     # SLURM extra options
 
     def add_slurm_extra_option(self, name: str, value: str,
                                origin: SettingState = SettingState.DEFAULT):
         """Add additional Slurm options."""
-        section = 'slurm_extra'
+        section = "slurm_extra"
 
         current_state = (self.__slurm_extra_options_set[name]
                          if name in self.__slurm_extra_options_set
@@ -605,11 +605,11 @@ class Settings:
 
     def get_slurm_extra_options(self) -> dict:
         """Return a dict with additional Slurm options."""
-        section = 'slurm_extra'
+        section = "slurm_extra"
         options = dict()
 
-        if 'slurm_extra' in self.__settings.sections():
-            for option in self.__settings['slurm_extra']:
+        if "slurm_extra" in self.__settings.sections():
+            for option in self.__settings["slurm_extra"]:
                 options[option] = self.__settings.get(section, option)
 
         return options
@@ -619,8 +619,8 @@ class Settings:
     def set_ablation_racing_flag(self, value: bool = DEFAULT_ablation_racing,
                                  origin: SettingState = SettingState.DEFAULT):
         """Set a flag indicating whether racing should be used for ablation."""
-        section = 'ablation'
-        name = 'racing'
+        section = "ablation"
+        name = "racing"
 
         if value is not None and self.__check_setting_state(
                 self.__ablation_racing_flag_set, origin, name):
@@ -635,7 +635,7 @@ class Settings:
         if self.__ablation_racing_flag_set == SettingState.NOT_SET:
             self.set_ablation_racing_flag()
 
-        return bool(self.__settings['ablation']['racing'])
+        return bool(self.__settings["ablation"]["racing"])
 
     # Parallel Portfolio settings ###
 
@@ -643,8 +643,8 @@ class Settings:
             self, value: bool = DEFAULT_paraport_overwriting,
             origin: SettingState = SettingState.DEFAULT):
         """Set the parallel portfolio overwriting flag to a given value."""
-        section = 'parallel_portfolio'
-        name = 'overwriting'
+        section = "parallel_portfolio"
+        name = "overwriting"
 
         if value is not None and self.__check_setting_state(
                 self.__paraport_overwriting_flag_set, origin, name):
@@ -659,14 +659,14 @@ class Settings:
         if self.__paraport_overwriting_flag_set == SettingState.NOT_SET:
             self.set_paraport_overwriting_flag()
 
-        return bool(self.__settings['parallel_portfolio']['overwriting'])
+        return bool(self.__settings["parallel_portfolio"]["overwriting"])
 
     def set_paraport_process_monitoring(
             self, value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
             origin: SettingState = SettingState.DEFAULT):
         """Set the parallel portfolio process monitoring state."""
-        section = 'parallel_portfolio'
-        name = 'process_monitoring'
+        section = "parallel_portfolio"
+        name = "process_monitoring"
 
         if value is not None and self.__check_setting_state(
                 self.__paraport_overwriting_flag_set, origin, name):
@@ -682,4 +682,4 @@ class Settings:
             self.set_paraport_process_monitoring()
 
         return ProcessMonitoring.from_str(
-            self.__settings['parallel_portfolio']['process_monitoring'])
+            self.__settings["parallel_portfolio"]["process_monitoring"])

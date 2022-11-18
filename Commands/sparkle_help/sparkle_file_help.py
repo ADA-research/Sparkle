@@ -19,7 +19,7 @@ except ImportError:
 
 def create_new_empty_file(filepath: str):
     """Create a new empty file given a filepath string."""
-    fo = open(filepath, 'w+')
+    fo = open(filepath, "w+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.close()
 
@@ -38,15 +38,15 @@ def checkout_directory(path, make_if_not_exist=True):
 
 def get_current_directory_name(filepath: str) -> str:
     """Return the name of the current directory as str."""
-    if filepath == '':
-        print('ERROR: Empty filepath given to get_current_directory_name(), stopping '
-              'execution!')
+    if filepath == "":
+        print("ERROR: Empty filepath given to get_current_directory_name(), stopping "
+              "execution!")
         sys.exit(-1)
 
-    if filepath[-1] == '/':
+    if filepath[-1] == "/":
         filepath = filepath[0:-1]
 
-    right_index = filepath.rfind('/')
+    right_index = filepath.rfind("/")
 
     if right_index < 0:
         pass
@@ -59,10 +59,10 @@ def get_current_directory_name(filepath: str) -> str:
 
 def get_last_level_directory_name(filepath: str) -> str:
     """Return the final path component for a given string; similar to Path.name."""
-    if filepath[-1] == '/':
+    if filepath[-1] == "/":
         filepath = filepath[0:-1]
 
-    right_index = filepath.rfind('/')
+    right_index = filepath.rfind("/")
 
     if right_index < 0:
         pass
@@ -74,7 +74,7 @@ def get_last_level_directory_name(filepath: str) -> str:
 
 def get_file_name(filepath):
     """Return the name of the file."""
-    right_index = filepath.rfind('/')
+    right_index = filepath.rfind("/")
     filename = filepath
     if right_index < 0:
         pass
@@ -85,9 +85,9 @@ def get_file_name(filepath):
 
 def get_directory(filepath):
     """Return the directory component of a path (without the filename)."""
-    right_index = filepath.rfind('/')
+    right_index = filepath.rfind("/")
     if right_index < 0:
-        directory = './'
+        directory = "./"
     else:
         directory = filepath[:right_index + 1]
     return directory
@@ -99,8 +99,8 @@ def get_file_full_extension(filepath):
     If it exists of multiple components, all are returned.
     """
     filename = get_file_name(filepath)
-    file_extension = ''
-    left_index = filename.find('.')
+    file_extension = ""
+    left_index = filename.find(".")
     if left_index < 0:
         pass
     else:
@@ -111,8 +111,8 @@ def get_file_full_extension(filepath):
 def get_file_least_extension(filepath):
     """Return the last extension of a file."""
     filename = get_file_name(filepath)
-    file_extension = ''
-    right_index = filename.rfind('.')
+    file_extension = ""
+    right_index = filename.rfind(".")
     if right_index < 0:
         pass
     else:
@@ -128,7 +128,7 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
     # Read instances from reference file
     instance_list_file_path = sgh.instance_list_path
 
-    with instance_list_file_path.open('r') as infile:
+    with instance_list_file_path.open("r") as infile:
         lines = infile.readlines()
 
         for line in lines:
@@ -145,12 +145,12 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
 def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
     """Return a list of solvers for a parallel portfolio specified by its path."""
     portfolio_solver_list = []
-    solvers_path_str = 'Solvers/'
+    solvers_path_str = "Solvers/"
 
     # Read the included solvers (or solver instances) from file
-    portfolio_solvers_file_path = Path(portfolio_path / 'solvers.txt')
+    portfolio_solvers_file_path = Path(portfolio_path / "solvers.txt")
 
-    with portfolio_solvers_file_path.open('r') as infile:
+    with portfolio_solvers_file_path.open("r") as infile:
         lines = infile.readlines()
 
         for line in lines:
@@ -181,8 +181,8 @@ def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
         list_all_cnf_filename.append(filename)
         return
     elif os.path.isdir(path):
-        if path[-1] != '/':
-            this_path = path + '/'
+        if path[-1] != "/":
+            this_path = path + "/"
         else:
             this_path = path
         list_all_items = os.listdir(this_path)
@@ -211,8 +211,8 @@ def get_list_all_filename_recursive(path, list_all_filename):
         list_all_filename.append(filename)
         return
     elif os.path.isdir(path):
-        if path[-1] != '/':
-            this_path = path + '/'
+        if path[-1] != "/":
+            this_path = path + "/"
         else:
             this_path = path
         list_all_items = os.listdir(this_path)
@@ -241,8 +241,8 @@ def get_list_all_directory_recursive(path, list_all_directory):
         list_all_directory.append(directory)
         return
     elif os.path.isdir(path):
-        if path[-1] != '/':
-            this_path = path + '/'
+        if path[-1] != "/":
+            this_path = path + "/"
         else:
             this_path = path
         list_all_items = os.listdir(this_path)
@@ -267,7 +267,7 @@ def get_list_all_csv_filename(filepath):
     list_all_items = os.listdir(filepath)
     for i in range(0, len(list_all_items)):
         file_extension = get_file_least_extension(list_all_items[i])
-        if file_extension == r'csv':
+        if file_extension == r"csv":
             csv_list.append(list_all_items[i])
     return csv_list
 
@@ -281,7 +281,7 @@ def get_list_all_result_filename(filepath: str) -> list[str]:
     list_all_items = os.listdir(filepath)
     for i in range(0, len(list_all_items)):
         file_extension = get_file_least_extension(list_all_items[i])
-        if file_extension == 'result':
+        if file_extension == "result":
             result_list.append(list_all_items[i])
     return result_list
 
@@ -295,7 +295,7 @@ def get_list_all_jobinfo_filename(filepath):
     list_all_items = os.listdir(filepath)
     for i in range(0, len(list_all_items)):
         file_extension = get_file_least_extension(list_all_items[i])
-        if file_extension == 'jobinfo':
+        if file_extension == "jobinfo":
             jobinfo_list.append(list_all_items[i])
     return jobinfo_list
 
@@ -309,16 +309,16 @@ def get_list_all_statusinfo_filename(filepath):
     list_all_items = os.listdir(filepath)
     for i in range(0, len(list_all_items)):
         file_extension = get_file_least_extension(list_all_items[i])
-        if file_extension == 'statusinfo':
+        if file_extension == "statusinfo":
             statusinfo_list.append(list_all_items[i])
     return statusinfo_list
 
 
 def add_new_instance_into_file(filepath):
     """Add an instance to a given instance file."""
-    fo = open(str(sgh.instance_list_path), 'a+')
+    fo = open(str(sgh.instance_list_path), "a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(filepath + '\n')
+    fo.write(filepath + "\n")
     fo.close()
     return
 
@@ -326,9 +326,9 @@ def add_new_instance_into_file(filepath):
 def add_new_solver_into_file(filepath: str, deterministic: int = 0,
                              solver_variations: int = 1):
     """Add a solver to an existing file listing solvers and their details."""
-    fo = open(sgh.solver_list_path, 'a+')
+    fo = open(sgh.solver_list_path, "a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(f'{filepath} {str(deterministic)} {str(solver_variations)}\n')
+    fo.write(f"{filepath} {str(deterministic)} {str(solver_variations)}\n")
     fo.close()
 
     return
@@ -336,46 +336,46 @@ def add_new_solver_into_file(filepath: str, deterministic: int = 0,
 
 def add_new_solver_nickname_into_file(nickname, filepath):
     """Add a new solver nickname to a given file."""
-    fo = open(sgh.solver_nickname_list_path, 'a+')
+    fo = open(sgh.solver_nickname_list_path, "a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(nickname + r' ' + filepath + '\n')
+    fo.write(nickname + r" " + filepath + "\n")
     fo.close()
     return
 
 
 def add_new_extractor_into_file(filepath):
     """Add a new feature extractor to a given file."""
-    fo = open(sgh.extractor_list_path, 'a+')
+    fo = open(sgh.extractor_list_path, "a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(filepath + '\n')
+    fo.write(filepath + "\n")
     fo.close()
     return
 
 
 def add_new_extractor_feature_vector_size_into_file(filepath, feature_vector_size):
     """Add a new feature vector size to a given file."""
-    fo = open(sgh.extractor_feature_vector_size_list_path, 'a+')
+    fo = open(sgh.extractor_feature_vector_size_list_path, "a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(filepath + r' ' + str(feature_vector_size) + '\n')
+    fo.write(filepath + r" " + str(feature_vector_size) + "\n")
     fo.close()
     return
 
 
 def add_new_extractor_nickname_into_file(nickname, filepath):
     """Add a new feature extractor nickname to a given file."""
-    fo = open(sgh.extractor_nickname_list_path, 'a+')
+    fo = open(sgh.extractor_nickname_list_path, "a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(nickname + r' ' + filepath + '\n')
+    fo.write(nickname + r" " + filepath + "\n")
     fo.close()
     return
 
 
 def write_solver_list():
     """Write the solver list to the default solver list file."""
-    fout = open(sgh.solver_list_path, 'w+')
+    fout = open(sgh.solver_list_path, "w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for i in range(0, len(sgh.solver_list)):
-        fout.write(sgh.solver_list[i] + '\n')
+        fout.write(sgh.solver_list[i] + "\n")
     fout.close()
     return
 
@@ -385,13 +385,13 @@ def remove_line_from_file(line_start: str, filepath: Path):
     newlines = []
 
     # Store lines that do not start with the input line
-    with filepath.open('r') as infile:
+    with filepath.open("r") as infile:
         for current_line in infile:
             if not current_line.startswith(line_start):
                 newlines.append(current_line)
 
     # Overwrite the file with stored lines
-    with filepath.open('w') as outfile:
+    with filepath.open("w") as outfile:
         for current_line in newlines:
             outfile.write(current_line)
 
@@ -403,13 +403,13 @@ def remove_from_solver_list(filepath):
     newlines = []
 
     # Store lines that do not contain filepath
-    with open(sgh.solver_list_path, 'r') as infile:
+    with open(sgh.solver_list_path, "r") as infile:
         for line in infile:
             if filepath not in line:
                 newlines.append(line)
 
     # Overwrite the file with stored lines
-    with open(sgh.solver_list_path, 'w') as outfile:
+    with open(sgh.solver_list_path, "w") as outfile:
         for line in newlines:
             outfile.write(line)
 
@@ -421,50 +421,50 @@ def remove_from_solver_list(filepath):
 
 def write_solver_nickname_mapping():
     """Write the mapping between solvers and nicknames to file."""
-    fout = open(sgh.solver_nickname_list_path, 'w+')
+    fout = open(sgh.solver_nickname_list_path, "w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for key in sgh.solver_nickname_mapping:
-        fout.write(key + r' ' + sgh.solver_nickname_mapping[key] + '\n')
+        fout.write(key + r" " + sgh.solver_nickname_mapping[key] + "\n")
     fout.close()
     return
 
 
 def write_extractor_list():
     """Write the list of extractors to the default file."""
-    fout = open(sgh.extractor_list_path, 'w+')
+    fout = open(sgh.extractor_list_path, "w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for i in range(0, len(sgh.extractor_list)):
-        fout.write(sgh.extractor_list[i] + '\n')
+        fout.write(sgh.extractor_list[i] + "\n")
     fout.close()
     return
 
 
 def write_extractor_feature_vector_size_mapping():
     """Write the mapping between feature extractors and feature vector sizes to file."""
-    fout = open(sgh.extractor_feature_vector_size_list_path, 'w+')
+    fout = open(sgh.extractor_feature_vector_size_list_path, "w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for key in sgh.extractor_feature_vector_size_mapping:
-        fout.write(f'{key} {str(sgh.extractor_feature_vector_size_mapping[key])}\n')
+        fout.write(f"{key} {str(sgh.extractor_feature_vector_size_mapping[key])}\n")
     fout.close()
     return
 
 
 def write_extractor_nickname_mapping():
     """Write the mapping between feature extractors and nicknames to file."""
-    fout = open(sgh.extractor_nickname_list_path, 'w+')
+    fout = open(sgh.extractor_nickname_list_path, "w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for key in sgh.extractor_nickname_mapping:
-        fout.write(key + r' ' + sgh.extractor_nickname_mapping[key] + '\n')
+        fout.write(key + r" " + sgh.extractor_nickname_mapping[key] + "\n")
     fout.close()
     return
 
 
 def write_instance_list():
     """Write the instance list to the default file."""
-    fout = open(str(sgh.instance_list_path), 'w+')
+    fout = open(str(sgh.instance_list_path), "w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for i in range(0, len(sgh.instance_list)):
-        fout.write(sgh.instance_list[i] + '\n')
+        fout.write(sgh.instance_list[i] + "\n")
     fout.close()
     return
 
@@ -486,13 +486,13 @@ def write_string_to_file(file: Path, string: str, append: bool = False, maxtry: 
 
     for i in range(maxtry):
         try:
-            with open(file, 'a' if append else 'w') as fout:
+            with open(file, "a" if append else "w") as fout:
                 fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 fout.write(string)
                 fcntl.flock(fout.fileno(), fcntl.LOCK_UN)
             return
         except OSError as e:
-            print(f'Warning: locking file {file} failed (try #{i})')
+            print(f"Warning: locking file {file} failed (try #{i})")
             if i < maxtry:
                 time.sleep(random.randint(1, 5) / 5)
             else:
@@ -549,8 +549,8 @@ def check_file_is_executable(file_name: Path):
     """Check if the given file is executable and create an error if not."""
     if not os.access(file_name, os.X_OK):
         print(
-            f'Error: The smac wrapper file {sgh.sparkle_smac_wrapper} is not '
-            'executable.\nAdd execution permissions to the file to run the configurator.'
+            f"Error: The smac wrapper file {sgh.sparkle_smac_wrapper} is not "
+            "executable.\nAdd execution permissions to the file to run the configurator."
         )
         sys.exit()
 

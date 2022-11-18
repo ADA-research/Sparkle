@@ -13,14 +13,14 @@ def parser_function():
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--recompute',
-        action='store_true',
-        help='re-run feature extractor for instances with previously computed features',
+        "--recompute",
+        action="store_true",
+        help="re-run feature extractor for instances with previously computed features",
     )
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -35,6 +35,6 @@ if __name__ == '__main__':
     my_flag_recompute = args.recompute
 
     # Start compute features parallel
-    print('Start computing features ...')
+    print("Start computing features ...")
 
     cf.compute_features_parallel(my_flag_recompute)

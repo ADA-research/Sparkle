@@ -19,7 +19,7 @@ from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
 def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
     """Return the number of instances for an instance set used by SMAC."""
-    str_value = ''
+    str_value = ""
 
     # For multi-file instances count based on the reference list
     if sih.check_existence_of_reference_instance_list(instance_set_name):
@@ -27,7 +27,7 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
         str_value = str(instance_count)
     # For single-file instances just count the number of instance files
     else:
-        instance_dir = f'{sgh.smac_dir}/example_scenarios/instances/{instance_set_name}/'
+        instance_dir = f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_name}/"
         list_instance = sfh.get_list_all_filename(instance_dir)
         str_value = str(len(list_instance))
 
@@ -53,14 +53,14 @@ def get_par10_performance(results_file, cutoff) -> float:
 def get_optimised_configuration_testing_performance_par10(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
     """Return the PAR10 score of the optimised configuration on the testing set."""
-    str_value = ''
-    smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+    str_value = ""
+    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
     configured_results_dir = (
-        f'{smac_solver_dir}results/'
-        f'{sgh.sparkle_run_configured_wrapper}_{instance_set_name}/')
-    script_calc_par10_time_path = f'{sgh.smac_dir}/example_scenarios/calc_par10_time.py'
-    command_line = (f'{script_calc_par10_time_path} {configured_results_dir} '
-                    f'{str(smac_each_run_cutoff_time)}')
+        f"{smac_solver_dir}results/"
+        f"{sgh.sparkle_run_configured_wrapper}_{instance_set_name}/")
+    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
+    command_line = (f"{script_calc_par10_time_path} {configured_results_dir} "
+                    f"{str(smac_each_run_cutoff_time)}")
     output = os.popen(command_line).readlines()
     str_value = output[0].strip().split()[2]
     return str_value
@@ -69,13 +69,13 @@ def get_optimised_configuration_testing_performance_par10(
 def get_default_configuration_testing_performance_par10(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
     """Return the PAR10 score of the default configuration on the testing set."""
-    str_value = ''
-    smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
-    default_results_dir = (f'{smac_solver_dir}results/{sgh.sparkle_run_default_wrapper}_'
-                           f'{instance_set_name}/')
-    script_calc_par10_time_path = f'{sgh.smac_dir}/example_scenarios/calc_par10_time.py'
-    command_line = (f'{script_calc_par10_time_path} {default_results_dir} '
-                    f'{str(smac_each_run_cutoff_time)}')
+    str_value = ""
+    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
+    default_results_dir = (f"{smac_solver_dir}results/{sgh.sparkle_run_default_wrapper}_"
+                           f"{instance_set_name}/")
+    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
+    command_line = (f"{script_calc_par10_time_path} {default_results_dir} "
+                    f"{str(smac_each_run_cutoff_time)}")
     output = os.popen(command_line).readlines()
     str_value = output[0].strip().split()[2]
     return str_value
@@ -84,14 +84,14 @@ def get_default_configuration_testing_performance_par10(
 def get_optimised_configuration_training_performance_par10(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
     """Return the PAR10 score of the optimised configuration on the training set."""
-    str_value = ''
-    smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
+    str_value = ""
+    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
     configured_results_dir = (
-        f'{smac_solver_dir}results_train/'
-        f'{sgh.sparkle_run_configured_wrapper}_{instance_set_name}/')
-    script_calc_par10_time_path = f'{sgh.smac_dir}/example_scenarios/calc_par10_time.py'
-    command_line = (f'{script_calc_par10_time_path} {configured_results_dir} '
-                    f'{str(smac_each_run_cutoff_time)}')
+        f"{smac_solver_dir}results_train/"
+        f"{sgh.sparkle_run_configured_wrapper}_{instance_set_name}/")
+    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
+    command_line = (f"{script_calc_par10_time_path} {configured_results_dir} "
+                    f"{str(smac_each_run_cutoff_time)}")
     output = os.popen(command_line).readlines()
     str_value = output[0].strip().split()[2]
     return str_value
@@ -100,13 +100,13 @@ def get_optimised_configuration_training_performance_par10(
 def get_default_configuration_training_performance_par10(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
     """Return the PAR10 score of the default configuration on the training set."""
-    str_value = ''
-    smac_solver_dir = sgh.smac_dir + '/example_scenarios/' + solver_name + '/'
-    default_results_dir = (f'{smac_solver_dir}results_train/'
-                           f'{sgh.sparkle_run_default_wrapper}_{instance_set_name}/')
-    script_calc_par10_time_path = f'{sgh.smac_dir}/example_scenarios/calc_par10_time.py'
-    command_line = (f'{script_calc_par10_time_path} {default_results_dir} '
-                    f'{str(smac_each_run_cutoff_time)}')
+    str_value = ""
+    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
+    default_results_dir = (f"{smac_solver_dir}results_train/"
+                           f"{sgh.sparkle_run_default_wrapper}_{instance_set_name}/")
+    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
+    command_line = (f"{script_calc_par10_time_path} {default_results_dir} "
+                    f"{str(smac_each_run_cutoff_time)}")
     output = os.popen(command_line).readlines()
     str_value = output[0].strip().split()[2]
     return str_value
@@ -141,7 +141,7 @@ def construct_list_instance_and_performance(result_file, cutoff):
     """Return a list of [instance, performance] pairs."""
     list_instance_and_performance = []
 
-    fin = open(result_file, 'r')
+    fin = open(result_file, "r")
     fin.readline()  # Skip column titles
 
     while True:
@@ -150,16 +150,16 @@ def construct_list_instance_and_performance(result_file, cutoff):
         if not myline.strip():
             break
 
-        mylist = myline.split(',')
+        mylist = myline.split(",")
         instance_path = mylist[0].strip('"')
-        instance = instance_path.split('/')[-1]
-        performance = float(mylist[2].replace('"', ''))
+        instance = instance_path.split("/")[-1]
+        performance = float(mylist[2].replace('"', ""))
 
         # If the objective is runtime, compute the PAR10 score; otherwise don't modify
         # the value
         smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
-        if smac_run_obj == 'RUNTIME':
+        if smac_run_obj == "RUNTIME":
             # Minimum runtime. Is lower than this not accurate?
             if performance < 0.01001:
                 performance = 0.01001
@@ -188,40 +188,40 @@ def get_dict_instance_to_performance(results_file, cutoff):
 
 def get_performance_measure() -> str:
     """Return the performance measure as LaTeX str."""
-    performance_measure = ''
+    performance_measure = ""
 
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
-    if smac_run_obj == 'RUNTIME':
-        performance_measure = 'PAR10'
-    elif smac_run_obj == 'QUALITY':
-        performance_measure = 'performance'
+    if smac_run_obj == "RUNTIME":
+        performance_measure = "PAR10"
+    elif smac_run_obj == "QUALITY":
+        performance_measure = "performance"
 
     return performance_measure
 
 
 def get_runtime_bool() -> str:
     """Return the runtime bool as LaTeX str."""
-    runtime_bool = ''
+    runtime_bool = ""
 
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
-    if smac_run_obj == 'RUNTIME':
-        runtime_bool = r'\runtimetrue'
-    elif smac_run_obj == 'QUALITY':
-        runtime_bool = r'\runtimefalse'
+    if smac_run_obj == "RUNTIME":
+        runtime_bool = r"\runtimetrue"
+    elif smac_run_obj == "QUALITY":
+        runtime_bool = r"\runtimefalse"
 
     return runtime_bool
 
 
 def get_ablation_bool(solver_name, instance_train_name, instance_test_name) -> str:
     """Return the ablation bool as LaTeX str."""
-    ablation_bool = ''
+    ablation_bool = ""
 
     if sah.check_for_ablation(solver_name, instance_train_name, instance_test_name):
-        ablation_bool = r'\ablationtrue'
+        ablation_bool = r"\ablationtrue"
     else:
-        ablation_bool = r'\ablationfalse'
+        ablation_bool = r"\ablationfalse"
 
     return ablation_bool
 
@@ -231,14 +231,14 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
 
     True if a feature file is given in the scenario file, false otherwise.
     """
-    scenario_file = (f'{get_smac_solver_dir(solver_name, instance_set_train_name)}'
-                     f'{solver_name}_{instance_set_train_name}_scenario.txt')
-    features_bool = r'\featuresfalse'
+    scenario_file = (f"{get_smac_solver_dir(solver_name, instance_set_train_name)}"
+                     f"{solver_name}_{instance_set_train_name}_scenario.txt")
+    features_bool = r"\featuresfalse"
 
-    with open(scenario_file, 'r') as f:
+    with open(scenario_file, "r") as f:
         for line in f.readlines():
-            if line.split(' ')[0] == 'feature_file':
-                features_bool = r'\featurestrue'
+            if line.split(" ")[0] == "feature_file":
+                features_bool = r"\featurestrue"
 
     return features_bool
 
@@ -283,34 +283,34 @@ def get_figure_configure_vs_default(configured_results_dir: str,
     @return the LaTeX code to include the figure.
     """
     latex_directory_path = (
-        configuration_reports_directory + 'Sparkle-latex-generator-for-configuration/')
+        configuration_reports_directory + "Sparkle-latex-generator-for-configuration/")
     points = get_data_for_plot(configured_results_dir, default_results_dir,
                                smac_each_run_cutoff_time)
 
     performance_measure = get_performance_measure()
 
-    plot_params = {'xlabel': f'Default parameters [{performance_measure}]',
-                   'ylabel': f'Configured parameters [{performance_measure}]',
-                   'cwd': latex_directory_path,
-                   'scale': 'linear',
-                   'limit_min': 1.5,
-                   'limit_max': 1.5,
-                   'limit': 'relative',
-                   'replace_zeros': False,
+    plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
+                   "ylabel": f"Configured parameters [{performance_measure}]",
+                   "cwd": latex_directory_path,
+                   "scale": "linear",
+                   "limit_min": 1.5,
+                   "limit_max": 1.5,
+                   "limit": "relative",
+                   "replace_zeros": False,
                    }
-    if performance_measure == 'PAR10':
-        plot_params['scale'] = 'log'
-        plot_params['limit_min'] = 0.25
-        plot_params['limit_max'] = 0.25
-        plot_params['limit'] = 'magnitude'
-        plot_params['penalty_time'] = sgh.settings.get_penalised_time()
-        plot_params['replace_zeros'] = True
+    if performance_measure == "PAR10":
+        plot_params["scale"] = "log"
+        plot_params["limit_min"] = 0.25
+        plot_params["limit_max"] = 0.25
+        plot_params["limit"] = "magnitude"
+        plot_params["penalty_time"] = sgh.settings.get_penalised_time()
+        plot_params["replace_zeros"] = True
 
     generate_comparison_plot(points,
                              figure_filename,
                              **plot_params)
 
-    str_value = f'\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}'
+    str_value = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
     return str_value
 
@@ -327,20 +327,20 @@ def get_figure_configured_vs_default_on_test_instance_set(
     @return the LaTeX code to include the figure.
     """
     configured_results_file = (
-        'validationObjectiveMatrix-configuration_for_validation-walltime.csv')
-    default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
+    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f'{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/')
-    configured_results_dir = (f'{smac_solver_dir}outdir_{instance_set_test_name}'
-                              f'_test_configured/{configured_results_file}')
-    default_results_dir = (f'{smac_solver_dir}outdir_{instance_set_test_name}'
-                           f'_test_default/{default_results_file}')
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+    configured_results_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
+                              f"_test_configured/{configured_results_file}")
+    default_results_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
+                           f"_test_default/{default_results_file}")
 
-    configuration_reports_directory = (f'Configuration_Reports/{solver_name}_'
-                                       f'{instance_set_train_name}_'
-                                       f'{instance_set_test_name}/')
+    configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
+                                       f"{instance_set_train_name}_"
+                                       f"{instance_set_test_name}/")
     data_plot_configured_vs_default_on_test_instance_set_filename = (
-        f'data_{solver_name}_configured_vs_default_on_{instance_set_test_name}_test')
+        f"data_{solver_name}_configured_vs_default_on_{instance_set_test_name}_test")
 
     return get_figure_configure_vs_default(
         configured_results_dir, default_results_dir, configuration_reports_directory,
@@ -361,18 +361,18 @@ def get_figure_configured_vs_default_on_train_instance_set(
     """
     _, _, optimised_configuration_seed = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
-    configured_results_file = ('validationObjectiveMatrix-traj-run-'
-                               f'{optimised_configuration_seed}-walltime.csv')
-    default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+    configured_results_file = ("validationObjectiveMatrix-traj-run-"
+                               f"{optimised_configuration_seed}-walltime.csv")
+    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f'{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/')
-    configured_results_dir = (f'{smac_solver_dir}outdir_train_configuration/'
-                              f'{solver_name}_{instance_set_train_name}_scenario/'
-                              f'{configured_results_file}')
-    default_results_dir = f'{smac_solver_dir}outdir_train_default/{default_results_file}'
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+    configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
+                              f"{solver_name}_{instance_set_train_name}_scenario/"
+                              f"{configured_results_file}")
+    default_results_dir = f"{smac_solver_dir}outdir_train_default/{default_results_file}"
 
     data_plot_configured_vs_default_on_train_instance_set_filename = (
-        f'data_{solver_name}_configured_vs_default_on_{instance_set_train_name}_train')
+        f"data_{solver_name}_configured_vs_default_on_{instance_set_train_name}_train")
     return get_figure_configure_vs_default(
         configured_results_dir, default_results_dir, configuration_reports_directory,
         data_plot_configured_vs_default_on_train_instance_set_filename,
@@ -387,14 +387,14 @@ def get_timeouts_test(solver_name, instance_set_train_name, instance_set_name, c
 
     # Retrieve instances and PAR10 values
     configured_results_file = (
-        'validationObjectiveMatrix-configuration_for_validation-walltime.csv')
-    default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
+    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f'{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/')
-    configured_results_dir = (f'{smac_solver_dir}outdir_{instance_set_name}'
-                              f'_test_configured/{configured_results_file}')
-    default_results_dir = (f'{smac_solver_dir}outdir_{instance_set_name}_test_default/'
-                           f'{default_results_file}')
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+    configured_results_dir = (f"{smac_solver_dir}outdir_{instance_set_name}"
+                              f"_test_configured/{configured_results_file}")
+    default_results_dir = (f"{smac_solver_dir}outdir_{instance_set_name}_test_default/"
+                           f"{default_results_file}")
     dict_instance_to_par10_configured = get_dict_instance_to_performance(
         configured_results_dir, cutoff)
     dict_instance_to_par10_default = get_dict_instance_to_performance(
@@ -428,15 +428,15 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
     (optimised_configuration_str, optimised_configuration_performance_par10,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_name)
-    configured_results_file = ('validationObjectiveMatrix-traj-run-'
-                               f'{optimised_configuration_seed}-walltime.csv')
-    default_results_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+    configured_results_file = ("validationObjectiveMatrix-traj-run-"
+                               f"{optimised_configuration_seed}-walltime.csv")
+    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f'{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_name}/')
-    configured_results_dir = (f'{smac_solver_dir}outdir_train_configuration/'
-                              f'{solver_name}_{instance_set_name}_scenario/'
-                              f'{configured_results_file}')
-    default_results_dir = f'{smac_solver_dir}outdir_train_default/{default_results_file}'
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_name}/")
+    configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
+                              f"{solver_name}_{instance_set_name}_scenario/"
+                              f"{configured_results_file}")
+    default_results_dir = f"{smac_solver_dir}outdir_train_default/{default_results_file}"
     dict_instance_to_par10_configured = get_dict_instance_to_performance(
         configured_results_dir, cutoff)
     dict_instance_to_par10_default = get_dict_instance_to_performance(
@@ -470,34 +470,34 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
     """
     results = sah.get_ablation_table(solver_name, instance_set_train_name,
                                      instance_set_test_name)
-    table_string = r'\begin{tabular}{rp{0.25\linewidth}rrr}'
+    table_string = r"\begin{tabular}{rp{0.25\linewidth}rrr}"
     # "Round", "Flipped parameter", "Source value", "Target value", "Validation result"
     for i, line in enumerate(results):
         # If this fails something has changed in the representation of ablation tables
         assert len(line) == 5
         if i == 0:
-            line = ['\\textbf{{{0}}}'.format(word) for word in line]
+            line = ["\\textbf{{{0}}}".format(word) for word in line]
 
         # Put multiple variable changes in one round on a seperate line
-        if (len(line[1].split(',')) > 1
-           and len(line[1].split(',')) == len(line[2].split(','))
-           and len(line[1].split(',')) == len(line[3].split(','))):
-            params = line[1].split(',')
-            default_values = line[2].split(',')
-            flipped_values = line[3].split(',')
+        if (len(line[1].split(",")) > 1
+           and len(line[1].split(",")) == len(line[2].split(","))
+           and len(line[1].split(",")) == len(line[3].split(","))):
+            params = line[1].split(",")
+            default_values = line[2].split(",")
+            flipped_values = line[3].split(",")
 
             sublines = len(params)
             for subline in range(sublines):
-                round = '' if subline != 0 else line[0]
-                result = '' if subline + 1 != sublines else line[-1]
+                round = "" if subline != 0 else line[0]
+                result = "" if subline + 1 != sublines else line[-1]
                 printline = [round, params[subline], default_values[subline],
                              flipped_values[subline], result]
-                table_string += ' & '.join(printline) + ' \\\\ '
+                table_string += " & ".join(printline) + " \\\\ "
         else:
-            table_string += ' & '.join(line) + ' \\\\ '
+            table_string += " & ".join(line) + " \\\\ "
         if i == 0:
-            table_string += '\\hline '
-    table_string += '\\end{tabular}'
+            table_string += "\\hline "
+    table_string += "\\end{tabular}"
 
     return table_string
 
@@ -509,41 +509,41 @@ def get_dict_variable_to_value(solver_name, instance_set_train_name,
 
     if instance_set_test_name is not None:
         configuration_reports_directory = (
-            f'Configuration_Reports/{solver_name}_{instance_set_train_name}_'
-            f'{instance_set_test_name}/')
+            f"Configuration_Reports/{solver_name}_{instance_set_train_name}_"
+            f"{instance_set_test_name}/")
     else:
         configuration_reports_directory = (
-            'Configuration_Reports/' + solver_name + '_' + instance_set_train_name + '/')
+            "Configuration_Reports/" + solver_name + "_" + instance_set_train_name + "/")
 
     common_dict = get_dict_variable_to_value_common(solver_name, instance_set_train_name,
                                                     instance_set_test_name,
                                                     configuration_reports_directory)
     full_dict.update(common_dict)
 
-    variable = 'testBool'
+    variable = "testBool"
 
     if instance_set_test_name is not None:
         test_dict = get_dict_variable_to_value_test(solver_name, instance_set_train_name,
                                                     instance_set_test_name)
         full_dict.update(test_dict)
-        str_value = r'\testtrue'
+        str_value = r"\testtrue"
     else:
-        str_value = r'\testfalse'
+        str_value = r"\testfalse"
     full_dict[variable] = str_value
 
     if not ablation:
-        full_dict['ablationBool'] = r'\ablationfalse'
+        full_dict["ablationBool"] = r"\ablationfalse"
 
-    if full_dict['featuresBool'] == r'\featurestrue':
-        variable = 'numFeatureExtractors'
+    if full_dict["featuresBool"] == r"\featurestrue":
+        variable = "numFeatureExtractors"
         str_value = sgrh.get_num_feature_extractors()
         full_dict[variable] = str_value
 
-        variable = 'featureExtractorList'
+        variable = "featureExtractorList"
         str_value = sgrh.get_feature_extractor_list()
         full_dict[variable] = str_value
 
-        variable = 'featureComputationCutoffTime'
+        variable = "featureComputationCutoffTime"
         str_value = sgrh.get_feature_computation_cutoff_time()
         full_dict[variable] = str_value
 
@@ -556,35 +556,35 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     """Return a dict matching LaTeX variables and values used for all config. reports."""
     common_dict = {}
 
-    variable = 'performanceMeasure'
+    variable = "performanceMeasure"
     str_value = get_performance_measure()
     common_dict[variable] = str_value
 
-    variable = 'runtimeBool'
+    variable = "runtimeBool"
     str_value = get_runtime_bool()
     common_dict[variable] = str_value
 
-    variable = 'customCommands'
+    variable = "customCommands"
     str_value = sgrh.get_custom_commands()
     common_dict[variable] = str_value
 
-    variable = 'sparkle'
+    variable = "sparkle"
     str_value = sgrh.get_sparkle()
     common_dict[variable] = str_value
 
-    variable = 'solver'
+    variable = "solver"
     str_value = solver_name
     common_dict[variable] = str_value
 
-    variable = 'instanceSetTrain'
+    variable = "instanceSetTrain"
     str_value = instance_set_train_name
     common_dict[variable] = str_value
 
-    variable = 'sparkleVersion'
+    variable = "sparkleVersion"
     str_value = sgh.sparkle_version
     common_dict[variable] = str_value
 
-    variable = 'numInstanceInTrainingInstanceSet'
+    variable = "numInstanceInTrainingInstanceSet"
     str_value = get_num_instance_in_instance_set_smac_dir(instance_set_train_name)
     common_dict[variable] = str_value
 
@@ -592,50 +592,50 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
      smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
      ) = scsh.get_smac_settings()
 
-    variable = 'numSmacRuns'
+    variable = "numSmacRuns"
     common_dict[variable] = str(num_of_smac_run_str)
 
-    variable = 'smacObjective'
+    variable = "smacObjective"
     common_dict[variable] = str(smac_run_obj)
 
-    variable = 'smacWholeTimeBudget'
+    variable = "smacWholeTimeBudget"
     common_dict[variable] = str(smac_whole_time_budget)
 
-    variable = 'smacEachRunCutoffTime'
+    variable = "smacEachRunCutoffTime"
     common_dict[variable] = str(smac_each_run_cutoff_time)
 
     (optimised_configuration_str, optimised_configuration_performance_par10,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
 
-    variable = 'optimisedConfiguration'
+    variable = "optimisedConfiguration"
     common_dict[variable] = str(optimised_configuration_str)
 
     smac_solver_dir = (
-        f'{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/')
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
 
-    variable = 'optimisedConfigurationTrainingPerformancePAR10'
+    variable = "optimisedConfigurationTrainingPerformancePAR10"
     (optimised_configuration_str, optimised_configuration_performance_par10,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
-    configured_results_train_file = 'validationObjectiveMatrix-traj-run-' + str(
-        optimised_configuration_seed) + '-walltime.csv'
-    configured_results_train_dir = (f'{smac_solver_dir}outdir_train_configuration/'
-                                    f'{solver_name}_{instance_set_train_name}_scenario/'
-                                    f'{configured_results_train_file}')
+    configured_results_train_file = "validationObjectiveMatrix-traj-run-" + str(
+        optimised_configuration_seed) + "-walltime.csv"
+    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
+                                    f"{solver_name}_{instance_set_train_name}_scenario/"
+                                    f"{configured_results_train_file}")
     str_value = get_par10_performance(configured_results_train_dir,
                                       smac_each_run_cutoff_time)
     common_dict[variable] = str(str_value)
 
-    variable = 'defaultConfigurationTrainingPerformancePAR10'
-    default_results_train_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
+    variable = "defaultConfigurationTrainingPerformancePAR10"
+    default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_train_dir = (
-        smac_solver_dir + 'outdir_train_default/' + default_results_train_file)
+        smac_solver_dir + "outdir_train_default/" + default_results_train_file)
     str_value = get_par10_performance(default_results_train_dir,
                                       smac_each_run_cutoff_time)
     common_dict[variable] = str(str_value)
 
-    variable = 'figure-configured-vs-default-train'
+    variable = "figure-configured-vs-default-train"
     str_value = get_figure_configured_vs_default_on_train_instance_set(
         solver_name, instance_set_train_name, configuration_reports_directory,
         float(smac_each_run_cutoff_time))
@@ -646,27 +646,27 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
         get_timeouts_train(solver_name, instance_set_train_name,
                            float(smac_each_run_cutoff_time)))
 
-    variable = 'timeoutsTrainDefault'
+    variable = "timeoutsTrainDefault"
     common_dict[variable] = str(default_timeouts_train)
 
-    variable = 'timeoutsTrainConfigured'
+    variable = "timeoutsTrainConfigured"
     common_dict[variable] = str(configured_timeouts_train)
 
-    variable = 'timeoutsTrainOverlap'
+    variable = "timeoutsTrainOverlap"
     common_dict[variable] = str(overlapping_timeouts_train)
 
-    variable = 'ablationBool'
+    variable = "ablationBool"
     ablation_validation_name = (instance_set_test_name
                                 if instance_set_test_name is not None
                                 else instance_set_train_name)
     common_dict[variable] = get_ablation_bool(solver_name, instance_set_train_name,
                                               ablation_validation_name)
 
-    variable = 'ablationPath'
+    variable = "ablationPath"
     common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,
                                                ablation_validation_name)
 
-    variable = 'featuresBool'
+    variable = "featuresBool"
     common_dict[variable] = get_features_bool(solver_name, instance_set_train_name)
 
     return common_dict
@@ -678,11 +678,11 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
     """Return a dict matching test set specific latex variables with their values."""
     test_dict = {}
 
-    variable = 'instanceSetTest'
+    variable = "instanceSetTest"
     str_value = instance_set_test_name
     test_dict[variable] = str_value
 
-    variable = 'numInstanceInTestingInstanceSet'
+    variable = "numInstanceInTestingInstanceSet"
     str_value = get_num_instance_in_instance_set_smac_dir(instance_set_test_name)
     test_dict[variable] = str_value
 
@@ -691,26 +691,26 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
      num_of_smac_run_in_parallel_str) = scsh.get_smac_settings()
 
     smac_solver_dir = (
-        f'{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/')
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
 
-    variable = 'optimisedConfigurationTestingPerformancePAR10'
+    variable = "optimisedConfigurationTestingPerformancePAR10"
     configured_results_test_file = (
-        'validationObjectiveMatrix-configuration_for_validation-walltime.csv')
-    configured_results_test_dir = (f'{smac_solver_dir}outdir_{instance_set_test_name}'
-                                   f'_test_configured/{configured_results_test_file}')
+        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
+    configured_results_test_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
+                                   f"_test_configured/{configured_results_test_file}")
     str_value = get_par10_performance(configured_results_test_dir,
                                       smac_each_run_cutoff_time)
     test_dict[variable] = str(str_value)
 
-    variable = 'defaultConfigurationTestingPerformancePAR10'
-    default_results_test_file = 'validationObjectiveMatrix-cli-1-walltime.csv'
-    default_results_test_dir = (f'{smac_solver_dir}outdir_{instance_set_test_name}'
-                                f'_test_default/{default_results_test_file}')
+    variable = "defaultConfigurationTestingPerformancePAR10"
+    default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
+    default_results_test_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
+                                f"_test_default/{default_results_test_file}")
     str_value = get_par10_performance(default_results_test_dir,
                                       smac_each_run_cutoff_time)
     test_dict[variable] = str(str_value)
 
-    variable = 'figure-configured-vs-default-test'
+    variable = "figure-configured-vs-default-test"
     str_value = get_figure_configured_vs_default_on_test_instance_set(
         solver_name, instance_set_train_name, instance_set_test_name,
         float(smac_each_run_cutoff_time))
@@ -721,20 +721,20 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
         get_timeouts_test(solver_name, instance_set_train_name, instance_set_test_name,
                           float(smac_each_run_cutoff_time)))
 
-    variable = 'timeoutsTestDefault'
+    variable = "timeoutsTestDefault"
     test_dict[variable] = str(default_timeouts_test)
 
-    variable = 'timeoutsTestConfigured'
+    variable = "timeoutsTestConfigured"
     test_dict[variable] = str(configured_timeouts_test)
 
-    variable = 'timeoutsTestOverlap'
+    variable = "timeoutsTestOverlap"
     test_dict[variable] = str(overlapping_timeouts_test)
 
-    variable = 'ablationBool'
+    variable = "ablationBool"
     test_dict[variable] = get_ablation_bool(solver_name, instance_set_train_name,
                                             instance_set_test_name)
 
-    variable = 'ablationPath'
+    variable = "ablationPath"
     test_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,
                                              instance_set_test_name)
 
@@ -745,64 +745,64 @@ def check_results_exist(solver_name, instance_set_train_name,
                         instance_set_test_name=None):
     """Check whether configuration results exist."""
     all_good = True
-    err_str = ''
+    err_str = ""
 
     # Check train instance dir exists
     instance_train_dir = (
-        f'{sgh.smac_dir}/example_scenarios/instances/{instance_set_train_name}/')
+        f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_train_name}/")
 
     if not os.path.exists(instance_train_dir):
         all_good = False
-        err_str += (' training set not found in configuration directory '
-                    f'{instance_train_dir};')
+        err_str += (" training set not found in configuration directory "
+                    f"{instance_train_dir};")
 
     # Check train results exist: configured+default
     smac_solver_dir = (
-        f'{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/')
-    configured_results_train_dir = (f'{smac_solver_dir}outdir_train_configuration/'
-                                    f'{solver_name}_{instance_set_train_name}_scenario/')
-    default_results_train_dir = smac_solver_dir + 'outdir_train_default/'
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
+                                    f"{solver_name}_{instance_set_train_name}_scenario/")
+    default_results_train_dir = smac_solver_dir + "outdir_train_default/"
 
     if not os.path.exists(configured_results_train_dir):
-        err_str += (' configured parameter results on the training set not found in '
-                    f'{configured_results_train_dir};')
+        err_str += (" configured parameter results on the training set not found in "
+                    f"{configured_results_train_dir};")
         all_good = False
     if not os.path.exists(default_results_train_dir):
-        err_str += (' default parameter results on the training set not found in '
-                    f'{default_results_train_dir};')
+        err_str += (" default parameter results on the training set not found in "
+                    f"{default_results_train_dir};")
         all_good = False
 
     if instance_set_test_name is not None:
         # Check test instance dir exists
         instance_test_dir = (
-            f'{sgh.smac_dir}/example_scenarios/instances/{instance_set_test_name}/')
+            f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_test_name}/")
         if not os.path.exists(instance_test_dir):
             all_good = False
-            err_str += (' testing set not found in configuration directory '
-                        f'{instance_test_dir};')
+            err_str += (" testing set not found in configuration directory "
+                        f"{instance_test_dir};")
 
         # Check test results exist: configured+default
-        smac_solver_dir = (f'{sgh.smac_dir}/example_scenarios/{solver_name}_'
-                           f'{instance_set_train_name}/')
+        smac_solver_dir = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
+                           f"{instance_set_train_name}/")
         configured_results_test_dir = (
-            smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_configured/')
+            smac_solver_dir + "outdir_" + instance_set_test_name + "_test_configured/")
         default_results_test_dir = (
-            smac_solver_dir + 'outdir_' + instance_set_test_name + '_test_default/')
+            smac_solver_dir + "outdir_" + instance_set_test_name + "_test_default/")
 
         if not os.path.exists(configured_results_test_dir):
-            err_str += (' configured parameter results on the testing set not found in '
-                        f'{configured_results_test_dir};')
+            err_str += (" configured parameter results on the testing set not found in "
+                        f"{configured_results_test_dir};")
             all_good = False
         if not os.path.exists(default_results_test_dir):
-            err_str += (' default parameter results on the testing set not found in '
-                        f'{default_results_test_dir};')
+            err_str += (" default parameter results on the testing set not found in "
+                        f"{default_results_test_dir};")
             all_good = False
 
     if not all_good:
-        print('Error: Results not found for the given solver and instance set(s) '
+        print("Error: Results not found for the given solver and instance set(s) "
               'combination. Make sure the "configure_solver" and '
               '"validate_configured_vs_default" commands were correctly executed. '
-              f'\nDetected errors:\n{err_str}')
+              f"\nDetected errors:\n{err_str}")
         sys.exit()
 
     return
@@ -810,22 +810,22 @@ def check_results_exist(solver_name, instance_set_train_name,
 
 def get_most_recent_test_run(solver_name: str) -> (str, str, bool, bool):
     """Return the instance sets used most recently to configure a given solver."""
-    instance_set_train = ''
-    instance_set_test = ''
+    instance_set_train = ""
+    instance_set_test = ""
     flag_instance_set_train = False
     flag_instance_set_test = False
 
     # Read most recent run from file
-    last_test_file_path = (f'{sgh.smac_dir}/example_scenarios/{solver_name}_'
-                           f'{sgh.sparkle_last_test_file_name}')
+    last_test_file_path = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
+                           f"{sgh.sparkle_last_test_file_name}")
     try:
-        fin = open(last_test_file_path, 'r')
+        fin = open(last_test_file_path, "r")
     except IOError:
         # Report error when file does not exist
-        print('Error: The most recent results do not match the given solver. Please '
-              'specify which instance sets you want a report for with this solver. '
+        print("Error: The most recent results do not match the given solver. Please "
+              "specify which instance sets you want a report for with this solver. "
               'Alternatively, make sure the "test_configured_solver_and_default_solver" '
-              'command was executed for this solver.')
+              "command was executed for this solver.")
         sys.exit()
 
     while True:
@@ -834,13 +834,13 @@ def get_most_recent_test_run(solver_name: str) -> (str, str, bool, bool):
             break
         words = myline.split()
 
-        if words[0] == 'train':
+        if words[0] == "train":
             instance_set_train = words[1]
-            if instance_set_train != '':
+            if instance_set_train != "":
                 flag_instance_set_train = True
-        if words[0] == 'test':
+        if words[0] == "test":
             instance_set_test = words[1]
-            if instance_set_test != '':
+            if instance_set_test != "":
                 flag_instance_set_test = True
     fin.close()
 
@@ -850,13 +850,13 @@ def get_most_recent_test_run(solver_name: str) -> (str, str, bool, bool):
 
 def generate_report_for_configuration_prep(configuration_reports_directory):
     """Prepare for the generation of an algorithm configuration report."""
-    print('Generating report for configuration ...')
+    print("Generating report for configuration ...")
 
     template_latex_directory_path = (
-        'Components/Sparkle-latex-generator-for-configuration/')
+        "Components/Sparkle-latex-generator-for-configuration/")
     if not os.path.exists(configuration_reports_directory):
-        os.system('mkdir -p ' + configuration_reports_directory)
-    os.system(f'cp -r {template_latex_directory_path} {configuration_reports_directory}')
+        os.system("mkdir -p " + configuration_reports_directory)
+    os.system(f"cp -r {template_latex_directory_path} {configuration_reports_directory}")
 
     return
 
@@ -864,8 +864,8 @@ def generate_report_for_configuration_prep(configuration_reports_directory):
 def generate_report_for_configuration_train(solver_name, instance_set_train_name,
                                             ablation=True):
     """Generate a report for algorithm configuration with only a training set."""
-    configuration_reports_directory = (f'Configuration_Reports/{solver_name}_'
-                                       f'{instance_set_train_name}/')
+    configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
+                                       f"{instance_set_train_name}/")
     generate_report_for_configuration_prep(configuration_reports_directory)
     dict_variable_to_value = get_dict_variable_to_value(
         solver_name, instance_set_train_name, ablation=ablation)
@@ -879,9 +879,9 @@ def generate_report_for_configuration_train(solver_name, instance_set_train_name
 def generate_report_for_configuration(solver_name, instance_set_train_name,
                                       instance_set_test_name, ablation=True):
     """Generate a report for algorithm configuration."""
-    configuration_reports_directory = (f'Configuration_Reports/{solver_name}_'
-                                       f'{instance_set_train_name}_'
-                                       f'{instance_set_test_name}/')
+    configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
+                                       f"{instance_set_train_name}_"
+                                       f"{instance_set_test_name}/")
     generate_report_for_configuration_prep(configuration_reports_directory)
     dict_variable_to_value = (
         get_dict_variable_to_value(solver_name, instance_set_train_name,
@@ -897,14 +897,14 @@ def generate_report_for_configuration_common(configuration_reports_directory,
                                              dict_variable_to_value):
     """Generate the common part of all algorithm configuration reports."""
     latex_directory_path = Path(
-        f'{configuration_reports_directory}Sparkle-latex-generator-for-configuration/')
-    latex_template_filename = 'template-Sparkle-for-configuration.tex'
-    latex_report_filename = Path('Sparkle_Report_for_Configuration')
+        f"{configuration_reports_directory}Sparkle-latex-generator-for-configuration/")
+    latex_template_filename = "template-Sparkle-for-configuration.tex"
+    latex_report_filename = Path("Sparkle_Report_for_Configuration")
 
     # Read in the report template from file
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
-    report_content = ''
-    fin = open(latex_template_filepath, 'r')
+    report_content = ""
+    fin = open(latex_template_filepath, "r")
 
     while True:
         myline = fin.readline()
@@ -915,18 +915,18 @@ def generate_report_for_configuration_common(configuration_reports_directory,
 
     # Replace variables in the report template with their value
     for variable_key, str_value in dict_variable_to_value.items():
-        variable = '@@' + variable_key + '@@'
-        if (variable_key != 'figure-configured-vs-default-test') and (
-                variable_key != 'figure-configured-vs-default-train'):
-            str_value = str_value.replace('_', r'\textunderscore ')
+        variable = "@@" + variable_key + "@@"
+        if (variable_key != "figure-configured-vs-default-test") and (
+                variable_key != "figure-configured-vs-default-train"):
+            str_value = str_value.replace("_", r"\textunderscore ")
         report_content = report_content.replace(variable, str_value)
 
     # print(report_content)
 
     # Write the completed report to a tex file
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
-    latex_report_filepath = latex_report_filepath.with_suffix('.tex')
-    fout = open(latex_report_filepath, 'w+')
+    latex_report_filepath = latex_report_filepath.with_suffix(".tex")
+    fout = open(latex_report_filepath, "w+")
     fout.write(report_content)
     fout.close()
 
@@ -935,7 +935,7 @@ def generate_report_for_configuration_common(configuration_reports_directory,
     # Compile the report
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
-    print(f'Report is placed at: {report_path}')
-    print('Generating report for configuration done!')
+    print(f"Report is placed at: {report_path}")
+    print("Generating report for configuration done!")
 
     return
