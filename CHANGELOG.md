@@ -75,6 +75,7 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Changed
 - Include linting for docstrings with `flake8-docstrings` and make the code comply.
+- Switch from single quote use to double quote use.
 
 ### Fixed
 - Fix an issue with the default partition in the Slurm settings causing execution with Slurm to fail on systems where this partition does not exist.
