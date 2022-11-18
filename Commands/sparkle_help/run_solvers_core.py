@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Run a solver on an instance, only for internal calls from Sparkle.'''
+"""Run a solver on an instance, only for internal calls from Sparkle."""
 
 import os
 import time

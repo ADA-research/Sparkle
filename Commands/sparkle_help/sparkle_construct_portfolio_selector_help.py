@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions for portfolio selector construction.'''
+"""Helper functions for portfolio selector construction."""
 
 import os
 import sys
@@ -18,7 +18,7 @@ from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
-    '''Return whether data has changed since the last portfolio selector construction.'''
+    """Return whether data has changed since the last portfolio selector construction."""
     unchanged = False
     pd_id = srsh.get_performance_data_id()
     fd_id = scfh.get_feature_data_id()
@@ -33,7 +33,7 @@ def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
 
 
 def write_selector_pd_id(sparkle_portfolio_selector_path: Path) -> None:
-    '''Write the IDF of the performance data used to construct the portfolio selector.'''
+    """Write the IDF of the performance data used to construct the portfolio selector."""
     # Get pd_id
     pd_id = srsh.get_performance_data_id()
 
@@ -51,7 +51,7 @@ def write_selector_pd_id(sparkle_portfolio_selector_path: Path) -> None:
 
 
 def get_selector_pd_id(selector_dir: PurePath) -> int:
-    '''Return the ID of the performance data used to construct the portfolio selector.'''
+    """Return the ID of the performance data used to construct the portfolio selector."""
     pd_id = -1
     pd_id_path = Path(selector_dir / 'pd.id')
 
@@ -65,7 +65,7 @@ def get_selector_pd_id(selector_dir: PurePath) -> int:
 
 
 def write_selector_fd_id(sparkle_portfolio_selector_path: Path) -> None:
-    '''Write the ID of the feature data used to construct the portfolio selector.'''
+    """Write the ID of the feature data used to construct the portfolio selector."""
     # Get fd_id
     fd_id = scfh.get_feature_data_id()
 
@@ -83,7 +83,7 @@ def write_selector_fd_id(sparkle_portfolio_selector_path: Path) -> None:
 
 
 def get_selector_fd_id(selector_dir: PurePath) -> int:
-    '''Return the ID of the feature data used to construct the portfolio selector.'''
+    """Return the ID of the feature data used to construct the portfolio selector."""
     fd_id = -1
     fd_id_path = Path(selector_dir / 'fd.id')
 
@@ -97,7 +97,7 @@ def get_selector_fd_id(selector_dir: PurePath) -> int:
 
 
 def selector_exists(sparkle_portfolio_selector_path: Path) -> bool:
-    '''Return whether a Sparkle portfolio selector exists or not.'''
+    """Return whether a Sparkle portfolio selector exists or not."""
     exists = sparkle_portfolio_selector_path.is_file()
 
     return exists
@@ -107,7 +107,7 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
                                          performance_data_csv_path: str,
                                          feature_data_csv_path: str,
                                          flag_recompute: bool = False) -> bool:
-    '''Create the Sparkle portfolio selector.'''
+    """Create the Sparkle portfolio selector."""
     # Convert to pathlib Path (remove when everything is pathlib compliant)
     selector_path = Path(sparkle_portfolio_selector_path)
 

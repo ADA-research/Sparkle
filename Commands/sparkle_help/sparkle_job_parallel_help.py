@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions for parallel job execution.'''
+"""Helper functions for parallel job execution."""
 
 import os
 from sparkle_help import sparkle_global_help as sgh
@@ -12,7 +12,7 @@ from sparkle_help import sparkle_job_help as sjh
 
 
 def get_dependency_list_str(dependency_jobid_list: list[str]) -> str:
-    '''Return a list of dependencies as a single str of Slurm dependencies.'''
+    """Return a list of dependencies as a single str of Slurm dependencies."""
     dependency_list_str = ''
 
     for dependency_jobid in dependency_jobid_list:
@@ -26,7 +26,7 @@ def get_dependency_list_str(dependency_jobid_list: list[str]) -> str:
 
 def generate_job_sbatch_shell_script(sbatch_script_path: str, job_script: str,
                                      dependency_jobid_list: list[str]):
-    '''Generate a Slurm batch script for the given job and dependencies.'''
+    """Generate a Slurm batch script for the given job and dependencies."""
     sbatch_script_name = sfh.get_file_name(sbatch_script_path)
     job_name = '--job-name=' + sbatch_script_name
     output = '--output=' + sbatch_script_path + '.txt'
@@ -55,7 +55,7 @@ def generate_job_sbatch_shell_script(sbatch_script_path: str, job_script: str,
 
 def running_job_parallel(job_script: str, dependency_jobid_list: list[str],
                          command_name: CommandName) -> str:
-    '''Queues a Slurm job with given dependencies. Returns a Slurm job ID as str.'''
+    """Queues a Slurm job with given dependencies. Returns a Slurm job ID as str."""
     sbatch_shell_script_path = (f'{sgh.sparkle_tmp_path}running_job_parallel_'
                                 f'{sbh.get_time_pid_random_string()}.sh')
     generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script,

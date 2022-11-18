@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to execute ablation analysis.'''
+"""Sparkle command to execute ablation analysis."""
 
 import argparse
 import os
@@ -20,7 +20,7 @@ from sparkle_help.sparkle_command_help import CommandName
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description=('Runs parameter importance between the default and configured '
                      'parameters with ablation. This command requires a finished '

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Compute features for an instance, only for internal calls from Sparkle.'''
+"""Compute features for an instance, only for internal calls from Sparkle."""
 
 import os
 import time

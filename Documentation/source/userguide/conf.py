@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-'''Configuration file for the Sphinx documentation builder.'''
+"""Configuration file for the Sphinx documentation builder."""
 #
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
@@ -133,13 +133,13 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': r'''
+    # 'preamble': r"""
     #     \usepackage[titles]{tocloft}
     #     \cftsetpnumwidth {1.25cm}\cftsetrmarg{1.5cm}
     #     \setlength{\cftchapnumwidth}{0.75cm}
     #     \setlength{\cftsecindent}{\cftchapnumwidth}
     #     \setlength{\cftsecnumwidth}{1.25cm}
-    #     ''',
+    #     """,
     # 'fncychap': r'\usepackage[Bjornstrup]{fncychap}',
     # 'printindex': r'\footnotesize\raggedright\printindex',
     # Latex figure (float) alignment

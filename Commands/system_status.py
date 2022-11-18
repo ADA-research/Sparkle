@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to display the status of the Sparkle platform.'''
+"""Sparkle command to display the status of the Sparkle platform."""
 
 import sys
 import argparse
@@ -9,7 +9,7 @@ from sparkle_help import sparkle_logging as sl
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--verbose',

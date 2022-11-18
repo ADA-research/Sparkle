@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Merge new performance/feature data into CSVs, only for internal calls from Sparkle.'''
+"""Merge new performance/feature data into CSVs, only for internal calls from Sparkle."""
 
 import os
 import fcntl
@@ -18,7 +18,7 @@ except ImportError:
 
 
 def feature_data_csv_merge() -> None:
-    '''Merge feature data of new results into the main feature data CSV.'''
+    """Merge feature data of new results into the main feature data CSV."""
     try:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
             sparkle_global_help.feature_data_csv_path)
@@ -42,7 +42,7 @@ def feature_data_csv_merge() -> None:
 
 
 def performance_data_csv_merge() -> None:
-    '''Merge performance data of new results into the main performance data CSV.'''
+    """Merge performance data of new results into the main performance data CSV."""
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sparkle_global_help.performance_data_csv_path)

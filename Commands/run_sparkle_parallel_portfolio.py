@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Sparkle command to execute a parallel algorithm portfolio..'''
+"""Sparkle command to execute a parallel algorithm portfolio.."""
 
 import sys
 import os

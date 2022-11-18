@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Sparkle run default configuration template.'''
+"""Sparkle run default configuration template."""
 
 # ### Sparkle default wrapper template; used for algorithm selection ###
 
@@ -12,7 +12,7 @@ import sys
 
 
 def print_command(instance_file, seed_str: str, cutoff_time_str: str):
-    '''Print a command line call for the target algorithm with a given instance file.'''
+    """Print a command line call for the target algorithm with a given instance file."""
     # TODO: Change executable_name to the name of your solver executable
     executable_name = 'MetaVC'
     # TODO: Change param_str to the static parameters for your solver (can be empty)
@@ -33,10 +33,10 @@ def print_command(instance_file, seed_str: str, cutoff_time_str: str):
 
 
 def print_output(terminal_output_file: str):
-    '''Parse problem specific output and print it for Sparkle.
+    """Parse problem specific output and print it for Sparkle.
 
     Alternatively ask Sparkle to use it's own parser (SAT only)
-    '''
+    """
     # TODO: [if optimising for quality]
     # Process algorithm output to determine the performance
     # TODO: [if optimising for runtime] This function can just print status SUCCESS, but

@@ -1,4 +1,4 @@
-'''Classes and Enums to control settings.'''
+"""Classes and Enums to control settings."""
 
 import configparser
 from enum import Enum
@@ -14,7 +14,7 @@ except ImportError:
 
 
 class PerformanceMeasure(Enum):
-    '''Possible performance measures.'''
+    """Possible performance measures."""
 
     RUNTIME = 0
     QUALITY_ABSOLUTE = 1
@@ -23,7 +23,7 @@ class PerformanceMeasure(Enum):
 
     @staticmethod
     def from_str(performance_measure):
-        '''Return a given str as PerformanceMeasure.'''
+        """Return a given str as PerformanceMeasure."""
         if performance_measure == 'RUNTIME':
             performance_measure = PerformanceMeasure.RUNTIME
         elif (performance_measure == 'QUALITY_ABSOLUTE'
@@ -34,14 +34,14 @@ class PerformanceMeasure(Enum):
 
 
 class SolutionVerifier(Enum):
-    '''Possible solution verifiers.'''
+    """Possible solution verifiers."""
 
     NONE = 0
     SAT = 1
 
     @staticmethod
     def from_str(verifier):
-        '''Return a given str as SolutionVerifier.'''
+        """Return a given str as SolutionVerifier."""
         if verifier == 'NONE':
             verifier = SolutionVerifier.NONE
         elif verifier == 'SAT':
@@ -51,7 +51,7 @@ class SolutionVerifier(Enum):
 
 
 class ProcessMonitoring(str, Enum):
-    '''Possible process monitoring approaches.'''
+    """Possible process monitoring approaches."""
 
     # Cancel all solvers within a portfolio once one solver finishes with an instance
     REALISTIC = 'REALISTIC'
@@ -64,12 +64,12 @@ class ProcessMonitoring(str, Enum):
 
     @staticmethod
     def from_str(process_monitoring):
-        '''Return a given str as ProcessMonitoring.'''
+        """Return a given str as ProcessMonitoring."""
         return ProcessMonitoring(process_monitoring)
 
 
 class SettingState(Enum):
-    '''Possible setting states.'''
+    """Possible setting states."""
 
     NOT_SET = 0
     DEFAULT = 1
@@ -78,7 +78,7 @@ class SettingState(Enum):
 
 
 class Settings:
-    '''Read, write, set, and get settings.'''
+    """Read, write, set, and get settings."""
 
     # Settings path names and default
     __settings_file = Path('sparkle_settings.ini')
@@ -106,7 +106,7 @@ class Settings:
     DEFAULT_paraport_process_monitoring = ProcessMonitoring.REALISTIC
 
     def __init__(self, file_path: PurePath = None):
-        '''Initialise a settings object.'''
+        """Initialise a settings object."""
         # Settings 'dictionary' in configparser format
         self.__settings = configparser.ConfigParser()
 
@@ -142,7 +142,7 @@ class Settings:
 
     def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path,
                           state: SettingState = SettingState.FILE):
-        '''Read the settings from an INI file.'''
+        """Read the settings from an INI file."""
         # Read file
         file_settings = configparser.ConfigParser()
         file_settings.read(str(file_path))
@@ -282,7 +282,7 @@ class Settings:
         return
 
     def write_used_settings(self):
-        '''Write the used settings to the default locations.'''
+        """Write the used settings to the default locations."""
         # Write to general output directory
         file_path_output = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                                     / self.__settings_dir / self.__settings_file)
@@ -295,7 +295,7 @@ class Settings:
         return
 
     def write_settings_ini(self, file_path: Path):
-        '''Write the settings to an INI file.'''
+        """Write the settings to an INI file."""
         # Create needed directories if they don't exist
         file_dir = file_path.parents[0]
         file_dir.mkdir(parents=True, exist_ok=True)
@@ -340,7 +340,7 @@ class Settings:
     def set_general_performance_measure(
             self, value: PerformanceMeasure = DEFAULT_general_performance_measure,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the performance measure.'''
+        """Set the performance measure."""
         section = 'general'
         name = 'performance_measure'
 
@@ -353,7 +353,7 @@ class Settings:
         return
 
     def get_general_performance_measure(self) -> PerformanceMeasure:
-        '''Return the performance measure.'''
+        """Return the performance measure."""
         if self.__general_performance_measure_set == SettingState.NOT_SET:
             self.set_general_performance_measure()
 
@@ -361,7 +361,7 @@ class Settings:
             self.__settings['general']['performance_measure'])
 
     def get_performance_metric_for_report(self) -> str:
-        '''Return a string describing the full performance metric, e.g. PAR10.'''
+        """Return a string describing the full performance metric, e.g. PAR10."""
         performance_measure = self.get_general_performance_measure()
 
         if performance_measure is PerformanceMeasure.RUNTIME:
@@ -375,7 +375,7 @@ class Settings:
     def set_general_penalty_multiplier(
             self, value: int = DEFAULT_general_penalty_multiplier,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the penalty multiplier.'''
+        """Set the penalty multiplier."""
         section = 'general'
         name = 'penalty_multiplier'
 
@@ -388,14 +388,14 @@ class Settings:
         return
 
     def get_general_penalty_multiplier(self) -> int:
-        '''Return the penalty multiplier.'''
+        """Return the penalty multiplier."""
         if self.__general_penalty_multiplier_set == SettingState.NOT_SET:
             self.set_general_penalty_multiplier()
 
         return int(self.__settings['general']['penalty_multiplier'])
 
     def get_penalised_time(self, custom_cutoff: int = None) -> int:
-        '''Return the penalised time associated with the cutoff time.'''
+        """Return the penalised time associated with the cutoff time."""
         if custom_cutoff is None:
             cutoff_time = self.get_general_target_cutoff_time()
         else:
@@ -409,7 +409,7 @@ class Settings:
     def set_general_solution_verifier(
             self, value: SolutionVerifier = DEFAULT_general_solution_verifier,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the solution verifier to use.'''
+        """Set the solution verifier to use."""
         section = 'general'
         name = 'solution_verifier'
 
@@ -422,7 +422,7 @@ class Settings:
         return
 
     def get_general_solution_verifier(self) -> SolutionVerifier:
-        '''Return the solution verifier to use.'''
+        """Return the solution verifier to use."""
         if self.__general_solution_verifier_set == SettingState.NOT_SET:
             self.set_general_solution_verifier()
 
@@ -431,7 +431,7 @@ class Settings:
     def set_general_target_cutoff_time(
             self, value: int = DEFAULT_general_target_cutoff_time,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the cutoff time in seconds for target algorithms.'''
+        """Set the cutoff time in seconds for target algorithms."""
         section = 'general'
         name = 'target_cutoff_time'
 
@@ -444,7 +444,7 @@ class Settings:
         return
 
     def get_general_target_cutoff_time(self) -> int:
-        '''Return the cutoff time in seconds for target algorithms.'''
+        """Return the cutoff time in seconds for target algorithms."""
         if self.__general_target_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_target_cutoff_time()
 
@@ -453,7 +453,7 @@ class Settings:
     def set_general_extractor_cutoff_time(
             self, value: int = DEFAULT_general_extractor_cutoff_time,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the cutoff time in seconds for feature extraction.'''
+        """Set the cutoff time in seconds for feature extraction."""
         section = 'general'
         name = 'extractor_cutoff_time'
 
@@ -466,7 +466,7 @@ class Settings:
         return
 
     def get_general_extractor_cutoff_time(self) -> int:
-        '''Return the cutoff time in seconds for feature extraction.'''
+        """Return the cutoff time in seconds for feature extraction."""
         if self.__general_extractor_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_extractor_cutoff_time()
 
@@ -477,7 +477,7 @@ class Settings:
     def set_config_budget_per_run(
             self, value: int = DEFAULT_config_budget_per_run,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the budget per configuration run in seconds.'''
+        """Set the budget per configuration run in seconds."""
         section = 'configuration'
         name = 'budget_per_run'
 
@@ -490,7 +490,7 @@ class Settings:
         return
 
     def get_config_budget_per_run(self) -> int:
-        '''Return the budget per configuration run in seconds.'''
+        """Return the budget per configuration run in seconds."""
         if self.__config_budget_per_run_set == SettingState.NOT_SET:
             self.set_config_budget_per_run()
 
@@ -499,7 +499,7 @@ class Settings:
     def set_config_number_of_runs(
             self, value: int = DEFAULT_config_number_of_runs,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the number of configuration runs.'''
+        """Set the number of configuration runs."""
         section = 'configuration'
         name = 'number_of_runs'
 
@@ -512,7 +512,7 @@ class Settings:
         return
 
     def get_config_number_of_runs(self) -> int:
-        '''Return the number of configuration runs.'''
+        """Return the number of configuration runs."""
         if self.__config_number_of_runs_set == SettingState.NOT_SET:
             self.set_config_number_of_runs()
 
@@ -523,7 +523,7 @@ class Settings:
     def set_smac_target_cutoff_length(
             self, value: str = DEFAULT_smac_target_cutoff_length,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the target algorithm cutoff length.'''
+        """Set the target algorithm cutoff length."""
         section = 'smac'
         name = 'target_cutoff_length'
 
@@ -536,7 +536,7 @@ class Settings:
         return
 
     def get_smac_target_cutoff_length(self) -> str:
-        '''Return the target algorithm cutoff length.'''
+        """Return the target algorithm cutoff length."""
         if self.__smac_target_cutoff_length_set == SettingState.NOT_SET:
             self.set_smac_target_cutoff_length()
 
@@ -547,7 +547,7 @@ class Settings:
     def set_slurm_number_of_runs_in_parallel(
             self, value: int = DEFAULT_slurm_number_of_runs_in_parallel,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the number of runs Slurm can do in parallel.'''
+        """Set the number of runs Slurm can do in parallel."""
         section = 'slurm'
         name = 'number_of_runs_in_parallel'
 
@@ -560,7 +560,7 @@ class Settings:
         return
 
     def get_slurm_number_of_runs_in_parallel(self) -> int:
-        '''Return the number of runs Slurm can do in parallel.'''
+        """Return the number of runs Slurm can do in parallel."""
         if self.__slurm_number_of_runs_in_parallel_set == SettingState.NOT_SET:
             self.set_slurm_number_of_runs_in_parallel()
 
@@ -568,7 +568,7 @@ class Settings:
 
     def set_slurm_clis_per_node(self, value: int = DEFAULT_slurm_clis_per_node,
                                 origin: SettingState = SettingState.DEFAULT):
-        '''Set the number of algorithms Slurm can run in parallel per node.'''
+        """Set the number of algorithms Slurm can run in parallel per node."""
         section = 'slurm'
         name = 'clis_per_node'
 
@@ -581,7 +581,7 @@ class Settings:
         return
 
     def get_slurm_clis_per_node(self) -> int:
-        '''Return the number of algorithms Slurm can run in parallel per node.'''
+        """Return the number of algorithms Slurm can run in parallel per node."""
         if self.__slurm_clis_per_node_set == SettingState.NOT_SET:
             self.set_slurm_clis_per_node()
 
@@ -591,7 +591,7 @@ class Settings:
 
     def add_slurm_extra_option(self, name: str, value: str,
                                origin: SettingState = SettingState.DEFAULT):
-        '''Add additional Slurm options.'''
+        """Add additional Slurm options."""
         section = 'slurm_extra'
 
         current_state = (self.__slurm_extra_options_set[name]
@@ -604,7 +604,7 @@ class Settings:
             self.__settings[section][name] = str(value)
 
     def get_slurm_extra_options(self) -> dict:
-        '''Return a dict with additional Slurm options.'''
+        """Return a dict with additional Slurm options."""
         section = 'slurm_extra'
         options = dict()
 
@@ -618,7 +618,7 @@ class Settings:
 
     def set_ablation_racing_flag(self, value: bool = DEFAULT_ablation_racing,
                                  origin: SettingState = SettingState.DEFAULT):
-        '''Set a flag indicating whether racing should be used for ablation.'''
+        """Set a flag indicating whether racing should be used for ablation."""
         section = 'ablation'
         name = 'racing'
 
@@ -631,7 +631,7 @@ class Settings:
         return
 
     def get_ablation_racing_flag(self) -> bool:
-        '''Return a bool indicating whether the racing flag is set for ablation.'''
+        """Return a bool indicating whether the racing flag is set for ablation."""
         if self.__ablation_racing_flag_set == SettingState.NOT_SET:
             self.set_ablation_racing_flag()
 
@@ -642,7 +642,7 @@ class Settings:
     def set_paraport_overwriting_flag(
             self, value: bool = DEFAULT_paraport_overwriting,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the parallel portfolio overwriting flag to a given value.'''
+        """Set the parallel portfolio overwriting flag to a given value."""
         section = 'parallel_portfolio'
         name = 'overwriting'
 
@@ -655,7 +655,7 @@ class Settings:
         return
 
     def get_paraport_overwriting_flag(self) -> bool:
-        '''Return the parallel portfolio overwriting flag state.'''
+        """Return the parallel portfolio overwriting flag state."""
         if self.__paraport_overwriting_flag_set == SettingState.NOT_SET:
             self.set_paraport_overwriting_flag()
 
@@ -664,7 +664,7 @@ class Settings:
     def set_paraport_process_monitoring(
             self, value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
             origin: SettingState = SettingState.DEFAULT):
-        '''Set the parallel portfolio process monitoring state.'''
+        """Set the parallel portfolio process monitoring state."""
         section = 'parallel_portfolio'
         name = 'process_monitoring'
 
@@ -677,7 +677,7 @@ class Settings:
         return
 
     def get_paraport_process_monitoring(self) -> ProcessMonitoring:
-        '''Return the parallel portfolio process monitoring state.'''
+        """Return the parallel portfolio process monitoring state."""
         if self.__paraport_process_monitoring_set == SettingState.NOT_SET:
             self.set_paraport_process_monitoring()
 

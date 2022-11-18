@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to compute features for instances.'''
+"""Sparkle command to compute features for instances."""
 
 import sys
 import argparse
@@ -18,7 +18,7 @@ from sparkle_help.sparkle_command_help import CommandName
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     sgh.settings = sparkle_settings.Settings()
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -43,7 +43,7 @@ def parser_function():
 
 
 def compute_features_parallel(my_flag_recompute):
-    '''Compute features in parallel.'''
+    """Compute features in parallel."""
     if my_flag_recompute:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         feature_data_csv.clean_csv()

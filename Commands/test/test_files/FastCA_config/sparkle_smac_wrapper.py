@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Sparkle SMAC wrapper for the FastCA algorithm.'''
+"""Sparkle SMAC wrapper for the FastCA algorithm."""
 
 import os
 import time
@@ -9,7 +9,7 @@ import sys
 
 
 def get_time_pid_random_string() -> str:
-    '''Return a combination of time, PID, and random str.'''
+    """Return a combination of time, PID, and random str."""
     my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
     my_pid = os.getpid()
     my_pid_str = str(my_pid)
@@ -20,7 +20,7 @@ def get_time_pid_random_string() -> str:
 
 
 def get_last_level_directory_name(filepath):
-    '''Return the final path component for a given string; similar to Path.name.'''
+    """Return the final path component for a given string; similar to Path.name."""
     if filepath[-1] == '/':
         filepath = filepath[0:-1]
     right_index = filepath.rfind('/')
@@ -32,7 +32,7 @@ def get_last_level_directory_name(filepath):
 
 
 def _is_a_number(input_str: str):
-    '''Check if an input string is a number (float or int).'''
+    """Check if an input string is a number (float or int)."""
     try:
         input_val = eval(input_str)
         if (type(input_val) == float) or (type(input_val) == int):
@@ -44,7 +44,7 @@ def _is_a_number(input_str: str):
 
 
 def parse_output(output_list) -> (str, float):
-    '''Parse problem specific output and return it.'''
+    """Parse problem specific output and return it."""
     # Read solution quality from output_list
     solution_quality = sys.maxsize
     status = 'UNKNOWN'

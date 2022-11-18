@@ -1,4 +1,4 @@
-'''Helper module for information about Sparkle.'''
+"""Helper module for information about Sparkle."""
 
 about_info = {
     'name': 'Sparkle',
@@ -9,5 +9,5 @@ about_str = '{name}-{version}'.format(**about_info)
 
 
 def print_about() -> None:
-    '''Print the about str.'''
+    """Print the about str."""
     print(about_str)

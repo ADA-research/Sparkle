@@ -1,4 +1,4 @@
-'''Setup file for Sparkle.'''
+"""Setup file for Sparkle."""
 from setuptools import setup, find_packages
 
 setup(name='sparkle',

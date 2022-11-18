@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to configure a solver.'''
+"""Sparkle command to configure a solver."""
 
 import argparse
 import sys
@@ -24,7 +24,7 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description='Configure a solver in the Sparkle platform.',
         epilog=('Note that the test instance set is only used if the ``-–ablation`'

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Sparkle SMAC wrapper template.'''
+"""Sparkle SMAC wrapper template."""
 
 import os
 import time
@@ -11,7 +11,7 @@ import Path
 
 
 def get_time_pid_random_string():
-    '''Return a combination of time, PID, and random str.'''
+    """Return a combination of time, PID, and random str."""
     my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
     my_pid = os.getpid()
     my_pid_str = str(my_pid)
@@ -22,7 +22,7 @@ def get_time_pid_random_string():
 
 
 def get_last_level_directory_name(filepath):
-    '''Return the final path component for a given string; similar to Path.name.'''
+    """Return the final path component for a given string; similar to Path.name."""
     if filepath[-1] == '/':
         filepath = filepath[0:-1]
     right_index = filepath.rfind('/')

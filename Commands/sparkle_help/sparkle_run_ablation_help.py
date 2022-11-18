@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions for ablation analysis.'''
+"""Helper functions for ablation analysis."""
 
 import os
 import sys
@@ -18,10 +18,10 @@ from sparkle_help import sparkle_add_solver_help as sash
 
 def get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name,
                                     exec_path=False):
-    '''Return the directory where ablation analysis is executed.
+    """Return the directory where ablation analysis is executed.
 
     exec_path: overwrite of the default ablation path to put the scenario in
-    '''
+    """
     instance_test_name = (
         '_{}'.format(instance_test_name) if instance_test_name is not None else '')
 
@@ -33,7 +33,7 @@ def get_ablation_scenario_directory(solver_name, instance_train_name, instance_t
 
 
 def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str):
-    '''Clean up ablation analysis directory.'''
+    """Clean up ablation analysis directory."""
     ablation_scenario_dir = Path(sgh.ablation_dir + 'scenarios/')
     if ablation_scenario_dir.is_dir():
         for ablation_scenario in ablation_scenario_dir.glob('{}_{}_*'.format(
@@ -43,7 +43,7 @@ def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str):
 
 
 def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_name):
-    '''Prepare directories and files for ablation analysis.'''
+    """Prepare directories and files for ablation analysis."""
     ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
                                                             instance_train_name,
                                                             instance_test_name)
@@ -70,14 +70,14 @@ def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_na
 
 
 def print_ablation_help():
-    '''Print help information for ablation analysis.'''
+    """Print help information for ablation analysis."""
     call = './{}/ablationAnalysis -h'.format(sgh.ablation_dir)
     print(os.system(call))
 
 
 def get_slurm_params(solver_name, instance_train_name, instance_test_name, postfix='',
                      dependency=None):
-    '''Return the Slurm settings to use.'''
+    """Return the Slurm settings to use."""
     if instance_test_name is not None:
         sbatch_script_name = 'ablation_{}_{}_{}'.format(solver_name, instance_train_name,
                                                         instance_test_name)
@@ -106,7 +106,7 @@ def get_slurm_params(solver_name, instance_train_name, instance_test_name, postf
 
 def generate_slurm_script(solver_name, instance_train_name, instance_test_name,
                           dependency=None):
-    '''Create a Slurm batch script.'''
+    """Create a Slurm batch script."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
         solver_name, instance_train_name, instance_test_name, postfix='',
         dependency=dependency)
@@ -128,7 +128,7 @@ def generate_slurm_script(solver_name, instance_train_name, instance_test_name,
 
 def generate_callback_slurm_script(solver_name, instance_train_name, instance_test_name,
                                    dependency=None):
-    '''Create callback Slurm batch script for ablation analysis.'''
+    """Create callback Slurm batch script for ablation analysis."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
         solver_name, instance_train_name, instance_test_name, postfix='_callback',
         dependency=dependency)
@@ -162,7 +162,7 @@ def generate_callback_slurm_script(solver_name, instance_train_name, instance_te
 
 def generate_validation_slurm_script(solver_name, instance_train_name,
                                      instance_test_name, dependency=None):
-    '''Create a Slurm batch script for ablation analysis validation.'''
+    """Create a Slurm batch script for ablation analysis validation."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
         solver_name, instance_train_name, instance_test_name, postfix='_validation',
         dependency=dependency)
@@ -185,7 +185,7 @@ def generate_validation_slurm_script(solver_name, instance_train_name,
 
 def generate_validation_callback_slurm_script(solver_name, instance_train_name,
                                               instance_test_name, dependency=None):
-    '''Create callback Slurm batch script for ablation analysis validation.'''
+    """Create callback Slurm batch script for ablation analysis validation."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
         solver_name, instance_train_name, instance_test_name,
         postfix='_validation_callback', dependency=dependency)
@@ -221,7 +221,7 @@ def generate_validation_callback_slurm_script(solver_name, instance_train_name,
 
 
 def create_configuration_file(solver_name, instance_train_name, instance_test_name):
-    '''Create a configuration file for ablation analysis.'''
+    """Create a configuration file for ablation analysis."""
     ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
                                                             instance_train_name,
                                                             instance_test_name)
@@ -265,7 +265,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
 
 
 def create_instance_file(instances_directory, ablation_scenario_dir, train_or_test):
-    '''Create an instance file for ablation analysis.'''
+    """Create an instance file for ablation analysis."""
     if train_or_test == r'train':
         file_suffix = r'_train.txt'
     elif train_or_test == r'test':
@@ -315,7 +315,7 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
 
 
 def check_for_ablation(solver_name, instance_train_name, instance_test_name) -> bool:
-    '''Run a solver on an instance, only for internal calls from Sparkle.'''
+    """Run a solver on an instance, only for internal calls from Sparkle."""
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name,
                                                    instance_test_name, exec_path=False)
     table_file = Path(scenario_dir, 'ablationValidation.txt')
@@ -331,7 +331,7 @@ def check_for_ablation(solver_name, instance_train_name, instance_test_name) -> 
 
 
 def get_ablation_table(solver_name, instance_train_name, instance_test_name):
-    '''Run a solver on an instance, only for internal calls from Sparkle.'''
+    """Run a solver on an instance, only for internal calls from Sparkle."""
     if not check_for_ablation(solver_name, instance_train_name, instance_test_name):
         # No ablation table exists for this solver-instance pair
         return dict()

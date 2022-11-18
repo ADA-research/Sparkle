@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to remove temporary files.'''
+"""Sparkle command to remove temporary files."""
 
 import os
 import sys
@@ -8,14 +8,14 @@ from sparkle_help import sparkle_logging as sl
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
 
     return parser
 
 
 def remove_temporary_files() -> None:
-    '''Remove temporary files.'''
+    """Remove temporary files."""
     command_line = 'rm -rf Commands/sparkle_help/*.pyc'
     os.system(command_line)
     command_line = 'rm -rf Tmp/*'
@@ -47,7 +47,7 @@ def remove_temporary_files() -> None:
 
 
 def create_temporary_directories() -> None:
-    '''Create directories for temporary files.'''
+    """Create directories for temporary files."""
     command_line = 'mkdir -p Tmp/SBATCH_Extractor_Jobs/'
     os.system(command_line)
     command_line = 'mkdir -p Tmp/SBATCH_Solver_Jobs/'

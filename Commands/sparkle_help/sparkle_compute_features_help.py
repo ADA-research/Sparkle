@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions for feature data computation.'''
+"""Helper functions for feature data computation."""
 
 import os
 import sys
@@ -21,7 +21,7 @@ except ImportError:
 
 def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path,
                                                      extractor_path, result_path):
-    '''Create a CSV file with the right number of commas and rows.'''
+    """Create a CSV file with the right number of commas and rows."""
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
     zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
 
@@ -37,7 +37,7 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_
 
 
 def computing_features(feature_data_csv_path, mode):
-    '''Compute features for all instance and feature extractor combinations.'''
+    """Compute features for all instance and feature extractor combinations."""
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     if mode == 1:
         list_feature_computation_job = (
@@ -149,7 +149,7 @@ def computing_features(feature_data_csv_path, mode):
 
 
 def update_feature_data_id():
-    '''Update the feature data ID.'''
+    """Update the feature data ID."""
     # Get current fd_id
     fd_id = get_feature_data_id()
 
@@ -166,7 +166,7 @@ def update_feature_data_id():
 
 
 def get_feature_data_id() -> int:
-    '''Return the current feature data ID.'''
+    """Return the current feature data ID."""
     fd_id = -1
     fd_id_path = sgh.feature_data_id_path
 

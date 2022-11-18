@@ -1,4 +1,4 @@
-'''This module helps to extract and structure information from Slurm sbatch files.'''
+"""This module helps to extract and structure information from Slurm sbatch files."""
 
 # Standard libs
 import re
@@ -13,7 +13,7 @@ re_srun_split = re.compile(r' (?!-)')
 
 
 class SlurmBatch:
-    '''Simple class to parse a Slurm batch file and get the info.
+    """Simple class to parse a Slurm batch file and get the info.
 
     Attributes
     ----------
@@ -27,10 +27,10 @@ class SlurmBatch:
         A list of arguments to pass to srun. Ex.: ['-n1', '--nodes=1']
     file: Path
         The loaded file Path
-    '''
+    """
 
     def __init__(self, srcfile: Path):
-        '''Parse the data contained in srcfile and localy store the information.'''
+        """Parse the data contained in srcfile and localy store the information."""
         self.file = Path(srcfile)
 
         with open(self.file) as f:

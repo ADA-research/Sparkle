@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to compute features for instances in parallel.'''
+"""Sparkle command to compute features for instances in parallel."""
 
 import sys
 import argparse
@@ -10,7 +10,7 @@ from sparkle_help import sparkle_settings
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--recompute',

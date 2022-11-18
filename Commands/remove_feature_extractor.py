@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to remove a feature extractor from the Sparkle platform.'''
+"""Sparkle command to remove a feature extractor from the Sparkle platform."""
 
 import os
 import sys
@@ -11,7 +11,7 @@ from sparkle_help import sparkle_logging as sl
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'extractor_path',

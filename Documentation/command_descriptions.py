@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Automatic extraction of command list from their implementations.'''
+"""Automatic extraction of command list from their implementations."""
 
 import os
 
@@ -21,13 +21,13 @@ if __name__ == '__main__':
             '*  :ref:`cmd:{name}`\n'.format(name=command.replace('.py', '')))
     sphinx_file.close()
 
-    string = '''
+    string = """
 .. _cmd:{name}:
 
 .. autoprogram:: {name}:parser_function()
    :prog: {name}.py
 
-    '''
+    """
     sphinx_file = open('source/userguide/commandsautoprogram.md', 'w')
     for command in commands:
         sphinx_file.write(string.format(name=command.replace('.py', '')))

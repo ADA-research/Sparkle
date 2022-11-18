@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to validate a configured solver against its default configuration.'''
+"""Sparkle command to validate a configured solver against its default configuration."""
 
 import sys
 import argparse
@@ -21,7 +21,7 @@ from sparkle_help.sparkle_command_help import CommandName
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description=('Test the performance of the configured solver and the default '
                      'solver by doing validation experiments on the training and test '

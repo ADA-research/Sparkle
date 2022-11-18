@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to wait for one or more other commands to complete execution.'''
+"""Sparkle command to wait for one or more other commands to complete execution."""
 
 import sys
 import argparse
@@ -10,7 +10,7 @@ from sparkle_help.sparkle_command_help import CommandName
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
     group.add_argument(

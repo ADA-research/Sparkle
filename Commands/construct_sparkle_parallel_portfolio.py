@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Sparkle command to construct a parallel algorithm portfolio.'''
+"""Sparkle command to construct a parallel algorithm portfolio."""
 
 import sys
 import argparse

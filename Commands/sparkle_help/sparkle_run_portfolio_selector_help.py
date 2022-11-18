@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions for the execution of a portfolio selector.'''
+"""Helper functions for the execution of a portfolio selector."""
 
 import os
 import pathlib
@@ -38,7 +38,7 @@ except ImportError:
 
 def get_list_feature_vector(extractor_path, instance_path, result_path,
                             cutoff_time_each_extractor_run):
-    '''Return the feature vector for an instance as a list.'''
+    """Return the feature vector for an instance as a list."""
     runsolver_path = sgh.runsolver_path
 
     cutoff_time_each_run_option = f'--cpu-limit {str(cutoff_time_each_extractor_run)}'
@@ -95,7 +95,7 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
 
 
 def print_predict_schedule(predict_schedule_result_path: str) -> None:
-    '''Print the predicted algorithm schedule.'''
+    """Print the predicted algorithm schedule."""
     fin = open(predict_schedule_result_path, 'r+')
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
     myline = fin.readline().strip()
@@ -106,7 +106,7 @@ def print_predict_schedule(predict_schedule_result_path: str) -> None:
 
 
 def get_list_predict_schedule_from_file(predict_schedule_result_path: str):
-    '''Return the predicted algorithm schedule as a list.'''
+    """Return the predicted algorithm schedule as a list."""
     list_predict_schedule = []
     prefix_string = 'Selected Schedule [(algorithm, budget)]: '
     fin = open(predict_schedule_result_path, 'r+')
@@ -128,7 +128,7 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str):
 
 
 def print_solution(raw_result_path) -> None:
-    '''Print the solution from a raw result.'''
+    """Print the solution from a raw result."""
     fin = open(raw_result_path, 'r+')
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 
@@ -151,7 +151,7 @@ def print_solution(raw_result_path) -> None:
 def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: str,
                                              cutoff_time: int,
                                              performance_data_csv_path: str = None):
-    '''Call the Sparkle portfolio selector to solve a single instance with a cutoff.'''
+    """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
     _, _, cpu_time_penalised, _, status, raw_result_path = (
         srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
                                                        custom_cutoff=cutoff_time))
@@ -185,7 +185,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
 
 def call_sparkle_portfolio_selector_solve_instance(
         instance_path: str, performance_data_csv_path: str = None):
-    '''Call the Sparkle portfolio selector to solve a single instance.'''
+    """Call the Sparkle portfolio selector to solve a single instance."""
     # Create instance strings to accommodate multi-file instances
     instance_path_list = instance_path.split()
     instance_file_list = []
@@ -272,7 +272,7 @@ def call_sparkle_portfolio_selector_solve_instance(
 def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
         sbatch_shell_script_path, test_case_directory_path, performance_data_csv_path,
         list_jobs, start_index, end_index):
-    '''Generate a Slurm batch script to run the Sparkle portfolio selector.'''
+    """Generate a Slurm batch script to run the Sparkle portfolio selector."""
     num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
     # specify the name of this sbatch script
     job_name = sfh.get_file_name(sbatch_shell_script_path)
@@ -344,7 +344,7 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
 
 def call_sparkle_portfolio_selector_solve_instance_directory(
         instance_directory_path: str):
-    '''Call the Sparkle portfolio selector to solve all instances in a directory.'''
+    """Call the Sparkle portfolio selector to solve all instances in a directory."""
     if instance_directory_path[-1] != '/':
         instance_directory_path += '/'
 
@@ -423,10 +423,10 @@ def call_sparkle_portfolio_selector_solve_instance_directory(
 
 
 def check_selector_status(solver_name):
-    '''Check if there is an selector at the given path.
+    """Check if there is an selector at the given path.
 
     If it does not exist the function will terminate the whole program.
-    '''
+    """
     selector = pathlib.Path(f'{solver_name}/sparkle_portfolio_selector__@@SPARKLE@@__')
     if not selector.exists() or not selector.is_file():
         print('ERROR: The portfolio selector could not be found. Please make sure to '

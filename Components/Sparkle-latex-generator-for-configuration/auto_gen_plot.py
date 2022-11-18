@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Automatically generate a gnuplot script for algorithm configuration.'''
+"""Automatically generate a gnuplot script for algorithm configuration."""
 
 import os
 from os.path import abspath, dirname, join

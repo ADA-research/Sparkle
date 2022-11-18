@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions to inform about Sparkle's sytem status.'''
+"""Helper functions to inform about Sparkle's sytem status."""
 
 import os
 import time
@@ -12,7 +12,7 @@ from sparkle_help import sparkle_job_help
 
 
 def print_solver_list(mode: int = 1):
-    '''Print the list of solvers in Sparkle.'''
+    """Print the list of solvers in Sparkle."""
     solver_list = sparkle_global_help.solver_list
     print('')
     print('Currently Sparkle has ' + str(len(solver_list)) + ' solvers:')
@@ -28,7 +28,7 @@ def print_solver_list(mode: int = 1):
 
 
 def print_extractor_list(mode: int = 1):
-    '''Print the list of feature extractors in Sparkle.'''
+    """Print the list of feature extractors in Sparkle."""
     extractor_list = sparkle_global_help.extractor_list
     print('')
     print('Currently Sparkle has ' + str(len(extractor_list)) + ' feature extractors:')
@@ -45,7 +45,7 @@ def print_extractor_list(mode: int = 1):
 
 
 def print_instance_list(mode: int = 1):
-    '''Print the list of instances in Sparkle.'''
+    """Print the list of instances in Sparkle."""
     instance_list = sparkle_global_help.instance_list
     print('')
     print('Currently Sparkle has ' + str(len(instance_list)) + ' instances:')
@@ -61,7 +61,7 @@ def print_instance_list(mode: int = 1):
 
 
 def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: int = 1):
-    '''Print a list of remaining feature computation jobs.'''
+    """Print a list of remaining feature computation jobs."""
     try:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
         list_feature_computation_job = (
@@ -94,7 +94,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: in
 
 def print_list_remaining_performance_computation_job(performance_data_csv_path,
                                                      mode: int = 1):
-    '''Print a list of remaining performance computation jobs.'''
+    """Print a list of remaining performance computation jobs."""
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
@@ -127,7 +127,7 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path,
 
 
 def print_portfolio_selector_info():
-    '''Print information about the Sparkle portfolio selector.'''
+    """Print information about the Sparkle portfolio selector."""
     sparkle_portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
     print('')
     print('Status of portfolio selector in Sparkle:')
@@ -147,7 +147,7 @@ def print_portfolio_selector_info():
 
 
 def print_report_info():
-    '''Print the current status of a the Sparkle algorithm selection report.'''
+    """Print the current status of a the Sparkle algorithm selection report."""
     sparkle_report_path = sparkle_global_help.sparkle_report_path
     print('')
     print('Status of report in Sparkle:')
@@ -166,12 +166,12 @@ def print_report_info():
 
 
 def timestamp_to_time(timestamp) -> str:
-    '''Return a timestamp as a readable str.'''
+    """Return a timestamp as a readable str."""
     time_struct = time.gmtime(timestamp)
     return time.strftime('%Y-%m-%d %H:%M:%S', time_struct)
 
 
 def get_file_modify_time(file_path):
-    '''Return the last time a file was modified.'''
+    """Return the last time a file was modified."""
     timestamp = os.path.getmtime(file_path)
     return timestamp_to_time(timestamp) + ' (UTC+0)'

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions for parallel execution of solvers.'''
+"""Helper functions for parallel execution of solvers."""
 
 import os
 
@@ -22,7 +22,7 @@ from runrunner.base import Runner
 def generate_running_solvers_sbatch_shell_script(total_job_num: int,
                                                  num_job_in_parallel: int, total_job_list
                                                  ) -> (str, str, str):
-    '''Generate a Slurm shell script to run the solvers.'''
+    """Generate a Slurm shell script to run the solvers."""
     sbatch_script_name = ('running_solvers_sbatch_shell_script_'
                           f'{sbh.get_time_pid_random_string()}.sh')
     sbatch_script_path = f'{sgh.sparkle_tmp_path}{sbatch_script_name}'
@@ -61,7 +61,7 @@ def running_solvers_parallel(
         num_job_in_parallel: int,
         rerun: bool = False,
         run_on: Runner = Runner.SLURM):
-    '''Run the solvers in parallel.
+    """Run the solvers in parallel.
 
     Parameters
     ----------
@@ -81,7 +81,7 @@ def running_solvers_parallel(
     run: runrunner.local.QueuedRun or runrunner.slurm.SlurmRun or None
         If the run is local return a QueuedRun object with the information concerning
         the run. If the run is executed on Slurm, return the ID of the run.
-    '''
+    """
     # Open the performance data csv file
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 

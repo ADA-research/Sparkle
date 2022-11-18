@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Definitions of constants broadly used in Sparkle.'''
+"""Definitions of constants broadly used in Sparkle."""
 
 import os
 import fcntl
@@ -9,7 +9,7 @@ from pathlib import PurePath
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
 def get_seed():
-    '''Return a seed.'''
+    """Return a seed."""
     return 1
 
 
