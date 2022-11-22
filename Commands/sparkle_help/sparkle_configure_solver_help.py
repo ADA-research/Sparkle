@@ -223,7 +223,6 @@ def remove_configuration_directory(solver_name: str, instance_set_name: str) -> 
 
     return
 
-# Components/smac-v2.10.03-master-778/example_scenarios/PbO-CCSAT-Generic_PTN
 
 def clean_configuration_directory(solver_name: str, instance_set_name: str) -> None:
     """Prepare clean configuration directory."""
