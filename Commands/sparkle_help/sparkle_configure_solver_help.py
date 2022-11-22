@@ -70,7 +70,7 @@ def get_smac_settings():
 def handle_file_instance(solver_name: str, instance_set_train_name: str,
                          instance_set_target_name: str, instance_type: str) -> None:
     """Copy file with the specified postfix listing instances to the solver directory."""
-    file_postfix = "_{}.txt".format(instance_type)
+    file_postfix = f"_{instance_type}.txt"
 
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
     smac_file_instance_path_ori = (f"{sgh.smac_dir}/example_scenarios/instances/"
@@ -213,10 +213,9 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
     return
 
 
-def remove_configuration_directory(solver_name: str, instance_set_name: str) -> None:
+def remove_configuration_directory(solver_name: str, smac_solver_dir: Path) -> None:
     """Remove the configuration directory."""
-    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
-
+    
     # Delete directory and then create it new with necessary files
     shutil.rmtree(smac_solver_dir, ignore_errors=True)
     create_configuration_directory(smac_solver_dir, solver_name)
@@ -226,8 +225,10 @@ def remove_configuration_directory(solver_name: str, instance_set_name: str) -> 
 
 def clean_configuration_directory(solver_name: str, instance_set_name: str) -> None:
     """Prepare clean configuration directory."""
-    remove_configuration_directory(solver_name, instance_set_name)
-    create_configuration_directory(solver_name, instance_set_name)
+    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
+
+    remove_configuration_directory(solver_name, smac_solver_dir)
+    create_configuration_directory(smac_solver_dir, solver_name)
 
     return
 
