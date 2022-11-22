@@ -234,8 +234,8 @@ def clean_configuration_directory(solver_name: str, instance_set_name: str) -> N
 
 def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     """Return the directory of a solver under the SMAC directory."""
-    smac_scenario_dir = f'{sgh.smac_dir}/example_scenarios'
-    smac_solver_dir = f'{smac_scenario_dir}/{solver_name}_{instance_set_name}/'
+    smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
+    smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
 
     return smac_solver_dir
 
@@ -254,32 +254,32 @@ def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
 
 
 def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
-    '''Create directories needed for configuration of a solver.'''
-    outdir_dir = smac_solver_dir / 'outdir_train_configuration'
-    command_line = 'mkdir -p ' + str(outdir_dir)
+    """Create directories needed for configuration of a solver."""
+    outdir_dir = smac_solver_dir / "outdir_train_configuration"
+    command_line = "mkdir -p " + str(outdir_dir)
     os.system(command_line)
 
-    tmp_dir = smac_solver_dir / 'tmp'
-    command_line = f'mkdir -p {tmp_dir}'
+    tmp_dir = smac_solver_dir / "tmp"
+    command_line = f"mkdir -p {tmp_dir}"
     os.system(command_line)
 
     return
 
 
 def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
-    '''Return the name of the PCS file in a solver directory.
+    """Return the name of the PCS file in a solver directory.
 
     If not found, return an empty str.
-    '''
+    """
     list_files = os.listdir(solver_directory)
 
     for file_name in list_files:
         file_extension = sfh.get_file_full_extension(file_name)
 
-        if file_extension == 'pcs':
+        if file_extension == "pcs":
             return file_name
 
-    return ''
+    return ""
 
 
 def prepare_smac_execution_directories_configuration(solver_name: str,

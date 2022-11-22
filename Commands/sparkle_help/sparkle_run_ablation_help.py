@@ -37,7 +37,7 @@ def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str):
     ablation_scenario_dir = Path(sgh.ablation_dir + "scenarios/")
     if ablation_scenario_dir.is_dir():
         for ablation_scenario in ablation_scenario_dir.glob(
-            f"{solver_name}_{instance_set_train_name}_*"):
+                f"{solver_name}_{instance_set_train_name}_*"):
             shutil.rmtree(ablation_scenario, ignore_errors=True)
     return
 

@@ -170,7 +170,7 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: Path,
 
     # Concatenating a path with a partial filename to create the full name
     smac_instance_file = (smac_instance_dir_prefix.parent
-                         / (smac_instance_dir_prefix.name + file_suffix))
+                          / (smac_instance_dir_prefix.name + file_suffix))
     smac_instance_dir = smac_instance_dir_prefix.parent
 
     # Remove the directory (of this specific instance set) to make sure it is empty
@@ -182,7 +182,7 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: Path,
     if not smac_instance_dir.is_dir():
         smac_instance_dir.mkdir(parents=True, exist_ok=True)
 
-    fout = smac_instance_file.open('w+')
+    fout = smac_instance_file.open("w+")
 
     for ori_instance_path in list_instance_path:
         target_instance_path = smac_instance_dir_prefix / Path(ori_instance_path).name
