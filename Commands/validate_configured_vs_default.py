@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to validate a configured solver against its default configuration.'''
+"""Sparkle command to validate a configured solver against its default configuration."""
 
 import sys
 import argparse
@@ -21,54 +21,54 @@ from sparkle_help.sparkle_command_help import CommandName
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description=('Test the performance of the configured solver and the default '
-                     'solver by doing validation experiments on the training and test '
-                     'sets.'))
+        description=("Test the performance of the configured solver and the default "
+                     "solver by doing validation experiments on the training and test "
+                     "sets."))
     parser.add_argument(
-        '--solver',
+        "--solver",
         required=True,
         type=str,
-        help='path to solver'
+        help="path to solver"
     )
     parser.add_argument(
-        '--instance-set-train',
+        "--instance-set-train",
         required=True,
         type=str,
-        help='path to training instance set',
+        help="path to training instance set",
     )
     parser.add_argument(
-        '--instance-set-test',
+        "--instance-set-test",
         required=False,
         type=str,
-        help='path to testing instance set',
+        help="path to testing instance set",
     )
     parser.add_argument(
-        '--performance-measure',
+        "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
         action=ac.SetByUser,
-        help='the performance measure, e.g. runtime',
+        help="the performance measure, e.g. runtime",
     )
     parser.add_argument(
-        '--target-cutoff-time',
+        "--target-cutoff-time",
         type=int,
         default=sgh.settings.DEFAULT_general_target_cutoff_time,
         action=ac.SetByUser,
-        help='cutoff time per target algorithm run in seconds',
+        help="cutoff time per target algorithm run in seconds",
     )
     parser.add_argument(
-        '--settings-file',
+        "--settings-file",
         type=Path,
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
-        help='specify the settings file to use instead of the default',
+        help="specify the settings file to use instead of the default",
     )
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -88,16 +88,16 @@ if __name__ == '__main__':
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
 
-    if ac.set_by_user(args, 'settings_file'):
+    if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
     args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
-    if ac.set_by_user(args, 'performance_measure'):
+    if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(
             args.performance_measure, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, 'target_cutoff_time'):
+    if ac.set_by_user(args, "target_cutoff_time"):
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
@@ -118,18 +118,18 @@ if __name__ == '__main__':
 
         # Copy test instances to smac directory (train should already be there from
         # configuration)
-        instances_directory_test = 'Instances/' + instance_set_test_name
+        instances_directory_test = "Instances/" + instance_set_test_name
         list_path = sih.get_list_all_path(instances_directory_test)
         inst_dir_prefix = instances_directory_test
         smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
                                     instance_set_train_name)
         sih.copy_instances_to_smac(
-            list_path, inst_dir_prefix, smac_inst_dir_prefix, 'test'
+            list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
         )
 
         # Copy file listing test instances to smac solver directory
         scsh.handle_file_instance(
-            solver_name, instance_set_train_name, instance_set_test_name, 'test'
+            solver_name, instance_set_train_name, instance_set_test_name, "test"
         )
 
     # Create solver execution directories, and copy necessary files there
@@ -150,23 +150,23 @@ if __name__ == '__main__':
         sbatch_script_dir,
     )
 
-    print(f'Running validation in parallel. Waiting for Slurm job with id: '
-          f'{validate_jobid}')
+    print(f"Running validation in parallel. Waiting for Slurm job with id: "
+          f"{validate_jobid}")
 
     # Write most recent run to file
     last_test_file_path = (
         sgh.smac_dir
-        + '/example_scenarios/'
+        + "/example_scenarios/"
         + solver_name
-        + '_'
+        + "_"
         + sgh.sparkle_last_test_file_name
     )
 
-    fout = open(last_test_file_path, 'w+')
-    fout.write('solver ' + str(solver) + '\n')
-    fout.write('train ' + str(instance_set_train) + '\n')
+    fout = open(last_test_file_path, "w+")
+    fout.write("solver " + str(solver) + "\n")
+    fout.write("train " + str(instance_set_train) + "\n")
     if instance_set_test is not None:
-        fout.write('test ' + str(instance_set_test) + '\n')
+        fout.write("test " + str(instance_set_test) + "\n")
     fout.close()
 
     # Update latest scenario

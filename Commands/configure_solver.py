@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to configure a solver.'''
+"""Sparkle command to configure a solver."""
 
 import argparse
 import sys
@@ -23,87 +23,87 @@ from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Configure a solver in the Sparkle platform.',
-        epilog=('Note that the test instance set is only used if the ``-–ablation`'
-                ' or ``–-validation`` flags are given'))
+        description="Configure a solver in the Sparkle platform.",
+        epilog=("Note that the test instance set is only used if the ``-–ablation`"
+                " or ``–-validation`` flags are given"))
     parser.add_argument(
-        '--validate',
+        "--validate",
         required=False,
-        action='store_true',
-        help='validate after configuration',
+        action="store_true",
+        help="validate after configuration",
     )
     parser.add_argument(
-        '--ablation',
+        "--ablation",
         required=False,
-        action='store_true',
-        help='run ablation after configuration',
+        action="store_true",
+        help="run ablation after configuration",
     )
     parser.add_argument(
-        '--solver',
+        "--solver",
         required=True,
         type=Path,
-        help='path to solver'
+        help="path to solver"
     )
     parser.add_argument(
-        '--instance-set-train',
+        "--instance-set-train",
         required=True,
         type=Path,
-        help='path to training instance set',
+        help="path to training instance set",
     )
     parser.add_argument(
-        '--instance-set-test',
+        "--instance-set-test",
         required=False,
         type=Path,
-        help='path to testing instance set (only for validating)',
+        help="path to testing instance set (only for validating)",
     )
     parser.add_argument(
-        '--performance-measure',
+        "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
         action=ac.SetByUser,
-        help='the performance measure, e.g. runtime',
+        help="the performance measure, e.g. runtime",
     )
     parser.add_argument(
-        '--target-cutoff-time',
+        "--target-cutoff-time",
         type=int,
         default=sgh.settings.DEFAULT_general_target_cutoff_time,
         action=ac.SetByUser,
-        help='cutoff time per target algorithm run in seconds',
+        help="cutoff time per target algorithm run in seconds",
     )
     parser.add_argument(
-        '--budget-per-run',
+        "--budget-per-run",
         type=int,
         default=sgh.settings.DEFAULT_config_budget_per_run,
         action=ac.SetByUser,
-        help='configuration budget per configurator run in seconds',
+        help="configuration budget per configurator run in seconds",
     )
     parser.add_argument(
-        '--number-of-runs',
+        "--number-of-runs",
         type=int,
         default=sgh.settings.DEFAULT_config_number_of_runs,
         action=ac.SetByUser,
-        help='number of configuration runs to execute',
+        help="number of configuration runs to execute",
     )
     parser.add_argument(
-        '--settings-file',
+        "--settings-file",
         type=Path,
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
-        help='specify the settings file to use instead of the default',
+        help="specify the settings file to use instead of the default",
     )
     parser.add_argument(
-        '--use-features',
+        "--use-features",
         required=False,
-        action='store_true',
+        action="store_true",
         help="use the training set's features for configuration",
     )
 
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
-            print('given training set path is not an existing directory')
+            print("given training set path is not an existing directory")
             sys.exit()
 
         # Takes folder/instance set name from training set path
@@ -146,41 +146,41 @@ if __name__ == '__main__':
             # os.path.split(os.path.split(label)[0])[1] gives the dir/instance set name
             if os.path.split(os.path.split(label)[0])[1] == set_name:
                 if row.empty:
-                    print('No feature data exists for the given training set, please '
-                          'run add_feature_extractor.py, then compute_features.py')
+                    print("No feature data exists for the given training set, please "
+                          "run add_feature_extractor.py, then compute_features.py")
                     sys.exit()
 
-                new_label = f'../../instances/{set_name}/{os.path.split(label)[1]}'
+                new_label = f"../../instances/{set_name}/{os.path.split(label)[1]}"
                 data_dict[new_label] = row
 
-        feature_data_df = DataFrame.from_dict(data_dict, orient='index',
+        feature_data_df = DataFrame.from_dict(data_dict, orient="index",
                                               columns=feature_data_df.columns)
 
         if feature_data_df.isnull().values.any():
-            print('You have unfinished feature computation jobs, please run '
-                  'compute_features.py')
+            print("You have unfinished feature computation jobs, please run "
+                  "compute_features.py")
             sys.exit()
 
         for index, column in enumerate(feature_data_df):
-            feature_data_df.rename(columns={column: f'Feature{index+1}'}, inplace=True)
+            feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    if ac.set_by_user(args, 'settings_file'):
+    if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, 'performance_measure'):
+    if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, 'target_cutoff_time'):
+    if ac.set_by_user(args, "target_cutoff_time"):
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, 'budget_per_run'):
+    if ac.set_by_user(args, "budget_per_run"):
         sgh.settings.set_config_budget_per_run(
             args.budget_per_run, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, 'number_of_runs'):
+    if ac.set_by_user(args, "number_of_runs"):
         sgh.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE
         )
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     # Check if solver has pcs file and is configurable
     if not sash.check_adding_solver_contain_pcs_file(solver):
         print(
-            'None or multiple .pcs files found. Solver is not valid for configuration.'
+            "None or multiple .pcs files found. Solver is not valid for configuration."
         )
         sys.exit()
 
@@ -202,15 +202,15 @@ if __name__ == '__main__':
     smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
                                 instance_set_train_name)
     sih.copy_instances_to_smac(
-        list_all_path, str(instance_set_train), smac_inst_dir_prefix, 'train'
+        list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
     )
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver_name, instance_set_train_name)
-        feature_file_name = f'{smac_solver_dir}{instance_set_train_name}_features.csv'
-        feature_data_df.to_csv(feature_file_name, index_label='INSTANCE_NAME')
+        feature_file_name = f"{smac_solver_dir}{instance_set_train_name}_features.csv"
+        feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
 
     scsh.handle_file_instance(
-        solver_name, instance_set_train_name, instance_set_train_name, 'train'
+        solver_name, instance_set_train_name, instance_set_train_name, "train"
     )
     scsh.create_file_scenario_configuration(solver_name, instance_set_train_name,
                                             use_features)
@@ -229,17 +229,17 @@ if __name__ == '__main__':
     # Write most recent run to file
     last_configuration_file_path = (
         sgh.smac_dir
-        + '/example_scenarios/'
+        + "/example_scenarios/"
         + solver_name
-        + '_'
+        + "_"
         + instance_set_train_name
-        + '/'
+        + "/"
         + sgh.sparkle_last_configuration_file_name
     )
 
-    fout = open(last_configuration_file_path, 'w+')
-    fout.write('solver ' + str(solver) + '\n')
-    fout.write('train ' + str(instance_set_train) + '\n')
+    fout = open(last_configuration_file_path, "w+")
+    fout.write("solver " + str(solver) + "\n")
+    fout.write("train " + str(instance_set_train) + "\n")
     fout.close()
 
     # Update latest scenario
@@ -266,9 +266,9 @@ if __name__ == '__main__':
         )
         dependency_jobid_list.append(ablation_jobid)
 
-    job_id_str = ','.join(dependency_jobid_list)
-    print(f'Running configuration in parallel. Waiting for Slurm job(s) with id(s): '
-          f'{job_id_str}')
+    job_id_str = ",".join(dependency_jobid_list)
+    print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+          f"{job_id_str}")
 
     # Write used settings to file
     sgh.settings.write_used_settings()

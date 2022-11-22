@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to clean up the current Sparkle platform.'''
+"""Sparkle command to clean up the current Sparkle platform."""
 
 import os
 import sys
@@ -11,13 +11,13 @@ import cleanup_temporary_files as ctf
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
 
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Log command call
     sl.log_command(sys.argv)
 
@@ -27,9 +27,9 @@ if __name__ == '__main__':
     # Process command line arguments
     args = parser.parse_args()
 
-    print('Cleaning existing Sparkle platform ...')
+    print("Cleaning existing Sparkle platform ...")
     sparkle_record_help.cleanup_current_sparkle_platform()
     ctf.remove_temporary_files()
-    command_line = 'rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf'
+    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
     os.system(command_line)
-    print('Existing Sparkle platform cleaned!')
+    print("Existing Sparkle platform cleaned!")

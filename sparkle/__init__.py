@@ -1,1 +1,1 @@
-'''Init file for sparkle.'''
+"""Init file for sparkle."""
