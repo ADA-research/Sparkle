@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Helper functions for parallel feature computation.'''
+"""Helper functions for parallel feature computation."""
 
 import sys
 
@@ -21,7 +21,7 @@ except ImportError:
 
 
 def computing_features_parallel(feature_data_csv_path, mode):
-    '''Compute features in parallel.
+    """Compute features in parallel.
 
     The 1st argument (feature_data_csv_path) specifies the path of the csv file where the
     resulting feature data would be placed.
@@ -29,7 +29,7 @@ def computing_features_parallel(feature_data_csv_path, mode):
     (1 or 2). If this value is 1, it means that this function will compute the remaining
     jobs for feature computation. Otherwise (if this value is 2), it means that this
     function will re-compute all jobs for feature computation.
-    '''
+    """
     # Open the csv file in terms of feature data
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
 
@@ -44,8 +44,8 @@ def computing_features_parallel(feature_data_csv_path, mode):
         list_feature_computation_job = (
             feature_data_csv.get_list_recompute_feature_computation_job())
     else:  # The abnormal case, exit
-        print('Computing features mode error!')
-        print('Do not compute features')
+        print("Computing features mode error!")
+        print("Do not compute features")
         sys.exit()
 
     ####
@@ -55,14 +55,14 @@ def computing_features_parallel(feature_data_csv_path, mode):
 
     # If there are no jobs, stop
     if total_job_num < 1:
-        print('No feature computation jobs to run; stopping execution! To recompute '
-              'feature values use the --recompute flag.')
+        print("No feature computation jobs to run; stopping execution! To recompute "
+              "feature values use the --recompute flag.")
         sys.exit()
     # If there are jobs update feature data ID
     else:
         scf.update_feature_data_id()
 
-    print('The number of total running jobs: ' + str(total_job_num))
+    print("The number of total running jobs: " + str(total_job_num))
     total_job_list = (
         sparkle_job_help.expand_total_job_from_list(list_feature_computation_job))
     ####
@@ -75,7 +75,7 @@ def computing_features_parallel(feature_data_csv_path, mode):
                                                            total_job_list))
     ####
 
-    execution_dir = './'
+    execution_dir = "./"
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
     # Execute the sbatch script via slurm
     jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES,
@@ -83,6 +83,6 @@ def computing_features_parallel(feature_data_csv_path, mode):
 
     # Log output paths
     sl.add_output(sbatch_script_path,
-                  'Slurm batch script to compute features in parallel')
+                  "Slurm batch script to compute features in parallel")
 
     return jobid

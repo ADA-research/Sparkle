@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''Sparkle command to add a solver to the Sparkle platform.'''
+"""Sparkle command to add a solver to the Sparkle platform."""
 
 import os
 import sys
@@ -19,57 +19,57 @@ from sparkle_help.sparkle_command_help import CommandName
 
 
 def parser_function():
-    '''Define the command line arguments.'''
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Add a solver to the Sparkle platform.',
-        epilog='')
+        description="Add a solver to the Sparkle platform.",
+        epilog="")
     parser.add_argument(
-        '--deterministic',
+        "--deterministic",
         required=True,
         type=int,
         choices=[0, 1],
-        help='indicate whether the solver is deterministic or not',
+        help="indicate whether the solver is deterministic or not",
     )
     group_solver_run = parser.add_mutually_exclusive_group()
     group_solver_run.add_argument(
-        '--run-solver-now',
+        "--run-solver-now",
         default=False,
-        action='store_true',
-        help='immediately run the newly added solver on all instances',
+        action="store_true",
+        help="immediately run the newly added solver on all instances",
     )
     group_solver_run.add_argument(
-        '--run-solver-later',
-        dest='run_solver_now',
-        action='store_false',
-        help='do not immediately run the newly added solver on all instances (default)',
+        "--run-solver-later",
+        dest="run_solver_now",
+        action="store_false",
+        help="do not immediately run the newly added solver on all instances (default)",
     )
     parser.add_argument(
-        '--nickname',
+        "--nickname",
         type=str,
-        help='set a nickname for the solver'
+        help="set a nickname for the solver"
     )
     parser.add_argument(
-        '--parallel',
-        action='store_true',
-        help='run the solver on multiple instances in parallel',
+        "--parallel",
+        action="store_true",
+        help="run the solver on multiple instances in parallel",
     )
     parser.add_argument(
-        '--solver-variations',
+        "--solver-variations",
         default=1,
         type=int,
-        help=('Use this option to add multiple variations of the solver by using a '
-              'different random seed for each varation.'))
+        help=("Use this option to add multiple variations of the solver by using a "
+              "different random seed for each varation."))
     parser.add_argument(
-        'solver_path',
-        metavar='solver-path',
+        "solver_path",
+        metavar="solver-path",
         type=str,
-        help='path to the solver'
+        help="path to the solver"
     )
 
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -93,26 +93,26 @@ if __name__ == '__main__':
     solver_variations = args.solver_variations
 
     if solver_variations < 1:
-        print('ERROR: Invalid number of solver variations given '
-              f'({str(solver_variations)}), '
-              'a postive integer must be used. Stopping execution.')
+        print("ERROR: Invalid number of solver variations given "
+              f"({str(solver_variations)}), "
+              "a postive integer must be used. Stopping execution.")
         sys.exit(0)
 
     sfh.check_file_is_executable(Path(solver_source, sgh.sparkle_smac_wrapper))
 
     # Start add solver
-    last_level_directory = ''
+    last_level_directory = ""
     last_level_directory = sfh.get_last_level_directory_name(solver_source)
 
     solver_directory = sash.get_solver_directory(last_level_directory)
     if not os.path.exists(solver_directory):
         Path(solver_directory).mkdir(parents=True, exist_ok=True)
     else:
-        print('Solver ' + last_level_directory + ' already exists!')
-        print('Do not add solver ' + last_level_directory)
+        print("Solver " + last_level_directory + " already exists!")
+        print("Do not add solver " + last_level_directory)
         sys.exit()
 
-    os.system('cp -r ' + solver_source + '/* ' + solver_directory)
+    os.system("cp -r " + solver_source + "/* " + solver_directory)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
@@ -124,21 +124,21 @@ if __name__ == '__main__':
     sfh.add_new_solver_into_file(solver_directory, deterministic, solver_variations)
 
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
-        print('one pcs file detected, this is a configurable solver')
+        print("one pcs file detected, this is a configurable solver")
 
-    print(f'Adding solver {sfh.get_last_level_directory_name(solver_directory)} '
-          'done!')
+    print(f"Adding solver {sfh.get_last_level_directory_name(solver_directory)} "
+          "done!")
 
     if os.path.exists(sgh.sparkle_portfolio_selector_path):
-        command_line = 'rm -f ' + sgh.sparkle_portfolio_selector_path
+        command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
         os.system(command_line)
-        print('Removing Sparkle portfolio selector '
-              f'{sgh.sparkle_portfolio_selector_path} done!')
+        print("Removing Sparkle portfolio selector "
+              f"{sgh.sparkle_portfolio_selector_path} done!")
 
     if os.path.exists(sgh.sparkle_report_path):
-        command_line = 'rm -f ' + sgh.sparkle_report_path
+        command_line = "rm -f " + sgh.sparkle_report_path
         os.system(command_line)
-        print('Removing Sparkle report ' + sgh.sparkle_report_path + ' done!')
+        print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
 
     if nickname_str is not None:
         sgh.solver_nickname_mapping[nickname_str] = solver_directory
@@ -147,24 +147,24 @@ if __name__ == '__main__':
 
     if args.run_solver_now:
         if not my_flag_parallel:
-            print('Start running solvers ...')
+            print("Start running solvers ...")
             srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
             print(
-                'Performance data file '
+                "Performance data file "
                 + sgh.performance_data_csv_path
-                + ' has been updated!'
+                + " has been updated!"
             )
-            print('Running solvers done!')
+            print("Running solvers done!")
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
             run_solvers_parallel_jobid = srsp.running_solvers_parallel(
                 sgh.performance_data_csv_path, num_job_in_parallel, rerun=False
             )
-            print('Running solvers in parallel ...')
+            print("Running solvers in parallel ...")
             dependency_jobid_list = []
             if run_solvers_parallel_jobid:
                 dependency_jobid_list.append(run_solvers_parallel_jobid)
-            job_script = 'Commands/construct_sparkle_portfolio_selector.py'
+            job_script = "Commands/construct_sparkle_portfolio_selector.py"
             run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(
                 job_script,
                 dependency_jobid_list,
@@ -173,7 +173,7 @@ if __name__ == '__main__':
 
             if run_job_parallel_jobid:
                 dependency_jobid_list.append(run_job_parallel_jobid)
-            job_script = 'Commands/generate_report.py'
+            job_script = "Commands/generate_report.py"
             run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(
                 job_script, dependency_jobid_list, CommandName.GENERATE_REPORT
             )

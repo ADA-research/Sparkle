@@ -1,1 +1,1 @@
-'''Initialisation file for tests.'''
+"""Initialisation file for tests."""

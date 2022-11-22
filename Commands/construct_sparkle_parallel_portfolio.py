@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-'''Sparkle command to construct a parallel algorithm portfolio.'''
+"""Sparkle command to construct a parallel algorithm portfolio."""
 
 import sys
 import argparse
@@ -14,7 +14,7 @@ from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     sgh.settings = sparkle_settings.Settings()
 
@@ -26,25 +26,25 @@ if __name__ == '__main__':
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--nickname', type=Path,
-                        help='Give a nickname to the portfolio.'
-                             f' (default: {sgh.sparkle_parallel_portfolio_name})')
-    parser.add_argument('--solver', required=False, nargs='+', type=str,
-                        help='Specify the list of solvers, add '
+    parser.add_argument("--nickname", type=Path,
+                        help="Give a nickname to the portfolio."
+                             f" (default: {sgh.sparkle_parallel_portfolio_name})")
+    parser.add_argument("--solver", required=False, nargs="+", type=str,
+                        help="Specify the list of solvers, add "
                              '\",<#solver_variations>\" to the end of a path to add '
-                             'multiple instances of a single solver. For example '
-                             '--solver Solver/PbO-CCSAT-Generic,25 to construct a '
-                             'portfolio containing 25 variations of PbO-CCSAT-Generic.')
-    parser.add_argument('--overwrite', type=bool,
-                        help='When set to True an existing parallel portfolio with the '
-                             'same name will be overwritten, when False an error will '
-                             'be thrown instead.'
-                             ' (default: '
-                             f'{sgh.settings.DEFAULT_paraport_overwriting})')
-    parser.add_argument('--settings-file', type=Path,
-                        help='Specify the settings file to use in case you want to use '
-                             'one other than the default'
-                             f' (default: {sgh.settings.DEFAULT_settings_path}')
+                             "multiple instances of a single solver. For example "
+                             "--solver Solver/PbO-CCSAT-Generic,25 to construct a "
+                             "portfolio containing 25 variations of PbO-CCSAT-Generic.")
+    parser.add_argument("--overwrite", type=bool,
+                        help="When set to True an existing parallel portfolio with the "
+                             "same name will be overwritten, when False an error will "
+                             "be thrown instead."
+                             " (default: "
+                             f"{sgh.settings.DEFAULT_paraport_overwriting})")
+    parser.add_argument("--settings-file", type=Path,
+                        help="Specify the settings file to use in case you want to use "
+                             "one other than the default"
+                             f" (default: {sgh.settings.DEFAULT_settings_path}")
 
     # Process command line arguments;
     args = parser.parse_args()
@@ -67,14 +67,14 @@ if __name__ == '__main__':
 
     portfolio_path = sgh.sparkle_parallel_portfolio_dir / portfolio_name
 
-    print('Start constructing Sparkle parallel portfolio ...')
+    print("Start constructing Sparkle parallel portfolio ...")
 
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
 
     if success:
-        print(f'Sparkle parallel portfolio located at {str(portfolio_path)}')
-        print('Sparkle parallel portfolio construction done!')
+        print(f"Sparkle parallel portfolio located at {str(portfolio_path)}")
+        print("Sparkle parallel portfolio construction done!")
 
         # Update latest scenario
         sgh.latest_scenario.set_parallel_portfolio_path(Path(portfolio_path))
@@ -82,8 +82,8 @@ if __name__ == '__main__':
         # Set to default to overwrite instance from possible previous run
         sgh.latest_scenario.set_parallel_portfolio_instance_list()
     else:
-        print('An unexpected error occurred when constructing the portfolio, please '
-              'check your input and try again.')
+        print("An unexpected error occurred when constructing the portfolio, please "
+              "check your input and try again.")
 
     # Write used settings to file
     sgh.settings.write_used_settings()
