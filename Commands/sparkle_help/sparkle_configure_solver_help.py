@@ -473,7 +473,7 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
 
 def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) -> str:
     """Submit a Slurm batch script for algorithm configuration with SMAC."""
-    ori_path = os.getcwd()
+    ori_path = Path.cwd()
     command_line = (f"cd {sgh.smac_dir} ; sbatch {smac_configure_sbatch_script_name} ; "
                     f"cd {ori_path}")
 
