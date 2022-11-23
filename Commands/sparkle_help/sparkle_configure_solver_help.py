@@ -204,7 +204,8 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
     fout.write("validation = true" + "\n")
     fout.close()
 
-    sl.add_output(str(smac_file_scenario), "SMAC configuration scenario on the training set")
+    sl.add_output(str(smac_file_scenario),
+                  "SMAC configuration scenario on the training set")
     sl.add_output(f"{sgh.smac_dir}{smac_outdir}",
                   "SMAC configuration output on the training set")
 
@@ -382,7 +383,8 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     return
 
 
-def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str) -> Path:
+def create_smac_configure_sbatch_script(solver_name: str,
+                                        instance_set_name: str) -> Path:
     """Generate a Slurm batch script for algorithm configuration with SMAC."""
     execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
     smac_file_scenario_name = Path(f"{solver_name}_{instance_set_name}_scenario.txt")
@@ -395,7 +397,8 @@ def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str
 
     scenario_file = execdir / smac_file_scenario_name
 
-    sbatch_script_path = Path(f"{smac_file_scenario_name}_{num_of_smac_run}_exp_sbatch.sh")
+    sbatch_script_path = Path(f"{smac_file_scenario_name}_"
+                              f"{num_of_smac_run}_exp_sbatch.sh")
 
     generate_configuration_sbatch_script(sbatch_script_path, scenario_file, result_part,
                                          num_of_smac_run, num_of_smac_run_in_parallel,
@@ -453,7 +456,7 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
         seed = i + 1
         result_path = f"{result_directory}{sbatch_script_path}_seed_{seed}_smac.txt"
         smac_execdir_i = smac_execdir / str(seed)
-        sl.add_output(sgh.smac_dir + result_path, 
+        sl.add_output(sgh.smac_dir + result_path,
                       f"Configuration log for SMAC run {num_job_total}")
 
         fout.write(f"'{scenario_file} {seed} {result_path} {smac_execdir_i}' \\\n")
