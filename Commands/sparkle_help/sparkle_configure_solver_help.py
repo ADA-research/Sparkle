@@ -67,8 +67,8 @@ def get_smac_settings():
             smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel)
 
 
-def handle_file_instance(solver_name: str, instance_set_train_name: str,
-                         instance_set_target_name: str, instance_type: str) -> None:
+def copy_file_instance(solver_name: str, instance_set_train_name: str,
+                       instance_set_target_name: str, instance_type: str) -> None:
     """Copy file with the specified postfix listing instances to the solver directory."""
     file_postfix = f"_{instance_type}.txt"
 
@@ -172,41 +172,39 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
 def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
                                        use_features: bool = False):
     """Create a file with the configuration scenario in the solver directory."""
-    smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
-    smac_file_scenario = (
-        f"{smac_solver_dir}{solver_name}_{instance_set_name}_scenario.txt")
+    solver_instance_name = f"{solver_name}_{instance_set_name}"
+    solver_instance_dir = Path("example_scenarios", solver_instance_name)
+
+    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
+    smac_file_scenario = Path(smac_solver_dir, f"{solver_instance_name}_scenario.txt")
+    smac_paramfile = Path(get_pcs_file_from_solver_directory(smac_solver_dir))
+
+    smac_paramfile_dir = solver_instance_dir / smac_paramfile
+    smac_outdir = solver_instance_dir / "outdir_train_configuration/"
+    smac_instance_file = solver_instance_dir / f"{instance_set_name}_train.txt"
+    smac_feature_file = solver_instance_dir / f"{instance_set_name}_features.csv"
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
-    smac_paramfile = (f"example_scenarios/{solver_name}_{instance_set_name}/"
-                      f"{get_pcs_file_from_solver_directory(smac_solver_dir)}")
-    smac_outdir = (f"example_scenarios/{solver_name}_{instance_set_name}/"
-                   "outdir_train_configuration/")
-    smac_instance_file = (f"example_scenarios/{solver_name}_{instance_set_name}/"
-                          f"{instance_set_name}_train.txt")
-    smac_test_instance_file = smac_instance_file
-    smac_feature_file = (f"example_scenarios/{solver_name}_{instance_set_name}/"
-                         f"{instance_set_name}_features.csv")
-
     fout = open(smac_file_scenario, "w")
-    fout.write("algo = ./" + sgh.sparkle_smac_wrapper + "\n")
-    fout.write(f"execdir = example_scenarios/{solver_name}_{instance_set_name}/\n")
-    fout.write("deterministic = " + get_solver_deterministic(solver_name) + "\n")
-    fout.write("run_obj = " + smac_run_obj + "\n")
-    fout.write("wallclock-limit = " + str(smac_whole_time_budget) + "\n")
-    fout.write("cutoffTime = " + str(smac_each_run_cutoff_time) + "\n")
-    fout.write("cutoff_length = " + smac_each_run_cutoff_length + "\n")
-    fout.write("paramfile = " + smac_paramfile + "\n")
-    fout.write("outdir = " + smac_outdir + "\n")
-    fout.write("instance_file = " + smac_instance_file + "\n")
-    fout.write("test_instance_file = " + smac_test_instance_file + "\n")
+    fout.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
+    fout.write(f"execdir = {solver_instance_dir}/\n")
+    fout.write(f"deterministic = {get_solver_deterministic(solver_name)}\n")
+    fout.write(f"run_obj = {smac_run_obj}\n")
+    fout.write(f"wallclock-limit = {smac_whole_time_budget}\n")
+    fout.write(f"cutoffTime = {smac_each_run_cutoff_time}\n")
+    fout.write(f"cutoff_length = {smac_each_run_cutoff_length}\n")
+    fout.write(f"paramfile = {smac_paramfile_dir}\n")
+    fout.write(f"outdir = {smac_outdir}\n")
+    fout.write(f"instance_file = {smac_instance_file}\n")
+    fout.write(f"test_instance_file = {smac_instance_file}\n")
     if use_features:
         fout.write(f"feature_file = {smac_feature_file}\n")
     fout.write("validation = true" + "\n")
     fout.close()
 
-    sl.add_output(smac_file_scenario, "SMAC configuration scenario on the training set")
+    sl.add_output(str(smac_file_scenario), "SMAC configuration scenario on the training set")
     sl.add_output(f"{sgh.smac_dir}{smac_outdir}",
                   "SMAC configuration output on the training set")
 
@@ -215,7 +213,6 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
 
 def remove_configuration_directory(solver_name: str, smac_solver_dir: Path) -> None:
     """Remove the configuration directory."""
-    
     # Delete directory and then create it new with necessary files
     shutil.rmtree(smac_solver_dir, ignore_errors=True)
     create_configuration_directory(smac_solver_dir, solver_name)

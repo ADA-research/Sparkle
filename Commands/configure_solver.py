@@ -209,7 +209,7 @@ if __name__ == "__main__":
         feature_file_name = f"{smac_solver_dir}{instance_set_train_name}_features.csv"
         feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
 
-    scsh.handle_file_instance(
+    scsh.copy_file_instance(
         solver_name, instance_set_train_name, instance_set_train_name, "train"
     )
     scsh.create_file_scenario_configuration(solver_name, instance_set_train_name,

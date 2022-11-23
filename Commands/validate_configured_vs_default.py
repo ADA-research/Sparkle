@@ -128,7 +128,7 @@ if __name__ == "__main__":
         )
 
         # Copy file listing test instances to smac solver directory
-        scsh.handle_file_instance(
+        scsh.copy_file_instance(
             solver_name, instance_set_train_name, instance_set_test_name, "test"
         )
 

@@ -21,7 +21,7 @@ __sparkle_instance_list_file = "sparkle_instance_list.txt"
 def get_list_all_path(instances_directory):
     """Return a list with all instance paths."""
     p = Path(instances_directory)
-    return [str(f) for f in p.rglob("*") if f.is_file()]
+    return [f for f in p.rglob("*") if f.is_file()]
 
 
 def _check_existence_of_instance_list_file(instances_source: str) -> bool:
