@@ -265,6 +265,42 @@ included in a portfolio selector. The `sprakle_run_default_wrapper.py`
 is a wrapper that Sparkle should call to run the solver on a specific
 instance.
 
+### The output directory
+
+```{note}
+This section describes a desirable behaviour but has not been implemented fully yet.
+```
+
+The output directory is located at the root of the Sparkle directory. Its structure is as follows:
+
+```
+Output/
+  Analysis/
+    run_<alias>/
+      related files
+  Configuration/
+    run_<alias>/
+      related files
+  Portfolio/
+    run_<alias>/
+      related files
+  Selection/
+    run_<alias>/
+      related files
+```
+
+The `alias` is based on the command and a timestamp.
+
+For each type of task run by Sparkle, the related files differ. The aim is always to have all required files for reproducibility. A copy of the sparkle configuration file at the time of the run and of all files relevant to the run, a copy of any log or error file that could help with debugging or a link to it, and the output of the executed task.
+
+*For configuration* the configuration trajectory if available, the training and testing sets, the default configuration and the final found configuration. The performance of those will be in the Analysis folder.
+
+*For portfolio* the resulting portfolio and its components. The performance of the portfolio will be in the Analysis folder.
+
+*For selection* the algorithms and their performance on the training set, the model(s) generated and selector. The performance evaluation of the selector will be in the Analysis folder.
+
+*For analysis* a link to the folder on which the analysis was performed (confguration, portfolio or selection), the performance evaluation from it and the report if it was generated.
+
 ## Wrappers
 
 ### `sparkle_run_default_wrapper.py`
