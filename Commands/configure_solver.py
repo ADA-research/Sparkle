@@ -227,28 +227,25 @@ if __name__ == "__main__":
     dependency_jobid_list = [configure_jobid]
 
     # Write most recent run to file
-    last_configuration_file_path = (
-        sgh.smac_dir
-        + "/example_scenarios/"
-        + solver_name
-        + "_"
-        + instance_set_train_name
-        + "/"
-        + sgh.sparkle_last_configuration_file_name
+    last_configuration_file_path = Path(
+        sgh.smac_dir,
+        "example_scenarios",
+        f"{solver_name}_{instance_set_train_name}",
+        sgh.sparkle_last_configuration_file_name
     )
 
     fout = open(last_configuration_file_path, "w+")
-    fout.write("solver " + str(solver) + "\n")
-    fout.write("train " + str(instance_set_train) + "\n")
+    fout.write(f"solver {solver}\n")
+    fout.write(f"train {instance_set_train}\n")
     fout.close()
 
     # Update latest scenario
-    sgh.latest_scenario.set_config_solver(Path(solver))
-    sgh.latest_scenario.set_config_instance_set_train(Path(instance_set_train))
+    sgh.latest_scenario.set_config_solver(solver)
+    sgh.latest_scenario.set_config_instance_set_train(instance_set_train)
     sgh.latest_scenario.set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        sgh.latest_scenario.set_config_instance_set_test(Path(instance_set_test))
+        sgh.latest_scenario.set_config_instance_set_test(instance_set_test)
     else:
         # Set to default to overwrite possible old path
         sgh.latest_scenario.set_config_instance_set_test()
