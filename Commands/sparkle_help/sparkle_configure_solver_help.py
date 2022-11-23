@@ -280,20 +280,19 @@ def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
     return ""
 
 
-def prepare_smac_execution_directories_configuration(solver_name: str,
-                                                     instance_set_name: str) -> None:
+def copy_solver_files_to_smac_dir(solver_name: str, instance_set_name: str) -> None:
     """Create and copy required directories and files for configuration with SMAC."""
-    smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_name)
+    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
     for i in range(1, num_of_smac_run + 1):
-        smac_solver_path_i = smac_solver_dir + str(i)
+        smac_solver_path_i = smac_solver_dir / str(i)
         # Create directories, -p makes sure any missing parents are also created
-        cmd = "mkdir -p " + smac_solver_path_i + "/tmp/"
+        cmd = f"mkdir -p {smac_solver_path_i}/tmp/"
         os.system(cmd)
 
-        solver_diretory = "Solvers/" + solver_name + "/*"
-        cmd = "cp -r " + solver_diretory + " " + smac_solver_dir + str(i)
+        solver_diretory = Path("Solvers", solver_name, "*")
+        cmd = f"cp -r {solver_diretory} {smac_solver_path_i}"
         os.system(cmd)
 
     return

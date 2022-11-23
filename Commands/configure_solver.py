@@ -214,7 +214,7 @@ if __name__ == "__main__":
     )
     scsh.create_file_scenario_configuration(solver_name, instance_set_train_name,
                                             use_features)
-    scsh.prepare_smac_execution_directories_configuration(
+    scsh.copy_solver_files_to_smac_dir(
         solver_name, instance_set_train_name
     )
     smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
