@@ -382,20 +382,20 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     return
 
 
-def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str) -> str:
+def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str) -> Path:
     """Generate a Slurm batch script for algorithm configuration with SMAC."""
-    execdir = "./example_scenarios/" + solver_name + "_" + instance_set_name
-    smac_file_scenario_name = solver_name + "_" + instance_set_name + "_scenario.txt"
+    execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
+    smac_file_scenario_name = Path(f"{solver_name}_{instance_set_name}_scenario.txt")
     _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
     # Remove possible old results for this scenario
-    result_part = "results/" + solver_name + "_" + instance_set_name + "/"
-    result_dir = sgh.smac_dir + result_part
-    [item.unlink() for item in Path(result_dir).glob("*") if item.is_file()]
+    result_part = Path("results", f"{solver_name}_{instance_set_name}")
+    result_dir = sgh.smac_dir / result_part
+    [item.unlink() for item in result_dir.glob("*") if item.is_file()]
 
-    scenario_file = execdir + "/" + smac_file_scenario_name
+    scenario_file = execdir / smac_file_scenario_name
 
-    sbatch_script_path = f"{smac_file_scenario_name}_{num_of_smac_run}_exp_sbatch.sh"
+    sbatch_script_path = Path(f"{smac_file_scenario_name}_{num_of_smac_run}_exp_sbatch.sh")
 
     generate_configuration_sbatch_script(sbatch_script_path, scenario_file, result_part,
                                          num_of_smac_run, num_of_smac_run_in_parallel,
@@ -404,67 +404,61 @@ def create_smac_configure_sbatch_script(solver_name: str, instance_set_name: str
     return sbatch_script_path
 
 
-def generate_configuration_sbatch_script(sbatch_script_path, scenario_file,
-                                         result_directory, num_job_total,
-                                         num_job_in_parallel, smac_execdir):
+def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file: Path,
+                                         result_directory: Path, num_job_total: int,
+                                         num_job_in_parallel: int, smac_execdir: Path):
     """Generate a Slurm batch script for algorithm configuration."""
-    job_name = sbatch_script_path
     sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
     num_job_in_parallel = max(num_job_in_parallel, num_job_total)
 
-    output_log_path = sgh.smac_dir + "tmp/" + job_name + ".txt"
-    error_log_path = sgh.smac_dir + "tmp/" + job_name + ".err"
+    output_log_path = Path(sgh.smac_dir, "tmp", f"{sbatch_script_path}.txt")
+    error_log_path = Path(sgh.smac_dir, "tmp", f"{sbatch_script_path}.err")
 
     # Remove possible old output
-    sfh.rmfile(Path(output_log_path))
-    sfh.rmfile(Path(error_log_path))
+    output_log_path.unlink(missing_ok=True)
+    error_log_path.unlink(missing_ok=True)
 
     # Log output paths
-    sl.add_output(output_log_path,
+    sl.add_output(str(output_log_path),
                   "Output log of batch script for parallel configuration runs with SMAC")
-    sl.add_output(error_log_path,
+    sl.add_output(str(error_log_path),
                   "Error log of batch script for parallel configuration runs with SMAC")
 
-    if result_directory[-1] != "/":
-        result_directory += "/"
-
-    if not os.path.exists(sgh.smac_dir + result_directory):
-        os.system("mkdir -p " + sgh.smac_dir + result_directory)
-
-    if not os.path.exists(sgh.smac_dir + "tmp/"):
-        os.system("mkdir -p " + sgh.smac_dir + "tmp/")
+    (sgh.smac_dir / result_directory).mkdir(parents=True, exist_ok=True)
+    Path(sgh.smac_dir, "tmp").mkdir(parents=True, exist_ok=True)
 
     fout = open(f"{sgh.smac_dir}{sbatch_script_path}", "w+")
-    fout.write("#!/bin/bash" + "\n")
-    fout.write("###" + "\n")
-    fout.write("#SBATCH --job-name=" + job_name + "\n")
-    fout.write("#SBATCH --output=" + "tmp/" + job_name + ".txt" + "\n")
-    fout.write("#SBATCH --error=" + "tmp/" + job_name + ".err" + "\n")
-    fout.write("###" + "\n")
-    fout.write("###" + "\n")
-    fout.write("#SBATCH --mem-per-cpu=3000" + "\n")
+    fout.write("#!/bin/bash\n")
+    fout.write("###\n")
+    fout.write(f"#SBATCH --job-name={sbatch_script_path}\n")
+    fout.write(f"#SBATCH --output=tmp/{sbatch_script_path}.txt\n")
+    fout.write(f"#SBATCH --error=tmp/{sbatch_script_path}.err\n")
+    fout.write("###\n")
+    fout.write("###\n")
+    fout.write("#SBATCH --mem-per-cpu=3000\n")
     fout.write(f"#SBATCH --array=0-{num_job_total}%{num_job_in_parallel}\n")
-    fout.write("###" + "\n")
+    fout.write("###\n")
     # Options from the slurm/sbatch settings file
     for i in sbatch_options_list:
-        fout.write("#SBATCH " + str(i) + "\n")
-    fout.write("###" + "\n")
+        fout.write(f"#SBATCH {i}\n")
+    fout.write("###\n")
 
-    fout.write("params=( \\" + "\n")
+    fout.write("params=( \\\n")
 
     sl.add_output(
         f"{sgh.smac_dir}{result_directory}{sbatch_script_path}_seed_N_smac.txt",
         f"Configuration log for SMAC run 1 < N <= {num_job_total}")
+
     for i in range(0, num_job_total):
         seed = i + 1
-        result_path = f"{result_directory}{sbatch_script_path}_seed_{str(seed)}_smac.txt"
-        smac_execdir_i = smac_execdir + "/" + str(seed)
-        sl.add_output(sgh.smac_dir + result_path, "Configuration log for SMAC run  "
-                      f"{num_job_total}")
+        result_path = f"{result_directory}{sbatch_script_path}_seed_{seed}_smac.txt"
+        smac_execdir_i = smac_execdir / str(seed)
+        sl.add_output(sgh.smac_dir + result_path, 
+                      f"Configuration log for SMAC run {num_job_total}")
 
         fout.write(f"'{scenario_file} {seed} {result_path} {smac_execdir_i}' \\\n")
 
-    fout.write(")" + "\n")
+    fout.write(")\n")
 
     cmd_srun_prefix = "srun -N1 -n1 "
     cmd_srun_prefix += ssh.get_slurm_srun_user_options_str()
