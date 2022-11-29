@@ -765,8 +765,8 @@ def get_optimised_configuration(solver_name: str,
             optimised_configuration_seed)
 
 
-def generate_validation_callback_slurm_script(solver: str, instance_set_train: str,
-                                              instance_set_test: str,
+def generate_validation_callback_slurm_script(solver: Path, instance_set_train: Path,
+                                              instance_set_test: Path,
                                               dependency: str) -> str:
     """Generate a callback Slurm batch script for validation."""
     command_line = "echo $(pwd) $(date)\n"
@@ -778,14 +778,14 @@ def generate_validation_callback_slurm_script(solver: str, instance_set_train: s
         command_line += f" --instance-set-test {instance_set_test}"
 
     jobid = generate_generic_callback_slurm_script(
-        "validation", solver, instance_set_train, instance_set_test, dependency,
-        command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+        "validation", solver, instance_set_train, instance_set_test,
+        dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
 
     return jobid
 
 
-def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str,
-                                            instance_set_test: str,
+def generate_ablation_callback_slurm_script(solver: Path, instance_set_train: Path,
+                                            instance_set_test: Path,
                                             dependency: str) -> str:
     """Generate a callback Slurm batch script for ablation."""
     command_line = "echo $(pwd) $(date)\n"
@@ -798,29 +798,22 @@ def generate_ablation_callback_slurm_script(solver: str, instance_set_train: str
         command_line += f" --instance-set-test {instance_set_test}"
 
     jobid = generate_generic_callback_slurm_script(
-        "ablation", solver, instance_set_train, instance_set_test, dependency,
-        command_line, CommandName.RUN_ABLATION)
+        "ablation", solver, instance_set_train, instance_set_test,
+        dependency, command_line, CommandName.RUN_ABLATION)
 
     return jobid
 
 
-def generate_generic_callback_slurm_script(name: str, solver: str,
-                                           instance_set_train: str,
-                                           instance_set_test: str, dependency: str,
+def generate_generic_callback_slurm_script(name: str, solver: Path,
+                                           instance_set_train: Path,
+                                           instance_set_test: Path, dependency: str,
                                            command_line: str,
                                            command_name: CommandName) -> str:
     """Generate a callback Slurm batch script."""
-    solver_name = sfh.get_last_level_directory_name(solver)
-    instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
-    instance_set_test_name = None
+    delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
 
     if instance_set_test is not None:
-        instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
-
-    delayed_job_file_name = f"delayed_{name}_{solver_name}_{instance_set_train_name}"
-
-    if instance_set_test is not None:
-        delayed_job_file_name += f"_{instance_set_test_name}"
+        delayed_job_file_name += f"_{instance_set_test.name}"
 
     delayed_job_file_name += "_script.sh"
 
@@ -834,7 +827,7 @@ def generate_generic_callback_slurm_script(name: str, solver: str,
     output = f"--output={delayed_job_output}"
     error = f"--error={delayed_job_error}"
 
-    sl.add_output(delayed_job_file_path, f"Delayed {name} script")
+    sl.add_output(str(delayed_job_file_path), f"Delayed {name} script")
     sl.add_output(delayed_job_output, f"Delayed {name} standard output")
     sl.add_output(delayed_job_error, f"Delayed {name} error output")
 

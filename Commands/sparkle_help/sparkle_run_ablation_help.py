@@ -13,7 +13,6 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help import sparkle_add_solver_help as sash
 
 
 def get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name,
@@ -253,7 +252,7 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         fout.write("seed = 1234\n")
         # Get PCS file name from solver directory
         solver_directory = "Solvers/" + solver_name
-        pcs_file_name = sash.get_pcs_file_from_solver_directory(solver_directory)
+        pcs_file_name = scsh.get_pcs_file_from_solver_directory(solver_directory)
         pcs_file_path = "./solver/" + pcs_file_name
         fout.write("paramfile = " + pcs_file_path + "\n")
         fout.write("instance_file = instances_train.txt\n")
@@ -292,7 +291,7 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
 
     # If a reference list does not exist this is a single-file instance
     if not sih.check_existence_of_reference_instance_list(instance_set_name):
-        list_all_path = [instance[len(instances_directory):]
+        list_all_path = [str(instance)[len(instances_directory):]
                          for instance in list_all_path]
 
         with open(file_instance_path, "w") as fh:
