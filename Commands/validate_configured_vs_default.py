@@ -124,7 +124,7 @@ if __name__ == "__main__":
         smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
                                     instance_set_train_name)
         sih.copy_instances_to_smac(
-            list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
+            list_path, Path(inst_dir_prefix), Path(smac_inst_dir_prefix), "test"
         )
 
         # Copy file listing test instances to smac solver directory
