@@ -7,7 +7,6 @@ from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help import sparkle_logging as sl
