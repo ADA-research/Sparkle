@@ -122,7 +122,7 @@ if __name__ == "__main__":
         list_path = sih.get_list_all_path(instances_directory_test)
         inst_dir_prefix = instances_directory_test
         smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
-                                    instance_set_train_name)
+                                    instance_set_test_name)
         sih.copy_instances_to_smac(
             list_path, Path(inst_dir_prefix), Path(smac_inst_dir_prefix), "test"
         )
