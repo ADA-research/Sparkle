@@ -136,7 +136,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
     smac_paramfile = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
-                      f"{get_pcs_file_from_solver_directory(smac_solver_dir)}")
+                      f"{get_pcs_file_from_solver_directory(Path(smac_solver_dir))}")
     if instance_type == InstanceType.TRAIN:
         smac_outdir = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{inst_type}_{config_type}/")
@@ -177,7 +177,7 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
 
     smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
     smac_file_scenario = Path(smac_solver_dir, f"{solver_instance_name}_scenario.txt")
-    smac_paramfile = Path(get_pcs_file_from_solver_directory(smac_solver_dir))
+    smac_paramfile = get_pcs_file_from_solver_directory(smac_solver_dir)
 
     smac_paramfile_dir = solver_instance_dir / smac_paramfile
     smac_outdir = solver_instance_dir / "outdir_train_configuration/"
@@ -244,8 +244,8 @@ def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
     create_necessary_files_for_configured_solver(smac_solver_dir)
 
     # Copy PCS file to smac_solver_dir
-    solver_diretory = f"Solvers/{solver_name}/"
-    pcs_file = solver_diretory + get_pcs_file_from_solver_directory(solver_diretory)
+    solver_directory = Path("Solvers", solver_name)
+    pcs_file = solver_directory / get_pcs_file_from_solver_directory(solver_directory)
     command_line = f"cp {pcs_file} {smac_solver_dir}"
     os.system(command_line)
 
@@ -255,7 +255,7 @@ def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
 def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
     """Create directories needed for configuration of a solver."""
     outdir_dir = smac_solver_dir / "outdir_train_configuration"
-    command_line = "mkdir -p " + str(outdir_dir)
+    command_line = f"mkdir -p {outdir_dir}"
     os.system(command_line)
 
     tmp_dir = smac_solver_dir / "tmp"
@@ -265,18 +265,16 @@ def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
     return
 
 
-def get_pcs_file_from_solver_directory(solver_directory: str) -> str:
+def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     """Return the name of the PCS file in a solver directory.
 
     If not found, return an empty str.
     """
-    list_files = os.listdir(solver_directory)
+    for file_path in Path(solver_directory).iterdir():
+        file_extension = "".join(file_path.suffixes)
 
-    for file_name in list_files:
-        file_extension = sfh.get_file_full_extension(file_name)
-
-        if file_extension == "pcs":
-            return file_name
+        if file_extension == ".pcs":
+            return file_path.name
 
     return ""
 
@@ -292,8 +290,8 @@ def copy_solver_files_to_smac_dir(solver_name: str, instance_set_name: str) -> N
         cmd = f"mkdir -p {smac_solver_path_i}/tmp/"
         os.system(cmd)
 
-        solver_diretory = Path("Solvers", solver_name, "*")
-        cmd = f"cp -r {solver_diretory} {smac_solver_path_i}"
+        solver_directory = Path("Solvers", solver_name, "*")
+        cmd = f"cp -r {solver_directory} {smac_solver_path_i}"
         os.system(cmd)
 
     return
@@ -347,16 +345,16 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
     for i in range(1, num_of_smac_run + 1):
-        solver_diretory = "Solvers/" + solver_name + "/*"
+        solver_directory = f"Solvers/{solver_name}/*"
 
         # Train default
         execdir = "validate_train_default/"
 
         # Create directories, -p makes sure any missing parents are also created
-        cmd = "mkdir -p " + smac_solver_dir + execdir + "/tmp/"
+        cmd = f"mkdir -p {smac_solver_dir}{execdir}/tmp/"
         os.system(cmd)
         # Copy solver to execution directory
-        cmd = "cp -r " + solver_diretory + " " + smac_solver_dir + execdir
+        cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
         os.system(cmd)
 
         # Test default
@@ -364,20 +362,20 @@ def prepare_smac_execution_directories_validation(solver_name: str,
             execdir = f"validate_{instance_set_test_name}_test_default/"
 
             # Create directories, -p makes sure any missing parents are also created
-            cmd = "mkdir -p " + smac_solver_dir + execdir + "/tmp/"
+            cmd = f"mkdir -p {smac_solver_dir}{execdir}/tmp/"
             os.system(cmd)
             # Copy solver to execution directory
-            cmd = "cp -r " + solver_diretory + " " + smac_solver_dir + execdir
+            cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
             os.system(cmd)
 
             # Test configured
-            execdir = "validate_{}_test_configured/".format(instance_set_test_name)
+            execdir = f"validate_{instance_set_test_name}_test_configured/"
 
             # Create directories, -p makes sure any missing parents are also created
-            cmd = "mkdir -p " + smac_solver_dir + execdir + "/tmp/"
+            cmd = f"mkdir -p {smac_solver_dir}{execdir}/tmp/"
             os.system(cmd)
             # Copy solver to execution directory
-            cmd = "cp -r " + solver_diretory + " " + smac_solver_dir + execdir
+            cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
             os.system(cmd)
 
     return
@@ -393,7 +391,7 @@ def create_smac_configure_sbatch_script(solver_name: str,
     # Remove possible old results for this scenario
     result_part = Path("results", f"{solver_name}_{instance_set_name}")
     result_dir = sgh.smac_dir / result_part
-    [item.unlink() for item in result_dir.glob("*") if item.is_file()]
+    [path.unlink() for path in result_dir.glob("*") if path.is_file()]
 
     scenario_file = execdir / smac_file_scenario_name
 
@@ -591,9 +589,9 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name) -> None:
             optimised_configuration_list[i + 1].strip(" '"))
 
     # Read existing PCS file and create output content
-    solver_diretory = "Solvers/" + solver_name
-    pcs_file = solver_diretory + "/" + get_pcs_file_from_solver_directory(
-        solver_diretory)
+    solver_directory = Path("Solvers", solver_name)
+    pcs_file = solver_directory / get_pcs_file_from_solver_directory(
+        solver_directory)
     pcs_file_out = []
 
     with open(pcs_file) as infile:
@@ -763,111 +761,3 @@ def get_optimised_configuration(solver_name: str,
 
     return (optimised_configuration_str, optimised_configuration_performance,
             optimised_configuration_seed)
-
-
-def generate_validation_callback_slurm_script(solver: Path, instance_set_train: Path,
-                                              instance_set_test: Path,
-                                              dependency: str) -> str:
-    """Generate a callback Slurm batch script for validation."""
-    command_line = "echo $(pwd) $(date)\n"
-    command_line += ("srun -N1 -n1 ./Commands/validate_configured_vs_default.py "
-                     "--settings-file Settings/latest.ini")
-    command_line += f" --solver {solver}"
-    command_line += f" --instance-set-train {instance_set_train}"
-    if instance_set_test is not None:
-        command_line += f" --instance-set-test {instance_set_test}"
-
-    jobid = generate_generic_callback_slurm_script(
-        "validation", solver, instance_set_train, instance_set_test,
-        dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
-
-    return jobid
-
-
-def generate_ablation_callback_slurm_script(solver: Path, instance_set_train: Path,
-                                            instance_set_test: Path,
-                                            dependency: str) -> str:
-    """Generate a callback Slurm batch script for ablation."""
-    command_line = "echo $(pwd) $(date)\n"
-    command_line += ("srun -N1 -n1 ./Commands/run_ablation.py --settings-file "
-                     "Settings/latest.ini")
-    command_line += f" --solver {solver}"
-    command_line += f" --instance-set-train {instance_set_train}"
-
-    if instance_set_test is not None:
-        command_line += f" --instance-set-test {instance_set_test}"
-
-    jobid = generate_generic_callback_slurm_script(
-        "ablation", solver, instance_set_train, instance_set_test,
-        dependency, command_line, CommandName.RUN_ABLATION)
-
-    return jobid
-
-
-def generate_generic_callback_slurm_script(name: str, solver: Path,
-                                           instance_set_train: Path,
-                                           instance_set_test: Path, dependency: str,
-                                           command_line: str,
-                                           command_name: CommandName) -> str:
-    """Generate a callback Slurm batch script."""
-    delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
-
-    if instance_set_test is not None:
-        delayed_job_file_name += f"_{instance_set_test.name}"
-
-    delayed_job_file_name += "_script.sh"
-
-    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
-    sparkle_tmp_path.mkdir(parents=True, exist_ok=True)
-    delayed_job_file_path = sparkle_tmp_path / delayed_job_file_name
-    delayed_job_output = f"{delayed_job_file_path}.txt"
-    delayed_job_error = f"{delayed_job_file_path}.err"
-
-    job_name = f"--job-name={delayed_job_file_name}"
-    output = f"--output={delayed_job_output}"
-    error = f"--error={delayed_job_error}"
-
-    sl.add_output(str(delayed_job_file_path), f"Delayed {name} script")
-    sl.add_output(delayed_job_output, f"Delayed {name} standard output")
-    sl.add_output(delayed_job_error, f"Delayed {name} error output")
-
-    sbatch_options_list = [job_name, output, error]
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
-    # Get user options second to overrule defaults
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
-
-    # Only overwrite task specific arguments
-    sbatch_options_list.append(f"--dependency=afterany:{dependency}")
-    sbatch_options_list.append("--nodes=1")
-    sbatch_options_list.append("--ntasks=1")
-    sbatch_options_list.append("-c1")
-    sbatch_options_list.append("--mem-per-cpu=3000")
-
-    fout = open(delayed_job_file_path, "w")
-    fout.write("#!/bin/bash\n")  # Use bash to execute this script
-    fout.write("###\n")
-    fout.write("###\n")
-
-    for sbatch_option in sbatch_options_list:
-        fout.write(f"#SBATCH {sbatch_option}\n")
-
-    fout.write("###\n")
-    fout.write(f"{command_line}\n")
-    fout.close()
-
-    os.popen(f"chmod 755 {delayed_job_file_path}")
-
-    output_list = os.popen(f"sbatch ./{delayed_job_file_path}").readlines()
-
-    if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-        jobid = output_list[0].strip().split()[-1]
-        # Add job to active job CSV
-        sjh.write_active_job(jobid, command_name)
-    else:
-        jobid = ""
-
-    print(f"Callback script to launch {name} is placed at {delayed_job_file_path}")
-    print(f"Once configuration is finished, {name} will automatically start as a Slurm "
-          f"job: {jobid}")
-
-    return jobid
