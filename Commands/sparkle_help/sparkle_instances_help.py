@@ -196,6 +196,7 @@ def copy_instances_to_smac(list_instance_path: list[Path], instance_dir_prefix: 
         # Only do this when no instance_list file exists for this instance set
         if not check_existence_of_reference_instance_list(instance_set_name):
             # Write instance to SMAC instance file
+            # ori_instance_path.parts[-2] returns the lowest level directory name
             fout.write(f"../../instances/{ori_instance_path.parts[-2]}/"
                        f"{ori_instance_path.name}\n")
 
