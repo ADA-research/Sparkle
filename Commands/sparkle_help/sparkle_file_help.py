@@ -83,21 +83,6 @@ def get_directory(filepath):
     return directory
 
 
-def get_file_full_extension(filepath):
-    """Return the full extension of a file.
-
-    If it exists of multiple components, all are returned.
-    """
-    filename = get_file_name(filepath)
-    file_extension = ""
-    left_index = filename.find(".")
-    if left_index < 0:
-        pass
-    else:
-        file_extension = filename[left_index + 1:]
-    return file_extension
-
-
 def get_file_least_extension(filepath):
     """Return the last extension of a file."""
     filename = get_file_name(filepath)

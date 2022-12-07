@@ -20,6 +20,7 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle_help import sparkle_slurm_help as ssh
 
 
 def parser_function():
@@ -127,9 +128,6 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
     use_features = args.use_features
 
-    solver_name = solver.name
-    instance_set_train_name = instance_set_train.name
-
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -194,31 +192,31 @@ if __name__ == "__main__":
 
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
-    scsh.clean_configuration_directory(solver_name, instance_set_train_name)
-    sah.clean_ablation_scenarios(solver_name, instance_set_train_name)
+    scsh.clean_configuration_directory(solver.name, instance_set_train.name)
+    sah.clean_ablation_scenarios(solver.name, instance_set_train.name)
 
     # Copy instances to smac directory
     list_all_path = sih.get_list_all_path(instance_set_train)
     smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
-                                instance_set_train_name)
+                                instance_set_train.name)
     sih.copy_instances_to_smac(
         list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
     )
     if use_features:
-        smac_solver_dir = scsh.get_smac_solver_dir(solver_name, instance_set_train_name)
-        feature_file_name = f"{smac_solver_dir}{instance_set_train_name}_features.csv"
+        smac_solver_dir = scsh.get_smac_solver_dir(solver.name, instance_set_train.name)
+        feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
         feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
 
     scsh.copy_file_instance(
-        solver_name, instance_set_train_name, instance_set_train_name, "train"
+        solver.name, instance_set_train.name, instance_set_train.name, "train"
     )
-    scsh.create_file_scenario_configuration(solver_name, instance_set_train_name,
+    scsh.create_file_scenario_configuration(solver.name, instance_set_train.name,
                                             use_features)
     scsh.copy_solver_files_to_smac_dir(
-        solver_name, instance_set_train_name
+        solver.name, instance_set_train.name
     )
     smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
-        solver_name, instance_set_train_name
+        solver.name, instance_set_train.name
     )
     configure_jobid = scsh.submit_smac_configure_sbatch_script(
         smac_configure_sbatch_script_name
@@ -230,7 +228,7 @@ if __name__ == "__main__":
     last_configuration_file_path = Path(
         sgh.smac_dir,
         "example_scenarios",
-        f"{solver_name}_{instance_set_train_name}",
+        f"{solver.name}_{instance_set_train.name}",
         sgh.sparkle_last_configuration_file_name
     )
 
@@ -252,13 +250,13 @@ if __name__ == "__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = scsh.generate_validation_callback_slurm_script(
+        validate_jobid = ssh.generate_validation_callback_slurm_script(
             solver, instance_set_train, instance_set_test, configure_jobid
         )
         dependency_jobid_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = scsh.generate_ablation_callback_slurm_script(
+        ablation_jobid = ssh.generate_ablation_callback_slurm_script(
             solver, instance_set_train, instance_set_test, configure_jobid
         )
         dependency_jobid_list.append(ablation_jobid)

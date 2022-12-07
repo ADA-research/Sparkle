@@ -154,7 +154,7 @@ def _copy_reference_instance_list_to_smac(smac_instance_file: Path,
     return
 
 
-def copy_instances_to_smac(list_instance_path, instance_dir_prefix: Path,
+def copy_instances_to_smac(list_instance_path: list[Path], instance_dir_prefix: Path,
                            smac_instance_dir_prefix: Path, train_or_test: str) -> None:
     """Copy problem instances to be used for configuration to the SMAC directory."""
     instance_set_name = Path(instance_dir_prefix).name
@@ -185,11 +185,11 @@ def copy_instances_to_smac(list_instance_path, instance_dir_prefix: Path,
     fout = smac_instance_file.open("w+")
 
     for ori_instance_path in list_instance_path:
-        target_instance_path = smac_instance_dir_prefix / Path(ori_instance_path).name
+        target_instance_path = smac_instance_dir_prefix / ori_instance_path.name
         target_instance_dir = target_instance_path.parent
 
         if not os.path.exists(target_instance_dir):
-            os.system(f"mkdir -p {str(target_instance_dir)}")
+            os.system(f"mkdir -p {target_instance_dir}")
         command_line = f"cp {ori_instance_path} {target_instance_path}"
         os.system(command_line)
 

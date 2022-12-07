@@ -101,16 +101,14 @@ if __name__ == "__main__":
             args.target_cutoff_time, SettingState.CMD_LINE
         )
 
-    solver_name = solver.name
-    instance_set_train_name = instance_set_train.name
     instance_set_test_name = None
 
     # Make sure configuration results exist before trying to work with them
-    scsh.check_validation_prerequisites(solver_name, instance_set_train_name)
+    scsh.check_validation_prerequisites(solver.name, instance_set_train.name)
 
     # Record optimised configuration
-    scsh.write_optimised_configuration_str(solver_name, instance_set_train_name)
-    scsh.write_optimised_configuration_pcs(solver_name, instance_set_train_name)
+    scsh.write_optimised_configuration_str(solver.name, instance_set_train.name)
+    scsh.write_optimised_configuration_pcs(solver.name, instance_set_train.name)
 
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name
@@ -128,17 +126,17 @@ if __name__ == "__main__":
 
         # Copy file listing test instances to smac solver directory
         scsh.copy_file_instance(
-            solver_name, instance_set_train_name, instance_set_test_name, "test"
+            solver.name, instance_set_train.name, instance_set_test_name, "test"
         )
 
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(
-        solver_name, instance_set_train_name, instance_set_test_name
+        solver.name, instance_set_train.name, instance_set_test_name
     )
 
     # Generate and run sbatch script for validation runs
     sbatch_script_name = ssh.generate_sbatch_script_for_validation(
-        solver_name, instance_set_train_name, instance_set_test_name
+        solver.name, instance_set_train.name, instance_set_test_name
     )
     sbatch_script_dir = sgh.smac_dir
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
@@ -156,7 +154,7 @@ if __name__ == "__main__":
     last_test_file_path = Path(
         sgh.smac_dir,
         "example_scenarios",
-        f"{solver_name}_{sgh.sparkle_last_test_file_name}"
+        f"{solver.name}_{sgh.sparkle_last_test_file_name}"
     )
 
     fout = open(last_test_file_path, "w+")

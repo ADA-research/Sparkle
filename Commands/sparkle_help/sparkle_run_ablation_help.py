@@ -46,10 +46,10 @@ def prepare_ablation_scenario(solver_name, instance_train_name, instance_test_na
     ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
                                                             instance_train_name,
                                                             instance_test_name)
-    ablation_scenario_solver_dir = PurePath(ablation_scenario_dir, "solver/")
+    ablation_scenario_solver_dir = Path(ablation_scenario_dir, "solver/")
 
     Path(ablation_scenario_dir).mkdir(parents=True, exist_ok=True)
-    Path(ablation_scenario_solver_dir).mkdir(parents=True, exist_ok=True)
+    ablation_scenario_solver_dir.mkdir(parents=True, exist_ok=True)
 
     # Copy ablation executables to isolated scenario directory
     copy_candidates = ["conf/", "lib/", "ablationAnalysis", "ablationAnalysis.jar",
@@ -251,9 +251,9 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
 
         fout.write("seed = 1234\n")
         # Get PCS file name from solver directory
-        solver_directory = "Solvers/" + solver_name
+        solver_directory = Path("Solvers/", solver_name)
         pcs_file_name = scsh.get_pcs_file_from_solver_directory(solver_directory)
-        pcs_file_path = "./solver/" + pcs_file_name
+        pcs_file_path = "./solver/" + str(pcs_file_name)
         fout.write("paramfile = " + pcs_file_path + "\n")
         fout.write("instance_file = instances_train.txt\n")
         fout.write("test_instance_file = instances_test.txt\n")

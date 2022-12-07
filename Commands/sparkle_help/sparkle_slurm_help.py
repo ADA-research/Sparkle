@@ -419,3 +419,111 @@ def submit_sbatch_script(sbatch_script_name: str, command_name: CommandName,
         jobid = ""
 
     return jobid
+
+
+def generate_validation_callback_slurm_script(solver: Path, instance_set_train: Path,
+                                              instance_set_test: Path,
+                                              dependency: str) -> str:
+    """Generate a callback Slurm batch script for validation."""
+    command_line = "echo $(pwd) $(date)\n"
+    command_line += ("srun -N1 -n1 ./Commands/validate_configured_vs_default.py "
+                     "--settings-file Settings/latest.ini")
+    command_line += f" --solver {solver}"
+    command_line += f" --instance-set-train {instance_set_train}"
+    if instance_set_test is not None:
+        command_line += f" --instance-set-test {instance_set_test}"
+
+    jobid = generate_generic_callback_slurm_script(
+        "validation", solver, instance_set_train, instance_set_test,
+        dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+
+    return jobid
+
+
+def generate_ablation_callback_slurm_script(solver: Path, instance_set_train: Path,
+                                            instance_set_test: Path,
+                                            dependency: str) -> str:
+    """Generate a callback Slurm batch script for ablation."""
+    command_line = "echo $(pwd) $(date)\n"
+    command_line += ("srun -N1 -n1 ./Commands/run_ablation.py --settings-file "
+                     "Settings/latest.ini")
+    command_line += f" --solver {solver}"
+    command_line += f" --instance-set-train {instance_set_train}"
+
+    if instance_set_test is not None:
+        command_line += f" --instance-set-test {instance_set_test}"
+
+    jobid = generate_generic_callback_slurm_script(
+        "ablation", solver, instance_set_train, instance_set_test,
+        dependency, command_line, CommandName.RUN_ABLATION)
+
+    return jobid
+
+
+def generate_generic_callback_slurm_script(name: str, solver: Path,
+                                           instance_set_train: Path,
+                                           instance_set_test: Path, dependency: str,
+                                           command_line: str,
+                                           command_name: CommandName) -> str:
+    """Generate a callback Slurm batch script."""
+    delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
+
+    if instance_set_test is not None:
+        delayed_job_file_name += f"_{instance_set_test.name}"
+
+    delayed_job_file_name += "_script.sh"
+
+    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
+    sparkle_tmp_path.mkdir(parents=True, exist_ok=True)
+    delayed_job_file_path = sparkle_tmp_path / delayed_job_file_name
+    delayed_job_output = f"{delayed_job_file_path}.txt"
+    delayed_job_error = f"{delayed_job_file_path}.err"
+
+    job_name = f"--job-name={delayed_job_file_name}"
+    output = f"--output={delayed_job_output}"
+    error = f"--error={delayed_job_error}"
+
+    sl.add_output(str(delayed_job_file_path), f"Delayed {name} script")
+    sl.add_output(delayed_job_output, f"Delayed {name} standard output")
+    sl.add_output(delayed_job_error, f"Delayed {name} error output")
+
+    sbatch_options_list = [job_name, output, error]
+    sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
+    # Get user options second to overrule defaults
+    sbatch_options_list.extend(get_slurm_sbatch_user_options_list())
+
+    # Only overwrite task specific arguments
+    sbatch_options_list.append(f"--dependency=afterany:{dependency}")
+    sbatch_options_list.append("--nodes=1")
+    sbatch_options_list.append("--ntasks=1")
+    sbatch_options_list.append("-c1")
+    sbatch_options_list.append("--mem-per-cpu=3000")
+
+    fout = open(delayed_job_file_path, "w")
+    fout.write("#!/bin/bash\n")  # Use bash to execute this script
+    fout.write("###\n")
+    fout.write("###\n")
+
+    for sbatch_option in sbatch_options_list:
+        fout.write(f"#SBATCH {sbatch_option}\n")
+
+    fout.write("###\n")
+    fout.write(f"{command_line}\n")
+    fout.close()
+
+    os.popen(f"chmod 755 {delayed_job_file_path}")
+
+    output_list = os.popen(f"sbatch ./{delayed_job_file_path}").readlines()
+
+    if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
+        jobid = output_list[0].strip().split()[-1]
+        # Add job to active job CSV
+        sjh.write_active_job(jobid, command_name)
+    else:
+        jobid = ""
+
+    print(f"Callback script to launch {name} is placed at {delayed_job_file_path}")
+    print(f"Once configuration is finished, {name} will automatically start as a Slurm "
+          f"job: {jobid}")
+
+    return jobid
