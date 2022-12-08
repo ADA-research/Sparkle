@@ -7,7 +7,6 @@ from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help import sparkle_logging as sl
@@ -29,19 +28,19 @@ def parser_function():
     parser.add_argument(
         "--solver",
         required=True,
-        type=str,
+        type=Path,
         help="path to solver"
     )
     parser.add_argument(
         "--instance-set-train",
         required=True,
-        type=str,
+        type=Path,
         help="path to training instance set",
     )
     parser.add_argument(
         "--instance-set-test",
         required=False,
-        type=str,
+        type=Path,
         help="path to testing instance set",
     )
     parser.add_argument(
@@ -102,49 +101,42 @@ if __name__ == "__main__":
             args.target_cutoff_time, SettingState.CMD_LINE
         )
 
-    solver_name = sfh.get_last_level_directory_name(solver)
-    instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
     instance_set_test_name = None
 
     # Make sure configuration results exist before trying to work with them
-    scsh.check_validation_prerequisites(solver_name, instance_set_train_name)
+    scsh.check_validation_prerequisites(solver.name, instance_set_train.name)
 
     # Record optimised configuration
-    scsh.write_optimised_configuration_str(solver_name, instance_set_train_name)
-    scsh.write_optimised_configuration_pcs(solver_name, instance_set_train_name)
+    scsh.write_optimised_configuration_str(solver.name, instance_set_train.name)
+    scsh.write_optimised_configuration_pcs(solver.name, instance_set_train.name)
 
     if instance_set_test is not None:
-        instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+        instance_set_test_name = instance_set_test.name
 
         # Copy test instances to smac directory (train should already be there from
         # configuration)
-        instances_directory_test = "Instances/" + instance_set_test_name
+        instances_directory_test = Path("Instances/", instance_set_test_name)
         list_path = sih.get_list_all_path(instances_directory_test)
         inst_dir_prefix = instances_directory_test
-        smac_inst_dir_prefix = (
-            sgh.smac_dir
-            + "/"
-            + "example_scenarios/"
-            + "instances/"
-            + sfh.get_last_level_directory_name(instances_directory_test)
-        )
+        smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
+                                    instance_set_test_name)
         sih.copy_instances_to_smac(
             list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
         )
 
         # Copy file listing test instances to smac solver directory
-        scsh.handle_file_instance(
-            solver_name, instance_set_train_name, instance_set_test_name, "test"
+        scsh.copy_file_instance(
+            solver.name, instance_set_train.name, instance_set_test_name, "test"
         )
 
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(
-        solver_name, instance_set_train_name, instance_set_test_name
+        solver.name, instance_set_train.name, instance_set_test_name
     )
 
     # Generate and run sbatch script for validation runs
     sbatch_script_name = ssh.generate_sbatch_script_for_validation(
-        solver_name, instance_set_train_name, instance_set_test_name
+        solver.name, instance_set_train.name, instance_set_test_name
     )
     sbatch_script_dir = sgh.smac_dir
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
@@ -159,19 +151,17 @@ if __name__ == "__main__":
           f"{validate_jobid}")
 
     # Write most recent run to file
-    last_test_file_path = (
-        sgh.smac_dir
-        + "/example_scenarios/"
-        + solver_name
-        + "_"
-        + sgh.sparkle_last_test_file_name
+    last_test_file_path = Path(
+        sgh.smac_dir,
+        "example_scenarios",
+        f"{solver.name}_{sgh.sparkle_last_test_file_name}"
     )
 
     fout = open(last_test_file_path, "w+")
-    fout.write("solver " + str(solver) + "\n")
-    fout.write("train " + str(instance_set_train) + "\n")
+    fout.write(f"solver {solver}\n")
+    fout.write(f"train {instance_set_train}\n")
     if instance_set_test is not None:
-        fout.write("test " + str(instance_set_test) + "\n")
+        fout.write(f"test {instance_set_test}\n")
     fout.close()
 
     # Update latest scenario
