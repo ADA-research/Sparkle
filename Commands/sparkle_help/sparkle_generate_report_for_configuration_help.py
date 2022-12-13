@@ -380,7 +380,7 @@ def get_figure_configured_vs_default_on_train_instance_set(
 
 
 def get_timeouts_test(solver_name: str, instance_set_train_name: str,
-                      instance_set_name: str, cutoff: int) -> tuple(int, int, int):
+                      instance_set_name: str, cutoff: int) -> tuple[int, int, int]:
     """Return the number timeouts by configured, default and both on the testing set."""
     # Retrieve instances and PARk values
     configured_results_file = (
@@ -402,7 +402,7 @@ def get_timeouts_test(solver_name: str, instance_set_train_name: str,
 
 
 def get_timeouts_train(solver_name: str, instance_set_name: str,
-                       cutoff: int) -> tuple(int, int, int):
+                       cutoff: int) -> tuple[int, int, int]:
     """Return the number timeouts by configured, default and both on the training set."""
     # Retrieve instances and PARk values
     (optimised_configuration_str, optimised_configuration_performance_par_k,
@@ -428,7 +428,7 @@ def get_timeouts_train(solver_name: str, instance_set_name: str,
 
 def get_timeouts(dict_instance_to_par_k_configured: dict,
                  dict_instance_to_par_k_default: dict,
-                 cutoff: int) -> tuple(int, int, int):
+                 cutoff: int) -> tuple[int, int, int]:
     """Return the number of timeouts for given dicts."""
     # Count default timeouts, configured timeouts, and overlapping timeouts
     penalty = sgh.settings.get_general_penalty_multiplier()
