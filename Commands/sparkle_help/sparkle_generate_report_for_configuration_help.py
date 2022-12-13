@@ -379,13 +379,10 @@ def get_figure_configured_vs_default_on_train_instance_set(
         smac_each_run_cutoff_time)
 
 
-def get_timeouts_test(solver_name, instance_set_train_name, instance_set_name, cutoff):
+def get_timeouts_test(solver_name: str, instance_set_train_name: str,
+                      instance_set_name: str, cutoff: int) -> tuple[int, int, int]:
     """Return the number timeouts by configured, default and both on the testing set."""
-    configured_timeouts = 0
-    default_timeouts = 0
-    overlapping_timeouts = 0
-
-    # Retrieve instances and PAR10 values
+    # Retrieve instances and PARk values
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
@@ -395,37 +392,20 @@ def get_timeouts_test(solver_name, instance_set_train_name, instance_set_name, c
                               f"_test_configured/{configured_results_file}")
     default_results_dir = (f"{smac_solver_dir}outdir_{instance_set_name}_test_default/"
                            f"{default_results_file}")
-    dict_instance_to_par10_configured = get_dict_instance_to_performance(
+    dict_instance_to_par_k_configured = get_dict_instance_to_performance(
         configured_results_dir, cutoff)
-    dict_instance_to_par10_default = get_dict_instance_to_performance(
+    dict_instance_to_par_k_default = get_dict_instance_to_performance(
         default_results_dir, cutoff)
 
-    # Count default timeouts, configured timeouts, and overlapping timeouts
-    timeout_value = cutoff * 10
-
-    for instance in dict_instance_to_par10_configured:
-        configured_par10_value = dict_instance_to_par10_configured[instance]
-        default_par10_value = dict_instance_to_par10_default[instance]
-
-        if configured_par10_value == timeout_value:
-            configured_timeouts += 1
-        if default_par10_value == timeout_value:
-            default_timeouts += 1
-        if (configured_par10_value == timeout_value
-           and default_par10_value == timeout_value):
-            overlapping_timeouts += 1
-
-    return configured_timeouts, default_timeouts, overlapping_timeouts
+    return get_timeouts(dict_instance_to_par_k_configured,
+                        dict_instance_to_par_k_default, cutoff)
 
 
-def get_timeouts_train(solver_name, instance_set_name, cutoff):
+def get_timeouts_train(solver_name: str, instance_set_name: str,
+                       cutoff: int) -> tuple[int, int, int]:
     """Return the number timeouts by configured, default and both on the training set."""
-    configured_timeouts = 0
-    default_timeouts = 0
-    overlapping_timeouts = 0
-
-    # Retrieve instances and PAR10 values
-    (optimised_configuration_str, optimised_configuration_performance_par10,
+    # Retrieve instances and PARk values
+    (optimised_configuration_str, optimised_configuration_performance_par_k,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_name)
     configured_results_file = ("validationObjectiveMatrix-traj-run-"
@@ -437,24 +417,37 @@ def get_timeouts_train(solver_name, instance_set_name, cutoff):
                               f"{solver_name}_{instance_set_name}_scenario/"
                               f"{configured_results_file}")
     default_results_dir = f"{smac_solver_dir}outdir_train_default/{default_results_file}"
-    dict_instance_to_par10_configured = get_dict_instance_to_performance(
+    dict_instance_to_par_k_configured = get_dict_instance_to_performance(
         configured_results_dir, cutoff)
-    dict_instance_to_par10_default = get_dict_instance_to_performance(
+    dict_instance_to_par_k_default = get_dict_instance_to_performance(
         default_results_dir, cutoff)
 
+    return get_timeouts(dict_instance_to_par_k_configured,
+                        dict_instance_to_par_k_default, cutoff)
+
+
+def get_timeouts(dict_instance_to_par_k_configured: dict,
+                 dict_instance_to_par_k_default: dict,
+                 cutoff: int) -> tuple[int, int, int]:
+    """Return the number of timeouts for given dicts."""
     # Count default timeouts, configured timeouts, and overlapping timeouts
-    timeout_value = cutoff * 10
+    penalty = sgh.settings.get_general_penalty_multiplier()
+    timeout_value = cutoff * penalty
 
-    for instance in dict_instance_to_par10_configured:
-        configured_par10_value = dict_instance_to_par10_configured[instance]
-        default_par10_value = dict_instance_to_par10_default[instance]
+    configured_timeouts = 0
+    default_timeouts = 0
+    overlapping_timeouts = 0
 
-        if configured_par10_value == timeout_value:
+    for instance in dict_instance_to_par_k_configured:
+        configured_par_k_value = dict_instance_to_par_k_configured[instance]
+        default_par_k_value = dict_instance_to_par_k_default[instance]
+
+        if configured_par_k_value == timeout_value:
             configured_timeouts += 1
-        if default_par10_value == timeout_value:
+        if default_par_k_value == timeout_value:
             default_timeouts += 1
-        if (configured_par10_value == timeout_value
-           and default_par10_value == timeout_value):
+        if (configured_par_k_value == timeout_value
+           and default_par_k_value == timeout_value):
             overlapping_timeouts += 1
 
     return configured_timeouts, default_timeouts, overlapping_timeouts
