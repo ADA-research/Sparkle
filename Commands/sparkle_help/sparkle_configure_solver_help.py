@@ -447,12 +447,12 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
     fout.write("params=( \\\n")
 
     sl.add_output(
-        f"{sgh.smac_dir}{result_directory}{sbatch_script_path}_seed_N_smac.txt",
+        f"{sgh.smac_dir}{result_directory}/{sbatch_script_path}_seed_N_smac.txt",
         f"Configuration log for SMAC run 1 < N <= {num_job_total}")
 
     for i in range(0, num_job_total):
         seed = i + 1
-        result_path = f"{result_directory}{sbatch_script_path}_seed_{seed}_smac.txt"
+        result_path = f"{result_directory}/{sbatch_script_path}_seed_{seed}_smac.txt"
         smac_execdir_i = smac_execdir / str(seed)
         sl.add_output(sgh.smac_dir + result_path,
                       f"Configuration log for SMAC run {num_job_total}")
