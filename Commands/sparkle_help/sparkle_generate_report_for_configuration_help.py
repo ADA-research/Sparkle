@@ -193,7 +193,8 @@ def get_performance_measure() -> str:
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
     if smac_run_obj == "RUNTIME":
-        performance_measure = "PAR10"
+        penalty = sgh.settings.get_general_penalty_multiplier()
+        performance_measure = f"PAR{penalty}"
     elif smac_run_obj == "QUALITY":
         performance_measure = "performance"
 
