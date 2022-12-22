@@ -8,7 +8,6 @@ import time
 import random
 import fcntl
 from pathlib import Path
-from typing import List
 
 
 try:
@@ -95,7 +94,7 @@ def get_file_least_extension(filepath):
     return file_extension
 
 
-def get_instance_list_from_reference(instances_path: Path) -> List[str]:
+def get_instance_list_from_reference(instances_path: Path) -> list[str]:
     """Return a list of instances read from a file."""
     instance_list = []
     instances_path_str = str(instances_path)
@@ -117,7 +116,7 @@ def get_instance_list_from_reference(instances_path: Path) -> List[str]:
     return instance_list
 
 
-def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> List[str]:
+def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
     """Return a list of solvers for a parallel portfolio specified by its path."""
     portfolio_solver_list = []
     solvers_path_str = "Solvers/"
@@ -247,7 +246,7 @@ def get_list_all_csv_filename(filepath):
     return csv_list
 
 
-def get_list_all_result_filename(filepath: str) -> List[str]:
+def get_list_all_result_filename(filepath: str) -> list[str]:
     """Return a list of result files in a given path."""
     result_list = []
     if not os.path.exists(filepath):
