@@ -8,7 +8,6 @@ import time
 import random
 import fcntl
 from pathlib import Path
-from typing import List
 
 
 try:
@@ -95,7 +94,7 @@ def get_file_least_extension(filepath):
     return file_extension
 
 
-def get_instance_list_from_reference(instances_path: Path) -> List[str]:
+def get_instance_list_from_reference(instances_path: Path) -> list[str]:
     """Return a list of instances read from a file."""
     instance_list = []
     instances_path_str = str(instances_path)
