@@ -17,10 +17,10 @@ dependencies:
     - pandas
     # Testing
     - pytest
-    - flake8
-    - flake8-quotes
-    - pep8-naming
-    - flake8-docstrings
+    - flake8==5.0.4
+    - flake8-quotes==3.3.1
+    - pep8-naming==0.13.2
+    - flake8-docstrings==1.6.0
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost
