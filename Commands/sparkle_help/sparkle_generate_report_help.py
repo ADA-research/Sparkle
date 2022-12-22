@@ -165,8 +165,8 @@ def get_solver_actual_ranking_list():
     return str_value
 
 
-def get_PARk_ranking_list():
-    """Return the list of solvers ranked by PARk as LaTeX str."""
+def get_par_ranking_list():
+    """Return the list of solvers ranked by PAR as LaTeX str."""
     str_value = ""
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -182,8 +182,8 @@ def get_PARk_ranking_list():
     return str_value
 
 
-def get_vbs_PARk():
-    """Return the PARk of the VBS over a set of instances."""
+def get_vbs_par():
+    """Return the PAR of the VBS over a set of instances."""
     str_value = r""
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -193,8 +193,8 @@ def get_vbs_PARk():
     return str_value
 
 
-def get_actual_PARk() -> str:
-    """Return the PARk of the selector over a set of instances.
+def get_actual_par() -> str:
+    """Return the PAR of the selector over a set of instances.
 
     @return string formatted mean performance.
     """
@@ -359,8 +359,8 @@ def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
     return str_value
 
 
-def get_test_actual_PARk(test_case_directory: str) -> str:
-    """Return the true PARk score on a test set."""
+def get_test_actual_par(test_case_directory: str) -> str:
+    """Return the true PAR score on a test set."""
     str_value = ""
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + "sparkle_performance_data.csv")
@@ -436,16 +436,20 @@ def get_dict_variable_to_value(test_case_directory: str = None):
     str_value = get_solver_actual_ranking_list()
     mydict[variable] = str_value
 
-    variable = r"PARkRankingList"
-    str_value = get_PARk_ranking_list()
+    variable = r"PARRankingList"
+    str_value = get_par_ranking_list()
     mydict[variable] = str_value
 
-    variable = r"VBSPARk"
-    str_value = get_vbs_PARk()
+    variable = r"VBSPAR"
+    str_value = get_vbs_par()
     mydict[variable] = str_value
 
-    variable = r"actualPARk"
-    str_value = get_actual_PARk()
+    variable = r"actualPAR"
+    str_value = get_actual_par()
+    mydict[variable] = str_value
+
+    variable = r"penalty"
+    str_value = str(sgh.settings.get_general_penalty_multiplier())
     mydict[variable] = str_value
 
     variable = r"figure-portfolio-selector-sparkle-vs-sbs"
@@ -470,8 +474,8 @@ def get_dict_variable_to_value(test_case_directory: str = None):
         str_value = get_num_instance_in_test_instance_class(test_case_directory)
         mydict[variable] = str_value
 
-        variable = "testActualPARk"
-        str_value = get_test_actual_PARk(test_case_directory)
+        variable = "testActualPAR"
+        str_value = get_test_actual_par(test_case_directory)
         mydict[variable] = str_value
 
         variable = r"testBool"
