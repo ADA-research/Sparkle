@@ -50,68 +50,6 @@ def get_PARk_performance(results_file, cutoff) -> float:
     return mean_PARk
 
 
-def get_optimised_configuration_testing_performance_PARk(
-        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PARk score of the optimised configuration on the testing set."""
-    str_value = ""
-    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
-    configured_results_dir = (
-        f"{smac_solver_dir}results/"
-        f"{sgh.sparkle_run_configured_wrapper}_{instance_set_name}/")
-    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
-    command_line = (f"{script_calc_par10_time_path} {configured_results_dir} "
-                    f"{str(smac_each_run_cutoff_time)}")
-    output = os.popen(command_line).readlines()
-    str_value = output[0].strip().split()[2]
-    return str_value
-
-
-def get_default_configuration_testing_performance_PARk(
-        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PARk score of the default configuration on the testing set."""
-    str_value = ""
-    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
-    default_results_dir = (f"{smac_solver_dir}results/{sgh.sparkle_run_default_wrapper}_"
-                           f"{instance_set_name}/")
-    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
-    command_line = (f"{script_calc_par10_time_path} {default_results_dir} "
-                    f"{str(smac_each_run_cutoff_time)}")
-    output = os.popen(command_line).readlines()
-    str_value = output[0].strip().split()[2]
-    return str_value
-
-
-def get_optimised_configuration_training_performance_PARk(
-        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PARk score of the optimised configuration on the training set."""
-    str_value = ""
-    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
-    configured_results_dir = (
-        f"{smac_solver_dir}results_train/"
-        f"{sgh.sparkle_run_configured_wrapper}_{instance_set_name}/")
-    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
-    command_line = (f"{script_calc_par10_time_path} {configured_results_dir} "
-                    f"{str(smac_each_run_cutoff_time)}")
-    output = os.popen(command_line).readlines()
-    str_value = output[0].strip().split()[2]
-    return str_value
-
-
-def get_default_configuration_training_performance_PARk(
-        solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PARk score of the default configuration on the training set."""
-    str_value = ""
-    smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
-    default_results_dir = (f"{smac_solver_dir}results_train/"
-                           f"{sgh.sparkle_run_default_wrapper}_{instance_set_name}/")
-    script_calc_par10_time_path = f"{sgh.smac_dir}/example_scenarios/calc_par10_time.py"
-    command_line = (f"{script_calc_par10_time_path} {default_results_dir} "
-                    f"{str(smac_each_run_cutoff_time)}")
-    output = os.popen(command_line).readlines()
-    str_value = output[0].strip().split()[2]
-    return str_value
-
-
 def get_instance_path_from_path(results_dir, path):
     """Return the name of an instance."""
     instance_path = Path(path)
@@ -300,7 +238,6 @@ def get_figure_configure_vs_default(configured_results_dir: str,
                    "limit": "relative",
                    "replace_zeros": False,
                    }
-    print(performance_measure[0:3])
     if performance_measure[0:3] == "PAR":
         plot_params["scale"] = "log"
         plot_params["limit_min"] = 0.25
