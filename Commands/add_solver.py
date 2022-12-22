@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     smac_wrapper_path = Path(solver_source, sgh.sparkle_smac_wrapper)
     if smac_wrapper_path.is_file():
-        sfh.check_file_is_executable()
+        sfh.check_file_is_executable(smac_wrapper_path)
     else:
         print("WARNING: The solver does not have a SMAC wrapper."
               "Therefore it cannot be configured using SMAC.")
