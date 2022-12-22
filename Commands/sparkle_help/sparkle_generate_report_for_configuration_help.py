@@ -164,7 +164,8 @@ def construct_list_instance_and_performance(result_file, cutoff):
             if performance < 0.01001:
                 performance = 0.01001
             elif performance >= float(cutoff):
-                performance = float(cutoff) * 10
+                penalty = sgh.settings.get_general_penalty_multiplier()
+                performance = float(cutoff) * penalty
 
         list_instance_and_performance.append([instance, performance])
 
