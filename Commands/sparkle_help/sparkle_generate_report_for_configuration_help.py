@@ -50,9 +50,9 @@ def get_PARk_performance(results_file, cutoff) -> float:
     return mean_PARk
 
 
-def get_optimised_configuration_testing_performance_par10(
+def get_optimised_configuration_testing_performance_PARk(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PAR10 score of the optimised configuration on the testing set."""
+    """Return the PARk score of the optimised configuration on the testing set."""
     str_value = ""
     smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
     configured_results_dir = (
@@ -66,9 +66,9 @@ def get_optimised_configuration_testing_performance_par10(
     return str_value
 
 
-def get_default_configuration_testing_performance_par10(
+def get_default_configuration_testing_performance_PARk(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PAR10 score of the default configuration on the testing set."""
+    """Return the PARk score of the default configuration on the testing set."""
     str_value = ""
     smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
     default_results_dir = (f"{smac_solver_dir}results/{sgh.sparkle_run_default_wrapper}_"
@@ -81,9 +81,9 @@ def get_default_configuration_testing_performance_par10(
     return str_value
 
 
-def get_optimised_configuration_training_performance_par10(
+def get_optimised_configuration_training_performance_PARk(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PAR10 score of the optimised configuration on the training set."""
+    """Return the PARk score of the optimised configuration on the training set."""
     str_value = ""
     smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
     configured_results_dir = (
@@ -97,9 +97,9 @@ def get_optimised_configuration_training_performance_par10(
     return str_value
 
 
-def get_default_configuration_training_performance_par10(
+def get_default_configuration_training_performance_PARk(
         solver_name, instance_set_name, smac_each_run_cutoff_time) -> str:
-    """Return the PAR10 score of the default configuration on the training set."""
+    """Return the PARk score of the default configuration on the training set."""
     str_value = ""
     smac_solver_dir = sgh.smac_dir + "/example_scenarios/" + solver_name + "/"
     default_results_dir = (f"{smac_solver_dir}results_train/"
@@ -155,7 +155,7 @@ def construct_list_instance_and_performance(result_file, cutoff):
         instance = instance_path.split("/")[-1]
         performance = float(mylist[2].replace('"', ""))
 
-        # If the objective is runtime, compute the PAR10 score; otherwise don't modify
+        # If the objective is runtime, compute the PARk score; otherwise don't modify
         # the value
         smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
@@ -255,18 +255,18 @@ def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
     @return List of Lists containing performance values for default and configured
     algorithms
     """
-    dict_instance_to_par10_default = get_dict_instance_to_performance(
+    dict_instance_to_PARk_default = get_dict_instance_to_performance(
         default_results_dir, smac_each_run_cutoff_time)
-    dict_instance_to_par10_configured = get_dict_instance_to_performance(
+    dict_instance_to_PARk_configured = get_dict_instance_to_performance(
         configured_results_dir, smac_each_run_cutoff_time)
 
-    instances = (dict_instance_to_par10_default.keys()
-                 & dict_instance_to_par10_configured.keys())
-    assert (len(dict_instance_to_par10_default) == len(instances))
+    instances = (dict_instance_to_PARk_default.keys()
+                 & dict_instance_to_PARk_configured.keys())
+    assert (len(dict_instance_to_PARk_default) == len(instances))
     points = []
     for instance in instances:
-        point = [dict_instance_to_par10_default[instance],
-                 dict_instance_to_par10_configured[instance]]
+        point = [dict_instance_to_PARk_default[instance],
+                 dict_instance_to_PARk_configured[instance]]
         points.append(point)
 
     return points
@@ -600,7 +600,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     variable = "smacEachRunCutoffTime"
     common_dict[variable] = str(smac_each_run_cutoff_time)
 
-    (optimised_configuration_str, optimised_configuration_performance_par10,
+    (optimised_configuration_str, optimised_configuration_performance_PARk,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
 
@@ -610,8 +610,8 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
     smac_solver_dir = (
         f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
 
-    variable = "optimisedConfigurationTrainingPerformancePAR10"
-    (optimised_configuration_str, optimised_configuration_performance_par10,
+    variable = "optimisedConfigurationTrainingPerformancePARk"
+    (optimised_configuration_str, optimised_configuration_performance_PARk,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
     configured_results_train_file = "validationObjectiveMatrix-traj-run-" + str(
@@ -623,7 +623,7 @@ def get_dict_variable_to_value_common(solver_name, instance_set_train_name,
                                       smac_each_run_cutoff_time)
     common_dict[variable] = str(str_value)
 
-    variable = "defaultConfigurationTrainingPerformancePAR10"
+    variable = "defaultConfigurationTrainingPerformancePARk"
     default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_train_dir = (
         smac_solver_dir + "outdir_train_default/" + default_results_train_file)
@@ -689,7 +689,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
     smac_solver_dir = (
         f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
 
-    variable = "optimisedConfigurationTestingPerformancePAR10"
+    variable = "optimisedConfigurationTestingPerformancePARk"
     configured_results_test_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     configured_results_test_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
@@ -698,7 +698,7 @@ def get_dict_variable_to_value_test(solver_name, instance_set_train_name,
                                       smac_each_run_cutoff_time)
     test_dict[variable] = str(str_value)
 
-    variable = "defaultConfigurationTestingPerformancePAR10"
+    variable = "defaultConfigurationTestingPerformancePARk"
     default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_test_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
                                 f"_test_default/{default_results_test_file}")
