@@ -8,7 +8,6 @@ import time
 import random
 import fcntl
 from pathlib import Path
-from typing import List
 
 
 try:
