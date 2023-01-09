@@ -7,6 +7,7 @@ import pathlib
 import sys
 import fcntl
 from pathlib import Path
+import ast
 
 try:
     from sparkle_help import sparkle_basic_help
@@ -121,7 +122,7 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str):
         sys.exit(-1)
 
     predict_schedule_string = predict_schedule[len(prefix_string):]
-    list_predict_schedule = eval(predict_schedule_string)
+    list_predict_schedule = ast.literal_eval(predict_schedule_string)
     fin.close()
 
     return list_predict_schedule

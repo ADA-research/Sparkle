@@ -287,7 +287,7 @@ def copy_solver_files_to_smac_dir(solver_name: str, instance_set_name: str) -> N
     for i in range(1, num_of_smac_run + 1):
         smac_solver_path_i = smac_solver_dir / str(i)
         # Create directories, -p makes sure any missing parents are also created
-        cmd = f"mkdir -p {smac_solver_path_i}/tmp/"
+        cmd = f"mkdir {smac_solver_path_i}"
         os.system(cmd)
 
         solver_directory = Path("Solvers", solver_name, "*")
@@ -351,7 +351,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
         execdir = "validate_train_default/"
 
         # Create directories, -p makes sure any missing parents are also created
-        cmd = f"mkdir -p {smac_solver_dir}{execdir}/tmp/"
+        cmd = f"mkdir -p {smac_solver_dir}{execdir}"
         os.system(cmd)
         # Copy solver to execution directory
         cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
@@ -362,7 +362,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
             execdir = f"validate_{instance_set_test_name}_test_default/"
 
             # Create directories, -p makes sure any missing parents are also created
-            cmd = f"mkdir -p {smac_solver_dir}{execdir}/tmp/"
+            cmd = f"mkdir -p {smac_solver_dir}{execdir}"
             os.system(cmd)
             # Copy solver to execution directory
             cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
@@ -372,7 +372,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
             execdir = f"validate_{instance_set_test_name}_test_configured/"
 
             # Create directories, -p makes sure any missing parents are also created
-            cmd = f"mkdir -p {smac_solver_dir}{execdir}/tmp/"
+            cmd = f"mkdir -p {smac_solver_dir}{execdir}"
             os.system(cmd)
             # Copy solver to execution directory
             cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
