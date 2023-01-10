@@ -420,7 +420,7 @@ def generate_parallel_portfolio_sbatch_script(parameters: list[str], num_jobs: i
     ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,
                                        job_params_list, srun_options_str,
                                        target_call_str)
-    print(sbatch_script_path)
+
     return sbatch_script_path
 
 

@@ -110,10 +110,8 @@ if __name__ == "__main__":
                 instance_paths.append(item_with_dir)
 
     if args.cutoff_time is not None:
-        print(f"cutoff_time: {args.cutoff_time}")
         sgh.settings.set_general_target_cutoff_time(args.cutoff_time,
                                                     SettingState.CMD_LINE)
-    print(f"{sgh.settings.get_general_target_cutoff_time()}")
 
     if args.process_monitoring is not None:
         sgh.settings.set_paraport_process_monitoring(args.process_monitoring,
