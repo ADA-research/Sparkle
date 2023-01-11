@@ -212,11 +212,10 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
     return
 
 
-def remove_configuration_directory(solver_name: str, smac_solver_dir: Path) -> None:
+def remove_configuration_directory(smac_solver_dir: Path) -> None:
     """Remove the configuration directory."""
     # Delete directory and then create it new with necessary files
     shutil.rmtree(smac_solver_dir, ignore_errors=True)
-    create_configuration_directory(smac_solver_dir, solver_name)
 
     return
 
@@ -225,7 +224,7 @@ def clean_configuration_directory(solver_name: str, instance_set_name: str) -> N
     """Prepare clean configuration directory."""
     smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
 
-    remove_configuration_directory(solver_name, smac_solver_dir)
+    remove_configuration_directory(smac_solver_dir)
     create_configuration_directory(smac_solver_dir, solver_name)
 
     return

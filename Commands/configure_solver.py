@@ -21,42 +21,36 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help.configurator import Configurator
 
 
 def parser_function():
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Configure a solver in the Sparkle platform.",
-        epilog=("Note that the test instance set is only used if the ``-–ablation`"
-                " or ``–-validation`` flags are given"))
+        epilog=("Note that the test instance set is only used if the ``--ablation``"
+                " or ``--validation`` flags are given"))
     parser.add_argument(
-        "--validate",
-        required=False,
-        action="store_true",
-        help="validate after configuration",
-    )
-    parser.add_argument(
-        "--ablation",
-        required=False,
-        action="store_true",
-        help="run ablation after configuration",
+        "--configurator",
+        type=Path,
+        help="path to configurator"
     )
     parser.add_argument(
         "--solver",
-        required=True,
         type=Path,
+        required=True,
         help="path to solver"
     )
     parser.add_argument(
         "--instance-set-train",
-        required=True,
         type=Path,
+        required=True,
         help="path to training instance set",
     )
     parser.add_argument(
         "--instance-set-test",
-        required=False,
         type=Path,
+        required=False,
         help="path to testing instance set (only for validating)",
     )
     parser.add_argument(
@@ -100,6 +94,18 @@ def parser_function():
         action="store_true",
         help="use the training set's features for configuration",
     )
+    parser.add_argument(
+        "--validate",
+        required=False,
+        action="store_true",
+        help="validate after configuration",
+    )
+    parser.add_argument(
+        "--ablation",
+        required=False,
+        action="store_true",
+        help="run ablation after configuration",
+    )
 
     return parser
 
@@ -127,6 +133,13 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     use_features = args.use_features
+
+    if args.configurator is not None:
+        configurator_path = args.configurator
+    else:
+        configurator_path = sgh.smac_dir
+
+    configurator = Configurator(configurator_path)
 
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
