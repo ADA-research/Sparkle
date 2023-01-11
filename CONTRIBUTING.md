@@ -8,6 +8,30 @@ The development is done on the `development` branch.
 To make changes to Sparkle, please create a branch from `development`, give it a descriptive name and add your code there.
 When ready, create a pull request towards the `development` branch.
 
+## Issue creation protocol
+When finding a bug or an issue in Sparkle, feel free to make an issue for it. 
+Check before you create a new issue if there already exists one that addresses the bug you found.
+In case an existing issue already partially covers the bug, you could add a comment to that issue, to ensure your bug is covered by it.
+Otherwise, you should create an issue. 
+
+### Issue contents checklist
+- **Summary**
+  - Give a one sentence summary of what the bug or issue is about.
+  - Estimate how much work you think addressing the issue takes ranging from XS, S, M, L, to XL and put this between brackets at the beginning of the summary.
+- **Contents**
+  - Describe the problem in more detail.
+    - Attach files or output logs when appropriate.
+  - Give instructions on how to reproduce the error.
+    - This could be commands to run.
+  - Make a suggestion on how to fix the issue if you have one.
+- **Type**
+  - Most issues will either be a `bug` or a `task`. A bug should fix an error, whereas a task should be an improvement.
+  - `epic` and `story` are reserved for overarching issue management and should only be used in agreement with lead developers. 
+- **Priority**
+  - Assign bugs as high priority and improvements as medium improvements for now.
+- **Assign**
+  - If the issue is related and isolated to the part of Sparkle you are working on, feel free to assign the issue to yourself. Otherwise, leave it unassigned.
+
 ## Pull requests, review, and merge protocol
 1. Before a pull request is reviewed, the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
