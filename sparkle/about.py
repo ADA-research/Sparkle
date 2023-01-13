@@ -5,7 +5,7 @@ about_info = {
     "version": 0.3
 }
 
-about_str = "{name}-{version}".format(**about_info)
+about_str = f"{about_info['name']}-{about_info['version']}"
 
 
 def print_about() -> None:

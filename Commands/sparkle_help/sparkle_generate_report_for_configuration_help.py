@@ -471,7 +471,7 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
         # If this fails something has changed in the representation of ablation tables
         assert len(line) == 5
         if i == 0:
-            line = ["\\textbf{{{0}}}".format(word) for word in line]
+            line = [f"\\textbf{{{word}}}" for word in line]
 
         # Put multiple variable changes in one round on a seperate line
         if (len(line[1].split(",")) > 1

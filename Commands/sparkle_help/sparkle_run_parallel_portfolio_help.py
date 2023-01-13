@@ -156,7 +156,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             try:
                 shutil.move(path_from, path_to)
             except shutil.Error:
-                print("the {str(sgh.pap_performance_data_tmp_path)} directory already "
+                print(f"the {str(sgh.pap_performance_data_tmp_path)} directory already "
                       "contains a file with the same name, it will be skipped")
 
             commandline = f"rm -rf {path_from}"
@@ -172,7 +172,7 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
     # was manually cancelled or it gave an error the template will ensure that all
     # solver on that instance will be cancelled.
     time_in_format_str = "-1:00"
-    solutions_dir = "f{str(sgh.pap_performance_data_tmp_path)}/"
+    solutions_dir = f"{str(sgh.pap_performance_data_tmp_path)}/"
     results = sfh.get_list_all_result_filename(solutions_dir)
 
     for result in results:

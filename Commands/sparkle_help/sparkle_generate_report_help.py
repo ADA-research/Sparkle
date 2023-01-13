@@ -295,8 +295,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
                              cwd=latex_directory_path)
-    str_value = ("\\includegraphics[width=0.6\\textwidth]{%s}" % (
-                 figure_portfolio_selector_sparkle_vs_sbs_filename))
+    str_value = f"\\includegraphics[width=0.6\\textwidth]{figure_portfolio_selector_sparkle_vs_sbs_filename}"
 
     return str_value
 
@@ -336,8 +335,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              replace_zeros=True,
                              cwd=latex_directory_path)
 
-    str_value = ("\\includegraphics[width=0.6\\textwidth]{%s}" % (
-        figure_portfolio_selector_sparkle_vs_vbs_filename))
+    str_value = f"\\includegraphics[width=0.6\\textwidth]{figure_portfolio_selector_sparkle_vs_vbs_filename}"
     return str_value
 
 
@@ -584,7 +582,7 @@ def generate_comparison_plot(points: list,
         check_zeros = np.count_nonzero(points <= 0)
         if check_zeros != 0:
             print("WARNING: Zero or negative valued performance values detected. Setting"
-                  " these values to {zero_runtime}.")
+                  f" these values to {zero_runtime}.")
         points[points == 0] = zero_runtime
 
     # process labels
