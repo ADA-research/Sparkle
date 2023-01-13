@@ -9,10 +9,10 @@ To make changes to Sparkle, please create a branch from `development`, give it a
 When ready, create a pull request towards the `development` branch.
 
 ## Issue creation protocol
-When finding a bug or an issue in Sparkle, feel free to make an issue for it. 
+When finding a bug or an issue in Sparkle, feel free to create an issue in [Jira](https://kvdblom.atlassian.net/jira/software/c/projects/SPRK/boards/1?atlOrigin=eyJpIjoiMmI0NjhmNDMzNzVjNDgxMDhmZjNiN2YyMDc2OTQzNzciLCJwIjoiaiJ9) if you are part of the closed core team.
 Check before you create a new issue if there already exists one that addresses the bug you found.
 In case an existing issue already partially covers the bug, you could add a comment to that issue, to ensure your bug is covered by it.
-Otherwise, you should create an issue. 
+Otherwise, you should create a new issue. 
 
 ### Issue contents checklist
 - **Summary**
@@ -28,7 +28,7 @@ Otherwise, you should create an issue.
   - Most issues will either be a `bug` or a `task`. A bug should fix an error, whereas a task should be an improvement.
   - `epic` and `story` are reserved for overarching issue management and should only be used in agreement with lead developers. 
 - **Priority**
-  - Assign bugs as high priority and improvements as medium improvements for now.
+  - Assign bugs as high priority and improvements as medium improvements. 
 - **Assign**
   - If the issue is related and isolated to the part of Sparkle you are working on, feel free to assign the issue to yourself. Otherwise, leave it unassigned.
 
