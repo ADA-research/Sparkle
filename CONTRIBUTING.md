@@ -28,7 +28,7 @@ Otherwise, you should create a new issue.
   - Most issues will either be a `bug` or a `task`. A bug should fix an error, whereas a task should be an improvement.
   - `epic` and `story` are reserved for overarching issue management and should only be used in agreement with lead developers. 
 - **Priority**
-  - Assign bugs as high priority and improvements as medium improvements. 
+  - Assign bugs as high priority and improvements as medium. 
 - **Assign**
   - If the issue is related and isolated to the part of Sparkle you are working on, feel free to assign the issue to yourself. Otherwise, leave it unassigned.
 
