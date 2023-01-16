@@ -296,7 +296,10 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
                              cwd=latex_directory_path)
-    str_value = f"\\includegraphics[width=0.6\\textwidth]{figure_portfolio_selector_sparkle_vs_sbs_filename}"
+    str_value = (
+        "\\includegraphics[width=0.6\\textwidth]"
+        f"{figure_portfolio_selector_sparkle_vs_sbs_filename}"
+    )
 
     return str_value
 
@@ -337,7 +340,10 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              replace_zeros=True,
                              cwd=latex_directory_path)
 
-    str_value = f"\\includegraphics[width=0.6\\textwidth]{figure_portfolio_selector_sparkle_vs_vbs_filename}"
+    str_value = (
+        "\\includegraphics[width=0.6\\textwidth]"
+        f"{figure_portfolio_selector_sparkle_vs_vbs_filename}"
+    )
     return str_value
 
 

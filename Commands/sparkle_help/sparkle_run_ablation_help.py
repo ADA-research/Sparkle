@@ -25,7 +25,10 @@ def get_ablation_scenario_directory(solver_name, instance_train_name, instance_t
         f"_{instance_test_name}" if instance_test_name is not None else "")
 
     ablation_scenario_dir = "" if exec_path else sgh.ablation_dir
-    ablation_scenario_dir += f"scenarios/{solver_name}_{instance_train_name}{instance_test_name}/"
+    ablation_scenario_dir += (
+        f"scenarios/{solver_name}_"
+        f"{instance_train_name}{instance_test_name}/"
+    )
     return ablation_scenario_dir
 
 
@@ -76,7 +79,10 @@ def get_slurm_params(solver_name, instance_train_name, instance_test_name, postf
                      dependency=None):
     """Return the Slurm settings to use."""
     if instance_test_name is not None:
-        sbatch_script_name = f"ablation_{solver_name}_{instance_train_name}_{instance_test_name}"
+        sbatch_script_name = (
+            f"ablation_{solver_name}_"
+            f"{instance_train_name}_{instance_test_name}"
+        )
     else:
         sbatch_script_name = f"ablation_{solver_name}_{instance_train_name}"
     sbatch_script_name += f"{postfix}"
@@ -239,7 +245,10 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         # USER SETTINGS
         fout.write(f"deterministic = {scsh.get_solver_deterministic(solver_name)}\n")
         fout.write("run_obj = " + smac_run_obj + "\n")
-        fout.write(f"overall_obj = {'MEAN10' if smac_run_obj == 'RUNTIME' else 'MEAN'}\n")
+        fout.write(
+            "overall_obj = "
+            f"{'MEAN10' if smac_run_obj == 'RUNTIME' else 'MEAN'}\n"
+        )
         fout.write("cutoffTime = " + str(smac_each_run_cutoff_time) + "\n")
         fout.write("cutoff_length = " + str(smac_each_run_cutoff_length) + "\n")
         fout.write(f"cli-cores = {concurrent_clis}\n")
