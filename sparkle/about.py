@@ -2,7 +2,7 @@
 
 about_info = {
     'name': 'Sparkle',
-    'version': 0.2
+    'version': 0.4
 }
 
 about_str = '{name}-{version}'.format(**about_info)
