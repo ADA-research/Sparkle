@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Run a configured solver on an instance, only for internal calls from Sparkle."""
 
 import argparse
 from pathlib import Path
@@ -19,20 +20,20 @@ except ImportError:
     from reporting_scenario import ReportingScenario
 
 
-if __name__ == r'__main__':
+if __name__ == r"__main__":
     # Initialise settings
     global settings
-    settings_dir = Path('Settings')
-    file_path_latest = PurePath(settings_dir / 'latest.ini')
+    settings_dir = Path("Settings")
+    file_path_latest = PurePath(settings_dir / "latest.ini")
     sgh.settings = sparkle_settings.Settings(file_path_latest)
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--instance', required=True, type=Path, nargs='+',
-                        help='path to instance to run on')
-    parser.add_argument('--performance-measure', choices=PerformanceMeasure.__members__,
+    parser.add_argument("--instance", required=True, type=Path, nargs="+",
+                        help="path to instance to run on")
+    parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
                         default=sgh.settings.DEFAULT_general_performance_measure,
-                        help='the performance measure, e.g. runtime')
+                        help="the performance measure, e.g. runtime")
 
     # Process command line arguments
     args = parser.parse_args()

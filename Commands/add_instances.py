@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Sparkle command to add an instance set to the Sparkle platform."""
 
 import os
 import sys
@@ -19,47 +20,48 @@ from sparkle_help import sparkle_instances_help as sih
 
 
 def parser_function():
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'instances_path',
-        metavar='instances-path',
+        "instances_path",
+        metavar="instances-path",
         type=str,
-        help='path to the instance set')
+        help="path to the instance set")
     group_extractor_run = parser.add_mutually_exclusive_group()
     group_extractor_run.add_argument(
-        '--run-extractor-now',
+        "--run-extractor-now",
         default=False,
-        action='store_true',
-        help='immediately run the feature extractor(s) on the newly added instances')
+        action="store_true",
+        help="immediately run the feature extractor(s) on the newly added instances")
     group_extractor_run.add_argument(
-        '--run-extractor-later',
-        dest='run_extractor_now',
-        action='store_false',
-        help=('do not immediately run the feature extractor(s) '
-              + 'on the newly added instances (default)'))
+        "--run-extractor-later",
+        dest="run_extractor_now",
+        action="store_false",
+        help=("do not immediately run the feature extractor(s) "
+              + "on the newly added instances (default)"))
     group_solver = parser.add_mutually_exclusive_group()
     group_solver.add_argument(
-        '--run-solver-now',
+        "--run-solver-now",
         default=False,
-        action='store_true',
-        help='immediately run the solver(s) on the newly added instances')
+        action="store_true",
+        help="immediately run the solver(s) on the newly added instances")
     group_solver.add_argument(
-        '--run-solver-later',
-        dest='run_solver_now',
-        action='store_false',
-        help=('do not immediately run the solver(s) '
-              + 'on the newly added instances (default)'))
+        "--run-solver-later",
+        dest="run_solver_now",
+        action="store_false",
+        help=("do not immediately run the solver(s) "
+              + "on the newly added instances (default)"))
     parser.add_argument(
-        '--nickname', type=str, help='set a nickname for the instance set')
+        "--nickname", type=str, help="set a nickname for the instance set")
     parser.add_argument(
-        '--parallel',
-        action='store_true',
-        help='run the solvers and feature extractor on multiple instances in parallel')
+        "--parallel",
+        action="store_true",
+        help="run the solvers and feature extractor on multiple instances in parallel")
 
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -80,15 +82,15 @@ if __name__ == '__main__':
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
 
-    print('Start adding all instances in directory ' + instances_source + ' ...')
+    print("Start adding all instances in directory " + instances_source + " ...")
 
-    last_level_directory = ''
+    last_level_directory = ""
     if nickname_str is not None:
         last_level_directory = nickname_str
     else:
         last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
-    instances_directory = 'Instances/' + last_level_directory
+    instances_directory = "Instances/" + last_level_directory
     if not os.path.exists(instances_directory):
         Path(instances_directory).mkdir(parents=True, exist_ok=True)
 
@@ -101,19 +103,19 @@ if __name__ == '__main__':
             sgh.performance_data_csv_path)
 
         num_inst = len(list_instance)
-        print('The number of intended adding instances: ' + str(num_inst))
+        print("The number of intended adding instances: " + str(num_inst))
 
         for i in range(0, num_inst):
             instance_line = list_instance[i]
             instance_related_files = instance_line.strip().split()
-            intended_instance_line = ''
+            intended_instance_line = ""
 
             for related_file_name in instance_related_files:
                 source_file_path = os.path.join(instances_source, related_file_name)
                 target_file_path = os.path.join(instances_directory, related_file_name)
-                cmd = 'cp %s %s' % (source_file_path, target_file_path)
+                cmd = "cp %s %s" % (source_file_path, target_file_path)
                 os.system(cmd)
-                intended_instance_line += target_file_path + ' '
+                intended_instance_line += target_file_path + " "
 
             intended_instance_line = intended_instance_line.strip()
 
@@ -122,7 +124,7 @@ if __name__ == '__main__':
             feature_data_csv.add_row(intended_instance_line)
             performance_data_csv.add_row(intended_instance_line)
 
-            print('Instance ' + instance_line + ' has been added!\n')
+            print("Instance " + instance_line + " has been added!\n")
 
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()
@@ -138,75 +140,75 @@ if __name__ == '__main__':
 
         num_inst = len(list_source_all_filename)
 
-        print('The number of intended adding instances: ' + str(num_inst))
+        print("The number of intended adding instances: " + str(num_inst))
 
         for i in range(0, len(list_source_all_filename)):
             intended_filename = list_source_all_filename[i]
-            print('')
-            print('Adding ' + intended_filename + ' ...')
-            print('Executing Progress: ' + str(i + 1) + ' out of ' + str(num_inst))
+            print("")
+            print("Adding " + intended_filename + " ...")
+            print("Executing Progress: " + str(i + 1) + " out of " + str(num_inst))
 
             if intended_filename in list_target_all_filename:
-                print(f'Instance {sfh.get_last_level_directory_name(intended_filename)}'
-                      ' already exists in Directory {instances_directory}')
-                print('Ignore adding file '
-                      f'{sfh.get_last_level_directory_name(intended_filename)}')
+                print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
+                      " already exists in Directory {instances_directory}")
+                print("Ignore adding file "
+                      f"{sfh.get_last_level_directory_name(intended_filename)}")
                 # continue
             else:
-                intended_filename_path = instances_directory + '/' + intended_filename
+                intended_filename_path = instances_directory + "/" + intended_filename
                 sgh.instance_list.append(intended_filename_path)
                 sfh.add_new_instance_into_file(intended_filename_path)
                 feature_data_csv.add_row(intended_filename_path)
                 performance_data_csv.add_row(intended_filename_path)
 
-                if list_source_all_directory[i][-1] == '/':
+                if list_source_all_directory[i][-1] == "/":
                     list_source_all_directory[i] = list_source_all_directory[i][:-1]
-                os.system(f'cp {list_source_all_directory[i]}/{intended_filename} '
-                          f'{instances_directory}')
-                print(f'Instance {sfh.get_last_level_directory_name(intended_filename)}'
-                      ' has been added!\n')
+                os.system(f"cp {list_source_all_directory[i]}/{intended_filename} "
+                          f"{instances_directory}")
+                print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
+                      " has been added!\n")
 
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()
 
-    print(f'Adding instances {sfh.get_last_level_directory_name(instances_directory)} '
-          'done!')
+    print(f"Adding instances {sfh.get_last_level_directory_name(instances_directory)} "
+          "done!")
 
     if os.path.exists(sgh.sparkle_portfolio_selector_path):
-        command_line = 'rm -f ' + sgh.sparkle_portfolio_selector_path
+        command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
         os.system(command_line)
-        print('Removing Sparkle portfolio selector '
-              f'{sgh.sparkle_portfolio_selector_path} done!')
+        print("Removing Sparkle portfolio selector "
+              f"{sgh.sparkle_portfolio_selector_path} done!")
 
     if os.path.exists(sgh.sparkle_report_path):
-        command_line = 'rm -f ' + sgh.sparkle_report_path
+        command_line = "rm -f " + sgh.sparkle_report_path
         os.system(command_line)
-        print('Removing Sparkle report ' + sgh.sparkle_report_path + ' done!')
+        print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
 
     if args.run_extractor_now:
         if not my_flag_parallel:
-            print('Start computing features ...')
+            print("Start computing features ...")
             scf.computing_features(sgh.feature_data_csv_path, 1)
-            print(f'Feature data file {sgh.feature_data_csv_path} has been updated!')
-            print('Computing features done!')
+            print(f"Feature data file {sgh.feature_data_csv_path} has been updated!")
+            print("Computing features done!")
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
             scfp.computing_features_parallel(
                 sgh.feature_data_csv_path, num_job_in_parallel, 1)
-            print('Computing features in parallel ...')
+            print("Computing features in parallel ...")
 
     if args.run_solver_now:
         if not my_flag_parallel:
-            print('Start running solvers ...')
-            srs.running_solvers(sgh.performance_data_csv_path, 1)
-            print(f'Performance data file {sgh.performance_data_csv_path} has been '
-                  'updated!')
-            print('Running solvers done!')
+            print("Start running solvers ...")
+            srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
+            print(f"Performance data file {sgh.performance_data_csv_path} has been "
+                  "updated!")
+            print("Running solvers done!")
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
             srsp.running_solvers_parallel(
-                sgh.performance_data_csv_path, num_job_in_parallel, 1)
-            print('Running solvers in parallel ...')
+                sgh.performance_data_csv_path, num_job_in_parallel, rerun=False)
+            print("Running solvers in parallel ...")
 
     # Write used settings to file
     sgh.settings.write_used_settings()

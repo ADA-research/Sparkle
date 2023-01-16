@@ -1,6 +1,23 @@
 # Changelog for Sparkle
 
 Notable changes to Sparkle will be documented in this file.
+## [0.4] - 2023/01/16
+### Added
+- New option --run-on in run\_solvers.py 
+- Integration with runrunner to run the solvers and related code on the local machine
+- Experimental implementation for integration with runrunner to run the solvers on a Slurm clusters. Old style Slurm use is still the default, but optionally Slurm can be used through runrunner with --run-on=slurm\_rr
+- Add issue creation, pull request, reviewing, and merging guidelines to `CONTRIBUTING.md`
+
+### Changed
+- Include linting for docstrings with `flake8-docstrings` and make the code comply.
+- Switch from single quote use to double quote use.
+
+### Fixed
+- Fix an issue with the default partition in the Slurm settings causing execution with Slurm to fail on systems where this partition does not exist.
+
+### Removed
+- Removed dead code.
+
 ## [0.3] - 2022/09/05
 ### Added
 - New option --run-solver-now in add\_solver.py and add\_instances.py
@@ -73,3 +90,4 @@ Notable changes to Sparkle will be documented in this file.
 
 ### Fixed
 
+### Removed

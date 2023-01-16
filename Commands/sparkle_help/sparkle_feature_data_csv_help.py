@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Module to manage feature data CSV files and common operation son them."""
 
 import pandas as pd
 import fcntl
@@ -13,26 +14,28 @@ except ImportError:
 
 
 class SparkleFeatureDataCSV(scsv.SparkleCSV):
+    """Class to manage feature data CSV files and common operations on them."""
 
-    def test(self):
-        print('just a test')
-        return
-
-    def __init__(self, csv_filepath):
+    def __init__(self, csv_filepath) -> None:
+        """Initialise a SparkleFeatureDataCSV object."""
         scsv.SparkleCSV.__init__(self, csv_filepath)
         self.extractor_list = sparkle_global_help.extractor_list
+
         return
 
     def get_list_recompute_feature_computation_job(self):
+        """Return a list of feature computations to re-do per instance and solver."""
         list_recompute_feature_computation_job = []
         list_row_name = self.list_rows()
 
         for row_name in list_row_name:
             list_item = [row_name, self.extractor_list]
             list_recompute_feature_computation_job.append(list_item)
+
         return list_recompute_feature_computation_job
 
     def get_list_remaining_feature_computation_job(self):
+        """Return a list of needed feature computations per instance and solver."""
         list_remaining_feature_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
         for row_name in self.list_rows():
@@ -45,9 +48,11 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
                         current_extractor_list.append(extractor_path)
             list_item = [row_name, current_extractor_list]
             list_remaining_feature_computation_job.append(list_item)
+
         return list_remaining_feature_computation_job
 
     def get_list_processed_feature_computation_job(self):
+        """Return a list of existing feature values per instance and solver."""
         list_processed_feature_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
         for row_name in self.list_rows():
@@ -60,25 +65,33 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
                         current_extractor_list.append(extractor_path)
             list_item = [row_name, current_extractor_list]
             list_processed_feature_computation_job.append(list_item)
+
         return list_processed_feature_computation_job
 
     def get_extractor_path_from_feature(self, given_column_name):
+        """Return the path to the feature extractor for a given feature."""
         sparkle_special_string = sparkle_global_help.sparkle_special_string
         index = given_column_name.find(sparkle_special_string)
         length = len(sparkle_special_string)
-        extractor_name = given_column_name[index+length:]
-        extractor_path = 'Extractors/' + extractor_name
+        extractor_name = given_column_name[index + length:]
+        extractor_path = "Extractors/" + extractor_name
+
         return extractor_path
 
-    def get_bool_in_rows(self, given_row_name):
+    def get_bool_in_rows(self, given_row_name) -> bool:
+        """Return whether a row with a given name exists."""
         ret = given_row_name in self.list_rows()
+
         return ret
 
-    def get_bool_in_columns(self, given_column_name):
+    def get_bool_in_columns(self, given_column_name) -> bool:
+        """Return whether a column with a given name exists."""
         ret = given_column_name in self.list_columns()
+
         return ret
 
-    def combine(self, second_sfdcsv):
+    def combine(self, second_sfdcsv) -> None:
+        """Combine this CSV with a given CSV."""
         list_columns_second_sfdcsv = second_sfdcsv.list_columns()
         list_rows_second_sfdcsv = second_sfdcsv.list_rows()
 
@@ -113,30 +126,36 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return
 
-    def reload_and_combine_and_update(self, second_sfdcsv):
-        fo = open(self.csv_filepath, 'r+')
+    def reload_and_combine_and_update(self, second_sfdcsv) -> None:
+        """Load this CSV from file, combine it with a given CSV and write it to file."""
+        fo = open(self.csv_filepath, "r+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         self.dataframe = pd.read_csv(self.csv_filepath, index_col=0)
         self.combine(second_sfdcsv)
         self.dataframe.to_csv(self.csv_filepath)
         fo.close()
+
         return
 
-    def get_feature_vector_string(self, instance):
-        feature_vector_string = ''
+    def get_feature_vector_string(self, instance) -> str:
+        """Return the feature vector of an instance as str."""
+        feature_vector_string = ""
         row = instance
+
         for column in self.list_columns():
             feature_value = self.get_value(row, column)
-            feature_vector_string = feature_vector_string + str(feature_value) + ' '
+            feature_vector_string = feature_vector_string + str(feature_value) + " "
+
         return feature_vector_string.strip()
 
     def calc_mean_over_all_non_missing_values_of_this_column(self, column_name):
+        """Return the mean over all non-missing values for this column."""
         sum_value = 0
         num = 0
 
         for row_name in self.list_rows():
             tmp_value = self.get_value(row_name, column_name)
-            if tmp_value < sparkle_global_help.sparkle_missing_value+1:
+            if tmp_value < sparkle_global_help.sparkle_missing_value + 1:
                 continue
             else:
                 num += 1
@@ -146,18 +165,22 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
             # all values are missing value
             return sparkle_global_help.sparkle_missing_value
 
-        mean_value = sum_value/num
+        mean_value = sum_value / num
+
         return mean_value
 
     def generate_mean_value_feature_vector(self):
+        """Return a list with the mean over all non-missing values for all columns."""
         list_mean_value_feature_vector = []
         for column_name in self.list_columns():
             list_item = self.calc_mean_over_all_non_missing_values_of_this_column(
                 column_name)
             list_mean_value_feature_vector.append(list_item)
+
         return list_mean_value_feature_vector
 
-    def impute_missing_value_of_this_column(self, column_name):
+    def impute_missing_value_of_this_column(self, column_name) -> None:
+        """Impute missing data for a given column in this feature data CSV."""
         sum_value = 0
         num = 0
 
@@ -165,7 +188,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         for row_name in self.list_rows():
             tmp_value = self.get_value(row_name, column_name)
-            if tmp_value < sparkle_global_help.sparkle_missing_value+1:
+            if tmp_value < sparkle_global_help.sparkle_missing_value + 1:
                 # this is missing value
                 missing_item = row_name
                 list_missing_value_row_name.append(missing_item)
@@ -179,20 +202,25 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
         if num == 0:
             return  # all values are missing value
 
-        mean_value = sum_value/num
+        mean_value = sum_value / num
         for row_name in list_missing_value_row_name:
             self.set_value(row_name, column_name, mean_value)
+
         return
 
-    def impute_missing_value_of_all_columns(self):
+    def impute_missing_value_of_all_columns(self) -> None:
+        """Impute missing data for all columns in this feature data CSV."""
         for column_name in self.list_columns():
             self.impute_missing_value_of_this_column(column_name)
+
         return
 
-    def bool_exists_missing_value(self):
+    def bool_exists_missing_value(self) -> bool:
+        """Return whether there are missing values in the feature data."""
         for column_name in self.list_columns():
             for row_name in self.list_rows():
                 tmp_value = self.get_value(row_name, column_name)
-                if tmp_value < sparkle_global_help.sparkle_missing_value+1:
+                if tmp_value < sparkle_global_help.sparkle_missing_value + 1:
                     return True
+
         return False

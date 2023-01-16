@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Sparkle command to execute a configured solver."""
 
 import sys
 import argparse
@@ -14,31 +15,32 @@ from sparkle_help.reporting_scenario import ReportingScenario
 
 
 def parser_function():
+    """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        'instance_path',
+        "instance_path",
         type=Path,
-        nargs='+',
-        help=('Path(s) to instance file(s) (when multiple files are given, it is assumed'
-              ' this is a multi-file instance) or instance directory.'))
+        nargs="+",
+        help=("Path(s) to instance file(s) (when multiple files are given, it is assumed"
+              " this is a multi-file instance) or instance directory."))
     parser.add_argument(
-        '--settings-file',
+        "--settings-file",
         type=Path,
-        help=('settings file to use instead of the default (default: '
-              f'{sgh.settings.DEFAULT_settings_path})'))
+        help=("settings file to use instead of the default (default: "
+              f"{sgh.settings.DEFAULT_settings_path})"))
     parser.add_argument(
-        '--performance-measure',
+        "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        help=('the performance measure, e.g. runtime'
-              f' (default: {sgh.settings.DEFAULT_general_performance_measure.name})'))
+        help=("the performance measure, e.g. runtime"
+              f" (default: {sgh.settings.DEFAULT_general_performance_measure.name})"))
     parser.add_argument(
-        '--parallel',
-        action='store_true',
-        help='run the solver on multiple instances in parallel')
+        "--parallel",
+        action="store_true",
+        help="run the solver on multiple instances in parallel")
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
@@ -64,19 +66,19 @@ if __name__ == '__main__':
     sgh.latest_scenario = ReportingScenario()
 
     # Validate input (is directory, or single instance (single-file or multi-file))
-    if((len(instance_path) == 1 and instance_path[0].is_dir())
+    if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Call the configured solver
         job_id_str = srcsh.call_configured_solver(args.instance_path, args.parallel)
     else:
-        sys.exit('ERROR: Faulty input instance or instance directory!')
+        sys.exit("ERROR: Faulty input instance or instance directory!")
 
     # Print result
     if args.parallel:
-        print('Running configured solver in parallel. Waiting for Slurm job(s) with '
-              f'id(s): {job_id_str}')
+        print("Running configured solver in parallel. Waiting for Slurm job(s) with "
+              f"id(s): {job_id_str}")
     else:
-        print('Running configured solver done!')
+        print("Running configured solver done!")
 
     # Write used settings to file
     sgh.settings.write_used_settings()

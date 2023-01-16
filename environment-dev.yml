@@ -10,14 +10,17 @@ dependencies:
   - latexmk
   - pip
   - pip:
+    - --editable .  # self install !
+    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
     # For Sparkle
     - numpy
     - pandas
     # Testing
     - pytest
-    - flake8
-    - flake8-quotes
-    - pep8-naming
+    - flake8==5.0.4
+    - flake8-quotes==3.3.1
+    - pep8-naming==0.13.2
+    - flake8-docstrings==1.6.0
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost
@@ -25,5 +28,7 @@ dependencies:
     - ConfigSpace
     - smac
     - scipy==1.6.3  # 1.7.x removed a private function used by smac
+    - pynisher<1.0  # smac requirement
+    - scikit-learn<1.1.0  # 1.1.0 contains a fix for SimpleImputer that breaks AutoFolio
     # To build documentation
     - -r Documentation/requirements.txt

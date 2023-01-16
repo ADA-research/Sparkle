@@ -5,14 +5,20 @@ max-doc-length = 89
 indent-size = 4
 statistics = True
 
-multiline-quotes = '''
-docstring-quotes = '''
+multiline-quotes = """
+docstring-quotes = """
+inline-quotes = "
 
 # Cyclomatic complexity desactivated
 # max-complexity = 15 
 
 # Ignore the unused import in __init__.py
 per-file-ignores = __init__.py:F401
+
+docstring-convention=google
+# Ignore docstring double quote error
+ignore = D300  # Conflicts with docstring-quotes rule
+         W503  # Will soon be an anti-pattern: https://www.flake8rules.com/rules/W503.html
 
 exclude =
     Components/AutoFolio-master/,

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Merge new performance/feature data into CSVs, only for internal calls from Sparkle."""
 
 import os
 import fcntl
@@ -16,11 +17,12 @@ except ImportError:
     import sparkle_performance_data_csv_help as spdcsv
 
 
-def feature_data_csv_merge():
+def feature_data_csv_merge() -> None:
+    """Merge feature data of new results into the main feature data CSV."""
     try:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
             sparkle_global_help.feature_data_csv_path)
-        tmp_feature_data_csv_directory = 'Feature_Data/Tmp/'
+        tmp_feature_data_csv_directory = "Feature_Data/Tmp/"
         csv_list = sfh.get_list_all_csv_filename(tmp_feature_data_csv_directory)
     except Exception:
         return
@@ -33,17 +35,18 @@ def feature_data_csv_merge():
             tmp_feature_data_csv = sfdcsv.SparkleFeatureDataCSV(csv_path)
             feature_data_csv.combine(tmp_feature_data_csv)
             feature_data_csv.update_csv()
-            os.system('rm -f ' + csv_path)
+            os.system("rm -f " + csv_path)
         except Exception:
             continue
     return
 
 
-def performance_data_csv_merge():
+def performance_data_csv_merge() -> None:
+    """Merge performance data of new results into the main performance data CSV."""
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sparkle_global_help.performance_data_csv_path)
-        tmp_performance_data_result_directory = 'Performance_Data/Tmp/'
+        tmp_performance_data_result_directory = "Performance_Data/Tmp/"
         result_list = sfh.get_list_all_result_filename(
             tmp_performance_data_result_directory)
     except Exception:
@@ -56,7 +59,7 @@ def performance_data_csv_merge():
         result_path = tmp_performance_data_result_directory + result_name
 
         try:
-            fin = open(result_path, 'r+')
+            fin = open(result_path, "r+")
             fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
             instance_path = fin.readline().strip()
             if not instance_path:
@@ -72,7 +75,7 @@ def performance_data_csv_merge():
             performance_data_csv.set_value(instance_path, solver_path, runtime)
             fin.close()
             performance_data_csv.update_csv()
-            os.system('rm -f ' + result_path)
+            os.system("rm -f " + result_path)
         except Exception:
             continue
 
@@ -88,7 +91,7 @@ def performance_data_csv_merge():
     return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     feature_data_csv_merge()
     performance_data_csv_merge()
 else:
