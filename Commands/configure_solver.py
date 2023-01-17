@@ -133,13 +133,10 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     use_features = args.use_features
-
     if args.configurator is not None:
         configurator_path = args.configurator
     else:
         configurator_path = sgh.smac_dir
-
-    configurator = Configurator(configurator_path)
 
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
@@ -205,16 +202,23 @@ if __name__ == "__main__":
 
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
-    scsh.clean_configuration_directory(solver.name, instance_set_train.name)
+    # Replace by create_scenario()
+    # scsh.clean_configuration_directory(solver.name, instance_set_train.name)
     sah.clean_ablation_scenarios(solver.name, instance_set_train.name)
 
     # Copy instances to smac directory
+    # Replace by create_scenario()
     list_all_path = sih.get_list_all_path(instance_set_train)
     smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
                                 instance_set_train.name)
     sih.copy_instances_to_smac(
         list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
     )
+    #
+
+    configurator = Configurator("Configurators" / configurator_path)
+
+    configurator.create_scenario(solver, instance_set_train)
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver.name, instance_set_train.name)
         feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
