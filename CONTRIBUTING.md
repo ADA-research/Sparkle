@@ -76,7 +76,8 @@ When releasing a new version of Sparkle to the main branch, the protocol below s
 ### Release
 1. Create a branch with the version number of the release from the development branch
 2. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
-3. Merge the new version branch into both development and main, DO NOT delete the version branch!
+3. Update and commit `sparkle/about.py` by changing the version number.
+4. Merge the new version branch into both development and main, DO NOT delete the version branch!
 
 ## CHANGELOG
 

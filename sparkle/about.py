@@ -2,7 +2,7 @@
 
 about_info = {
     "name": "Sparkle",
-    "version": 0.3
+    "version": 0.4
 }
 
 about_str = f"{about_info['name']}-{about_info['version']}"
