@@ -5,6 +5,7 @@ Solvers/*
 Extractors/*
 Instances/*
 Configuration_Reports/*
+Configurators/*
 Feature_Data/*
 Performance_Data/*
 LOG/*
@@ -17,14 +18,6 @@ Output/*
 Records/*
 Test_Cases/*
 Settings/latest.ini
-Components/smac-v2.10.03-master-778/log*.txt
-Components/smac-v2.10.03-master-778/results/*
-Components/smac-v2.10.03-master-778/tmp/*
-Components/smac-v2.10.03-master-778/example_scenarios/instances/*
-Components/smac-v2.10.03-master-778/example_scenarios/instances_test/*
-Components/smac-v2.10.03-master-778/example_scenarios/*/
-Components/smac-v2.10.03-master-778/example_scenarios/*.txt
-Components/smac-v2.10.03-master-778/*sbatch.sh
 Components/ablationAnalysis-0.9.4/scenarios
 
 Examples/Resources/CCAG/Solvers/TCA/src/
