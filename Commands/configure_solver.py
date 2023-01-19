@@ -136,7 +136,7 @@ if __name__ == "__main__":
     if args.configurator is not None:
         configurator_path = args.configurator
     else:
-        configurator_path = sgh.smac_dir
+        configurator_path = Path("smac-v2.10.03-master-778")
 
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
@@ -200,21 +200,7 @@ if __name__ == "__main__":
         )
         sys.exit()
 
-    # Clean the configuration and ablation directories for this solver to make sure
-    # we start with a clean slate
-    # Replace by create_scenario()
-    # scsh.clean_configuration_directory(solver.name, instance_set_train.name)
     sah.clean_ablation_scenarios(solver.name, instance_set_train.name)
-
-    # Copy instances to smac directory
-    # Replace by create_scenario()
-    list_all_path = sih.get_list_all_path(instance_set_train)
-    smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
-                                instance_set_train.name)
-    sih.copy_instances_to_smac(
-        list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
-    )
-    #
 
     configurator = Configurator("Configurators" / configurator_path)
 
