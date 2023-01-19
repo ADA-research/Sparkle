@@ -110,6 +110,30 @@ def parser_function():
     return parser
 
 
+def apply_settings_from_args(args):
+    """Apply command line arguments to settings."""
+    if ac.set_by_user(args, "settings_file"):
+        sgh.settings.read_settings_ini(
+            args.settings_file, SettingState.CMD_LINE
+        )  # Do first, so other command line options can override settings from the file
+    if ac.set_by_user(args, "performance_measure"):
+        sgh.settings.set_general_performance_measure(
+            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
+        )
+    if ac.set_by_user(args, "target_cutoff_time"):
+        sgh.settings.set_general_target_cutoff_time(
+            args.target_cutoff_time, SettingState.CMD_LINE
+        )
+    if ac.set_by_user(args, "budget_per_run"):
+        sgh.settings.set_config_budget_per_run(
+            args.budget_per_run, SettingState.CMD_LINE
+        )
+    if ac.set_by_user(args, "number_of_runs"):
+        sgh.settings.set_config_number_of_runs(
+            args.number_of_runs, SettingState.CMD_LINE
+        )
+
+
 if __name__ == "__main__":
     # Initialise settings
     global settings
@@ -126,6 +150,8 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    apply_settings_from_args(args)
 
     validate = args.validate
     ablation = args.ablation
@@ -172,27 +198,6 @@ if __name__ == "__main__":
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    if ac.set_by_user(args, "settings_file"):
-        sgh.settings.read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
-        )
-    if ac.set_by_user(args, "target_cutoff_time"):
-        sgh.settings.set_general_target_cutoff_time(
-            args.target_cutoff_time, SettingState.CMD_LINE
-        )
-    if ac.set_by_user(args, "budget_per_run"):
-        sgh.settings.set_config_budget_per_run(
-            args.budget_per_run, SettingState.CMD_LINE
-        )
-    if ac.set_by_user(args, "number_of_runs"):
-        sgh.settings.set_config_number_of_runs(
-            args.number_of_runs, SettingState.CMD_LINE
-        )
-
     # Check if solver has pcs file and is configurable
     if not sash.check_adding_solver_contain_pcs_file(solver):
         print(
@@ -200,21 +205,39 @@ if __name__ == "__main__":
         )
         sys.exit()
 
+    # Clean the configuration and ablation directories for this solver to make sure
+    # we start with a clean slate
+    # Replace by create_scenario()
+    scsh.clean_configuration_directory(solver.name, instance_set_train.name)
+
     sah.clean_ablation_scenarios(solver.name, instance_set_train.name)
+
+    # Copy instances to smac directory
+    # Replace by create_scenario()
+    # list_all_path = sih.get_list_all_path(instance_set_train)
+    # smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
+    #                             instance_set_train.name)
+    # sih.copy_instances_to_smac(
+    #     list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
+    # )
+    #
 
     configurator = Configurator("Configurators" / configurator_path)
 
     configurator.create_scenario(solver, instance_set_train)
+
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver.name, instance_set_train.name)
         feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
         feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
 
-    scsh.copy_file_instance(
-        solver.name, instance_set_train.name, instance_set_train.name, "train"
-    )
-    scsh.create_file_scenario_configuration(solver.name, instance_set_train.name,
-                                            use_features)
+    # scsh.copy_file_instance(
+    #     solver.name, instance_set_train.name, instance_set_train.name, "train"
+    # )
+    # scsh.create_file_scenario_configuration(solver.name, instance_set_train.name,
+    #                                         use_features)
+    configurator.create_script(solver.name, instance_set_train.name, use_features)
+
     scsh.copy_solver_files_to_smac_dir(
         solver.name, instance_set_train.name
     )
