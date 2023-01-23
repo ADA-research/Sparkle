@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import csv
 import time
+import sys
 
 try:
     from sparkle_help.sparkle_command_help import CommandName
@@ -170,13 +171,15 @@ def read_active_jobs() -> list[dict[str, str]]:
     """Read active jobs from file and return them as list of [job_id, command] dicts."""
     jobs = []
     path = __active_jobs_path
+    try:
+        with open(path, "r", newline="") as infile:
+            reader = csv.DictReader(infile)
 
-    with open(path, "r", newline="") as infile:
-        reader = csv.DictReader(infile)
-
-        for row in reader:
-            jobs.append(row)
-
+            for row in reader:
+                jobs.append(row)
+    except EnvironmentError:
+        print("No jobs yet submitted to wait for ! ")
+        sys.exit()
     return jobs
 
 
