@@ -4,20 +4,17 @@ For now, the development of Sparkle is done by a closed core team.
 
 We will gladly accept contributions in the form of bug reports, feature requests and pull requests in the near future, when the appropriate infrastructure is in place, and the code base is ready.
 
-The development is done on the `development` branch. 
-To make changes to Sparkle, please create a branch from `development`, give it a descriptive name and add your code there.
-When ready, create a pull request towards the `development` branch.
-
 ## Issue creation protocol
 When finding a bug or an issue in Sparkle, feel free to create an issue in [Jira](https://kvdblom.atlassian.net/jira/software/c/projects/SPRK/boards/1) if you are part of the closed core team.
 Check before you create a new issue if there already exists one that addresses the bug you found.
 In case an existing issue already partially covers the bug, you could add a comment to that issue, to ensure your bug is covered by it.
-Otherwise, you should create a new issue. 
+Otherwise, you should create a new issue.
 
 ### Issue contents checklist
 - **Summary**
   - Give a one sentence summary of what the bug or issue is about.
   - Estimate how much work you think addressing the issue takes ranging from XS, S, M, L, to XL and put this between brackets at the beginning of the summary.
+  - For bugs, clearly indicate whether it affects the `main` branch to facilitate a fix being expedited and quickly merged into the `main` branch.
 - **Contents**
   - Describe the problem in more detail.
     - Attach files or output logs when appropriate.
@@ -31,6 +28,19 @@ Otherwise, you should create a new issue.
   - Assign bugs as high priority and improvements as medium. 
 - **Assign**
   - If the issue is related and isolated to the part of Sparkle you are working on, feel free to assign the issue to yourself. Otherwise, leave it unassigned.
+
+## Branching for issues and bugs
+In general, give branches a descriptive name (e.g., by creating the branch through the related Jira issue, which uses the issue ID and name in the branch name).
+
+### Bugs affecting the `main` branch
+For bug fixes affecting the `main` branch, create a branch from `main`, and implement the fix there. If unsure, first try to reproduce the bug on the `main` branch.
+When ready, create a pull request towards the `main` branch, clearly indicating it should also be merged into the `development` branch.
+Make sure to also update the `CHANGELOG.md` and the version number with a minor version (after the dot) when ready to merge to main.
+
+### All other development
+The development is done on the `development` branch. 
+To make changes to Sparkle, please create a branch from `development` and add your code there.
+When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
 1. Before a pull request is reviewed, the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied.
@@ -63,7 +73,7 @@ The coding style consistency is a work in progress, and existing code may not ad
 3. Make sure the examples relevant to the changes execute correctly (see the `.sh` files in `Examples/`).
 
 ## Release protocol
-When releasing a new version of Sparkle to the main branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
+When releasing a new version of Sparkle to the `main` branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
 ### Checks
 1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml`
@@ -74,10 +84,10 @@ When releasing a new version of Sparkle to the main branch, the protocol below s
 6. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
 
 ### Release
-1. Create a branch with the version number of the release from the development branch
+1. Create a branch with the version number of the release from the `development` branch
 2. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
 3. Update and commit `sparkle/about.py` by changing the version number.
-4. Merge the new version branch into both development and main, DO NOT delete the version branch!
+4. Merge the new version branch into both `development` and `main`, DO NOT delete the version branch!
 
 ## CHANGELOG
 
