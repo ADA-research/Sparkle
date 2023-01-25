@@ -21,7 +21,7 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help.configurator import Configurator
+from sparkle_help.configurator import Configurator
 
 
 def parser_function():
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
     # Replace by create_scenario()
-    scsh.clean_configuration_directory(solver.name, instance_set_train.name)
+    # scsh.clean_configuration_directory(solver.name, instance_set_train.name)
 
     sah.clean_ablation_scenarios(solver.name, instance_set_train.name)
 
@@ -224,19 +224,18 @@ if __name__ == "__main__":
 
     configurator = Configurator("Configurators" / configurator_path)
 
-    configurator.create_scenario(solver, instance_set_train)
+    configurator.create_scenario(solver, instance_set_train, use_features)
 
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver.name, instance_set_train.name)
         feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
         feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
 
-    # scsh.copy_file_instance(
-    #     solver.name, instance_set_train.name, instance_set_train.name, "train"
-    # )
+    scsh.copy_file_instance(
+        solver.name, instance_set_train.name, instance_set_train.name, "train"
+    )
     # scsh.create_file_scenario_configuration(solver.name, instance_set_train.name,
     #                                         use_features)
-    configurator.create_script(solver.name, instance_set_train.name, use_features)
 
     scsh.copy_solver_files_to_smac_dir(
         solver.name, instance_set_train.name
