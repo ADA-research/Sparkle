@@ -1,3 +1,1 @@
---mem-per-cpu=
---exclude=
---nodelist=
+--mem-per-cpu=3000

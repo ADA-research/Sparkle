@@ -204,7 +204,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
     and cutoff_seconds int as value.
     """
     # Find all job_array_numbers that are currently running
-    # This is specifically for Grace
+    # This is specific to Slurm
     result = subprocess.run(["squeue", "--array", "--jobs", job_id], capture_output=True,
                             text=True)
     remaining_jobs = {}
