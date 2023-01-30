@@ -177,8 +177,9 @@ def read_active_jobs() -> list[dict[str, str]]:
 
             for row in reader:
                 jobs.append(row)
-    except EnvironmentError:
-        print("No jobs yet submitted to wait for ! ")
+    except FileNotFoundError:
+        print(f"The file {__active_jobs_path} was not found. "
+              "Most likely no jobs have yet been submitted, that we can wait for.")
         sys.exit()
     return jobs
 
