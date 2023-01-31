@@ -205,8 +205,9 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
     """
     # Find all job_array_numbers that are currently running
     # This is specific to Slurm
-    result = subprocess.run(["squeue", "--array", "--jobs", job_id], capture_output=True,
-                            text=True)
+    result = subprocess.run(["squeue", "--array", "--jobs", job_id,
+                             "--format", "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
+                            capture_output=True, text=True)
     remaining_jobs = {}
 
     for jobs in result.stdout.strip().split("\n"):
@@ -299,7 +300,8 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
 
     while not done:
         # Ask the cluster for a list of all jobs which are currently running
-        result = subprocess.run(["squeue", "--array", "--jobs", job_id],
+        result = subprocess.run(["squeue", "--array", "--jobs", job_id,
+                                 "--format", "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
                                 capture_output=True, text=True)
 
         # If none of the jobs on the cluster are running then nothing has to done yet,
@@ -646,7 +648,8 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
 
             while not done:
                 # Ask the cluster for a list of all jobs which are currently running
-                result = subprocess.run(["squeue", "--array", "--jobs", job_id],
+                result = subprocess.run(["squeue", "--array", "--jobs", job_id,
+                                         "--format", "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
                                         capture_output=True, text=True)
 
                 # If none of the jobs on the cluster are running then nothing has to done
