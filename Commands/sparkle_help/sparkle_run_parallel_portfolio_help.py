@@ -320,7 +320,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
 
                 with open(logging_file, "a+") as outfile:
                     fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
-                    outfile.write(f"starting time of portfolio: {curreœnt_time}\n")
+                    outfile.write(f"starting time of portfolio: {current_time}\n")
 
                 started = True
             unfinished_solver_list = list()
