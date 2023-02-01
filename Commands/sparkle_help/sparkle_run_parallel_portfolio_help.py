@@ -451,7 +451,7 @@ def generate_sbatch_job_list(solver_list: list[str], instance_path_list: list[st
                 new_num_jobs = new_num_jobs + int(seed) - 1
 
                 for instance in range(1, int(seed) + 1):
-                    commandline = (f" --instance {str(instance_path)} --solver "
+                    commandline = (f"--instance {str(instance_path)} --solver "
                                    f"{str(solver_path)} --performance-measure "
                                    f"{performance_measure.name} --seed {str(instance)}")
                     parameters.append(commandline)
@@ -463,7 +463,7 @@ def generate_sbatch_job_list(solver_list: list[str], instance_path_list: list[st
                 solver_name = solver_path.name
                 instance_name = Path(instance_path).name
                 solver_instance_list.append(f"{solver_name}_{instance_name}")
-                commandline = (f" --instance {str(instance_path)} --solver "
+                commandline = (f"--instance {str(instance_path)} --solver "
                                f"{str(solver_path)} --performance-measure "
                                f"{performance_measure.name}")
                 parameters.append(commandline)
