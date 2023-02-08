@@ -35,7 +35,7 @@ In general, give branches a descriptive name (e.g., by creating the branch throu
 ### Bugs affecting the `main` branch
 For bug fixes affecting the `main` branch, create a branch from `main`, and implement the fix there. If unsure, first try to reproduce the bug on the `main` branch.
 When ready, create a pull request towards the `main` branch, clearly indicating it should also be merged into the `development` branch.
-Make sure to also update the `CHANGELOG.md` and the version number with a minor version (after the dot) when ready to merge to main.
+Make sure to also update the `CHANGELOG.md` and the version number with a minor version (after the dot) when ready to merge to main. E.g., 0.4.1 changes to 0.4.2.
 
 ### All other development
 The development is done on the `development` branch. 
@@ -73,7 +73,7 @@ The coding style consistency is a work in progress, and existing code may not ad
 3. Make sure the examples relevant to the changes execute correctly (see the `.sh` files in `Examples/`).
 
 ## Release protocol
-When releasing a new version of Sparkle to the `main` branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
+When releasing a new version (including bugfix versions) of Sparkle to the `main` branch, the protocol below should be followed. First the checks should be performed. If at any step anything fails, it should first be fixed and then ALL checks should be performed again from scratch, starting from point 1.
 
 ### Checks
 1. Freshly install the conda environment. Remove the old one with `conda env remove -n sparkle` and create it again with `conda env create -f environment.yml`
