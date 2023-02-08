@@ -407,7 +407,8 @@ def submit_sbatch_script(sbatch_script_name: str, command_name: CommandName,
     sbatch_script_path = sbatch_script_name
     ori_path = os.getcwd()
     os.system(f"cd {execution_dir} ; chmod a+x {sbatch_script_path} ; cd {ori_path}")
-    command = f"cd {execution_dir} ; sbatch {sbatch_script_path} ; cd {ori_path}"
+    # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
+    command = f"cd {execution_dir} ; unset SLURM_CPU_BIND; sbatch {sbatch_script_path} ; cd {ori_path}"
 
     output_list = os.popen(command).readlines()
 
