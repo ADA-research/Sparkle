@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 try:
-    from sparkle_help import sparkle_global_help as sgh
+    from Commands.sparkle_help import sparkle_global_help as sgh
 except ImportError:
     import sparkle_global_help as sgh
 
