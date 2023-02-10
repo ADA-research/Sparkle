@@ -84,7 +84,14 @@ def _copy_instance_list_to_reference(instances_source: Path) -> None:
 
 
 def count_instances_in_reference_list(instance_set_name: str) -> int:
-    """Return the number of instances in a given instance set."""
+    """Return the number of instances in a given instance set.
+
+    Args:
+        instance_set_name: The name of the instance set.
+
+    Returns:
+        An integer indicating the number of instances in this set.
+    """
     count = 0
     instance_list_path = Path(sgh.reference_list_dir
                               / Path(instance_set_name + sgh.instance_list_postfix))
@@ -100,7 +107,14 @@ def count_instances_in_reference_list(instance_set_name: str) -> int:
 
 
 def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
-    """Return whether a file with a list of instances exists for a given instance set."""
+    """Return whether a file with a list of instances exists for a given instance set.
+
+    Args:
+        instance_set_name: The name of the instance set.
+
+    Returns:
+        A bool indicating whether a reference list of the instances in this set exists.
+    """
     instance_list_path = Path(sgh.reference_list_dir
                               / Path(instance_set_name + sgh.instance_list_postfix))
 
