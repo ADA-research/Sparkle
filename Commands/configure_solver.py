@@ -22,6 +22,8 @@ from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.configurator import Configurator
+from sparkle_help.configuration_scenario import Configuration_Scenario
+from sparkle_help.solver import Solver
 
 
 def parser_function():
@@ -155,7 +157,7 @@ if __name__ == "__main__":
 
     validate = args.validate
     ablation = args.ablation
-    solver = args.solver
+    solver_path = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     use_features = args.use_features
@@ -199,98 +201,101 @@ if __name__ == "__main__":
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
     # Check if solver has pcs file and is configurable
-    if not sash.check_adding_solver_contain_pcs_file(solver):
-        print(
-            "None or multiple .pcs files found. Solver is not valid for configuration."
-        )
-        sys.exit()
+    # if not sash.check_adding_solver_contain_pcs_file(solver_path):
+    #     print(
+    #         "None or multiple .pcs files found. Solver is not valid for configuration."
+    #     )
+    #     sys.exit()
 
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
     # Replace by create_scenario()
-    scsh.clean_configuration_directory(solver.name, instance_set_train.name)
+    # scsh.clean_configuration_directory(solver_path.name, instance_set_train.name)
 
-    sah.clean_ablation_scenarios(solver.name, instance_set_train.name)
+    # sah.clean_ablation_scenarios(solver_path.name, instance_set_train.name)
 
     # Copy instances to smac directory
     # Replace by create_scenario()
-    list_all_path = sih.get_list_all_path(instance_set_train)
-    smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
-                                instance_set_train.name)
-    sih.copy_instances_to_smac(
-        list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
-    )
+    # list_all_path = sih.get_list_all_path(instance_set_train)
+    # smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
+    #                             instance_set_train.name)
+    # sih.copy_instances_to_smac(
+    #     list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
+    # )
 
-    configurator = Configurator("Configurators" / configurator_path)
+    full_configurator_path = "Configurators" / configurator_path
+    solver = Solver(solver_path)
+    config_scenario = Configuration_Scenario(solver, instance_set_train, use_features)
+    configurator = Configurator(full_configurator_path, config_scenario)
 
-    configurator.create_scenario(solver, instance_set_train, use_features)
     configurator.create_sbatch_script()
+    configurator.configure()
 
-    if use_features:
-        smac_solver_dir = scsh.get_smac_solver_dir(solver.name, instance_set_train.name)
-        feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
-        feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
+    # if use_features:
+    #     smac_solver_dir = scsh.get_smac_solver_dir(solver_path.name, instance_set_train.name)
+    #     feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
+    #     feature_data_df.to_csv(feature_file_name, index_label="INSTANCE_NAME")
 
-    scsh.copy_file_instance(
-        solver.name, instance_set_train.name, instance_set_train.name, "train"
-    )
-    scsh.create_file_scenario_configuration(solver.name, instance_set_train.name,
-                                            use_features)
+    # scsh.copy_file_instance(
+    #     solver_path.name, instance_set_train.name, instance_set_train.name, "train"
+    # )
+    # scsh.create_file_scenario_configuration(solver_path.name, instance_set_train.name,
+    #                                         use_features)
 
-    scsh.copy_solver_files_to_smac_dir(
-        solver.name, instance_set_train.name
-    )
-    smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
-        solver.name, instance_set_train.name
-    )
-    configure_jobid = scsh.submit_smac_configure_sbatch_script(
-        smac_configure_sbatch_script_name
-    )
+    # scsh.copy_solver_files_to_smac_dir(
+    #     solver_path.name, instance_set_train.name
+    # )
+    # smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
+    #     solver_path.name, instance_set_train.name
+    # )
+    # configure_jobid = scsh.submit_smac_configure_sbatch_script(
+    #     smac_configure_sbatch_script_name
+    # )
 
-    dependency_jobid_list = [configure_jobid]
+    # dependency_jobid_list = [configure_jobid]
 
-    # Write most recent run to file
-    last_configuration_file_path = Path(
-        sgh.smac_dir,
-        "example_scenarios",
-        f"{solver.name}_{instance_set_train.name}",
-        sgh.sparkle_last_configuration_file_name
-    )
+    # # Write most recent run to file
+    # last_configuration_file_path = Path(
+    #     sgh.smac_dir,
+    #     "example_scenarios",
+    #     f"{solver_path.name}_{instance_set_train.name}",
+    #     sgh.sparkle_last_configuration_file_name
+    # )
 
-    fout = open(last_configuration_file_path, "w+")
-    fout.write(f"solver {solver}\n")
-    fout.write(f"train {instance_set_train}\n")
-    fout.close()
+    # fout = open(last_configuration_file_path, "w+")
+    # fout.write(f"solver {solver_path}\n")
+    # fout.write(f"train {instance_set_train}\n")
+    # fout.close()
 
-    # Update latest scenario
-    sgh.latest_scenario.set_config_solver(solver)
-    sgh.latest_scenario.set_config_instance_set_train(instance_set_train)
-    sgh.latest_scenario.set_latest_scenario(Scenario.CONFIGURATION)
+    # # Update latest scenario
+    # sgh.latest_scenario.set_config_solver(solver_path)
+    # sgh.latest_scenario.set_config_instance_set_train(instance_set_train)
+    # sgh.latest_scenario.set_latest_scenario(Scenario.CONFIGURATION)
 
-    if instance_set_test is not None:
-        sgh.latest_scenario.set_config_instance_set_test(instance_set_test)
-    else:
-        # Set to default to overwrite possible old path
-        sgh.latest_scenario.set_config_instance_set_test()
+    # if instance_set_test is not None:
+    #     sgh.latest_scenario.set_config_instance_set_test(instance_set_test)
+    # else:
+    #     # Set to default to overwrite possible old path
+    #     sgh.latest_scenario.set_config_instance_set_test()
 
-    # Set validation to wait until configuration is done
-    if validate:
-        validate_jobid = ssh.generate_validation_callback_slurm_script(
-            solver, instance_set_train, instance_set_test, configure_jobid
-        )
-        dependency_jobid_list.append(validate_jobid)
+    # # Set validation to wait until configuration is done
+    # if validate:
+    #     validate_jobid = ssh.generate_validation_callback_slurm_script(
+    #         solver_path, instance_set_train, instance_set_test, configure_jobid
+    #     )
+    #     dependency_jobid_list.append(validate_jobid)
 
-    if ablation:
-        ablation_jobid = ssh.generate_ablation_callback_slurm_script(
-            solver, instance_set_train, instance_set_test, configure_jobid
-        )
-        dependency_jobid_list.append(ablation_jobid)
+    # if ablation:
+    #     ablation_jobid = ssh.generate_ablation_callback_slurm_script(
+    #         solver_path, instance_set_train, instance_set_test, configure_jobid
+    #     )
+    #     dependency_jobid_list.append(ablation_jobid)
 
-    job_id_str = ",".join(dependency_jobid_list)
-    print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
-          f"{job_id_str}")
+    # job_id_str = ",".join(dependency_jobid_list)
+    # print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+    #       f"{job_id_str}")
 
-    # Write used settings to file
-    sgh.settings.write_used_settings()
-    # Write used scenario to file
-    sgh.latest_scenario.write_scenario_ini()
+    # # Write used settings to file
+    # sgh.settings.write_used_settings()
+    # # Write used scenario to file
+    # sgh.latest_scenario.write_scenario_ini()
