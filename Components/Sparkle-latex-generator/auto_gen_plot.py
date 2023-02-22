@@ -39,7 +39,7 @@ if __name__ == "__main__":
     fout.write("set size square\n")
     fout.write("set arrow from 0.01,0.01 to "
                f"{penalty_time},{penalty_time} nohead lc rgb 'black'\n")
-    fout.write("set terminal postscript eps color solid linewidth "Helvetica" 20\n")
+    fout.write("set terminal postscript eps color solid linewidth 'Helvetica' 20\n")
     fout.write(f"set output '{output_eps_file}'\n")
     fout.write(f"plot '{data_portfolio_selector_sparkle_vs_vbs_filename}'\n")
     fout.close()
