@@ -245,10 +245,8 @@ def create_configuration_file(solver_name, instance_train_name, instance_test_na
         # USER SETTINGS
         fout.write(f"deterministic = {scsh.get_solver_deterministic(solver_name)}\n")
         fout.write("run_obj = " + smac_run_obj + "\n")
-        fout.write(
-            "overall_obj = "
-            f"{'MEAN10' if smac_run_obj == 'RUNTIME' else 'MEAN'}\n"
-        )
+        objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
+        fout.write(f"overall_obj = {objective_str}\n")
         fout.write("cutoffTime = " + str(smac_each_run_cutoff_time) + "\n")
         fout.write("cutoff_length = " + str(smac_each_run_cutoff_length) + "\n")
         fout.write(f"cli-cores = {concurrent_clis}\n")

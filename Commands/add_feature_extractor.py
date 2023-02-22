@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
         command_line = (
             f"{os.path.join(extractor_directory, sgh.sparkle_run_default_wrapper)} "
-            f"{extractor_directory + '/'} {instance_path} {result_path}"
+            f"{extractor_directory}/ {instance_path} {result_path}"
         )
         os.system(command_line)
     else:
