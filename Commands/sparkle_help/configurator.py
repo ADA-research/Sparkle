@@ -4,6 +4,7 @@
 
 from pathlib import Path
 import subprocess
+import sys
 
 from sparkle_help.configuration_scenario import Configuration_Scenario
 
@@ -24,7 +25,7 @@ class Configurator:
         scenario.create_scenario(parent_directory=configurator_path)
 
         self.sbatch_filename = ""
-        Path("tmp").mkdir()
+        (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
     def create_sbatch_script(self) -> None:
         """Create sbatch script."""
@@ -44,11 +45,16 @@ class Configurator:
     def configure(self) -> None:
         """Submit sbatch script."""
         command = ["sbatch", self.sbatch_filename]
+
         output = subprocess.run(command, cwd=self.configurator_path, capture_output=True, text=True)
+        if output.stderr != "":
+            print("An error occured during the script submission:")
+            print(output.stderr)
+            print("Depending on the error, the configurator might still run.")
         job_id = output.stdout.split()[-1]
         sjh.write_active_job(job_id, CommandName.CONFIGURE_SOLVER)
 
-        print(f"Job running with id {job_id}")
+        print(f"Job running with id {job_id}.")
         return
 
     def _get_sbatch_options(self):
@@ -85,15 +91,16 @@ class Configurator:
             f"Configuration log for SMAC run 1 < N <= {num_job_total}")
 
         params = "params=( \\\n"
+        
+        scenario_file = Path(self.scenario.directory.parts[-2], self.scenario.directory.parts[-1], self.scenario.scenario_file)
         for i in range(0, num_job_total):
             seed = i + 1
-            result_path = f"{result_directory}/{self.sbatch_filename}_seed_{seed}_smac.txt"
-            smac_execdir_i = self.scenario.directory / str(seed)
-            sl.add_output(sgh.smac_dir + result_path,
+            result_path = Path(result_directory, f"{self.sbatch_filename}_seed_{seed}_smac.txt")
+            smac_execdir_i = Path("scenarios", self.scenario.name, str(seed))
+            sl.add_output(sgh.smac_dir + str(result_path),
                           f"Configuration log for SMAC run {num_job_total}")
 
-            params += (f"'{self.scenario.directory / self.scenario.scenario_file} {seed} "
-                       f"{result_path} {smac_execdir_i}' \\\n")
+            params += (f"'{scenario_file} {seed} {result_path} {smac_execdir_i}' \\\n")
 
         params += ")\n"
         return params

@@ -77,20 +77,22 @@ class Configuration_Scenario:
 
     def _create_scenario_file(self) -> None:
         """Create a file with the configuration scenario."""
+        inner_directory = Path("scenarios", self.name)
+
         run_objective = self._get_run_objective()
         time_budget = sgh.settings.get_config_budget_per_run()
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         cutoff_length = sgh.settings.get_smac_target_cutoff_length()
-        solver_param_file_path = self.directory / self.solver.pcs_file
-        config_output_directory = self.directory / "outdir_train_configuration"
-        instance_file = self.directory / f"{self.instance_directory.name}_train.txt"
+        solver_param_file_path = inner_directory / self.solver.pcs_file.name
+        config_output_directory = inner_directory / "outdir_train_configuration"
+        instance_file = inner_directory / f"{self.instance_directory.name}_train.txt"
 
         scenario_file = (self.directory
                          / f"{self.name}_scenario.txt")
         self.scenario_file = scenario_file.name
         file = open(scenario_file, "w")
         file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
-        file.write(f"execdir = {self.directory}/\n")
+        file.write(f"execdir = {inner_directory}/\n")
         file.write(f"deterministic = {self.solver.is_deterministic}\n")
         file.write(f"run_obj = {run_objective}\n")
         file.write(f"wallclock-limit = {time_budget}\n")
@@ -101,7 +103,7 @@ class Configuration_Scenario:
         file.write(f"instance_file = {instance_file}\n")
         file.write(f"test_instance_file = {instance_file}\n")
         if self.use_features:
-            feature_file = self.directory / f"{self.instance_directory.name}_features.csv"
+            feature_file = inner_directory / f"{self.instance_directory.name}_features.csv"
             file.write(f"feature_file = {feature_file}\n")
         file.write("validation = true" + "\n")
         file.close()
@@ -130,7 +132,7 @@ class Configuration_Scenario:
         instance_list_file = instance_list_path.open("w+")
 
         for original_instance_path in source_instance_list:
-            instance_list_file.write(f"../../instances/"
+            instance_list_file.write(f"../../../instances/"
                                      f"{original_instance_path.parts[-2]}/"
                                      f"{original_instance_path.name}\n")
 
