@@ -24,6 +24,7 @@ class Configurator:
         scenario.create_scenario(parent_directory=configurator_path)
 
         self.sbatch_filename = ""
+        Path("tmp").mkdir()
 
     def create_sbatch_script(self) -> None:
         """Create sbatch script."""
