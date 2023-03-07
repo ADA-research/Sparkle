@@ -42,7 +42,7 @@ class Configurator:
         sbatch_script.write(file_content)
         sbatch_script.close()
 
-    def configure(self) -> None:
+    def configure(self) -> int:
         """Submit sbatch script."""
         command = ["sbatch", self.sbatch_filename]
 
@@ -55,7 +55,7 @@ class Configurator:
         sjh.write_active_job(job_id, CommandName.CONFIGURE_SOLVER)
 
         print(f"Job running with id {job_id}.")
-        return
+        return job_id
 
     def _get_sbatch_options(self):
         """Get sbatch options."""

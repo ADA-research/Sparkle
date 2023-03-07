@@ -16,12 +16,13 @@ from sparkle_help.solver import Solver
 class Configuration_Scenario:
     """Class to handle all activities around scenarios."""
     def __init__(self, solver: Solver, source_instance_directory: Path,
-                 use_features: bool) -> None:
+                 use_features: bool, feature_file: Path = None) -> None:
         """Initialize scenario paths and names."""
         self.solver = solver
         self.parent_directory = ""
         self.source_instance_directory = source_instance_directory
         self.use_features = use_features
+        self.feature_file = feature_file
 
         self.name = f"{self.solver.name}_{self.source_instance_directory.name}"
 
@@ -103,8 +104,7 @@ class Configuration_Scenario:
         file.write(f"instance_file = {instance_file}\n")
         file.write(f"test_instance_file = {instance_file}\n")
         if self.use_features:
-            feature_file = inner_directory / f"{self.instance_directory.name}_features.csv"
-            file.write(f"feature_file = {feature_file}\n")
+            file.write(f"feature_file = {self.feature_file}\n")
         file.write("validation = true" + "\n")
         file.close()
 
