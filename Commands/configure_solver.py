@@ -146,7 +146,8 @@ if __name__ == "__main__":
                           "run add_feature_extractor.py, then compute_features.py")
                     sys.exit()
 
-                new_label = f"../../instances/{instance_set_train.name}/{os.path.split(label)[1]}"
+                new_label = (f"../../instances/{instance_set_train.name}/"
+                             + os.path.split(label)[1])
                 data_dict[new_label] = row
 
         feature_data_df = DataFrame.from_dict(data_dict, orient="index",
