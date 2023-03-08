@@ -23,6 +23,9 @@ ignore = D300  # Conflicts with docstring-quotes rule
          W503  # Will soon be an anti-pattern: https://www.flake8rules.com/rules/W503.html
          S605  # Flags all spawns of subprocesses, which we can't do without
          S311  # Only relevant for cryptographic purposes
+         S607  # No way to locate bin folder beforehand
+         S404  # Just a warning about the usage of subprocess
+         S603  # Flags only false positives as of now
 exclude =
     Components/AutoFolio-master/,
     Components/ablationAnalysis-0.9.4/,

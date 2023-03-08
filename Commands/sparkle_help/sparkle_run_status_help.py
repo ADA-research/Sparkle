@@ -38,7 +38,7 @@ def get_list_running_extractor_jobs():
                 list_running_extractor_jobs.append([status_str, extractor_name,
                                                     instance_name, start_time_str,
                                                     cutoff_time_str])
-        except Exception:
+        except OSError:
             continue
 
     return list_running_extractor_jobs

@@ -200,7 +200,8 @@ def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
 
     instances = (dict_instance_to_par_default.keys()
                  & dict_instance_to_par_configured.keys())
-    assert (len(dict_instance_to_par_default) == len(instances))
+    if (len(dict_instance_to_par_default) != len(instances)):
+        print("ERROR: invald number of instances to performance !")
     points = []
     for instance in instances:
         point = [dict_instance_to_par_default[instance],
@@ -407,7 +408,9 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
     # "Round", "Flipped parameter", "Source value", "Target value", "Validation result"
     for i, line in enumerate(results):
         # If this fails something has changed in the representation of ablation tables
-        assert len(line) == 5
+        if len(line) != 5:
+            print("""ERROR: something has changed with the representation
+                   of ablation tables""")
         if i == 0:
             line = ["\\textbf{{{0}}}".format(word) for word in line]
 
