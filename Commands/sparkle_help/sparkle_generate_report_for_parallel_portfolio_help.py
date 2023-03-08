@@ -361,11 +361,11 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
                       solver_with_solutions: dict[str, int],
                       n_unsolved_instances: int, n_instances: int) -> str:
     """Return a string containing LaTeX code for a table with the portfolio results."""
-    portfolio_par10 = 0.0
+    portfolio_par = 0.0
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
     for instance in dict_portfolio:
-        portfolio_par10 += dict_portfolio[instance]
+        portfolio_par += dict_portfolio[instance]
 
     # Table 1: Portfolio results
     table_string = (
@@ -378,7 +378,7 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
         "\\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline ")
     table_string += (
         f"{sgrh.underscore_for_latex(parallel_portfolio_path.name)} & "
-        f"{str(round(portfolio_par10,2))} & {str(n_unsolved_instances)} & 0 & "
+        f"{str(round(portfolio_par,2))} & {str(n_unsolved_instances)} & 0 & "
         f"{str(n_instances-n_unsolved_instances)} \\\\ ")
     table_string += "\\end{tabular}"
     table_string += "\\bigskip"

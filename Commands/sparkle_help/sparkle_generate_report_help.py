@@ -165,8 +165,8 @@ def get_solver_actual_ranking_list():
     return str_value
 
 
-def get_par10_ranking_list():
-    """Return the list of solvers ranked by PAR10 as LaTeX str."""
+def get_par_ranking_list():
+    """Return the list of solvers ranked by PAR as LaTeX str."""
     str_value = ""
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -176,14 +176,14 @@ def get_par10_ranking_list():
 
     for solver, this_penalty_time in solver_penalty_time_ranking_list:
         solver = sfh.get_file_name(solver)
-        str_value += (r"\item \textbf{" + solver + r"}, PAR10: "
-                      + f"{str(this_penalty_time)}\n")
+        penalty = sgh.settings.get_general_penalty_multiplier()
+        str_value += (rf"\item \textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n")
 
     return str_value
 
 
-def get_vbs_par10():
-    """Return the PAR10 of the VBS over a set of instances."""
+def get_vbs_par():
+    """Return the PAR of the VBS over a set of instances."""
     str_value = r""
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -193,8 +193,8 @@ def get_vbs_par10():
     return str_value
 
 
-def get_actual_par10() -> str:
-    """Return the PAR10 of the selector over a set of instances.
+def get_actual_par() -> str:
+    """Return the PAR of the selector over a set of instances.
 
     @return string formatted mean performance.
     """
@@ -284,11 +284,12 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
         performance_data_csv.get_solver_penalty_time_ranking_list())
     sbs_solver = solver_penalty_time_ranking_list[0][0]
     sbs_solver = sfh.get_file_name(sbs_solver)
+    penalty = sgh.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
                              figure_portfolio_selector_sparkle_vs_sbs_filename,
-                             xlabel=f"SBS ({sbs_solver}) [PAR10]",
-                             ylabel="Sparkle Selector [PAR10]",
+                             xlabel=f"SBS ({sbs_solver}) [PAR{penalty}]",
+                             ylabel=f"Sparkle Selector [PAR{penalty}]",
                              limit="magnitude",
                              limit_min=0.25,
                              limit_max=0.25,
@@ -324,11 +325,12 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
     latex_directory_path = "Components/Sparkle-latex-generator/"
     figure_portfolio_selector_sparkle_vs_vbs_filename = (
         "figure_portfolio_selector_sparkle_vs_vbs")
+    penalty = sgh.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
                              figure_portfolio_selector_sparkle_vs_vbs_filename,
-                             xlabel="VBS [PAR10]",
-                             ylabel="Sparkle Selector [PAR10]",
+                             xlabel=f"VBS [PAR{penalty}]",
+                             ylabel=f"Sparkle Selector [PAR{penalty}]",
                              limit="magnitude",
                              limit_min=0.25,
                              limit_max=0.25,
@@ -357,8 +359,8 @@ def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
     return str_value
 
 
-def get_test_actual_par10(test_case_directory: str) -> str:
-    """Return the true PAR10 score on a test set."""
+def get_test_actual_par(test_case_directory: str) -> str:
+    """Return the true PAR score on a test set."""
     str_value = ""
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + "sparkle_performance_data.csv")
@@ -434,16 +436,20 @@ def get_dict_variable_to_value(test_case_directory: str = None):
     str_value = get_solver_actual_ranking_list()
     mydict[variable] = str_value
 
-    variable = r"PAR10RankingList"
-    str_value = get_par10_ranking_list()
+    variable = r"PARRankingList"
+    str_value = get_par_ranking_list()
     mydict[variable] = str_value
 
-    variable = r"VBSPAR10"
-    str_value = get_vbs_par10()
+    variable = r"VBSPAR"
+    str_value = get_vbs_par()
     mydict[variable] = str_value
 
-    variable = r"actualPAR10"
-    str_value = get_actual_par10()
+    variable = r"actualPAR"
+    str_value = get_actual_par()
+    mydict[variable] = str_value
+
+    variable = r"penalty"
+    str_value = str(sgh.settings.get_general_penalty_multiplier())
     mydict[variable] = str_value
 
     variable = r"figure-portfolio-selector-sparkle-vs-sbs"
@@ -468,8 +474,8 @@ def get_dict_variable_to_value(test_case_directory: str = None):
         str_value = get_num_instance_in_test_instance_class(test_case_directory)
         mydict[variable] = str_value
 
-        variable = "testActualPAR10"
-        str_value = get_test_actual_par10(test_case_directory)
+        variable = "testActualPAR"
+        str_value = get_test_actual_par(test_case_directory)
         mydict[variable] = str_value
 
         variable = r"testBool"
