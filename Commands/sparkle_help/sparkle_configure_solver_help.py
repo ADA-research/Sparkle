@@ -287,7 +287,7 @@ def copy_solver_files_to_smac_dir(solver_name: str, instance_set_name: str) -> N
     for i in range(1, num_of_smac_run + 1):
         smac_solver_path_i = smac_solver_dir / str(i)
         # Create directories, -p makes sure any missing parents are also created
-        cmd = f"mkdir {smac_solver_path_i}"
+        cmd = f"mkdir -p {smac_solver_path_i}"
         os.system(cmd)
 
         solver_directory = Path("Solvers", solver_name, "*")

@@ -35,6 +35,7 @@ def get_last_level_directory_name(filepath):
 def _is_a_number(input_str: str):
     """Check if an input string is a number (float or int)."""
     try:
+        # eval insecure, so use ast.literal_eval instead
         input_val = ast.literal_eval(input_str)
         if (type(input_val) == float) or (type(input_val) == int):
             return True
