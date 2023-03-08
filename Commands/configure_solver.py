@@ -173,6 +173,7 @@ if __name__ == "__main__":
     else:
         configurator_path = Path("smac-v2.10.03-master-778")
 
+    feature_data_df = None
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -191,7 +192,7 @@ if __name__ == "__main__":
                           "run add_feature_extractor.py, then compute_features.py")
                     sys.exit()
 
-                new_label = (f"../../instances/{instance_set_train.name}/"
+                new_label = (f"../../../instances/{instance_set_train.name}/"
                              + os.path.split(label)[1])
                 data_dict[new_label] = row
 
@@ -211,12 +212,7 @@ if __name__ == "__main__":
     full_configurator_path = "Configurators" / configurator_path
     solver = Solver(solver_path)
 
-    feature_file = None
-    if use_features:
-        feature_file = solver.directory / f"{instance_set_train.name}_features.csv"
-        feature_data_df.to_csv(feature_file, index_label="INSTANCE_NAME")
-
-    config_scenario = Configuration_Scenario(solver, instance_set_train, use_features, feature_file)
+    config_scenario = Configuration_Scenario(solver, instance_set_train, use_features, feature_data_df)
     configurator = Configurator(full_configurator_path, config_scenario)
 
     configurator.create_sbatch_script()

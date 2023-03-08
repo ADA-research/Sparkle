@@ -5,6 +5,8 @@
 import shutil
 from pathlib import Path
 
+from pandas import DataFrame
+
 from sparkle_help import sparkle_configure_solver_help as scsh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_logging as sl
@@ -16,25 +18,25 @@ from sparkle_help.solver import Solver
 class Configuration_Scenario:
     """Class to handle all activities around scenarios."""
     def __init__(self, solver: Solver, source_instance_directory: Path,
-                 use_features: bool, feature_file: Path = None) -> None:
+                 use_features: bool, feature_data_df: DataFrame = None) -> None:
         """Initialize scenario paths and names."""
         self.solver = solver
         self.parent_directory = ""
         self.source_instance_directory = source_instance_directory
         self.use_features = use_features
-        self.feature_file = feature_file
-
+        self.feature_data = feature_data_df
         self.name = f"{self.solver.name}_{self.source_instance_directory.name}"
 
         self.directory = ""
         self.result_directory = ""
         self.instance_directory = ""
         self.scenario_file = ""
+        self.feature_file = ""
                 
 
     def create_scenario(self, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory."""
-        self.parent_directory = parent_directory
+        self.parent_directory = parent_directory.absolute()
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.parent_directory / "results" / self.name
         self.instance_directory = Path(self.parent_directory / "instances" 
@@ -48,6 +50,9 @@ class Configuration_Scenario:
         self._prepare_instances()
 
         self._copy_instance_file_to_scenario()
+
+        if self.use_features:
+            self._create_feature_file()
 
         self._create_scenario_file()
 
@@ -159,3 +164,7 @@ class Configuration_Scenario:
         instance_file_name = Path(str(self.instance_directory.name + "_train.txt"))
         shutil.copy(self.parent_directory / "instances" / instance_file_name,
                     self.directory / instance_file_name)
+        
+    def _create_feature_file(self) -> None:
+        self.feature_file = Path(self.directory / f"{self.source_instance_directory.name}_features.csv")
+        self.feature_data.to_csv(self.directory / self.feature_file, index_label="INSTANCE_NAME")
