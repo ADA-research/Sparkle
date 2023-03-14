@@ -305,7 +305,6 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
     # specify the file for error output
     fout.write("#SBATCH --error=" + std_err_path + "\n")
     fout.write("###" + "\n")
-    fout.write("#SBATCH --mem-per-cpu=3072" + "\n")  # assigned 3GB memory for each cpu
     # using slurm job array and specify the number of jobs executing in parallel in this
     # sbatch script
     fout.write(f"#SBATCH --array=0-{str(num_job_total-1)}%{str(num_job_in_parallel)}\n")

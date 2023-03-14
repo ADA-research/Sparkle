@@ -87,7 +87,13 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 
 ### Changed
+- Changed several hardcoded Slurm settings to now be based on the settings file or user input.
 
 ### Fixed
+- Fixed calls to Slurm's `squeue` command to request an exact output format to ensure robustness against different Slurm configurations.
+- Fixed an issue where newer versions of Slurm (>= 22.05.0) occasionally cause problems when launching scripts from an interactive job (<https://bugs.schedmd.com/show_bug.cgi?id=14298>).
 
 ### Removed
+
+## [Known issues]
+- On some Slurm configurations problems may arise when running scripts. This is linked to the environment in which the script is running. We are investigating solutions to this issue.

@@ -148,7 +148,7 @@ def generate_callback_slurm_script(solver_name, instance_train_name, instance_te
         fh.close()
     os.system("chmod 755 {}".format(sgh.ablation_dir + callback_script_path))
 
-    srun_options_str = "-N1 -n1 -c1 --mem-per-cpu=1000"
+    srun_options_str = "-N1 -n1 -c1"
     target_call_str = callback_script_name
 
     job_params_list = []
@@ -207,7 +207,7 @@ def generate_validation_callback_slurm_script(solver_name, instance_train_name,
         fh.close()
     os.system("chmod 755 {}".format(sgh.ablation_dir + callback_script_path))
 
-    srun_options_str = "-N1 -n1 -c1 --mem-per-cpu=1000"
+    srun_options_str = "-N1 -n1 -c1"
     target_call_str = callback_script_name
 
     job_params_list = []
