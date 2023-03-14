@@ -62,5 +62,5 @@ Richard Middelkoop,
 Jeremie Gobeil
 
 ## Contact
-k.van.der.blom@liacs.leidenuniv.nl
+sparkle@aim.rwth-aachen.de
 
