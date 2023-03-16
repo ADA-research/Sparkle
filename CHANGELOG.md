@@ -1,6 +1,25 @@
 # Changelog for Sparkle
 
 Notable changes to Sparkle will be documented in this file.
+
+## [0.5] - 2023/03/16
+
+### Added
+- Instructions in `CONTRIBUTING.md` on how to deal with branching and merging for bug fixes.
+
+### Changed
+- Changed several hard coded Slurm settings to now be based on the settings file or user input.
+- Include linting for fstrings with `flake8-use-fstring` and make the code comply.
+- Include linting for security issues with `flake8-bandit` and make the code comply.
+- Changed author list in `README.md` to updated list of maintainers and contributors.
+- Update contact email in `README.md`.
+- The `sparkle_wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
+
+### Fixed
+- Fixed calls to Slurm's `squeue` command to request an exact output format to ensure robustness against different Slurm configurations.
+- Fixed an issue where newer versions of Slurm (>= 22.05.0) occasionally cause problems when launching scripts from an interactive job (<https://bugs.schedmd.com/show_bug.cgi?id=14298>).
+- Fix issue with retrieving instance set names for configuration with instance features.
+
 ## [0.4] - 2023/01/16
 ### Added
 - New option --run-on in run\_solvers.py 
@@ -85,20 +104,10 @@ Notable changes to Sparkle will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- Instructions in `CONTRIBUTING.md` on how to deal with branching and merging for bug fixes.
 
 ### Changed
-- Changed several hard coded Slurm settings to now be based on the settings file or user input.
-- Include linting for fstrings with `flake8-use-fstring` and make the code comply.
-- Include linting for security issues with `flake8-bandit` and make the code comply.
-- Changed author list in `README.md` to updated list of maintainers and contributors.
-- Update contact email in `README.md`.
-- The `sparkle_wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
 
 ### Fixed
-- Fixed calls to Slurm's `squeue` command to request an exact output format to ensure robustness against different Slurm configurations.
-- Fixed an issue where newer versions of Slurm (>= 22.05.0) occasionally cause problems when launching scripts from an interactive job (<https://bugs.schedmd.com/show_bug.cgi?id=14298>).
-- Fix issue with retrieving instance set names for configuration with instance features.
 
 ### Removed
 
