@@ -92,7 +92,7 @@ Notable changes to Sparkle will be documented in this file.
 - Include linting for fstrings with `flake8-use-fstring` and make the code comply.
 - Changed author list in `README.md` to updated list of maintainers and contributors.
 - Update contact email in `README.md`.
-- The `sparkle\_wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
+- The `sparkle_wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
 
 ### Fixed
 - Fixed calls to Slurm's `squeue` command to request an exact output format to ensure robustness against different Slurm configurations.
