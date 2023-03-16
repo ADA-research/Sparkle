@@ -71,5 +71,5 @@ Sam Vermeulen,
 Marcel Baumann
 
 ## Contact
-k.van.der.blom@liacs.leidenuniv.nl
+sparkle@aim.rwth-aachen.de
 
