@@ -31,13 +31,10 @@ def feature_data_csv_merge() -> None:
         csv_name = csv_list[i]
         csv_path = tmp_feature_data_csv_directory + csv_name
 
-        try:
-            tmp_feature_data_csv = sfdcsv.SparkleFeatureDataCSV(csv_path)
-            feature_data_csv.combine(tmp_feature_data_csv)
-            feature_data_csv.update_csv()
-            os.system("rm -f " + csv_path)
-        except Exception:
-            continue
+        tmp_feature_data_csv = sfdcsv.SparkleFeatureDataCSV(csv_path)
+        feature_data_csv.combine(tmp_feature_data_csv)
+        feature_data_csv.update_csv()
+        os.system("rm -f " + csv_path)
     return
 
 
@@ -77,8 +74,7 @@ def performance_data_csv_merge() -> None:
             performance_data_csv.update_csv()
             os.system("rm -f " + result_path)
         except Exception:
-            continue
-
+            print(f"ERROR: Could not remove file: {result_path}")
     for i in range(0, len(wrong_solver_list)):
         wrong_solver_path = wrong_solver_list[i]
         performance_data_csv.delete_column(wrong_solver_path)
