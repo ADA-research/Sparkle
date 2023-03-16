@@ -12,9 +12,10 @@ inline-quotes = "
 # Cyclomatic complexity desactivated
 # max-complexity = 15 
 
-# Ignore the unused import in __init__.py
+# Ignore the unused import in __init__.py (F401)
+# Asserts needed in test code (S101)
 per-file-ignores = __init__.py:F401
-                 = tests/*    :S101
+                 = tests/*    :S101 
                  = test/*     :S101
 
 docstring-convention=google

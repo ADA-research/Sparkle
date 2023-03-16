@@ -99,7 +99,7 @@ def get_list_running_solver_jobs():
             fin.close()
             list_running_solver_jobs.append([status_str, solver_name, instance_name,
                                              start_time_str, cutoff_time_str])
-        return list_running_solver_jobs
+    return list_running_solver_jobs
 
 
 def print_running_solver_jobs(mode: int = 1):

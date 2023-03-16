@@ -201,7 +201,9 @@ def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
     instances = (dict_instance_to_par_default.keys()
                  & dict_instance_to_par_configured.keys())
     if (len(dict_instance_to_par_default) != len(instances)):
-        print("ERROR: invald number of instances to performance !")
+        print("""ERROR: Number of instances does not match
+         the number of performance values for the default configuration.""")
+        sys.exit()
     points = []
     for instance in instances:
         point = [dict_instance_to_par_default[instance],
@@ -411,6 +413,7 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
         if len(line) != 5:
             print("""ERROR: something has changed with the representation
                    of ablation tables""")
+            sys.exit()
         if i == 0:
             line = ["\\textbf{{{0}}}".format(word) for word in line]
 

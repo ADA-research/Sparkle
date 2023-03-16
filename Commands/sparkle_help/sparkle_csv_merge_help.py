@@ -36,7 +36,7 @@ def feature_data_csv_merge() -> None:
         feature_data_csv.update_csv()
         os.system("rm -f " + csv_path)
     return
- 
+
 
 def performance_data_csv_merge() -> None:
     """Merge performance data of new results into the main performance data CSV."""

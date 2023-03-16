@@ -28,6 +28,7 @@ pipelines:
               - pip install flake8-docstrings==1.6.0
               - pip install flake8-quotes==3.3.1
               - pip install pep8-naming==0.13.2
+              - pip install flake8-bandit==4.1.1
               - flake8
               
 definitions:
