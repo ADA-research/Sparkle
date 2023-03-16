@@ -173,7 +173,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
     else:
         if flag_solved:
             print("instance solved by solver " + solver_path)
-            os.system("cat %s" % (raw_result_path))
+            os.system(f"cat {raw_result_path}")
         else:
             print(f"solver {solver_path} failed to solve the instance with status "
                   f"{status}")

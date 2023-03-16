@@ -113,7 +113,7 @@ if __name__ == "__main__":
             for related_file_name in instance_related_files:
                 source_file_path = os.path.join(instances_source, related_file_name)
                 target_file_path = os.path.join(instances_directory, related_file_name)
-                cmd = "cp %s %s" % (source_file_path, target_file_path)
+                cmd = f"cp {source_file_path} {target_file_path}"
                 os.system(cmd)
                 intended_instance_line += target_file_path + " "
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
             if intended_filename in list_target_all_filename:
                 print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
-                      " already exists in Directory {instances_directory}")
+                      f" already exists in Directory {instances_directory}")
                 print("Ignore adding file "
                       f"{sfh.get_last_level_directory_name(intended_filename)}")
                 # continue
