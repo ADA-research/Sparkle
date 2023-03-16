@@ -264,7 +264,8 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                             logging_file2 = (
                                 f'{logging_file[:logging_file.rfind(".")]}2.txt')
                             log_computation_time(logging_file2, job, cutoff_seconds)
-                        subprocess.Popen(command_line, shell=True)
+                        # Shell is needed for admin rights to do scancel
+                        subprocess.Popen(command_line, shell=True)  # noqa # nosec
                     else:
                         pending_job_with_new_cutoff[job] = cutoff_seconds
                 else:
@@ -273,7 +274,8 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                                               remaining_jobs[job][0])
                     logging_file2 = logging_file[:logging_file.rfind(".")] + "2.txt"
                     log_computation_time(logging_file2, job, "-1")
-                    subprocess.Popen(command_line, shell=True)
+                    # Shell is needed for admin rights to do scancel
+                    subprocess.Popen(command_line, shell=True)  # noqa # nosec
 
     return remaining_jobs, pending_job_with_new_cutoff
 

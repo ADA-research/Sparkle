@@ -69,4 +69,4 @@ if __name__ == "__main__":
     cmd = f"epstopdf '{output_eps_file}'"
     os.system(cmd)
 
-    os.system("rm -f '{output_gnuplot_script}'")
+    os.system(f"rm -f '{output_gnuplot_script}'")

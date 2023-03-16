@@ -19,8 +19,10 @@ dependencies:
     - pytest
     - flake8==5.0.4
     - flake8-quotes==3.3.1
+    - flake8-bandit==4.1.1
     - pep8-naming==0.13.2
     - flake8-docstrings==1.6.0
+    - flake8-use-fstring==1.4.0
     - flake8-use-pathlib==0.3.0
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario

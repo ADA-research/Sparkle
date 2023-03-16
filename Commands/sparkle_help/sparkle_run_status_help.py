@@ -38,7 +38,7 @@ def get_list_running_extractor_jobs():
                 list_running_extractor_jobs.append([status_str, extractor_name,
                                                     instance_name, start_time_str,
                                                     cutoff_time_str])
-        except Exception:
+        except OSError:
             continue
 
     return list_running_extractor_jobs
@@ -79,31 +79,26 @@ def get_list_running_solver_jobs():
     for statusinfo_filename in list_all_statusinfo_filename:
         statusinfo_filepath = (
             tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
-        try:
-            fin = Path(statusinfo_filepath).open("r+")
-            fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-            mylist1 = fin.readline().strip().split()
-            status_str = mylist1[1]
-
-            if not status_str == "Running":
-                fin.close()
-                continue
-            else:
-                mylist2 = fin.readline().strip().split()
-                solver_name = mylist2[1]
-                mylist3 = fin.readline().strip().split()
-                instance_name = mylist3[1]
-                mylist4 = fin.readline().strip().split()
-                start_time_str = mylist4[2] + " " + mylist4[3]
-                fin.readline()
-                mylist5 = fin.readline().strip().split()
-                cutoff_time_str = mylist5[2]
-                fin.close()
-                list_running_solver_jobs.append([status_str, solver_name, instance_name,
-                                                 start_time_str, cutoff_time_str])
-        except Exception:
+        fin = Path(statusinfo_filepath).open("r+")
+        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+        mylist1 = fin.readline().strip().split()
+        status_str = mylist1[1]
+        if not status_str == "Running":
+            fin.close()
             continue
-
+        else:
+            mylist2 = fin.readline().strip().split()
+            solver_name = mylist2[1]
+            mylist3 = fin.readline().strip().split()
+            instance_name = mylist3[1]
+            mylist4 = fin.readline().strip().split()
+            start_time_str = mylist4[2] + " " + mylist4[3]
+            fin.readline()
+            mylist5 = fin.readline().strip().split()
+            cutoff_time_str = mylist5[2]
+            fin.close()
+            list_running_solver_jobs.append([status_str, solver_name, instance_name,
+                                             start_time_str, cutoff_time_str])
     return list_running_solver_jobs
 
 

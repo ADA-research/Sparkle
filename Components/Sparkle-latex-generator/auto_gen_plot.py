@@ -10,9 +10,9 @@ import pathlib
 
 if __name__ == "__main__":
     if len(sys.argv) != 6:
-        print("Usage: %s <data_portfolio_selector_sparkle_vs_vbs_filename> "
+        print(f"Usage: {sys.argv[0]} <data_portfolio_selector_sparkle_vs_vbs_filename> "
               "<penalty_time> <vbs_name> <portfolio_selector_sparkle_name> "
-              "<figure_portfolio_selector_sparkle_vs_vbs_filename>" % (sys.argv[0]))
+              "<figure_portfolio_selector_sparkle_vs_vbs_filename>")
         exit(-1)
 
     data_portfolio_selector_sparkle_vs_vbs_filename = sys.argv[1]
@@ -28,30 +28,29 @@ if __name__ == "__main__":
     output_gnuplot_script = portfolio_selector_sparkle_name + "_vs_" + vbs_name + ".plt"
 
     fout = pathlib.Path(output_gnuplot_script).open("w+")
-    fout.write("set xlabel '%s, PAR10'" % (vbs_name) + "\n")
-    fout.write("set ylabel '%s, PAR10'" % (portfolio_selector_sparkle_name) + "\n")
-    fout.write("set title "
-               "'%s vs %s'" % (portfolio_selector_sparkle_name, vbs_name) + "\n")
-    fout.write("unset key" + "\n")
-    fout.write("set xrange [0.01:%s]" % (penalty_time) + "\n")
-    fout.write("set yrange [0.01:%s]" % (penalty_time) + "\n")
-    fout.write("set logscale x" + "\n")
-    fout.write("set logscale y" + "\n")
-    fout.write("set grid" + "\n")
-    fout.write("set size square" + "\n")
+    fout.write(f"set xlabel '{vbs_name}, PAR10'" + "\n")
+    fout.write(f"set ylabel '{portfolio_selector_sparkle_name}, PAR10'\n")
+    fout.write(f"set title '{portfolio_selector_sparkle_name} vs {vbs_name}'\n")
+    fout.write("unset key\n")
+    fout.write(f"set xrange [0.01:{penalty_time}]\n")
+    fout.write(f"set yrange [0.01:{penalty_time}]\n")
+    fout.write("set logscale x\n")
+    fout.write("set logscale y\n")
+    fout.write("set grid\n")
+    fout.write("set size square\n")
     fout.write("set arrow from 0.01,0.01 to "
-               "%s,%s nohead lc rgb 'black'" % (penalty_time, penalty_time) + "\n")
-    fout.write('set terminal postscript eps color solid linewidth "Helvetica" 20' + "\n")
-    fout.write("set output '%s'" % (output_eps_file) + "\n")
-    fout.write("plot '%s'" % (data_portfolio_selector_sparkle_vs_vbs_filename) + "\n")
+               f"{penalty_time},{penalty_time} nohead lc rgb 'black'\n")
+    fout.write("set terminal postscript eps color solid linewidth 'Helvetica' 20\n")
+    fout.write(f"set output '{output_eps_file}'\n")
+    fout.write(f"plot '{data_portfolio_selector_sparkle_vs_vbs_filename}'\n")
     fout.close()
 
-    cmd = "gnuplot \'%s\'" % (output_gnuplot_script)
+    cmd = f"gnuplot '{output_gnuplot_script}'"
     os.system(cmd)
 
     # Some systems are missing epstopdf so a copy is included
     epsbackup = pathlib.Path(join(dirname(__file__), "..", "epstopdf.pl")).resolve()
     epstopdf = which("epstopdf") or epsbackup
-    os.system("%s '%s'" % (epstopdf, output_eps_file))
+    os.system(f"{epstopdf} '{output_eps_file}'")
 
-    os.system("rm -f '%s'" % (output_gnuplot_script))
+    os.system(f"rm -f '{output_gnuplot_script}'")

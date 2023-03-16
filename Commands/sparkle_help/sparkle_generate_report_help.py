@@ -267,7 +267,10 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
 
     instances = (dict_sbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
-    assert (len(dict_sbs_penalty_time_on_each_instance) == len(instances))
+    if (len(dict_sbs_penalty_time_on_each_instance) != len(instances)):
+        print("""ERROR: Number of penalty times for the single best solver
+          does not match the number of instances""")
+        sys.exit()
     points = []
     for instance in instances:
         point = [dict_sbs_penalty_time_on_each_instance[instance],
@@ -296,8 +299,10 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
                              cwd=latex_directory_path)
-    str_value = ("\\includegraphics[width=0.6\\textwidth]{%s}" % (
-                 figure_portfolio_selector_sparkle_vs_sbs_filename))
+    str_value = (
+        "\\includegraphics[width=0.6\\textwidth]"
+        f"{figure_portfolio_selector_sparkle_vs_sbs_filename}"
+    )
 
     return str_value
 
@@ -315,7 +320,10 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
 
     instances = (dict_vbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
-    assert (len(dict_vbs_penalty_time_on_each_instance) == len(instances))
+    if (len(dict_vbs_penalty_time_on_each_instance) != len(instances)):
+        print("""ERROR: Number of penalty times for the virtual best solver
+          does not match the number of instances""")
+        sys.exit()
     points = []
     for instance in instances:
         point = [dict_vbs_penalty_time_on_each_instance[instance],
@@ -338,8 +346,10 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              replace_zeros=True,
                              cwd=latex_directory_path)
 
-    str_value = ("\\includegraphics[width=0.6\\textwidth]{%s}" % (
-        figure_portfolio_selector_sparkle_vs_vbs_filename))
+    str_value = (
+        "\\includegraphics[width=0.6\\textwidth]"
+        f"{figure_portfolio_selector_sparkle_vs_vbs_filename}"
+    )
     return str_value
 
 
@@ -590,7 +600,7 @@ def generate_comparison_plot(points: list,
         check_zeros = np.count_nonzero(points <= 0)
         if check_zeros != 0:
             print("WARNING: Zero or negative valued performance values detected. Setting"
-                  " these values to {zero_runtime}.")
+                  f" these values to {zero_runtime}.")
         points[points == 0] = zero_runtime
 
     # process labels
@@ -602,7 +612,9 @@ def generate_comparison_plot(points: list,
     min_point_value = np.min(points)
     max_point_value = np.max(points)
     if penalty_time is not None:
-        assert penalty_time >= max_point_value
+        if (penalty_time < max_point_value):
+            print("ERROR: Penalty time too small for the given performance data.")
+            sys.exit()
         max_point_value = penalty_time
 
     if limit == "absolute":

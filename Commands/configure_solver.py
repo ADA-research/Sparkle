@@ -135,20 +135,19 @@ if __name__ == "__main__":
             print("given training set path is not an existing directory")
             sys.exit()
 
-        # Takes folder/instance set name from training set path
-        set_name = os.path.split(os.path.split(instance_set_train)[0])[1]
         data_dict = {}
         feature_data_df = feature_data_csv.dataframe
 
         for label, row in feature_data_df.iterrows():
             # os.path.split(os.path.split(label)[0])[1] gives the dir/instance set name
-            if os.path.split(os.path.split(label)[0])[1] == set_name:
+            if os.path.split(os.path.split(label)[0])[1] == instance_set_train.name:
                 if row.empty:
                     print("No feature data exists for the given training set, please "
                           "run add_feature_extractor.py, then compute_features.py")
                     sys.exit()
 
-                new_label = f"../../instances/{set_name}/{os.path.split(label)[1]}"
+                new_label = (f"../../instances/{instance_set_train.name}/"
+                             + os.path.split(label)[1])
                 data_dict[new_label] = row
 
         feature_data_df = DataFrame.from_dict(data_dict, orient="index",

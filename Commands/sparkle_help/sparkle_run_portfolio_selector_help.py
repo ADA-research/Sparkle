@@ -7,6 +7,7 @@ import pathlib
 import sys
 import fcntl
 from pathlib import Path
+import ast
 
 try:
     from sparkle_help import sparkle_basic_help
@@ -121,7 +122,8 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str):
         sys.exit(-1)
 
     predict_schedule_string = predict_schedule[len(prefix_string):]
-    list_predict_schedule = eval(predict_schedule_string)
+    # eval insecure, so use ast.literal_eval instead
+    list_predict_schedule = ast.literal_eval(predict_schedule_string)
     fin.close()
 
     return list_predict_schedule
@@ -173,7 +175,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
     else:
         if flag_solved:
             print("instance solved by solver " + solver_path)
-            os.system("cat %s" % (raw_result_path))
+            os.system(f"cat {raw_result_path}")
         else:
             print(f"solver {solver_path} failed to solve the instance with status "
                   f"{status}")
