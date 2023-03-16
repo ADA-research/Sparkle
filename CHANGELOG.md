@@ -30,7 +30,7 @@ Notable changes to Sparkle will be documented in this file.
 - Default to --run-extractor-later in add\_instances.py and add\_feature\_extractor.py
 - Updated documentation, examples and tests for new behaviour of --run-solver-later and --run-extrator-later
 - Improve integration tests so all launched jobs are cancelled upon test completion
-- Change the list of authors in about.py to be in alphebetical order
+- Change the list of authors in about.py to be in alphabetical order
 - Update runsolver version to 3.4
 
 ### Fixed
@@ -68,7 +68,7 @@ Notable changes to Sparkle will be documented in this file.
 - Updated dependencies
 - Merge add\_solver\_help.py and add\_configured\_solver\_help.py
 - Changed file location of last\_test\_file\_path such that only the solver name is required to find the correct directory
-- Seperate configuration for different train and test sets
+- Separate configuration for different train and test sets
 - Remove ablation scenarios when platform is cleaned
 - Change selection report title
 - Remove Yahsp solver and Depots instances (unclear redistribution permissions)
@@ -85,9 +85,21 @@ Notable changes to Sparkle will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Instructions in `CONTRIBUTING.md` on how to deal with branching and merging for bug fixes.
 
 ### Changed
+- Changed several hard coded Slurm settings to now be based on the settings file or user input.
+- Include linting for fstrings with `flake8-use-fstring` and make the code comply.
+- Changed author list in `README.md` to updated list of maintainers and contributors.
+- Update contact email in `README.md`.
+- The `sparkle_wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
 
 ### Fixed
+- Fixed calls to Slurm's `squeue` command to request an exact output format to ensure robustness against different Slurm configurations.
+- Fixed an issue where newer versions of Slurm (>= 22.05.0) occasionally cause problems when launching scripts from an interactive job (<https://bugs.schedmd.com/show_bug.cgi?id=14298>).
+- Fix issue with retrieving instance set names for configuration with instance features.
 
 ### Removed
+
+## [Known issues]
+- On some Slurm configurations problems may arise when running scripts. This is linked to the environment in which the script is running. We are investigating solutions to this issue.

@@ -436,7 +436,6 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
     fout.write(f"#SBATCH --error=tmp/{sbatch_script_path}.err\n")
     fout.write("###\n")
     fout.write("###\n")
-    fout.write("#SBATCH --mem-per-cpu=3000\n")
     fout.write(f"#SBATCH --array=0-{num_job_total}%{num_job_in_parallel}\n")
     fout.write("###\n")
     # Options from the slurm/sbatch settings file

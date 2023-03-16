@@ -96,7 +96,7 @@ class Settings:
     DEFAULT_config_number_of_runs = 25
 
     DEFAULT_slurm_number_of_runs_in_parallel = 25
-    DEFAULT_slurm_clis_per_node = 32
+    DEFAULT_slurm_clis_per_node = 8
 
     DEFAULT_smac_target_cutoff_length = "max"
 

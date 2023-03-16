@@ -18,17 +18,16 @@ if __name__ == "__main__":
     sphinx_file = open("source/userguide/commandlist.md", "w")
     for command in commands:
         sphinx_file.write(
-            "*  :ref:`cmd:{name}`\n".format(name=command.replace(".py", "")))
+            f"*  :ref:`cmd:{command.replace('.py', '')}`\n")
     sphinx_file.close()
 
-    string = """
-.. _cmd:{name}:
-
-.. autoprogram:: {name}:parser_function()
-   :prog: {name}.py
-
-    """
     sphinx_file = open("source/userguide/commandsautoprogram.md", "w")
     for command in commands:
-        sphinx_file.write(string.format(name=command.replace(".py", "")))
+        sphinx_file.write(f"""
+        .. _cmd:{command.replace(".py", "")}:
+
+        .. autoprogram:: {command.replace(".py", "")}:parser_function()
+            :prog: {command.replace(".py", "")}.py
+
+            """)
     sphinx_file.close()

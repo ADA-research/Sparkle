@@ -57,3 +57,9 @@ exclude =
     Tmp/,
     build/,
     dist/
+
+# use-fstring configurations
+percent-greedy=2
+format-greedy=2
+# enable-extensions=FS003 
+fstring-ignore-format=False

@@ -175,7 +175,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
     else:
         if flag_solved:
             print("instance solved by solver " + solver_path)
-            os.system("cat %s" % (raw_result_path))
+            os.system(f"cat {raw_result_path}")
         else:
             print(f"solver {solver_path} failed to solve the instance with status "
                   f"{status}")
@@ -307,7 +307,6 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
     # specify the file for error output
     fout.write("#SBATCH --error=" + std_err_path + "\n")
     fout.write("###" + "\n")
-    fout.write("#SBATCH --mem-per-cpu=3072" + "\n")  # assigned 3GB memory for each cpu
     # using slurm job array and specify the number of jobs executing in parallel in this
     # sbatch script
     fout.write(f"#SBATCH --array=0-{str(num_job_total-1)}%{str(num_job_in_parallel)}\n")

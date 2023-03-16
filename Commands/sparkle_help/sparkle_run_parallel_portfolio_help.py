@@ -156,7 +156,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             try:
                 shutil.move(path_from, path_to)
             except shutil.Error:
-                print("the {str(sgh.pap_performance_data_tmp_path)} directory already "
+                print(f"the {str(sgh.pap_performance_data_tmp_path)} directory already "
                       "contains a file with the same name, it will be skipped")
 
             commandline = f"rm -rf {path_from}"
@@ -172,7 +172,7 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
     # was manually cancelled or it gave an error the template will ensure that all
     # solver on that instance will be cancelled.
     time_in_format_str = "-1:00"
-    solutions_dir = "f{str(sgh.pap_performance_data_tmp_path)}/"
+    solutions_dir = f"{str(sgh.pap_performance_data_tmp_path)}/"
     results = sfh.get_list_all_result_filename(solutions_dir)
 
     for result in results:
@@ -204,9 +204,10 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
     and cutoff_seconds int as value.
     """
     # Find all job_array_numbers that are currently running
-    # This is specifically for Grace
-    result = subprocess.run(["squeue", "--array", "--jobs", job_id], capture_output=True,
-                            text=True)
+    # This is specific to Slurm
+    result = subprocess.run(["squeue", "--array", "--jobs", job_id,
+                             "--format", "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
+                            capture_output=True, text=True)
     remaining_jobs = {}
 
     for jobs in result.stdout.strip().split("\n"):
@@ -301,7 +302,8 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
 
     while not done:
         # Ask the cluster for a list of all jobs which are currently running
-        result = subprocess.run(["squeue", "--array", "--jobs", job_id],
+        result = subprocess.run(["squeue", "--array", "--jobs", job_id,
+                                 "--format", "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
                                 capture_output=True, text=True)
 
         # If none of the jobs on the cluster are running then nothing has to done yet,
@@ -451,7 +453,7 @@ def generate_sbatch_job_list(solver_list: list[str], instance_path_list: list[st
                 new_num_jobs = new_num_jobs + int(seed) - 1
 
                 for instance in range(1, int(seed) + 1):
-                    commandline = (f" --instance {str(instance_path)} --solver "
+                    commandline = (f"--instance {str(instance_path)} --solver "
                                    f"{str(solver_path)} --performance-measure "
                                    f"{performance_measure.name} --seed {str(instance)}")
                     parameters.append(commandline)
@@ -463,7 +465,7 @@ def generate_sbatch_job_list(solver_list: list[str], instance_path_list: list[st
                 solver_name = solver_path.name
                 instance_name = Path(instance_path).name
                 solver_instance_list.append(f"{solver_name}_{instance_name}")
-                commandline = (f" --instance {str(instance_path)} --solver "
+                commandline = (f"--instance {str(instance_path)} --solver "
                                f"{str(solver_path)} --performance-measure "
                                f"{performance_measure.name}")
                 parameters.append(commandline)
@@ -648,7 +650,10 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
 
             while not done:
                 # Ask the cluster for a list of all jobs which are currently running
-                result = subprocess.run(["squeue", "--array", "--jobs", job_id],
+                result = subprocess.run(["squeue", "--array",
+                                         "--jobs", job_id,
+                                         "--format",
+                                         "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
                                         capture_output=True, text=True)
 
                 # If none of the jobs on the cluster are running then nothing has to done
@@ -701,7 +706,6 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                 print(f"{str(instances)} was not solved in the given cutoff-time.")
     except Exception as except_msg:
         print(except_msg)
-
         return False
 
     return True
