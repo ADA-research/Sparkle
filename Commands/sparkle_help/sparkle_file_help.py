@@ -18,7 +18,7 @@ except ImportError:
 
 def create_new_empty_file(filepath: str):
     """Create a new empty file given a filepath string."""
-    fo = open(filepath, "w+")
+    fo = Path(filepath).open("w+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.close()
 
@@ -146,7 +146,7 @@ def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
     NOTE: Possibly to be merged with get_list_all_filename() since the CNF extension is
     not considered anymore.
     """
-    if os.path.isfile(path):
+    if Path(path).is_file():
         # TODO: Possibly add extension check back when we get this information from the
         # user
         # file_extension = get_file_least_extension(path)
@@ -154,7 +154,7 @@ def get_list_all_cnf_filename_recursive(path, list_all_cnf_filename):
         filename = get_file_name(path)
         list_all_cnf_filename.append(filename)
         return
-    elif os.path.isdir(path):
+    elif Path(path).is_dir():
         if path[-1] != "/":
             this_path = path + "/"
         else:
@@ -180,11 +180,11 @@ def get_list_all_filename_recursive(path, list_all_filename):
     NOTE: Possibly to be merged with get_list_all_cnf_filename() since the CNF extension
     is not considered anymore.
     """
-    if os.path.isfile(path):
+    if Path(path).is_file():
         filename = get_file_name(path)
         list_all_filename.append(filename)
         return
-    elif os.path.isdir(path):
+    elif Path(path).is_dir():
         if path[-1] != "/":
             this_path = path + "/"
         else:
@@ -210,11 +210,11 @@ def get_list_all_directory_recursive(path, list_all_directory):
     NOTE: Possibly to be merged with get_list_all_cnf_filename() since the CNF extension
     is not considered anymore.
     """
-    if os.path.isfile(path):
+    if Path(path).is_file():
         directory = get_directory(path)
         list_all_directory.append(directory)
         return
-    elif os.path.isdir(path):
+    elif Path(path).is_dir():
         if path[-1] != "/":
             this_path = path + "/"
         else:
@@ -235,7 +235,7 @@ def get_list_all_directory(filepath):
 def get_list_all_csv_filename(filepath):
     """Return a list of all CSV files in a given path."""
     csv_list = []
-    if not os.path.exists(filepath):
+    if not Path(filepath).exists():
         return csv_list
 
     list_all_items = os.listdir(filepath)
@@ -249,7 +249,7 @@ def get_list_all_csv_filename(filepath):
 def get_list_all_result_filename(filepath: str) -> list[str]:
     """Return a list of result files in a given path."""
     result_list = []
-    if not os.path.exists(filepath):
+    if not Path(filepath).exists():
         return result_list
 
     list_all_items = os.listdir(filepath)
@@ -263,7 +263,7 @@ def get_list_all_result_filename(filepath: str) -> list[str]:
 def get_list_all_jobinfo_filename(filepath):
     """Return a list of all `jobinfo` files in a given path."""
     jobinfo_list = []
-    if not os.path.exists(filepath):
+    if not Path(filepath).exists():
         return jobinfo_list
 
     list_all_items = os.listdir(filepath)
@@ -277,7 +277,7 @@ def get_list_all_jobinfo_filename(filepath):
 def get_list_all_statusinfo_filename(filepath):
     """Return a list of all `jobinfo` files in a given path."""
     statusinfo_list = []
-    if not os.path.exists(filepath):
+    if not Path(filepath).exists():
         return statusinfo_list
 
     list_all_items = os.listdir(filepath)
@@ -290,7 +290,7 @@ def get_list_all_statusinfo_filename(filepath):
 
 def add_new_instance_into_file(filepath):
     """Add an instance to a given instance file."""
-    fo = open(str(sgh.instance_list_path), "a+")
+    fo = Path(str(sgh.instance_list_path)).open("a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.write(filepath + "\n")
     fo.close()
@@ -300,7 +300,7 @@ def add_new_instance_into_file(filepath):
 def add_new_solver_into_file(filepath: str, deterministic: int = 0,
                              solver_variations: int = 1):
     """Add a solver to an existing file listing solvers and their details."""
-    fo = open(sgh.solver_list_path, "a+")
+    fo = Path(sgh.solver_list_path).open("a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.write(f"{filepath} {str(deterministic)} {str(solver_variations)}\n")
     fo.close()
@@ -310,7 +310,7 @@ def add_new_solver_into_file(filepath: str, deterministic: int = 0,
 
 def add_new_solver_nickname_into_file(nickname, filepath):
     """Add a new solver nickname to a given file."""
-    fo = open(sgh.solver_nickname_list_path, "a+")
+    fo = Path(sgh.solver_nickname_list_path).open("a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.write(nickname + r" " + filepath + "\n")
     fo.close()
@@ -319,7 +319,7 @@ def add_new_solver_nickname_into_file(nickname, filepath):
 
 def add_new_extractor_into_file(filepath):
     """Add a new feature extractor to a given file."""
-    fo = open(sgh.extractor_list_path, "a+")
+    fo = Path(sgh.extractor_list_path).open("a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.write(filepath + "\n")
     fo.close()
@@ -328,7 +328,7 @@ def add_new_extractor_into_file(filepath):
 
 def add_new_extractor_feature_vector_size_into_file(filepath, feature_vector_size):
     """Add a new feature vector size to a given file."""
-    fo = open(sgh.extractor_feature_vector_size_list_path, "a+")
+    fo = Path(sgh.extractor_feature_vector_size_list_path).open("a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.write(filepath + r" " + str(feature_vector_size) + "\n")
     fo.close()
@@ -337,7 +337,7 @@ def add_new_extractor_feature_vector_size_into_file(filepath, feature_vector_siz
 
 def add_new_extractor_nickname_into_file(nickname, filepath):
     """Add a new feature extractor nickname to a given file."""
-    fo = open(sgh.extractor_nickname_list_path, "a+")
+    fo = Path(sgh.extractor_nickname_list_path).open("a+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     fo.write(nickname + r" " + filepath + "\n")
     fo.close()
@@ -346,7 +346,7 @@ def add_new_extractor_nickname_into_file(nickname, filepath):
 
 def write_solver_list():
     """Write the solver list to the default solver list file."""
-    fout = open(sgh.solver_list_path, "w+")
+    fout = Path(sgh.solver_list_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for i in range(0, len(sgh.solver_list)):
         fout.write(sgh.solver_list[i] + "\n")
@@ -377,13 +377,13 @@ def remove_from_solver_list(filepath):
     newlines = []
 
     # Store lines that do not contain filepath
-    with open(sgh.solver_list_path, "r") as infile:
+    with Path(sgh.solver_list_path).open("r") as infile:
         for line in infile:
             if filepath not in line:
                 newlines.append(line)
 
     # Overwrite the file with stored lines
-    with open(sgh.solver_list_path, "w") as outfile:
+    with Path(sgh.solver_list_path).open("w") as outfile:
         for line in newlines:
             outfile.write(line)
 
@@ -395,7 +395,7 @@ def remove_from_solver_list(filepath):
 
 def write_solver_nickname_mapping():
     """Write the mapping between solvers and nicknames to file."""
-    fout = open(sgh.solver_nickname_list_path, "w+")
+    fout = Path(sgh.solver_nickname_list_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for key in sgh.solver_nickname_mapping:
         fout.write(key + r" " + sgh.solver_nickname_mapping[key] + "\n")
@@ -405,7 +405,7 @@ def write_solver_nickname_mapping():
 
 def write_extractor_list():
     """Write the list of extractors to the default file."""
-    fout = open(sgh.extractor_list_path, "w+")
+    fout = Path(sgh.extractor_list_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for i in range(0, len(sgh.extractor_list)):
         fout.write(sgh.extractor_list[i] + "\n")
@@ -415,7 +415,7 @@ def write_extractor_list():
 
 def write_extractor_feature_vector_size_mapping():
     """Write the mapping between feature extractors and feature vector sizes to file."""
-    fout = open(sgh.extractor_feature_vector_size_list_path, "w+")
+    fout = Path(sgh.extractor_feature_vector_size_list_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for key in sgh.extractor_feature_vector_size_mapping:
         fout.write(f"{key} {str(sgh.extractor_feature_vector_size_mapping[key])}\n")
@@ -425,7 +425,7 @@ def write_extractor_feature_vector_size_mapping():
 
 def write_extractor_nickname_mapping():
     """Write the mapping between feature extractors and nicknames to file."""
-    fout = open(sgh.extractor_nickname_list_path, "w+")
+    fout = Path(sgh.extractor_nickname_list_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for key in sgh.extractor_nickname_mapping:
         fout.write(key + r" " + sgh.extractor_nickname_mapping[key] + "\n")
@@ -435,7 +435,7 @@ def write_extractor_nickname_mapping():
 
 def write_instance_list():
     """Write the instance list to the default file."""
-    fout = open(str(sgh.instance_list_path), "w+")
+    fout = Path(str(sgh.instance_list_path)).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     for i in range(0, len(sgh.instance_list)):
         fout.write(sgh.instance_list[i] + "\n")
@@ -460,7 +460,7 @@ def write_string_to_file(file: Path, string: str, append: bool = False, maxtry: 
 
     for i in range(maxtry):
         try:
-            with open(file, "a" if append else "w") as fout:
+            with Path(file).open("a" if append else "w") as fout:
                 fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 fout.write(string)
                 fcntl.flock(fout.fileno(), fcntl.LOCK_UN)

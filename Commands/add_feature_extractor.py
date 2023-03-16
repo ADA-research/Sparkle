@@ -4,6 +4,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
@@ -16,15 +17,14 @@ from sparkle_help import sparkle_settings
 
 def _check_existence_of_test_instance_list_file(extractor_directory: str):
     """Check whether a file exists with the list of test instances."""
-    if not os.path.isdir(extractor_directory):
+    if not Path(extractor_directory).is_dir():
         return False
 
     test_instance_list_file_name = "sparkle_test_instance_list.txt"
-    test_instance_list_file_path = os.path.join(
-        extractor_directory, test_instance_list_file_name
-    )
+    test_instance_list_file_path = (Path(extractor_directory)
+                                    / test_instance_list_file_name)
 
-    if os.path.isfile(test_instance_list_file_path):
+    if Path(test_instance_list_file_path).is_file():
         return True
     else:
         return False
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     extractor_source = args.extractor_path
-    if not os.path.exists(extractor_source):
+    if not Path(extractor_source).exists():
         print(f'Feature extractor path "{extractor_source}" does not exist!')
         sys.exit()
 
@@ -94,8 +94,8 @@ if __name__ == "__main__":
 
     extractor_directory = "Extractors/" + last_level_directory
 
-    if not os.path.exists(extractor_directory):
-        os.mkdir(extractor_directory)
+    if not Path(extractor_directory).exists():
+        Path(extractor_directory).mkdir()
     else:
         print(
             "Feature extractor "
@@ -116,14 +116,13 @@ if __name__ == "__main__":
     # pre-run the feature extractor on a testing instance, to obtain the feature names
     if _check_existence_of_test_instance_list_file(extractor_directory):
         test_instance_list_file_name = "sparkle_test_instance_list.txt"
-        test_instance_list_file_path = os.path.join(
-            extractor_directory, test_instance_list_file_name
-        )
-        infile = open(test_instance_list_file_path, "r")
+        test_instance_list_file_path = (Path(extractor_directory)
+                                        / test_instance_list_file_name)
+        infile = Path(test_instance_list_file_path).open("r")
         test_instance_files = infile.readline().strip().split()
         instance_path = ""
         for test_instance_file in test_instance_files:
-            instance_path += os.path.join(extractor_directory, test_instance_file) + " "
+            instance_path += Path(extractor_directory) / test_instance_file + " "
         instance_path = instance_path.strip()
         infile.close()
 
@@ -138,23 +137,21 @@ if __name__ == "__main__":
         )
 
         command_line = "%s %s %s %s" % (
-            os.path.join(extractor_directory, sgh.sparkle_run_default_wrapper),
+            Path(extractor_directory) / sgh.sparkle_run_default_wrapper,
             extractor_directory + "/",
             instance_path,
             result_path,
         )
         os.system(command_line)
     else:
-        instance_path = os.path.join(extractor_directory, "sparkle_test_instance.cnf")
-        if not os.path.isfile(instance_path):
-            instance_path = os.path.join(
-                extractor_directory, "sparkle_test_instance.txt"
-            )
+        instance_path = Path(extractor_directory) / "sparkle_test_instance.cnf"
+        if not Path(instance_path).is_file():
+            instance_path = Path(extractor_directory) / "sparkle_test_instance.txt"
         result_path = (
             "Tmp/"
             + sfh.get_last_level_directory_name(extractor_directory)
             + "_"
-            + sfh.get_last_level_directory_name(instance_path)
+            + sfh.get_last_level_directory_name(str(instance_path))
             + "_"
             + sparkle_basic_help.get_time_pid_random_string()
             + ".rawres"
@@ -167,7 +164,7 @@ if __name__ == "__main__":
             + extractor_directory
             + "/"
             + " "
-            + instance_path
+            + str(instance_path)
             + " "
             + result_path
         )
@@ -196,7 +193,7 @@ if __name__ == "__main__":
         + " done!"
     )
 
-    if os.path.exists(sgh.sparkle_portfolio_selector_path):
+    if Path(sgh.sparkle_portfolio_selector_path).exists():
         command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
         os.system(command_line)
         print(
@@ -205,7 +202,7 @@ if __name__ == "__main__":
             + " done!"
         )
 
-    if os.path.exists(sgh.sparkle_report_path):
+    if Path(sgh.sparkle_report_path).exists():
         command_line = "rm -f " + sgh.sparkle_report_path
         os.system(command_line)
         print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")

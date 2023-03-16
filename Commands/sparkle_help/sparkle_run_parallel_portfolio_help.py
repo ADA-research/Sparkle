@@ -55,7 +55,7 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str):
     job_starting_time = now - job_running_time
     start_time_formatted = job_starting_time.strftime("%H:%M:%S")
 
-    with open(log_file, "a+") as outfile:
+    with Path(log_file).open("a+") as outfile:
         fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
         outfile.write(f"starting time: {start_time_formatted} end time: {current_time} "
                       f"job number: {job_nr}\n")
@@ -71,7 +71,7 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str):
     if "_" in job_nr:
         job_nr = job_nr[job_nr.rfind("_") + 1:]
 
-    with open(log_file, "a+") as outfile:
+    with Path(log_file).open("a+") as outfile:
         fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
         outfile.write(f"{job_nr}:{job_duration}\n")
 
@@ -122,7 +122,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             directories_path = f"{tmp_dir}{directories}"
 
             for solver_instance in solver_instance_list:
-                if (os.path.isdir(directories_path)
+                if (Path(directories_path).is_dir()
                         and directories.startswith(
                             solver_instance[:len(temp_solver) + 1])):
                     shutil.rmtree(directories_path)
@@ -135,7 +135,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
     for file in list_of_paths:
         file_path = f"{tmp_dir}{file}"
 
-        if not os.path.isdir(file_path):
+        if not Path(file_path).is_dir():
             tmp_file = file[:file.rfind(".")]
             tmp_file = f"{tmp_file}.val"
 
@@ -183,7 +183,7 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
         if result.startswith(solver_instance_list[int(finished_job_array_nr)]):
             result_file_path = solutions_dir + result
 
-            with open(result_file_path, "r") as result_file:
+            with Path(result_file_path).open("r") as result_file:
                 result_lines = result_file.readlines()
                 result_time = int(float(result_lines[2].strip()))
                 time_in_format_str = str(datetime.timedelta(seconds=result_time))
@@ -318,7 +318,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                 now = datetime.datetime.now()
                 current_time = now.strftime("%H:%M:%S")
 
-                with open(logging_file, "a+") as outfile:
+                with Path(logging_file).open("a+") as outfile:
                     fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
                     outfile.write(f"starting time of portfolio: {current_time}\n")
 
@@ -353,7 +353,7 @@ def wait_for_finished_solver(logging_file: str, job_id: str,
                 now = datetime.datetime.now()
                 current_time = now.strftime("%H:%M:%S")
 
-                with open(logging_file, "a+") as outfile:
+                with Path(logging_file).open("a+") as outfile:
                     fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
                     outfile.write(f"starting time of portfolio: {current_time}\n")
 
@@ -519,7 +519,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
             for finished_solver_file in finished_solver_files:
                 file_path = finished_solver_file
 
-                with open(file_path, "r") as infile:
+                with Path(file_path).open("r") as infile:
                     content = infile.readlines()
 
                 solving_time = float(content[2].strip())
@@ -540,7 +540,7 @@ def handle_waiting_and_removal_process(instances: list[str], logging_file: str,
                                                f"*.rawres")
 
                         for rawres_file_path in temp_files:
-                            with open(rawres_file_path, "r") as rawres_file:
+                            with Path(rawres_file_path).open("r") as rawres_file:
                                 raw_content = rawres_file.readlines()
 
                             nr_of_lines_raw_content = len(raw_content)
@@ -632,7 +632,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
             now = datetime.datetime.now()
             current_time = now.strftime("%H:%M:%S")
 
-            with open(file_path_output1, "a+") as outfile:
+            with Path(file_path_output1).open("a+") as outfile:
                 fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
                 outfile.write(f"ending time of portfolio: {current_time}\n")
 
@@ -682,7 +682,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                 if str(instance) in str(finished_solver_files):
                     file_path = f"{str(finished_solver_files)}"
 
-                    with open(file_path, "r") as infile:
+                    with Path(file_path).open("r") as infile:
                         content = infile.readlines()
 
                     # A new instance is solved

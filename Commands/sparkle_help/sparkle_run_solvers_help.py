@@ -92,7 +92,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     raw_result_path_option = f"-o {str(raw_result_path)}"
 
     # For configured solvers change the directory to accommodate sparkle_smac_wrapper
-    original_path = os.getcwd()
+    original_path = Path.cwd()
 
     if is_configured:
         # Change paths to accommodate configured execution directory
@@ -453,7 +453,7 @@ def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
     cpu_time = float(-1)
     wc_time = float(-1)
 
-    infile = open(runsolver_values_path, "r+")
+    infile = Path(runsolver_values_path).open("r+")
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
     while True:
@@ -537,7 +537,7 @@ def sat_get_result_status(raw_result_path: str) -> str:
     # timed out
     status = "UNKNOWN"
 
-    infile = open(raw_result_path, "r+")
+    infile = Path(raw_result_path).open("r+")
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
     while True:
@@ -567,7 +567,7 @@ def sat_get_verify_string(tmp_verify_result_path):
     Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
     """
     ret = "UNKNOWN"
-    fin = open(tmp_verify_result_path, "r+")
+    fin = Path(tmp_verify_result_path).open("r+")
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fin.readline()
@@ -631,7 +631,7 @@ def update_performance_data_id():
     # Write new pd_id
     pd_id_path = sgh.performance_data_id_path
 
-    with open(pd_id_path, "w") as pd_id_file:
+    with Path(pd_id_path).open("w") as pd_id_file:
         pd_id_file.write(str(pd_id))
 
     return
@@ -643,7 +643,7 @@ def get_performance_data_id() -> int:
     pd_id_path = sgh.performance_data_id_path
 
     try:
-        with open(pd_id_path, "r") as pd_id_file:
+        with Path(pd_id_path).open("r") as pd_id_file:
             pd_id = int(pd_id_file.readline())
     except FileNotFoundError:
         pd_id = 0

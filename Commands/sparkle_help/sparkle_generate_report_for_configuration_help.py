@@ -79,7 +79,7 @@ def construct_list_instance_and_performance(result_file, cutoff):
     """Return a list of [instance, performance] pairs."""
     list_instance_and_performance = []
 
-    fin = open(result_file, "r")
+    fin = Path(result_file).open("r")
     fin.readline()  # Skip column titles
 
     while True:
@@ -175,7 +175,7 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
                      f"{solver_name}_{instance_set_train_name}_scenario.txt")
     features_bool = r"\featuresfalse"
 
-    with open(scenario_file, "r") as f:
+    with Path(scenario_file).open("r") as f:
         for line in f.readlines():
             if line.split(" ")[0] == "feature_file":
                 features_bool = r"\featurestrue"
@@ -684,7 +684,7 @@ def check_results_exist(solver_name, instance_set_train_name,
     instance_train_dir = (
         f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_train_name}/")
 
-    if not os.path.exists(instance_train_dir):
+    if not Path(instance_train_dir).exists():
         all_good = False
         err_str += (" training set not found in configuration directory "
                     f"{instance_train_dir};")
@@ -696,11 +696,11 @@ def check_results_exist(solver_name, instance_set_train_name,
                                     f"{solver_name}_{instance_set_train_name}_scenario/")
     default_results_train_dir = smac_solver_dir + "outdir_train_default/"
 
-    if not os.path.exists(configured_results_train_dir):
+    if not Path(configured_results_train_dir).exists():
         err_str += (" configured parameter results on the training set not found in "
                     f"{configured_results_train_dir};")
         all_good = False
-    if not os.path.exists(default_results_train_dir):
+    if not Path(default_results_train_dir).exists():
         err_str += (" default parameter results on the training set not found in "
                     f"{default_results_train_dir};")
         all_good = False
@@ -709,7 +709,7 @@ def check_results_exist(solver_name, instance_set_train_name,
         # Check test instance dir exists
         instance_test_dir = (
             f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_test_name}/")
-        if not os.path.exists(instance_test_dir):
+        if not Path(instance_test_dir).exists():
             all_good = False
             err_str += (" testing set not found in configuration directory "
                         f"{instance_test_dir};")
@@ -722,11 +722,11 @@ def check_results_exist(solver_name, instance_set_train_name,
         default_results_test_dir = (
             smac_solver_dir + "outdir_" + instance_set_test_name + "_test_default/")
 
-        if not os.path.exists(configured_results_test_dir):
+        if not Path(configured_results_test_dir).exists():
             err_str += (" configured parameter results on the testing set not found in "
                         f"{configured_results_test_dir};")
             all_good = False
-        if not os.path.exists(default_results_test_dir):
+        if not Path(default_results_test_dir).exists():
             err_str += (" default parameter results on the testing set not found in "
                         f"{default_results_test_dir};")
             all_good = False
@@ -752,7 +752,7 @@ def get_most_recent_test_run(solver_name: str) -> (str, str, bool, bool):
     last_test_file_path = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
                            f"{sgh.sparkle_last_test_file_name}")
     try:
-        fin = open(last_test_file_path, "r")
+        fin = Path(last_test_file_path).open("r")
     except IOError:
         # Report error when file does not exist
         print("Error: The most recent results do not match the given solver. Please "
@@ -787,7 +787,7 @@ def generate_report_for_configuration_prep(configuration_reports_directory):
 
     template_latex_directory_path = (
         "Components/Sparkle-latex-generator-for-configuration/")
-    if not os.path.exists(configuration_reports_directory):
+    if not Path(configuration_reports_directory).exists():
         os.system("mkdir -p " + configuration_reports_directory)
     os.system(f"cp -r {template_latex_directory_path} {configuration_reports_directory}")
 
@@ -837,7 +837,7 @@ def generate_report_for_configuration_common(configuration_reports_directory,
     # Read in the report template from file
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ""
-    fin = open(latex_template_filepath, "r")
+    fin = Path(latex_template_filepath).open("r")
 
     while True:
         myline = fin.readline()
@@ -859,7 +859,7 @@ def generate_report_for_configuration_common(configuration_reports_directory,
     # Write the completed report to a tex file
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-    fout = open(latex_report_filepath, "w+")
+    fout = Path(latex_report_filepath).open("w+")
     fout.write(report_content)
     fout.close()
 

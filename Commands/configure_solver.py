@@ -232,7 +232,7 @@ if __name__ == "__main__":
         sgh.sparkle_last_configuration_file_name
     )
 
-    fout = open(last_configuration_file_path, "w+")
+    fout = Path(last_configuration_file_path).open("w+")
     fout.write(f"solver {solver}\n")
     fout.write(f"train {instance_set_train}\n")
     fout.close()

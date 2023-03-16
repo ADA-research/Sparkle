@@ -89,7 +89,7 @@ if __name__ == "__main__":
         os.system(command_line)
         end_time = time.time()
     except Exception:
-        if not os.path.exists(result_path):
+        if not Path(result_path).exists():
             sfh.create_new_empty_file(result_path)
 
     try:

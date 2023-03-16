@@ -6,6 +6,7 @@ import os
 import time
 import random
 import sys
+from pathlib import Path
 
 
 def get_time_pid_random_string() -> str:
@@ -89,7 +90,7 @@ runsolver_binary = relative_path + "runsolver"
 solver_binary = relative_path + "FastCA"
 
 tmp_directory = relative_path + "tmp/"
-if not os.path.exists(tmp_directory):
+if not Path(tmp_directory).exists():
     os.system("mkdir -p " + tmp_directory)
 
 instance_model_name = get_last_level_directory_name(inst_model)

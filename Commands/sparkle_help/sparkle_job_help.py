@@ -143,13 +143,13 @@ def write_active_job(job_id: str, command: CommandName) -> None:
 
     # Write header if the file does not exist
     if not path.is_file():
-        with open(path, "w", newline="") as outfile:
+        with Path(path).open("w", newline="") as outfile:
             writer = csv.writer(outfile)
             writer.writerow(__active_jobs_csv_header)
 
     # Write job row if it did not finish yet
     if not check_job_is_done(job_id) and not check_job_exists(job_id, command):
-        with open(path, "a", newline="") as outfile:
+        with Path(path).open("a", newline="") as outfile:
             writer = csv.writer(outfile)
             writer.writerow([job_id, command.name])
 
@@ -172,7 +172,7 @@ def read_active_jobs() -> list[dict[str, str]]:
     jobs = []
     path = __active_jobs_path
     try:
-        with open(path, "r", newline="") as infile:
+        with Path(path).open("r", newline="") as infile:
             reader = csv.DictReader(infile)
 
             for row in reader:
@@ -219,8 +219,8 @@ def delete_active_jobs(job_ids: list[str]):
     inpath = __active_jobs_path
     outpath = __active_jobs_path.with_suffix(".tmp")
 
-    with (open(inpath, "r", newline="") as infile,
-          open(outpath, "w", newline="") as outfile):
+    with (Path(inpath).open("r", newline="") as infile,
+           Path(outpath).open("w", newline="") as outfile):
         writer = csv.writer(outfile)
         writer.writerow(__active_jobs_csv_header)
         reader = csv.DictReader(infile)

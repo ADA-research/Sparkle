@@ -26,13 +26,12 @@ def get_list_all_path(instances_directory):
 
 def _check_existence_of_instance_list_file(instances_source: str) -> bool:
     """Return whether a given instance list file exists."""
-    if not os.path.isdir(instances_source):
+    if not Path(instances_source).is_dir():
         return False
 
-    instance_list_file_path = os.path.join(instances_source,
-                                           __sparkle_instance_list_file)
+    instance_list_file_path = Path(instances_source) / __sparkle_instance_list_file
 
-    if os.path.isfile(instance_list_file_path):
+    if Path(instance_list_file_path).is_file():
         return True
     else:
         return False
@@ -41,9 +40,8 @@ def _check_existence_of_instance_list_file(instances_source: str) -> bool:
 def _get_list_instance(instances_source: str):
     """Return a list of instances."""
     list_instance = []
-    instance_list_file_path = os.path.join(instances_source,
-                                           __sparkle_instance_list_file)
-    infile = open(instance_list_file_path)
+    instance_list_file_path = Path(instances_source) / __sparkle_instance_list_file
+    infile = Path(instance_list_file_path).open()
     lines = infile.readlines()
 
     for line in lines:
@@ -188,7 +186,7 @@ def copy_instances_to_smac(list_instance_path: list[Path], instance_dir_prefix: 
         target_instance_path = smac_instance_dir_prefix / ori_instance_path.name
         target_instance_dir = target_instance_path.parent
 
-        if not os.path.exists(target_instance_dir):
+        if not Path(target_instance_dir).exists():
             os.system(f"mkdir -p {target_instance_dir}")
         command_line = f"cp {ori_instance_path} {target_instance_path}"
         os.system(command_line)

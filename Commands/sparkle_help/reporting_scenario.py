@@ -161,7 +161,7 @@ class ReportingScenario:
         file_dir.mkdir(parents=True, exist_ok=True)
 
         # Write the scenario to file
-        with open(str(file_path), "w") as scenario_file:
+        with Path(str(file_path)).open("w") as scenario_file:
             self.__scenario.write(scenario_file)
 
         return

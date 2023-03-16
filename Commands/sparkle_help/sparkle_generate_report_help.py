@@ -489,7 +489,7 @@ def generate_report(test_case_directory: str = None):
     """Generate a report for algorithm selection."""
     # Include results on the test set if a test case directory is given
     if test_case_directory is not None:
-        if not os.path.exists(test_case_directory):
+        if not Path(test_case_directory).exists():
             print("ERROR: The given directory", test_case_directory, "does not exist!")
             sys.exit(-1)
 
@@ -508,7 +508,7 @@ def generate_report(test_case_directory: str = None):
 
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ""
-    fin = open(latex_template_filepath, "r")
+    fin = Path(latex_template_filepath).open("r")
     while True:
         myline = fin.readline()
         if not myline:
@@ -525,7 +525,7 @@ def generate_report(test_case_directory: str = None):
 
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-    fout = open(latex_report_filepath, "w+")
+    fout = Path(latex_report_filepath).open("w+")
     fout.write(report_content)
     fout.close()
 
@@ -580,7 +580,7 @@ def generate_comparison_plot(points: list,
         cwd: directory path to place the figure and its intermediate files in (default:
         current working directory)
     """
-    pwd = os.getcwd()
+    pwd = Path.cwd()
     if cwd is not None:
         os.chdir(cwd)
 
@@ -625,13 +625,13 @@ def generate_comparison_plot(points: list,
     output_eps_file = f"{figure_filename}.eps"
 
     # Create data file
-    with open(output_data_file, "w") as fout:
+    with Path(output_data_file).open("w") as fout:
         for point in points:
             fout.write(" ".join([str(c) for c in point]) + "\n")
         fout.close()
 
     # Generate plot script
-    with open(output_gnuplot_script, "w") as fout:
+    with Path(output_gnuplot_script).open("w") as fout:
         fout.write(f"set xlabel '{xlabel}'\n")
         fout.write(f"set ylabel '{ylabel}'\n")
         fout.write(f"set title '{title}'\n")
@@ -678,7 +678,7 @@ def generate_comparison_plot(points: list,
     os.system(cmd)
 
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = os.path.join(os.path.abspath(pwd), "Components/epstopdf.pl")
+    epsbackup = Path(os.path.abspath(pwd)) / "Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
     os.system(f"{epstopdf} '{output_eps_file}'")
 
