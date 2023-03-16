@@ -106,7 +106,7 @@ if __name__ == "__main__":
             print(f"Running on {str(len(os.listdir(instance)))} instance(s) from "
                   f"directory {instance}")
             for item in os.listdir(instance):
-                item_with_dir = f"{instance}/{item}"
+                item_with_dir = f"{instance}{item}"
                 instance_paths.append(item_with_dir)
 
     if args.cutoff_time is not None:

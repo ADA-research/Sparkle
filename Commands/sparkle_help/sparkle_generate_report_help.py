@@ -267,7 +267,10 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
 
     instances = (dict_sbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
-    assert (len(dict_sbs_penalty_time_on_each_instance) == len(instances))
+    if (len(dict_sbs_penalty_time_on_each_instance) != len(instances)):
+        print("""ERROR: Number of penalty times for the single best solver
+          does not match the number of instances""")
+        sys.exit()
     points = []
     for instance in instances:
         point = [dict_sbs_penalty_time_on_each_instance[instance],
@@ -317,7 +320,10 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
 
     instances = (dict_vbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
-    assert (len(dict_vbs_penalty_time_on_each_instance) == len(instances))
+    if (len(dict_vbs_penalty_time_on_each_instance) != len(instances)):
+        print("""ERROR: Number of penalty times for the virtual best solver
+          does not match the number of instances""")
+        sys.exit()
     points = []
     for instance in instances:
         point = [dict_vbs_penalty_time_on_each_instance[instance],
@@ -606,7 +612,9 @@ def generate_comparison_plot(points: list,
     min_point_value = np.min(points)
     max_point_value = np.max(points)
     if penalty_time is not None:
-        assert penalty_time >= max_point_value
+        if (penalty_time < max_point_value):
+            print("ERROR: Penalty time too small for the given performance data.")
+            sys.exit()
         max_point_value = penalty_time
 
     if limit == "absolute":
