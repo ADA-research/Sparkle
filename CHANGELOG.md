@@ -90,6 +90,7 @@ Notable changes to Sparkle will be documented in this file.
 ### Changed
 - Changed several hard coded Slurm settings to now be based on the settings file or user input.
 - Include linting for fstrings with `flake8-use-fstring` and make the code comply.
+- Include linting for security issues with `flake8-bandit` and make the code comply.
 - Changed author list in `README.md` to updated list of maintainers and contributors.
 - Update contact email in `README.md`.
 - The `sparkle_wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
