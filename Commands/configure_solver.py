@@ -8,9 +8,6 @@ from pathlib import Path
 from pandas import DataFrame
 
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_add_solver_help as sash
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_instances_help as sih
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_run_ablation_help as sah
@@ -22,7 +19,7 @@ from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_slurm_help as ssh
 from sparkle_help.configurator import Configurator
-from sparkle_help.configuration_scenario import Configuration_Scenario
+from sparkle_help.configuration_scenario import ConfigurationScenario
 from sparkle_help.solver import Solver
 
 
@@ -136,7 +133,9 @@ def apply_settings_from_args(args) -> None:
         )
 
 
-def write_latest_config_file(file_path: Path, solver_path: Path, instance_set_path: Path) -> None:
+def write_latest_config_file(file_path: Path, solver_path: Path,
+                             instance_set_path: Path) -> None:
+    """Write solver and instance set to config file."""
     fout = open(file_path, "w+")
     fout.write(f"solver {solver_path}\n")
     fout.write(f"train {instance_set_path}\n")
@@ -211,14 +210,16 @@ if __name__ == "__main__":
 
     solver = Solver(solver_path)
 
-    config_scenario = Configuration_Scenario(solver, instance_set_train, use_features, feature_data_df)
+    config_scenario = ConfigurationScenario(solver, instance_set_train,
+                                            use_features, feature_data_df)
     configurator = Configurator("Configurators" / configurator, config_scenario)
 
     configurator.create_sbatch_script()
     configure_jobid = configurator.configure()
 
     # Write most recent run to file
-    config_file_path = config_scenario.directory / sgh.sparkle_last_configuration_file_name
+    config_file_path = (config_scenario.directory
+                        / sgh.sparkle_last_configuration_file_name)
     write_latest_config_file(config_file_path, solver.directory, instance_set_train)
 
     # Update latest scenario

@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Configurator class to use different configurators like SMAC."""
 
-import os
 import sys
 import fcntl
 
@@ -12,14 +11,16 @@ from sparkle_help import sparkle_global_help as sgh
 
 
 class Solver:
+    """Class to handle a solver and its directories."""
     def __init__(self, solver_directory: Path) -> None:
+        """Initialize solver."""
         self.directory = solver_directory
         self.name = solver_directory.name
         self.pcs_file = (self.directory / self.get_pcs_file())
         self.is_deterministic = self.get_solver_deterministic()
 
     def get_pcs_file(self) -> Path:
-        """."""
+        """Get parameter file name from solver."""
         file_count = 0
         file_name = ""
         for file_path in self.directory.iterdir():
@@ -30,9 +31,8 @@ class Solver:
                 file_count += 1
 
         if file_count != 1:
-            print(
-                "None or multiple .pcs files found. Solver is not valid for configuration."
-            )
+            print("None or multiple .pcs files found. Solver "
+                  "is not valid for configuration.")
             sys.exit()
 
         return file_name
