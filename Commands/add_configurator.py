@@ -15,9 +15,9 @@ def parser_function():
         description="Add a configurator to the Sparkle platform.",
         epilog="")
     parser.add_argument(
-        "--configurator",
+        "configurator_path",
+        metavar="configurator_path",
         type=Path,
-        required=True,
         help="path to the configurator"
     )
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     parser = parser_function()
 
     args = parser.parse_args()
-    configurator_path = args.configurator
+    configurator_path = args.configurator_path
 
     try:
         shutil.copytree(configurator_path, Path("Configurators", configurator_path.name))

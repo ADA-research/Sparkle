@@ -70,7 +70,7 @@ runsolver_path = "Components/runsolver/src/runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
 autofolio_path = "Components/AutoFolio-master/scripts/autofolio"
 
-smac_dir = "Components/smac-v2.10.03-master-778/"
+smac_dir = "Configurators/smac-v2.10.03-master-778/"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 

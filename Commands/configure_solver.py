@@ -169,9 +169,9 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
     use_features = args.use_features
     if args.configurator is not None:
-        configurator_path = args.configurator
+        configurator = args.configurator
     else:
-        configurator_path = Path("smac-v2.10.03-master-778")
+        configurator = Path("smac-v2.10.03-master-778")
 
     feature_data_df = None
     if use_features:
@@ -209,11 +209,10 @@ if __name__ == "__main__":
 
     sah.clean_ablation_scenarios(solver_path.name, instance_set_train.name)
 
-    full_configurator_path = "Configurators" / configurator_path
     solver = Solver(solver_path)
 
     config_scenario = Configuration_Scenario(solver, instance_set_train, use_features, feature_data_df)
-    configurator = Configurator(full_configurator_path, config_scenario)
+    configurator = Configurator("Configurators" / configurator, config_scenario)
 
     configurator.create_sbatch_script()
     configure_jobid = configurator.configure()

@@ -73,7 +73,7 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     file_postfix = f"_{instance_type}.txt"
 
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
-    smac_file_instance_path_ori = (f"{sgh.smac_dir}example_scenarios/instances/"
+    smac_file_instance_path_ori = (f"{sgh.smac_dir}scenarios/instances/"
                                    f"{instance_set_target_name}{file_postfix}")
     smac_file_instance_path_target = (
         smac_solver_dir + instance_set_target_name + file_postfix)
@@ -135,21 +135,21 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
-    smac_paramfile = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+    smac_paramfile = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                       f"{get_pcs_file_from_solver_directory(Path(smac_solver_dir))}")
     if instance_type == InstanceType.TRAIN:
-        smac_outdir = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+        smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{inst_type}_{config_type}/")
     else:
-        smac_outdir = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+        smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
-    smac_instance_file = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+    smac_instance_file = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                           f"{instance_set_val_name}_{inst_type}.txt")
     smac_test_instance_file = smac_instance_file
 
     fout = open(smac_file_scenario, "w+")
     fout.write("algo = ./" + sgh.sparkle_smac_wrapper + "\n")
-    fout.write(f"execdir = example_scenarios/{solver_name}_{instance_set_train_name}/\n")
+    fout.write(f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n")
     fout.write("deterministic = " + get_solver_deterministic(solver_name) + "\n")
     fout.write("run_obj = " + smac_run_obj + "\n")
     fout.write("wallclock-limit = " + str(smac_whole_time_budget) + "\n")
@@ -173,7 +173,7 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
                                        use_features: bool = False):
     """Create a file with the configuration scenario in the solver directory."""
     solver_instance_name = f"{solver_name}_{instance_set_name}"
-    solver_instance_dir = Path("example_scenarios", solver_instance_name)
+    solver_instance_dir = Path("scenarios", solver_instance_name)
 
     smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
     smac_file_scenario = Path(smac_solver_dir, f"{solver_instance_name}_scenario.txt")
@@ -232,7 +232,7 @@ def clean_configuration_directory(solver_name: str, instance_set_name: str) -> N
 
 def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     """Return the directory of a solver under the SMAC directory."""
-    smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
+    smac_scenario_dir = f"{sgh.smac_dir}/scenarios"
     smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
 
     return smac_solver_dir
@@ -383,7 +383,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
 def create_smac_configure_sbatch_script(solver_name: str,
                                         instance_set_name: str) -> Path:
     """Generate a Slurm batch script for algorithm configuration with SMAC."""
-    execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
+    execdir = Path(".", "scenarios", f"{solver_name}_{instance_set_name}")
     smac_file_scenario_name = Path(f"{solver_name}_{instance_set_name}_scenario.txt")
     _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
@@ -512,7 +512,7 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
     """Check the instance list file exists."""
     file_name = Path(instance_set_name + "_train.txt")
     instance_list_file_path = Path(PurePath(Path(sgh.smac_dir)
-                                   / Path("example_scenarios")
+                                   / Path("scenarios")
                                    / Path(solver_name + "_" + instance_set_name)
                                    / file_name))
 

@@ -39,7 +39,7 @@ class Configuration_Scenario:
         self.parent_directory = parent_directory.absolute()
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.parent_directory / "results" / self.name
-        self.instance_directory = Path(self.parent_directory / "instances" 
+        self.instance_directory = Path(self.parent_directory / "scenarios"/ "instances"
                                        / self.source_instance_directory.name)
         self._prepare_scenario_directory()
         self._prepare_result_directory()
@@ -137,7 +137,7 @@ class Configuration_Scenario:
         instance_list_file = instance_list_path.open("w+")
 
         for original_instance_path in source_instance_list:
-            instance_list_file.write(f"../../../instances/"
+            instance_list_file.write(f"../../instances/"
                                      f"{original_instance_path.parts[-2]}/"
                                      f"{original_instance_path.name}\n")
 
@@ -162,7 +162,7 @@ class Configuration_Scenario:
     def _copy_instance_file_to_scenario(self) -> None:
         """."""
         instance_file_name = Path(str(self.instance_directory.name + "_train.txt"))
-        shutil.copy(self.parent_directory / "instances" / instance_file_name,
+        shutil.copy(self.parent_directory / "scenarios" / "instances" / instance_file_name,
                     self.directory / instance_file_name)
         
     def _create_feature_file(self) -> None:

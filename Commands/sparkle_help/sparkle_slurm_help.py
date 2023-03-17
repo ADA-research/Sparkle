@@ -234,7 +234,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
     sbatch_options_list = get_sbatch_options_list(Path(sbatch_script_path), num_jobs,
                                                   job)
 
-    scenario_dir = "example_scenarios/" + solver_name + "_" + instance_set_train_name
+    scenario_dir = "scenarios/" + solver_name + "_" + instance_set_train_name
 
     # Train default
     default = True
