@@ -156,13 +156,14 @@ class ConfigurationScenario:
         return run_objective
 
     def _copy_instance_file_to_scenario(self) -> None:
-        """."""
+        """Copy instance list file to directory of scenario."""
         instance_file_name = Path(str(self.instance_directory.name + "_train.txt"))
         instance_file_directory = (self.parent_directory / "scenarios"
                                    / "instances" / instance_file_name)
         shutil.copy(instance_file_directory, self.directory / instance_file_name)
 
     def _create_feature_file(self) -> None:
+        """Create CSV file from feature data."""
         self.feature_file = Path(self.directory
                                  / f"{self.source_instance_directory.name}_features.csv")
         self.feature_data.to_csv(self.directory
