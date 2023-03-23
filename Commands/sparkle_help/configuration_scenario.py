@@ -61,7 +61,7 @@ class ConfigurationScenario:
         (self.directory / "outdir_train_configuration").mkdir()
         (self.directory / "tmp").mkdir()
 
-        shutil.copy(self.solver.pcs_file, self.directory)
+        shutil.copy(self.solver.get_pcs_file(), self.directory)
 
     def _prepare_result_directory(self) -> None:
         """Delete possible files in result directory."""
@@ -85,7 +85,7 @@ class ConfigurationScenario:
         time_budget = sgh.settings.get_config_budget_per_run()
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         cutoff_length = sgh.settings.get_smac_target_cutoff_length()
-        solver_param_file_path = inner_directory / self.solver.pcs_file.name
+        solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
         instance_file = inner_directory / f"{self.instance_directory.name}_train.txt"
 
@@ -95,7 +95,7 @@ class ConfigurationScenario:
         file = open(scenario_file, "w")
         file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
         file.write(f"execdir = {inner_directory}/\n")
-        file.write(f"deterministic = {self.solver.is_deterministic}\n")
+        file.write(f"deterministic = {self.solver.is_deterministic()}\n")
         file.write(f"run_obj = {run_objective}\n")
         file.write(f"wallclock-limit = {time_budget}\n")
         file.write(f"cutoffTime = {cutoff_time}\n")

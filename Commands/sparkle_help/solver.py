@@ -3,11 +3,13 @@
 """Configurator class to use different configurators like SMAC."""
 
 import sys
-import fcntl
 
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
+try:
+    from Commands.sparkle_help import sparkle_global_help as sgh
+except ImportError:
+    from sparkle_help import sparkle_global_help as sgh
 
 
 class Solver:
@@ -16,8 +18,6 @@ class Solver:
         """Initialize solver."""
         self.directory = solver_directory
         self.name = solver_directory.name
-        self.pcs_file = (self.directory / self.get_pcs_file())
-        self.is_deterministic = self.get_solver_deterministic()
 
     def get_pcs_file(self) -> Path:
         """Get parameter file name from solver."""
@@ -37,14 +37,13 @@ class Solver:
 
         return file_name
 
-    def get_solver_deterministic(self) -> str:
+    def is_deterministic(self) -> str:
         """Return a str indicating whether a given solver is deterministic or not."""
         deterministic = ""
         target_solver_path = "Solvers/" + self.name
         solver_list_path = sgh.solver_list_path
 
         fin = open(solver_list_path, "r+")
-        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 
         while True:
             myline = fin.readline()
