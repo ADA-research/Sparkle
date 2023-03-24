@@ -28,7 +28,7 @@ class Configurator:
 
     def create_sbatch_script(self) -> None:
         """Create sbatch script."""
-        number_of_runs = sgh.settings.get_config_number_of_runs()
+        number_of_runs = self.scenario.run_number
         self.sbatch_filename = Path(f"{self.scenario.scenario_file}_"
                                     f"{number_of_runs}_exp_sbatch.sh")
 
@@ -60,7 +60,7 @@ class Configurator:
 
     def _get_sbatch_options(self):
         """Get sbatch options."""
-        total_jobs = sgh.settings.get_config_number_of_runs()
+        total_jobs = self.scenario.run_number
 
         maximal_parallel_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
         parallel_jobs = max(maximal_parallel_jobs, total_jobs)
@@ -84,7 +84,7 @@ class Configurator:
 
     def _get_run_parameter_list(self):
         """Get list for SBATCH script containing parameters for all configurator runs."""
-        num_job_total = sgh.settings.get_config_number_of_runs()
+        num_job_total = self.scenario.run_number
         result_directory = Path("results", self.scenario.name)
 
         sl.add_output(

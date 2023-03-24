@@ -7,19 +7,31 @@ from pathlib import Path
 
 from pandas import DataFrame
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.solver import Solver
+try:
+    from sparkle_help import sparkle_global_help as sgh
+    from sparkle_help.sparkle_settings import PerformanceMeasure
+    from sparkle_help.solver import Solver
+    from sparkle_help import sparkle_settings
+except ImportError:
+    from Commands.sparkle_help import sparkle_global_help as sgh
+    from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+    from Commands.sparkle_help.solver import Solver
+    from Commands.sparkle_help import sparkle_settings
 
 
 class ConfigurationScenario:
     """Class to handle all activities around scenarios."""
     def __init__(self, solver: Solver, source_instance_directory: Path,
-                 use_features: bool, feature_data_df: DataFrame = None) -> None:
+                 run_number: int, use_features: bool,
+                 feature_data_df: DataFrame = None,) -> None:
         """Initialize scenario paths and names."""
+        global settings
+        sgh.settings = sparkle_settings.Settings()
+
         self.solver = solver
         self.parent_directory = ""
         self.source_instance_directory = source_instance_directory
+        self.run_number = run_number
         self.use_features = use_features
         self.feature_data = feature_data_df
         self.name = f"{self.solver.name}_{self.source_instance_directory.name}"
@@ -29,6 +41,7 @@ class ConfigurationScenario:
         self.instance_directory = ""
         self.scenario_file = ""
         self.feature_file = ""
+        self.instance_file_name = ""
 
     def create_scenario(self, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory."""
@@ -37,6 +50,7 @@ class ConfigurationScenario:
         self.result_directory = self.parent_directory / "results" / self.name
         self.instance_directory = Path(self.parent_directory / "scenarios" / "instances"
                                        / self.source_instance_directory.name)
+        self.instance_file_name = Path(str(self.instance_directory.name + "_train.txt"))
         self._prepare_scenario_directory()
         self._prepare_result_directory()
 
@@ -44,8 +58,6 @@ class ConfigurationScenario:
 
         self.instance_directory.mkdir(parents=True, exist_ok=True)
         self._prepare_instances()
-
-        self._copy_instance_file_to_scenario()
 
         if self.use_features:
             self._create_feature_file()
@@ -70,8 +82,7 @@ class ConfigurationScenario:
 
     def _prepare_run_folders(self) -> None:
         """Create folders for each configurator run and copy solver files to them."""
-        configurator_run_number = sgh.settings.get_config_number_of_runs()
-        for i in range(configurator_run_number):
+        for i in range(self.run_number):
             run_path = self.directory / str(i + 1)
 
             shutil.copytree(self.solver.directory, run_path)
@@ -87,7 +98,7 @@ class ConfigurationScenario:
         cutoff_length = sgh.settings.get_smac_target_cutoff_length()
         solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
-        instance_file = inner_directory / f"{self.instance_directory.name}_train.txt"
+        instance_file = inner_directory / self.instance_file_name
 
         scenario_file = (self.directory
                          / f"{self.name}_scenario.txt")
@@ -128,7 +139,8 @@ class ConfigurationScenario:
 
     def _create_instance_list_file(self, source_instance_list: list) -> None:
         """Create file with paths to all instances."""
-        instance_list_path = Path(str(self.instance_directory) + "_train.txt")
+        instance_list_path = self.directory / self.instance_file_name
+
         instance_list_path.unlink(missing_ok=True)
         instance_list_file = instance_list_path.open("w+")
 
@@ -157,10 +169,9 @@ class ConfigurationScenario:
 
     def _copy_instance_file_to_scenario(self) -> None:
         """Copy instance list file to directory of scenario."""
-        instance_file_name = Path(str(self.instance_directory.name + "_train.txt"))
         instance_file_directory = (self.parent_directory / "scenarios"
-                                   / "instances" / instance_file_name)
-        shutil.copy(instance_file_directory, self.directory / instance_file_name)
+                                   / "instances" / self.instance_file_name)
+        shutil.copy(instance_file_directory, self.directory / self.instance_file_name)
 
     def _create_feature_file(self) -> None:
         """Create CSV file from feature data."""

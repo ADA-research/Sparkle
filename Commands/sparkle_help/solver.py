@@ -35,7 +35,7 @@ class Solver:
                   "is not valid for configuration.")
             sys.exit()
 
-        return file_name
+        return self.directory / file_name
 
     def is_deterministic(self) -> str:
         """Return a str indicating whether a given solver is deterministic or not."""

@@ -50,4 +50,5 @@ exclude =
     Sparkle_Portfolio_Selector/,
     Tmp/,
     build/,
-    dist/
+    dist/,
+    tests/test_files/Solvers
