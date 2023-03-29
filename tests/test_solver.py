@@ -5,7 +5,7 @@ import shutil
 from unittest import TestCase, mock
 from pathlib import Path
 
-from Commands.sparkle_help.solver import Solver
+from sparkle_help.solver import Solver
 
 
 class TestSolver(TestCase):
@@ -25,7 +25,6 @@ class TestSolver(TestCase):
 
         self.assertEqual(solver.directory, Path("test/directory/solver_executable"))
         self.assertEqual(solver.name, "solver_executable")
-        pass
 
     def test_pcs_file_correct_name(self):
         """Test if get_pcs_file() returns the correct path if file exists."""

@@ -2,27 +2,27 @@
 
 import shutil
 
-from unittest import TestCase
+from unittest import TestCase, mock
 from pathlib import Path
 
-from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
-from Commands.sparkle_help.solver import Solver
+from sparkle_help.configuration_scenario import ConfigurationScenario
+from sparkle_help.solver import Solver
 
 
 class TestConfigurationScenario(TestCase):
     """Class bundling all tests regarding ConfigurationScenario."""
     def setUp(self):
         """Setup executed before each test."""
-        self.solver_path = Path("tests", "test_files", "Solvers", "PbO-CCSAT-Generic")
+        self.solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
         self.solver = Solver(self.solver_path)
 
         self.source_instance_directory = Path("tests/test_files/"
-                                              "Instances/test_instances")
+                                              "Instances/Test-Instance-Set")
 
         self.run_number = 2
 
         self.parent_directory = Path("tests/test_files/test_configurator")
-        self.parent_directory.mkdir(parents=True)
+        self.parent_directory.mkdir(parents=True, exist_ok=True)
 
         self.scenario = ConfigurationScenario(self.solver,
                                               self.source_instance_directory,
@@ -86,20 +86,23 @@ class TestConfigurationScenario(TestCase):
         instance_file = instance_file_path.open()
         instance_file_content = instance_file.read()
         self.assertEqual(instance_file_content,
-                         "../../instances/test_instances/test_instance_1.cnf\n")
+                         "../../instances/Test-Instance-Set/test_instance_1.cnf\n")
 
         instance_file.close()
 
     def test_configuration_scenario_check_scenario_file(self):
         """Test if create_scenario() correctly creates the scenario file."""
-        self.scenario.create_scenario(self.parent_directory)
+        with mock.patch.object(Solver, "is_deterministic") as mock_deterministic:
+            mock_deterministic.return_value = "0"
+
+            self.scenario.create_scenario(self.parent_directory)
 
         scenario_file_path = self.scenario.directory / self.scenario.scenario_file
         reference_scenario_file = Path("tests", "test_files", "reference_files",
                                        "scenario_file.txt")
 
         # Use to show full diff of file
-        # self.maxDiff = None
+        self.maxDiff = None
 
         self.assertEqual(scenario_file_path.is_file(), True)
         self.assertEqual(scenario_file_path.open().read(),

@@ -17,6 +17,7 @@ dependencies:
     - pandas
     # Testing
     - pytest
+    - pytest-mock
     - flake8==5.0.4
     - flake8-quotes==3.3.1
     - pep8-naming==0.13.2
