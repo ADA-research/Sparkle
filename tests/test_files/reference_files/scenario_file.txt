@@ -1,12 +1,12 @@
 algo = ./sparkle_smac_wrapper.py
-execdir = scenarios/PbO-CCSAT-Generic_test_instances/
+execdir = scenarios/Test-Solver_Test-Instance-Set/
 deterministic = 0
 run_obj = RUNTIME
 wallclock-limit = 100
 cutoffTime = 10
 cutoff_length = max
-paramfile = scenarios/PbO-CCSAT-Generic_test_instances/PbO-CCSAT-params_test.pcs
-outdir = scenarios/PbO-CCSAT-Generic_test_instances/outdir_train_configuration
-instance_file = scenarios/PbO-CCSAT-Generic_test_instances/test_instances_train.txt
-test_instance_file = scenarios/PbO-CCSAT-Generic_test_instances/test_instances_train.txt
+paramfile = scenarios/Test-Solver_Test-Instance-Set/Test-Solver.pcs
+outdir = scenarios/Test-Solver_Test-Instance-Set/outdir_train_configuration
+instance_file = scenarios/Test-Solver_Test-Instance-Set/Test-Instance-Set_train.txt
+test_instance_file = scenarios/Test-Solver_Test-Instance-Set/Test-Instance-Set_train.txt
 validation = true
