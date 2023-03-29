@@ -7,16 +7,10 @@ from pathlib import Path
 
 from pandas import DataFrame
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help.sparkle_settings import PerformanceMeasure
-    from sparkle_help.solver import Solver
-    from sparkle_help import sparkle_settings
-except ImportError:
-    from Commands.sparkle_help import sparkle_global_help as sgh
-    from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
-    from Commands.sparkle_help.solver import Solver
-    from Commands.sparkle_help import sparkle_settings
+from sparkle_help import sparkle_global_help as sgh
+from sparkle_help.sparkle_settings import PerformanceMeasure
+from sparkle_help.solver import Solver
+from sparkle_help import sparkle_settings
 
 
 class ConfigurationScenario:

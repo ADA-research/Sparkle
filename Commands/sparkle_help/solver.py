@@ -6,10 +6,7 @@ import sys
 
 from pathlib import Path
 
-try:
-    from Commands.sparkle_help import sparkle_global_help as sgh
-except ImportError:
-    from sparkle_help import sparkle_global_help as sgh
+from sparkle_help import sparkle_global_help as sgh
 
 
 class Solver:
