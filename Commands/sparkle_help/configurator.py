@@ -6,7 +6,6 @@ from pathlib import Path
 import subprocess
 
 from sparkle_help.configuration_scenario import ConfigurationScenario
-
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_slurm_help as ssh
@@ -21,7 +20,7 @@ class Configurator:
         """Initialize Configurator."""
         self.configurator_path = configurator_path
         self.scenario = scenario
-        scenario.create_scenario(parent_directory=configurator_path)
+        self.scenario.create_scenario(parent_directory=configurator_path)
 
         self.sbatch_filename = ""
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
