@@ -168,9 +168,9 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
     use_features = args.use_features
     if args.configurator is not None:
-        configurator = args.configurator
+        configurator_path = args.configurator
     else:
-        configurator = Path("smac-v2.10.03-master-778")
+        configurator_path = Path("smac-v2.10.03-master-778")
 
     feature_data_df = None
     if use_features:
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     run_number = sgh.settings.get_config_number_of_runs()
     config_scenario = ConfigurationScenario(solver, instance_set_train, run_number,
                                             use_features, feature_data_df)
-    configurator = Configurator("Configurators" / configurator, config_scenario)
+    configurator = Configurator("Configurators" / configurator_path, config_scenario)
 
     configurator.create_sbatch_script()
     configure_jobid = configurator.configure()
