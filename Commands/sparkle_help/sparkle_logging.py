@@ -7,7 +7,7 @@ from pathlib import Path
 from pathlib import PurePath
 
 try:
-    from Commands.sparkle_help import sparkle_global_help as sgh
+    from sparkle_help import sparkle_global_help as sgh
 except ImportError:
     import sparkle_global_help as sgh
 
