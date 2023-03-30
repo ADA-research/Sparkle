@@ -64,6 +64,7 @@ def scenario_fixture(solver_fixture):
     return ConfigurationScenario(solver_fixture, instance_set_train, run_number,
                                  use_features)
 
+
 @pytest.fixture
 def configurator_path():
     """Configurator path fixture for tests."""
