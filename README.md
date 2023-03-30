@@ -53,14 +53,23 @@ Sparkle is distributed with a number of external components, solvers, and instan
 
 The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. The main modification of this component is to disable calling the SAT instance preprocessor called SatELite. It is located in: `Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
 
-## Authors
-Chuan Luo,
+## Maintainers
 Koen van der Blom,
 Jeroen Rook,
 Holger H. Hoos,
+Malte Schwerin,
+Yingliu Lu,
+Tarek Junied,
+Marie Anastacio,
+Jakob Bossek
+
+## Contributors
+Chuan Luo,
 Richard Middelkoop,
-Jeremie Gobeil
+Jérémie Gobeil,
+Sam Vermeulen,
+Marcel Baumann
 
 ## Contact
-k.van.der.blom@liacs.leidenuniv.nl
+sparkle@aim.rwth-aachen.de
 

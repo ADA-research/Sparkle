@@ -57,7 +57,7 @@ def get_slurm_sbatch_user_options_list(path_modifier=None):
 
 def get_slurm_sbatch_default_options_list():
     """Return the default list of Slurm batch options."""
-    return ["--partition=graceADA"]
+    return list()
 
 
 def get_slurm_srun_user_options_list(path_modifier=None):
@@ -296,7 +296,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
         job_params_list.extend([test_default, test_configured])
         job_output_list.extend([test_default_out, test_configured_out])
 
-    # Number of cores available on a Grace CPU
+    # Number of cores available on a CPU of this cluster
     n_cpus = sgh.settings.get_slurm_clis_per_node()
 
     # Adjust maximum number of cores to be the maximum of the instances we validate on
@@ -407,7 +407,9 @@ def submit_sbatch_script(sbatch_script_name: str, command_name: CommandName,
     sbatch_script_path = sbatch_script_name
     ori_path = os.getcwd()
     os.system(f"cd {execution_dir} ; chmod a+x {sbatch_script_path} ; cd {ori_path}")
-    command = f"cd {execution_dir} ; sbatch {sbatch_script_path} ; cd {ori_path}"
+    # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
+    command = f"cd {execution_dir} ; unset SLURM_CPU_BIND;" \
+              f"sbatch {sbatch_script_path} ; cd {ori_path}"
 
     output_list = os.popen(command).readlines()
 
@@ -497,7 +499,6 @@ def generate_generic_callback_slurm_script(name: str, solver: Path,
     sbatch_options_list.append("--nodes=1")
     sbatch_options_list.append("--ntasks=1")
     sbatch_options_list.append("-c1")
-    sbatch_options_list.append("--mem-per-cpu=3000")
 
     fout = open(delayed_job_file_path, "w")
     fout.write("#!/bin/bash\n")  # Use bash to execute this script
