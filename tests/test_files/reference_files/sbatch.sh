@@ -6,7 +6,7 @@
 ###
 ###
 #SBATCH --mem-per-cpu=3000
-#SBATCH --array=0-2%2
+#SBATCH --array=0-2%25
 ###
 params=( \
 'scenarios/Test-Solver_Test-Instance-Set/Test-Solver_Test-Instance-Set_scenario.txt 1 results/Test-Solver_Test-Instance-Set/Test-Solver_Test-Instance-Set_scenario.txt_2_exp_sbatch.sh_seed_1_smac.txt scenarios/Test-Solver_Test-Instance-Set/1' \

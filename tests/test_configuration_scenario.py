@@ -102,7 +102,7 @@ class TestConfigurationScenario(TestCase):
                                        "scenario_file.txt")
 
         # Use to show full diff of file
-        self.maxDiff = None
+        # self.maxDiff = None
 
         self.assertEqual(scenario_file_path.is_file(), True)
         self.assertEqual(scenario_file_path.open().read(),
