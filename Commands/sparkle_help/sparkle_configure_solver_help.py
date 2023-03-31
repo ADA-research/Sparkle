@@ -32,13 +32,16 @@ except ImportError:
 
 class InstanceType(Enum):
     """Enum of possible instance types."""
-
     TRAIN = 1
     TEST = 2
 
 
 def get_smac_run_obj() -> str:
-    """Return the SMAC run objective."""
+    """Return the SMAC run objective.
+
+    Returns:
+        A string that represents the run objective set in the settings.
+    """
     # Get smac_run_obj from general settings
     smac_run_obj = sgh.settings.get_general_performance_measure()
 
@@ -55,7 +58,11 @@ def get_smac_run_obj() -> str:
 
 
 def get_smac_settings():
-    """Return the SMAC settings."""
+    """Return the SMAC settings.
+
+    Returns:
+        A tuple containing all settings important to SMAC.
+    """
     smac_each_run_cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     smac_run_obj = get_smac_run_obj()
     smac_whole_time_budget = sgh.settings.get_config_budget_per_run()
@@ -69,7 +76,14 @@ def get_smac_settings():
 
 def copy_file_instance(solver_name: str, instance_set_train_name: str,
                        instance_set_target_name: str, instance_type: str) -> None:
-    """Copy file with the specified postfix listing instances to the solver directory."""
+    """Copy instance file to the solver directory with the specified postfix.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_train_name: Name of the instance set for training
+        instance_set_target_name: Target name of the instance set
+        instance_type: Instance type used for the file postfix
+    """
     file_postfix = f"_{instance_type}.txt"
 
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
@@ -84,11 +98,16 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     log_str = "List of instances to be used for configuration"
     sl.add_output(smac_file_instance_path_target, log_str)
 
-    return
-
 
 def get_solver_deterministic(solver_name: str) -> str:
-    """Return a str indicating whether a given solver is deterministic or not."""
+    """Return a string indicating whether a given solver is deterministic or not.
+
+    Args:
+        solver_name: Name of the solver to check
+
+    Returns:
+        A string containing 0 or 1 indicating whether solver is deterministic
+    """
     deterministic = ""
     target_solver_path = "Solvers/" + solver_name
     solver_list_path = sgh.solver_list_path
@@ -116,6 +135,16 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     """Create a file with the configuration scenario to be used for SMAC validation.
 
     This will be located in the solver directory.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_train_name: Name of training instance set
+        instance_set_val_name: Name of the validation instance set
+        instance_type: Instance type (train or test)
+        default: Whether the configured or default settings should be used
+
+    Returns:
+        String containing the name of the scenario file
     """
     if instance_type is InstanceType.TRAIN:
         inst_type = "train"
@@ -161,7 +190,6 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     fout.write("test_instance_file = " + smac_test_instance_file + "\n")
     fout.close()
 
-    # Log scenario file location
     log_str = (f"SMAC Scenario file for the validation of the {config_type} solver "
                f"{solver_name} on the {inst_type}ing set")
     sl.add_output(smac_file_scenario, log_str)
@@ -170,8 +198,14 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
 
 
 def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
-                                       use_features: bool = False):
-    """Create a file with the configuration scenario in the solver directory."""
+                                       use_features: bool = False) -> None:
+    """Create a file with the configuration scenario in the solver directory.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of instance set used for configuration
+        use_features: Whether features should be used. Defaults to False.
+    """
     solver_instance_name = f"{solver_name}_{instance_set_name}"
     solver_instance_dir = Path("example_scenarios", solver_instance_name)
 
@@ -209,38 +243,55 @@ def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
     sl.add_output(f"{sgh.smac_dir}{smac_outdir}",
                   "SMAC configuration output on the training set")
 
-    return
-
 
 def remove_configuration_directory(solver_name: str, smac_solver_dir: Path) -> None:
-    """Remove the configuration directory."""
+    """Remove and recreate the configuration directory.
+
+    Args:
+        solver_name: Name of the solver
+        smac_solver_dir: Directory of the solver in SMAC directory
+    """
     # Delete directory and then create it new with necessary files
     shutil.rmtree(smac_solver_dir, ignore_errors=True)
     create_configuration_directory(smac_solver_dir, solver_name)
 
-    return
-
 
 def clean_configuration_directory(solver_name: str, instance_set_name: str) -> None:
-    """Prepare clean configuration directory."""
+    """Prepare clean configuration directory.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+    """
     smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
 
     remove_configuration_directory(solver_name, smac_solver_dir)
     create_configuration_directory(smac_solver_dir, solver_name)
 
-    return
-
 
 def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
-    """Return the directory of a solver under the SMAC directory."""
+    """Return the directory of a solver under the SMAC directory.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        String containing the scenario directory inside SMAC
+    """
     smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
     smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
 
     return smac_solver_dir
 
 
-def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
-    """Create a directory for the configuration of a solver+instance-set combination."""
+def create_configuration_directory(smac_solver_dir: Path, solver_name: str) -> None:
+    """Create a directory for the configuration of a solver+instance-set combination.
+
+    Args:
+        smac_solver_dir: Name of the scenario directory inside SMAC
+        solver_name: Name of the solver
+    """
     create_necessary_files_for_configured_solver(smac_solver_dir)
 
     # Copy PCS file to smac_solver_dir
@@ -249,11 +300,13 @@ def create_configuration_directory(smac_solver_dir: Path, solver_name: str):
     command_line = f"cp {pcs_file} {smac_solver_dir}"
     os.system(command_line)
 
-    return
-
 
 def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
-    """Create directories needed for configuration of a solver."""
+    """Create directories needed for configuration of a solver.
+
+    Args:
+        smac_solver_dir: Name of the scenario directory inside SMAC
+    """
     outdir_dir = smac_solver_dir / "outdir_train_configuration"
     command_line = f"mkdir -p {outdir_dir}"
     os.system(command_line)
@@ -262,13 +315,17 @@ def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
     command_line = f"mkdir -p {tmp_dir}"
     os.system(command_line)
 
-    return
-
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     """Return the name of the PCS file in a solver directory.
 
     If not found, return an empty str.
+
+    Args:
+        solver_directory: Directory of solver
+
+    Returns:
+        Returns string containing the name of pcs file if found
     """
     for file_path in Path(solver_directory).iterdir():
         file_extension = "".join(file_path.suffixes)
@@ -280,7 +337,12 @@ def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
 
 
 def copy_solver_files_to_smac_dir(solver_name: str, instance_set_name: str) -> None:
-    """Create and copy required directories and files for configuration with SMAC."""
+    """Create and copy required directories and files for configuration with SMAC.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+    """
     smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
@@ -294,14 +356,19 @@ def copy_solver_files_to_smac_dir(solver_name: str, instance_set_name: str) -> N
         cmd = f"cp -r {solver_directory} {smac_solver_path_i}"
         os.system(cmd)
 
-    return
-
 
 def remove_validation_directories_execution_or_output(solver_name: str,
                                                       instance_set_train_name: str,
                                                       instance_set_test_name: str,
-                                                      exec_or_out: str):
-    """Remove execution or output directories for validation."""
+                                                      exec_or_out: str) -> None:
+    """Remove execution or output directories for validation.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_train_name: Name of instance set for training
+        instance_set_test_name: Name of instance set for testing
+        exec_or_out: Postfix describing if execution or output directory is used
+    """
     solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name) + exec_or_out
 
     train_default_dir = Path(solver_dir + "_train_default/")
@@ -316,26 +383,33 @@ def remove_validation_directories_execution_or_output(solver_name: str,
             solver_dir + "_" + instance_set_test_name + "_test_configured/")
         sfh.rmtree(test_configured_dir)
 
-    return
-
 
 def remove_validation_directories(solver_name: str, instance_set_train_name: str,
-                                  instance_set_test_name: str):
-    """Remove validation directories for a solver and instance set(s) combination."""
+                                  instance_set_test_name: str) -> None:
+    """Remove validation directories for a solver and instance set(s) combination.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_train_name: Name of the instance set for training
+        instance_set_test_name: Name of the instance set for testing
+    """
     remove_validation_directories_execution_or_output(
         solver_name, instance_set_train_name, instance_set_test_name, "validate")
     remove_validation_directories_execution_or_output(
         solver_name, instance_set_train_name, instance_set_test_name, "output")
 
-    return
-
 
 def prepare_smac_execution_directories_validation(solver_name: str,
                                                   instance_set_train_name: str,
-                                                  instance_set_test_name: str):
+                                                  instance_set_test_name: str) -> None:
     """Create and copy required directories and files for validation with SMAC.
 
     Remove old directories and files as needed.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_train_name: Name of the instance set for training
+        instance_set_test_name: Name of the instance set for testing
     """
     # Make sure no old files remain that could interfere
     remove_validation_directories(solver_name, instance_set_train_name,
@@ -378,12 +452,18 @@ def prepare_smac_execution_directories_validation(solver_name: str,
             cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
             os.system(cmd)
 
-    return
-
 
 def create_smac_configure_sbatch_script(solver_name: str,
                                         instance_set_name: str) -> Path:
-    """Generate a Slurm batch script for algorithm configuration with SMAC."""
+    """Generate a Slurm batch script for algorithm configuration with SMAC.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        Path to the sbatch script
+    """
     execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
     smac_file_scenario_name = Path(f"{solver_name}_{instance_set_name}_scenario.txt")
     _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
@@ -407,8 +487,18 @@ def create_smac_configure_sbatch_script(solver_name: str,
 
 def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file: Path,
                                          result_directory: Path, num_job_total: int,
-                                         num_job_in_parallel: int, smac_execdir: Path):
-    """Generate a Slurm batch script for algorithm configuration."""
+                                         num_job_in_parallel: int,
+                                         smac_execdir: Path) -> None:
+    """Generate a Slurm batch script for algorithm configuration.
+
+    Args:
+        sbatch_script_path: Filepath for sbatch script
+        scenario_file: Filepath for the scenario file
+        result_directory: Directory for configuration results
+        num_job_total: Total number of slurm jobs
+        num_job_in_parallel: Maximum number of parallel jobs
+        smac_execdir: Scenario directory
+    """
     sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
     num_job_in_parallel = max(num_job_in_parallel, num_job_total)
 
@@ -468,11 +558,16 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
     fout.write(cmd + "\n")
     fout.close()
 
-    return
-
 
 def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) -> str:
-    """Submit a Slurm batch script for algorithm configuration with SMAC."""
+    """Submit a Slurm batch script for algorithm configuration with SMAC.
+
+    Args:
+        smac_configure_sbatch_script_name: Name of the script to execute
+
+    Returns:
+        String containing the slurm job ID
+    """
     ori_path = Path.cwd()
     command_line = (f"cd {sgh.smac_dir} ; sbatch {smac_configure_sbatch_script_name} ; "
                     f"cd {ori_path}")
@@ -489,10 +584,14 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) 
     return jobid
 
 
-def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
-    """Check the results directory for this solver and instance set combination exists.
+def check_configuration_exists(solver_name: str, instance_set_name: str) -> None:
+    """Check if the results directory for the solver and instance set combination exists.
 
-    NOTE: This function assumes SMAC output.
+    NOTE: This function assumes SMAC output
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
     """
     # Check the results directory exists
     smac_results_dir = Path(
@@ -505,11 +604,14 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
               "instance set.")
         sys.exit(-1)
 
-    return all_good
-
 
 def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> None:
-    """Check the instance list file exists."""
+    """Check the instance list file exists.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+    """
     file_name = Path(instance_set_name + "_train.txt")
     instance_list_file_path = Path(PurePath(Path(sgh.smac_dir)
                                    / Path("example_scenarios")
@@ -523,11 +625,15 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
               "completed correctly for this solver and instance set combination.")
         sys.exit(-1)
 
-    return
 
+def check_configuration_permission_error(solver_name: str,
+                                         instance_set_name: str) -> None:
+    """Check the files for solver permission errors.
 
-def check_configuration_permission_error(solver_name: str, instance_set_name: str):
-    """Check the files for solver permission errors."""
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+    """
     smac_results_dir = Path(f"{sgh.smac_dir}/results/{solver_name}_{instance_set_name}/")
 
     # Get the name of the first file in the directory
@@ -543,36 +649,44 @@ def check_configuration_permission_error(solver_name: str, instance_set_name: st
                   "for the solver executable.")
             sys.exit(-1)
 
-    print(file)
-
 
 def check_validation_prerequisites(solver_name: str, instance_set_name: str) -> None:
-    """Validate prerequisites for validation are available."""
+    """Validate prerequisites for validation are available.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+    """
     check_configuration_exists(solver_name, instance_set_name)
     check_instance_list_file_exist(solver_name, instance_set_name)
     check_configuration_permission_error(solver_name, instance_set_name)
 
-    return
 
+def write_optimised_configuration_str(solver_name: str, instance_set_name: str) -> None:
+    """Write the latest optimised configuration parameter string to file.
 
-# Write optimised configuration string to file
-def write_optimised_configuration_str(solver_name, instance_set_name) -> None:
-    """Write the latest optimised configuration parameter str to file."""
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+    """
     optimised_configuration_str, _, _ = get_optimised_configuration(
         solver_name, instance_set_name)
     latest_configuration_str_path = sgh.sparkle_tmp_path + "latest_configuration.txt"
 
     with open(latest_configuration_str_path, "w") as outfile:
         outfile.write(optimised_configuration_str)
-    # Log output
+
     sl.add_output(latest_configuration_str_path, "Configured algorithm parameters of the"
                   " most recent configuration process")
 
-    return
 
+def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) -> None:
+    """Write optimised configuration to a new PCS file.
 
-def write_optimised_configuration_pcs(solver_name, instance_set_name) -> None:
-    """Write optimised configuration to a new PCS file."""
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+    """
     # Read optimised configuration and convert to dict
     optimised_configuration_str, _, _ = get_optimised_configuration(
         solver_name, instance_set_name)
@@ -638,42 +752,51 @@ def write_optimised_configuration_pcs(solver_name, instance_set_name) -> None:
                   "parameters of the most recent configuration process as default "
                   "values")
 
-    return
-
 
 def check_optimised_configuration_params(params: str) -> None:
-    """Check if a given configuration parameter str appears to be valid."""
-    # Check if a valid configuration was found
+    """Check if a given configuration parameter string appears to be valid.
+
+    Args:
+        params: Parameters to be checked
+    """
     if params == "":
         print(f"ERROR: Invalid optimised_configuration_str: {params}; "
               "Stopping execution!")
         sys.exit(-1)
 
-    return
-
 
 def check_optimised_configuration_performance(performance: str) -> None:
-    """Check if a given configuration performance str appears to be valid."""
-    # Check if a valid seed was found
+    """Check if a given configuration performance string appears to be valid.
+
+    Args:
+        performance: Performance value to be checked
+    """
     if performance == -1:
         print("ERROR: Invalid optimised_configuration_performance; Stopping execution!")
         sys.exit(-1)
 
-    return
-
 
 def check_optimised_configuration_seed(seed: str) -> None:
-    """Check if a given configuration seed str appears to be valid."""
-    # Check if a valid seed was found
+    """Check if a given configuration seed string appears to be valid.
+
+    Args:
+        seed: Seed value to be checked
+    """
     if seed == -1:
         print("ERROR: Invalid optimised_configuration_seed; Stopping execution!")
         sys.exit(-1)
 
-    return
-
 
 def get_optimised_configuration_params(solver_name: str, instance_set_name: str) -> str:
-    """Return the optimised configuration parameter str."""
+    """Return the optimised configuration parameter string.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        String containing the optimised configuration
+    """
     optimised_configuration_str, _, _ = get_optimised_configuration_from_file(
         solver_name, instance_set_name)
     check_optimised_configuration_params(optimised_configuration_str)
@@ -683,7 +806,15 @@ def get_optimised_configuration_params(solver_name: str, instance_set_name: str)
 
 def get_optimised_configuration_from_file(solver_name: str, instance_set_name: str
                                           ) -> tuple[str, str, str]:
-    """Read the optimised configuration, its performance, and seed from file."""
+    """Read the optimised configuration, its performance, and seed from file.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        A tuple containing string, performance, and seed of optimised configuration
+    """
     optimised_configuration_str = ""
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
@@ -750,7 +881,15 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
 
 def get_optimised_configuration(solver_name: str,
                                 instance_set_name: str) -> tuple[str, str, str]:
-    """Return the optimised configuration str, its performance, and its seed."""
+    """Return the optimised configuration str, its performance, and its seed.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        A tuple containing string, performance, and seed of optimised configuration
+    """
     (optimised_configuration_str, optimised_configuration_performance,
      optimised_configuration_seed) = get_optimised_configuration_from_file(
         solver_name, instance_set_name)
