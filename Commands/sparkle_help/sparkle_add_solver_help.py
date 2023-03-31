@@ -14,7 +14,7 @@ def get_solver_directory(solver_name: str) -> str:
     """A helper function that returs the path to a solver.
 
     Args:
-        solver_name (str): The name of the solver for which the path is needed.
+        solver_name: The name of the solver for which the path is needed.
 
     Returns:
         The relative path of the solver as a string.
@@ -26,7 +26,7 @@ def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
     """Returns whether the directory of the solver being added contains a PCS file.
 
     Args:
-        solver_directory (str): The directory to be checked if it contains a PCS file.
+        solver_directory: The directory to be checked if it contains a PCS file.
     Returns:
         A Boolean that is true if and only if
         solver_directory contains exactly one PCS file.
