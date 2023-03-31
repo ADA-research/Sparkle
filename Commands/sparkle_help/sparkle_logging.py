@@ -27,22 +27,22 @@ caller_out_dir: Path = Path(".")
 caller_log_dir: Path = Path(".")
 
 
-def _update_caller(argv: list[str]):
+def _update_caller(argv: list[str]) -> None:
     """Update which command is currently active.
 
     Args:
-        argv: List containing the command line arguments derived from sys.argv
+        argv: List containing the command line arguments derived from sys.argv.
 
     """
     global caller
     caller = Path(argv[0]).stem
 
 
-def _update_caller_file_path(timestamp: str):
+def _update_caller_file_path(timestamp: str) -> None:
     """Create a new file path for the caller with the given timestamp.
 
     Args:
-        timestamp: String representation of the time
+        timestamp: String representation of the time.
 
     """
 
@@ -71,12 +71,12 @@ def _update_caller_file_path(timestamp: str):
             output_file.write(output_header)
 
 
-def add_output(output_path: str, description: str):
+def add_output(output_path: str, description: str) -> None:
     """Add output location and description to the log of the current command.
 
     Args:
-        output_path: The file path of where output is written to
-        description: A short description of what kind of output is written to this file
+        output_path: The file path of where output is written to.
+        description: A short description of what kind of output is written to this file.
 
     """
     # Prepare logging information
@@ -88,14 +88,14 @@ def add_output(output_path: str, description: str):
         output_file.write(output_str)
 
 
-def log_command(argv: list[str]):
+def log_command(argv: list[str]) -> None:
     """Write to file which command was executed.
 
     Includes information on when it was executed, with which arguments, and
     where details about it's output are stored (if any).
 
     Args:
-        argv: List containing the command line arguments derived from sys.argv
+        argv: List containing the command line arguments derived from sys.argv.
 
     """
     # Determine caller

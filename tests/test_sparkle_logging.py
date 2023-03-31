@@ -29,7 +29,7 @@ def test_add_output():
     sl.add_output("test.txt", "functionality test.")
     with open(str(sl.caller_log_path), "r") as output_file:
         for line in output_file:
-            pass
+            continue
         last_line = line
     assert "test.txt" in last_line
     assert "functionality test." in last_line
@@ -41,7 +41,6 @@ def test_log_command():
     log_path = sgh.sparkle_global_log_path
     with open(str(log_path), "r") as log_file:
         for line in log_file:
-            pass
+            continue
         last_line = line
-    print(f"\n{last_line}\n")
     assert "test.py" in last_line
