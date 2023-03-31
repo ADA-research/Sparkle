@@ -19,12 +19,30 @@ except ImportError:
     import sparkle_job_help
 
 
-def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path,
-                                                     extractor_path, result_path):
-    """Create a CSV file with the right number of commas and rows."""
+def generate_missing_value_csv_like_feature_data_csv(feature_data_csv:
+                                                     sfdcsv.SparkleFeatureDataCSV,
+                                                     instance_path: str,
+                                                     extractor_path: str,
+                                                     result_path: str) -> sfdcsv.SparkleFeatureDataCSV:  # noqa: E501
+    """Create a CSV file with the right number of commas and rows.
+
+    Args:
+    feature_data_csv: The CSV file of which the dimensions will be copied.
+    instance_path: The name used for each row in the new CSV file.
+    This features of this instance will be the column of this row.
+    extractor_path: This will be used to determine the number of
+    columns in the new CSV file.
+    result_path: The path to store the new created CSV file in.
+
+    Returns:
+    A newly created csv file of type SparkleFeatureDataCSV
+    with the same dimensions as feature_data_csv.
+    """
+    # create an empty CSV
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
     zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
 
+    # add as many columns as feature_data_csv has
     for column_name in feature_data_csv.list_columns():
         zero_value_csv.add_column(column_name)
 
@@ -36,8 +54,17 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_
     return zero_value_csv
 
 
-def computing_features(feature_data_csv_path, mode):
-    """Compute features for all instance and feature extractor combinations."""
+def computing_features(feature_data_csv_path: str, mode: int) -> None:
+    """Compute features for all instance and feature extractor combinations.
+
+    Args:
+        feature_data_csv_path: Create a new feature data CSV file in the path
+          specified by this parameter.
+        mode: If the mode value is 1 then the list of computation jobs
+          is the list of the remaining jobs.
+        If the mode = 2 then the list of computation jobs is the list of all jobs.
+        Otherwise an error message will be displayed.
+    """
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     if mode == 1:
         list_feature_computation_job = (
@@ -145,11 +172,9 @@ def computing_features(feature_data_csv_path, mode):
                   " computing feature vector of instance "
                   f"{sfh.get_last_level_directory_name(instance_path)} done!\n")
 
-    return
 
-
-def update_feature_data_id():
-    """Update the feature data ID."""
+def update_feature_data_id() -> None:
+    """Updates the feature data id by incrementing the current feature data id by 1."""
     # Get current fd_id
     fd_id = get_feature_data_id()
 
@@ -162,11 +187,13 @@ def update_feature_data_id():
     with open(fd_id_path, "w") as fd_id_file:
         fd_id_file.write(str(fd_id))
 
-    return
-
 
 def get_feature_data_id() -> int:
-    """Return the current feature data ID."""
+    """Returns the current feature data ID.
+
+    Returns:
+        An Int containing the current feature data ID.
+    """
     fd_id = -1
     fd_id_path = sgh.feature_data_id_path
 

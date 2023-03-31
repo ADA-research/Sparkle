@@ -23,12 +23,19 @@ except ImportError:
 def computing_features_parallel(feature_data_csv_path, mode):
     """Compute features in parallel.
 
-    The 1st argument (feature_data_csv_path) specifies the path of the csv file where the
-    resulting feature data would be placed.
-    The 2nd argument (mode) specifies the mode of computation. It has 2 possible values
-    (1 or 2). If this value is 1, it means that this function will compute the remaining
-    jobs for feature computation. Otherwise (if this value is 2), it means that this
-    function will re-compute all jobs for feature computation.
+    An sbatch job is submitted for the computation of the features. The results are then
+    stored in the csv file specified by feature_data_csv_path.
+
+    Args
+        feature_data_csv_path: This specifies the path of the
+         csv file where the resulting feature data would be placed.
+        mode: If the mode value is 1 then the list of computation jobs is
+         the list of the remaining jobs.
+        If the mode = 2 then the list of computation jobs is the list of all jobs.
+         Otherwise an error message will be displayed.
+
+    Returns:
+        The job ID of the sbatch job will be returned as an int.
     """
     # Open the csv file in terms of feature data
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
