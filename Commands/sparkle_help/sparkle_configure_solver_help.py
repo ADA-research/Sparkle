@@ -79,10 +79,10 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     """Copy instance file to the solver directory with the specified postfix.
 
     Args:
-        solver_name (str): Name of the solver
-        instance_set_train_name (str): Name of the instance set for training
-        instance_set_target_name (str): Target name of the instance set
-        instance_type (str): Instance type used for the file postfix
+        solver_name: Name of the solver
+        instance_set_train_name: Name of the instance set for training
+        instance_set_target_name: Target name of the instance set
+        instance_type: Instance type used for the file postfix
     """
     file_postfix = f"_{instance_type}.txt"
 
