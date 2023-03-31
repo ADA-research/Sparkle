@@ -11,7 +11,7 @@ except ImportError:
 
 
 def get_solver_directory(solver_name: str) -> str:
-    """ A helper function that returs the path to a solver
+    """A helper function that returs the path to a solver.
 
     Args:
         solver_name (str): the name of the solver for which the path is needed
@@ -23,11 +23,13 @@ def get_solver_directory(solver_name: str) -> str:
 
 
 def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
-    """Returns whether the directory of the solver being added contains a PCS file. 
+    """Returns whether the directory of the solver being added contains a PCS file.
+
     Args:
         solver_directory (str): the directory to be checked if it contains a PCS file
     Returns:
-        bool: A Boolean that is true if and only if solver_directory contains exactly one PCS file
+        bool: A Boolean that is true if and only if
+        solver_directory contains exactly one PCS file
     """
     list_files = os.listdir(solver_directory)
 
