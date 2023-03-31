@@ -1,9 +1,8 @@
-import pytest
-import sys
 from pathlib import Path, PurePath
 
 import sparkle_help.sparkle_logging as sl
 import sparkle_help.sparkle_global_help as sgh
+
 
 def test__update_caller():
     argv = ["test.py"]
@@ -22,6 +21,7 @@ def test__update_caller_file_path():
     assert str(sl.caller_out_dir) == f"{timestamp}_{sl.caller}"
 
     assert Path(sl.caller_log_path).is_file()
+
 
 def test_add_output():
     argv = ["test.py"]
