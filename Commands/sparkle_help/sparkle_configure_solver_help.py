@@ -58,10 +58,10 @@ def get_smac_run_obj() -> str:
 
 
 def get_smac_settings():
-    """Return the smac settings.
+    """Return the SMAC settings.
 
     Returns:
-        A tuple containing all settings important to smac.
+        A tuple containing all settings important to SMAC.
     """
     smac_each_run_cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     smac_run_obj = get_smac_run_obj()
@@ -249,7 +249,7 @@ def remove_configuration_directory(solver_name: str, smac_solver_dir: Path) -> N
 
     Args:
         solver_name: Name of the solver
-        smac_solver_dir: Directory of the solver in smac directory
+        smac_solver_dir: Directory of the solver in SMAC directory
     """
     # Delete directory and then create it new with necessary files
     shutil.rmtree(smac_solver_dir, ignore_errors=True)
@@ -277,7 +277,7 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
         instance_set_name: Name of the instance set
 
     Returns:
-        String containing the scenario directory inside smac
+        String containing the scenario directory inside SMAC
     """
     smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
     smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
@@ -289,7 +289,7 @@ def create_configuration_directory(smac_solver_dir: Path, solver_name: str) -> N
     """Create a directory for the configuration of a solver+instance-set combination.
 
     Args:
-        smac_solver_dir: Name of the scenario directory inside smac
+        smac_solver_dir: Name of the scenario directory inside SMAC
         solver_name: Name of the solver
     """
     create_necessary_files_for_configured_solver(smac_solver_dir)
@@ -305,7 +305,7 @@ def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
     """Create directories needed for configuration of a solver.
 
     Args:
-        smac_solver_dir: Name of the scenario directory inside smac
+        smac_solver_dir: Name of the scenario directory inside SMAC
     """
     outdir_dir = smac_solver_dir / "outdir_train_configuration"
     command_line = f"mkdir -p {outdir_dir}"
