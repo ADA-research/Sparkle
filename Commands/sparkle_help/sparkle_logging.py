@@ -16,7 +16,7 @@ except ImportError:
 caller: str = "unknown"
 
 # Current caller file path
-caller_log_path: str = "not set"
+caller_log_path: str | PurePath = "not set"
 
 # Root output directory for the calling command in the form of
 # Output/<timestamp>_<command_name>/
