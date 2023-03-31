@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to log which output was created by Sparkle where."""
+from __future__ import annotations
 
 import time
 from pathlib import Path
