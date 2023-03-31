@@ -27,6 +27,7 @@ def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
 
     Args:
         solver_directory: The directory to be checked if it contains a PCS file.
+
     Returns:
         A Boolean that is true if and only if
         solver_directory contains exactly one PCS file.
