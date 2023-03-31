@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for algorithm configuration report generation."""
 
+from __future__ import annotations
+
 import os
 import sys
 from pathlib import Path
@@ -97,7 +99,8 @@ def get_instance_name_from_path(path: str) -> str:
 
 # Retrieve instances and corresponding performance values from smac validation objective
 # matrix
-def construct_list_instance_and_performance(result_file: str, cutoff: int) -> list:
+def construct_list_instance_and_performance(result_file: str,
+                                            cutoff: int) -> list[list[str | float]]:
     """Return a list of [instance, performance] pairs.
 
     Args:
@@ -140,7 +143,7 @@ def construct_list_instance_and_performance(result_file: str, cutoff: int) -> li
     return list_instance_and_performance
 
 
-def get_dict_instance_to_performance(results_file: str, cutoff: int) -> dict:
+def get_dict_instance_to_performance(results_file: str, cutoff: int) -> dict[str, float]:
     """Return a dictionary of instance names and their performance.
 
     Args:
@@ -164,7 +167,7 @@ def get_dict_instance_to_performance(results_file: str, cutoff: int) -> dict:
 
 
 def get_performance_measure() -> str:
-    """Return the performance measure as LaTeX str.
+    """Return the performance measure as LaTeX string.
 
     Returns:
         A string containing the performance measure
@@ -183,7 +186,7 @@ def get_performance_measure() -> str:
 
 
 def get_runtime_bool() -> str:
-    """Return the runtime bool as LaTeX str.
+    """Return the runtime bool as LaTeX string.
 
     Returns:
         A string containing the runtime boolean
@@ -202,7 +205,7 @@ def get_runtime_bool() -> str:
 
 def get_ablation_bool(solver_name: str, instance_train_name: str,
                       instance_test_name: str) -> str:
-    """Return the ablation bool as LaTeX str.
+    """Return the ablation bool as LaTeX string.
 
     Args:
         solver_name: Name of the solver
@@ -904,7 +907,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
     return
 
 
-def get_most_recent_test_run(solver_name: str) -> tuple(str, str, bool, bool):
+def get_most_recent_test_run(solver_name: str) -> tuple[str, str, bool, bool]:
     """Return the instance sets used most recently to configure a given solver.
 
     Args:
@@ -988,7 +991,7 @@ def generate_report_for_configuration_train(solver_name: str,
 
 def generate_report_for_configuration(solver_name: str, instance_set_train_name: str,
                                       instance_set_test_name: str,
-                                      ablation: bool = True):
+                                      ablation: bool = True) -> None:
     """Generate a report for algorithm configuration.
 
     Args:
