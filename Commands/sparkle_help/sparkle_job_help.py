@@ -20,16 +20,32 @@ __active_jobs_path = Path("Output/active_jobs.csv")
 __active_jobs_csv_header = ["job_id", "command"]
 
 
-def get_num_of_total_job_from_list(list_jobs):
-    """Return the total number of jobs."""
+def get_num_of_total_job_from_list(list_jobs: list) -> int:
+    """Return the total number of jobs.
+
+    Args:
+      list_jobs: List of jobs. Each entry is a list itself where the type
+      of the entries depends on the job type (e.g., feature computation job).
+
+    Returns:
+      The total number of jobs.
+    """
     num = 0
     for i in range(0, len(list_jobs)):
         num += len(list_jobs[i][1])
     return num
 
 
-def expand_total_job_from_list(list_jobs):
-    """Transform a given job list."""
+def expand_total_job_from_list(list_jobs: list) -> list:
+    """Expand job list.
+
+    Args:
+      list_jobs: List of jobs. Each entry is a list itself where the type
+      of the entries depends on the job type (e.g., feature computation job).
+
+    Returns:
+      Expanded job list.
+    """
     total_job_list = []
     for i in range(0, len(list_jobs)):
         first_item = list_jobs[i][0]
@@ -43,29 +59,34 @@ def expand_total_job_from_list(list_jobs):
 
 def check_active_jobs_exist() -> bool:
     """Return whether there are any active jobs."""
-    exist = False
     # Cleanup to make sure completed jobs are removed
     cleanup_active_jobs()
-    jobs_list = get_active_job_ids()
-
-    if len(jobs_list) > 0:
-        exist = True
-
-    return exist
+    return len(get_active_job_ids()) > 0
 
 
 def check_job_is_done(job_id: str) -> bool:
-    """Check whether a job is done."""
-    # TODO: Handle other cases than slurm when they are implemented
-    done = False
-    done = check_job_is_done_slurm(job_id)
+    """Check whether a job is done.
 
-    return done
+    Args:
+      job_id: String job identifier.
+
+    Returns:
+      Boolean indicating whether the job has finished.
+    """
+    # TODO: Handle other cases than slurm when they are implemented
+    return check_job_is_done_slurm(job_id)
 
 
 # TODO: Move to sparkle_slurm_help
 def check_job_is_done_slurm(job_id: str) -> bool:
-    """Check whether a Slurm job is done and update the active job file as needed."""
+    """Check whether a Slurm job is done and update the active job file as needed.
+
+    Args:
+      job_id: String job identifier.
+
+    Returns:
+      Boolean indicating whether the job has finished.
+    """
     done = False
     result = subprocess.run(["squeue", "-j", job_id], capture_output=True, text=True)
 
@@ -85,17 +106,23 @@ def check_job_is_done_slurm(job_id: str) -> bool:
     return done
 
 
-def sleep(n_seconds: int):
-    """Sleep for a given number of seconds."""
+def sleep(n_seconds: int) -> None:
+    """Sleep for a given number of seconds.
+
+    Args:
+      n_seconds: The number of the system should sleep.
+    """
     if n_seconds > 0:
         time.sleep(n_seconds)
 
-    return
-
 
 # Wait until all dependencies of the command to run are completed
-def wait_for_dependencies(command_to_run: CommandName):
-    """Wait for all dependencies of a given command to finish executing."""
+def wait_for_dependencies(command_to_run: CommandName) -> None:
+    """Wait for all dependencies of a given command to finish executing.
+
+    Args:
+      command_to_run: Command name.
+    """
     dependencies = COMMAND_DEPENDENCIES[command_to_run]
     dependent_job_ids = []
 
@@ -105,11 +132,13 @@ def wait_for_dependencies(command_to_run: CommandName):
     for job_id in dependent_job_ids:
         wait_for_job(job_id)
 
-    return
 
+def wait_for_job(job_id: str) -> None:
+    """Wait for a given job to finish executing.
 
-def wait_for_job(job_id: str):
-    """Wait for a given job to finish executing."""
+    Args:
+      job_id: String job identifier.
+    """
     done = check_job_is_done(job_id)
     n_seconds = 10
 
@@ -119,10 +148,8 @@ def wait_for_job(job_id: str):
 
     print("Job with ID", job_id, "done!", flush=True)
 
-    return
 
-
-def wait_for_all_jobs():
+def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     remaining_jobs = cleanup_active_jobs()
     n_seconds = 10
@@ -134,11 +161,14 @@ def wait_for_all_jobs():
 
     print("All jobs done!")
 
-    return
-
 
 def write_active_job(job_id: str, command: CommandName) -> None:
-    """Write a given command and job ID combination to the active jobs file."""
+    """Write a given command and job ID combination to the active jobs file.
+
+    Args:
+      job_id: String job identifier.
+      command_to_run: Command name.
+    """
     path = __active_jobs_path
 
     # Write header if the file does not exist
@@ -157,7 +187,16 @@ def write_active_job(job_id: str, command: CommandName) -> None:
 
 
 def check_job_exists(job_id: str, command: CommandName) -> bool:
-    """Check whether a job for a given command and ID combination exists."""
+    """Check whether a job for a given command and ID combination exists.
+
+    Args:
+      job_id: String job identifier.
+      command_to_run: Command name.
+
+    Returns:
+      Boolean indicating whether the respective command and ID combination
+      exists.
+    """
     jobs_list = read_active_jobs()
 
     for job in jobs_list:
@@ -168,7 +207,11 @@ def check_job_exists(job_id: str, command: CommandName) -> bool:
 
 
 def read_active_jobs() -> list[dict[str, str]]:
-    """Read active jobs from file and return them as list of [job_id, command] dicts."""
+    """Read active jobs from file and return them as list of [job_id, command] dicts.
+
+    Returns:
+      List of dictionaries with string keys and dict values.
+    """
     jobs = []
     path = __active_jobs_path
     try:
@@ -185,7 +228,11 @@ def read_active_jobs() -> list[dict[str, str]]:
 
 
 def get_active_job_ids() -> list[str]:
-    """Return the IDs of all active jobs."""
+    """Return the IDs of all active jobs.
+
+    Returns:
+      List of job IDs (in string format).
+    """
     job_ids = []
     jobs_list = read_active_jobs()
 
@@ -196,7 +243,14 @@ def get_active_job_ids() -> list[str]:
 
 
 def get_job_ids_for_command(command: CommandName) -> list[str]:
-    """Return the IDs of active jobs for a given command."""
+    """Return the IDs of active jobs for a given command.
+
+    Args:
+      command_to_run: Command name.
+
+    Returns:
+      List of job IDs (in string format).
+    """
     jobs_list = read_active_jobs()
     job_ids = []
 
@@ -207,15 +261,21 @@ def get_job_ids_for_command(command: CommandName) -> list[str]:
     return job_ids
 
 
-def delete_active_job(job_id: str):
-    """Remove the specified job from the active jobs file."""
+def delete_active_job(job_id: str) -> None:
+    """Remove the specified job from the active jobs file.
+
+    Args:
+      job_id: String job identifier.
+    """
     delete_active_jobs([job_id])
 
-    return
 
+def delete_active_jobs(job_ids: list[str]) -> None:
+    """Remove the specified jobs from the active jobs file.
 
-def delete_active_jobs(job_ids: list[str]):
-    """Remove the specified jobs from the active jobs file."""
+    Args:
+      job_ids: List of string job identifiers.
+    """
     inpath = __active_jobs_path
     outpath = __active_jobs_path.with_suffix(".tmp")
 
@@ -233,11 +293,13 @@ def delete_active_jobs(job_ids: list[str]):
     # Replace the old CSV
     outpath.rename(inpath)
 
-    return
-
 
 def cleanup_active_jobs() -> int:
-    """Remove completed jobs from the active jobs file, return the number remaining."""
+    """Remove completed jobs from the active jobs file and return the number remaining.
+
+    Returns:
+      Number of remaining jobs (after removing the completed jobs).
+    """
     jobs_list = read_active_jobs()
     delete_ids = []
     remaining_jobs = 0
