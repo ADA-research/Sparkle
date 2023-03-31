@@ -425,9 +425,10 @@ def generate_sbatch_script_for_validation(solver_name: str,
     return sbatch_script_name
 
 
-def generate_sbatch_script_for_feature_computation(n_jobs: int,
-                                                   feature_data_csv_path: str,
-                                                   list_jobs: list[str]) -> tuple(str, str):
+def generate_sbatch_script_for_feature_computation(
+        n_jobs: int,
+        feature_data_csv_path: str,
+        list_jobs: list[str]) -> tuple(str, str):
     """Generate a Slurm batch script for feature computation.
 
     Args:
