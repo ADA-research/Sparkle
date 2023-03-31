@@ -597,8 +597,10 @@ def generate_generic_callback_slurm_script(name: str,
       instance_set_train: Path (object) to instances used for training.
       instance_set_test: Path (object) to instances used for testing.
       dependency: String of job dependencies.
-      command_line: Command line.
-      command_name: Command name.
+      command_line: String representation of the actual command line
+        that is to be executed.
+      command_name: Command name for job that shall be exectuted if the
+        job was successfully submitted to the batch system.
 
     Returns:
       String job identifier.
