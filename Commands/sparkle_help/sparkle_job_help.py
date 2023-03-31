@@ -167,7 +167,7 @@ def write_active_job(job_id: str, command: CommandName) -> None:
 
     Args:
       job_id: String job identifier.
-      command_to_run: Command name.
+      command: Command name.
     """
     path = __active_jobs_path
 
