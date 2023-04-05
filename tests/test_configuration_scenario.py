@@ -34,6 +34,10 @@ class TestConfigurationScenario(TestCase):
 
     def test_configuration_scenario_init(self):
         """Test if all variables that are set in the init are correct."""
+        mock.patch("sparkle_help.sparkle_global_help.solver_list_path",
+                   return_value="tests/test_files/reference_files/"
+                   "sparkle_solver_list.txt")
+
         self.assertEqual(self.scenario.solver, self.solver)
         self.assertEqual(self.scenario.source_instance_directory,
                          self.source_instance_directory)
@@ -44,7 +48,10 @@ class TestConfigurationScenario(TestCase):
 
     def test_configuration_scenario_check_scenario_directory(self):
         """Test if create_scenario() correctly creates the scenario directory."""
-        self.scenario.create_scenario(self.parent_directory)
+        with mock.patch("sparkle_help.sparkle_global_help.solver_list_path",
+                        return_value="tests/test_files/reference_files/"
+                        "sparkle_solver_list.txt"):
+            self.scenario.create_scenario(self.parent_directory)
 
         self.assertEqual(self.scenario.directory.is_dir(), True)
         self.assertEqual((self.scenario.directory
@@ -57,13 +64,19 @@ class TestConfigurationScenario(TestCase):
 
     def test_configuration_scenario_check_result_directory(self):
         """Test if create_scenario() creates the result directory."""
-        self.scenario.create_scenario(self.parent_directory)
+        with mock.patch("sparkle_help.sparkle_global_help.solver_list_path",
+                        return_value="tests/test_files/reference_files/"
+                        "sparkle_solver_list.txt"):
+            self.scenario.create_scenario(self.parent_directory)
 
         self.assertEqual(self.scenario.result_directory.is_dir(), True)
 
     def test_configuration_scenario_check_run_folders(self):
         """Test if create_scenario() correctly creates the run directories."""
-        self.scenario.create_scenario(self.parent_directory)
+        with mock.patch("sparkle_help.sparkle_global_help.solver_list_path",
+                        return_value="tests/test_files/reference_files/"
+                        "sparkle_solver_list.txt"):
+            self.scenario.create_scenario(self.parent_directory)
 
         for i in range(self.run_number):
             run_path = self.scenario.directory / str(i + 1)
@@ -73,13 +86,19 @@ class TestConfigurationScenario(TestCase):
 
     def test_configuration_scenario_check_instance_directory(self):
         """Test if create_scenario() creates the instance directory."""
-        self.scenario.create_scenario(self.parent_directory)
+        with mock.patch("sparkle_help.sparkle_global_help.solver_list_path",
+                        return_value="tests/test_files/reference_files/"
+                        "sparkle_solver_list.txt"):
+            self.scenario.create_scenario(self.parent_directory)
 
         self.assertEqual(self.scenario.instance_directory.is_dir(), True)
 
     def test_configuration_scenario_check_instances(self):
         """Test if create_scenario() copies instances and creates instance list file."""
-        self.scenario.create_scenario(self.parent_directory)
+        with mock.patch("sparkle_help.sparkle_global_help.solver_list_path",
+                        return_value="tests/test_files/reference_files/"
+                        "sparkle_solver_list.txt"):
+            self.scenario.create_scenario(self.parent_directory)
 
         instance_file_path = self.scenario.directory / self.scenario.instance_file_name
         self.assertEqual(instance_file_path.is_file(), True)
