@@ -44,9 +44,8 @@ class Configurator:
 
         file_content = sbatch_options + params_list + srun_command
 
-        sbatch_script = open(self.configurator_path / self.sbatch_filename, "w+")
-        sbatch_script.write(file_content)
-        sbatch_script.close()
+        with open(self.configurator_path / self.sbatch_filename, "w+") as sbatch_script:
+            sbatch_script.write(file_content)
 
     def configure(self) -> int:
         """Submit sbatch script."""
@@ -55,9 +54,11 @@ class Configurator:
         output = subprocess.run(command, cwd=self.configurator_path, capture_output=True,
                                 text=True)
         if output.stderr != "":
-            print("An error occured during the script submission:")
+            print("An error occurred during the script submission:")
             print(output.stderr)
             print("Depending on the error, the configurator might still run.")
+
+        # Get last token of the output for job_id
         job_id = output.stdout.split()[-1]
         sjh.write_active_job(job_id, CommandName.CONFIGURE_SOLVER)
 
@@ -66,7 +67,7 @@ class Configurator:
 
     def _get_sbatch_options(self):
         """Get sbatch options."""
-        total_jobs = self.scenario.run_number
+        total_jobs = self.scenario.number_of_runs
 
         maximal_parallel_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
         parallel_jobs = max(maximal_parallel_jobs, total_jobs)
@@ -78,7 +79,6 @@ class Configurator:
         options += f"#SBATCH --error=tmp/{self.sbatch_filename}.err\n"
         options += "###\n"
         options += "###\n"
-        options += "#SBATCH --mem-per-cpu=3000\n"
         options += f"#SBATCH --array=0-{total_jobs}%{parallel_jobs}\n"
         options += "###\n"
 
@@ -99,9 +99,10 @@ class Configurator:
 
         params = "params=( \\\n"
 
+        # Use scneario_file_name and two parent directories of it
         scenario_file = Path(self.scenario.directory.parts[-2],
                              self.scenario.directory.parts[-1],
-                             self.scenario.scenario_file)
+                             self.scenario.scenario_file_name)
         for i in range(0, num_job_total):
             seed = i + 1
             result_path = Path(result_directory,
