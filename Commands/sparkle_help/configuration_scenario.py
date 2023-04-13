@@ -14,8 +14,7 @@ from sparkle_help import sparkle_settings
 
 
 class ConfigurationScenario:
-    """Class to handle all activities around configuration scenarios.
-    """
+    """Class to handle all activities around configuration scenarios."""
     def __init__(self, solver: Solver, source_instance_directory: Path,
                  number_of_runs: int, use_features: bool,
                  feature_data_df: pd.DataFrame = None,) -> None:

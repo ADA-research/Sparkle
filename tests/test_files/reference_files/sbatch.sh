@@ -5,7 +5,6 @@
 #SBATCH --error=tmp/Test-Solver_Test-Instance-Set_scenario.txt_2_exp_sbatch.sh.err
 ###
 ###
-#SBATCH --mem-per-cpu=3000
 #SBATCH --array=0-2%25
 ###
 params=( \

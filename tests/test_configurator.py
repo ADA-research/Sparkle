@@ -35,7 +35,7 @@ class TestConfigurator():
         mocker.patch.object(ConfigurationScenario, "create_scenario", return_value=None)
         scenario_fixture.directory = Path("parent_dir", "scenarios",
                                           scenario_fixture.name)
-        scenario_fixture.scenario_file = f"{scenario_fixture.name}_scenario.txt"
+        scenario_fixture.scenario_file_name = f"{scenario_fixture.name}_scenario.txt"
 
         configurator = Configurator(configurator_path, scenario_fixture)
 
@@ -59,9 +59,9 @@ def solver_fixture():
 def scenario_fixture(solver_fixture):
     """Scenario fixture for tests."""
     instance_set_train = Path("Instances", "Test-Instance-Set")
-    run_number = 2
+    number_of_runs = 2
     use_features = False
-    return ConfigurationScenario(solver_fixture, instance_set_train, run_number,
+    return ConfigurationScenario(solver_fixture, instance_set_train, number_of_runs,
                                  use_features)
 
 

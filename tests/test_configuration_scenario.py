@@ -116,7 +116,7 @@ class TestConfigurationScenario(TestCase):
 
             self.scenario.create_scenario(self.parent_directory)
 
-        scenario_file_path = self.scenario.directory / self.scenario.scenario_file
+        scenario_file_path = self.scenario.directory / self.scenario.scenario_file_name
         reference_scenario_file = Path("tests", "test_files", "reference_files",
                                        "scenario_file.txt")
 

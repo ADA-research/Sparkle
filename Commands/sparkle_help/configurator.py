@@ -34,8 +34,8 @@ class Configurator:
 
     def create_sbatch_script(self) -> None:
         """Create sbatch script."""
-        number_of_runs = self.scenario.run_number
-        self.sbatch_filename = Path(f"{self.scenario.scenario_file}_"
+        number_of_runs = self.scenario.number_of_runs
+        self.sbatch_filename = Path(f"{self.scenario.scenario_file_name}_"
                                     f"{number_of_runs}_exp_sbatch.sh")
 
         sbatch_options = self._get_sbatch_options()
@@ -90,7 +90,7 @@ class Configurator:
 
     def _get_run_parameter_list(self):
         """Get list for SBATCH script containing parameters for all configurator runs."""
-        num_job_total = self.scenario.run_number
+        num_job_total = self.scenario.number_of_runs
         result_directory = Path("results", self.scenario.name)
 
         sl.add_output(
@@ -109,7 +109,7 @@ class Configurator:
                                f"{self.sbatch_filename}_seed_{seed}_smac.txt")
             smac_execdir_i = Path("scenarios", self.scenario.name, str(seed))
             sl.add_output(sgh.smac_dir + str(result_path),
-                          f"Configuration log for SMAC run {num_job_total}")
+                          f"Configuration log for SMAC run {seed}")
 
             params += (f"'{scenario_file} {seed} {result_path} {smac_execdir_i}' \\\n")
 
