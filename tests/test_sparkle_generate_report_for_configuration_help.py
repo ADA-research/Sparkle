@@ -1,9 +1,11 @@
 import pytest
+from pathlib import Path
 
 from sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_settings
 from sparkle_help import sparkle_configure_solver_help as scsh
+from sparkle_help import sparkle_tex_help as stex
 
 global settings
 sgh.settings = sparkle_settings.Settings()
@@ -613,8 +615,159 @@ def test_get_ablation_table(mocker):
                             r"\end{tabular}")
 
 
-def test_get_dict_variable_to_value(mocker):
-    pass
+def test_get_dict_variable_to_value_with_test(mocker):
+    solver_name = "test-solver"
+    train_instance = "train-instance"
+    test_instance = "test-instance"
+    config_reports_dir = (f"Configuration_Reports/{solver_name}_{train_instance}_"
+                          f"{test_instance}/")
+    ablation = False
+    common_dict = {
+        "common-1": "1",
+        "common-2": "2",
+        "featuresBool": r"\featuresfalse"
+    }
+    test_dict = {
+        "test-1": "3",
+        "test-2": "4"
+    }
+    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                               "configuration_help."
+                               "get_dict_variable_to_value_common",
+                               return_value=common_dict)
+    mock_test = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                             "configuration_help."
+                             "get_dict_variable_to_value_test",
+                             return_value=test_dict)
+
+    full_dict = sgr.get_dict_variable_to_value(solver_name, train_instance,
+                                               test_instance, ablation)
+
+    mock_common.assert_called_once_with(solver_name, train_instance,
+                                        test_instance, config_reports_dir)
+    mock_test.assert_called_once_with(solver_name, train_instance, test_instance)
+    assert full_dict == {
+        "testBool": r"\testtrue",
+        "ablationBool": r"\ablationfalse"
+    } | common_dict | test_dict
+
+
+def test_get_dict_variable_to_value_without_test(mocker):
+    solver_name = "test-solver"
+    train_instance = "train-instance"
+    test_instance = None
+    config_reports_dir = (f"Configuration_Reports/{solver_name}_{train_instance}/")
+    ablation = False
+    common_dict = {
+        "common-1": "1",
+        "common-2": "2",
+        "featuresBool": r"\featuresfalse"
+    }
+    test_dict = {
+        "test-1": "3",
+        "test-2": "4"
+    }
+    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                               "configuration_help."
+                               "get_dict_variable_to_value_common",
+                               return_value=common_dict)
+
+    full_dict = sgr.get_dict_variable_to_value(solver_name, train_instance,
+                                               test_instance, ablation)
+
+    mock_common.assert_called_once_with(solver_name, train_instance,
+                                        test_instance, config_reports_dir)
+    assert full_dict == {
+        "testBool": r"\testfalse",
+        "ablationBool": r"\ablationfalse"
+    } | common_dict
+
+
+def test_get_dict_variable_to_value_with_ablation(mocker):
+    solver_name = "test-solver"
+    train_instance = "train-instance"
+    test_instance = "test-instance"
+    config_reports_dir = (f"Configuration_Reports/{solver_name}_{train_instance}_"
+                          f"{test_instance}/")
+    ablation = True
+    common_dict = {
+        "common-1": "1",
+        "common-2": "2",
+        "featuresBool": r"\featuresfalse"
+    }
+    test_dict = {
+        "test-1": "3",
+        "test-2": "4"
+    }
+    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                               "configuration_help."
+                               "get_dict_variable_to_value_common",
+                               return_value=common_dict)
+    mock_test = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                             "configuration_help."
+                             "get_dict_variable_to_value_test",
+                             return_value=test_dict)
+
+    full_dict = sgr.get_dict_variable_to_value(solver_name, train_instance,
+                                               test_instance, ablation)
+
+    mock_common.assert_called_once_with(solver_name, train_instance,
+                                        test_instance, config_reports_dir)
+    mock_test.assert_called_once_with(solver_name, train_instance, test_instance)
+    assert full_dict == {
+        "testBool": r"\testtrue"
+    } | common_dict | test_dict
+
+
+def test_get_dict_variable_to_value_with_features(mocker):
+    solver_name = "test-solver"
+    train_instance = "train-instance"
+    test_instance = "test-instance"
+    config_reports_dir = (f"Configuration_Reports/{solver_name}_{train_instance}_"
+                          f"{test_instance}/")
+    ablation = True
+    common_dict = {
+        "common-1": "1",
+        "common-2": "2",
+        "featuresBool": r"\featurestrue"
+    }
+    test_dict = {
+        "test-1": "3",
+        "test-2": "4"
+    }
+    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                               "configuration_help."
+                               "get_dict_variable_to_value_common",
+                               return_value=common_dict)
+    mock_test = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                             "configuration_help."
+                             "get_dict_variable_to_value_test",
+                             return_value=test_dict)
+    mock_num_extractors = mocker.patch("sparkle_help.sparkle_generate_report_help."
+                                       "get_num_feature_extractors",
+                                       return_value="42")
+    mock_extractor_list = mocker.patch("sparkle_help.sparkle_generate_report_help."
+                                       "get_feature_extractor_list",
+                                       return_value="43")
+    mock_cutoff = mocker.patch("sparkle_help.sparkle_generate_report_help."
+                               "get_feature_computation_cutoff_time",
+                               return_value="44")
+
+    full_dict = sgr.get_dict_variable_to_value(solver_name, train_instance,
+                                               test_instance, ablation)
+
+    mock_common.assert_called_once_with(solver_name, train_instance,
+                                        test_instance, config_reports_dir)
+    mock_test.assert_called_once_with(solver_name, train_instance, test_instance)
+    mock_num_extractors.assert_called_once_with()
+    mock_extractor_list.assert_called_once_with()
+    mock_cutoff.assert_called_once_with()
+    assert full_dict == {
+        "testBool": r"\testtrue",
+        "numFeatureExtractors": "42",
+        "featureExtractorList": "43",
+        "featureComputationCutoffTime": "44"
+    } | common_dict | test_dict
 
 
 def test_get_dict_variable_to_value_common(mocker):
@@ -812,3 +965,265 @@ def test_get_dict_variable_to_value_test(mocker):
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path"
     }
+
+
+def test_check_results_exist_all_good(mocker):
+    solver_name = "test-solver"
+    train_instance = "train-instance"
+    test_instance = "test-instance"
+
+    mock_exists = mocker.patch("os.path.exists", return_value=True)
+
+    sgr.check_results_exist(solver_name, train_instance, test_instance)
+
+    train_instance_dir = (f"{sgh.smac_dir}/example_scenarios/instances/"
+                          f"{train_instance}/")
+    smac_solver_dir = (
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
+    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
+                                    f"{solver_name}_{train_instance}_scenario/")
+    default_results_train_dir = smac_solver_dir + "outdir_train_default/"
+
+    instance_test_dir = (
+        f"{sgh.smac_dir}/example_scenarios/instances/{test_instance}/")
+    smac_solver_dir = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
+                       f"{train_instance}/")
+    configured_results_test_dir = (
+        smac_solver_dir + "outdir_" + test_instance + "_test_configured/")
+    default_results_test_dir = (
+        smac_solver_dir + "outdir_" + test_instance + "_test_default/")
+    mock_exists.assert_has_calls([
+        mocker.call(train_instance_dir),
+        mocker.call(configured_results_train_dir),
+        mocker.call(default_results_train_dir),
+        mocker.call(instance_test_dir),
+        mocker.call(configured_results_test_dir),
+        mocker.call(default_results_test_dir)
+    ])
+
+def test_check_results_exist_all_error(mocker):
+    solver_name = "test-solver"
+    train_instance = "train-instance"
+    test_instance = "test-instance"
+
+    mock_exists = mocker.patch("os.path.exists", return_value=False)
+    mock_print = mocker.patch("builtins.print")
+
+    with pytest.raises(SystemExit):
+        sgr.check_results_exist(solver_name, train_instance, test_instance)
+
+    mock_print.assert_called_once_with(
+        "Error: Results not found for the given solver and instance set(s) combination. "
+        'Make sure the "configure_solver" and "validate_configured_vs_default" commands '
+        "were correctly executed. \nDetected errors:\n training set not found in "
+        "configuration directory Components/smac-v2.10.03-master-778//example_scenarios/"
+        "instances/train-instance/; configured parameter results on the training set not"
+        " found in Components/smac-v2.10.03-master-778//example_scenarios/test-solver_"
+        "train-instance/outdir_train_configuration/test-solver_train-instance_scenario/;"
+        " default parameter results on the training set not found in Components/"
+        "smac-v2.10.03-master-778//example_scenarios/test-solver_train-instance/"
+        "outdir_train_default/; testing set not found in configuration directory "
+        "Components/smac-v2.10.03-master-778//example_scenarios/instances/test-"
+        "instance/; configured parameter results on the testing set not found in "
+        "Components/smac-v2.10.03-master-778//example_scenarios/test-solver_train-"
+        "instance/outdir_test-instance_test_configured/; default parameter results on "
+        "the testing set not found in Components/smac-v2.10.03-master-778//"
+        "example_scenarios/test-solver_train-instance/"
+        "outdir_test-instance_test_default/;")
+
+    train_instance_dir = (f"{sgh.smac_dir}/example_scenarios/instances/"
+                          f"{train_instance}/")
+    smac_solver_dir = (
+        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
+    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
+                                    f"{solver_name}_{train_instance}_scenario/")
+    default_results_train_dir = smac_solver_dir + "outdir_train_default/"
+
+    instance_test_dir = (
+        f"{sgh.smac_dir}/example_scenarios/instances/{test_instance}/")
+    smac_solver_dir = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
+                       f"{train_instance}/")
+    configured_results_test_dir = (
+        smac_solver_dir + "outdir_" + test_instance + "_test_configured/")
+    default_results_test_dir = (
+        smac_solver_dir + "outdir_" + test_instance + "_test_default/")
+    mock_exists.assert_has_calls([
+        mocker.call(train_instance_dir),
+        mocker.call(configured_results_train_dir),
+        mocker.call(default_results_train_dir),
+        mocker.call(instance_test_dir),
+        mocker.call(configured_results_test_dir),
+        mocker.call(default_results_test_dir)
+    ])
+
+
+def test_get_most_recent_test_run_full(mocker):
+    solver_name = "solver-name"
+    file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n"
+                         "train Instances/PTN\n"
+                         "test Instances/PTN2")
+
+    mocker.patch("builtins.open", mocker.mock_open(read_data=file_content_mock))
+
+    (train_instance, test_instance, train_flag, test_flag) = (
+        sgr.get_most_recent_test_run(solver_name))
+
+    assert train_instance == "Instances/PTN"
+    assert test_instance == "Instances/PTN2"
+    assert train_flag
+    assert test_flag
+
+def test_get_most_recent_test_run_empty(mocker):
+    solver_name = "solver-name"
+    file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n")
+
+    mocker.patch("builtins.open", mocker.mock_open(read_data=file_content_mock))
+
+    (train_instance, test_instance, train_flag, test_flag) = (
+        sgr.get_most_recent_test_run(solver_name))
+
+    assert train_instance == ""
+    assert test_instance == ""
+    assert not train_flag
+    assert not test_flag
+
+
+def test_generate_report_for_configuration_prep_exists_not(mocker):
+    report_directory = "report/directory"
+
+    template_latex_directory_path = (
+        "Components/Sparkle-latex-generator-for-configuration/")
+
+    mock_exists = mocker.patch("os.path.exists", return_value=False)
+    mock_system = mocker.patch("os.system")
+
+    sgr.generate_report_for_configuration_prep(report_directory)
+
+    mock_exists.assert_called_once_with(report_directory)
+
+    mkdir_command = f"mkdir -p {report_directory}"
+    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
+    mock_system.assert_has_calls([
+        mocker.call(mkdir_command),
+        mocker.call(cp_command)
+    ])
+
+
+def test_generate_report_for_configuration_prep_exists(mocker):
+    report_directory = "report/directory"
+
+    template_latex_directory_path = (
+        "Components/Sparkle-latex-generator-for-configuration/")
+
+    mock_exists = mocker.patch("os.path.exists", return_value=True)
+    mock_system = mocker.patch("os.system")
+
+    sgr.generate_report_for_configuration_prep(report_directory)
+
+    mock_exists.assert_called_once_with(report_directory)
+
+    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
+    mock_system.assert_called_once_with(cp_command)
+
+
+def test_generate_report_for_configuration_train(mocker):
+    solver_name = "solver-name"
+    train_instance = "train-instance"
+    ablation = True
+
+    value_dict = {
+        "key-1": "value-1",
+        "key-2": "value-2"
+    }
+
+    mock_report_for_prep = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                                        "configuration_help."
+                                        "generate_report_for_configuration_prep")
+    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                             "configuration_help."
+                             "get_dict_variable_to_value",
+                             return_value=value_dict)
+    mock_report_for_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                                          "configuration_help."
+                                          "generate_report_for_configuration_common")
+
+    sgr.generate_report_for_configuration_train(solver_name,
+                                                train_instance,
+                                                ablation)
+
+    config_report_dir = (f"Configuration_Reports/{solver_name}_{train_instance}/")
+    mock_report_for_prep.assert_called_once_with(config_report_dir)
+    mock_dict.assert_called_once_with(solver_name, train_instance, ablation=ablation)
+    mock_report_for_common.assert_called_once_with(config_report_dir, value_dict)
+
+
+def test_generate_report_for_configuration(mocker):
+    solver_name = "solver-name"
+    train_instance = "train-instance"
+    test_instance = "test-instance"
+    ablation = True
+
+    value_dict = {
+        "key-1": "value-1",
+        "key-2": "value-2"
+    }
+
+    mock_report_for_prep = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                                        "configuration_help."
+                                        "generate_report_for_configuration_prep")
+    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                             "configuration_help."
+                             "get_dict_variable_to_value",
+                             return_value=value_dict)
+    mock_report_for_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+                                          "configuration_help."
+                                          "generate_report_for_configuration_common")
+
+    sgr.generate_report_for_configuration(solver_name, train_instance,
+                                          test_instance, ablation)
+
+    config_report_dir = (f"Configuration_Reports/{solver_name}_{train_instance}_"
+                         f"{test_instance}/")
+    mock_report_for_prep.assert_called_once_with(config_report_dir)
+    mock_dict.assert_called_once_with(solver_name, train_instance, test_instance,
+                                      ablation=ablation)
+    mock_report_for_common.assert_called_once_with(config_report_dir, value_dict)
+
+
+def test_generate_report_for_configuration_common(mocker):
+    config_reports_dir = "Configuration_Reports/solver_train_test"
+    value_dict = {
+        "key-1": "value-1",
+        "key-2": "value-2"
+    }
+    file_read = "@@key-1@@\n@@key-2@@"
+    file_write = "value-1\nvalue-2"
+    report_path = "path/report"
+    mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data=file_read))
+    mock_check = mocker.patch("sparkle_help.sparkle_tex_help."
+                              "check_tex_commands_exist")
+    mock_compile = mocker.patch("sparkle_help.sparkle_tex_help."
+                                "compile_pdf",
+                                return_value=report_path)
+    mock_print = mocker.patch("builtins.print")
+
+    sgr.generate_report_for_configuration_common(config_reports_dir, value_dict)
+
+    latex_directory_path = Path(
+        f"{config_reports_dir}Sparkle-latex-generator-for-configuration/")
+    latex_report_filename = Path("Sparkle_Report_for_Configuration")
+    latex_template_filename = "template-Sparkle-for-configuration.tex"
+    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
+    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
+    latex_report_filepath = latex_report_filepath.with_suffix(".tex")
+
+    mock_open.assert_any_call(latex_template_filepath, "r"),
+    mock_open.assert_any_call(latex_report_filepath, "w+")
+
+    mock_open().write.assert_called_once_with(file_write)
+    mock_check.assert_called_once_with(latex_directory_path)
+    mock_compile.assert_called_once_with(latex_directory_path, latex_report_filename)
+    mock_print.assert_has_calls([
+        mocker.call(f"Report is placed at: {report_path}"),
+        mocker.call("Generating report for configuration done!")
+    ])
