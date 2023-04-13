@@ -1,0 +1,13 @@
+algo = ./PbO-CCSAT_wrapper.py
+execdir = example_scenarios/PbO-CCSAT_v1.2.3_test/
+deterministic = 0
+run_obj = RUNTIME
+wallclock-limit = 36000
+cutoffTime = 60
+cutoff_length = max
+paramfile = example_scenarios/PbO-CCSAT_v1.2.3_test/PbO-CCSAT-params_v1.2.3_test.pcs
+outdir = example_scenarios/PbO-CCSAT_v1.2.3_test/outdir/
+instance_file = example_scenarios/PbO-CCSAT_v1.2.3_test/ptn_train_instances.txt
+test_instance_file = example_scenarios/PbO-CCSAT_v1.2.3_test/ptn_train_instances.txt
+validation = true
+

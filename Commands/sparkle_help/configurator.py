@@ -4,6 +4,7 @@
 
 from pathlib import Path
 import subprocess
+import sys
 
 from sparkle_help.configuration_scenario import ConfigurationScenario
 from sparkle_help import sparkle_global_help as sgh
@@ -19,6 +20,12 @@ class Configurator:
     def __init__(self, configurator_path: Path, scenario: ConfigurationScenario) -> None:
         """Initialize Configurator."""
         self.configurator_path = configurator_path
+
+        if not self.configurator_path.is_dir():
+            print(f"The given configurator path '{self.configurator_path}' is not a valid "
+                  "directory. Abort")
+            sys.exit(-1)
+
         self.scenario = scenario
         self.scenario.create_scenario(parent_directory=configurator_path)
 

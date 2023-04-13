@@ -31,8 +31,8 @@ exclude =
     Components/AutoFolio-master/,
     Components/ablationAnalysis-0.9.4/,
     Components/runsolver/,
+    Components/smac-v2.10.03-master-778/,
     Configuration_Reports/,
-    Configurators/smac-v2.10.03-master-778/,
     Examples/Resources/Configurators/smac-v2.10.03-master-778/,
     Examples/Resources/CVRP/,
     Examples/Resources/CCAG/,
@@ -58,8 +58,7 @@ exclude =
     Tmp/,
     tests/test_files,
     build/,
-    dist/,
-    tests/test_files/Solvers
+    dist/
 
 # use-fstring configurations
 percent-greedy=2
