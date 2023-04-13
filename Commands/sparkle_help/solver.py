@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Configurator class to use different configurators like SMAC."""
+"""Class to handle a solver and its directories."""
 
 import sys
 
@@ -12,12 +12,20 @@ from sparkle_help import sparkle_global_help as sgh
 class Solver:
     """Class to handle a solver and its directories."""
     def __init__(self, solver_directory: Path) -> None:
-        """Initialize solver."""
+        """Initialize solver.
+
+        Args:
+            solver_directory: Directory of the solver.
+        """
         self.directory = solver_directory
         self.name = solver_directory.name
 
     def get_pcs_file(self) -> Path:
-        """Get parameter file name from solver."""
+        """Get path of the parameter file.
+
+        Returns:
+            Path to the parameter file.
+        """
         file_count = 0
         file_name = ""
         for file_path in self.directory.iterdir():
@@ -35,7 +43,11 @@ class Solver:
         return self.directory / file_name
 
     def is_deterministic(self) -> str:
-        """Return a str indicating whether a given solver is deterministic or not."""
+        """Return a string indicating whether a given solver is deterministic or not.
+
+        Returns:
+            A string containing 0 or 1 indicating whether solver is deterministic.
+        """
         deterministic = ""
         target_solver_path = "Solvers/" + self.name
         solver_list_path = sgh.solver_list_path
