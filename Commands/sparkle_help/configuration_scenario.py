@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Class to handle all activities around scenarios."""
+"""Class to handle all activities around configuration scenarios."""
 
 import shutil
 from pathlib import Path
 
-from pandas import DataFrame
+import pandas as pd
 
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help.sparkle_settings import PerformanceMeasure
@@ -14,27 +14,28 @@ from sparkle_help import sparkle_settings
 
 
 class ConfigurationScenario:
-    """Class to handle all activities around scenarios."""
+    """Class to handle all activities around configuration scenarios.
+    """
     def __init__(self, solver: Solver, source_instance_directory: Path,
-                 run_number: int, use_features: bool,
-                 feature_data_df: DataFrame = None,) -> None:
+                 number_of_runs: int, use_features: bool,
+                 feature_data_df: pd.DataFrame = None,) -> None:
         """Initialize scenario paths and names."""
         global settings
         sgh.settings = sparkle_settings.Settings()
 
         self.solver = solver
-        self.parent_directory = ""
+        self.parent_directory = Path()
         self.source_instance_directory = source_instance_directory
-        self.run_number = run_number
+        self.number_of_runs = number_of_runs
         self.use_features = use_features
         self.feature_data = feature_data_df
         self.name = f"{self.solver.name}_{self.source_instance_directory.name}"
 
-        self.directory = ""
-        self.result_directory = ""
-        self.instance_directory = ""
-        self.scenario_file = ""
-        self.feature_file = ""
+        self.directory = Path()
+        self.result_directory = Path()
+        self.instance_directory = Path()
+        self.scenario_file_name = ""
+        self.feature_file = Path()
         self.instance_file_name = ""
 
     def create_scenario(self, parent_directory: Path) -> None:
@@ -48,7 +49,7 @@ class ConfigurationScenario:
         self._prepare_scenario_directory()
         self._prepare_result_directory()
 
-        self._prepare_run_folders()
+        self._prepare_run_directories()
 
         self.instance_directory.mkdir(parents=True, exist_ok=True)
         self._prepare_instances()
@@ -59,11 +60,11 @@ class ConfigurationScenario:
         self._create_scenario_file()
 
     def _prepare_scenario_directory(self) -> None:
-        """Recreate scenario directory and create empty folders inside."""
+        """Recreate scenario directory and create empty directories inside."""
         shutil.rmtree(self.directory, ignore_errors=True)
         self.directory.mkdir(parents=True)
 
-        # Create empty folders as needed
+        # Create empty directories as needed
         (self.directory / "outdir_train_configuration").mkdir()
         (self.directory / "tmp").mkdir()
 
@@ -74,9 +75,9 @@ class ConfigurationScenario:
         shutil.rmtree(self.result_directory, ignore_errors=True)
         self.result_directory.mkdir(parents=True)
 
-    def _prepare_run_folders(self) -> None:
-        """Create folders for each configurator run and copy solver files to them."""
-        for i in range(self.run_number):
+    def _prepare_run_directories(self) -> None:
+        """Create directories for each configurator run and copy solver files to them."""
+        for i in range(self.number_of_runs):
             run_path = self.directory / str(i + 1)
 
             shutil.copytree(self.solver.directory, run_path)
@@ -96,7 +97,7 @@ class ConfigurationScenario:
 
         scenario_file = (self.directory
                          / f"{self.name}_scenario.txt")
-        self.scenario_file = scenario_file.name
+        self.scenario_file_name = scenario_file.name
         file = open(scenario_file, "w")
         file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
         file.write(f"execdir = {inner_directory}/\n")

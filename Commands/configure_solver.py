@@ -210,8 +210,8 @@ if __name__ == "__main__":
 
     solver = Solver(solver_path)
 
-    run_number = sgh.settings.get_config_number_of_runs()
-    config_scenario = ConfigurationScenario(solver, instance_set_train, run_number,
+    number_of_runs = sgh.settings.get_config_number_of_runs()
+    config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
                                             use_features, feature_data_df)
     configurator = Configurator(configurator_path, config_scenario)
 
