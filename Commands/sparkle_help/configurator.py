@@ -22,8 +22,8 @@ class Configurator:
         self.configurator_path = configurator_path
 
         if not self.configurator_path.is_dir():
-            print(f"The given configurator path '{self.configurator_path}' is not a valid "
-                  "directory. Abort")
+            print(f"The given configurator path '{self.configurator_path}' is not a "
+                  "valid directory. Abort")
             sys.exit(-1)
 
         self.scenario = scenario
