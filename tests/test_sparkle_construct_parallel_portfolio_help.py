@@ -12,20 +12,16 @@ class Test(TestCase):
 
     def setUp(self):
         """Set up for each test case."""
-        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)
-        # Add solvers
+        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)  # noqa
 
     def tearDown(self):
         """Tear down for each test case."""
-        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)
+        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)  # noqa
 
     def test_add_solvers_to_portfolio(self):
         """Test whether solvers are added to a parallel portfolio correctly."""
-        path = Path("tests/temporary/")
-        success = scpph.construct_sparkle_parallel_portfolio(
-            path, True, ["solver", "algorithm", "function"])
-        self.assertTrue(success)
-        shutil.rmtree(path)
+        # TODO: Implement test
+        pass
 
     def test_construct_sparkle_parallel_portfolio(self):
         """Test parallel portfolios are constructed correctly."""
@@ -34,5 +30,8 @@ class Test(TestCase):
 
     def test_overwrite_existing_parallel_portfolio(self):
         """Test parallel portfolios are constructed correctly when one already exists."""
-        # TODO: Implement test
-        pass
+        path = Path("tests/temporary/")
+        success = scpph.construct_sparkle_parallel_portfolio(
+            path, True, ["solver", "algorithm", "function"])
+        self.assertTrue(success)
+        shutil.rmtree(path)
