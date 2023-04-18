@@ -59,10 +59,10 @@ def test_get_par_performance(mocker):
                                        "construct_list_instance_and_performance",
                                        return_value=[["one", 10], ["two", 5]])
 
-    mean_par = sgr.get_par_performance(results_file, cutoff)
+    par = sgr.get_par_performance(results_file, cutoff)
 
     mock_construct_list.assert_called_once_with(results_file, cutoff)
-    assert mean_par == 7.5
+    assert par == 7.5
 
 def test_get_instance_name_from_path():
     path_string = "parent/directory/instance-name"
@@ -80,7 +80,7 @@ def test_construct_list_instance_and_performance(mocker):
                          '"../../instances/instances/instance-3.cnf","null","15"\n')
     mocker.patch("builtins.open", mocker.mock_open(read_data=file_content_mock))
     mocker.patch("sparkle_help.sparkle_configure_solver_help.get_smac_settings",
-                 return_value=("RUNTIME", None, None, None, None, None))
+                 return_value=("RUNTIME", "", "", "", "", ""))
 
     result_file = ""
     cutoff = 10
