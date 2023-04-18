@@ -12,8 +12,11 @@ inline-quotes = "
 # Cyclomatic complexity desactivated
 # max-complexity = 15 
 
-# Ignore the unused import in __init__.py
-per-file-ignores = __init__.py:F401
+per-file-ignores =
+    # Ignore the unused import in __init__.py
+    __init__.py:F401
+    # Ignore assert use in tests
+    test_*.py:S101
 
 docstring-convention=google
 # Ignore docstring double quote error

@@ -1,24 +1,38 @@
+"""Test the sparkle_construct_parallel_portfolio_help module."""
 from unittest import TestCase
 import subprocess
 from pathlib import Path
+import shutil
 
-from Commands.sparkle_help.sparkle_construct_parallel_portfolio_help import construct_sparkle_parallel_portfolio
-#TODO gives error, because it cannot import
+from Commands.sparkle_help import sparkle_construct_parallel_portfolio_help as scpph
+
 
 class Test(TestCase):
+    """Test each function in the module."""
 
     def setUp(self):
-        subprocess.run('./Commands/initialise.py > /dev/null', shell=True)
+        """Set up for each test case."""
+        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)
         # Add solvers
 
     def tearDown(self):
-        subprocess.run('./Commands/initialise.py > /dev/null', shell=True)
+        """Tear down for each test case."""
+        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)
 
     def test_add_solvers_to_portfolio(self):
-        path = Path("temporary/")
-        success = construct_sparkle_parallel_portfolio(path, ["solver", "algorithm", "function"])
+        """Test whether solvers are added to a parallel portfolio correctly."""
+        path = Path("tests/temporary/")
+        success = scpph.construct_sparkle_parallel_portfolio(
+            path, True, ["solver", "algorithm", "function"])
         self.assertTrue(success)
+        shutil.rmtree(path)
+
     def test_construct_sparkle_parallel_portfolio(self):
-        self.fail()
+        """Test parallel portfolios are constructed correctly."""
+        # TODO: Implement test
+        pass
+
     def test_overwrite_existing_parallel_portfolio(self):
-        self.fail()
+        """Test parallel portfolios are constructed correctly when one already exists."""
+        # TODO: Implement test
+        pass

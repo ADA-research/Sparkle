@@ -4,6 +4,7 @@ from sparkle import about
 
 
 class TestAbout(TestCase):
+    """Tests function of sparkle.about."""
     def test_about_str_type(self):
         """Tests about_str() returns the correct type."""
         # Simple test, mostly for example purpose

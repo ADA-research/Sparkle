@@ -3,16 +3,15 @@
 """Helper functions for parallel portfolio construction."""
 
 from pathlib import Path
-from sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_file_help as sfh
 
 
 def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -> bool:
-    """
-    Create a file containing the list of solvers within the given portfolio path.
+    """Create a file containing the list of solvers within the given portfolio path.
 
     Args:
-        sparkle_parallel_portfolio_path: A path object pointing to the directory where the
-            parallel portfolio files should be written to.
+        sparkle_parallel_portfolio_path: A path object pointing to the directory where
+            the parallel portfolio files should be written to.
         solver_list: A list of solver names. Solver names should map to added solvers.
 
     Returns:
@@ -38,9 +37,10 @@ def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
     """Create the parallel portfolio by preparing a directory and the solver list.
 
     Args:
-        sparkle_parallel_portfolio_path: A path object pointing to the directory where the
-            parallel portfolio files should be written to.
-        overwrite: A Boolean which decides if existing parallel portfolios should be overwritten.
+        sparkle_parallel_portfolio_path: A path object pointing to the directory where
+            the parallel portfolio files should be written to.
+        overwrite: A Boolean which decides if existing parallel portfolios should be
+            overwritten.
         solver_list: A list of solver names. Solver names should map to added solvers.
 
     Returns:
