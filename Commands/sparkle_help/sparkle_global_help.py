@@ -62,8 +62,6 @@ sparkle_marginal_contribution_actual_path = Path(
 
 sparkle_last_test_file_name = "last_test_configured_default.txt"
 
-sparkle_last_configuration_file_name = "last_configuration.txt"
-
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
 
 runsolver_path = "Components/runsolver/src/runsolver"

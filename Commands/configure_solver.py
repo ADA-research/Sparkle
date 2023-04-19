@@ -55,36 +55,26 @@ def parser_function() -> None:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
-        action=ac.SetByUser,
         help="the performance measure, e.g. runtime",
     )
     parser.add_argument(
         "--target-cutoff-time",
         type=int,
-        default=sgh.settings.DEFAULT_general_target_cutoff_time,
-        action=ac.SetByUser,
         help="cutoff time per target algorithm run in seconds",
     )
     parser.add_argument(
         "--budget-per-run",
         type=int,
-        default=sgh.settings.DEFAULT_config_budget_per_run,
-        action=ac.SetByUser,
         help="configuration budget per configurator run in seconds",
     )
     parser.add_argument(
         "--number-of-runs",
         type=int,
-        default=sgh.settings.DEFAULT_config_number_of_runs,
-        action=ac.SetByUser,
         help="number of configuration runs to execute",
     )
     parser.add_argument(
         "--settings-file",
         type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
         help="specify the settings file to use instead of the default",
     )
     parser.add_argument(
@@ -110,36 +100,25 @@ def parser_function() -> None:
 
 
 def apply_settings_from_args(args) -> None:
-    """Apply command line arguments to settings."""
-    if ac.set_by_user(args, "settings_file"):
-        sgh.settings.read_settings_ini(
-            args.settings_file, SettingState.CMD_LINE
-        )  # Do first, so other command line options can override settings from the file
-    if ac.set_by_user(args, "performance_measure"):
+    """Apply command line arguments to settings.
+
+    Args:
+        args: Arguments object created by ArgumentParser.
+    """
+    if args.settings_file is not None:
+        sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+    if args.performance_measure is not None:
         sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
-        )
-    if ac.set_by_user(args, "target_cutoff_time"):
+            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
+    if args.target_cutoff_time is not None:
         sgh.settings.set_general_target_cutoff_time(
-            args.target_cutoff_time, SettingState.CMD_LINE
-        )
-    if ac.set_by_user(args, "budget_per_run"):
+            args.target_cutoff_time, SettingState.CMD_LINE)
+    if args.budget_per_run is not None:
         sgh.settings.set_config_budget_per_run(
-            args.budget_per_run, SettingState.CMD_LINE
-        )
-    if ac.set_by_user(args, "number_of_runs"):
+            args.budget_per_run, SettingState.CMD_LINE)
+    if args.number_of_runs is not None:
         sgh.settings.set_config_number_of_runs(
-            args.number_of_runs, SettingState.CMD_LINE
-        )
-
-
-def write_latest_config_file(file_path: Path, solver_path: Path,
-                             instance_set_path: Path) -> None:
-    """Write solver and instance set to config file."""
-    fout = open(file_path, "w+")
-    fout.write(f"solver {solver_path}\n")
-    fout.write(f"train {instance_set_path}\n")
-    fout.close()
+            args.number_of_runs, SettingState.CMD_LINE)
 
 
 if __name__ == "__main__":
@@ -217,11 +196,6 @@ if __name__ == "__main__":
 
     configurator.create_sbatch_script()
     configure_jobid = configurator.configure()
-
-    # Write most recent run to file
-    config_file_path = (config_scenario.directory
-                        / sgh.sparkle_last_configuration_file_name)
-    write_latest_config_file(config_file_path, solver.directory, instance_set_train)
 
     # Update latest scenario
     sgh.latest_scenario.set_config_solver(solver.directory)
