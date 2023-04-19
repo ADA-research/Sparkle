@@ -94,8 +94,8 @@ class ConfigurationScenario:
         for i in range(self.number_of_runs):
             run_path = self.directory / str(i + 1)
 
-            (run_path / "tmp").mkdir(parents=True)
             shutil.copytree(self.solver.directory, run_path)
+            (run_path / "tmp").mkdir()
 
     def _create_scenario_file(self) -> None:
         """Create a file with the configuration scenario."""
