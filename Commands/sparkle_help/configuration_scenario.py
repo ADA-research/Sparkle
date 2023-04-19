@@ -18,7 +18,16 @@ class ConfigurationScenario:
     def __init__(self, solver: Solver, source_instance_directory: Path,
                  number_of_runs: int, use_features: bool,
                  feature_data_df: pd.DataFrame = None,) -> None:
-        """Initialize scenario paths and names."""
+        """Initialize scenario paths and names.
+
+        Args:
+            solver: Solver that should be configured.
+            source_instance_directory: Original directory of instances.
+            number_of_runs: Number of runs used for configuration.
+            use_features: Boolean indicating if features should be used.
+            feature_data_df: If features are used, this contains the feature data.
+                Defaults to None.
+        """
         global settings
         sgh.settings = sparkle_settings.Settings()
 
@@ -38,7 +47,13 @@ class ConfigurationScenario:
         self.instance_file_name = ""
 
     def create_scenario(self, parent_directory: Path) -> None:
-        """Create scenario with solver and instances in the parent directory."""
+        """Create scenario with solver and instances in the parent directory.
+
+        This prepares all the necessary subdirectories related to configuration.
+
+        Args:
+            parent_directory: Directory in which the scenario should be created.
+        """
         self.parent_directory = parent_directory.absolute()
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.parent_directory / "results" / self.name
@@ -126,7 +141,11 @@ class ConfigurationScenario:
         self._create_instance_list_file(source_instance_list)
 
     def _copy_instances(self, source_instance_list: list) -> None:
-        """Copy problem instances for configuration to the solver directory."""
+        """Copy problem instances for configuration to the solver directory.
+
+        Args:
+            source_instance_list: List of instaces to be copied.
+        """
         for original_instance_path in source_instance_list:
             target_instance_path = self.instance_directory / original_instance_path.name
             shutil.copy(original_instance_path, target_instance_path)
@@ -146,7 +165,11 @@ class ConfigurationScenario:
         instance_list_file.close()
 
     def _get_run_objective(self) -> str:
-        """Return the SMAC run objective."""
+        """Return the SMAC run objective.
+
+        Returns:
+            The run objective from global settings.
+        """
         # Get run_obj from general settings
         run_objective = sgh.settings.get_general_performance_measure()
 

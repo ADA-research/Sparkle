@@ -18,7 +18,12 @@ class Configurator:
     """Generic class to use different configurators like SMAC."""
 
     def __init__(self, configurator_path: Path, scenario: ConfigurationScenario) -> None:
-        """Initialize Configurator."""
+        """Initialize Configurator.
+
+        Args:
+            configurator_path: Path to the configurator
+            scenario: ConfigurationScenario object used for configuration
+        """
         self.configurator_path = configurator_path
 
         if not self.configurator_path.is_dir():
@@ -48,7 +53,11 @@ class Configurator:
             sbatch_script.write(file_content)
 
     def configure(self) -> int:
-        """Submit sbatch script."""
+        """Submit sbatch script.
+
+        Returns:
+            ID of the submitted job.
+        """
         command = ["sbatch", self.sbatch_filename]
 
         output = subprocess.run(command, cwd=self.configurator_path, capture_output=True,
@@ -65,8 +74,12 @@ class Configurator:
         print(f"Job running with id {job_id}.")
         return job_id
 
-    def _get_sbatch_options(self):
-        """Get sbatch options."""
+    def _get_sbatch_options(self) -> str:
+        """Get sbatch options.
+
+        Returns:
+            String containing the sbatch options.
+        """
         total_jobs = self.scenario.number_of_runs
 
         maximal_parallel_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
@@ -88,8 +101,12 @@ class Configurator:
 
         return options
 
-    def _get_run_parameter_list(self):
-        """Get list for SBATCH script containing parameters for all configurator runs."""
+    def _get_run_parameter_list(self) -> str:
+        """Get list for SBATCH script containing parameters for all configurator runs.
+
+        Returns:
+            String containing the run parameters.
+        """
         num_job_total = self.scenario.number_of_runs
         result_directory = Path("results", self.scenario.name)
 
@@ -116,8 +133,12 @@ class Configurator:
         params += ")\n"
         return params
 
-    def _get_srun_command(self):
-        """Get srun command."""
+    def _get_srun_command(self) -> str:
+        """Get srun command.
+
+        Returns:
+            String containing the srun command.
+        """
         slurm_options = " ".join(ssh.get_slurm_options_list())
         cmd = (f"srun -N1 -n1 {slurm_options} ./each_smac_run_core.sh "
                + "${params[$SLURM_ARRAY_TASK_ID]}\n")
