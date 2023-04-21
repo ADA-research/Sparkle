@@ -172,7 +172,7 @@ if __name__ == "__main__":
                   " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
             sys.exit()
 
-        if not os.path.isfile(sgh.sparkle_portfolio_selector_path):
+        if not Path(sgh.sparkle_portfolio_selector_path).is_file():
             print("Before generating a Sparkle report, please first construct the "
                   "Sparkle portfolio selector!")
             print("Not generating a Sparkle report, stopping execution!")

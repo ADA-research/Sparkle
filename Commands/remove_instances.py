@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     if args.nickname:
         instances_path = "Instances/" + args.nickname
-    if not os.path.exists(instances_path):
+    if not Path(instances_path).exists():
         print(f'Instances path "{instances_path}" does not exist!')
         print("Removing possible leftovers (if any)")
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     feature_data_csv.update_csv()
     performance_data_csv.update_csv()
 
-    if os.path.exists(sgh.sparkle_portfolio_selector_path):
+    if Path(sgh.sparkle_portfolio_selector_path).exists():
         command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
         os.system(command_line)
         print(
@@ -134,7 +134,7 @@ if __name__ == "__main__":
             + " done!"
         )
 
-    if os.path.exists(sgh.sparkle_report_path):
+    if Path(sgh.sparkle_report_path).exists():
         command_line = "rm -f " + sgh.sparkle_report_path
         os.system(command_line)
         print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")

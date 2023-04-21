@@ -4,8 +4,8 @@
 
 import os
 import sys
-from pathlib import Path
-from pathlib import PurePath
+from pathlib import Path, PurePath
+
 
 from sparkle_help import sparkle_basic_help
 from sparkle_help import sparkle_global_help as sgh
@@ -189,8 +189,8 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
               "construct_sparkle_portfolio_selector")
         sys.exit(-1)
 
-    if not os.path.exists(r"Tmp/"):
-        os.mkdir(r"Tmp/")
+    if not Path(r"Tmp/").exists():
+        Path(r"Tmp/").mkdir()
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()

@@ -4,6 +4,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 try:
     from sparkle_help import sparkle_global_help as sgh
@@ -104,12 +105,12 @@ def computing_features(feature_data_csv_path, mode):
 
             try:
                 os.system(command_line)
-                with open(runsolver_value_data_path) as file:
+                with Path(runsolver_value_data_path).open() as file:
                     if "TIMEOUT=true" in file.read():
                         print(f"****** WARNING: Feature vector computing on instance "
                               f"{instance_path} timed out! ******")
             except Exception:
-                if not os.path.exists(result_path):
+                if not Path(result_path).exists():
                     sfh.create_new_empty_file(result_path)
 
             try:
@@ -159,7 +160,7 @@ def update_feature_data_id():
     # Write new fd_id
     fd_id_path = sgh.feature_data_id_path
 
-    with open(fd_id_path, "w") as fd_id_file:
+    with Path(fd_id_path).open("w") as fd_id_file:
         fd_id_file.write(str(fd_id))
 
     return
@@ -171,7 +172,7 @@ def get_feature_data_id() -> int:
     fd_id_path = sgh.feature_data_id_path
 
     try:
-        with open(fd_id_path, "r") as fd_id_file:
+        with Path(fd_id_path).open("r") as fd_id_file:
             fd_id = int(fd_id_file.readline())
     except FileNotFoundError:
         fd_id = 0

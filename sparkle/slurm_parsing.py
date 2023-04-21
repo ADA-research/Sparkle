@@ -33,7 +33,7 @@ class SlurmBatch:
         """Parse the data contained in srcfile and localy store the information."""
         self.file = Path(srcfile)
 
-        with open(self.file) as f:
+        with Path(self.file).open() as f:
             filestr = f.read()
 
         self.sbatch_options = re_sbatch.findall(filestr)

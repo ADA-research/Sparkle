@@ -2,10 +2,10 @@
 # -*- coding: UTF-8 -*-
 """Helper class for CSV manipulation."""
 
-import os
 import pandas as pd
 import numpy as np
 import fcntl
+from pathlib import Path
 
 
 class SparkleCSV:
@@ -16,11 +16,11 @@ class SparkleCSV:
     @staticmethod
     def create_empty_csv(csv_filepath):
         """Create an empty CSV file."""
-        if os.path.exists(csv_filepath):
+        if Path(csv_filepath).exists():
             print("Path", csv_filepath, "already exists!")
             print("Nothing changed!")
             return
-        fo = open(csv_filepath, "w+")
+        fo = Path(csv_filepath).open("w+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         fo.write(SparkleCSV.empty_column_name)
         fo.close()
@@ -50,7 +50,7 @@ class SparkleCSV:
 
     def update_csv(self):
         """Update a CSV file."""
-        fo = open(self.csv_filepath, "w+")
+        fo = Path(self.csv_filepath).open("w+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         self.dataframe.to_csv(self.csv_filepath)
         fo.close()
@@ -58,7 +58,7 @@ class SparkleCSV:
 
     def save_csv(self, csv_filepath: str):
         """Write a CSV to the given path."""
-        fo = open(csv_filepath, "w+")
+        fo = Path(csv_filepath).open("w+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         self.dataframe.to_csv(csv_filepath)
         fo.close()
