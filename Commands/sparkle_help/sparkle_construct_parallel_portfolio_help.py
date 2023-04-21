@@ -6,8 +6,14 @@ from pathlib import Path
 from sparkle_help import sparkle_file_help as sfh
 
 
-def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -> bool:
-    """Create a file containing the list of solvers within the given portfolio path."""
+def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -> None:
+    """
+    Create a file containing the list of solvers within the given portfolio path.
+
+    Args:
+        sparkle_parallel_portfolio_path: portfolio path.
+        solver_list: list of solvers to be added.
+    """
     solvers_file = f"{sparkle_parallel_portfolio_path}/solvers.txt"
     sfh.create_new_empty_file(str(solvers_file))
 
@@ -19,13 +25,21 @@ def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -
         solver = f"{solver}\n"
         sfh.append_string_to_file(solvers_file, solver)
 
-    return True
-
 
 def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
                                          overwrite: bool,
                                          solver_list: list[str]) -> bool:
-    """Create the parallel portfolio by preparing a directory and the solver list."""
+    """
+    Create the parallel portfolio by preparing a directory and the solver list.
+
+    Args:
+        sparkle_parallel_portfolio_path: portfolio path.
+        overwrite: whether overwriting is allowed.
+        solver_list: list of solvers to be added.
+
+    Returns:
+        True if portfolio construction successful
+    """
     if sparkle_parallel_portfolio_path.is_dir():
         if overwrite:
             sfh.rmtree(sparkle_parallel_portfolio_path)
@@ -39,7 +53,6 @@ def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
 
     # Directory is now created (and cleaned)
     # Add a file which specifies the location of the solvers.
-    if add_solvers(sparkle_parallel_portfolio_path, solver_list) is False:
-        print("An error occured when adding the solvers to the portfolio")
+    add_solvers(sparkle_parallel_portfolio_path, solver_list)
 
     return True
