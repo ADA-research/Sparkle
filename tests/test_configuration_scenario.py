@@ -94,6 +94,7 @@ class TestConfigurationScenario(TestCase):
 
         self.assertEqual(self.scenario.instance_file.is_file(), True)
         instance_file = self.scenario.instance_file.open()
+        print(self.scenario.instance_file)
         instance_file_content = instance_file.read()
         self.assertEqual(instance_file_content, "/absolute/path/Instances/"
                          "Test-Instance-Set/test_instance_1.cnf\n")

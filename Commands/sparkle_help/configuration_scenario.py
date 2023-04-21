@@ -15,7 +15,7 @@ from sparkle_help import sparkle_settings
 
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
-    def __init__(self, solver: Solver, source_instance_directory: Path,
+    def __init__(self, solver: Solver, instance_directory: Path,
                  number_of_runs: int, use_features: bool,
                  feature_data_df: pd.DataFrame = None,) -> None:
         """Initialize scenario paths and names.
@@ -33,18 +33,17 @@ class ConfigurationScenario:
 
         self.solver = solver
         self.parent_directory = Path()
-        self.source_instance_directory = source_instance_directory
+        self.instance_directory = instance_directory
         self.number_of_runs = number_of_runs
         self.use_features = use_features
         self.feature_data = feature_data_df
-        self.name = f"{self.solver.name}_{self.source_instance_directory.name}"
+        self.name = f"{self.solver.name}_{self.instance_directory.name}"
 
         self.directory = Path()
         self.result_directory = Path()
-        self.instance_directory = Path()
         self.scenario_file_name = ""
         self.feature_file = Path()
-        self.instance_file_name = ""
+        self.instance_file = Path()
 
     def create_scenario(self, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
@@ -58,8 +57,9 @@ class ConfigurationScenario:
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.parent_directory / "results" / self.name
         self.instance_directory = Path(self.parent_directory / "scenarios" / "instances"
-                                       / self.source_instance_directory.name)
-        self.instance_file_name = Path(str(self.instance_directory.name + "_train.txt"))
+                                       / self.instance_directory.name)
+        self.instance_file = self.instance_directory / Path(str(self.instance_directory.name
+                                                                + "_train.txt"))
         self._prepare_scenario_directory()
         self._prepare_result_directory()
 
@@ -107,7 +107,7 @@ class ConfigurationScenario:
         cutoff_length = sgh.settings.get_smac_target_cutoff_length()
         solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
-        instance_file = inner_directory / self.instance_file_name
+        instance_file = inner_directory / self.instance_file.name
 
         scenario_file = (self.directory
                          / f"{self.name}_scenario.txt")
@@ -132,37 +132,15 @@ class ConfigurationScenario:
     def _prepare_instances(self) -> None:
         """Copy problem instances and create instance list file."""
         source_instance_list = (
-            [f for f in self.source_instance_directory.rglob("*") if f.is_file()])
+            [f for f in self.instance_directory.rglob("*") if f.is_file()])
 
-        shutil.rmtree(self.instance_directory, ignore_errors=True)
-        self.instance_directory.mkdir()
+        instance_list_path = self.instance_file
 
-        self._copy_instances(source_instance_list=source_instance_list)
-        self._create_instance_list_file(source_instance_list)
-
-    def _copy_instances(self, source_instance_list: list) -> None:
-        """Copy problem instances for configuration to the solver directory.
-
-        Args:
-            source_instance_list: List of instaces to be copied.
-        """
-        for original_instance_path in source_instance_list:
-            target_instance_path = self.instance_directory / original_instance_path.name
-            shutil.copy(original_instance_path, target_instance_path)
-
-    def _create_instance_list_file(self, source_instance_list: list) -> None:
-        """Create file with paths to all instances."""
-        instance_list_path = self.directory / self.instance_file_name
-
-        instance_list_path.unlink(missing_ok=True)
-        instance_list_file = instance_list_path.open("w+")
-
-        for original_instance_path in source_instance_list:
-            instance_list_file.write(f"../../instances/"
-                                     f"{original_instance_path.parts[-2]}/"
-                                     f"{original_instance_path.name}\n")
-
-        instance_list_file.close()
+        with instance_list_path.open("w+") as file:
+            for original_instance_path in source_instance_list:
+                file.write(f"../../instances/"
+                           f"{original_instance_path.parts[-2]}/"
+                           f"{original_instance_path.name}\n")
 
     def _get_run_objective(self) -> str:
         """Return the SMAC run objective.
@@ -184,15 +162,9 @@ class ConfigurationScenario:
 
         return run_objective
 
-    def _copy_instance_file_to_scenario(self) -> None:
-        """Copy instance list file to directory of scenario."""
-        instance_file_directory = (self.parent_directory / "scenarios"
-                                   / "instances" / self.instance_file_name)
-        shutil.copy(instance_file_directory, self.directory / self.instance_file_name)
-
     def _create_feature_file(self) -> None:
         """Create CSV file from feature data."""
         self.feature_file = Path(self.directory
-                                 / f"{self.source_instance_directory.name}_features.csv")
+                                 / f"{self.instance_directory.name}_features.csv")
         self.feature_data.to_csv(self.directory
                                  / self.feature_file, index_label="INSTANCE_NAME")
