@@ -16,30 +16,38 @@ record_log_file_path = sgh.sparkle_err_path
 
 
 def detect_current_sparkle_platform_exists() -> bool:
-    """Return whether a Sparkle platform is currently active."""
-    my_flag_anyone = False
+    """Return whether a Sparkle platform is currently active.
+
+    Returns:
+      Boolean value indicating whether a Sparkle platform is active or not.
+    """
     if Path("Instances/").exists():
-        my_flag_anyone = True
+        return True
     if Path("Solvers/").exists():
-        my_flag_anyone = True
+        return True
     if Path("Extractors/").exists():
-        my_flag_anyone = True
+        return True
     if Path("Feature_Data/").exists():
-        my_flag_anyone = True
+        return True
     if Path("Performance_Data/").exists():
-        my_flag_anyone = True
+        return True
     if Path("Reference_Lists/").exists():
-        my_flag_anyone = True
+        return True
     if Path("Sparkle_Portfolio_Selector/").exists():
-        my_flag_anyone = True
+        return True
     if sgh.sparkle_parallel_portfolio_dir.exists():
-        my_flag_anyone = True
+        return True
 
-    return my_flag_anyone
+    return False
 
 
-def save_current_sparkle_platform(my_record_filename) -> None:
-    """Store the current Sparkle platform in a .zip file."""
+def save_current_sparkle_platform(my_record_filename: str) -> None:
+    """Store the current Sparkle platform in a .zip file.
+
+    Args:
+      my_record_filename: File path to the file where the current Sparkle
+        platform should be stored.
+    """
     my_flag_instances = False
     my_flag_solvers = False
     my_flag_extractors = False
@@ -170,8 +178,6 @@ def save_current_sparkle_platform(my_record_filename) -> None:
 
     os.system("rm -f " + record_log_file_path)
 
-    return
-
 
 def cleanup_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
@@ -194,11 +200,15 @@ def cleanup_current_sparkle_platform() -> None:
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     if Path(ablation_scenario_dir).exists():
         sfh.rmtree(Path(ablation_scenario_dir))
-    return
 
 
-def extract_sparkle_record(my_record_filename) -> None:
-    """Restore a Sparkle platform from a record."""
+def extract_sparkle_record(my_record_filename: str) -> None:
+    """Restore a Sparkle platform from a record.
+
+    Args:
+      my_record_filename: File path to the file where the current Sparkle
+        platform should be stored.
+    """
     if not Path(my_record_filename).exists():
         sys.exit()
 
@@ -213,5 +223,3 @@ def extract_sparkle_record(my_record_filename) -> None:
     os.system(r"cp -r " + my_tmp_directory + "/* " + "./")
     sfh.rmtree(Path(my_tmp_directory))
     os.system(r"rm -f " + record_log_file_path)
-
-    return
