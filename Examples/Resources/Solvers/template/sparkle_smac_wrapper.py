@@ -6,7 +6,7 @@ import os
 import time
 import random
 import sys
-import Path
+from pathlib import Path
 # TODO: Add imports required by your changes
 
 
@@ -48,7 +48,7 @@ runsolver_binary = relative_path + "runsolver"
 solver_binary = relative_path + "PbO-CCSAT"
 
 tmp_directory = relative_path + "tmp/"
-if not os.path.exists(tmp_directory):
+if not Path(tmp_directory).exists():
     os.system("mkdir -p " + tmp_directory)
 
 instance_name = get_last_level_directory_name(instance)

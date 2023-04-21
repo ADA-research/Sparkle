@@ -21,19 +21,19 @@ def detect_current_sparkle_platform_exists() -> bool:
     Returns:
       Boolean value indicating whether a Sparkle platform is active or not.
     """
-    if os.path.exists("Instances/"):
+    if Path("Instances/").exists():
         return True
-    if os.path.exists("Solvers/"):
+    if Path("Solvers/").exists():
         return True
-    if os.path.exists("Extractors/"):
+    if Path("Extractors/").exists():
         return True
-    if os.path.exists("Feature_Data/"):
+    if Path("Feature_Data/").exists():
         return True
-    if os.path.exists("Performance_Data/"):
+    if Path("Performance_Data/").exists():
         return True
-    if os.path.exists("Reference_Lists/"):
+    if Path("Reference_Lists/").exists():
         return True
-    if os.path.exists("Sparkle_Portfolio_Selector/"):
+    if Path("Sparkle_Portfolio_Selector/").exists():
         return True
     if sgh.sparkle_parallel_portfolio_dir.exists():
         return True
@@ -57,27 +57,27 @@ def save_current_sparkle_platform(my_record_filename: str) -> None:
     my_flag_sparkle_portfolio_selector = False
     my_flag_sparkle_parallel_portfolio = False
 
-    if os.path.exists("Instances/"):
+    if Path("Instances/").exists():
         my_flag_instances = True
-    if os.path.exists("Solvers/"):
+    if Path("Solvers/").exists():
         my_flag_solvers = True
-    if os.path.exists("Extractors/"):
+    if Path("Extractors/").exists():
         my_flag_extractors = True
-    if os.path.exists("Feature_Data/"):
+    if Path("Feature_Data/").exists():
         my_flag_feature_data = True
-    if os.path.exists("Performance_Data/"):
+    if Path("Performance_Data/").exists():
         my_flag_performance_data = True
-    if os.path.exists("Reference_Lists/"):
+    if Path("Reference_Lists/").exists():
         my_flag_reference_lists = True
-    if os.path.exists("Sparkle_Portfolio_Selector/"):
+    if Path("Sparkle_Portfolio_Selector/").exists():
         my_flag_sparkle_portfolio_selector = True
     if sgh.sparkle_parallel_portfolio_dir.exists():
         my_flag_sparkle_parallel_portfolio = True
 
-    if not os.path.exists(sgh.sparkle_tmp_path):
-        os.mkdir(sgh.sparkle_tmp_path)
+    if not Path(sgh.sparkle_tmp_path).exists():
+        Path(sgh.sparkle_tmp_path).mkdir()
 
-    my_record_filename_exist = os.path.exists(my_record_filename)
+    my_record_filename_exist = Path(my_record_filename).exists()
     if not my_record_filename_exist:
         if my_flag_instances:
             my_record_filename_exist = True
@@ -181,24 +181,24 @@ def save_current_sparkle_platform(my_record_filename: str) -> None:
 
 def cleanup_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
-    if os.path.exists("Instances/"):
+    if Path("Instances/").exists():
         sfh.rmtree(Path("Instances/"))
-    if os.path.exists("Solvers/"):
+    if Path("Solvers/").exists():
         sfh.rmtree(Path("Solvers/"))
-    if os.path.exists("Extractors/"):
+    if Path("Extractors/").exists():
         sfh.rmtree(Path("Extractors/"))
-    if os.path.exists("Feature_Data/"):
+    if Path("Feature_Data/").exists():
         sfh.rmtree(Path("Feature_Data/"))
-    if os.path.exists("Performance_Data/"):
+    if Path("Performance_Data/").exists():
         sfh.rmtree(Path("Performance_Data/"))
-    if os.path.exists("Reference_Lists/"):
+    if Path("Reference_Lists/").exists():
         sfh.rmtree(Path("Reference_Lists/"))
-    if os.path.exists("Sparkle_Portfolio_Selector"):
+    if Path("Sparkle_Portfolio_Selector").exists():
         sfh.rmtree(Path("Sparkle_Portfolio_Selector/"))
     if sgh.sparkle_parallel_portfolio_dir.exists():
         sfh.rmtree(sgh.sparkle_parallel_portfolio_dir)
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
-    if os.path.exists(ablation_scenario_dir):
+    if Path(ablation_scenario_dir).exists():
         sfh.rmtree(Path(ablation_scenario_dir))
 
 
@@ -209,14 +209,14 @@ def extract_sparkle_record(my_record_filename: str) -> None:
       my_record_filename: File path to the file where the current Sparkle
         platform should be stored.
     """
-    if not os.path.exists(my_record_filename):
+    if not Path(my_record_filename).exists():
         sys.exit()
 
     my_suffix = sbh.get_time_pid_random_string()
     my_tmp_directory = f"tmp_directory_{my_suffix}"
 
-    if not os.path.exists(sgh.sparkle_tmp_path):
-        os.mkdir(sgh.sparkle_tmp_path)
+    if not Path(sgh.sparkle_tmp_path).exists():
+        Path(sgh.sparkle_tmp_path).mkdir()
 
     os.system(f"unzip -o {my_record_filename} -d {my_tmp_directory} >> "
               f"{record_log_file_path}")

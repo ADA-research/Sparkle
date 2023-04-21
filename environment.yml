@@ -25,6 +25,7 @@ dependencies:
     - pep8-naming==0.13.2
     - flake8-docstrings==1.6.0
     - flake8-use-fstring==1.4.0
+    - flake8-use-pathlib==0.3.0
     - fsspec==2021.7.0
     - HeapDict==1.0.1
     - iniconfig==1.1.1
