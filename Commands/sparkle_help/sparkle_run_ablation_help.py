@@ -299,7 +299,7 @@ def create_instance_file(instances_directory, ablation_scenario_dir, train_or_te
 
         with Path(file_instance_path).open("w") as fh:
             for instance in list_all_path:
-                instance_path = f"{os.path.join(relative_instance_directory,instance)}\n"
+                instance_path = f"{relative_instance_directory / instance}\n"
                 fh.write(instance_path)
 
             fh.close()
