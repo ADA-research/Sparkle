@@ -279,7 +279,8 @@ def delete_active_jobs(job_ids: list[str]) -> None:
     inpath = __active_jobs_path
     outpath = __active_jobs_path.with_suffix(".tmp")
 
-    with Path(inpath).open("r", newline="") as infile, Path(outpath).open("w", newline="") as outfile:
+    with (Path(inpath).open("r", newline="") as infile,
+          Path(outpath).open("w", newline="") as outfile):
         writer = csv.writer(outfile)
         writer.writerow(__active_jobs_csv_header)
         reader = csv.DictReader(infile)
