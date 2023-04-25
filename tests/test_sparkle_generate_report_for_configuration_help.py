@@ -1,4 +1,4 @@
-"""This contains tests for all helper functions in sparkle_generate_report_for_configuration_help""" # noqa D415
+"""This contains tests for all helper functions in sgr""" # noqa D415
 
 import pytest
 from pathlib import Path
