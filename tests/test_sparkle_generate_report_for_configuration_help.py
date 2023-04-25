@@ -1328,7 +1328,7 @@ def test_generate_report_for_configuration_common(mocker):
     Test that the function reads the template, replaces all variables with values from
     dictionary, writes the new tex file and trigger the compilation.
     """
-    config_reports_dir = "Configuration_Reports/solver_train_test"
+    config_reports_dir = "Configuration_Reports/solver_train_test/"
     value_dict = {
         "key-1": "value-1",
         "key-2": "value-2"
@@ -1346,15 +1346,15 @@ def test_generate_report_for_configuration_common(mocker):
 
     sgr.generate_report_for_configuration_common(config_reports_dir, value_dict)
 
-    latex_directory_path = Path(
-        f"{config_reports_dir}Sparkle-latex-generator-for-configuration/")
+    latex_directory_path = Path(config_reports_dir,
+                                "Sparkle-latex-generator-for-configuration/")
     latex_report_filename = Path("Sparkle_Report_for_Configuration")
     latex_template_filename = "template-Sparkle-for-configuration.tex"
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
 
-    mock_open.assert_any_call(latex_template_filepath, "r"),
+    mock_open.assert_any_call(latex_template_filepath, "r")
     mock_open.assert_any_call(latex_report_filepath, "w+")
 
     mock_open().write.assert_called_once_with(file_write)
