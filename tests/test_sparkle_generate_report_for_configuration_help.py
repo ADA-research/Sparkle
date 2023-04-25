@@ -1,16 +1,21 @@
+"""This contains tests for all helper functions in sparkle_generate_report_for_configuration_help""" # noqa D415
+
 import pytest
 from pathlib import Path
 
 from sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_settings
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_tex_help as stex
 
 global settings
 sgh.settings = sparkle_settings.Settings()
 
+
 def test_get_num_in_instance_set_reference_list_exists(mocker):
+    """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
+
+    Check that number of instances is retrieved from reference list when it exists.
+    """
     mock_check_existence = mocker.patch("sparkle_help.sparkle_instances_help."
                                         "check_existence_of_reference_instance_list",
                                         return_value=True)
@@ -30,6 +35,11 @@ def test_get_num_in_instance_set_reference_list_exists(mocker):
 
 
 def test_get_num_in_instance_set_reference_list_not_exists(mocker):
+    """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
+
+    Check that number of instances is retrieved by counting all files in instance
+    directory when no reference list exists.
+    """
     mock_check_existence = mocker.patch("sparkle_help.sparkle_instances_help."
                                         "check_existence_of_reference_instance_list",
                                         return_value=False)
@@ -37,8 +47,8 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker):
                                         "count_instances_in_reference_list",
                                         return_value=3)
     mock_list_filename = mocker.patch("sparkle_help.sparkle_file_help."
-                                        "get_list_all_filename",
-                                        return_value=["instance-1", "instance-2"])
+                                      "get_list_all_filename",
+                                      return_value=["instance-1", "instance-2"])
     instance_set_name = "test-instance"
 
     number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
@@ -52,6 +62,11 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker):
 
 
 def test_get_par_performance(mocker):
+    """Test get_par_performance returns correct PAR value.
+
+    A performance list should be retrieved from results file.
+    The mean of the performance values should be computed and returned.
+    """
     results_file = "example_file"
     cutoff = 42
     mock_construct_list = mocker.patch("sparkle_help.sparkle_generate_report_for"
@@ -64,7 +79,9 @@ def test_get_par_performance(mocker):
     mock_construct_list.assert_called_once_with(results_file, cutoff)
     assert par == 7.5
 
+
 def test_get_instance_name_from_path():
+    """Test get_instance_name_from_path returns the last part of the given path."""
     path_string = "parent/directory/instance-name"
 
     name = sgr.get_instance_name_from_path(path_string)
@@ -73,6 +90,7 @@ def test_get_instance_name_from_path():
 
 
 def test_construct_list_instance_and_performance(mocker):
+    """Test construct_list_instance_and_performance creates list from file content."""
     file_content_mock = ('"Problem Instance","Seed",'
                          '"Objective of validation config #1"\n'
                          '"../../instances/instances/instance-1.cnf","null","0.001"\n'
@@ -92,6 +110,7 @@ def test_construct_list_instance_and_performance(mocker):
 
 
 def test_get_dict_instance_to_performance(mocker):
+    """Test get_dict_instance_to_performance creates dict from performance list."""
     instance_list = [["instance-1.cnf", 0.01001],
                      ["instance-2.cnf", 1.0],
                      ["instance-3.cnf", 100]]
@@ -113,6 +132,10 @@ def test_get_dict_instance_to_performance(mocker):
 
 
 def test_get_performance_measure_par10(mocker):
+    """Test get_performance_measure returns correct measure.
+
+    Return `PAR10` for RUNTIME with default penalty multiplier of 10.
+    """
     mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
@@ -128,6 +151,10 @@ def test_get_performance_measure_par10(mocker):
 
 
 def test_get_performance_measure_par5(mocker):
+    """Test get_performance_measure returns correct measure.
+
+    Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
+    """
     mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
@@ -143,6 +170,7 @@ def test_get_performance_measure_par5(mocker):
 
 
 def test_get_performance_measure_performance(mocker):
+    """Test get_performance_measure returns correct measure for QUALITY."""
     mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("QUALITY", "", "", "", "", ""))
@@ -154,6 +182,7 @@ def test_get_performance_measure_performance(mocker):
 
 
 def test_get_runtime_bool_runtime(mocker):
+    """Test get_runtime_bool returns correct string for objective RUNTIME."""
     mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
@@ -165,6 +194,7 @@ def test_get_runtime_bool_runtime(mocker):
 
 
 def test_get_runtime_bool_quality(mocker):
+    """Test get_runtime_bool returns correct string for objective QUALITY."""
     mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("QUALITY", "", "", "", "", ""))
@@ -176,6 +206,7 @@ def test_get_runtime_bool_quality(mocker):
 
 
 def test_get_runtime_bool_other(mocker):
+    """Test get_runtime_bool returns correct string for no given objective."""
     mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("ERROR", "", "", "", "", ""))
@@ -187,6 +218,7 @@ def test_get_runtime_bool_other(mocker):
 
 
 def test_get_ablation_bool_true(mocker):
+    """Test get_ablation_bool returns correct string if get_ablation_bool is True."""
     mock_check = mocker.patch("sparkle_help.sparkle_run_ablation_help."
                               "check_for_ablation",
                               return_value=True)
@@ -202,6 +234,7 @@ def test_get_ablation_bool_true(mocker):
 
 
 def test_get_ablation_bool_false(mocker):
+    """Test get_ablation_bool returns correct string if get_ablation_bool is False."""
     mock_check = mocker.patch("sparkle_help.sparkle_run_ablation_help."
                               "check_for_ablation",
                               return_value=False)
@@ -217,6 +250,10 @@ def test_get_ablation_bool_false(mocker):
 
 
 def test_get_features_bool_false(mocker):
+    """Test get_features_bool returns correct string if no feature file is given.
+
+    The function should check the scenario file for a link to the feature file.
+    """
     solver_name = "test-solver"
     instance_set = "train-instance"
     solver_dir = "smac-solver-dir/"
@@ -237,6 +274,10 @@ def test_get_features_bool_false(mocker):
 
 
 def test_get_features_bool_true(mocker):
+    """Test get_features_bool returns correct string if feature file is given.
+
+    The function should check the scenario file for a link to the feature file.
+    """
     solver_dir = "smac-solver-dir/"
     solver_name = "test-solver"
     instance_set = "train-instance"
@@ -257,6 +298,7 @@ def test_get_features_bool_true(mocker):
 
 
 def test_get_data_for_plot_same_instance(mocker):
+    """Test get_data_for_plot returns list of values if dicts are correct."""
     dict_configured = {
         "instance-1.cnf": 1.0
     }
@@ -277,7 +319,12 @@ def test_get_data_for_plot_same_instance(mocker):
     mock_dict.assert_any_call(configured_dir, cutoff)
     assert points == [[1.0, 0.01]]
 
+
 def test_get_data_for_plot_instance_error(mocker):
+    """Test get_data_for_plot raises a SystemExit if dicts to not fit.
+
+    If the two dicts do not contain the same instances, an error is raised.
+    """
     dict_configured = {
         "instance-2.cnf": 1.0
     }
@@ -300,6 +347,12 @@ def test_get_data_for_plot_instance_error(mocker):
 
 
 def test_get_figure_configure_vs_default(mocker):
+    """Test get_figure_configure_vs_default creates plot and returns correct string.
+
+    The function `generate_comparison_plot()` should be called with the correct
+    arguments.
+    Also, the correct LaTeX string to include the figure should be returned.
+    """
     configured_dir = "configured/directory/"
     default_dir = "default/directory/"
     reports_dir = "reports/directory/"
@@ -343,6 +396,11 @@ def test_get_figure_configure_vs_default(mocker):
 
 
 def test_get_figure_configure_vs_default_par(mocker):
+    """Test get_figure_configure_vs_default adds params for performance measure PAR.
+
+    If the performance measure starts with PAR, `generate_comparison_plot()` should
+    be called with additional parameters.
+    """
     configured_dir = "configured/directory/"
     default_dir = "default/directory/"
     reports_dir = "reports/directory/"
@@ -391,6 +449,11 @@ def test_get_figure_configure_vs_default_par(mocker):
 
 
 def test_get_figure_configured_vs_default_on_test_instance_set(mocker):
+    """Test get_figure_configured_vs_default_on_test_instance_set returns correct string.
+
+    This should call `get_figure_configure_vs_default()` with correct values and return
+    its return value.
+    """
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -429,6 +492,11 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker):
 
 
 def test_get_figure_configured_vs_default_on_train_instance_set(mocker):
+    """Test get_figure_configured_vs_default_on_train_instance_set return correct string.
+
+    This should call `get_figure_configure_vs_default()` with correct values and return
+    its return value.
+    """
     seed = 3
     solver_name = "test-solver"
     train_instance = "train-instance"
@@ -473,6 +541,7 @@ def test_get_figure_configured_vs_default_on_train_instance_set(mocker):
 
 
 def test_get_timeouts_test(mocker):
+    """Test get_timeouts_test returns correct number of timeouts from test set."""
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -516,6 +585,7 @@ def test_get_timeouts_test(mocker):
 
 
 def test_get_timeouts_train(mocker):
+    """Test get_timeouts_test returns correct number of timeouts from train set."""
     optimised_configuration_seed = "3"
     solver_name = "test-solver"
     instance_set = "train-instance"
@@ -562,6 +632,7 @@ def test_get_timeouts_train(mocker):
 
 
 def test_get_timeouts(mocker):
+    """Test get_timeouts correctly computes timeouts and overlapping values for dicts."""
     conf_dict = {
         "instance-1.cnf": 100.0,
         "instance-2.cnf": 100.0,
@@ -589,6 +660,7 @@ def test_get_timeouts(mocker):
 
 
 def test_get_ablation_table(mocker):
+    """Test get_ablation_table calls sah.get_ablation_table and transforms its string."""
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -616,6 +688,11 @@ def test_get_ablation_table(mocker):
 
 
 def test_get_dict_variable_to_value_with_test(mocker):
+    """Test get_dict_variable_to_value returns correct dictionary.
+
+    If a test instance is present, the function should add the corresponding entry
+    to the dictionary.
+    """
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -653,6 +730,11 @@ def test_get_dict_variable_to_value_with_test(mocker):
 
 
 def test_get_dict_variable_to_value_without_test(mocker):
+    """Test get_dict_variable_to_value returns correct dictionary.
+
+    If no test instance is present, the function should add the corresponding entry
+    to the dictionary.
+    """
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = None
@@ -662,10 +744,6 @@ def test_get_dict_variable_to_value_without_test(mocker):
         "common-1": "1",
         "common-2": "2",
         "featuresBool": r"\featuresfalse"
-    }
-    test_dict = {
-        "test-1": "3",
-        "test-2": "4"
     }
     mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
                                "configuration_help."
@@ -684,6 +762,11 @@ def test_get_dict_variable_to_value_without_test(mocker):
 
 
 def test_get_dict_variable_to_value_with_ablation(mocker):
+    """Test get_dict_variable_to_value returns correct dictionary.
+
+    If `ablation` is set to True, the key `ablationBool` should not be set in the
+    dictionary.
+    """
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -720,6 +803,11 @@ def test_get_dict_variable_to_value_with_ablation(mocker):
 
 
 def test_get_dict_variable_to_value_with_features(mocker):
+    """Test get_dict_variable_to_value returns correct dictionary.
+
+    If the key `featuresBool` in the common dictionary is found and set to true,
+    the corresponding other keys should be added to the final dictionary.
+    """
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -771,6 +859,11 @@ def test_get_dict_variable_to_value_with_features(mocker):
 
 
 def test_get_dict_variable_to_value_common(mocker):
+    """Test get_dict_variable_to_value_common creates the correct dictionary.
+
+    Test that all needed functions are called to retrieve values and that these
+    values are added to the common dictionary.
+    """
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -888,7 +981,13 @@ def test_get_dict_variable_to_value_common(mocker):
         "featuresBool": "featurestrue"
     }
 
+
 def test_get_dict_variable_to_value_test(mocker):
+    """Test get_dict_variable_to_value_test creates the correct dictionary.
+
+    Test that all needed functions are called to retrieve values and that these
+    values are added to the common dictionary.
+    """
     solver_name = "solver-name"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -968,6 +1067,7 @@ def test_get_dict_variable_to_value_test(mocker):
 
 
 def test_check_results_exist_all_good(mocker):
+    """Test check_results_exist does not produce an error if all paths exist."""
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -1001,7 +1101,13 @@ def test_check_results_exist_all_good(mocker):
         mocker.call(default_results_test_dir)
     ])
 
+
 def test_check_results_exist_all_error(mocker):
+    """Test check_results_exist produces the correct error if no path exists.
+
+    If none of the tested paths exist, test that a SystemExit is raised.
+    Also, test that the correct error string is printed, explaining each missing path.
+    """
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -1058,6 +1164,11 @@ def test_check_results_exist_all_error(mocker):
 
 
 def test_get_most_recent_test_run_full(mocker):
+    """Test get_most_recent_test_run returns the correct tuple if present in file.
+
+    If the last test file contains information on train and test instances, return the
+    corresponding information and set the flags to True.
+    """
     solver_name = "solver-name"
     file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n"
                          "train Instances/PTN\n"
@@ -1073,7 +1184,13 @@ def test_get_most_recent_test_run_full(mocker):
     assert train_flag
     assert test_flag
 
+
 def test_get_most_recent_test_run_empty(mocker):
+    """Test get_most_recent_test_run returns empyt strings if values not present in file.
+
+    If the last test file contains no information on train and test instances, return the
+    empty strings and set the flags to False.
+    """
     solver_name = "solver-name"
     file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n")
 
@@ -1089,6 +1206,10 @@ def test_get_most_recent_test_run_empty(mocker):
 
 
 def test_generate_report_for_configuration_prep_exists_not(mocker):
+    """Test generate_report_for_configuration_prep creates directory if necessary.
+
+    Also test that the function then copies the latex templates to the report directory.
+    """
     report_directory = "report/directory"
 
     template_latex_directory_path = (
@@ -1110,6 +1231,7 @@ def test_generate_report_for_configuration_prep_exists_not(mocker):
 
 
 def test_generate_report_for_configuration_prep_exists(mocker):
+    """Test generate_report_for_configuration_prep copies files to report directory."""
     report_directory = "report/directory"
 
     template_latex_directory_path = (
@@ -1127,6 +1249,11 @@ def test_generate_report_for_configuration_prep_exists(mocker):
 
 
 def test_generate_report_for_configuration_train(mocker):
+    """Test generate_report_for_configuration_train generates report.
+
+    The function should call functions to prepare report generation and call
+    `generate_report_for_configuration_common` with the right parameters.
+    """
     solver_name = "solver-name"
     train_instance = "train-instance"
     ablation = True
@@ -1158,6 +1285,11 @@ def test_generate_report_for_configuration_train(mocker):
 
 
 def test_generate_report_for_configuration(mocker):
+    """Test generate_report_for_configuration generates report.
+
+    Teh function should call functions to prepare report generation and call
+    `generate_report_for_configuration_common` with the right parameters.
+    """
     solver_name = "solver-name"
     train_instance = "train-instance"
     test_instance = "test-instance"
@@ -1191,6 +1323,11 @@ def test_generate_report_for_configuration(mocker):
 
 
 def test_generate_report_for_configuration_common(mocker):
+    """Test generate_report_for_configuration_common triggers report generation.
+
+    Test that the function reads the template, replaces all variables with values from
+    dictionary, writes the new tex file and trigger the compilation.
+    """
     config_reports_dir = "Configuration_Reports/solver_train_test"
     value_dict = {
         "key-1": "value-1",
