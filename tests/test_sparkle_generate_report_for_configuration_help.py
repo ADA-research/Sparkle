@@ -1,4 +1,4 @@
-"""This contains tests for all helper functions in sgr""" # noqa D415
+"""This contains tests for all helper functions in sgr"""
 
 import pytest
 from pathlib import Path
