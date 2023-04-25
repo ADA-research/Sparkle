@@ -6,6 +6,8 @@ from pathlib import Path
 from sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_settings
+from sparkle_help import sparkle_configure_solver_help as scsh
+from sparkle_help import sparkle_tex_help as stx
 
 global settings
 sgh.settings = sparkle_settings.Settings()
