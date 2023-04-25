@@ -4,6 +4,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -42,7 +43,7 @@ if __name__ == "__main__":
 
     if args.nickname:
         extractor_path = sparkle_global_help.extractor_nickname_mapping[extractor_path]
-    if not os.path.exists(extractor_path):
+    if not Path(extractor_path).exists():
         print(f'Feature extractor path "{extractor_path}" does not exist!')
         sys.exit()
 
@@ -75,7 +76,7 @@ if __name__ == "__main__":
                 break
         sfh.write_extractor_nickname_mapping()
 
-    if os.path.exists(sparkle_global_help.feature_data_csv_path):
+    if Path(sparkle_global_help.feature_data_csv_path).exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
             sparkle_global_help.feature_data_csv_path
         )
@@ -90,7 +91,7 @@ if __name__ == "__main__":
         command_line = "rm -rf " + extractor_path
         os.system(command_line)
 
-    if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
+    if Path(sparkle_global_help.sparkle_portfolio_selector_path).exists():
         command_line = "rm -f " + sparkle_global_help.sparkle_portfolio_selector_path
         os.system(command_line)
         print(
@@ -99,7 +100,7 @@ if __name__ == "__main__":
             + " done!"
         )
 
-    if os.path.exists(sparkle_global_help.sparkle_report_path):
+    if Path(sparkle_global_help.sparkle_report_path).exists():
         command_line = "rm -f " + sparkle_global_help.sparkle_report_path
         os.system(command_line)
         print(

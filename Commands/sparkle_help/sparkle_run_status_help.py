@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to communicate run statuses of various commands."""
 
-import os
+from pathlib import Path
 import fcntl
 from sparkle_help import sparkle_file_help as sfh
 
@@ -17,7 +17,7 @@ def get_list_running_extractor_jobs():
         statusinfo_filepath = (
             tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
         try:
-            fin = open(statusinfo_filepath, "r+")
+            fin = Path(statusinfo_filepath).open("r+")
             fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
             mylist1 = fin.readline().strip().split()
             status_str = mylist1[1]
@@ -79,7 +79,7 @@ def get_list_running_solver_jobs():
     for statusinfo_filename in list_all_statusinfo_filename:
         statusinfo_filepath = (
             tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
-        fin = open(statusinfo_filepath, "r+")
+        fin = Path(statusinfo_filepath).open("r+")
         fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
         mylist1 = fin.readline().strip().split()
         status_str = mylist1[1]
@@ -131,7 +131,7 @@ def print_running_portfolio_selector_jobs():
     print("")
     key_str = "construct_sparkle_portfolio_selector"
     task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
+    if Path(task_run_status_path).is_file():
         print("Currently Sparkle portfolio selecotr is constructing ...")
     else:
         print("No currently running Sparkle portfolio selector construction job!")
@@ -144,7 +144,7 @@ def print_running_report_jobs():
     print("")
     key_str = "generate_report"
     task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
+    if Path(task_run_status_path).is_file():
         print("Currently Sparkle report is generating ...")
     else:
         print("No currently running Sparkle report generation job!")

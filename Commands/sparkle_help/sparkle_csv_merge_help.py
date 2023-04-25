@@ -4,6 +4,7 @@
 
 import os
 import fcntl
+from pathlib import Path
 
 try:
     from sparkle_help import sparkle_global_help
@@ -56,7 +57,7 @@ def performance_data_csv_merge() -> None:
         result_path = tmp_performance_data_result_directory + result_name
 
         try:
-            fin = open(result_path, "r+")
+            fin = Path(result_path).open("r+")
             fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
             instance_path = fin.readline().strip()
             if not instance_path:

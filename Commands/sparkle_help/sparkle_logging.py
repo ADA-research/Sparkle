@@ -60,7 +60,7 @@ def update_caller_file_path(timestamp: str) -> str:
     if not Path(caller_log_path).is_file():
         output_header = ("     Timestamp                              Path           "
                          "                  Description\n")
-        with open(str(caller_log_path), "a") as output_file:
+        with Path(str(caller_log_path)).open("a") as output_file:
             output_file.write(output_header)
 
     return
@@ -73,7 +73,7 @@ def add_output(output_path: str, description: str) -> None:
     output_str = timestamp + "   " + output_path + "   " + description + "\n"
 
     # Write output path and description to caller file
-    with open(str(caller_log_path), "a") as output_file:
+    with Path(str(caller_log_path)).open("a") as output_file:
         output_file.write(output_str)
 
     return
@@ -104,11 +104,11 @@ def log_command(argv) -> None:
     if not Path(log_path).is_file():
         log_header = ("     Timestamp                              Command            "
                       "                 Output details\n")
-        with open(str(log_path), "a") as log_file:
+        with Path(str(log_path)).open("a") as log_file:
             log_file.write(log_header)
 
     # Write to log file
-    with open(str(log_path), "a") as log_file:
+    with Path(str(log_path)).open("a") as log_file:
         log_file.write(log_str)
 
     return
