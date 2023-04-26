@@ -2,7 +2,6 @@
 
 import pytest
 from pathlib import Path
-from io import StringIO
 
 from sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from sparkle_help import sparkle_global_help as sgh
