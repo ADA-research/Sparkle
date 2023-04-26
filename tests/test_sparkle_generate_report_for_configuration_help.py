@@ -1,13 +1,12 @@
-"""This contains tests for all helper functions in sgr"""
+"""This contains tests for all helper functions in sgr."""
 
 import pytest
 from pathlib import Path
+from io import StringIO
 
 from sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_settings
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_tex_help as stx
 
 global settings
 sgh.settings = sparkle_settings.Settings()
@@ -98,7 +97,7 @@ def test_construct_list_instance_and_performance(mocker):
                          '"../../instances/instances/instance-1.cnf","null","0.001"\n'
                          '"../../instances/instances/instance-2.cnf","null","1.0"\n'
                          '"../../instances/instances/instance-3.cnf","null","15"\n')
-    mocker.patch("builtins.open", mocker.mock_open(read_data=file_content_mock))
+    mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
     mocker.patch("sparkle_help.sparkle_configure_solver_help.get_smac_settings",
                  return_value=("RUNTIME", "", "", "", "", ""))
 
@@ -259,19 +258,18 @@ def test_get_features_bool_false(mocker):
     solver_name = "test-solver"
     instance_set = "train-instance"
     solver_dir = "smac-solver-dir/"
-    scenario_file = f"{solver_dir}{solver_name}_{instance_set}_scenario.txt"
     mock_dir = mocker.patch("sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
                             "get_smac_solver_dir",
                             return_value=solver_dir)
     file_content_mock = ""
-    mock_open = mocker.patch("builtins.open",
+    mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
 
     features_bool = sgr.get_features_bool(solver_name, instance_set)
 
     mock_dir.assert_called_once_with(solver_name, instance_set)
-    mock_open.assert_called_once_with(scenario_file, "r")
+    mock_open.assert_called_once_with("r")
     assert features_bool == r"\featuresfalse"
 
 
@@ -283,19 +281,18 @@ def test_get_features_bool_true(mocker):
     solver_dir = "smac-solver-dir/"
     solver_name = "test-solver"
     instance_set = "train-instance"
-    scenario_file = f"{solver_dir}{solver_name}_{instance_set}_scenario.txt"
     mock_dir = mocker.patch("sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
                             "get_smac_solver_dir",
                             return_value=solver_dir)
     file_content_mock = "feature_file = some/file"
-    mock_open = mocker.patch("builtins.open",
+    mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
 
     features_bool = sgr.get_features_bool(solver_name, instance_set)
 
     mock_dir.assert_called_once_with(solver_name, instance_set)
-    mock_open.assert_called_once_with(scenario_file, "r")
+    mock_open.assert_called_once_with("r")
     assert features_bool == r"\featurestrue"
 
 
@@ -1074,34 +1071,11 @@ def test_check_results_exist_all_good(mocker):
     train_instance = "train-instance"
     test_instance = "test-instance"
 
-    mock_exists = mocker.patch("os.path.exists", return_value=True)
+    mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
 
     sgr.check_results_exist(solver_name, train_instance, test_instance)
 
-    train_instance_dir = (f"{sgh.smac_dir}/example_scenarios/instances/"
-                          f"{train_instance}/")
-    smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
-    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
-                                    f"{solver_name}_{train_instance}_scenario/")
-    default_results_train_dir = smac_solver_dir + "outdir_train_default/"
-
-    instance_test_dir = (
-        f"{sgh.smac_dir}/example_scenarios/instances/{test_instance}/")
-    smac_solver_dir = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
-                       f"{train_instance}/")
-    configured_results_test_dir = (
-        smac_solver_dir + "outdir_" + test_instance + "_test_configured/")
-    default_results_test_dir = (
-        smac_solver_dir + "outdir_" + test_instance + "_test_default/")
-    mock_exists.assert_has_calls([
-        mocker.call(train_instance_dir),
-        mocker.call(configured_results_train_dir),
-        mocker.call(default_results_train_dir),
-        mocker.call(instance_test_dir),
-        mocker.call(configured_results_test_dir),
-        mocker.call(default_results_test_dir)
-    ])
+    mock_exists.assert_called()
 
 
 def test_check_results_exist_all_error(mocker):
@@ -1114,7 +1088,7 @@ def test_check_results_exist_all_error(mocker):
     train_instance = "train-instance"
     test_instance = "test-instance"
 
-    mock_exists = mocker.patch("os.path.exists", return_value=False)
+    mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
     mock_print = mocker.patch("builtins.print")
 
     with pytest.raises(SystemExit):
@@ -1139,30 +1113,7 @@ def test_check_results_exist_all_error(mocker):
         "example_scenarios/test-solver_train-instance/"
         "outdir_test-instance_test_default/;")
 
-    train_instance_dir = (f"{sgh.smac_dir}/example_scenarios/instances/"
-                          f"{train_instance}/")
-    smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
-    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
-                                    f"{solver_name}_{train_instance}_scenario/")
-    default_results_train_dir = smac_solver_dir + "outdir_train_default/"
-
-    instance_test_dir = (
-        f"{sgh.smac_dir}/example_scenarios/instances/{test_instance}/")
-    smac_solver_dir = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
-                       f"{train_instance}/")
-    configured_results_test_dir = (
-        smac_solver_dir + "outdir_" + test_instance + "_test_configured/")
-    default_results_test_dir = (
-        smac_solver_dir + "outdir_" + test_instance + "_test_default/")
-    mock_exists.assert_has_calls([
-        mocker.call(train_instance_dir),
-        mocker.call(configured_results_train_dir),
-        mocker.call(default_results_train_dir),
-        mocker.call(instance_test_dir),
-        mocker.call(configured_results_test_dir),
-        mocker.call(default_results_test_dir)
-    ])
+    mock_exists.assert_called()
 
 
 def test_get_most_recent_test_run_full(mocker):
@@ -1176,7 +1127,7 @@ def test_get_most_recent_test_run_full(mocker):
                          "train Instances/PTN\n"
                          "test Instances/PTN2")
 
-    mocker.patch("builtins.open", mocker.mock_open(read_data=file_content_mock))
+    mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
 
     (train_instance, test_instance, train_flag, test_flag) = (
         sgr.get_most_recent_test_run(solver_name))
@@ -1196,7 +1147,7 @@ def test_get_most_recent_test_run_empty(mocker):
     solver_name = "solver-name"
     file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n")
 
-    mocker.patch("builtins.open", mocker.mock_open(read_data=file_content_mock))
+    mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
 
     (train_instance, test_instance, train_flag, test_flag) = (
         sgr.get_most_recent_test_run(solver_name))
@@ -1217,12 +1168,12 @@ def test_generate_report_for_configuration_prep_exists_not(mocker):
     template_latex_directory_path = (
         "Components/Sparkle-latex-generator-for-configuration/")
 
-    mock_exists = mocker.patch("os.path.exists", return_value=False)
+    mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
     mock_system = mocker.patch("os.system")
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_exists.assert_called_once_with(report_directory)
+    mock_exists.assert_called_once()
 
     mkdir_command = f"mkdir -p {report_directory}"
     cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
@@ -1239,12 +1190,12 @@ def test_generate_report_for_configuration_prep_exists(mocker):
     template_latex_directory_path = (
         "Components/Sparkle-latex-generator-for-configuration/")
 
-    mock_exists = mocker.patch("os.path.exists", return_value=True)
+    mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
     mock_system = mocker.patch("os.system")
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_exists.assert_called_once_with(report_directory)
+    mock_exists.assert_called_once()
 
     cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
     mock_system.assert_called_once_with(cp_command)
@@ -1289,7 +1240,7 @@ def test_generate_report_for_configuration_train(mocker):
 def test_generate_report_for_configuration(mocker):
     """Test generate_report_for_configuration generates report.
 
-    Teh function should call functions to prepare report generation and call
+    The function should call functions to prepare report generation and call
     `generate_report_for_configuration_common` with the right parameters.
     """
     solver_name = "solver-name"
@@ -1338,7 +1289,7 @@ def test_generate_report_for_configuration_common(mocker):
     file_read = "@@key-1@@\n@@key-2@@"
     file_write = "value-1\nvalue-2"
     report_path = "path/report"
-    mock_open = mocker.patch("builtins.open", mocker.mock_open(read_data=file_read))
+    mock_open = mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_read))
     mock_check = mocker.patch("sparkle_help.sparkle_tex_help."
                               "check_tex_commands_exist")
     mock_compile = mocker.patch("sparkle_help.sparkle_tex_help."
@@ -1351,13 +1302,11 @@ def test_generate_report_for_configuration_common(mocker):
     latex_directory_path = Path(config_reports_dir,
                                 "Sparkle-latex-generator-for-configuration/")
     latex_report_filename = Path("Sparkle_Report_for_Configuration")
-    latex_template_filename = "template-Sparkle-for-configuration.tex"
-    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
 
-    mock_open.assert_any_call(latex_template_filepath, "r")
-    mock_open.assert_any_call(latex_report_filepath, "w+")
+    mock_open.assert_any_call("r")
+    mock_open.assert_any_call("w+")
 
     mock_open().write.assert_called_once_with(file_write)
     mock_check.assert_called_once_with(latex_directory_path)
