@@ -301,7 +301,7 @@ class Settings:
         file_dir.mkdir(parents=True, exist_ok=True)
 
         # Write the settings to file
-        with open(str(file_path), "w") as settings_file:
+        with Path(str(file_path)).open("w") as settings_file:
             self.__settings.write(settings_file)
 
             # Log the settings file location

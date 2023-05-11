@@ -120,7 +120,7 @@ if __name__ == "__main__":
     else:
         obj_str = str(cpu_time_penalised)
 
-    fout = open(processed_result_path, "w+")
+    fout = Path(processed_result_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     fout.write(instance_path + "\n")
     fout.write(solver_path + "\n")

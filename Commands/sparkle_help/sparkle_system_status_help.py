@@ -4,6 +4,7 @@
 
 import os
 import time
+from pathlib import Path
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -134,9 +135,9 @@ def print_portfolio_selector_info():
 
     key_str = "construct_sparkle_portfolio_selector"
     task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
+    if Path(task_run_status_path).is_file():
         print("Currently Sparkle portfolio selector is constructing ...")
-    elif os.path.isfile(sparkle_portfolio_selector_path):
+    elif Path(sparkle_portfolio_selector_path).is_file():
         print("Path: " + sparkle_portfolio_selector_path)
         print("Last modified time: "
               f"{get_file_modify_time(sparkle_portfolio_selector_path)}")
@@ -154,9 +155,9 @@ def print_report_info():
 
     key_str = "generate_report"
     task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
+    if Path(task_run_status_path).is_file():
         print("Currently Sparkle report is generating ...")
-    elif os.path.isfile(sparkle_report_path):
+    elif Path(sparkle_report_path).is_file():
         print("Path: " + sparkle_report_path)
         print("Last modified time: " + get_file_modify_time(sparkle_report_path))
     else:

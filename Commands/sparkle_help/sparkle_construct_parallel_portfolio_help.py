@@ -3,11 +3,20 @@
 """Helper functions for parallel portfolio construction."""
 
 from pathlib import Path
-from sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_file_help as sfh
 
 
 def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -> bool:
-    """Create a file containing the list of solvers within the given portfolio path."""
+    """Create a file containing the list of solvers within the given portfolio path.
+
+    Args:
+        sparkle_parallel_portfolio_path: A path object pointing to the directory where
+            the parallel portfolio files should be written to.
+        solver_list: A list of solver names. Solver names should map to added solvers.
+
+    Returns:
+        A Boolean which is set to True if the file was successfully created.
+    """
     solvers_file = f"{sparkle_parallel_portfolio_path}/solvers.txt"
     sfh.create_new_empty_file(str(solvers_file))
 
@@ -25,7 +34,19 @@ def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -
 def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
                                          overwrite: bool,
                                          solver_list: list[str]) -> bool:
-    """Create the parallel portfolio by preparing a directory and the solver list."""
+    """Create the parallel portfolio by preparing a directory and the solver list.
+
+    Args:
+        sparkle_parallel_portfolio_path: A path object pointing to the directory where
+            the parallel portfolio files should be written to.
+        overwrite: A Boolean which decides if existing parallel portfolios should be
+            overwritten.
+        solver_list: A list of solver names. Solver names should map to added solvers.
+
+    Returns:
+        A Boolean which is set to True if the portfolio was successfully constructed.
+
+    """
     if sparkle_parallel_portfolio_path.is_dir():
         if overwrite:
             sfh.rmtree(sparkle_parallel_portfolio_path)

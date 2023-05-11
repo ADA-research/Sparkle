@@ -179,7 +179,7 @@ def run_configured_solver(instance_path_list: list[Path]):
                                                          is_configured=True)
 
     # Process 'Result for SMAC' line from raw_result_path
-    with open(raw_result_path, "r") as infile:
+    with Path(raw_result_path).open("r") as infile:
         results_good = False
 
         for line in infile:

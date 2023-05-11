@@ -44,7 +44,7 @@ def get_slurm_options_list(path_modifier: str = None) -> list[str]:
 
     sparkle_slurm_settings_path = str(path_modifier) + sgh.sparkle_slurm_settings_path
 
-    settings_file = open(sparkle_slurm_settings_path, "r")
+    settings_file = Path(sparkle_slurm_settings_path).open("r")
     while True:
         current_line = settings_file.readline()
         if not current_line:
@@ -180,19 +180,26 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
       job_output_list: Optional list of job outputs that should be appended to
         the job output. Default is None.
     """
-    fout = open(sbatch_script_path, "w+")  # open the file of sbatch script
+    fout = Path(sbatch_script_path).open("w+")  # open the file of sbatch script
+
     # using the UNIX file lock to prevent other attempts to visit this sbatch script
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 
     # specify the options of sbatch in the top of this sbatch script
-    fout.write("#!/bin/bash" + "\n")  # use bash to execute this script
-    fout.write("###" + "\n")
-    fout.write("###" + "\n")
+    # fout.write(f"#!{os.environ['SHELL']}\n")
+    fout.write("#!/usr/local_rwth/bin/zsh\n")  # use bash to execute this script
+    # fout.write("#!/usr/bin/env python\n")
+    fout.write("###\n")
+    fout.write("###\n")
 
     for i in sbatch_options_list:
         fout.write("#SBATCH " + str(i) + "\n")
 
-    fout.write("###" + "\n")
+    fout.write("###\n")
+    fout.write("export CONDA_ROOT=$HOME/miniconda3\n")
+    fout.write(". $CONDA_ROOT/etc/profile.d/conda.sh\n")
+    fout.write('export PATH="$CONDA_ROOT/bin:$PATH"\n')
+    fout.write("conda activate sparkle\n")
 
     # specify the array of parameters for each command
     if len(job_params_list) > 0:
@@ -244,7 +251,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
       A list of batch options for Slurm.
     """
     if smac:
-        tmp_dir = "tmp/"
+        tmp_dir = sgh.smac_dir + "tmp/"
     else:
         tmp_dir = "Tmp/"
 
@@ -264,18 +271,14 @@ def get_sbatch_options_list(sbatch_script_path: Path,
 
     # Log script and output paths
     sl.add_output(str(sbatch_script_path), f"Slurm batch script for {job}")
-    sl.add_output(sgh.smac_dir + std_out,
+    sl.add_output(std_out,
                   f"Standard output of Slurm batch script for {job}")
-    sl.add_output(sgh.smac_dir + std_err,
+    sl.add_output(std_err,
                   f"Error output of Slurm batch script for {job}")
 
     # Remove possible old output
-    if smac:
-        sfh.rmfile(Path(sgh.smac_dir + std_out))
-        sfh.rmfile(Path(sgh.smac_dir + std_err))
-    else:
-        sfh.rmfile(Path(std_out))
-        sfh.rmfile(Path(std_err))
+    sfh.rmfile(Path(std_out))
+    sfh.rmfile(Path(std_err))
 
     return sbatch_options_list
 
@@ -357,7 +360,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
         # Write configuration to file to be used by smac-validate
         config_file_path = scenario_dir + "/configuration_for_validation.txt"
         # open the file of sbatch script
-        fout = open(sgh.smac_dir + config_file_path, "w+")
+        fout = Path(sgh.smac_dir + config_file_path).open("w+")
         # using the UNIX file lock to prevent other attempts to visit this sbatch script
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
         fout.write(optimised_configuration_str + "\n")
@@ -504,7 +507,7 @@ def submit_sbatch_script(sbatch_script_name: str,
         execution_dir = sgh.smac_dir
 
     sbatch_script_path = sbatch_script_name
-    ori_path = os.getcwd()
+    ori_path = Path.cwd()
     os.system(f"cd {execution_dir} ; chmod a+x {sbatch_script_path} ; cd {ori_path}")
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
     command = f"cd {execution_dir} ; unset SLURM_CPU_BIND;" \
@@ -637,7 +640,7 @@ def generate_generic_callback_slurm_script(name: str,
     sbatch_options_list.append("--ntasks=1")
     sbatch_options_list.append("-c1")
 
-    fout = open(delayed_job_file_path, "w")
+    fout = Path(delayed_job_file_path).open("w")
     fout.write("#!/bin/bash\n")  # Use bash to execute this script
     fout.write("###\n")
     fout.write("###\n")

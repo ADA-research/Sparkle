@@ -83,7 +83,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     solver_source = args.solver_path
-    if not os.path.exists(solver_source):
+    if not Path(solver_source).exists():
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit()
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     last_level_directory = sfh.get_last_level_directory_name(solver_source)
 
     solver_directory = sash.get_solver_directory(last_level_directory)
-    if not os.path.exists(solver_directory):
+    if not Path(solver_directory).exists():
         Path(solver_directory).mkdir(parents=True, exist_ok=True)
     else:
         print("Solver " + last_level_directory + " already exists!")
@@ -134,13 +134,13 @@ if __name__ == "__main__":
     print(f"Adding solver {sfh.get_last_level_directory_name(solver_directory)} "
           "done!")
 
-    if os.path.exists(sgh.sparkle_portfolio_selector_path):
+    if Path(sgh.sparkle_portfolio_selector_path).exists():
         command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
         os.system(command_line)
         print("Removing Sparkle portfolio selector "
               f"{sgh.sparkle_portfolio_selector_path} done!")
 
-    if os.path.exists(sgh.sparkle_report_path):
+    if Path(sgh.sparkle_report_path).exists():
         command_line = "rm -f " + sgh.sparkle_report_path
         os.system(command_line)
         print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
