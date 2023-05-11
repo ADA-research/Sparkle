@@ -2,7 +2,7 @@
 
 import shutil
 
-from unittest import TestCase, mock
+from unittest import TestCase
 from unittest.mock import patch
 from pathlib import Path
 
@@ -85,8 +85,9 @@ class TestConfigurationScenario(TestCase):
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_instances(self, mock_abs, mock_deterministic):
         """Test if create_scenario() copies instances and creates instance list file."""
-        mock_abs.side_effect = [Path("tests/test_files/test_configurator"),
-                                Path("/absolute/path/Instances/Test-Instance-Set/test_instance_1.cnf")]
+        mock_abs.side_effect = [
+            Path("tests/test_files/test_configurator"),
+            Path("/absolute/path/Instances/Test-Instance-Set/test_instance_1.cnf")]
 
         self.scenario.create_scenario(self.parent_directory)
 

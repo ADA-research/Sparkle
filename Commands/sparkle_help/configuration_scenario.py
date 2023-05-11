@@ -22,7 +22,7 @@ class ConfigurationScenario:
 
         Args:
             solver: Solver that should be configured.
-            source_instance_directory: Original directory of instances.
+            instance_directory: Original directory of instances.
             number_of_runs: Number of runs used for configuration.
             use_features: Boolean indicating if features should be used.
             feature_data_df: If features are used, this contains the feature data.
@@ -58,8 +58,9 @@ class ConfigurationScenario:
         self.result_directory = self.parent_directory / "results" / self.name
         self.instance_directory = Path(self.parent_directory / "scenarios" / "instances"
                                        / self.instance_directory.name)
-        self.instance_file = self.instance_directory / Path(str(self.instance_directory.name
-                                                                + "_train.txt"))
+        self.instance_file = (
+            self.instance_directory / Path(str(self.instance_directory.name
+                                               + "_train.txt")))
         self._prepare_scenario_directory()
         self._prepare_result_directory()
 
