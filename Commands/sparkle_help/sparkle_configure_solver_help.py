@@ -105,7 +105,7 @@ def get_solver_deterministic(solver_name: str) -> str:
     target_solver_path = "Solvers/" + solver_name
     solver_list_path = sgh.solver_list_path
 
-    fin = open(solver_list_path, "r+")
+    fin = Path(solver_list_path).open("r+")
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 
     while True:
@@ -169,7 +169,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
                           f"{instance_set_val_name}_{inst_type}.txt")
     smac_test_instance_file = smac_instance_file
 
-    fout = open(smac_file_scenario, "w+")
+    fout = Path(smac_file_scenario).open("w+")
     fout.write("algo = ./" + sgh.sparkle_smac_wrapper + "\n")
     fout.write(f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n")
     fout.write("deterministic = " + get_solver_deterministic(solver_name) + "\n")
@@ -379,7 +379,7 @@ def check_configuration_permission_error(solver_name: str,
     filename = next(Path(smac_results_dir / f) for f in os.listdir(smac_results_dir)
                     if Path(smac_results_dir / f).is_file())
 
-    with open(filename, "r") as file:
+    with Path(filename).open("r") as file:
         content = file.read()
         if "exec failed: Permission denied" in content:
             print("ERROR: The solver configuration was not succesfull so the validation "
@@ -411,7 +411,7 @@ def write_optimised_configuration_str(solver_name: str, instance_set_name: str) 
         solver_name, instance_set_name)
     latest_configuration_str_path = sgh.sparkle_tmp_path + "latest_configuration.txt"
 
-    with open(latest_configuration_str_path, "w") as outfile:
+    with Path(latest_configuration_str_path).open("w") as outfile:
         outfile.write(optimised_configuration_str)
 
     sl.add_output(latest_configuration_str_path, "Configured algorithm parameters of the"
@@ -445,7 +445,7 @@ def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) 
         solver_directory)
     pcs_file_out = []
 
-    with open(pcs_file) as infile:
+    with Path(pcs_file).open() as infile:
         for line in infile:
             # Copy empty lines
             if not line.strip():
@@ -482,7 +482,7 @@ def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) 
 
     latest_configuration_pcs_path = sgh.sparkle_tmp_path + "latest_configuration.pcs"
 
-    with open(latest_configuration_pcs_path, "w") as outfile:
+    with Path(latest_configuration_pcs_path).open("w") as outfile:
         for element in pcs_file_out:
             outfile.write(str(element))
     # Log output
@@ -566,7 +566,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     # among them
     for file_result_name in list_file_result_name:
         file_result_path = smac_results_dir + file_result_name
-        fin = open(file_result_path, "r+")
+        fin = Path(file_result_path).open("r+")
 
         while True:
             myline = fin.readline()

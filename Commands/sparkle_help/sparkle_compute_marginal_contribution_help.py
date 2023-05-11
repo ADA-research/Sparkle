@@ -122,8 +122,8 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv,
     """Return the solvers schedule suggested by the selector as a list."""
     list_predict_schedule = []
     python_executable = sgh.python_executable
-    if not os.path.exists("Tmp/"):
-        os.mkdir("Tmp/")
+    if not Path("Tmp/").exists():
+        Path("Tmp/").mkdir()
     feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
 
     predit_schedule_file = ("predict_schedule_"
@@ -150,7 +150,7 @@ def get_list_predict_schedule(actual_portfolio_selector_path, feature_data_csv,
         srps.get_list_predict_schedule_from_file(predict_schedule_result_path_str))
 
     # If there is error output log temporary files for analsysis, otherwise remove them
-    with open(err_path_str) as file_content:
+    with Path(err_path_str).open() as file_content:
         lines = file_content.read().splitlines()
     if len(lines) > 1 or lines[0] != "INFO:AutoFolio:Predict on Test":
         sl.add_output(str(log_path), "Predicted portfolio schedule command line call")
@@ -285,8 +285,8 @@ def compute_actual_selector_marginal_contribution(
     num_solvers = performance_data_csv.get_column_size()
     capvalue_list = get_capvalue_list(performance_data_csv)
 
-    if not os.path.exists("Tmp/"):
-        os.mkdir("Tmp/")
+    if not Path("Tmp/").exists():
+        Path("Tmp/").mkdir()
 
     # Compute performance of actual selector
     print("Computing actual performance for portfolio selector with all solvers ...")
@@ -295,7 +295,7 @@ def compute_actual_selector_marginal_contribution(
                                               performance_data_csv_path,
                                               feature_data_csv_path)
 
-    if not os.path.exists(actual_portfolio_selector_path):
+    if not Path(actual_portfolio_selector_path).exists():
         print(f"****** WARNING: {actual_portfolio_selector_path} does not exist! ******")
         print("****** WARNING: AutoFolio constructing the actual portfolio selector with"
               " all solvers failed! ******")
@@ -345,7 +345,7 @@ def compute_actual_selector_marginal_contribution(
         else:
             print("****** WARNING: No solver exists ! ******")
 
-        if not os.path.exists(tmp_actual_portfolio_selector_path):
+        if not Path(tmp_actual_portfolio_selector_path).exists():
             print(f"****** WARNING: {tmp_actual_portfolio_selector_path} does not exist!"
                   " ******")
             print("****** WARNING: AutoFolio constructing the actual portfolio selector "

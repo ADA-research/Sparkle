@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_source = args.instances_path
-    if not os.path.exists(instances_source):
+    if not Path(instances_source).exists():
         print(f'Instance set path "{instances_source}" does not exist!')
         sys.exit()
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
     instances_directory = "Instances/" + last_level_directory
-    if not os.path.exists(instances_directory):
+    if not Path(instances_directory).exists():
         Path(instances_directory).mkdir(parents=True, exist_ok=True)
 
     if sih._check_existence_of_instance_list_file(instances_source):
@@ -111,11 +111,11 @@ if __name__ == "__main__":
             intended_instance_line = ""
 
             for related_file_name in instance_related_files:
-                source_file_path = os.path.join(instances_source, related_file_name)
-                target_file_path = os.path.join(instances_directory, related_file_name)
+                source_file_path = Path(instances_source) / related_file_name
+                target_file_path = Path(instances_directory) / related_file_name
                 cmd = f"cp {source_file_path} {target_file_path}"
                 os.system(cmd)
-                intended_instance_line += target_file_path + " "
+                intended_instance_line += str(target_file_path) + " "
 
             intended_instance_line = intended_instance_line.strip()
 
@@ -174,13 +174,13 @@ if __name__ == "__main__":
     print(f"Adding instances {sfh.get_last_level_directory_name(instances_directory)} "
           "done!")
 
-    if os.path.exists(sgh.sparkle_portfolio_selector_path):
+    if Path(sgh.sparkle_portfolio_selector_path).exists():
         command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
         os.system(command_line)
         print("Removing Sparkle portfolio selector "
               f"{sgh.sparkle_portfolio_selector_path} done!")
 
-    if os.path.exists(sgh.sparkle_report_path):
+    if Path(sgh.sparkle_report_path).exists():
         command_line = "rm -f " + sgh.sparkle_report_path
         os.system(command_line)
         print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")

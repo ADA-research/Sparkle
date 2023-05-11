@@ -136,7 +136,7 @@ def get_results() -> dict[str, list[str, str]]:
     for result in results:
         result_path = Path(solutions_dir / result)
 
-        with open(result_path, "r") as result_file:
+        with Path(result_path).open("r") as result_file:
             lines = result_file.readlines()
 
         result_lines = [line.strip() for line in lines]
@@ -333,7 +333,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     data_filename = "data_parallel_portfolio_sparkle_vs_sbs.dat"
     data_filepath = latex_directory_path + data_filename
 
-    with open(data_filepath, "w+") as outfile:
+    with Path(data_filepath).open("w+") as outfile:
         for instance in dict_sbs_penalty_time_on_each_instance:
             sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
             sparkle_penalty_time = (
@@ -491,7 +491,7 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ""
 
-    with open(latex_template_filepath, "r") as infile:
+    with Path(latex_template_filepath).open("r") as infile:
         for line in infile:
             report_content += line
 
@@ -502,7 +502,7 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
 
-    with open(latex_report_filepath, "w+") as outfile:
+    with Path(latex_report_filepath).open("w+") as outfile:
         for line in report_content:
             outfile.write(line)
 
