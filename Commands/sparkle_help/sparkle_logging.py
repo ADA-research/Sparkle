@@ -46,7 +46,6 @@ def _update_caller_file_path(timestamp: str) -> None:
         timestamp: String representation of the time.
 
     """
-
     caller_file = caller + "_main_log.txt"
     caller_dir = Path(timestamp + "_" + caller)
     # Set caller directory for other Sparkle functions to use
