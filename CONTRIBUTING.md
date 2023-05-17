@@ -57,6 +57,7 @@ When ready, create a pull request towards the `development` branch.
 
 ### Code style
 The coding style consistency is a work in progress, and existing code may not adhere to the points below. Please favour the style discussed here over the style of whatever existing code you are working on, so we can gradually move to a consistent code base.
+
 1. Ensure the code is easily readable and understandable.
 2. Ensure comments explain code that cannot be written in an easily readable and understandable way.
 3. Adhere to the [PEP8](https://pep8.org/) style guide. Deviations are documented in `.flake8` (only larger line length).

@@ -157,7 +157,7 @@ if __name__ == "__main__":
         f"{solver.name}_{sgh.sparkle_last_test_file_name}"
     )
 
-    fout = open(last_test_file_path, "w+")
+    fout = Path(last_test_file_path).open("w+")
     fout.write(f"solver {solver}\n")
     fout.write(f"train {instance_set_train}\n")
     if instance_set_test is not None:

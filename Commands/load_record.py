@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Sparkle command to load a Sparkle platform from a .zip file."""
 
-import os
 import sys
 import argparse
+from pathlib import Path
 from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_logging as sl
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     record_file_name = args.record_file_path
-    if not os.path.exists(record_file_name):
+    if not Path(record_file_name).exists():
         print("Record file " + record_file_name + " does not exist!")
         sys.exit()
 

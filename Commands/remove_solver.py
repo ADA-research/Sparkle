@@ -4,6 +4,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -40,7 +41,7 @@ if __name__ == "__main__":
 
     if args.nickname:
         solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]
-    if not os.path.exists(solver_path):
+    if not Path(solver_path).exists():
         print(f'Solver path "{solver_path}" does not exist!')
         sys.exit()
 
@@ -65,7 +66,7 @@ if __name__ == "__main__":
                 break
         sfh.write_solver_nickname_mapping()
 
-    if os.path.exists(sparkle_global_help.performance_data_csv_path):
+    if Path(sparkle_global_help.performance_data_csv_path).exists():
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sparkle_global_help.performance_data_csv_path
         )
@@ -85,11 +86,11 @@ if __name__ == "__main__":
         + solver_name
         + "_*/"
     )
-    if os.path.exists(smac_solver_path):
+    if Path(smac_solver_path).exists():
         command_line = "rm -rf " + smac_solver_path
         os.system(command_line)
 
-    if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
+    if Path(sparkle_global_help.sparkle_portfolio_selector_path).exists():
         command_line = "rm -f " + sparkle_global_help.sparkle_portfolio_selector_path
         os.system(command_line)
         print(
@@ -98,7 +99,7 @@ if __name__ == "__main__":
             + " done!"
         )
 
-    if os.path.exists(sparkle_global_help.sparkle_report_path):
+    if Path(sparkle_global_help.sparkle_report_path).exists():
         command_line = "rm -f " + sparkle_global_help.sparkle_report_path
         os.system(command_line)
         print(

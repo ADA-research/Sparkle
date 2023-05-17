@@ -3,9 +3,10 @@
 """Automatically generate a gnuplot script for algorithm configuration."""
 
 import os
-from os.path import abspath, dirname, join
+from os.path import dirname, join
 import sys
 from shutil import which
+import pathlib
 
 if __name__ == "__main__":
     if len(sys.argv) != 7 and len(sys.argv) != 9:
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     default_name = default_name.replace("/", "_")
     output_gnuplot_script = configured_name + "_vs_" + default_name + ".plt"
 
-    fout = open(output_gnuplot_script, "w+")
+    fout = pathlib.Path(output_gnuplot_script).open("w+")
     fout.write(f"set xlabel '{performance_measure} (default)'\n")
     fout.write(f"set ylabel '{performance_measure} (configured)'\n")
     fout.write("unset key" + "\n")
@@ -67,7 +68,7 @@ if __name__ == "__main__":
     os.system(cmd)
 
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = abspath(join(dirname(__file__), "..", "epstopdf.pl"))
+    epsbackup = pathlib.Path(join(dirname(__file__), "..", "epstopdf.pl")).resolve()
     epstopdf = which("epstopdf") or epsbackup
     os.system(f"{epstopdf} '{output_eps_file}'")
 

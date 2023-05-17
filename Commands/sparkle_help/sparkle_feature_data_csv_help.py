@@ -4,6 +4,7 @@
 
 import pandas as pd
 import fcntl
+from pathlib import Path
 
 try:
     from sparkle_help import sparkle_global_help
@@ -128,7 +129,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
     def reload_and_combine_and_update(self, second_sfdcsv) -> None:
         """Load this CSV from file, combine it with a given CSV and write it to file."""
-        fo = open(self.csv_filepath, "r+")
+        fo = Path(self.csv_filepath).open("r+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         self.dataframe = pd.read_csv(self.csv_filepath, index_col=0)
         self.combine(second_sfdcsv)

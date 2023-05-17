@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
 
-import os
 import fcntl
 from pathlib import Path
 from pathlib import PurePath
@@ -112,8 +111,8 @@ extractor_nickname_mapping = {}
 extractor_feature_vector_size_mapping = {}
 instance_list = []
 
-if os.path.exists(extractor_nickname_list_path):
-    fo = open(extractor_nickname_list_path, "r+")
+if Path(extractor_nickname_list_path).exists():
+    fo = Path(extractor_nickname_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -124,8 +123,8 @@ if os.path.exists(extractor_nickname_list_path):
         extractor_nickname_mapping[mylist[0]] = mylist[1]
     fo.close()
 
-if os.path.exists(extractor_feature_vector_size_list_path):
-    fo = open(extractor_feature_vector_size_list_path, "r+")
+if Path(extractor_feature_vector_size_list_path).exists():
+    fo = Path(extractor_feature_vector_size_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline().strip()
@@ -135,8 +134,8 @@ if os.path.exists(extractor_feature_vector_size_list_path):
         extractor_feature_vector_size_mapping[mylist[0]] = int(mylist[1])
     fo.close()
 
-if os.path.exists(extractor_list_path):
-    fo = open(extractor_list_path, "r+")
+if Path(extractor_list_path).exists():
+    fo = Path(extractor_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -146,8 +145,8 @@ if os.path.exists(extractor_list_path):
         extractor_list.append(myline)
     fo.close()
 
-if os.path.exists(solver_nickname_list_path):
-    fo = open(solver_nickname_list_path, "r+")
+if Path(solver_nickname_list_path).exists():
+    fo = Path(solver_nickname_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -158,8 +157,8 @@ if os.path.exists(solver_nickname_list_path):
         solver_nickname_mapping[mylist[0]] = mylist[1]
     fo.close()
 
-if os.path.exists(solver_list_path):
-    fo = open(solver_list_path, "r+")
+if Path(solver_list_path).exists():
+    fo = Path(solver_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -170,8 +169,8 @@ if os.path.exists(solver_list_path):
         solver_list.append(mylist[0])
     fo.close()
 
-if os.path.exists(str(instance_list_path)):
-    fo = open(str(instance_list_path), "r+")
+if Path(str(instance_list_path)).exists():
+    fo = Path(str(instance_list_path)).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()

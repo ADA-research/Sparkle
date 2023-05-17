@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Command to initialise a Sparkle platform."""
 
-import os
 import sys
 import argparse
 from pathlib import Path
@@ -33,32 +32,32 @@ if __name__ == "__main__":
 
     print("Start initialising Sparkle platform ...")
 
-    if not os.path.exists("Records/"):
-        output = os.mkdir("Records/")
+    if not Path("Records/").exists():
+        output = Path("Records/").mkdir()
 
-    if not os.path.exists("Tmp/"):
-        output = os.mkdir("Tmp/")
+    if not Path("Tmp/").exists():
+        output = Path("Tmp/").mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
 
-    if not os.path.exists("Tmp/SBATCH_Extractor_Jobs/"):
-        output = os.mkdir("Tmp/SBATCH_Extractor_Jobs/")
+    if not Path("Tmp/SBATCH_Extractor_Jobs/").exists():
+        output = Path("Tmp/SBATCH_Extractor_Jobs/").mkdir()
 
-    if not os.path.exists("Tmp/SBATCH_Solver_Jobs/"):
-        output = os.mkdir("Tmp/SBATCH_Solver_Jobs/")
+    if not Path("Tmp/SBATCH_Solver_Jobs/").exists():
+        output = Path("Tmp/SBATCH_Solver_Jobs/").mkdir()
 
-    if not os.path.exists("Tmp/SBATCH_Portfolio_Jobs/"):
-        output = os.mkdir("Tmp/SBATCH_Portfolio_Jobs/")
+    if not Path("Tmp/SBATCH_Portfolio_Jobs/").exists():
+        output = Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir()
 
-    if not os.path.exists("Tmp/SBATCH_Report_Jobs/"):
-        output = os.mkdir("Tmp/SBATCH_Report_Jobs/")
+    if not Path("Tmp/SBATCH_Report_Jobs/").exists():
+        output = Path("Tmp/SBATCH_Report_Jobs/").mkdir()
 
     pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
 
     if not pap_sbatch_path.exists():
         pap_sbatch_path.mkdir()
 
-    if not os.path.exists("Log/"):
-        output = os.mkdir("Log/")
+    if not Path("Log/").exists():
+        output = Path("Log/").mkdir()
 
     my_flag_anyone = sparkle_record_help.detect_current_sparkle_platform_exists()
 
@@ -72,17 +71,17 @@ if __name__ == "__main__":
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
 
-    output = os.mkdir("Instances/")
-    output = os.mkdir("Solvers/")
-    output = os.mkdir("Extractors/")
-    output = os.mkdir("Feature_Data/")
-    output = os.mkdir("Performance_Data/")
-    output = os.mkdir("Reference_Lists/")
-    output = os.mkdir("Sparkle_Portfolio_Selector/")
+    output = Path("Instances/").mkdir()
+    output = Path("Solvers/").mkdir()
+    output = Path("Extractors/").mkdir()
+    output = Path("Feature_Data/").mkdir()
+    output = Path("Performance_Data/").mkdir()
+    output = Path("Reference_Lists/").mkdir()
+    output = Path("Sparkle_Portfolio_Selector/").mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
-    output = os.mkdir("Feature_Data/Tmp/")
-    output = os.mkdir("Performance_Data/Tmp/")
+    output = Path("Feature_Data/Tmp/").mkdir()
+    output = Path("Performance_Data/Tmp/").mkdir()
     sgh.pap_performance_data_tmp_path.mkdir()
     print("New Sparkle platform initialised!")

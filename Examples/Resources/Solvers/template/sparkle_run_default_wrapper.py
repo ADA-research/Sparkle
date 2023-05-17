@@ -10,6 +10,8 @@ import argparse
 import fcntl
 import sys
 
+from pathlib import Path
+
 
 def print_command(instance_file, seed_str: str, cutoff_time_str: str):
     """Print a command line call for the target algorithm with a given instance file."""
@@ -44,7 +46,7 @@ def print_output(terminal_output_file: str):
     # TODO: [optional] Determine algorithm run status based on output
 
     # Read solution quality from file
-    infile = open(terminal_output_file, "r")
+    infile = Path(terminal_output_file).open("r")
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
     solution_quality = sys.maxsize
