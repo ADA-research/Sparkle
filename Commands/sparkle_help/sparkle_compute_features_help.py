@@ -25,7 +25,7 @@ def generate_missing_value_csv_like_feature_data_csv(
         instance_path: str,
         extractor_path: str,
         result_path: str) -> sfdcsv.SparkleFeatureDataCSV:
-    """Create a CSV file with the right number of columns and rows.
+    """Create a CSV file with missing values for a given instance and extractor pair.
 
     Args:
         feature_data_csv: Reference to a SparkleFeatureDataCSV object for which the
