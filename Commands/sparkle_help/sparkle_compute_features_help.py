@@ -26,8 +26,11 @@ except ImportError:
     from sparkle_command_help import CommandName
 
 
-def generate_missing_value_csv_like_feature_data_csv(feature_data_csv: sfdcsv.SparkleFeatureDataCSV, instance_path: Path,
-                                                     extractor_path: Path, result_path: Path) -> sfdcsv.SparkleFeatureDataCSV:
+def generate_missing_value_csv_like_feature_data_csv(
+        feature_data_csv: sfdcsv.SparkleFeatureDataCSV,
+        instance_path: Path,
+        extractor_path: Path,
+        result_path: Path) -> sfdcsv.SparkleFeatureDataCSV:
     """Create a CSV file with the right number of commas and rows.
 
     Args:
@@ -37,7 +40,7 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv: sfdcsv.Sp
         result_path: (Path): path for storing the results
     Returns:
         zero_value_csv (SparkleFeatureDataCSV): a new csv filled with zero values
-        """
+    """
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
     zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
 
@@ -77,7 +80,8 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
     else:
         cutoff_time_each_extractor_run = (
-                sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
+            sgh.settings.get_general_extractor_cutoff_time() / len(
+                sgh.extractor_list))
     cutoff_time_each_run_option = r"--cpu-limit " + str(cutoff_time_each_extractor_run)
     print("Cutoff time for each run on computing features is set to "
           f"{str(cutoff_time_each_extractor_run)} seconds")
@@ -144,7 +148,8 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                 command_line = "rm -f " + result_path
                 os.system(command_line)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
-                    feature_data_csv, Path(instance_path), Path(extractor_path), Path(result_path))
+                    feature_data_csv, Path(instance_path), Path(extractor_path),
+                    Path(result_path))
 
             feature_data_csv.combine(tmp_fdcsv)
 
@@ -174,7 +179,8 @@ def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) ->
     """Compute features in parallel.
 
     Args:
-        feature_data_csv_path (Path): Specifies the path of the csv file where the feature data is stored.
+        feature_data_csv_path (Path): Specifies the path of the csv file where
+            the feature data is stored.
         recompute (bool): Specifies if features should be recomputed.
 
     Returns:
