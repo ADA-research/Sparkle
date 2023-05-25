@@ -104,7 +104,7 @@ if __name__ == "__main__":
         command_line = "rm -f " + result_path
         os.system(command_line)
         tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(
-            feature_data_csv, instance_path, extractor_path, result_path)
+            feature_data_csv, Path(instance_path), Path(extractor_path), Path(result_path))
         result_string = "Failed -- using missing value instead"
 
     description_str = (

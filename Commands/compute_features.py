@@ -8,7 +8,6 @@ from pathlib import Path
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_job_parallel_help as sjph
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
@@ -47,12 +46,12 @@ def compute_features_parallel(my_flag_recompute):
     if my_flag_recompute:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         feature_data_csv.clean_csv()
-        compute_features_parallel_jobid = scfp.computing_features_parallel(
-            sgh.feature_data_csv_path, 2
+        compute_features_parallel_jobid = scf.computing_features_parallel(
+            Path(sgh.feature_data_csv_path), True
         )
     else:
-        compute_features_parallel_jobid = scfp.computing_features_parallel(
-            sgh.feature_data_csv_path, 1
+        compute_features_parallel_jobid = scf.computing_features_parallel(
+            Path(sgh.feature_data_csv_path), False
         )
 
     dependency_jobid_list = []
@@ -104,9 +103,9 @@ if __name__ == "__main__":
                 sgh.feature_data_csv_path
             )
             feature_data_csv.clean_csv()
-            scf.computing_features(sgh.feature_data_csv_path, 2)
+            scf.computing_features(Path(sgh.feature_data_csv_path), True)
         else:
-            scf.computing_features(sgh.feature_data_csv_path, 1)
+            scf.computing_features(Path(sgh.feature_data_csv_path), False)
 
         print("Feature data file " + sgh.feature_data_csv_path + " has been updated!")
         print("Computing features done!")

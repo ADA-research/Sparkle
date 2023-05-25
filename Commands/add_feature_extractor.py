@@ -10,7 +10,6 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
 
@@ -213,7 +212,7 @@ if __name__ == "__main__":
     if args.run_extractor_now:
         if not my_flag_parallel:
             print("Start computing features ...")
-            scf.computing_features(sgh.feature_data_csv_path, 1)
+            scf.computing_features(Path(sgh.feature_data_csv_path), False)
             print(
                 "Feature data file "
                 + sgh.feature_data_csv_path
@@ -221,9 +220,8 @@ if __name__ == "__main__":
             )
             print("Computing features done!")
         else:
-            num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
-            scfp.computing_features_parallel(
-                sgh.feature_data_csv_path, num_job_in_parallel, 1
+            scf.computing_features_parallel(
+                Path(sgh.feature_data_csv_path), False
             )
             print("Computing features in parallel ...")
 

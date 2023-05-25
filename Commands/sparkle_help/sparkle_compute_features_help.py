@@ -10,19 +10,34 @@ try:
     from sparkle_help import sparkle_global_help as sgh
     from sparkle_help import sparkle_basic_help
     from sparkle_help import sparkle_file_help as sfh
+    from sparkle_help import sparkle_slurm_help as ssh
+    from sparkle_help import sparkle_logging as sl
     from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
     from sparkle_help import sparkle_job_help
+    from sparkle_help.sparkle_command_help import CommandName
 except ImportError:
     import sparkle_global_help as sgh
     import sparkle_basic_help
     import sparkle_file_help as sfh
+    import sparkle_slurm_help as ssh
+    import sparkle_logging as sl
     import sparkle_feature_data_csv_help as sfdcsv
     import sparkle_job_help
+    from sparkle_command_help import CommandName
 
 
-def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path,
-                                                     extractor_path, result_path):
-    """Create a CSV file with the right number of commas and rows."""
+def generate_missing_value_csv_like_feature_data_csv(feature_data_csv: sfdcsv.SparkleFeatureDataCSV, instance_path: Path,
+                                                     extractor_path: Path, result_path: Path) -> sfdcsv.SparkleFeatureDataCSV:
+    """Create a CSV file with the right number of commas and rows.
+
+    Args:
+        feature_data_csv (Path): the feature data csv
+        instance_path (Path) : path to the instance
+        extractor_path (Path): path to the extractor
+        result_path: (Path): path for storing the results
+    Returns:
+        zero_value_csv (SparkleFeatureDataCSV): a new csv filled with zero values
+        """
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
     zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
 
@@ -37,13 +52,19 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_
     return zero_value_csv
 
 
-def computing_features(feature_data_csv_path, mode):
-    """Compute features for all instance and feature extractor combinations."""
+def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
+    """Compute features for all instance and feature extractor combinations.
+
+    Args:
+        feature_data_csv_path (Path): path of feature data csv
+        recompute (bool): boolean indicating if features should be recomputed
+
+    """
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-    if mode == 1:
+    if not recompute:
         list_feature_computation_job = (
             feature_data_csv.get_list_remaining_feature_computation_job())
-    elif mode == 2:
+    elif recompute:
         list_feature_computation_job = (
             feature_data_csv.get_list_recompute_feature_computation_job())
     else:
@@ -56,7 +77,7 @@ def computing_features(feature_data_csv_path, mode):
         cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
     else:
         cutoff_time_each_extractor_run = (
-            sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
+                sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
     cutoff_time_each_run_option = r"--cpu-limit " + str(cutoff_time_each_extractor_run)
     print("Cutoff time for each run on computing features is set to "
           f"{str(cutoff_time_each_extractor_run)} seconds")
@@ -118,12 +139,12 @@ def computing_features(feature_data_csv_path, mode):
             except Exception:
                 print("****** WARNING: Feature vector computing on instance "
                       f"{instance_path} failed! ******")
-                print("****** WARNING: The feature vector of this instace consists of "
+                print("****** WARNING: The feature vector of this instance consists of "
                       "missing values ******")
                 command_line = "rm -f " + result_path
                 os.system(command_line)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
-                    feature_data_csv, instance_path, extractor_path, result_path)
+                    feature_data_csv, Path(instance_path), Path(extractor_path), Path(result_path))
 
             feature_data_csv.combine(tmp_fdcsv)
 
@@ -149,7 +170,76 @@ def computing_features(feature_data_csv_path, mode):
     return
 
 
-def update_feature_data_id():
+def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) -> str:
+    """Compute features in parallel.
+
+    Args:
+        feature_data_csv_path (Path): Specifies the path of the csv file where the feature data is stored.
+        recompute (bool): Specifies if features should be recomputed.
+
+    Returns:
+        jobid (string): The jobid of the created slurm job
+
+    """
+    # Open the csv file in terms of feature data
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+
+    if not recompute:
+        # The value of mode is 1, so the list of computation jobs is the list of the
+        # remaining jobs
+        list_feature_computation_job = (
+            feature_data_csv.get_list_remaining_feature_computation_job())
+    elif recompute:
+        # The value of mode is 2, so the list of computation jobs is the list of all jobs
+        # (recomputing)
+        list_feature_computation_job = (
+            feature_data_csv.get_list_recompute_feature_computation_job())
+    else:  # The abnormal case, exit
+        print("Computing features mode error!")
+        print("Do not compute features")
+        sys.exit()
+
+    ####
+    # Expand the job list
+    total_job_num = (
+        sparkle_job_help.get_num_of_total_job_from_list(list_feature_computation_job))
+
+    # If there are no jobs, stop
+    if total_job_num < 1:
+        print("No feature computation jobs to run; stopping execution! To recompute "
+              "feature values use the --recompute flag.")
+        sys.exit()
+    # If there are jobs update feature data ID
+    else:
+        update_feature_data_id()
+
+    print("The number of total running jobs: " + str(total_job_num))
+    total_job_list = (
+        sparkle_job_help.expand_total_job_from_list(list_feature_computation_job))
+    ####
+
+    ####
+    # Generate the sbatch script
+    n_jobs = len(total_job_list)
+    sbatch_script_name, sbatch_script_dir = (
+        ssh.generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
+                                                           total_job_list))
+    ####
+
+    execution_dir = "./"
+    sbatch_script_path = sbatch_script_dir + sbatch_script_name
+    # Execute the sbatch script via slurm
+    jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES,
+                                     execution_dir)
+
+    # Log output paths
+    sl.add_output(sbatch_script_path,
+                  "Slurm batch script to compute features in parallel")
+
+    return jobid
+
+
+def update_feature_data_id() -> None:
     """Update the feature data ID."""
     # Get current fd_id
     fd_id = get_feature_data_id()
@@ -168,7 +258,6 @@ def update_feature_data_id():
 
 def get_feature_data_id() -> int:
     """Return the current feature data ID."""
-    fd_id = -1
     fd_id_path = sgh.feature_data_id_path
 
     try:
