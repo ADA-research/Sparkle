@@ -63,7 +63,6 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         recompute: boolean indicating if features should be recomputed
 
     """
-
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_feature_computation_job = get_feature_computation_job_list(
         feature_data_csv, recompute)
@@ -73,8 +72,8 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
     else:
         cutoff_time_each_extractor_run = (
-                sgh.settings.get_general_extractor_cutoff_time() / len(
-            sgh.extractor_list))
+            sgh.settings.get_general_extractor_cutoff_time() / len(
+                sgh.extractor_list))
     cutoff_time_each_run_option = r"--cpu-limit " + str(cutoff_time_each_extractor_run)
     print("Cutoff time for each run on computing features is set to "
           f"{str(cutoff_time_each_extractor_run)} seconds")
@@ -226,7 +225,7 @@ def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) ->
 
 def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureDataCSV,
                                      recompute: bool) -> list[list[list[str]]]:
-    """computes the needed feature computation jobs
+    """Computes the needed feature computation jobs.
 
     Args:
         feature_data_csv: the csv containing the feature data

@@ -6,7 +6,6 @@ import argparse
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_compute_features_help as scf
 from sparkle_help import sparkle_job_parallel_help as sjph
 from sparkle_help import sparkle_logging as sl
@@ -47,7 +46,6 @@ def compute_features_parallel(recompute: bool):
     Args:
         recompute: variable indicating if features should be recomputed
     """
-
     compute_features_parallel_jobid = scf.computing_features_parallel(
         Path(sgh.feature_data_csv_path), recompute
     )
