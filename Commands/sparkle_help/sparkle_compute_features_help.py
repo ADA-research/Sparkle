@@ -35,7 +35,7 @@ def generate_missing_value_csv_like_feature_data_csv(
 
     Args:
         feature_data_csv: Reference to a SparkleFeatureDataCSV object for which the
-            dimensions will be used to create an new SparkleFeatureDataCSV with the same
+            dimensions will be used to create a new SparkleFeatureDataCSV with the same
             dimensions.
         instance_path: Path to the instance, to be used for a row with missing values in
             the new CSV file.
@@ -181,7 +181,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
 def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) -> str:
     """Compute features for all instance and feature extractor combinations in parallel.
 
-    An sbatch job is submitted for the computation of the features. The results are then
+    A sbatch job is submitted for the computation of the features. The results are then
     stored in the csv file specified by feature_data_csv_path.
 
     Args:
@@ -195,21 +195,8 @@ def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) ->
 
     """
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-
-    if not recompute:
-        # The value of mode is 1, so the list of computation jobs is the list of the
-        # remaining jobs
-        list_feature_computation_job = (
-            feature_data_csv.get_list_remaining_feature_computation_job())
-    elif recompute:
-        # The value of mode is 2, so the list of computation jobs is the list of all jobs
-        # (recomputing)
-        list_feature_computation_job = (
-            feature_data_csv.get_list_recompute_feature_computation_job())
-    else:  # The abnormal case, exit
-        print("Computing features mode error!")
-        print("Do not compute features")
-        sys.exit()
+    list_feature_computation_job = get_feature_computation_job_list(
+        feature_data_csv, recompute)
 
     n_jobs = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
