@@ -61,7 +61,7 @@ if __name__ == "__main__":
     key_str = (f"{sfh.get_last_level_directory_name(extractor_path)}_"
                f"{sfh.get_last_level_directory_name(instance_path)}_"
                f"{sparkle_basic_help.get_time_pid_random_string()}")
-    result_path = Path("Feature_Data/Tmp/" + key_str + ".csv")
+    result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
     basic_part = "Tmp/" + key_str
     err_path = basic_part + ".err"
     runsolver_watch_data_path = basic_part + ".log"

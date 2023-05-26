@@ -85,7 +85,6 @@ if __name__ == "__main__":
         sys.exit()
 
     nickname_str = args.nickname
-    my_flag_parallel = args.parallel
 
     # Start add feature extractor
     last_level_directory = ""
@@ -210,7 +209,7 @@ if __name__ == "__main__":
         pass
 
     if args.run_extractor_now:
-        if not my_flag_parallel:
+        if not args.parallel:
             print("Start computing features ...")
             scf.computing_features(Path(sgh.feature_data_csv_path), False)
             print(

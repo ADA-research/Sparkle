@@ -79,7 +79,6 @@ if __name__ == "__main__":
         sys.exit()
 
     nickname_str = args.nickname
-    my_flag_parallel = args.parallel
 
     print("Start adding all instances in directory " + instances_source + " ...")
 
@@ -185,7 +184,7 @@ if __name__ == "__main__":
         print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
 
     if args.run_extractor_now:
-        if not my_flag_parallel:
+        if not args.parallel:
             print("Start computing features ...")
             scf.computing_features(Path(sgh.feature_data_csv_path), False)
             print(f"Feature data file {sgh.feature_data_csv_path} has been updated!")
@@ -196,7 +195,7 @@ if __name__ == "__main__":
             print("Computing features in parallel ...")
 
     if args.run_solver_now:
-        if not my_flag_parallel:
+        if not args.parallel:
             print("Start running solvers ...")
             srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
             print(f"Performance data file {sgh.performance_data_csv_path} has been "

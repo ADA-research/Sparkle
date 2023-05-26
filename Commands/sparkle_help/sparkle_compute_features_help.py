@@ -34,12 +34,12 @@ def generate_missing_value_csv_like_feature_data_csv(
     """Create a CSV file with the right number of commas and rows.
 
     Args:
-        feature_data_csv (Path): the feature data csv
-        instance_path (Path) : path to the instance
-        extractor_path (Path): path to the extractor
-        result_path: (Path): path for storing the results
+        feature_data_csv: the feature data csv
+        instance_path: path to the instance
+        extractor_path: path to the extractor
+        result_path:: path for storing the results
     Returns:
-        zero_value_csv (SparkleFeatureDataCSV): a new csv filled with zero values
+        zero_value_csv: a new csv filled with zero values
     """
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
     zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
@@ -59,29 +59,22 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
     """Compute features for all instance and feature extractor combinations.
 
     Args:
-        feature_data_csv_path (Path): path of feature data csv
-        recompute (bool): boolean indicating if features should be recomputed
+        feature_data_csv_path: path of feature data csv
+        recompute: boolean indicating if features should be recomputed
 
     """
+
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-    if not recompute:
-        list_feature_computation_job = (
-            feature_data_csv.get_list_remaining_feature_computation_job())
-    elif recompute:
-        list_feature_computation_job = (
-            feature_data_csv.get_list_recompute_feature_computation_job())
-    else:
-        print("Computing features mode error!")
-        print("Do not compute features")
-        sys.exit()
+    list_feature_computation_job = get_feature_computation_job_list(
+        feature_data_csv, recompute)
 
     runsolver_path = sgh.runsolver_path
     if len(sgh.extractor_list) == 0:
         cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
     else:
         cutoff_time_each_extractor_run = (
-            sgh.settings.get_general_extractor_cutoff_time() / len(
-                sgh.extractor_list))
+                sgh.settings.get_general_extractor_cutoff_time() / len(
+            sgh.extractor_list))
     cutoff_time_each_run_option = r"--cpu-limit " + str(cutoff_time_each_extractor_run)
     print("Cutoff time for each run on computing features is set to "
           f"{str(cutoff_time_each_extractor_run)} seconds")
@@ -179,31 +172,17 @@ def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) ->
     """Compute features in parallel.
 
     Args:
-        feature_data_csv_path (Path): Specifies the path of the csv file where
+        feature_data_csv_path: Specifies the path of the csv file where
             the feature data is stored.
-        recompute (bool): Specifies if features should be recomputed.
+        recompute: Specifies if features should be recomputed.
 
     Returns:
-        jobid (string): The jobid of the created slurm job
+        jobid: The jobid of the created slurm job
 
     """
-    # Open the csv file in terms of feature data
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-
-    if not recompute:
-        # The value of mode is 1, so the list of computation jobs is the list of the
-        # remaining jobs
-        list_feature_computation_job = (
-            feature_data_csv.get_list_remaining_feature_computation_job())
-    elif recompute:
-        # The value of mode is 2, so the list of computation jobs is the list of all jobs
-        # (recomputing)
-        list_feature_computation_job = (
-            feature_data_csv.get_list_recompute_feature_computation_job())
-    else:  # The abnormal case, exit
-        print("Computing features mode error!")
-        print("Do not compute features")
-        sys.exit()
+    list_feature_computation_job = get_feature_computation_job_list(
+        feature_data_csv, recompute)
 
     ####
     # Expand the job list
@@ -243,6 +222,32 @@ def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) ->
                   "Slurm batch script to compute features in parallel")
 
     return jobid
+
+
+def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureDataCSV,
+                                     recompute: bool) -> list[list[list[str]]]:
+    """computes the needed feature computation jobs
+
+    Args:
+        feature_data_csv: the csv containing the feature data
+        recompute: variable indicating if the features need to be recomputed
+
+    Returns:
+        list_feature_computation_job: a list of feature
+            computations to do per instance and solver
+    """
+    if recompute:
+        # recompute is true, so the list of computation jobs is the list of all jobs
+        # (recomputing)
+        feature_data_csv.clean_csv()
+        list_feature_computation_job = (
+            feature_data_csv.get_list_recompute_feature_computation_job())
+    else:
+        # recompute is false, so the list of computation jobs is the list of the
+        # remaining jobs
+        list_feature_computation_job = (
+            feature_data_csv.get_list_remaining_feature_computation_job())
+    return list_feature_computation_job
 
 
 def update_feature_data_id() -> None:
