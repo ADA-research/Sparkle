@@ -20,15 +20,37 @@ except ImportError:
     import sparkle_job_help
 
 
-def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_path,
-                                                     extractor_path, result_path):
-    """Create a CSV file with the right number of commas and rows."""
+def generate_missing_value_csv_like_feature_data_csv(
+        feature_data_csv: sfdcsv.SparkleFeatureDataCSV,
+        instance_path: str,
+        extractor_path: str,
+        result_path: str) -> sfdcsv.SparkleFeatureDataCSV:
+    """Create a CSV file with missing values for a given instance and extractor pair.
+
+    Args:
+        feature_data_csv: Reference to a SparkleFeatureDataCSV object for which the
+            dimensions will be used to create an new SparkleFeatureDataCSV with the same
+            dimensions.
+        instance_path: The name used for a row with missing values in the new CSV file.
+        extractor_path: This will be used to determine the number of missing values to
+            add for the instance.
+        result_path: The path to store the new created CSV file in.
+
+    Returns:
+        A newly created SparkleFeatureDataCSV object with missing values for the provided
+        instance_path with the same number of columns as feature_data_csv.
+    """
+    # create an empty CSV
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
     zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
 
+    # add as many columns as feature_data_csv has
     for column_name in feature_data_csv.list_columns():
         zero_value_csv.add_column(column_name)
 
+    # Add missing values based on the number of features this extractor computes.
+    # WARNING: This currently does not correctly handle which columns should be set in
+    # case of multiple feature extractors.
     length = int(sgh.extractor_feature_vector_size_mapping[extractor_path])
     value_list = [sgh.sparkle_missing_value] * length
 
@@ -37,9 +59,20 @@ def generate_missing_value_csv_like_feature_data_csv(feature_data_csv, instance_
     return zero_value_csv
 
 
-def computing_features(feature_data_csv_path, mode):
-    """Compute features for all instance and feature extractor combinations."""
+def computing_features(feature_data_csv_path: str, mode: int) -> None:
+    """Compute features for all instance and feature extractor combinations.
+
+    Args:
+        feature_data_csv_path: Create a new feature data CSV file in the path
+            specified by this parameter.
+        mode: If mode is set to 1 features will be computed only for instances for which
+            they are not available yet.
+            If mode = 2 features will be computed for all instances, including
+            recomputing any that were previously saved.
+            If mode has any other value an error message is printed.
+    """
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+
     if mode == 1:
         list_feature_computation_job = (
             feature_data_csv.get_list_remaining_feature_computation_job())
@@ -52,11 +85,13 @@ def computing_features(feature_data_csv_path, mode):
         sys.exit()
 
     runsolver_path = sgh.runsolver_path
+
     if len(sgh.extractor_list) == 0:
         cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
     else:
         cutoff_time_each_extractor_run = (
             sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
+
     cutoff_time_each_run_option = r"--cpu-limit " + str(cutoff_time_each_extractor_run)
     print("Cutoff time for each run on computing features is set to "
           f"{str(cutoff_time_each_extractor_run)} seconds")
@@ -80,6 +115,7 @@ def computing_features(feature_data_csv_path, mode):
         instance_path = list_feature_computation_job[i][0]
         extractor_list = list_feature_computation_job[i][1]
         len_extractor_list = len(extractor_list)
+
         for j in range(0, len_extractor_list):
             extractor_path = extractor_list[j]
             basic_part = (f"Tmp/{sfh.get_last_level_directory_name(extractor_path)}_"
@@ -146,11 +182,9 @@ def computing_features(feature_data_csv_path, mode):
                   " computing feature vector of instance "
                   f"{sfh.get_last_level_directory_name(instance_path)} done!\n")
 
-    return
 
-
-def update_feature_data_id():
-    """Update the feature data ID."""
+def update_feature_data_id() -> None:
+    """Updates the feature data ID by incrementing the current feature data ID by 1."""
     # Get current fd_id
     fd_id = get_feature_data_id()
 
@@ -163,11 +197,13 @@ def update_feature_data_id():
     with Path(fd_id_path).open("w") as fd_id_file:
         fd_id_file.write(str(fd_id))
 
-    return
-
 
 def get_feature_data_id() -> int:
-    """Return the current feature data ID."""
+    """Returns the current feature data ID.
+
+    Returns:
+        An int containing the current feature data ID.
+    """
     fd_id = -1
     fd_id_path = sgh.feature_data_id_path
 
