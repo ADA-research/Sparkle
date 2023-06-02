@@ -6,9 +6,7 @@ import argparse
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_compute_features_parallel_help as scfp
 from sparkle_help import sparkle_job_parallel_help as sjph
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
@@ -42,18 +40,15 @@ def parser_function():
     return parser
 
 
-def compute_features_parallel(my_flag_recompute):
-    """Compute features in parallel."""
-    if my_flag_recompute:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-        feature_data_csv.clean_csv()
-        compute_features_parallel_jobid = scfp.computing_features_parallel(
-            sgh.feature_data_csv_path, 2
-        )
-    else:
-        compute_features_parallel_jobid = scfp.computing_features_parallel(
-            sgh.feature_data_csv_path, 1
-        )
+def compute_features_parallel(recompute: bool):
+    """Compute features in parallel.
+
+    Args:
+        recompute: variable indicating if features should be recomputed
+    """
+    compute_features_parallel_jobid = scf.computing_features_parallel(
+        Path(sgh.feature_data_csv_path), recompute
+    )
 
     dependency_jobid_list = []
 
@@ -87,8 +82,6 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    my_flag_recompute = args.recompute
-    my_flag_parallel = args.parallel
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
@@ -98,20 +91,13 @@ if __name__ == "__main__":
     # Start compute features
     print("Start computing features ...")
 
-    if not my_flag_parallel:
-        if my_flag_recompute:
-            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
-                sgh.feature_data_csv_path
-            )
-            feature_data_csv.clean_csv()
-            scf.computing_features(sgh.feature_data_csv_path, 2)
-        else:
-            scf.computing_features(sgh.feature_data_csv_path, 1)
+    if not args.parallel:
+        scf.computing_features(Path(sgh.feature_data_csv_path), args.recompute)
 
         print("Feature data file " + sgh.feature_data_csv_path + " has been updated!")
         print("Computing features done!")
     else:
-        compute_features_parallel(my_flag_recompute)
+        compute_features_parallel(args.recompute)
 
     # Write used settings to file
     sgh.settings.write_used_settings()
