@@ -15,14 +15,13 @@ from sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def get_num_solvers(parallel_portfolio_path: Path) -> str:
-    """
-    Return the number of solvers as string, counting each solver-seed combination.
+    """Return the number of solvers as string, counting each solver-seed combination.
 
     Args:
-        parallel_portfolio_path: parallel portfolio path
+        parallel_portfolio_path: Path to the parallel portfolio.
 
     Returns:
-        Number of solvers as string
+        The number of solvers as string.
     """
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     num_solvers = len(solver_list)
@@ -40,14 +39,13 @@ def get_num_solvers(parallel_portfolio_path: Path) -> str:
 
 
 def get_solver_list(parallel_portfolio_path: Path) -> str:
-    """
-    Return the list of solvers in the parallel portfolio as string, including each solver-seed combination.
+    """Return the list of solvers as string, including each solver-seed combination.
 
     Args:
-        parallel_portfolio_path: parallel portfolio path
+        parallel_portfolio_path: Path to the parallel portfolio.
 
     Returns:
-        list of solvers as string
+        A list of solvers in the parallel portfolio as str.
     """
     str_value = ""
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
@@ -86,14 +84,13 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
 
 
 def get_num_instance_sets(instance_list: list[str]) -> str:
-    """
-    Return the number of instance sets in the given list as string.
+    """Return the number of instance sets in the given list as string.
 
     Args:
         instance_list: list of instance sets
 
     Returns:
-        number of instance sets in the given list as string
+        Number of instance sets in the given list as string
     """
     list_instance_sets = []
 
@@ -115,12 +112,13 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
 
 
 def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
-    """
+    """Retrieve a list of the instance sets.
+
     Args:
         instance_list: list of instance sets
 
     Returns:
-        a list of instance sets and the number of instances in the set as string.
+        A list of instance sets and the number of instances in the set as string.
     """
     str_value = ""
     n_instances = 0
@@ -146,12 +144,11 @@ def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
 
 
 def get_results() -> dict[str, list[str, str]]:
-    """
-    Return a dict with the performance results on each instance.
+    """Return a dict with the performance results on each instance.
 
     Returns:
-        A dict consists of a string indicating the instance name, and a list which contains
-        the solver name followed by the performance (both as string).
+        A dict consists of a string indicating the instance name, and a list which
+        contains the solver name followed by the performance (both as string).
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(str(solutions_dir))
@@ -184,12 +181,15 @@ def get_results() -> dict[str, list[str, str]]:
 
 
 def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
-    """
+    """Retrieve the number of solved and unsolved instances per solver.
+
     Returns:
-        a three-tuple:
-            - str_value: a string with the number of instances solved per successful solver.
-            - solver_dict: a dict with solver name as key, and number of solved instances for the corresponding solver as value
-            - unsolved_instances: number of unsolved instances.
+        A three-tuple:
+            str_value: a string with the number of instances solved per successful
+                solver.
+            solver_dict: a dict with solver name as key, and number of solved instances
+                for the corresponding solver as value
+            unsolved_instances: number of unsolved instances.
     """
     results_on_instances = get_results()
     str_value = ""
@@ -237,13 +237,16 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
 def get_dict_sbs_penalty_time_on_each_instance(
         parallel_portfolio_path: Path,
         instance_list: list[str]) -> tuple[dict[str, float], str, dict[str, float]]:
-    """
-    Return the penalised run time for the single best solver and per solver.
+    """Return the penalised run time for the single best solver and per solver.
 
-    Returns: a three-tuple
-        - A dict containing the run time per instance for the single best solver, 
-        - a string containing the name of the single best solver
-        - a second dict containing penalised average run time per solver.
+    Args:
+        # TODO
+
+    Returns:
+        A three-tuple:
+            A dict containing the run time per instance for the single best solver.
+            A string containing the name of the single best solver.
+            A second dict containing penalised average run time per solver.
     """
     # Collect full solver list, including solver variants
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
@@ -326,7 +329,8 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
         instance_list: list[str]) -> dict[str, float]:
-    """
+    """Returns the instance names and corresponding penalised running times of the PaP.
+
     Args:
         instance_list: list of instances.
 
@@ -363,10 +367,11 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
 
     Returns:
         a three tuple:
-        - str_value: a string to include the PaP vs SBS figure in LaTeX
-        - dict_all_solvers: a dict containing the penalised average run time per solver.
-        - dict_actual_parallel_portfolio_penalty_time_on_each_instance: a dict with instance
-          names and the penalised running time of the PaP.
+            str_value: a string to include the PaP vs SBS figure in LaTeX
+            dict_all_solvers: a dict containing the penalised average run time per
+                solver.
+            dict_actual_parallel_portfolio_penalty_time_on_each_instance: a dict with
+                instance names and the penalised running time of the PaP.
     """
     str_value = ""
     dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = (
@@ -406,14 +411,16 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
                       dict_portfolio: dict[str, float],
                       solver_with_solutions: dict[str, int],
                       n_unsolved_instances: int, n_instances: int) -> str:
-    """
-    Return a string containing LaTeX code for a table with the portfolio results.
+    """Returns a LaTeX table with the portfolio results.
 
     Args:
         results: a dict containing the penalised average run time per solver.
         parallel_portfolio_path: parallel portfolio path
-        dict_portfolio: a dict with instance names and the penalised running time of the PaP.
-        solver_with_solutions: a dict with solver name as key, and number of solved instances for the corresponding solver as value, see get_solvers_with_solution
+        dict_portfolio: a dict with instance names and the penalised running time of the
+            PaP.
+        solver_with_solutions: a dict with solver name as key, and number of solved
+            instances for the corresponding solver as value, see
+            get_solvers_with_solution
         n_unsolved_instances: number of unsolved instances
         n_instances: number of instances
 
@@ -475,7 +482,8 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
 
 def get_dict_variable_to_value(parallel_portfolio_path: Path,
                                instances: list[str]) -> dict[str, str]:
-    """
+    """Returns a mapping between LaTeX report variables and their values.
+
     Args:
         parallel_portfolio_path: parallel portfolio path
         instances: list of instances

@@ -54,11 +54,11 @@ class ReportingScenario:
 
     def read_scenario_ini(
             self, file_path: Path = DEFAULT_reporting_scenario_path) -> None:
-        """
-        Read the scenario from an INI file.
+        """Read the scenario from an INI file.
 
         Args:
-            file_path: Path of the INI file for the scenario. Defaults to DEFAULT_reporting_scenario_path.
+            file_path: Path of the INI file for the scenario. Defaults to
+                DEFAULT_reporting_scenario_path.
         """
         # If the file does not exist set default values
         if not Path(file_path).is_file():
@@ -79,7 +79,7 @@ class ReportingScenario:
         # successfully
         if file_scenario.sections() != []:
             section = "latest"
-            option_names = ("scenario",)  # comma so make it a tuple
+            option_names = ("scenario",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Scenario.from_str(file_scenario.get(section, option))
@@ -87,7 +87,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "selection"
-            option_names = ("portfolio_path",)  # comma so make it a tuple
+            option_names = ("portfolio_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -95,7 +95,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "selection"
-            option_names = ("test_case_directory",)  # comma so make it a tuple
+            option_names = ("test_case_directory",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -103,21 +103,21 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("solver",)  # comma so make it a tuple
+            option_names = ("solver",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
                     self.set_config_solver(value)
                     file_scenario.remove_option(section, option)
 
-            option_names = ("instance_set_train",)  # comma so make it a tuple
+            option_names = ("instance_set_train",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
                     self.set_config_instance_set_train(value)
                     file_scenario.remove_option(section, option)
 
-            option_names = ("instance_set_test",)  # comma so make it a tuple
+            option_names = ("instance_set_test",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -125,7 +125,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "parallel_portfolio"
-            option_names = ("portfolio_path",)  # comma so make it a tuple
+            option_names = ("portfolio_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -133,7 +133,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "parallel_portfolio"
-            option_names = ("instance_list",)  # comma so make it a tuple
+            option_names = ("instance_list",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = file_scenario.get(section, option)
@@ -152,17 +152,17 @@ class ReportingScenario:
 
         # Print error if unable to read the scenario file
         else:
-            print(f"ERROR: Failed to read latetst scenario from {str(file_path)} The "
+            print(f"ERROR: Failed to read latest scenario from {str(file_path)} The "
                   "file may have been empty, or is in another format than INI. Default "
                   "values will be used.")
 
     def write_scenario_ini(
             self, file_path: Path = DEFAULT_reporting_scenario_path) -> None:
-        """
-        Write the scenario file in INI format.
+        """Write the scenario file in INI format.
 
         Args:
-            file_path: Path of the INI file for the scenario. Defaults to DEFAULT_reporting_scenario_path.
+            file_path: Path of the INI file for the scenario. Defaults to
+                DEFAULT_reporting_scenario_path.
         """
         # Create needed directories if they don't exist
         file_dir = file_path.parents[0]
@@ -173,11 +173,10 @@ class ReportingScenario:
             self.__scenario.write(scenario_file)
 
     def __init_section(self, section: str) -> None:
-        """
-        Initialise a section in the scenario file.
+        """Initialise a section in the scenario file.
 
         Args:
-            section: name of the section.
+            section: Name of the section.
         """
         if section not in self.__scenario:
             self.__scenario[section] = {}
@@ -185,26 +184,24 @@ class ReportingScenario:
     # Generic setters ###
 
     def path_setter(self, section: str, name: str, value: Path) -> None:
-        """
-        Write a generic Path to the scenario file.
+        """Write a generic Path to the scenario file.
 
         Args:
-            section: name of the seciton.
-            name: name of the path.
-            value: value of the path given.
+            section: Name of the section.
+            name: Name of the path element.
+            value: Value of the path given.
         """
         if value is not None:
             self.__init_section(section)
             self.__scenario[section][name] = str(value)
 
     def list_setter(self, section: str, name: str, value: list[str]) -> None:
-        """
-        Write generic lists to the scenario file.
+        """Write generic lists to the scenario file.
 
         Args:
-            section: name of the seciton.
-            name: name of the path.
-            value: value of the path given.
+            section: Name of the section.
+            name: Name of the list element.
+            value: Value of the list given.
         """
         if value is not None:
             self.__init_section(section)
@@ -217,8 +214,7 @@ class ReportingScenario:
     # Generic getters ###
 
     def none_if_empty_path(self, path: Path) -> Path:
-        """
-        Return None if a path is empty or the Path otherwise.
+        """Return None if a path is empty or the Path otherwise.
 
         Args:
             path: Path value given.
@@ -277,7 +273,9 @@ class ReportingScenario:
 
     # Parallel portfolio settings ###
 
-    def set_parallel_portfolio_path(self, value: Path = DEFAULT_parallel_portfolio_path) -> None:
+    def set_parallel_portfolio_path(
+            self,
+            value: Path = DEFAULT_parallel_portfolio_path) -> None:
         """Set the path to the parallel portfolio."""
         section = "parallel_portfolio"
         name = "portfolio_path"
