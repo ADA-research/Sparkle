@@ -130,9 +130,7 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 
     # specify the options of sbatch in the top of this sbatch script
-    # fout.write(f"#!{os.environ['SHELL']}\n")
-    fout.write("#!/usr/local_rwth/bin/zsh\n")  # use bash to execute this script
-    # fout.write("#!/usr/bin/env python\n")
+    fout.write("#!/bin/bash\n")
     fout.write("###\n")
     fout.write("###\n")
 
@@ -140,10 +138,6 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
         fout.write("#SBATCH " + str(i) + "\n")
 
     fout.write("###\n")
-    fout.write("export CONDA_ROOT=$HOME/miniconda3\n")
-    fout.write(". $CONDA_ROOT/etc/profile.d/conda.sh\n")
-    fout.write('export PATH="$CONDA_ROOT/bin:$PATH"\n')
-    fout.write("conda activate sparkle\n")
 
     # specify the array of parameters for each command
     if len(job_params_list) > 0:
