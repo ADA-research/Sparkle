@@ -568,7 +568,7 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
 
 def get_dict_variable_to_value(solver_name: str, instance_set_train_name: str,
                                instance_set_test_name: str = None,
-                               ablation: bool = True):
+                               ablation: bool = True) -> dict:
     """Return a dict matching LaTeX variables and their values.
 
     Args:

@@ -41,7 +41,7 @@ def get_num_solvers(parallel_portfolio_path: Path) -> str:
 
 def get_solver_list(parallel_portfolio_path: Path) -> str:
     """
-    Return the list of solvers as string, including each solver-seed combination.
+    Return the list of solvers in the parallel portfolio as string, including each solver-seed combination.
 
     Args:
         parallel_portfolio_path: parallel portfolio path
@@ -121,8 +121,6 @@ def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
 
     Returns:
         a list of instance sets and the number of instances in the set as string.
-
-        Also returns the total number of instances.
     """
     str_value = ""
     n_instances = 0
@@ -190,9 +188,8 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
     Returns:
         a three-tuple:
             - str_value: a string with the number of instances solved per successful solver.
-            - solver_dict: a dict consists of a string indicating the instance name, and a list which contains
-              the solver name followed by the performance (both as string)
-            . unsolved_instances: an int indicating the number of unsolved instances.
+            - solver_dict: a dict with solver name as key, and number of solved instances for the corresponding solver as value
+            - unsolved_instances: number of unsolved instances.
     """
     results_on_instances = get_results()
     str_value = ""
@@ -413,10 +410,10 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
     Return a string containing LaTeX code for a table with the portfolio results.
 
     Args:
-        results: ??????
+        results: a dict containing the penalised average run time per solver.
         parallel_portfolio_path: parallel portfolio path
-        dict_portfolio: ?????
-        solver_with_solutions: ?????
+        dict_portfolio: a dict with instance names and the penalised running time of the PaP.
+        solver_with_solutions: a dict with solver name as key, and number of solved instances for the corresponding solver as value, see get_solvers_with_solution
         n_unsolved_instances: number of unsolved instances
         n_instances: number of instances
 
