@@ -108,7 +108,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
                 value = second_sfdcsv.get_value_index(i, j)
                 if bool_in_rows:
                     if bool_in_columns:
-                        self.set_value(row_name_second_sfdcsv, column_name_second_sfdcsv,
+                        self.set_value(str(row_name_second_sfdcsv), column_name_second_sfdcsv,
                                        value)
                     else:
                         self.add_column(column_name_second_sfdcsv)
@@ -117,12 +117,12 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
                 else:
                     if bool_in_columns:
                         self.add_row(row_name_second_sfdcsv)
-                        self.set_value(row_name_second_sfdcsv, column_name_second_sfdcsv,
+                        self.set_value(str(row_name_second_sfdcsv), column_name_second_sfdcsv,
                                        value)
                     else:
                         self.add_row(row_name_second_sfdcsv)
                         self.add_column(column_name_second_sfdcsv)
-                        self.set_value(row_name_second_sfdcsv, column_name_second_sfdcsv,
+                        self.set_value(str(row_name_second_sfdcsv), column_name_second_sfdcsv,
                                        value)
 
         return

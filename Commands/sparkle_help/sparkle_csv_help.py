@@ -82,7 +82,7 @@ class SparkleCSV:
         ret = self.dataframe.at[row, column]
         return ret
 
-    def set_value(self, row, column, value):
+    def set_value(self, row: str, column, value):
         """Set a value by name."""
         self.dataframe.at[row, column] = value
         return
