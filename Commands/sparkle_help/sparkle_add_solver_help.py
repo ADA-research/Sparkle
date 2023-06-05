@@ -11,7 +11,7 @@ except ImportError:
 
 
 def get_solver_directory(solver_name: str) -> str:
-    """Return the directory a solver is stored at as str.
+    """Return the directory a solver is stored in as str.
 
     Args:
         solver_name: Name of the solver.

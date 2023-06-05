@@ -29,10 +29,10 @@ def jobtime_to_seconds(jobtime: str) -> int:
     """Convert a jobtime string to an integer number of seconds.
 
     Args:
-        jobtime: a string indicating jobtime
+        jobtime: Running time of a job in squeue (Slurm) format.
 
     Returns:
-        an integer indicating number of seconds
+        An int indicating the number of seconds.
     """
     seconds = int(sum(int(x) * 60 ** i for i, x in enumerate(
         reversed(jobtime.split(":")))))
@@ -44,9 +44,9 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str) -> None:
     """Log the starting time, end time and job number to a given file.
 
     Args:
-        log_file: Path to the file to be logged
-        line: a string of the form "sleep {str(sleep_time)}; scancel {str(jobid)}"
-        jobtime: jobtime as string
+        log_file: Path to the log file.
+        line: A str of the form "sleep {str(sleep_time)}; scancel {str(jobid)}"
+        jobtime: Running time of a job in squeue (Slurm) format.
     """
     now = datetime.datetime.now()
     job_duration_seconds = jobtime_to_seconds(jobtime)
@@ -78,9 +78,9 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str) -> None:
     """Log the job number and job duration.
 
     Args:
-        log_file: Path to the file to be logged
-        job_nr: Job number as string
-        job_duration: Job duration as string
+        log_file: Path to the log file.
+        job_nr: Job number as str.
+        job_duration: Job duration as str.
     """
     if ":" in job_duration:
         job_duration = str(jobtime_to_seconds(job_duration))
@@ -97,7 +97,7 @@ def check_sbatch_for_errors(sbatch_script_path: Path) -> None:
     """Check sbatch files for errors. If found, stop execution.
 
     Args:
-        sbatch_script_path: Path to sbatch script
+        sbatch_script_path: Path to the sbatch script.
     """
     error_lines = [ \
         # ERROR: [...] not found [...]
@@ -122,9 +122,9 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
     """Remove temporary files and directories, and move result files.
 
     Args:
-        solver_instance_list: list of solver instances
-        sbatch_script_path: Path to the file to be logged
-        temp_solvers: a list of temporary solvers
+        solver_instance_list: List of solver instances.
+        sbatch_script_path: Path to the sbatch script.
+        temp_solvers: A list of temporary solvers.
     """
     tmp_dir = sgh.sparkle_tmp_path
 
@@ -194,7 +194,7 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
 
     Args:
         solver_instance_list: List of solver instances.
-        finished_job_array_nr: The array number of the finished job.
+        finished_job_array_nr: The Slurm array number of the finished job.
 
     Returns:
         A formatted string that represents the finishing time of a solver.
@@ -233,7 +233,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
         logging_file: Path to the logging file.
         job_id: Job ID as str.
         finished_solver_id_list: List of str typed job IDs of finished solvers.
-        portfolio_size: Size of paralle algorithm portfolio.
+        portfolio_size: Size of parallel algorithm portfolio.
         solver_instance_list: List of solver instances as str.
         pending_job_with_new_cutoff: Dict with jobid str as key, and cutoff_seconds int
             as value. Defaults to an empty dict.
@@ -252,9 +252,9 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
     remaining_jobs = {}
 
     for jobs in result.stdout.strip().split("\n"):
-        jobid = jobs.strip().split()[0]
-        jobtime = jobs.strip().split()[5]
-        jobstatus = jobs.strip().split()[4]
+        jobid = jobs.strip().split()[0]  # First squeue column is JOBID
+        jobtime = jobs.strip().split()[5]  # Sixth squeue column is TIME
+        jobstatus = jobs.strip().split()[4]  # Fifth squeue column is ST (status)
 
         # If option extended is used some jobs are not directly cancelled to allow all
         # jobs to compute for at least the same running time.
@@ -340,7 +340,7 @@ def wait_for_finished_solver(
         pending_job_with_new_cutoff: Dict of pending jobs with new cutoff time
             (jobid str as key, and cutoff_seconds int as value).
         started: Boolean indicating whether the portfolio has started running.
-        portfolio_size: size of the portfolio.
+        portfolio_size: Size of the portfolio.
 
     Returns:
         finished_solver_list: A list of str typed job IDs of finished solvers.
@@ -498,9 +498,9 @@ def generate_sbatch_job_list(
     """Generate a list of jobs to be executed in the sbatch script.
 
     Args:
-        solver_list: list of solvers.
-        instance_path_list: list of instance paths.
-        num_jobs: number of jobs.
+        solver_list: List of solvers.
+        instance_path_list: List of instance paths.
+        num_jobs: Number of jobs.
 
     Returns:
         A list of parameters used in the sbatch script.
@@ -686,7 +686,7 @@ def remove_result_files(instances: list[str]) -> None:
     """Remove existing results for given instances.
 
     Args:
-        instances: list of instance names
+        instances: List of instance names.
     """
     for instance in instances:
         instance = Path(instance).name
@@ -700,8 +700,8 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     """Run the parallel algorithm portfolio and return whether this was successful.
 
     Args:
-        instances: List of instance names
-        portfolio_path: Path to portfolio
+        instances: List of instance names.
+        portfolio_path: Path to the parallel portfolio.
 
     Returns:
         True if successful; False otherwise.

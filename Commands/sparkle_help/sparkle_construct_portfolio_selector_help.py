@@ -21,7 +21,7 @@ def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
     """Return whether data has changed since the last portfolio selector construction.
 
     Args:
-        sparkle_portfolio_selector_path: portfolio selector path.
+        sparkle_portfolio_selector_path: Portfolio selector path.
 
     Returns:
         True if neither performance data id and feature data id remain the same.
@@ -43,7 +43,7 @@ def write_selector_pd_id(sparkle_portfolio_selector_path: Path) -> None:
     """Write the ID of the performance data used to construct the portfolio selector.
 
     Args:
-        sparkle_portfolio_selector_path: portfolio selector path.
+        sparkle_portfolio_selector_path: Portfolio selector path.
     """
     # Get pd_id
     pd_id = srsh.get_performance_data_id()
@@ -63,10 +63,10 @@ def get_selector_pd_id(selector_dir: PurePath) -> int:
     """Return the ID of the performance data used to construct the portfolio selector.
 
     Args:
-        selector_dir: selector directory path.
+        selector_dir: Selector directory path.
 
     Returns:
-        selector performance data id, -1 if no such file is found.
+        Selector performance data ID, -1 if no file with a saved ID is found.
     """
     pd_id = -1
     pd_id_path = Path(selector_dir / "pd.id")
@@ -84,7 +84,7 @@ def write_selector_fd_id(sparkle_portfolio_selector_path: Path) -> None:
     """Write the ID of the feature data used to construct the portfolio selector.
 
     Args:
-        sparkle_portfolio_selector_path: portfolio selector path.
+        sparkle_portfolio_selector_path: Portfolio selector path.
     """
     # Get fd_id
     fd_id = scfh.get_feature_data_id()
@@ -104,10 +104,10 @@ def get_selector_fd_id(selector_dir: PurePath) -> int:
     """Return the ID of the feature data used to construct the portfolio selector.
 
     Args:
-        selector_dir: selector directory path.
+        selector_dir: Selector directory path.
 
     Returns:
-        selector feature data id, -1 if no such file is found.
+        Selector feature data ID, -1 if no file with a saved ID is found.
     """
     fd_id = -1
     fd_id_path = Path(selector_dir / "fd.id")

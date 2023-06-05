@@ -21,10 +21,10 @@ def underscore_for_latex(string: str) -> str:
     """Return the input str with the underscores escaped for use in LaTeX.
 
     Args:
-        string: a given str with underscores.
+        string: A given str with underscores.
 
     Returns:
-        the corresponding str with underscores escaped.
+        The corresponding str with underscores escaped.
     """
     updated_string = string.replace("_", "\\_")
 
@@ -36,7 +36,7 @@ def get_custom_commands() -> str:
 
     NOTE: Re-evaluate the need for this.
     """
-    str_value = r""
+    str_value = ""
     return str_value
 
 

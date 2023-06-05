@@ -112,13 +112,13 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
 
 
 def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
-    """Retrieve a list of the instance sets.
+    """Retrieve a list of instance sets in LaTeX format.
 
     Args:
-        instance_list: list of instance sets
+        instance_list: List of paths to instance sets.
 
     Returns:
-        A list of instance sets and the number of instances in the set as string.
+        The instance sets as itemize elements, and the number of instances in the set.
     """
     str_value = ""
     n_instances = 0
@@ -240,7 +240,8 @@ def get_dict_sbs_penalty_time_on_each_instance(
     """Return the penalised run time for the single best solver and per solver.
 
     Args:
-        # TODO
+        parallel_portfolio_path: Path to the parallel portfolio.
+        instance_list: List of paths to instance sets.
 
     Returns:
         A three-tuple:
@@ -332,10 +333,10 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     """Returns the instance names and corresponding penalised running times of the PaP.
 
     Args:
-        instance_list: list of instances.
+        instance_list: List of instances.
 
     Returns:
-        a dict of instance names and the penalised running time of the PaP.
+        A dict of instance names and the penalised running time of the PaP.
     """
     mydict = {}
 
@@ -362,15 +363,15 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     """Generate PaP vs SBS figure and return a string to include it in LaTeX.
 
     Args:
-        parallel_portfolio_path: parallel portfolio path.
-        instances: list of instances.
+        parallel_portfolio_path: Parallel portfolio path.
+        instances: List of instances.
 
     Returns:
         a three tuple:
-            str_value: a string to include the PaP vs SBS figure in LaTeX
-            dict_all_solvers: a dict containing the penalised average run time per
+            str_value: A string to include the PaP vs SBS figure in LaTeX
+            dict_all_solvers: A dict containing the penalised average run time per
                 solver.
-            dict_actual_parallel_portfolio_penalty_time_on_each_instance: a dict with
+            dict_actual_parallel_portfolio_penalty_time_on_each_instance: A dict with
                 instance names and the penalised running time of the PaP.
     """
     str_value = ""
@@ -414,18 +415,18 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
     """Returns a LaTeX table with the portfolio results.
 
     Args:
-        results: a dict containing the penalised average run time per solver.
-        parallel_portfolio_path: parallel portfolio path
-        dict_portfolio: a dict with instance names and the penalised running time of the
+        results: A dict containing the penalised average run time per solver.
+        parallel_portfolio_path: Parallel portfolio path
+        dict_portfolio: A dict with instance names and the penalised running time of the
             PaP.
-        solver_with_solutions: a dict with solver name as key, and number of solved
+        solver_with_solutions: A dict with solver name as key, and number of solved
             instances for the corresponding solver as value, see
-            get_solvers_with_solution
-        n_unsolved_instances: number of unsolved instances
-        n_instances: number of instances
+            get_solvers_with_solution.
+        n_unsolved_instances: Number of unsolved instances.
+        n_instances: Number of instances.
 
     Returns:
-        a string containing LaTeX code for a table with the portfolio results.
+        A string containing LaTeX code for a table with the portfolio results.
     """
     portfolio_par = 0.0
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
@@ -485,11 +486,11 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     """Returns a mapping between LaTeX report variables and their values.
 
     Args:
-        parallel_portfolio_path: parallel portfolio path
-        instances: list of instances
+        parallel_portfolio_path: Parallel portfolio path.
+        instances: List of instances.
 
     Returns:
-        a dictionary that maps variables used in the LaTeX report to values.
+        A dictionary that maps variables used in the LaTeX report to values.
     """
     mydict = {}
 
@@ -557,8 +558,8 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]) -> None
     """Generate a report for a parallel algorithm portfolio.
 
     Args:
-        parallel_portfolio_path: parallel portfolio path
-        instances: list of instances
+        parallel_portfolio_path: Parallel portfolio path.
+        instances: List of instances.
     """
     latex_report_filename = Path("Sparkle_Report")
     dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path,

@@ -184,7 +184,7 @@ class ReportingScenario:
     # Generic setters ###
 
     def path_setter(self, section: str, name: str, value: Path) -> None:
-        """Write a generic Path to the scenario file.
+        """Set a generic Path for the scenario.
 
         Args:
             section: Name of the section.
@@ -196,7 +196,7 @@ class ReportingScenario:
             self.__scenario[section][name] = str(value)
 
     def list_setter(self, section: str, name: str, value: list[str]) -> None:
-        """Write generic lists to the scenario file.
+        """Set a generic lists for the scenario.
 
         Args:
             section: Name of the section.
