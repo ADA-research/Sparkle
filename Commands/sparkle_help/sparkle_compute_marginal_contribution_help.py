@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for marginal contribution computation."""
 
+from __future__ import annotations
+
 import os
 import csv
 from pathlib import Path
@@ -16,7 +18,7 @@ from sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from sparkle_help import sparkle_run_portfolio_selector_help as srps
 from sparkle_help import sparkle_logging as sl
 from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_feature_data_csv import SparkleFeatureDataCSV
+from sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
 
 
 def read_marginal_contribution_csv(path: Path) -> list[tuple[str, float]]:
