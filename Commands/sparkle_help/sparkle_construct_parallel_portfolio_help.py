@@ -28,8 +28,6 @@ def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -
         solver = f"{solver}\n"
         sfh.append_string_to_file(solvers_file, solver)
 
-    return True
-
 
 def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
                                          overwrite: bool,
@@ -60,7 +58,6 @@ def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
 
     # Directory is now created (and cleaned)
     # Add a file which specifies the location of the solvers.
-    if add_solvers(sparkle_parallel_portfolio_path, solver_list) is False:
-        print("An error occured when adding the solvers to the portfolio")
+    add_solvers(sparkle_parallel_portfolio_path, solver_list)
 
     return True

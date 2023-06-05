@@ -54,7 +54,12 @@ class ReportingScenario:
 
     def read_scenario_ini(
             self, file_path: Path = DEFAULT_reporting_scenario_path) -> None:
-        """Read the scenario from an INI file."""
+        """Read the scenario from an INI file.
+
+        Args:
+            file_path: Path of the INI file for the scenario. Defaults to
+                DEFAULT_reporting_scenario_path.
+        """
         # If the file does not exist set default values
         if not Path(file_path).is_file():
             self.set_latest_scenario()
@@ -74,7 +79,7 @@ class ReportingScenario:
         # successfully
         if file_scenario.sections() != []:
             section = "latest"
-            option_names = ("scenario",)  # comma so make it a tuple
+            option_names = ("scenario",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Scenario.from_str(file_scenario.get(section, option))
@@ -82,7 +87,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "selection"
-            option_names = ("portfolio_path",)  # comma so make it a tuple
+            option_names = ("portfolio_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -90,7 +95,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "selection"
-            option_names = ("test_case_directory",)  # comma so make it a tuple
+            option_names = ("test_case_directory",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -98,21 +103,21 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("solver",)  # comma so make it a tuple
+            option_names = ("solver",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
                     self.set_config_solver(value)
                     file_scenario.remove_option(section, option)
 
-            option_names = ("instance_set_train",)  # comma so make it a tuple
+            option_names = ("instance_set_train",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
                     self.set_config_instance_set_train(value)
                     file_scenario.remove_option(section, option)
 
-            option_names = ("instance_set_test",)  # comma so make it a tuple
+            option_names = ("instance_set_test",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -120,7 +125,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "parallel_portfolio"
-            option_names = ("portfolio_path",)  # comma so make it a tuple
+            option_names = ("portfolio_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = Path(file_scenario.get(section, option))
@@ -128,7 +133,7 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "parallel_portfolio"
-            option_names = ("instance_list",)  # comma so make it a tuple
+            option_names = ("instance_list",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = file_scenario.get(section, option)
@@ -147,15 +152,18 @@ class ReportingScenario:
 
         # Print error if unable to read the scenario file
         else:
-            print(f"ERROR: Failed to read latetst scenario from {str(file_path)} The "
+            print(f"ERROR: Failed to read latest scenario from {str(file_path)} The "
                   "file may have been empty, or is in another format than INI. Default "
                   "values will be used.")
 
-        return
-
     def write_scenario_ini(
             self, file_path: Path = DEFAULT_reporting_scenario_path) -> None:
-        """Write the scenario file in INI format."""
+        """Write the scenario file in INI format.
+
+        Args:
+            file_path: Path of the INI file for the scenario. Defaults to
+                DEFAULT_reporting_scenario_path.
+        """
         # Create needed directories if they don't exist
         file_dir = file_path.parents[0]
         file_dir.mkdir(parents=True, exist_ok=True)
@@ -164,27 +172,37 @@ class ReportingScenario:
         with Path(str(file_path)).open("w") as scenario_file:
             self.__scenario.write(scenario_file)
 
-        return
-
     def __init_section(self, section: str) -> None:
-        """Initialise a section in the scenario file."""
+        """Initialise a section in the scenario file.
+
+        Args:
+            section: Name of the section.
+        """
         if section not in self.__scenario:
             self.__scenario[section] = {}
 
-        return
-
     # Generic setters ###
 
-    def path_setter(self, section: str, name: str, value: Path):
-        """Write a generic Path to the scenario file."""
+    def path_setter(self, section: str, name: str, value: Path) -> None:
+        """Set a generic Path for the scenario.
+
+        Args:
+            section: Name of the section.
+            name: Name of the path element.
+            value: Value of the path given.
+        """
         if value is not None:
             self.__init_section(section)
             self.__scenario[section][name] = str(value)
 
-        return
+    def list_setter(self, section: str, name: str, value: list[str]) -> None:
+        """Set a generic lists for the scenario.
 
-    def list_setter(self, section: str, name: str, value: list[str]):
-        """Write generic lists to the scenario file."""
+        Args:
+            section: Name of the section.
+            name: Name of the list element.
+            value: Value of the list given.
+        """
         if value is not None:
             self.__init_section(section)
             # Convert to string
@@ -193,12 +211,17 @@ class ReportingScenario:
 
         self.write_scenario_ini()
 
-        return
-
     # Generic getters ###
 
-    def none_if_empty_path(self, path: Path):
-        """Return None if a path is empty or the Path otherwise."""
+    def none_if_empty_path(self, path: Path) -> Path:
+        """Return None if a path is empty or the Path otherwise.
+
+        Args:
+            path: Path value given.
+
+        Returns:
+            None if the given path is empty, the given Path value otherwise.
+        """
         if str(path) == "" or str(path) == ".":
             path = None
 
@@ -215,8 +238,6 @@ class ReportingScenario:
             self.__init_section(section)
             self.__scenario[section][name] = value.name
 
-        return
-
     def get_latest_scenario(self) -> Scenario:
         """Return the latest Scenario that was executed."""
         return Scenario.from_str(self.__scenario["latest"]["scenario"])
@@ -230,8 +251,6 @@ class ReportingScenario:
         name = "portfolio_path"
         self.path_setter(section, name, value)
 
-        return
-
     def get_selection_portfolio_path(self) -> Path:
         """Return the path to portfolio selector used for algorithm selection."""
         return Path(self.__scenario["selection"]["portfolio_path"])
@@ -242,8 +261,6 @@ class ReportingScenario:
         section = "selection"
         name = "test_case_directory"
         self.path_setter(section, name, value)
-
-        return
 
     def get_selection_test_case_directory(self) -> Path:
         """Return the path to the testing set that was used for algorithm selection."""
@@ -256,26 +273,24 @@ class ReportingScenario:
 
     # Parallel portfolio settings ###
 
-    def set_parallel_portfolio_path(self, value: Path = DEFAULT_parallel_portfolio_path):
+    def set_parallel_portfolio_path(
+            self,
+            value: Path = DEFAULT_parallel_portfolio_path) -> None:
         """Set the path to the parallel portfolio."""
         section = "parallel_portfolio"
         name = "portfolio_path"
         self.path_setter(section, name, value)
-
-        return
 
     def get_parallel_portfolio_path(self) -> Path:
         """Return the path to the parallel portfolio."""
         return Path(self.__scenario["parallel_portfolio"]["portfolio_path"])
 
     def set_parallel_portfolio_instance_list(
-            self, value: list[str] = DEFAULT_parallel_portfolio_instance_list):
+            self, value: list[str] = DEFAULT_parallel_portfolio_instance_list) -> None:
         """Set the instance list used with the parallel portfolio."""
         section = "parallel_portfolio"
         name = "instance_list"
         self.list_setter(section, name, value)
-
-        return
 
     def get_parallel_portfolio_instance_list(self) -> list[str]:
         """Return the instance list used with the parallel portfolio.
@@ -301,8 +316,6 @@ class ReportingScenario:
         name = "solver"
         self.path_setter(section, name, value)
 
-        return
-
     def get_config_solver(self) -> Path:
         """Return the path to the solver that was configured."""
         return self.none_if_empty_path(Path(self.__scenario["configuration"]["solver"]))
@@ -313,8 +326,6 @@ class ReportingScenario:
         section = "configuration"
         name = "instance_set_train"
         self.path_setter(section, name, value)
-
-        return
 
     def get_config_instance_set_train(self) -> Path:
         """Return the path to the training instance set used for configuration."""
@@ -327,8 +338,6 @@ class ReportingScenario:
         section = "configuration"
         name = "instance_set_test"
         self.path_setter(section, name, value)
-
-        return
 
     def get_config_instance_set_test(self) -> Path:
         """Return the path to the testing instance set used for configuration."""

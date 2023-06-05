@@ -11,15 +11,15 @@ except ImportError:
 
 
 def get_solver_directory(solver_name: str) -> str:
-    """A helper function that returs the path to a solver.
+    """Return the directory a solver is stored in as str.
 
     Args:
-        solver_name: The name of the solver for which the path is needed.
+        solver_name: Name of the solver.
 
     Returns:
-        The relative path of the solver as a string.
+        A str of the path to the solver.
     """
-    return "Solvers/" + solver_name
+    return f"Solvers/{solver_name}"
 
 
 def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
@@ -35,6 +35,7 @@ def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
     list_files = os.listdir(solver_directory)
 
     pcs_count = 0
+
     for file_name in list_files:
         file_extension = sfh.get_file_least_extension(file_name)
 
