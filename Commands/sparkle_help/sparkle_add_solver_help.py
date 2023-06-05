@@ -23,7 +23,15 @@ def get_solver_directory(solver_name: str) -> str:
 
 
 def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
-    """Return whether the directory of the solver being added contains a PCS file."""
+    """Returns whether the directory of the solver being added contains a PCS file.
+
+    Args:
+        solver_directory: The directory to be checked if it contains a PCS file.
+
+    Returns:
+        A Boolean that is true if and only if
+        solver_directory contains exactly one PCS file.
+    """
     list_files = os.listdir(solver_directory)
 
     pcs_count = 0
