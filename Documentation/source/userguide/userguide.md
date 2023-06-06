@@ -326,16 +326,16 @@ to get a description of the required arguments and other options.
 % *  construct_sparkle_portfolio_selector.py
 % *  :ref:`cmd:generate_report`
 % *  :ref:`cmd:initialise`
-% *  load_record.py
+% *  load_snapshot.py
 % *  remove_feature_extractor.py
 % *  remove_instances.py
-% *  remove_record.py
+% *  remove_snapshot.py
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py
 % *  run_sparkle_portfolio_selector.py
 % *  run_status.py
-% *  save_record.py
+% *  save_snapshot.py
 % *  system_status.py
 % *  :ref:`cmd:validate_configured_vs_default`
 

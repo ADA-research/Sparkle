@@ -10,9 +10,7 @@ from sparkle_help import sparkle_basic_help as sbh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_file_help as sfh
 
-
-global record_log_file_path
-record_log_file_path = sgh.sparkle_err_path
+snapshot_log_file_path = sgh.sparkle_err_path
 
 
 def detect_current_sparkle_platform_exists() -> bool:
@@ -41,13 +39,12 @@ def detect_current_sparkle_platform_exists() -> bool:
     return False
 
 
-def save_current_sparkle_platform(my_record_filename: str) -> None:
+def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file.
-
-    Args:
-      my_record_filename: File path to the file where the current Sparkle
-        platform should be stored.
     """
+    my_suffix = sbh.get_time_pid_random_string()
+    my_snapshot_filename = f"Snapshots/My_Snapshot_{my_suffix}.zip"
+
     my_flag_instances = False
     my_flag_solvers = False
     my_flag_extractors = False
@@ -77,106 +74,107 @@ def save_current_sparkle_platform(my_record_filename: str) -> None:
     if not Path(sgh.sparkle_tmp_path).exists():
         Path(sgh.sparkle_tmp_path).mkdir()
 
-    my_record_filename_exist = Path(my_record_filename).exists()
-    if not my_record_filename_exist:
+    my_snapshot_filename_exist = Path(my_snapshot_filename).exists()
+    if not my_snapshot_filename_exist:
         if my_flag_instances:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
-            os.system(f"zip -r {my_record_filename} Instances/ >> "
-                      f"{record_log_file_path}")
+                  f"{my_snapshot_filename} ...")
+            os.system(f"zip -r {my_snapshot_filename} Instances/ >> "
+                      f"{snapshot_log_file_path}")
     else:
         if my_flag_instances:
-            os.system(f"zip -g -r {my_record_filename} Instances/ >> "
-                      f"{record_log_file_path}")
+            os.system(f"zip -g -r {my_snapshot_filename} Instances/ >> "
+                      f"{snapshot_log_file_path}")
 
-    if not my_record_filename_exist:
+    if not my_snapshot_filename_exist:
         if my_flag_solvers:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
-            os.system(f"zip -r {my_record_filename} Solvers/ >> "
-                      f"{record_log_file_path}")
+                  f"{my_snapshot_filename} ...")
+            os.system(f"zip -r {my_snapshot_filename} Solvers/ >> "
+                      f"{snapshot_log_file_path}")
     else:
         if my_flag_solvers:
-            os.system(f"zip -g -r {my_record_filename} Solvers/ >> "
-                      f"{record_log_file_path}")
+            os.system(f"zip -g -r {my_snapshot_filename} Solvers/ >> "
+                      f"{snapshot_log_file_path}")
 
-    if not my_record_filename_exist:
+    if not my_snapshot_filename_exist:
         if my_flag_extractors:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
-            os.system(f"zip -r {my_record_filename} Extractors/ >> "
-                      f"{record_log_file_path}")
+                  f"{my_snapshot_filename} ...")
+            os.system(f"zip -r {my_snapshot_filename} Extractors/ >> "
+                      f"{snapshot_log_file_path}")
     else:
         if my_flag_extractors:
-            os.system(f"zip -g -r {my_record_filename} Extractors/ >> "
-                      f"{record_log_file_path}")
+            os.system(f"zip -g -r {my_snapshot_filename} Extractors/ >> "
+                      f"{snapshot_log_file_path}")
 
-    if not my_record_filename_exist:
+    if not my_snapshot_filename_exist:
         if my_flag_feature_data:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
-            os.system(f"zip -r {my_record_filename} Feature_Data/ >> "
-                      f"{record_log_file_path}")
+                  f"{my_snapshot_filename} ...")
+            os.system(f"zip -r {my_snapshot_filename} Feature_Data/ >> "
+                      f"{snapshot_log_file_path}")
     else:
         if my_flag_feature_data:
-            os.system(f"zip -g -r {my_record_filename} Feature_Data/ >> "
-                      f"{record_log_file_path}")
+            os.system(f"zip -g -r {my_snapshot_filename} Feature_Data/ >> "
+                      f"{snapshot_log_file_path}")
 
-    if not my_record_filename_exist:
+    if not my_snapshot_filename_exist:
         if my_flag_performance_data:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
-            os.system(f"zip -r {my_record_filename} Performance_Data/ >> "
-                      f"{record_log_file_path}")
+                  f"{my_snapshot_filename} ...")
+            os.system(f"zip -r {my_snapshot_filename} Performance_Data/ >> "
+                      f"{snapshot_log_file_path}")
     else:
         if my_flag_performance_data:
-            os.system(f"zip -g -r {my_record_filename} Performance_Data/ >> "
-                      f"{record_log_file_path}")
+            os.system(f"zip -g -r {my_snapshot_filename} Performance_Data/ >> "
+                      f"{snapshot_log_file_path}")
 
-    if not my_record_filename_exist:
+    if not my_snapshot_filename_exist:
         if my_flag_reference_lists:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
-            os.system(f"zip -r {my_record_filename} Reference_Lists/ >> "
-                      f"{record_log_file_path}")
+                  f"{my_snapshot_filename} ...")
+            os.system(f"zip -r {my_snapshot_filename} Reference_Lists/ >> "
+                      f"{snapshot_log_file_path}")
     else:
         if my_flag_reference_lists:
-            os.system(f"zip -g -r {my_record_filename} Reference_Lists/ >> "
-                      f"{record_log_file_path}")
+            os.system(f"zip -g -r {my_snapshot_filename} Reference_Lists/ >> "
+                      f"{snapshot_log_file_path}")
 
-    if not my_record_filename_exist:
+    if not my_snapshot_filename_exist:
         if my_flag_sparkle_portfolio_selector:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
-            os.system(f"zip -r {my_record_filename} Sparkle_Portfolio_Selector/ >> "
-                      f"{record_log_file_path}")
+                  f"{my_snapshot_filename} ...")
+            os.system(f"zip -r {my_snapshot_filename} Sparkle_Portfolio_Selector/ >> "
+                      f"{snapshot_log_file_path}")
     else:
         if my_flag_sparkle_portfolio_selector:
-            os.system(f"zip -g -r {my_record_filename} Sparkle_Portfolio_Selector/ >> "
-                      f"{record_log_file_path}")
+            os.system(f"zip -g -r {my_snapshot_filename} Sparkle_Portfolio_Selector/ >> "
+                      f"{snapshot_log_file_path}")
 
-    if not my_record_filename_exist:
+    if not my_snapshot_filename_exist:
         if my_flag_sparkle_parallel_portfolio:
-            my_record_filename_exist = True
+            my_snapshot_filename_exist = True
             print("Now recording current Sparkle platform in file "
-                  f"{my_record_filename} ...")
+                  f"{my_snapshot_filename} ...")
             os.system(
-                f"zip -r {my_record_filename} "
-                f"{sgh.sparkle_parallel_portfolio_dir}/ >> {record_log_file_path}")
+                f"zip -r {my_snapshot_filename} "
+                f"{sgh.sparkle_parallel_portfolio_dir}/ >> {snapshot_log_file_path}")
     else:
         if my_flag_sparkle_parallel_portfolio:
             os.system(
-                f"zip -g -r {my_record_filename} "
-                f"{sgh.sparkle_parallel_portfolio_dir}/ >> {record_log_file_path}")
+                f"zip -g -r {my_snapshot_filename} "
+                f"{sgh.sparkle_parallel_portfolio_dir}/ >> {snapshot_log_file_path}")
 
-    os.system("rm -f " + record_log_file_path)
+    print(f"Snapshot file {my_snapshot_filename} saved successfully!")
+    os.system("rm -f " + snapshot_log_file_path)
 
 
 def cleanup_current_sparkle_platform() -> None:
@@ -202,14 +200,14 @@ def cleanup_current_sparkle_platform() -> None:
         sfh.rmtree(Path(ablation_scenario_dir))
 
 
-def extract_sparkle_record(my_record_filename: str) -> None:
-    """Restore a Sparkle platform from a record.
+def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
+    """Restore a Sparkle platform from a snapshot.
 
     Args:
-      my_record_filename: File path to the file where the current Sparkle
+      my_snapshot_filename: File path to the file where the current Sparkle
         platform should be stored.
     """
-    if not Path(my_record_filename).exists():
+    if not Path(my_snapshot_filename).exists():
         sys.exit()
 
     my_suffix = sbh.get_time_pid_random_string()
@@ -218,8 +216,8 @@ def extract_sparkle_record(my_record_filename: str) -> None:
     if not Path(sgh.sparkle_tmp_path).exists():
         Path(sgh.sparkle_tmp_path).mkdir()
 
-    os.system(f"unzip -o {my_record_filename} -d {my_tmp_directory} >> "
-              f"{record_log_file_path}")
+    os.system(f"unzip -o {my_snapshot_filename} -d {my_tmp_directory} >> "
+              f"{snapshot_log_file_path}")
     os.system(r"cp -r " + my_tmp_directory + "/* " + "./")
     sfh.rmtree(Path(my_tmp_directory))
-    os.system(r"rm -f " + record_log_file_path)
+    os.system(r"rm -f " + snapshot_log_file_path)

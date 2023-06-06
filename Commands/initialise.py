@@ -6,8 +6,7 @@ import argparse
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
+from sparkle_help import sparkle_snapshot_help
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_logging as sl
 
@@ -32,8 +31,8 @@ if __name__ == "__main__":
 
     print("Start initialising Sparkle platform ...")
 
-    if not Path("Records/").exists():
-        output = Path("Records/").mkdir()
+    if not Path("Snapshots/").exists():
+        output = Path("Snapshots/").mkdir()
 
     if not Path("Tmp/").exists():
         output = Path("Tmp/").mkdir()
@@ -59,14 +58,11 @@ if __name__ == "__main__":
     if not Path("Log/").exists():
         output = Path("Log/").mkdir()
 
-    my_flag_anyone = sparkle_record_help.detect_current_sparkle_platform_exists()
+    my_flag_anyone = sparkle_snapshot_help.detect_current_sparkle_platform_exists()
 
     if my_flag_anyone:
-        my_suffix = sparkle_basic_help.get_time_pid_random_string()
-        my_record_filename = f"Records/My_Record_{my_suffix}.zip"
-
-        sparkle_record_help.save_current_sparkle_platform(my_record_filename)
-        sparkle_record_help.cleanup_current_sparkle_platform()
+        sparkle_snapshot_help.save_current_sparkle_platform()
+        sparkle_snapshot_help.cleanup_current_sparkle_platform()
 
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")

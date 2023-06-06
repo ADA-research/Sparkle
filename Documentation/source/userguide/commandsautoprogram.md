@@ -102,11 +102,11 @@
 
 ```
 
-(cmd-load-record)=
+(cmd-load-snapshot)=
 
 ```{eval-rst}
-.. autoprogram:: load_record:parser_function()
-   :prog: load_record.py
+.. autoprogram:: load_snapshot:parser_function()
+   :prog: load_snapshot.py
 
 ```
 
@@ -126,11 +126,11 @@
 
 ```
 
-(cmd-remove-record)=
+(cmd-remove-snapshot)=
 
 ```{eval-rst}
-.. autoprogram:: remove_record:parser_function()
-   :prog: remove_record.py
+.. autoprogram:: remove_snapshot:parser_function()
+   :prog: remove_snapshot.py
 
 ```
 
@@ -182,11 +182,11 @@
 
 ```
 
-(cmd-save-record)=
+(cmd-save-snapshot)=
 
 ```{eval-rst}
-.. autoprogram:: save_record:parser_function()
-   :prog: save_record.py
+.. autoprogram:: save_snapshot:parser_function()
+   :prog: save_snapshot.py
 
 ```
 

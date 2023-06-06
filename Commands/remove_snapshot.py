@@ -12,10 +12,10 @@ def parser_function():
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "record_file_path",
-        metavar="record-file-path",
+        "snapshot_file_path",
+        metavar="snapshot-file-path",
         type=str,
-        help="path to the record file",
+        help="path to the snapshot file",
     )
 
     return parser
@@ -30,12 +30,12 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    record_file_name = args.record_file_path
-    if not Path(record_file_name).exists():
-        print("Record file " + record_file_name + " does not exist!")
+    snapshot_file_name = args.snapshot_file_path
+    if not Path(snapshot_file_name).exists():
+        print("Snapshot file " + snapshot_file_name + " does not exist!")
         sys.exit()
 
-    print("Removing record file " + record_file_name + " ...")
-    command_line = "rm -rf " + record_file_name
+    print("Removing snapshot file " + snapshot_file_name + " ...")
+    command_line = "rm -rf " + snapshot_file_name
     os.system(command_line)
-    print("Record file " + record_file_name + " removed!")
+    print("Snapshot file " + snapshot_file_name + " removed!")
