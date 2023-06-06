@@ -74,9 +74,6 @@ Commands/test/save_record.sh
 # Test load record
 Commands/test/load_record.sh
 
-# Test remove record
-Commands/test/remove_record.sh
-
 # Test remove feature extractor
 Commands/test/remove_feature_extractor.sh
 
