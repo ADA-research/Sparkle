@@ -2,6 +2,7 @@
 """Command to initialise a Sparkle platform."""
 
 import sys
+import os
 import argparse
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_file_help as sfh
+import cleanup_temporary_files as ctf
 
 
 def parser_function():
@@ -30,6 +32,13 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    print("Cleaning existing Sparkle platform ...")
+    sparkle_record_help.cleanup_current_sparkle_platform()
+    ctf.remove_temporary_files()
+    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+    os.system(command_line)
+    print("Existing Sparkle platform cleaned!")
 
     print("Start initialising Sparkle platform ...")
 

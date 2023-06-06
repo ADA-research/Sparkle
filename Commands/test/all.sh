@@ -35,9 +35,6 @@ Commands/test/add_solver.sh
 # Test run solvers
 Commands/test/run_solvers.sh
 
-# Test cleanup current sparkle platform
-Commands/test/cleanup_current_sparkle_platform.sh
-
 # Test cleanup temporary files
 Commands/test/cleanup_temporary_files.sh
 
