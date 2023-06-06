@@ -690,16 +690,9 @@ def create_temporary_directories() -> None:
         Path("Tmp/").mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
 
-    if not Path("Tmp/SBATCH_Extractor_Jobs/").exists():
-        Path("Tmp/SBATCH_Extractor_Jobs/").mkdir()
-
-    if not Path("Tmp/SBATCH_Solver_Jobs/").exists():
-        Path("Tmp/SBATCH_Solver_Jobs/").mkdir()
-
-    if not Path("Tmp/SBATCH_Portfolio_Jobs/").exists():
-        Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir()
-
-    if not Path("Tmp/SBATCH_Report_Jobs/").exists():
-        Path("Tmp/SBATCH_Report_Jobs/").mkdir()
+    Path("Tmp/SBATCH_Extractor_Jobs/").mkdir(exist_ok=True)
+    Path("Tmp/SBATCH_Solver_Jobs/").mkdir(exist_ok=True)
+    Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir(exist_ok=True)
+    Path("Tmp/SBATCH_Report_Jobs/").mkdir(exist_ok=True)
 
     return
