@@ -31,14 +31,5 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     snapshot_file_name = args.snapshot_file_path
-    if not Path(snapshot_file_name).exists():
-        print("Snapshot file " + snapshot_file_name + " does not exist!")
-        sys.exit()
+    sparkle_snapshot_help.load_snapshot(snapshot_file_name)
 
-    print("Cleaning existing Sparkle platform ...")
-    sparkle_snapshot_help.cleanup_current_sparkle_platform()
-    print("Existing Sparkle platform cleaned!")
-
-    print("Loading snapshot file " + snapshot_file_name + " ...")
-    sparkle_snapshot_help.extract_sparkle_snapshot(snapshot_file_name)
-    print("Snapshot file " + snapshot_file_name + " loaded successfully!")

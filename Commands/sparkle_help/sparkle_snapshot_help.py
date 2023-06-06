@@ -209,6 +209,10 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
     if not Path(my_snapshot_filename).exists():
         sys.exit()
 
+    if not my_snapshot_filename.endswith(".zip"):
+        print("File " + my_snapshot_filename + " is not a .zip file!")
+        sys.exit()
+
     my_suffix = sbh.get_time_pid_random_string()
     my_tmp_directory = f"tmp_directory_{my_suffix}"
 
@@ -220,3 +224,27 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
     os.system(r"cp -r " + my_tmp_directory + "/* " + "./")
     sfh.rmtree(Path(my_tmp_directory))
     os.system(r"rm -f " + snapshot_log_file_path)
+
+
+def load_snapshot(snapshot_file_path: str) -> None:
+    """Load a Sparkle platform from a snapshot.
+
+    Args:
+        snapshot_file_path: File path to the file where the Sparkle
+        platform is stored.
+    """
+
+    if not Path(snapshot_file_path).exists():
+        print("Snapshot file " + snapshot_file_path + " does not exist!")
+        sys.exit()
+    if not snapshot_file_path.endswith(".zip"):
+        print("File " + snapshot_file_path + " is not a .zip file!")
+        sys.exit()
+    print("Cleaning existing Sparkle platform ...")
+    cleanup_current_sparkle_platform()
+    print("Existing Sparkle platform cleaned!")
+
+    print("Loading snapshot file " + snapshot_file_path + " ...")
+    extract_sparkle_snapshot(snapshot_file_path)
+    print("Snapshot file " + snapshot_file_path + " loaded successfully!")
+
