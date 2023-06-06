@@ -18,7 +18,7 @@ def parser_function():
 
 
 def remove_temporary_files() -> None:
-    """Remove temporary files."""
+    """Remove temporary files. Only removes files not affecting the sparkle state."""
     command_line = "rm -rf Commands/sparkle_help/*.pyc"
     os.system(command_line)
     shutil.rmtree(Path("Tmp/"))
