@@ -231,9 +231,8 @@ def load_snapshot(snapshot_file_path: str) -> None:
 
     Args:
         snapshot_file_path: File path to the file where the Sparkle
-        platform is stored.
+            platform is stored.
     """
-
     if not Path(snapshot_file_path).exists():
         print("Snapshot file " + snapshot_file_path + " does not exist!")
         sys.exit()
@@ -247,4 +246,3 @@ def load_snapshot(snapshot_file_path: str) -> None:
     print("Loading snapshot file " + snapshot_file_path + " ...")
     extract_sparkle_snapshot(snapshot_file_path)
     print("Snapshot file " + snapshot_file_path + " loaded successfully!")
-
