@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Sparkle command to remove temporary files."""
+"""Sparkle command to remove temporary files.
+
+Only removes files not affecting the sparkle state.
+"""
 
 import os
 import shutil

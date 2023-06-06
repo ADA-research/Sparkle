@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Sparkle command to clean up the current Sparkle platform.
-
-Only removes files not affecting the sparkle state.
-"""
+"""Sparkle command to clean up the current Sparkle platform."""
 
 import os
 import sys
