@@ -4,6 +4,7 @@
 import os
 import sys
 import argparse
+from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_logging as sl
 
 
@@ -46,22 +47,6 @@ def remove_temporary_files() -> None:
     return
 
 
-def create_temporary_directories() -> None:
-    """Create directories for temporary files."""
-    command_line = "mkdir -p Tmp/SBATCH_Extractor_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Solver_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Portfolio_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Report_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Parallel_Portfolio_Jobs/"
-    os.system(command_line)
-
-    return
-
-
 if __name__ == "__main__":
     # Log command call
     sl.log_command(sys.argv)
@@ -74,5 +59,5 @@ if __name__ == "__main__":
 
     print("Cleaning temporary files ...")
     remove_temporary_files()
-    create_temporary_directories()
+    sfh.create_temporary_directories()
     print("Temporary files cleaned!")

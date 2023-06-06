@@ -681,3 +681,19 @@ def check_file_is_executable(file_name: Path) -> None:
             "executable.\nAdd execution permissions to the file to run the configurator."
         )
         sys.exit()
+
+
+def create_temporary_directories() -> None:
+    """Create directories for temporary files."""
+    command_line = "mkdir -p Tmp/SBATCH_Extractor_Jobs/"
+    os.system(command_line)
+    command_line = "mkdir -p Tmp/SBATCH_Solver_Jobs/"
+    os.system(command_line)
+    command_line = "mkdir -p Tmp/SBATCH_Portfolio_Jobs/"
+    os.system(command_line)
+    command_line = "mkdir -p Tmp/SBATCH_Report_Jobs/"
+    os.system(command_line)
+    command_line = "mkdir -p Tmp/SBATCH_Parallel_Portfolio_Jobs/"
+    os.system(command_line)
+
+    return
