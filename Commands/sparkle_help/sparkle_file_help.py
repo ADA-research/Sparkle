@@ -5,11 +5,11 @@
 import os
 import sys
 import time
+import shutil
 import random
 import fcntl
 from pathlib import Path
 from sparkle_help import sparkle_logging as sl
-
 
 try:
     from Commands.sparkle_help import sparkle_global_help as sgh
@@ -694,5 +694,24 @@ def create_temporary_directories() -> None:
     Path("Tmp/SBATCH_Solver_Jobs/").mkdir(exist_ok=True)
     Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir(exist_ok=True)
     Path("Tmp/SBATCH_Report_Jobs/").mkdir(exist_ok=True)
+
+    return
+
+
+def remove_temporary_files() -> None:
+    """Remove temporary files. Only removes files not affecting the sparkle state."""
+    command_line = "rm -rf Commands/sparkle_help/*.pyc"
+    os.system(command_line)
+    shutil.rmtree(Path("Tmp/"), ignore_errors=True)
+    shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
+    shutil.rmtree(Path("Performance_Data/Tmp/"), ignore_errors=True)
+    shutil.rmtree(Path("Performance_Data/Tmp_PaP/"), ignore_errors=True)
+    shutil.rmtree(Path("Log/"), ignore_errors=True)
+
+    command_line = "rm -f slurm-*"
+    os.system(command_line)
+
+    shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
+                  ignore_errors=True)
 
     return

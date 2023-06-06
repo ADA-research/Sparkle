@@ -58,6 +58,13 @@ def save_current_sparkle_platform(my_record_filename: str) -> None:
     my_flag_sparkle_portfolio_selector = False
     my_flag_sparkle_parallel_portfolio = False
 
+    my_flag_output = False
+    my_flag_test_data = False
+
+    if Path("Output/").exists():
+        my_flag_output = True
+    if Path("Test_Data/").exists():
+        my_flag_test_data = True
     if Path("Instances/").exists():
         my_flag_instances = True
     if Path("Solvers/").exists():
@@ -79,6 +86,30 @@ def save_current_sparkle_platform(my_record_filename: str) -> None:
         Path(sgh.sparkle_tmp_path).mkdir()
 
     my_record_filename_exist = Path(my_record_filename).exists()
+    if not my_record_filename_exist:
+        if my_flag_output:
+            my_record_filename_exist = True
+            print("Now recording current Sparkle platform in file "
+                  f"{my_record_filename} ...")
+            os.system(f"zip -r {my_record_filename} Output/ >> "
+                      f"{record_log_file_path}")
+    else:
+        if my_flag_output:
+            os.system(f"zip -g -r {my_record_filename} Output/ >> "
+                      f"{record_log_file_path}")
+
+    if not my_record_filename_exist:
+        if my_flag_test_data:
+            my_record_filename_exist = True
+            print("Now recording current Sparkle platform in file "
+                  f"{my_record_filename} ...")
+            os.system(f"zip -r {my_record_filename} Test_Data/ >> "
+                      f"{record_log_file_path}")
+    else:
+        if my_flag_test_data:
+            os.system(f"zip -g -r {my_record_filename} Test_Data/ >> "
+                      f"{record_log_file_path}")
+
     if not my_record_filename_exist:
         if my_flag_instances:
             my_record_filename_exist = True
@@ -182,16 +213,17 @@ def save_current_sparkle_platform(my_record_filename: str) -> None:
 
 def remove_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
+    sfh.remove_temporary_files()
     if Path("Instances/").exists():
         shutil.rmtree(Path("Instances/"), ignore_errors=True)
     if Path("Solvers/").exists():
         shutil.rmtree(Path("Solvers/"), ignore_errors=True)
+    if Path("Output/").exists():
+        shutil.rmtree(Path("Output/"), ignore_errors=True)
+    if Path("Test_Data/").exists():
+        shutil.rmtree(Path("Test_Data/"), ignore_errors=True)
     if Path("Extractors/").exists():
         shutil.rmtree(Path("Extractors/"), ignore_errors=True)
-    if Path("Feature_Data/").exists():
-        shutil.rmtree(Path("Feature_Data/"), ignore_errors=True)
-    if Path("Performance_Data/").exists():
-        shutil.rmtree(Path("Performance_Data/"), ignore_errors=True)
     if Path("Reference_Lists/").exists():
         shutil.rmtree(Path("Reference_Lists/"), ignore_errors=True)
     if Path("Sparkle_Portfolio_Selector").exists():

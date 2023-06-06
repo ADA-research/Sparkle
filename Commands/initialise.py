@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     print("Cleaning existing Sparkle platform ...")
     sparkle_record_help.remove_current_sparkle_platform()
-    ctf.remove_temporary_files()
+    sfh.remove_temporary_files()
     command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
     os.system(command_line)
     print("Existing Sparkle platform cleaned!")
