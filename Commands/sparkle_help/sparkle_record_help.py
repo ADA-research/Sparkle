@@ -4,6 +4,7 @@
 
 import os
 import sys
+import shutil
 from pathlib import Path
 
 from sparkle_help import sparkle_basic_help as sbh
@@ -179,27 +180,27 @@ def save_current_sparkle_platform(my_record_filename: str) -> None:
     os.system("rm -f " + record_log_file_path)
 
 
-def cleanup_current_sparkle_platform() -> None:
+def remove_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
     if Path("Instances/").exists():
-        sfh.rmtree(Path("Instances/"))
+        shutil.rmtree(Path("Instances/"), ignore_errors=True)
     if Path("Solvers/").exists():
-        sfh.rmtree(Path("Solvers/"))
+        shutil.rmtree(Path("Solvers/"), ignore_errors=True)
     if Path("Extractors/").exists():
-        sfh.rmtree(Path("Extractors/"))
+        shutil.rmtree(Path("Extractors/"), ignore_errors=True)
     if Path("Feature_Data/").exists():
-        sfh.rmtree(Path("Feature_Data/"))
+        shutil.rmtree(Path("Feature_Data/"), ignore_errors=True)
     if Path("Performance_Data/").exists():
-        sfh.rmtree(Path("Performance_Data/"))
+        shutil.rmtree(Path("Performance_Data/"), ignore_errors=True)
     if Path("Reference_Lists/").exists():
-        sfh.rmtree(Path("Reference_Lists/"))
+        shutil.rmtree(Path("Reference_Lists/"), ignore_errors=True)
     if Path("Sparkle_Portfolio_Selector").exists():
-        sfh.rmtree(Path("Sparkle_Portfolio_Selector/"))
+        shutil.rmtree(Path("Sparkle_Portfolio_Selector/"), ignore_errors=True)
     if sgh.sparkle_parallel_portfolio_dir.exists():
-        sfh.rmtree(sgh.sparkle_parallel_portfolio_dir)
+        shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     if Path(ablation_scenario_dir).exists():
-        sfh.rmtree(Path(ablation_scenario_dir))
+        shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
 
 
 def extract_sparkle_record(my_record_filename: str) -> None:

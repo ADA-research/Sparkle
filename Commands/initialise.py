@@ -34,7 +34,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Cleaning existing Sparkle platform ...")
-    sparkle_record_help.cleanup_current_sparkle_platform()
+    sparkle_record_help.remove_current_sparkle_platform()
     ctf.remove_temporary_files()
     command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
     os.system(command_line)
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         my_record_filename = f"Records/My_Record_{my_suffix}.zip"
 
         sparkle_record_help.save_current_sparkle_platform(my_record_filename)
-        sparkle_record_help.cleanup_current_sparkle_platform()
+        sparkle_record_help.remove_current_sparkle_platform()
 
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
