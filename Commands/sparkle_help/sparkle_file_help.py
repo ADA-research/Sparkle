@@ -8,6 +8,7 @@ import time
 import random
 import fcntl
 from pathlib import Path
+from sparkle_help import sparkle_logging as sl
 
 
 try:
@@ -685,15 +686,20 @@ def check_file_is_executable(file_name: Path) -> None:
 
 def create_temporary_directories() -> None:
     """Create directories for temporary files."""
-    command_line = "mkdir -p Tmp/SBATCH_Extractor_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Solver_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Portfolio_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Report_Jobs/"
-    os.system(command_line)
-    command_line = "mkdir -p Tmp/SBATCH_Parallel_Portfolio_Jobs/"
-    os.system(command_line)
+    if not Path("Tmp/").exists():
+        Path("Tmp/").mkdir()
+        sl.add_output("Tmp/", "Directory with temporary files")
+
+    if not Path("Tmp/SBATCH_Extractor_Jobs/").exists():
+        Path("Tmp/SBATCH_Extractor_Jobs/").mkdir()
+
+    if not Path("Tmp/SBATCH_Solver_Jobs/").exists():
+        Path("Tmp/SBATCH_Solver_Jobs/").mkdir()
+
+    if not Path("Tmp/SBATCH_Portfolio_Jobs/").exists():
+        Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir()
+
+    if not Path("Tmp/SBATCH_Report_Jobs/").exists():
+        Path("Tmp/SBATCH_Report_Jobs/").mkdir()
 
     return
