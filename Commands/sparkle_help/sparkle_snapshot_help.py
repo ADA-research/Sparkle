@@ -40,8 +40,7 @@ def detect_current_sparkle_platform_exists() -> bool:
 
 
 def save_current_sparkle_platform() -> None:
-    """Store the current Sparkle platform in a .zip file.
-    """
+    """Store the current Sparkle platform in a .zip file."""
     my_suffix = sbh.get_time_pid_random_string()
     my_snapshot_filename = f"Snapshots/My_Snapshot_{my_suffix}.zip"
 
