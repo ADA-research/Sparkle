@@ -33,18 +33,15 @@ if __name__ == "__main__":
 
     print("Start initialising Sparkle platform ...")
 
-    if not Path("Records/").exists():
-        Path("Records/").mkdir()
+    Path("Records/").mkdir(exist_ok=True)
 
     sfh.create_temporary_directories()
 
     pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
 
-    if not pap_sbatch_path.exists():
-        pap_sbatch_path.mkdir()
+    pap_sbatch_path.mkdir(exist_ok=True)
 
-    if not Path("Log/").exists():
-        Path("Log/").mkdir()
+    Path("Log/").mkdir(exist_ok=True)
 
     my_flag_anyone = sparkle_record_help.detect_current_sparkle_platform_exists()
 

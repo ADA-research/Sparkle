@@ -2,6 +2,8 @@
 """Sparkle command to remove temporary files."""
 
 import os
+import shutil
+from pathlib import Path
 import sys
 import argparse
 from sparkle_help import sparkle_file_help as sfh
@@ -19,30 +21,21 @@ def remove_temporary_files() -> None:
     """Remove temporary files."""
     command_line = "rm -rf Commands/sparkle_help/*.pyc"
     os.system(command_line)
-    command_line = "rm -rf Tmp/*"
-    os.system(command_line)
-    command_line = "rm -rf Tmp/SBATCH_Extractor_Jobs/*"
-    os.system(command_line)
-    command_line = "rm -rf Tmp/SBATCH_Solver_Jobs/*"
-    os.system(command_line)
-    command_line = "rm -rf Tmp/SBATCH_Portfolio_Jobs/*"
-    os.system(command_line)
-    command_line = "rm -rf Tmp/SBATCH_Report_Jobs/*"
-    os.system(command_line)
-    command_line = "rm -rf Tmp/SBATCH_Parallel_Portfolio_Jobs/*"
-    os.system(command_line)
-    command_line = "rm -rf Feature_Data/Tmp/*"
-    os.system(command_line)
-    command_line = "rm -rf Performance_Data/Tmp/*"
-    os.system(command_line)
-    command_line = "rm -rf Performance_Data/Tmp_PaP/*"
-    os.system(command_line)
-    command_line = "rm -rf Log/*"
-    os.system(command_line)
+    shutil.rmtree(Path("Tmp/"))
+    shutil.rmtree(Path("Tmp/SBATCH_Extractor_Jobs/"))
+    shutil.rmtree(Path("Tmp/SBATCH_Solver_Jobs/"))
+    shutil.rmtree(Path("Tmp/SBATCH_Portfolio_Jobs/"))
+    shutil.rmtree(Path("Tmp/SBATCH_Report_Jobs/"))
+    shutil.rmtree(Path("Tmp/SBATCH_Parallel_Portfolio_Jobs/"))
+    shutil.rmtree(Path("Feature_Data/Tmp/"))
+    shutil.rmtree(Path("Performance_Data/Tmp/"))
+    shutil.rmtree(Path("Performance_Data/Tmp_PaP/"))
+    shutil.rmtree(Path("Log/"))
+
     command_line = "rm -f slurm-*"
     os.system(command_line)
-    command_line = "rm -rf Components/smac-v2.10.03-master-778/tmp/*"
-    os.system(command_line)
+
+    shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"))
 
     return
 
