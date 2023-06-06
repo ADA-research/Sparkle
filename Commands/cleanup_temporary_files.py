@@ -17,7 +17,6 @@ def parser_function():
     return parser
 
 
-
 if __name__ == "__main__":
     # Log command call
     sl.log_command(sys.argv)

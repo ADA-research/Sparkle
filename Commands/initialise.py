@@ -12,7 +12,6 @@ from sparkle_help import sparkle_record_help
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_file_help as sfh
-import cleanup_temporary_files as ctf
 
 
 def parser_function():
