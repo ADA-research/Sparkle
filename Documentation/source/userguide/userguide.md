@@ -328,7 +328,6 @@ to get a description of the required arguments and other options.
 % *  load_record.py
 % *  remove_feature_extractor.py
 % *  remove_instances.py
-% *  remove_record.py
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py

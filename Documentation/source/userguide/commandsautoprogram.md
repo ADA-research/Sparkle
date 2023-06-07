@@ -118,14 +118,6 @@
 
 ```
 
-(cmd-remove-record)=
-
-```{eval-rst}
-.. autoprogram:: remove_record:parser_function()
-   :prog: remove_record.py
-
-```
-
 (cmd-remove-solver)=
 
 ```{eval-rst}
