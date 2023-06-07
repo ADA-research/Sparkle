@@ -54,14 +54,6 @@
 
 ```
 
-(cmd-compute-features-parallel)=
-
-```{eval-rst}
-.. autoprogram:: compute_features_parallel:parser_function()
-   :prog: compute_features_parallel.py
-
-```
-
 (cmd-compute-marginal-contribution)=
 
 ```{eval-rst}
