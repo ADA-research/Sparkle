@@ -218,8 +218,6 @@ def remove_current_sparkle_platform() -> None:
         shutil.rmtree(Path("Instances/"), ignore_errors=True)
     if Path("Solvers/").exists():
         shutil.rmtree(Path("Solvers/"), ignore_errors=True)
-    if Path("Output/").exists():
-        shutil.rmtree(Path("Output/"), ignore_errors=True)
     if Path("Test_Data/").exists():
         shutil.rmtree(Path("Test_Data/"), ignore_errors=True)
     if Path("Extractors/").exists():
