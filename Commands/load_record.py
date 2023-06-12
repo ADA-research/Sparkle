@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     print("Cleaning existing Sparkle platform ...")
     sparkle_record_help.remove_current_sparkle_platform()
-    print("Existing Sparkle platform cleaned!")
+    print("Existing Sparkle platform removed!")
 
     print("Loading record file " + record_file_name + " ...")
     sparkle_record_help.extract_sparkle_record(record_file_name)

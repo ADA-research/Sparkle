@@ -43,21 +43,28 @@ sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"
 
 sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
 
-sparkle_portfolio_selector_dir = "Sparkle_Portfolio_Selector/"
+sparkle_portfolio_selector_dir = Path("Sparkle_Portfolio_Selector/")
 
 sparkle_portfolio_selector_name = "sparkle_portfolio_selector" + sparkle_special_string
 
 sparkle_portfolio_selector_path = (
-    sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name)
+    sparkle_portfolio_selector_dir / sparkle_portfolio_selector_name)
+
+instance_dir = Path("Instances/")
+solver_dir = Path("Solvers/")
+test_data_dir = Path("Test_Data/")
+extractor_dir = Path("Extractors/")
+feature_data_dir = Path("Feature_Data/")
+performance_data_dir = Path("Performance_Data")
 
 sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio/")
 sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio/")
 
-sparkle_marginal_contribution_perfect_path = Path(
-    sparkle_portfolio_selector_dir + "margi_contr_perfect.csv")
+sparkle_marginal_contribution_perfect_path = (
+    sparkle_portfolio_selector_dir / "margi_contr_perfect.csv")
 
-sparkle_marginal_contribution_actual_path = Path(
-    sparkle_portfolio_selector_dir + "margi_contr_actual.csv")
+sparkle_marginal_contribution_actual_path = (
+    sparkle_portfolio_selector_dir / "margi_contr_actual.csv")
 
 sparkle_last_test_file_name = "last_test_configured_default.txt"
 

@@ -700,16 +700,17 @@ def create_temporary_directories() -> None:
 
 def remove_temporary_files() -> None:
     """Remove temporary files. Only removes files not affecting the sparkle state."""
-    command_line = "rm -rf Commands/sparkle_help/*.pyc"
-    os.system(command_line)
+    sparkle_help_path = Path("Commands/sparkle_help")
+    for filename in sparkle_help_path.glob("*.pyc"):
+        shutil.rmtree(sparkle_help_path.joinpath(filename))
     shutil.rmtree(Path("Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Performance_Data/Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Performance_Data/Tmp_PaP/"), ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)
 
-    command_line = "rm -f slurm-*"
-    os.system(command_line)
+    for filename in Path(".").glob("slurm-*"):
+        shutil.rmtree(filename)
 
     shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
                   ignore_errors=True)
