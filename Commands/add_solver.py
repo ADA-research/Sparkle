@@ -102,7 +102,7 @@ if __name__ == "__main__":
     if smac_wrapper_path.is_file():
         sfh.check_file_is_executable(smac_wrapper_path)
     else:
-        print("WARNING: The solver does not have a SMAC wrapper."
+        print("WARNING: The solver does not have a SMAC wrapper. "
               "Therefore it cannot be configured using SMAC.")
 
     # Start add solver
@@ -113,11 +113,11 @@ if __name__ == "__main__":
     if not Path(solver_directory).exists():
         Path(solver_directory).mkdir(parents=True, exist_ok=True)
     else:
-        print("Solver " + last_level_directory + " already exists!")
-        print("Do not add solver " + last_level_directory)
+        print(f"Solver {last_level_directory} already exists!")
+        print(f"Do not add solver {last_level_directory}")
         sys.exit()
 
-    os.system("cp -r " + solver_source + "/* " + solver_directory)
+    os.system(f"cp -r {solver_source}/* {solver_directory}")
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     sfh.add_new_solver_into_file(solver_directory, deterministic, solver_variations)
 
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
-        print("one pcs file detected, this is a configurable solver")
+        print("One pcs file detected, this is a configurable solver.")
 
     print(f"Adding solver {sfh.get_last_level_directory_name(solver_directory)} "
           "done!")

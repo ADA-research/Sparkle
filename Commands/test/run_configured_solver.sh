@@ -12,6 +12,8 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
+Commands/initialise.py > /dev/null
+
 # Copy configuration results and other files to simulate the configuration command
 configuration_results_path="Commands/test/test_files/results/"
 configuration_files_path="Commands/test/test_files/PbO-CCSAT-Generic_PTN/PTN_train.txt"
@@ -44,7 +46,7 @@ instance_path_test="Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 # Run commands to prepare Sparkle for the test
-Commands/initialise.py > /dev/null
+
 Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run configured solver on a single instance

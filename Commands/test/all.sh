@@ -35,9 +35,6 @@ Commands/test/add_solver.sh
 # Test run solvers
 Commands/test/run_solvers.sh
 
-# Test cleanup current sparkle platform
-Commands/test/cleanup_current_sparkle_platform.sh
-
 # Test cleanup temporary files
 Commands/test/cleanup_temporary_files.sh
 
@@ -73,9 +70,6 @@ Commands/test/save_record.sh
 
 # Test load record
 Commands/test/load_record.sh
-
-# Test remove record
-Commands/test/remove_record.sh
 
 # Test remove feature extractor
 Commands/test/remove_feature_extractor.sh

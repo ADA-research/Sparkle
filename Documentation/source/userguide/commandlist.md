@@ -5,7 +5,6 @@
 - {ref}`cmd-cleanup-current-sparkle-platform`
 - {ref}`cmd-cleanup-temporary-files`
 - {ref}`cmd-compute-features`
-- {ref}`cmd-compute-features-parallel`
 - {ref}`cmd-compute-marginal-contribution`
 - {ref}`cmd-configure-solver`
 - {ref}`cmd-construct-sparkle-portfolio-selector`
