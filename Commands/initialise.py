@@ -49,8 +49,6 @@ if __name__ == "__main__":
 
     pap_sbatch_path.mkdir(exist_ok=True)
 
-    Path("Log/").mkdir(exist_ok=True)
-
     my_flag_anyone = sparkle_record_help.detect_current_sparkle_platform_exists()
 
     if my_flag_anyone:
@@ -63,15 +61,24 @@ if __name__ == "__main__":
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
 
-    Path("Instances/").mkdir()
-    Path("Solvers/").mkdir()
-    Path("Extractors/").mkdir()
-    Path("Tmp/").mkdir()
-    Path("Reference_Lists/").mkdir()
-    Path("Sparkle_Portfolio_Selector/").mkdir()
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
+
+    # Process command line arguments
+    args = parser.parse_args()
+
+    sfh.create_temporary_directories()
+    sgh.test_data_dir.mkdir()
+    sgh.instance_dir.mkdir()
+    sgh.solver_dir.mkdir()
+    sgh.extractor_dir.mkdir()
+    sgh.reference_list_dir.mkdir()
+    sgh.sparkle_portfolio_selector_dir.mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
-    Path("Feature_Data/Tmp/").mkdir(parents=True)
-    Path("Performance_Data/Tmp/").mkdir(parents=True)
+    Path(f"{sgh.ablation_dir}scenarios/").mkdir()
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
     sgh.pap_performance_data_tmp_path.mkdir()

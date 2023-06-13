@@ -686,6 +686,7 @@ def check_file_is_executable(file_name: Path) -> None:
 
 def create_temporary_directories() -> None:
     """Create directories for temporary files."""
+
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
@@ -695,6 +696,10 @@ def create_temporary_directories() -> None:
     Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir(exist_ok=True)
     Path("Tmp/SBATCH_Report_Jobs/").mkdir(exist_ok=True)
     Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
+    Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
+    Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
+    Path("Performance_Data/Tmp_Pap/").mkdir(parents=True, exist_ok=True)
+    Path("Log/").mkdir(exist_ok=True)
 
     return
 
