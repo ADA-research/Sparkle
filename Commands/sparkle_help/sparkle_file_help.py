@@ -5,10 +5,11 @@
 import os
 import sys
 import time
+import shutil
 import random
 import fcntl
 from pathlib import Path
-
+from sparkle_help import sparkle_logging as sl
 
 try:
     from Commands.sparkle_help import sparkle_global_help as sgh
@@ -681,3 +682,42 @@ def check_file_is_executable(file_name: Path) -> None:
             "executable.\nAdd execution permissions to the file to run the configurator."
         )
         sys.exit()
+
+
+def create_temporary_directories() -> None:
+    """Create directories for temporary files."""
+    if not Path("Tmp/").exists():
+        Path("Tmp/").mkdir()
+        sl.add_output("Tmp/", "Directory with temporary files")
+
+    Path("Tmp/SBATCH_Extractor_Jobs/").mkdir(exist_ok=True)
+    Path("Tmp/SBATCH_Solver_Jobs/").mkdir(exist_ok=True)
+    Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir(exist_ok=True)
+    Path("Tmp/SBATCH_Report_Jobs/").mkdir(exist_ok=True)
+    Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
+    Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
+    Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
+    Path("Performance_Data/Tmp_Pap/").mkdir(parents=True, exist_ok=True)
+    Path("Log/").mkdir(exist_ok=True)
+
+    return
+
+
+def remove_temporary_files() -> None:
+    """Remove temporary files. Only removes files not affecting the sparkle state."""
+    sparkle_help_path = Path("Commands/sparkle_help")
+    for filename in sparkle_help_path.glob("*.pyc"):
+        shutil.rmtree(sparkle_help_path.joinpath(filename))
+    shutil.rmtree(Path("Tmp/"), ignore_errors=True)
+    shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
+    shutil.rmtree(Path("Performance_Data/Tmp/"), ignore_errors=True)
+    shutil.rmtree(Path("Performance_Data/Tmp_PaP/"), ignore_errors=True)
+    shutil.rmtree(Path("Log/"), ignore_errors=True)
+
+    for filename in Path(".").glob("slurm-*"):
+        shutil.rmtree(filename)
+
+    shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
+                  ignore_errors=True)
+
+    return
