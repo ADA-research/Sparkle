@@ -50,6 +50,7 @@ sparkle_portfolio_selector_name = "sparkle_portfolio_selector" + sparkle_special
 sparkle_portfolio_selector_path = (
     sparkle_portfolio_selector_dir / sparkle_portfolio_selector_name)
 
+output_dir = Path("Output/")
 instance_dir = Path("Instances/")
 solver_dir = Path("Solvers/")
 test_data_dir = Path("Test_Data/")

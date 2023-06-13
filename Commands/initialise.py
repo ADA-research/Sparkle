@@ -23,6 +23,13 @@ def parser_function():
 
 
 if __name__ == "__main__":
+
+    print("Cleaning existing Sparkle platform ...")
+    sparkle_record_help.remove_current_sparkle_platform()
+    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+    os.system(command_line)
+    print("Existing Sparkle platform cleaned!")
+
     # Log command call
     sl.log_command(sys.argv)
 
@@ -31,13 +38,6 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-
-    print("Cleaning existing Sparkle platform ...")
-    sparkle_record_help.remove_current_sparkle_platform()
-    sfh.remove_temporary_files()
-    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
-    os.system(command_line)
-    print("Existing Sparkle platform cleaned!")
 
     print("Start initialising Sparkle platform ...")
 

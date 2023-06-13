@@ -24,6 +24,8 @@ def detect_current_sparkle_platform_exists() -> bool:
     """
     if sgh.instance_dir.exists():
         return True
+    if sgh.output_dir.exists():
+        return True
     if sgh.solver_dir.exists():
         return True
     if sgh.extractor_dir.exists():
@@ -59,9 +61,12 @@ def save_current_sparkle_platform(record_filename: str) -> None:
     flag_sparkle_parallel_portfolio = False
 
     flag_test_data = False
+    flag_output_data = False
 
     if sgh.test_data_dir.exists():
         flag_test_data = True
+    if sgh.output_dir.exists():
+        flag_output_data = True
     if sgh.instance_dir.exists():
         flag_instances = True
     if sgh.solver_dir.exists():
@@ -94,6 +99,18 @@ def save_current_sparkle_platform(record_filename: str) -> None:
     else:
         if flag_test_data:
             os.system(f"zip -g -r {record_filename} Test_Data/ >> "
+                      f"{record_log_file_path}")
+
+    if not record_filename_exist:
+        if flag_output_data:
+            record_filename_exist = True
+            print("Now recording current Sparkle platform in file "
+                  f"{record_filename} ...")
+            os.system(f"zip -r {record_filename} Output/ >> "
+                      f"{record_log_file_path}")
+    else:
+        if flag_output_data:
+            os.system(f"zip -g -r {record_filename} Output/ >> "
                       f"{record_log_file_path}")
 
     if not record_filename_exist:
@@ -200,6 +217,7 @@ def save_current_sparkle_platform(record_filename: str) -> None:
 def remove_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
     sfh.remove_temporary_files()
+    shutil.rmtree(sgh.output_dir, ignore_errors=True)
     shutil.rmtree(sgh.instance_dir, ignore_errors=True)
     shutil.rmtree(sgh.solver_dir, ignore_errors=True)
     shutil.rmtree(sgh.test_data_dir, ignore_errors=True)
