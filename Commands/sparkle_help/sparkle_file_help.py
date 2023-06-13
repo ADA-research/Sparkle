@@ -686,7 +686,6 @@ def check_file_is_executable(file_name: Path) -> None:
 
 def create_temporary_directories() -> None:
     """Create directories for temporary files."""
-
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
