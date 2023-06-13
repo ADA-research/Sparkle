@@ -694,6 +694,7 @@ def create_temporary_directories() -> None:
     Path("Tmp/SBATCH_Solver_Jobs/").mkdir(exist_ok=True)
     Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir(exist_ok=True)
     Path("Tmp/SBATCH_Report_Jobs/").mkdir(exist_ok=True)
+    Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
 
     return
 
