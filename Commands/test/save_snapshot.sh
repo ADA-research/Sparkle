@@ -15,15 +15,15 @@
 Commands/initialise.py > /dev/null
 
 # Save snapshot
-output_true_partA="c Record file Snapshot/My_Snapshot"
-output_true_partB=".zip saved successfully!" # Somehow regex does not work when followed by this...
-output=$(Commands/save_snapshot.py | tail -1)
+output_true_partA="Snapshot file Snapshots/My_Snapshot"
+output_true_partB=".zip saved successfully!"
+output="$(Commands/save_snapshot.py | tail -1)"
 
-if [[ $output =~ ['${output_true_partA}'a-z0-9:._-] ]];
+if [[ $output =~ $output_true_partA[a-z0-9:._-]+$output_true_partB ]];
 then
-	echo "[success] save_snapshot test succeeded"
+    echo "[success] save_snapshot test succeeded"
 else
-	echo "[failure] save_snapshot test failed with output:"
-	echo $output
+    echo "[failure] save_snapshot test failed with output:"
+    echo "$output"
 fi
 
