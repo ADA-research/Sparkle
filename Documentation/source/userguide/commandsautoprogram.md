@@ -54,14 +54,6 @@
 
 ```
 
-(cmd-compute-features-parallel)=
-
-```{eval-rst}
-.. autoprogram:: compute_features_parallel:parser_function()
-   :prog: compute_features_parallel.py
-
-```
-
 (cmd-compute-marginal-contribution)=
 
 ```{eval-rst}
@@ -123,14 +115,6 @@
 ```{eval-rst}
 .. autoprogram:: remove_instances:parser_function()
    :prog: remove_instances.py
-
-```
-
-(cmd-remove-snapshot)=
-
-```{eval-rst}
-.. autoprogram:: remove_snapshot:parser_function()
-   :prog: remove_snapshot.py
 
 ```
 

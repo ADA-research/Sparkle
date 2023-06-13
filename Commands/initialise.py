@@ -9,6 +9,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_snapshot_help
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_file_help as sfh
 
 
 def parser_function():
@@ -20,6 +21,13 @@ def parser_function():
 
 
 if __name__ == "__main__":
+
+    print("Cleaning existing Sparkle platform ...")
+    sparkle_record_help.remove_current_sparkle_platform()
+    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+    os.system(command_line)
+    print("Existing Sparkle platform cleaned!")
+
     # Log command call
     sl.log_command(sys.argv)
 
@@ -31,53 +39,42 @@ if __name__ == "__main__":
 
     print("Start initialising Sparkle platform ...")
 
-    if not Path("Snapshots/").exists():
-        output = sgh.snapshot_dir.mkdir()
+    sgh.snapshot_dir.mkdir(exist_ok=True)
 
-    if not Path("Tmp/").exists():
-        output = Path("Tmp/").mkdir()
-        sl.add_output("Tmp/", "Directory with temporary files")
-
-    if not Path("Tmp/SBATCH_Extractor_Jobs/").exists():
-        output = Path("Tmp/SBATCH_Extractor_Jobs/").mkdir()
-
-    if not Path("Tmp/SBATCH_Solver_Jobs/").exists():
-        output = Path("Tmp/SBATCH_Solver_Jobs/").mkdir()
-
-    if not Path("Tmp/SBATCH_Portfolio_Jobs/").exists():
-        output = Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir()
-
-    if not Path("Tmp/SBATCH_Report_Jobs/").exists():
-        output = Path("Tmp/SBATCH_Report_Jobs/").mkdir()
+    sfh.create_temporary_directories()
 
     pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
 
-    if not pap_sbatch_path.exists():
-        pap_sbatch_path.mkdir()
-
-    if not Path("Log/").exists():
-        output = Path("Log/").mkdir()
+    pap_sbatch_path.mkdir(exist_ok=True)
 
     my_flag_anyone = sparkle_snapshot_help.detect_current_sparkle_platform_exists()
 
     if my_flag_anyone:
         sparkle_snapshot_help.save_current_sparkle_platform()
-        sparkle_snapshot_help.cleanup_current_sparkle_platform()
+        sparkle_snapshot_help.remove_current_sparkle_platform()
 
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
 
-    output = Path("Instances/").mkdir()
-    output = Path("Solvers/").mkdir()
-    output = Path("Extractors/").mkdir()
-    output = Path("Feature_Data/").mkdir()
-    output = Path("Performance_Data/").mkdir()
-    output = Path("Reference_Lists/").mkdir()
-    output = Path("Sparkle_Portfolio_Selector/").mkdir()
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
+
+    # Process command line arguments
+    args = parser.parse_args()
+
+    sfh.create_temporary_directories()
+    sgh.test_data_dir.mkdir()
+    sgh.instance_dir.mkdir()
+    sgh.solver_dir.mkdir()
+    sgh.extractor_dir.mkdir()
+    sgh.reference_list_dir.mkdir()
+    sgh.sparkle_portfolio_selector_dir.mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
+    Path(f"{sgh.ablation_dir}scenarios/").mkdir()
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
-    output = Path("Feature_Data/Tmp/").mkdir()
-    output = Path("Performance_Data/Tmp/").mkdir()
     sgh.pap_performance_data_tmp_path.mkdir()
     print("New Sparkle platform initialised!")

@@ -319,7 +319,6 @@ to get a description of the required arguments and other options.
 % *  :ref:`cmd:add_solver`
 % *  cleanup_current_sparkle_platform.py
 % *  cleanup_temporary_files.py
-% *  compute_features_parallel.py
 % *  compute_features.py
 % *  compute_marginal_contribution.py
 % *  :ref:`cmd:configure_solver`
@@ -329,7 +328,6 @@ to get a description of the required arguments and other options.
 % *  load_snapshot.py
 % *  remove_feature_extractor.py
 % *  remove_instances.py
-% *  remove_snapshot.py
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py
