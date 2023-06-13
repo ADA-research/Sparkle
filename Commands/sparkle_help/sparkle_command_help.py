@@ -83,7 +83,7 @@ COMMAND_DEPENDENCIES = {
     CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR: [
         CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR],
     CommandName.RUN_STATUS: [],
-    CommandName.SAVE_RECORD: [],
+    CommandName.SAVE_SNAPSHOT: [],
     CommandName.SPARKLE_WAIT: [],
     CommandName.SYSTEM_STATUS: [],
     CommandName.VALIDATE_CONFIGURED_VS_DEFAULT: [CommandName.CONFIGURE_SOLVER],
