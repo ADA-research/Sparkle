@@ -52,17 +52,16 @@ class Solver:
         target_solver_path = "Solvers/" + self.name
         solver_list_path = sgh.solver_list_path
 
-        fin = open(solver_list_path, "r+")
+        with Path(solver_list_path).open("r+") as fin:
+            while True:
+                myline = fin.readline()
+                if not myline:
+                    break
+                myline = myline.strip()
+                mylist = myline.split()
 
-        while True:
-            myline = fin.readline()
-            if not myline:
-                break
-            myline = myline.strip()
-            mylist = myline.split()
-
-            if (mylist[0] == target_solver_path):
-                deterministic = mylist[1]
-                break
+                if (mylist[0] == target_solver_path):
+                    deterministic = mylist[1]
+                    break
 
         return deterministic

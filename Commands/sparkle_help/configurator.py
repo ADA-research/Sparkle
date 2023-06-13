@@ -49,7 +49,7 @@ class Configurator:
 
         file_content = sbatch_options + params_list + srun_command
 
-        with open(self.configurator_path / self.sbatch_filename, "w+") as sbatch_script:
+        with (self.configurator_path / self.sbatch_filename).open("w+") as sbatch_script:
             sbatch_script.write(file_content)
 
     def configure(self) -> int:

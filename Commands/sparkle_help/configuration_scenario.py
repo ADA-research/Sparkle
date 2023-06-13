@@ -113,22 +113,21 @@ class ConfigurationScenario:
         scenario_file = (self.directory
                          / f"{self.name}_scenario.txt")
         self.scenario_file_name = scenario_file.name
-        file = open(scenario_file, "w")
-        file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
-        file.write(f"execdir = {inner_directory}/\n")
-        file.write(f"deterministic = {self.solver.is_deterministic()}\n")
-        file.write(f"run_obj = {run_objective}\n")
-        file.write(f"wallclock-limit = {time_budget}\n")
-        file.write(f"cutoffTime = {cutoff_time}\n")
-        file.write(f"cutoff_length = {cutoff_length}\n")
-        file.write(f"paramfile = {solver_param_file_path}\n")
-        file.write(f"outdir = {config_output_directory}\n")
-        file.write(f"instance_file = {instance_file}\n")
-        file.write(f"test_instance_file = {instance_file}\n")
-        if self.use_features:
-            file.write(f"feature_file = {self.feature_file}\n")
-        file.write("validation = true" + "\n")
-        file.close()
+        with scenario_file.open("w") as file:
+            file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
+            file.write(f"execdir = {inner_directory}/\n")
+            file.write(f"deterministic = {self.solver.is_deterministic()}\n")
+            file.write(f"run_obj = {run_objective}\n")
+            file.write(f"wallclock-limit = {time_budget}\n")
+            file.write(f"cutoffTime = {cutoff_time}\n")
+            file.write(f"cutoff_length = {cutoff_length}\n")
+            file.write(f"paramfile = {solver_param_file_path}\n")
+            file.write(f"outdir = {config_output_directory}\n")
+            file.write(f"instance_file = {instance_file}\n")
+            file.write(f"test_instance_file = {instance_file}\n")
+            if self.use_features:
+                file.write(f"feature_file = {self.feature_file}\n")
+            file.write("validation = true" + "\n")
 
     def _prepare_instances(self) -> None:
         """Copy problem instances and create instance list file."""

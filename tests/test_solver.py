@@ -28,8 +28,7 @@ class TestSolver(TestCase):
 
     def test_pcs_file_correct_name(self):
         """Test if get_pcs_file() returns the correct path if file exists."""
-        file = open(self.solver_path / "paramfile.pcs", "w")
-        file.close()
+        (self.solver_path / "paramfile.pcs").open("a").close()
 
         solver = Solver(self.solver_path)
 
@@ -44,11 +43,9 @@ class TestSolver(TestCase):
 
     def test_pcs_file_multiple(self):
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
-        file = open(self.solver_path / "paramfile1.pcs", "w")
-        file.close()
+        (self.solver_path / "paramfile1.pcs").open("a").close()
 
-        file = open(self.solver_path / "paramfile2.pcs", "w")
-        file.close()
+        (self.solver_path / "paramfile2.pcs", "w").open("a").close()
 
         solver = Solver(self.solver_path)
 
