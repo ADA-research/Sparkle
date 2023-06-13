@@ -43,6 +43,7 @@ sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"
 
 sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
 
+snapshot_dir = Path("Snapshots/")
 sparkle_portfolio_selector_dir = "Sparkle_Portfolio_Selector/"
 
 sparkle_portfolio_selector_name = "sparkle_portfolio_selector" + sparkle_special_string

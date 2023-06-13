@@ -42,7 +42,7 @@ def detect_current_sparkle_platform_exists() -> bool:
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
     my_suffix = sbh.get_time_pid_random_string()
-    my_snapshot_filename = f"Snapshots/My_Snapshot_{my_suffix}.zip"
+    my_snapshot_filename = f"{sgh.snapshot_dir}/My_Snapshot_{my_suffix}.zip"
 
     my_flag_instances = False
     my_flag_solvers = False
@@ -210,7 +210,7 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
         sys.exit()
 
     if not my_snapshot_filename.endswith(".zip"):
-        print("File " + my_snapshot_filename + " is not a .zip file!")
+        print(f"File {my_snapshot_filename} is not a .zip file!")
         sys.exit()
 
     my_suffix = sbh.get_time_pid_random_string()
@@ -234,15 +234,32 @@ def load_snapshot(snapshot_file_path: str) -> None:
             platform is stored.
     """
     if not Path(snapshot_file_path).exists():
-        print("Snapshot file " + snapshot_file_path + " does not exist!")
+        print(f"Snapshot file {snapshot_file_path} does not exist!")
         sys.exit()
     if not snapshot_file_path.endswith(".zip"):
-        print("File " + snapshot_file_path + " is not a .zip file!")
+        print(f"File {snapshot_file_path} is not a .zip file!")
         sys.exit()
     print("Cleaning existing Sparkle platform ...")
     cleanup_current_sparkle_platform()
     print("Existing Sparkle platform cleaned!")
 
-    print("Loading snapshot file " + snapshot_file_path + " ...")
+    print(f"Loading snapshot file {snapshot_file_path} ...")
     extract_sparkle_snapshot(snapshot_file_path)
-    print("Snapshot file " + snapshot_file_path + " loaded successfully!")
+    print(f"Snapshot file {snapshot_file_path} loaded successfully!")
+
+
+def remove_snapshot(snapshot_file_path: str) -> None:
+    """Remove a snapshot from a Sparkle platform.
+
+    Args:
+        snapshot_file_path: File path to the file where the Sparkle
+            platform is stored.
+    """
+    if not Path(snapshot_file_path).exists():
+        print(f"Snapshot file {snapshot_file_path} does not exist!")
+        sys.exit()
+
+    print(f"Removing snapshot file {snapshot_file_path} ...")
+    command_line = f"rm -rf {snapshot_file_path}"
+    os.system(command_line)
+    print(f"Snapshot file {snapshot_file_path} removed!")

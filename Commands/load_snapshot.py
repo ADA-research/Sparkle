@@ -29,5 +29,4 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    snapshot_file_name = args.snapshot_file_path
-    sparkle_snapshot_help.load_snapshot(snapshot_file_name)
+    sparkle_snapshot_help.load_snapshot(args.snapshot_file_path)

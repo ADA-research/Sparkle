@@ -32,7 +32,7 @@ if __name__ == "__main__":
     print("Start initialising Sparkle platform ...")
 
     if not Path("Snapshots/").exists():
-        output = Path("Snapshots/").mkdir()
+        output = sgh.snapshot_dir.mkdir()
 
     if not Path("Tmp/").exists():
         output = Path("Tmp/").mkdir()
