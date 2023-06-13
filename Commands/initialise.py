@@ -66,6 +66,7 @@ if __name__ == "__main__":
     Path("Instances/").mkdir()
     Path("Solvers/").mkdir()
     Path("Extractors/").mkdir()
+    Path("Tmp/").mkdir()
     Path("Reference_Lists/").mkdir()
     Path("Sparkle_Portfolio_Selector/").mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
