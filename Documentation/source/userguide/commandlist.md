@@ -2,7 +2,6 @@
 - {ref}`cmd-add-feature-extractor`
 - {ref}`cmd-add-instances`
 - {ref}`cmd-add-solver`
-- {ref}`cmd-cleanup-current-sparkle-platform`
 - {ref}`cmd-cleanup-temporary-files`
 - {ref}`cmd-compute-features`
 - {ref}`cmd-compute-marginal-contribution`

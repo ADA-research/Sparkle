@@ -30,14 +30,6 @@
 
 ```
 
-(cmd-cleanup-current-sparkle-platform)=
-
-```{eval-rst}
-.. autoprogram:: cleanup_current_sparkle_platform:parser_function()
-   :prog: cleanup_current_sparkle_platform.py
-
-```
-
 (cmd-cleanup-temporary-files)=
 
 ```{eval-rst}
