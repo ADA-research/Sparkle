@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Command to initialise a Sparkle platform."""
 
-import sys
 import os
+import sys
 import argparse
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_record_help
+from sparkle_help import sparkle_snapshot_help as snh
 from sparkle_help import sparkle_csv_help as scsv
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_file_help as sfh
@@ -25,7 +24,7 @@ def parser_function():
 if __name__ == "__main__":
 
     print("Cleaning existing Sparkle platform ...")
-    sparkle_record_help.remove_current_sparkle_platform()
+    snh.remove_current_sparkle_platform()
     command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
     os.system(command_line)
     print("Existing Sparkle platform cleaned!")
@@ -41,7 +40,7 @@ if __name__ == "__main__":
 
     print("Start initialising Sparkle platform ...")
 
-    Path("Records/").mkdir(exist_ok=True)
+    sgh.snapshot_dir.mkdir(exist_ok=True)
 
     sfh.create_temporary_directories()
 
@@ -49,14 +48,11 @@ if __name__ == "__main__":
 
     pap_sbatch_path.mkdir(exist_ok=True)
 
-    my_flag_anyone = sparkle_record_help.detect_current_sparkle_platform_exists()
+    my_flag_anyone = snh.detect_current_sparkle_platform_exists()
 
     if my_flag_anyone:
-        my_suffix = sparkle_basic_help.get_time_pid_random_string()
-        my_record_filename = f"Records/My_Record_{my_suffix}.zip"
-
-        sparkle_record_help.save_current_sparkle_platform(my_record_filename)
-        sparkle_record_help.remove_current_sparkle_platform()
+        snh.save_current_sparkle_platform()
+        snh.remove_current_sparkle_platform()
 
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
