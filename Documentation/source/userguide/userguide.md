@@ -317,7 +317,6 @@ to get a description of the required arguments and other options.
 % *  add_feature_extractor
 % *  add_instances.py
 % *  :ref:`cmd:add_solver`
-% *  cleanup_current_sparkle_platform.py
 % *  cleanup_temporary_files.py
 % *  compute_features.py
 % *  compute_marginal_contribution.py
