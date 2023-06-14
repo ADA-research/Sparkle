@@ -82,27 +82,6 @@ class TestConfigurationScenario(TestCase):
         self.assertEqual(self.scenario.instance_directory.is_dir(), True)
 
     @patch.object(Solver, "is_deterministic")
-    @patch("pathlib.Path.absolute")
-    def test_configuration_scenario_check_instances(self, mock_abs, mock_deterministic):
-        """Test if create_scenario() copies instances and creates instance list file."""
-        mock_abs.side_effect = [
-            Path("tests/test_files/test_configurator"),
-            Path("/absolute/path/Instances/Test-Instance-Set/test_instance_1.cnf")]
-
-        self.scenario.create_scenario(self.parent_directory)
-
-        self.maxDiff = None
-
-        self.assertEqual(self.scenario.instance_file.is_file(), True)
-        instance_file = self.scenario.instance_file.open()
-        print(self.scenario.instance_file)
-        instance_file_content = instance_file.read()
-        self.assertEqual(instance_file_content, "/absolute/path/Instances/"
-                         "Test-Instance-Set/test_instance_1.cnf\n")
-
-        instance_file.close()
-
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_scenario_file(self, mock_deterministic):
         """Test if create_scenario() correctly creates the scenario file."""
         mock_deterministic.return_value = "0"

@@ -39,12 +39,16 @@ class TestConfigurator():
 
         configurator = Configurator(configurator_path, scenario_fixture)
 
-        mocked_file = mocker.patch("builtins.open", mocker.mock_open())
+        reference_file_path = Path("tests", "test_files", "reference_files", "sbatch.sh")
+        with reference_file_path.open("r") as file:
+            reference_file_content = file.read()
+
+        mocked_file = mocker.patch("pathlib.Path.open", mocker.mock_open())
 
         configurator.create_sbatch_script()
 
-        reference_file_path = Path("tests", "test_files", "reference_files", "sbatch.sh")
-        reference_file_content = reference_file_path.open().read()
+        print("reference file content:")
+        print(reference_file_content)
         mocked_file().write.assert_called_with(reference_file_content)
 
 

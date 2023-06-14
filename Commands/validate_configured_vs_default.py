@@ -92,9 +92,9 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     if args.configurator is not None:
-        configurator_path = Path("Configurators", args.configurator)
+        configurator_path = Path(args.configurator)
     else:
-        configurator_path = Path("Configurators", "smac-v2.10.03-master-778")
+        configurator_path = Path("Components", "smac-v2.10.03-master-778")
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

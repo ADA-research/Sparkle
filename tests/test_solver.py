@@ -45,7 +45,7 @@ class TestSolver(TestCase):
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
         (self.solver_path / "paramfile1.pcs").open("a").close()
 
-        (self.solver_path / "paramfile2.pcs", "w").open("a").close()
+        (self.solver_path / "paramfile2.pcs").open("a").close()
 
         solver = Solver(self.solver_path)
 
@@ -57,17 +57,17 @@ class TestSolver(TestCase):
         file_string = "Solvers/test_solver 0 1"
         solver = Solver(self.solver_path)
 
-        with mock.patch("builtins.open",
+        with mock.patch("pathlib.Path.open",
                         mock.mock_open(read_data=file_string)) as mock_file:
             self.assertEqual(solver.is_deterministic(), "0")
-            mock_file.assert_called_with("Reference_Lists/sparkle_solver_list.txt", "r+")
+            mock_file.assert_called_with("r+")
 
     def test_is_deterministic_true(self):
         """Test if is_deterministic() correctly returns True."""
         file_string = "Solvers/test_solver 1 1"
         solver = Solver(self.solver_path)
 
-        with mock.patch("builtins.open",
+        with mock.patch("pathlib.Path.open",
                         mock.mock_open(read_data=file_string)) as mock_file:
             self.assertEqual(solver.is_deterministic(), "1")
-            mock_file.assert_called_with("Reference_Lists/sparkle_solver_list.txt", "r+")
+            mock_file.assert_called_with("r+")
