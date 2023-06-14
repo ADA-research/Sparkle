@@ -47,8 +47,6 @@ class TestConfigurator():
 
         configurator.create_sbatch_script()
 
-        print("reference file content:")
-        print(reference_file_content)
         mocked_file().write.assert_called_with(reference_file_content)
 
 

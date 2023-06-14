@@ -57,7 +57,8 @@ class ConfigurationScenario:
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.parent_directory / "results" / self.name
         self.instance_file = (
-            Path(self.parent_directory / "scenarios" / "instances" / self.instance_directory.name)
+            Path(self.parent_directory / "scenarios"
+                 / "instances" / self.instance_directory.name)
             / Path(str(self.instance_directory.name + "_train.txt")))
         self._prepare_scenario_directory()
         self._prepare_result_directory()

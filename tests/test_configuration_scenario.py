@@ -24,6 +24,10 @@ class TestConfigurationScenario(TestCase):
         self.parent_directory = Path("tests/test_files/test_configurator")
         self.parent_directory.mkdir(parents=True, exist_ok=True)
 
+        self.instance_file_directory = Path("tests/test_files/test_configurator"
+                                            "/scenarios/instances/Test-Instance-Set")
+        self.instance_file_directory.mkdir(parents=True, exist_ok=True)
+
         self.scenario = ConfigurationScenario(self.solver,
                                               self.instance_directory,
                                               self.run_number, False)
@@ -79,7 +83,7 @@ class TestConfigurationScenario(TestCase):
         """Test if create_scenario() creates the instance directory."""
         self.scenario.create_scenario(self.parent_directory)
 
-        self.assertEqual(self.scenario.instance_directory.is_dir(), True)
+        self.assertTrue(self.scenario.instance_directory.is_dir())
 
     @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_scenario_file(self, mock_deterministic):
@@ -93,7 +97,7 @@ class TestConfigurationScenario(TestCase):
                                        "scenario_file.txt")
 
         # Use to show full diff of file
-        # self.maxDiff = None
+        self.maxDiff = None
 
         self.assertEqual(scenario_file_path.is_file(), True)
         self.assertEqual(scenario_file_path.open().read(),
