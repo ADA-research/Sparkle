@@ -85,6 +85,7 @@ class TestConfigurationScenario(TestCase):
 
         self.assertTrue(self.scenario.instance_directory.is_dir())
 
+    @patch("pathlib.Path.absolute")
     @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_scenario_file(self, mock_deterministic):
         """Test if create_scenario() correctly creates the scenario file."""
