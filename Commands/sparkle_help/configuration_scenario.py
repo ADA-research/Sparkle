@@ -56,17 +56,12 @@ class ConfigurationScenario:
         self.parent_directory = parent_directory.absolute()
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.parent_directory / "results" / self.name
-        self.instance_directory = Path(self.parent_directory / "scenarios" / "instances"
-                                       / self.instance_directory.name)
         self.instance_file = (
-            self.instance_directory / Path(str(self.instance_directory.name
-                                               + "_train.txt")))
+            Path(self.parent_directory / "scenarios" / "instances" / self.instance_directory.name)
+            / Path(str(self.instance_directory.name + "_train.txt")))
         self._prepare_scenario_directory()
         self._prepare_result_directory()
-
         self._prepare_run_directories()
-
-        self.instance_directory.mkdir(parents=True, exist_ok=True)
         self._prepare_instances()
 
         if self.use_features:
@@ -108,7 +103,6 @@ class ConfigurationScenario:
         cutoff_length = sgh.settings.get_smac_target_cutoff_length()
         solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
-        instance_file = inner_directory / self.instance_file.name
 
         scenario_file = (self.directory
                          / f"{self.name}_scenario.txt")
@@ -123,14 +117,14 @@ class ConfigurationScenario:
             file.write(f"cutoff_length = {cutoff_length}\n")
             file.write(f"paramfile = {solver_param_file_path}\n")
             file.write(f"outdir = {config_output_directory}\n")
-            file.write(f"instance_file = {instance_file}\n")
-            file.write(f"test_instance_file = {instance_file}\n")
+            file.write(f"instance_file = {self.instance_file}\n")
+            file.write(f"test_instance_file = {self.instance_file}\n")
             if self.use_features:
                 file.write(f"feature_file = {self.feature_file}\n")
             file.write("validation = true" + "\n")
 
     def _prepare_instances(self) -> None:
-        """Copy problem instances and create instance list file."""
+        """Create instance list file."""
         source_instance_list = (
             [f for f in self.instance_directory.rglob("*") if f.is_file()])
 
@@ -138,7 +132,7 @@ class ConfigurationScenario:
 
         with instance_list_path.open("w+") as file:
             for original_instance_path in source_instance_list:
-                file.write(f"../../instances/"
+                file.write(f"../../../../../Instances/"
                            f"{original_instance_path.parts[-2]}/"
                            f"{original_instance_path.name}\n")
 
