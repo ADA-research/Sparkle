@@ -3,14 +3,12 @@
 """Configurator class to use different configurators like SMAC."""
 
 from pathlib import Path
-import subprocess
 import sys
 
 from sparkle_help.configuration_scenario import ConfigurationScenario
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help import sparkle_job_help as sjh
 from sparkle_help.sparkle_command_help import CommandName
 
 
