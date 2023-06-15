@@ -58,21 +58,9 @@ class Configurator:
         Returns:
             ID of the submitted job.
         """
-        command = ["sbatch", self.sbatch_filename]
-
-        output = subprocess.run(command, cwd=self.configurator_path, capture_output=True,
-                                text=True)
-        if output.stderr != "":
-            print("An error occurred during the script submission:")
-            print(output.stderr)
-            print("Depending on the error, the configurator might still run.")
-
-        # Get last token of the output for job_id
-        job_id = output.stdout.split()[-1]
-        sjh.write_active_job(job_id, CommandName.CONFIGURE_SOLVER)
-
-        print(f"Job running with id {job_id}.")
-        return job_id
+        return ssh.submit_sbatch_script(self.sbatch_filename,
+                                        CommandName.CONFIGURE_SOLVER,
+                                        self.configurator_path)
 
     def _get_sbatch_options(self) -> str:
         """Get sbatch options.
