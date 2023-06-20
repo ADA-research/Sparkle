@@ -726,9 +726,9 @@ def remove_temporary_files() -> None:
 
     return
 
-def initialise_sparkle() -> None:
-    """Initialize a new Sparkle platform"""
 
+def initialise_sparkle() -> None:
+    """Initialize a new Sparkle platform."""
     print("Cleaning existing Sparkle platform ...")
     snh.remove_current_sparkle_platform()
     command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
