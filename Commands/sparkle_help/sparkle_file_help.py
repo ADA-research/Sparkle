@@ -13,7 +13,11 @@ from sparkle_help import sparkle_logging as sl
 
 try:
     from Commands.sparkle_help import sparkle_global_help as sgh
+    from Commands.sparkle_help import sparkle_snapshot_help as snh
+    from Commands.sparkle_help import sparkle_csv_help as scsv
 except ImportError:
+    import sparkle_snapshot_help as snh
+    import sparkle_csv_help as scsv
     import sparkle_global_help as sgh
 
 
@@ -721,3 +725,45 @@ def remove_temporary_files() -> None:
                   ignore_errors=True)
 
     return
+
+def initialise_sparkle() -> None:
+    """Initialize a new Sparkle platform"""
+
+    print("Cleaning existing Sparkle platform ...")
+    snh.remove_current_sparkle_platform()
+    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+    os.system(command_line)
+    print("Existing Sparkle platform cleaned!")
+
+    print("Start initialising Sparkle platform ...")
+
+    sgh.snapshot_dir.mkdir(exist_ok=True)
+
+    create_temporary_directories()
+
+    pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
+
+    pap_sbatch_path.mkdir(exist_ok=True)
+
+    my_flag_anyone = snh.detect_current_sparkle_platform_exists()
+
+    if my_flag_anyone:
+        snh.save_current_sparkle_platform()
+        snh.remove_current_sparkle_platform()
+
+        print("Current Sparkle platform found!")
+        print("Current Sparkle platform recorded!")
+
+    create_temporary_directories()
+    sgh.test_data_dir.mkdir()
+    sgh.instance_dir.mkdir()
+    sgh.solver_dir.mkdir()
+    sgh.extractor_dir.mkdir()
+    sgh.reference_list_dir.mkdir()
+    sgh.sparkle_portfolio_selector_dir.mkdir()
+    sgh.sparkle_parallel_portfolio_dir.mkdir()
+    Path(f"{sgh.ablation_dir}scenarios/").mkdir()
+    scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
+    scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
+    sgh.pap_performance_data_tmp_path.mkdir()
+    print("New Sparkle platform initialised!")
