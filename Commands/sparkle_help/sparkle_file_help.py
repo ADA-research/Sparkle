@@ -729,21 +729,15 @@ def remove_temporary_files() -> None:
 
 def initialise_sparkle() -> None:
     """Initialize a new Sparkle platform."""
-    snh.remove_current_sparkle_platform()
+    # snh.remove_current_sparkle_platform()
 
     print("Start initialising Sparkle platform ...")
 
     sgh.snapshot_dir.mkdir(exist_ok=True)
 
-    create_temporary_directories()
+    # create_temporary_directories()
 
-    pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
-
-    pap_sbatch_path.mkdir(exist_ok=True)
-
-    my_flag_anyone = snh.detect_current_sparkle_platform_exists()
-
-    if my_flag_anyone:
+    if snh.detect_current_sparkle_platform_exists():
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
 
@@ -751,6 +745,8 @@ def initialise_sparkle() -> None:
         print("Current Sparkle platform recorded!")
 
     create_temporary_directories()
+    pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
+    pap_sbatch_path.mkdir(exist_ok=True)
     sgh.test_data_dir.mkdir()
     sgh.instance_dir.mkdir()
     sgh.solver_dir.mkdir()

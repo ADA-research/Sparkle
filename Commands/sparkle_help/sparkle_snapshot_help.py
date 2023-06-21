@@ -224,8 +224,7 @@ def remove_current_sparkle_platform() -> None:
     shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
-    command_line = "rm -f Components/Sparkle-latex-generator/Sparkle_Report.pdf"
-    os.system(command_line)
+    Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf").unlink(missing_ok=True)
     print("Existing Sparkle platform cleaned!")
 
 
