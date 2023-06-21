@@ -729,13 +729,10 @@ def remove_temporary_files() -> None:
 
 def initialise_sparkle() -> None:
     """Initialize a new Sparkle platform."""
-    # snh.remove_current_sparkle_platform()
 
     print("Start initialising Sparkle platform ...")
 
     sgh.snapshot_dir.mkdir(exist_ok=True)
-
-    # create_temporary_directories()
 
     if snh.detect_current_sparkle_platform_exists():
         snh.save_current_sparkle_platform()
