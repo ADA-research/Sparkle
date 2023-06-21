@@ -20,11 +20,8 @@ if __name__ == "__main__":
     parser = parser_function()
     # Process command line arguments
     args = parser.parse_args()
-    
+
     sfh.initialise_sparkle()
 
     # Log command call
     sl.log_command(sys.argv)
-
-
-
