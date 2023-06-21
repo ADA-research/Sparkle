@@ -72,7 +72,7 @@ if __name__ == "__main__":
     sgh.solver_dir.mkdir()
     sgh.extractor_dir.mkdir()
     sgh.reference_list_dir.mkdir()
-    sgh.sparkle_portfolio_selector_dir.mkdir()
+    sgh.sparkle_algorithm_selector_dir.mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
     Path(f"{sgh.ablation_dir}scenarios/").mkdir()
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)

@@ -172,11 +172,11 @@ if __name__ == "__main__":
     print(f"Adding instances {sfh.get_last_level_directory_name(instances_directory)} "
           "done!")
 
-    if Path(sgh.sparkle_portfolio_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
+    if Path(sgh.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
         os.system(command_line)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_portfolio_selector_path} done!")
+              f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
         command_line = "rm -f " + sgh.sparkle_report_path

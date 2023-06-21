@@ -228,7 +228,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     print("Sparkle computing features of instance " + instance_files_str + " done!")
 
     command_line = (f"{python_executable} {sgh.autofolio_path} --load "
-                    f'{sgh.sparkle_portfolio_selector_path} --feature_vec "')
+                    f'{sgh.sparkle_algorithm_selector_path} --feature_vec "')
     for i in range(0, len(list_feature_vector)):
         command_line = command_line + str(list_feature_vector[i])
 

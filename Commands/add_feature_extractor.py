@@ -189,12 +189,12 @@ if __name__ == "__main__":
         + " done!"
     )
 
-    if Path(sgh.sparkle_portfolio_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
+    if Path(sgh.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
         os.system(command_line)
         print(
             "Removing Sparkle portfolio selector "
-            + sgh.sparkle_portfolio_selector_path
+            + sgh.sparkle_algorithm_selector_path
             + " done!"
         )
 

@@ -34,7 +34,7 @@ def detect_current_sparkle_platform_exists() -> bool:
         return True
     if sgh.reference_list_dir.exists():
         return True
-    if sgh.sparkle_portfolio_selector_dir.exists():
+    if sgh.sparkle_algorithm_selector_dir.exists():
         return True
     if sgh.sparkle_parallel_portfolio_dir.exists():
         return True
@@ -75,7 +75,7 @@ def save_current_sparkle_platform() -> None:
         flag_performance_data = True
     if sgh.reference_list_dir.exists():
         flag_reference_lists = True
-    if sgh.sparkle_portfolio_selector_dir.exists():
+    if sgh.sparkle_algorithm_selector_dir.exists():
         flag_sparkle_portfolio_selector = True
     if sgh.sparkle_parallel_portfolio_dir.exists():
         flag_sparkle_parallel_portfolio = True
@@ -219,7 +219,7 @@ def remove_current_sparkle_platform() -> None:
     shutil.rmtree(sgh.test_data_dir, ignore_errors=True)
     shutil.rmtree(sgh.extractor_dir, ignore_errors=True)
     shutil.rmtree(sgh.reference_list_dir, ignore_errors=True)
-    shutil.rmtree(sgh.sparkle_portfolio_selector_dir, ignore_errors=True)
+    shutil.rmtree(sgh.sparkle_algorithm_selector_dir, ignore_errors=True)
     shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)

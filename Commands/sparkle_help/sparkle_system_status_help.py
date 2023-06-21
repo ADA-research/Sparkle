@@ -12,13 +12,18 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_job_help
 
 
-def print_solver_list(mode: int = 1):
-    """Print the list of solvers in Sparkle."""
+def print_solver_list(verbose: bool = False):
+    """Print the list of solvers in Sparkle.
+
+    Args:
+        verbose: Indicating, if output should be verbose
+    """
     solver_list = sparkle_global_help.solver_list
     print("")
-    print("Currently Sparkle has " + str(len(solver_list)) + " solvers:")
+    print("Currently Sparkle has " + str(len(solver_list)) + " solvers"
+          + (":" if verbose else ""))
 
-    if mode == 2:
+    if verbose:
         i = 1
         for solver in solver_list:
             print(f"[{str(i)}]: Solver: {sfh.get_last_level_directory_name(solver)}")
@@ -28,13 +33,18 @@ def print_solver_list(mode: int = 1):
     return
 
 
-def print_extractor_list(mode: int = 1):
-    """Print the list of feature extractors in Sparkle."""
+def print_extractor_list(verbose: bool = False):
+    """Print the list of feature extractors in Sparkle.
+
+    Args:
+        verbose: Indicating, if output should be verbose
+    """
     extractor_list = sparkle_global_help.extractor_list
     print("")
-    print("Currently Sparkle has " + str(len(extractor_list)) + " feature extractors:")
+    print("Currently Sparkle has " + str(len(extractor_list)) + " feature extractors"
+          + (":" if verbose else ""))
 
-    if mode == 2:
+    if verbose:
         i = 1
         for extractor in extractor_list:
             print(
@@ -45,24 +55,37 @@ def print_extractor_list(mode: int = 1):
     return
 
 
-def print_instance_list(mode: int = 1):
-    """Print the list of instances in Sparkle."""
+def print_instance_list(verbose: bool = False):
+    """Print the list of instances in Sparkle.
+
+    Args:
+        verbose: Indicating, if output should be verbose
+    """
     instance_list = sparkle_global_help.instance_list
     print("")
-    print("Currently Sparkle has " + str(len(instance_list)) + " instances:")
-
-    if mode == 2:
+    print("Currently Sparkle has " + str(len(instance_list)) + " instances"
+          + (":" if verbose else ""))
+    print(instance_list)
+    if verbose:
         i = 1
         for instance in instance_list:
-            print(f"[{str(i)}]: Instance: {sfh.get_last_level_directory_name(instance)}")
+            instance_dir = sfh.get_directory(instance).split("Instances/")[1][:-1]
+            print(f"[{str(i)}]: [{instance_dir}] Instance: ",
+                  f"{sfh.get_last_level_directory_name(instance)}")
             i += 1
 
     print("")
     return
 
 
-def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: int = 1):
-    """Print a list of remaining feature computation jobs."""
+def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
+                                                 verbose: bool = False):
+    """Print a list of remaining feature computation jobs.
+
+    Args:
+        feature_data_csv_path: path to the feature data csv
+        verbose: Indicating, if output should be verbose
+    """
     try:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
         list_feature_computation_job = (
@@ -74,9 +97,10 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: in
 
     print("")
     print(f"Currently Sparkle has {str(total_job_num)} remaining feature computation "
-          "jobs needed to be performed:")
+          "jobs needed to be performed before creating an algorithm selector"
+          + (":" if verbose else ""))
 
-    if mode == 2:
+    if verbose:
         current_job_num = 1
         for i in range(0, len(list_feature_computation_job)):
             instance_path = list_feature_computation_job[i][0]
@@ -93,9 +117,14 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: in
     return
 
 
-def print_list_remaining_performance_computation_job(performance_data_csv_path,
-                                                     mode: int = 1):
-    """Print a list of remaining performance computation jobs."""
+def print_list_remaining_performance_computation_job(performance_data_csv_path: str,
+                                                     verbose: bool = False):
+    """Print a list of remaining performance computation jobs.
+
+    Args:
+        performance_data_csv_path: path to the performance data csv
+        verbose: Indicating, if output should be verbose
+    """
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
@@ -108,9 +137,10 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path,
 
     print("")
     print(f"Currently Sparkle has {str(total_job_num)} remaining performance computation"
-          " jobs needed to be performed:")
+          " jobs needed to be performed before creating an algorithm selector"
+          + (":" if verbose else ""))
 
-    if mode == 2:
+    if verbose:
         current_job_num = 1
         for i in range(0, len(list_performance_computation_job)):
             instance_path = list_performance_computation_job[i][0]
@@ -127,28 +157,48 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path,
     return
 
 
-def print_portfolio_selector_info():
-    """Print information about the Sparkle portfolio selector."""
-    sparkle_portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
+def print_algorithm_selector_info():
+    """Print information about the Sparkle algorithm selector."""
+    sparkle_algorithm_selector_path = sparkle_global_help.sparkle_algorithm_selector_path
     print("")
-    print("Status of portfolio selector in Sparkle:")
+    print("Status of algorithm selector in Sparkle:")
 
-    key_str = "construct_sparkle_portfolio_selector"
+    key_str = "construct_sparkle_algorithm_selector"
     task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
     if Path(task_run_status_path).is_file():
-        print("Currently Sparkle portfolio selector is constructing ...")
-    elif Path(sparkle_portfolio_selector_path).is_file():
-        print("Path: " + sparkle_portfolio_selector_path)
+        print("Currently Sparkle algorithm selector is constructing ...")
+    elif Path(sparkle_algorithm_selector_path).is_file():
+        print(f"Path: {sparkle_algorithm_selector_path}")
         print("Last modified time: "
-              f"{get_file_modify_time(sparkle_portfolio_selector_path)}")
+              f"{get_file_modify_time(sparkle_algorithm_selector_path)}")
     else:
-        print("No portfolio selector exists!")
+        print("No algorithm selector exists!")
+    print("")
+    return
+
+
+def print_parallel_portfolio_info():
+    """Print information about the Sparkle parallel portfolio."""
+    sparkle_parallel_portfolio_path = sparkle_global_help.sparkle_parallel_portfolio_path
+    print("")
+    print("Status of parallel portfolio in Sparkle:")
+
+    key_str = "construct_sparkle_parallel_portfolio"
+    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    if Path(task_run_status_path).is_file():
+        print("Currently Sparkle parallel portfolio is constructing ...")
+    elif Path(sparkle_parallel_portfolio_path).is_file():
+        print(f"Path: {sparkle_parallel_portfolio_path}")
+        print("Last modified time: "
+              f"{get_file_modify_time(sparkle_parallel_portfolio_path)}")
+    else:
+        print("No parallel portfolio exists!")
     print("")
     return
 
 
 def print_report_info():
-    """Print the current status of a the Sparkle algorithm selection report."""
+    """Print the current status of the Sparkle algorithm selection report."""
     sparkle_report_path = sparkle_global_help.sparkle_report_path
     print("")
     print("Status of report in Sparkle:")

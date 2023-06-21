@@ -29,23 +29,23 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    my_flag_verbose = args.verbose
 
-    if my_flag_verbose:
-        mode = 2
+    if args.verbose:
+        verbose = True
     else:
-        mode = 1
+        verbose = False
 
     print("Reporting current system status of Sparkle ...")
-    sparkle_system_status_help.print_solver_list(mode)
-    sparkle_system_status_help.print_extractor_list(mode)
-    sparkle_system_status_help.print_instance_list(mode)
+    sparkle_system_status_help.print_solver_list(verbose)
+    sparkle_system_status_help.print_extractor_list(verbose)
+    sparkle_system_status_help.print_instance_list(verbose)
     sparkle_system_status_help.print_list_remaining_feature_computation_job(
-        sparkle_global_help.feature_data_csv_path, mode
+        sparkle_global_help.feature_data_csv_path, verbose
     )
     sparkle_system_status_help.print_list_remaining_performance_computation_job(
-        sparkle_global_help.performance_data_csv_path, mode
+        sparkle_global_help.performance_data_csv_path, verbose
     )
-    sparkle_system_status_help.print_portfolio_selector_info()
+    sparkle_system_status_help.print_algorithm_selector_info()
+    sparkle_system_status_help.print_parallel_portfolio_info()
     sparkle_system_status_help.print_report_info()
     print("Current system status of Sparkle reported!")

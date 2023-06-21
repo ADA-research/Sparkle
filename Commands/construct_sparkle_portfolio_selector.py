@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     delete_log_files()  # Make sure no old log files remain
     success = scps.construct_sparkle_portfolio_selector(
-        sgh.sparkle_portfolio_selector_path,
+        sgh.sparkle_algorithm_selector_path,
         sgh.performance_data_csv_path,
         sgh.feature_data_csv_path,
         flag_recompute_portfolio,
@@ -167,11 +167,11 @@ if __name__ == "__main__":
     if success:
         print("Sparkle portfolio selector constructed!")
         print("Sparkle portfolio selector located at "
-              f"{sgh.sparkle_portfolio_selector_path}")
+              f"{sgh.sparkle_algorithm_selector_path}")
 
         # Update latest scenario
         sgh.latest_scenario.set_selection_portfolio_path(
-            Path(sgh.sparkle_portfolio_selector_path)
+            Path(sgh.sparkle_algorithm_selector_path)
         )
         sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
         # Set to default to overwrite possible old path

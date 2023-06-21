@@ -387,7 +387,7 @@ def compute_actual_selector_marginal_contribution(
 
     # Compute performance of actual selector
     print("Computing actual performance for portfolio selector with all solvers ...")
-    actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+    actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
     scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
                                               performance_data_csv_path,
                                               feature_data_csv_path)
@@ -432,8 +432,8 @@ def compute_actual_selector_marginal_contribution(
             "Tmp/tmp_actual_portfolio_selector_"
             f"{sparkle_basic_help.get_time_pid_random_string()}")
         tmp_actual_portfolio_selector_path = (
-            f"{sgh.sparkle_portfolio_selector_dir}without_{solver_name}/"
-            f"{sgh.sparkle_portfolio_selector_name}")
+            f"{sgh.sparkle_algorithm_selector_dir}without_{solver_name}/"
+            f"{sgh.sparkle_algorithm_selector_name}")
 
         if len(tmp_performance_data_csv.list_columns()) >= 1:
             scps.construct_sparkle_portfolio_selector(

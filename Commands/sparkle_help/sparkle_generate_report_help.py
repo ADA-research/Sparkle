@@ -324,7 +324,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     mydict = {}
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
-    actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+    actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
 
     for instance in performance_data_csv.list_rows():
         used_time_for_this_instance, flag_successfully_solving = (

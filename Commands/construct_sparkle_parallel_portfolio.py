@@ -3,6 +3,7 @@
 """Sparkle command to construct a parallel algorithm portfolio."""
 
 import sys
+import os
 import argparse
 from pathlib import Path
 
@@ -13,6 +14,27 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
+from sparkle_help import sparkle_file_help as sfh
+
+
+def generate_task_run_status() -> None:
+    """Generate run status info files for portfolio selector Slurm batch jobs."""
+    key_str = "construct_sparkle_parallel_portfolio"
+    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    status_info_str = "Status: Running\n"
+    sfh.write_string_to_file(Path(task_run_status_path), status_info_str)
+
+    return
+
+
+def delete_task_run_status() -> None:
+    """Remove run status info files for portfolio selector Slurm batch jobs."""
+    key_str = "construct_sparkle_parallel_portfolio"
+    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    os.system("rm -rf " + task_run_status_path)
+
+    return
+
 
 if __name__ == "__main__":
     # Initialise settings
@@ -69,6 +91,8 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle parallel portfolio ...")
 
+    generate_task_run_status()
+
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
 
@@ -81,6 +105,8 @@ if __name__ == "__main__":
         sgh.latest_scenario.set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
         # Set to default to overwrite instance from possible previous run
         sgh.latest_scenario.set_parallel_portfolio_instance_list()
+
+        delete_task_run_status()
     else:
         print("An unexpected error occurred when constructing the portfolio, please "
               "check your input and try again.")
