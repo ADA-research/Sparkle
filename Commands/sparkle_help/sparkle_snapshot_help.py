@@ -212,6 +212,7 @@ def save_current_sparkle_platform() -> None:
 
 def remove_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
+    print("Cleaning existing Sparkle platform ...")
     sfh.remove_temporary_files()
     shutil.rmtree(sgh.output_dir, ignore_errors=True)
     shutil.rmtree(sgh.instance_dir, ignore_errors=True)
@@ -223,6 +224,8 @@ def remove_current_sparkle_platform() -> None:
     shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
+    Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf").unlink(missing_ok=True)
+    print("Existing Sparkle platform cleaned!")
 
 
 def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
