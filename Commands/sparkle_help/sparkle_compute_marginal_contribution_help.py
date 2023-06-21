@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import os
+import sys
 import csv
 from pathlib import Path
 
@@ -510,3 +511,70 @@ def print_rank_list(rank_list: list, mode: int) -> None:
         print(f"#{str(i+1)}: {sfh.get_last_level_directory_name(solver)}\t Margi_Contr: "
               f"{str(marginal_contribution)}")
     print("******")
+
+
+def compute_perfect(flag_recompute: bool = False) -> list[tuple[str, float]]:
+    """Compute the marginal contribution for the perfect portfolio selector.
+
+    Args:
+        flag_recompute: Flag indicating whether marginal contributions
+            should be recalculated.
+
+    Returns:
+        rank_list: A list of 2-tuples of the form (solver name, marginal contribution).
+    """
+    print(
+        "Start computing each solver's marginal contribution to perfect selector ..."
+    )
+    rank_list = compute_perfect_selector_marginal_contribution(
+        flag_recompute=flag_recompute
+    )
+    print_rank_list(rank_list, 1)
+    print("Marginal contribution (perfect selector) computing done!")
+
+    return rank_list
+
+
+def compute_actual(flag_recompute: bool = False) -> list[tuple[str, float]]:
+    """Compute the marginal contribution for the actual portfolio selector.
+
+    Args:
+        flag_recompute: Flag indicating whether marginal contributions
+            should be recalculated.
+
+    Returns:
+        rank_list: A list of 2-tuples of the form (solver name, marginal contribution).
+    """
+    print(
+        "Start computing each solver's marginal contribution to actual selector ..."
+    )
+    rank_list = compute_actual_selector_marginal_contribution(
+        flag_recompute=flag_recompute
+    )
+    print_rank_list(rank_list, 2)
+    print("Marginal contribution (actual selector) computing done!")
+
+    return rank_list
+
+
+def compute_marginal_contribution(
+        flag_compute_perfect: bool, flag_compute_actual: bool,
+        flag_recompute: bool) -> None:
+    """Compute the marginal contribution.
+
+    Args:
+        flag_compute_perfect: Flag indicating if the contribution for the perfect
+            portfolio selector should be computed.
+        flag_compute_actual: Flag indicating if the contribution for the actual portfolio
+             selector should be computed.
+        flag_recompute: Flag indicating whether marginal contributions
+            should be recalculated.
+    """
+    if flag_compute_perfect:
+        compute_perfect(flag_recompute)
+    elif flag_compute_actual:
+        compute_actual(flag_recompute)
+    else:
+        print("ERROR: compute_marginal_contribution called without a flag set to"
+              " True, stopping execution")
+        sys.exit()
