@@ -21,6 +21,26 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_slurm_help as ssh
+from sparkle_help import sparkle_file_help as sfh
+
+
+def generate_task_run_status() -> None:
+    """Generate run status info files for portfolio selector Slurm batch jobs."""
+    key_str = "configure_solver"
+    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    status_info_str = "Status: Running\n"
+    sfh.write_string_to_file(Path(task_run_status_path), status_info_str)
+
+    return
+
+
+def delete_task_run_status() -> None:
+    """Remove run status info files for portfolio selector Slurm batch jobs."""
+    key_str = "configure_solver"
+    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    os.system("rm -rf " + task_run_status_path)
+
+    return
 
 
 def parser_function():
@@ -189,6 +209,7 @@ if __name__ == "__main__":
         )
         sys.exit()
 
+    generate_task_run_status()
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
     scsh.clean_configuration_directory(solver.name, instance_set_train.name)
@@ -264,6 +285,7 @@ if __name__ == "__main__":
     print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
           f"{job_id_str}")
 
+    delete_task_run_status()
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file

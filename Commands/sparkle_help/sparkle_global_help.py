@@ -4,6 +4,7 @@
 import fcntl
 from pathlib import Path
 from pathlib import PurePath
+from enum import Enum
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
@@ -11,6 +12,8 @@ def get_seed():
     """Return a seed."""
     return 1
 
+
+latest_scenario = None
 
 sparkle_version = "0.3"
 
@@ -27,6 +30,14 @@ sparkle_smac_settings_path = "Settings/sparkle_smac_settings.txt"
 sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 
 sparkle_global_output_dir = Path("Output")
+
+
+class ReportType(Enum):
+    """enum for separating different types of reports."""
+    algorithm_selection = "algorithm_selection"
+    algorithm_configuration = "algorithm_configuration"
+    parallel_portfolio = "parallel_portfolio"
+
 
 # Log that keeps track of which commands were executed and where output details can be
 # found
@@ -91,7 +102,6 @@ sparkle_run_configured_wrapper = "sparkle_run_configured_wrapper.sh"
 
 sparkle_smac_wrapper = "sparkle_smac_wrapper.py"
 
-
 ablation_dir = "Components/ablationAnalysis-0.9.4/"
 
 feature_data_csv_path = "Feature_Data/sparkle_feature_data.csv"
@@ -101,7 +111,6 @@ performance_data_id_path = "Performance_Data/sparkle_performance_data.id"
 pap_performance_data_tmp_path = Path("Performance_Data/Tmp_PaP/")
 pap_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/")
 run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")
-
 
 reference_list_dir = Path("Reference_Lists/")
 instance_list_postfix = "_instance_list.txt"
@@ -114,7 +123,6 @@ solver_nickname_list_path = str(reference_list_dir) + "/sparkle_solver_nickname_
 solver_list_path = str(reference_list_dir) + "/sparkle_solver_list.txt"
 instance_list_file = Path("sparkle" + instance_list_postfix)
 instance_list_path = Path(reference_list_dir / instance_list_file)
-
 
 solver_list = []
 solver_nickname_mapping = {}
