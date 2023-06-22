@@ -3,8 +3,6 @@
 
 import sys
 import argparse
-from typing import List
-from typing import Tuple
 from pathlib import Path
 
 from sparkle_help import sparkle_global_help as sgh
@@ -55,48 +53,6 @@ def parser_function():
     return parser
 
 
-def compute_perfect(flag_recompute: bool = False) -> List[Tuple[str, float]]:
-    """Compute the marginal contribution for the perfect portfolio selector."""
-    print(
-        "Start computing each solver's marginal contribution to perfect selector ..."
-    )
-    rank_list = scmc.compute_perfect_selector_marginal_contribution(
-        flag_recompute=flag_recompute
-    )
-    scmc.print_rank_list(rank_list, 1)
-    print("Marginal contribution (perfect selector) computing done!")
-
-    return rank_list
-
-
-def compute_actual(flag_recompute: bool = False) -> List[Tuple[str, float]]:
-    """Compute the marginal contribution for the actual portfolio selector."""
-    print(
-        "Start computing each solver's marginal contribution to actual selector ..."
-    )
-    rank_list = scmc.compute_actual_selector_marginal_contribution(
-        flag_recompute=flag_recompute
-    )
-    scmc.print_rank_list(rank_list, 2)
-    print("Marginal contribution (actual selector) computing done!")
-
-    return rank_list
-
-
-def compute_marginal_contribution(
-        flag_compute_perfect: bool, flag_compute_actual: bool,
-        flag_recompute: bool) -> None:
-    """Compute the marginal contribution."""
-    if flag_compute_perfect:
-        compute_perfect(flag_recompute)
-    elif flag_compute_actual:
-        compute_actual(flag_recompute)
-    else:
-        print("ERROR: compute_marginal_contribution called without a flag set to"
-              " True, stopping execution")
-        sys.exit()
-
-
 if __name__ == "__main__":
     # Initialise settings
     global settings
@@ -110,10 +66,9 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    flag_compute_perfect = args.perfect
-    flag_compute_actual = args.actual
-    flag_recompute = args.recompute
 
+    print("[Deprecated] command, functionality is called automatically by other commands"
+          "when needed.")
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
@@ -123,8 +78,8 @@ if __name__ == "__main__":
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
 
-    compute_marginal_contribution(
-        flag_compute_perfect, flag_compute_actual, flag_recompute
+    scmc.compute_marginal_contribution(
+        args.perfect, args.actual, args.recompute
     )
 
     # Write used settings to file
