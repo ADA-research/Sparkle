@@ -18,6 +18,7 @@ from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -131,6 +132,8 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+
+    sch.check_for_initialize(["add_instances", "add_feature_extractor", "add_solver"])
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):

@@ -4,6 +4,13 @@
 
 from enum import Enum
 
+try:
+    from sparkle_help import sparkle_snapshot_help as srh
+    from sparkle_help import sparkle_file_help as sfh
+except ImportError:
+    import sparkle_snapshot_help as srh
+    import sparkle_file_help as sfh
+
 
 class CommandName(str, Enum):
     """Enum of all command names."""
@@ -56,38 +63,67 @@ class CommandName(str, Enum):
 # INITIALISE command.
 COMMAND_DEPENDENCIES = {
     CommandName.ABOUT: [],
-    CommandName.ADD_FEATURE_EXTRACTOR: [],
-    CommandName.ADD_INSTANCES: [],
-    CommandName.ADD_SOLVER: [],
+    CommandName.ADD_FEATURE_EXTRACTOR: [CommandName.INITIALISE],
+    CommandName.ADD_INSTANCES: [CommandName.INITIALISE],
+    CommandName.ADD_SOLVER: [CommandName.INITIALISE],
     CommandName.CLEANUP_CURRENT_SPARKLE_PLATFORM: [],
     CommandName.CLEANUP_TEMPORARY_FILES: [],
-    CommandName.COMPUTE_FEATURES: [CommandName.ADD_FEATURE_EXTRACTOR,
+    CommandName.COMPUTE_FEATURES: [CommandName.INITIALISE,
+                                   CommandName.ADD_FEATURE_EXTRACTOR,
                                    CommandName.ADD_INSTANCES],
     CommandName.COMPUTE_MARGINAL_CONTRIBUTION: [
+        CommandName.INITIALISE,
         CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR],
-    CommandName.CONFIGURE_SOLVER: [CommandName.ADD_INSTANCES, CommandName.ADD_SOLVER],
-    CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR: [CommandName.COMPUTE_FEATURES,
+    CommandName.CONFIGURE_SOLVER: [CommandName.INITIALISE,
+                                   CommandName.ADD_INSTANCES,
+                                   CommandName.ADD_SOLVER],
+    CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR: [CommandName.INITIALISE,
+                                                       CommandName.COMPUTE_FEATURES,
                                                        CommandName.RUN_SOLVERS],
-    CommandName.GENERATE_REPORT: [CommandName.CONFIGURE_SOLVER,
+    CommandName.GENERATE_REPORT: [CommandName.INITIALISE,
+                                  CommandName.CONFIGURE_SOLVER,
                                   CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
                                   CommandName.RUN_ABLATION,
                                   CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
                                   CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR],
     CommandName.INITIALISE: [],
     CommandName.LOAD_SNAPSHOT: [],
-    CommandName.REMOVE_FEATURE_EXTRACTOR: [],
-    CommandName.REMOVE_INSTANCES: [],
-    CommandName.REMOVE_SOLVER: [],
-    CommandName.RUN_ABLATION: [CommandName.CONFIGURE_SOLVER],
-    CommandName.RUN_SOLVERS: [CommandName.ADD_INSTANCES, CommandName.ADD_SOLVER],
+    CommandName.REMOVE_FEATURE_EXTRACTOR: [CommandName.INITIALISE],
+    CommandName.REMOVE_INSTANCES: [CommandName.INITIALISE],
+    CommandName.REMOVE_SOLVER: [CommandName.INITIALISE],
+    CommandName.RUN_ABLATION: [CommandName.INITIALISE,
+                               CommandName.CONFIGURE_SOLVER],
+    CommandName.RUN_SOLVERS: [CommandName.INITIALISE,
+                              CommandName.ADD_INSTANCES,
+                              CommandName.ADD_SOLVER],
     CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR: [
+        CommandName.INITIALISE,
         CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR],
     CommandName.RUN_STATUS: [],
     CommandName.SAVE_SNAPSHOT: [],
     CommandName.SPARKLE_WAIT: [],
     CommandName.SYSTEM_STATUS: [],
-    CommandName.VALIDATE_CONFIGURED_VS_DEFAULT: [CommandName.CONFIGURE_SOLVER],
-    CommandName.RUN_CONFIGURED_SOLVER: [CommandName.CONFIGURE_SOLVER],
+    CommandName.VALIDATE_CONFIGURED_VS_DEFAULT: [CommandName.INITIALISE,
+                                                 CommandName.CONFIGURE_SOLVER],
+    CommandName.RUN_CONFIGURED_SOLVER: [CommandName.INITIALISE,
+                                        CommandName.CONFIGURE_SOLVER],
     CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO: [
+        CommandName.INITIALISE,
         CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO]
 }
+
+
+def check_for_initialize(requirements: list[str] = None):
+    """Function to check if initialize command was executed and execute it otherwise."""
+    if not srh.detect_current_sparkle_platform_exists(check_all_dirs=True):
+        print("-----------------------------------------------")
+        print("No Sparkle platform found; Platform will be initialized automatically")
+        if requirements is not None:
+            if len(requirements) == 1:
+                print(f"Also the command {requirements[0]} have \
+                      to be executed before executing this command.")
+            else:
+                print(f"""Also the commands {", ".join(requirements)} \
+                      have to be executed before executing this command.""")
+        print("-----------------------------------------------")
+        sfh.initialise_sparkle()

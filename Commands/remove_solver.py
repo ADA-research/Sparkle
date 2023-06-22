@@ -9,6 +9,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_logging as sl
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -38,6 +39,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     solver_path = args.solver_path
+
+    sch.check_for_initialize(["add_solver"])
 
     if args.nickname:
         solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]

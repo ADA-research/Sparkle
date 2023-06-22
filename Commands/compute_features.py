@@ -13,6 +13,7 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.sparkle_command_help import CommandName
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -82,6 +83,8 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    sch.check_for_initialize(["add_instances", "add_feature_extractor"])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

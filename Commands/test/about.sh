@@ -12,7 +12,6 @@
 #SBATCH --nodes=1
 
 # Initialise
-Commands/initialise.py > /dev/null
 
 # Save record
 output_true="For more details see README.md"

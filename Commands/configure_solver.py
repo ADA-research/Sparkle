@@ -21,6 +21,7 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_slurm_help as ssh
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -127,6 +128,8 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     use_features = args.use_features
+
+    sch.check_for_initialize(["add_instances", "add_solver"])
 
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)

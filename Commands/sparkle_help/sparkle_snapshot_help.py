@@ -7,37 +7,53 @@ import shutil
 import sys
 from pathlib import Path
 
-from sparkle_help import sparkle_basic_help as sbh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
+try:
+    from sparkle_help import sparkle_basic_help as sbh
+    from sparkle_help import sparkle_global_help as sgh
+    from sparkle_help import sparkle_file_help as sfh
+except ImportError:
+    import sparkle_basic_help as sbh
+    import sparkle_global_help as sgh
+    import sparkle_file_help as sfh
 
 snapshot_log_file_path = sgh.sparkle_err_path
 
 
-def detect_current_sparkle_platform_exists() -> bool:
+def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
     """Return whether a Sparkle platform is currently active.
 
+    Args:
+        check_all_dirs: variable indicating, if all the directories for a sparkle
+            platform should be checked or if just finding one directory is fine
     Returns:
       Boolean value indicating whether a Sparkle platform is active or not.
     """
-    if sgh.instance_dir.exists():
-        return True
-    if sgh.output_dir.exists():
-        return True
-    if sgh.solver_dir.exists():
-        return True
-    if sgh.extractor_dir.exists():
-        return True
-    if sgh.feature_data_dir.exists():
-        return True
-    if sgh.performance_data_dir.exists():
-        return True
-    if sgh.reference_list_dir.exists():
-        return True
-    if sgh.sparkle_portfolio_selector_dir.exists():
-        return True
-    if sgh.sparkle_parallel_portfolio_dir.exists():
-        return True
+    if check_all_dirs:
+        return sgh.instance_dir.exists() and sgh.output_dir.exists() \
+            and sgh.solver_dir.exists() and sgh.extractor_dir.exists() \
+            and sgh.feature_data_dir.exists() and sgh.performance_data_dir.exists() \
+            and sgh.reference_list_dir.exists \
+            and sgh.sparkle_portfolio_selector_dir.exists() \
+            and sgh.sparkle_parallel_portfolio_dir.exists()
+    else:
+        if sgh.instance_dir.exists():
+            return True
+        if sgh.output_dir.exists():
+            return True
+        if sgh.solver_dir.exists():
+            return True
+        if sgh.extractor_dir.exists():
+            return True
+        if sgh.feature_data_dir.exists():
+            return True
+        if sgh.performance_data_dir.exists():
+            return True
+        if sgh.reference_list_dir.exists():
+            return True
+        if sgh.sparkle_portfolio_selector_dir.exists():
+            return True
+        if sgh.sparkle_parallel_portfolio_dir.exists():
+            return True
 
     return False
 

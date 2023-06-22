@@ -9,16 +9,18 @@ import shutil
 import random
 import fcntl
 from pathlib import Path
-from sparkle_help import sparkle_logging as sl
+
 
 try:
     from Commands.sparkle_help import sparkle_global_help as sgh
     from Commands.sparkle_help import sparkle_snapshot_help as snh
     from Commands.sparkle_help import sparkle_csv_help as scsv
+    from Commands.sparkle_help import sparkle_logging as sl
 except ImportError:
     import sparkle_snapshot_help as snh
     import sparkle_csv_help as scsv
     import sparkle_global_help as sgh
+    import sparkle_logging as sl
 
 
 def create_new_empty_file(filepath: str) -> None:
@@ -733,7 +735,7 @@ def initialise_sparkle() -> None:
 
     sgh.snapshot_dir.mkdir(exist_ok=True)
 
-    if snh.detect_current_sparkle_platform_exists():
+    if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
 
@@ -754,4 +756,6 @@ def initialise_sparkle() -> None:
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
     sgh.pap_performance_data_tmp_path.mkdir()
+    # Log command call
+    sl.log_command(sys.argv)
     print("New Sparkle platform initialised!")

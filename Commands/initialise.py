@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Command to initialise a Sparkle platform."""
 
-import sys
 import argparse
-from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_file_help as sfh
 
 
@@ -22,6 +20,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     sfh.initialise_sparkle()
-
-    # Log command call
-    sl.log_command(sys.argv)

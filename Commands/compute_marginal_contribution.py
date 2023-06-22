@@ -12,6 +12,7 @@ from sparkle_help import sparkle_settings
 from sparkle_help.sparkle_settings import PerformanceMeasure
 from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -66,6 +67,8 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    sch.check_for_initialize(["add_instances", "add_solver"])
 
     print("[Deprecated] command, functionality is called automatically by other commands"
           "when needed.")

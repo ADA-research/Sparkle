@@ -1,4 +1,4 @@
-#!/bin/bash
+##!/bin/bash
 
 # Execute this script from the Sparkle directory
 
@@ -10,9 +10,6 @@
 #SBATCH --exclude=
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-
-# Initialise
-Commands/initialise.py > /dev/null
 
 # Save snapshot
 output_true_partA="Snapshot file Snapshots/My_Snapshot"

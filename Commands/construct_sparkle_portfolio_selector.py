@@ -20,6 +20,7 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -134,6 +135,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     flag_recompute_portfolio = args.recompute_portfolio_selector
     flag_recompute_marg_cont = args.recompute_marginal_contribution
+
+    sch.check_for_initialize(["add_instances", "add_feature_extractor", "add_solver"])
+
     if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE

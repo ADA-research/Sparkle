@@ -13,6 +13,7 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
+from sparkle_help import sparkle_command_help as sch
 
 if __name__ == "__main__":
     # Initialise settings
@@ -50,6 +51,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     portfolio_name = args.nickname
     list_of_solvers = args.solver
+
+    sch.check_for_initialize(["add_instances", "add_solver"])
 
     # If no solvers are given all previously added solvers are used
     if list_of_solvers is None:
