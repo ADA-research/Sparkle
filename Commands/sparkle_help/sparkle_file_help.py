@@ -742,6 +742,8 @@ def initialise_sparkle() -> None:
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
 
+    sl.log_command(sys.argv)
+
     create_temporary_directories()
     pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
     pap_sbatch_path.mkdir(exist_ok=True)
@@ -752,10 +754,10 @@ def initialise_sparkle() -> None:
     sgh.reference_list_dir.mkdir()
     sgh.sparkle_portfolio_selector_dir.mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
-    Path(f"{sgh.ablation_dir}scenarios/").mkdir()
+    Path(f"{sgh.ablation_dir}scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
     sgh.pap_performance_data_tmp_path.mkdir()
     # Log command call
-    sl.log_command(sys.argv)
+
     print("New Sparkle platform initialised!")
