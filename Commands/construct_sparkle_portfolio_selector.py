@@ -6,7 +6,6 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -20,6 +19,8 @@ from sparkle_help.sparkle_settings import SettingState
 from sparkle_help import argparse_custom as ac
 from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
+from sparkle_help import sparkle_system_status_help as sssh
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -79,25 +80,6 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
     return False
 
 
-def generate_task_run_status() -> None:
-    """Generate run status info files for portfolio selector Slurm batch jobs."""
-    key_str = "construct_sparkle_portfolio_selector"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    status_info_str = "Status: Running\n"
-    sfh.write_string_to_file(task_run_status_path, status_info_str)
-
-    return
-
-
-def delete_task_run_status() -> None:
-    """Remove run status info files for portfolio selector Slurm batch jobs."""
-    key_str = "construct_sparkle_portfolio_selector"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    os.system("rm -rf " + task_run_status_path)
-
-    return
-
-
 def delete_log_files() -> None:
     """Remove the log files."""
     os.system("rm -f " + sgh.sparkle_log_path)
@@ -141,7 +123,8 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle portfolio selector ...")
 
-    generate_task_run_status()
+    sssh.generate_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+                                  sgh.portfolio_job_path)
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         sgh.feature_data_csv_path, sgh.performance_data_csv_path
@@ -153,7 +136,7 @@ if __name__ == "__main__":
         print("Please first execute all unperformed jobs before constructing Sparkle "
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
-        delete_task_run_status()
+        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
         sys.exit()
 
     delete_log_files()  # Make sure no old log files remain
@@ -182,7 +165,8 @@ if __name__ == "__main__":
         cmc.compute_perfect(flag_recompute_marg_cont)
         cmc.compute_actual(flag_recompute_marg_cont)
 
-        delete_task_run_status()
+        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+                                    sgh.portfolio_job_path)
         delete_log_files()
 
     # Write used settings to file

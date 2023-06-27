@@ -21,26 +21,8 @@ from sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help.reporting_scenario import Scenario
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help import sparkle_file_help as sfh
-
-
-def generate_task_run_status() -> None:
-    """Generate run status info files for portfolio selector Slurm batch jobs."""
-    key_str = "configure_solver"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    status_info_str = "Status: Running\n"
-    sfh.write_string_to_file(Path(task_run_status_path), status_info_str)
-
-    return
-
-
-def delete_task_run_status() -> None:
-    """Remove run status info files for portfolio selector Slurm batch jobs."""
-    key_str = "configure_solver"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    os.system("rm -rf " + task_run_status_path)
-
-    return
+from sparkle_help import sparkle_system_status_help as sssh
+from sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -179,7 +161,7 @@ if __name__ == "__main__":
             sys.exit()
 
         for index, column in enumerate(feature_data_df):
-            feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
+            feature_data_df.rename(columns={column: f"Feature{index + 1}"}, inplace=True)
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
@@ -209,7 +191,8 @@ if __name__ == "__main__":
         )
         sys.exit()
 
-    generate_task_run_status()
+    sssh.generate_task_run_status(sch.CommandName.CONFIGURE_SOLVER,
+                                  sgh.configuration_job_path)
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
     scsh.clean_configuration_directory(solver.name, instance_set_train.name)
@@ -285,7 +268,8 @@ if __name__ == "__main__":
     print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
           f"{job_id_str}")
 
-    delete_task_run_status()
+    sssh.delete_task_run_status(sch.CommandName.CONFIGURE_SOLVER,
+                                sgh.configuration_job_path)
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file

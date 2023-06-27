@@ -10,6 +10,7 @@ from sparkle_help import sparkle_file_help as sfh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_job_help
+from sparkle_help import sparkle_command_help as sch
 
 
 def print_solver_list(verbose: bool = False):
@@ -298,3 +299,32 @@ def get_file_modify_time(file_path):
     """Return the last time a file was modified."""
     timestamp = os.path.getmtime(file_path)
     return timestamp_to_time(timestamp) + " (UTC+0)"
+
+
+def generate_task_run_status(command_name: sch.CommandName, job_path: str) -> None:
+    """Generate run status info files for Slurm batch jobs.
+
+    Args:
+        command_name: enum name of the executed command
+        job_path: path to the commands job folder
+    """
+    key_str = command_name
+    task_run_status_path = f"Tmp/{job_path}/{key_str}.statusinfo"
+    status_info_str = "Status: Running\n"
+    sfh.write_string_to_file(Path(task_run_status_path), status_info_str)
+
+    return
+
+
+def delete_task_run_status(command_name: sch.CommandName, job_path: str) -> None:
+    """Remove run status info files for Slurm batch jobs.
+
+    Args:
+        command_name: enum name of the executed command
+        job_path: path to the commands job folder
+    """
+    key_str = command_name
+    task_run_status_path = f"Tmp/{job_path}/{key_str}.statusinfo"
+    os.system("rm -rf " + task_run_status_path)
+
+    return
