@@ -10,7 +10,7 @@ from sparkle_help import sparkle_global_help as sgh
 from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_construct_portfolio_selector_help as scps
-import compute_marginal_contribution as cmc
+from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_job_help
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_settings
@@ -162,8 +162,8 @@ if __name__ == "__main__":
 
         # Compute and print marginal contributions of the perfect and actual portfolio
         # selectors
-        cmc.compute_perfect(flag_recompute_marg_cont)
-        cmc.compute_actual(flag_recompute_marg_cont)
+        scmch.compute_perfect(flag_recompute_marg_cont)
+        scmch.compute_actual(flag_recompute_marg_cont)
 
         sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
                                     sgh.portfolio_job_path)
