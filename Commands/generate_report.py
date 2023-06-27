@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to generate a report for an executed experiment."""
 
-import os
 import sys
 import argparse
 from pathlib import Path

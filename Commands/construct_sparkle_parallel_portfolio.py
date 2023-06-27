@@ -3,7 +3,6 @@
 """Sparkle command to construct a parallel algorithm portfolio."""
 
 import sys
-import os
 import argparse
 from pathlib import Path
 
