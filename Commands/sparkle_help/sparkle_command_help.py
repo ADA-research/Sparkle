@@ -76,6 +76,9 @@ COMMAND_DEPENDENCIES = {
     CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR: [CommandName.INITIALISE,
                                                        CommandName.COMPUTE_FEATURES,
                                                        CommandName.RUN_SOLVERS],
+    CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO: [CommandName.INITIALISE,
+                                                        CommandName.ADD_INSTANCES,
+                                                        CommandName.ADD_SOLVER],
     CommandName.GENERATE_REPORT: [CommandName.INITIALISE,
                                   CommandName.CONFIGURE_SOLVER,
                                   CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
@@ -123,10 +126,10 @@ def check_for_initialize(argv: list[str], requirements: list[CommandName] = None
               + "The platform will now be initialized automatically")
         if requirements is not None:
             if len(requirements) == 1:
-                print(f"Also the command {requirements[0]} has \
+                print(f"The command {requirements[0]} has \
                       to be executed before executing this command.")
             else:
-                print(f"""Also the commands {", ".join(requirements)} \
+                print(f"""The commands {", ".join(requirements)} \
                       have to be executed before executing this command.""")
         print("-----------------------------------------------")
         sfh.initialise_sparkle(argv)
