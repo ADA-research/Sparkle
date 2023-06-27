@@ -49,11 +49,10 @@ sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_lo
 
 sparkle_tmp_path = "Tmp/"
 
-extractor_job_path = "Tmp/SBATCH_Extractor_Jobs/"
-solver_job_path = "Tmp/SBATCH_Solver_Jobs/"
-portfolio_job_path = "Tmp/SBATCH_Portfolio_Jobs/"
-report_job_path = "Tmp/SBATCH_Report_Jobs/"
-configuration_job_path = "Tmp/SBATCH_Configuration_Jobs"
+extractor_job_path = f"{sparkle_tmp_path}SBATCH_Extractor_Jobs/"
+algorithm_selector_job_path = f"{sparkle_tmp_path}SBATCH_Portfolio_Jobs/"
+report_job_path = f"{sparkle_tmp_path}SBATCH_Report_Jobs/"
+configuration_job_path = f"{sparkle_tmp_path}SBATCH_Configuration_Jobs"
 
 sparkle_log_path = sparkle_tmp_path + "sparkle_log.out"
 sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"

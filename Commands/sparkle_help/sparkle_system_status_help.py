@@ -164,7 +164,7 @@ def print_algorithm_selector_info():
     print("Status of algorithm selector in Sparkle:")
 
     key_str = "construct_sparkle_algorithm_selector"
-    task_run_status_path = f"Tmp/{sgh.portfolio_job_path}/{key_str}.statusinfo"
+    task_run_status_path = f"Tmp/{sgh.algorithm_selector_job_path}/{key_str}.statusinfo"
     if Path(task_run_status_path).is_file():
         print("Currently Sparkle algorithm selector is constructing ...")
     elif Path(sparkle_algorithm_selector_path).is_file():
@@ -307,10 +307,9 @@ def generate_task_run_status(command_name: sch.CommandName, job_path: str) -> No
         command_name: enum name of the executed command
         job_path: path to the commands job folder
     """
-    key_str = command_name
-    task_run_status_path = f"Tmp/{job_path}/{key_str}.statusinfo"
+    task_run_status_path = Path(f"{job_path}/{command_name}.statusinfo")
     status_info_str = "Status: Running\n"
-    sfh.write_string_to_file(Path(task_run_status_path), status_info_str)
+    sfh.write_string_to_file(task_run_status_path, status_info_str)
 
     return
 
@@ -322,8 +321,7 @@ def delete_task_run_status(command_name: sch.CommandName, job_path: str) -> None
         command_name: enum name of the executed command
         job_path: path to the commands job folder
     """
-    key_str = command_name
-    task_run_status_path = f"Tmp/{job_path}/{key_str}.statusinfo"
-    Path(task_run_status_path).unlink()
+    task_run_status_path = Path(f"{job_path}/{command_name}.statusinfo")
+    task_run_status_path.unlink()
 
     return

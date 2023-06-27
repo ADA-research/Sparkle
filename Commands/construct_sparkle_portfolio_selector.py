@@ -124,7 +124,7 @@ if __name__ == "__main__":
     print("Start constructing Sparkle portfolio selector ...")
 
     sssh.generate_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-                                  sgh.portfolio_job_path)
+                                  sgh.algorithm_selector_job_path)
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         sgh.feature_data_csv_path, sgh.performance_data_csv_path
@@ -136,7 +136,8 @@ if __name__ == "__main__":
         print("Please first execute all unperformed jobs before constructing Sparkle "
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
-        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
+        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+                                    sgh.algorithm_selector_job_path)
         sys.exit()
 
     delete_log_files()  # Make sure no old log files remain
@@ -166,7 +167,7 @@ if __name__ == "__main__":
         scmch.compute_actual(flag_recompute_marg_cont)
 
         sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-                                    sgh.portfolio_job_path)
+                                    sgh.algorithm_selector_job_path)
         delete_log_files()
 
     # Write used settings to file

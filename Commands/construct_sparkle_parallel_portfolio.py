@@ -72,7 +72,7 @@ if __name__ == "__main__":
     print("Start constructing Sparkle parallel portfolio ...")
 
     sssh.generate_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO,
-                                  sgh.portfolio_job_path)
+                                  sgh.pap_sbatch_tmp_path)
 
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         sgh.latest_scenario.set_parallel_portfolio_instance_list()
 
         sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO,
-                                    sgh.portfolio_job_path)
+                                    sgh.pap_sbatch_tmp_path)
     else:
         print("An unexpected error occurred when constructing the portfolio, please "
               "check your input and try again.")
