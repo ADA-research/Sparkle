@@ -76,8 +76,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    sch.check_for_initialize(["add_instances", "add_solver",
-                              "construct_sparkle_parallel_portfolio"])
+    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO])
 
     # Do first, so other command line options can override settings from the file
     if args.settings_file is not None:

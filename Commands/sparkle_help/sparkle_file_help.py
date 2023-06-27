@@ -729,8 +729,12 @@ def remove_temporary_files() -> None:
     return
 
 
-def initialise_sparkle() -> None:
-    """Initialize a new Sparkle platform."""
+def initialise_sparkle(argv: list[str]) -> None:
+    """Initialize a new Sparkle platform.
+
+    Args:
+        argv: The argument list for the log_command
+    """
     print("Start initialising Sparkle platform ...")
 
     sgh.snapshot_dir.mkdir(exist_ok=True)
@@ -742,7 +746,8 @@ def initialise_sparkle() -> None:
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
 
-    sl.log_command(sys.argv)
+    # Log command call
+    sl.log_command(argv)
 
     create_temporary_directories()
     pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
@@ -758,6 +763,5 @@ def initialise_sparkle() -> None:
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
     sgh.pap_performance_data_tmp_path.mkdir()
-    # Log command call
 
     print("New Sparkle platform initialised!")

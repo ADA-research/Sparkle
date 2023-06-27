@@ -129,7 +129,8 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
     use_features = args.use_features
 
-    sch.check_for_initialize(["add_instances", "add_solver"])
+    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.CONFIGURE_SOLVER])
 
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)

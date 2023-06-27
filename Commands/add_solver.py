@@ -85,7 +85,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     solver_source = args.solver_path
 
-    sch.check_for_initialize()
+    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.ADD_SOLVER])
 
     if not Path(solver_source).exists():
         print(f'Solver path "{solver_source}" does not exist!')

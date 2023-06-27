@@ -59,7 +59,9 @@ if __name__ == "__main__":
         args.instance_path
     )  # Turn multiple instance files into a space separated string
 
-    sch.check_for_initialize(["add_instances, ""add_feature_extractor", "add_solver"])
+    sch.check_for_initialize(sys.argv,
+                             sch.COMMAND_DEPENDENCIES[
+                                 sch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
@@ -71,8 +73,8 @@ if __name__ == "__main__":
         )
 
     if (
-        sgh.settings.get_general_performance_measure()
-        == PerformanceMeasure.QUALITY_ABSOLUTE
+            sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE
     ):
         print(
             "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"

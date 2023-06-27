@@ -28,34 +28,13 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
     Returns:
       Boolean value indicating whether a Sparkle platform is active or not.
     """
+    dirs = [sgh.instance_dir, sgh.output_dir, sgh.solver_dir, sgh.extractor_dir,
+            sgh.feature_data_dir, sgh.performance_data_dir, sgh.reference_list_dir,
+            sgh.sparkle_portfolio_selector_dir, sgh.sparkle_parallel_portfolio_dir]
     if check_all_dirs:
-        return sgh.instance_dir.exists() and sgh.output_dir.exists() \
-            and sgh.solver_dir.exists() and sgh.extractor_dir.exists() \
-            and sgh.feature_data_dir.exists() and sgh.performance_data_dir.exists() \
-            and sgh.reference_list_dir.exists \
-            and sgh.sparkle_portfolio_selector_dir.exists() \
-            and sgh.sparkle_parallel_portfolio_dir.exists()
+        return all([x.exists() for x in dirs])
     else:
-        if sgh.instance_dir.exists():
-            return True
-        if sgh.output_dir.exists():
-            return True
-        if sgh.solver_dir.exists():
-            return True
-        if sgh.extractor_dir.exists():
-            return True
-        if sgh.feature_data_dir.exists():
-            return True
-        if sgh.performance_data_dir.exists():
-            return True
-        if sgh.reference_list_dir.exists():
-            return True
-        if sgh.sparkle_portfolio_selector_dir.exists():
-            return True
-        if sgh.sparkle_parallel_portfolio_dir.exists():
-            return True
-
-    return False
+        return any([x.exists() for x in dirs])
 
 
 def save_current_sparkle_platform() -> None:

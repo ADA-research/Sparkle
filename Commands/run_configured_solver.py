@@ -56,7 +56,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     instance_path = args.instance_path
 
-    sch.check_for_initialize(["add_solver"])
+    sch.check_for_initialize(
+        sys.argv, sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file

@@ -76,7 +76,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     instances_source = args.instances_path
 
-    sch.check_for_initialize()
+    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.ADD_INSTANCES])
 
     if not Path(instances_source).exists():
         print(f'Instance set path "{instances_source}" does not exist!')

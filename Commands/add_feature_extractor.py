@@ -81,7 +81,9 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    sch.check_for_initialize()
+    sch.check_for_initialize(sys.argv,
+                             sch.COMMAND_DEPENDENCIES[
+                                 sch.CommandName.ADD_FEATURE_EXTRACTOR])
     extractor_source = args.extractor_path
     if not Path(extractor_source).exists():
         print(f'Feature extractor path "{extractor_source}" does not exist!')

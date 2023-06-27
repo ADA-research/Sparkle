@@ -136,7 +136,8 @@ if __name__ == "__main__":
     flag_recompute_portfolio = args.recompute_portfolio_selector
     flag_recompute_marg_cont = args.recompute_marginal_contribution
 
-    sch.check_for_initialize(["add_instances", "add_feature_extractor", "add_solver"])
+    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR])
 
     if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(

@@ -42,7 +42,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     extractor_path = args.extractor_path
 
-    sch.check_for_initialize(["add_feature_extractor"])
+    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.REMOVE_FEATURE_EXTRACTOR])
 
     if args.nickname:
         extractor_path = sparkle_global_help.extractor_nickname_mapping[extractor_path]

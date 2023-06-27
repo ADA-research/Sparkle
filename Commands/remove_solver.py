@@ -40,7 +40,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     solver_path = args.solver_path
 
-    sch.check_for_initialize(["add_solver"])
+    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.REMOVE_SOLVER])
 
     if args.nickname:
         solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]

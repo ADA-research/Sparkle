@@ -11,7 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Initialise
 
 # Save record
 output_true="For more details see README.md"
