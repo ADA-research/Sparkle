@@ -17,7 +17,7 @@ def print_solver_list(verbose: bool = False):
     """Print the list of solvers in Sparkle.
 
     Args:
-        verbose: Indicating, if output should be verbose
+        verbose: Indicating if output should be verbose
     """
     solver_list = sgh.solver_list
     print("")
@@ -38,7 +38,7 @@ def print_extractor_list(verbose: bool = False):
     """Print the list of feature extractors in Sparkle.
 
     Args:
-        verbose: Indicating, if output should be verbose
+        verbose: Indicating if output should be verbose
     """
     extractor_list = sgh.extractor_list
     print("")
@@ -66,7 +66,6 @@ def print_instance_list(verbose: bool = False):
     print("")
     print("Currently Sparkle has " + str(len(instance_list)) + " instances"
           + (":" if verbose else ""))
-    print(instance_list)
     if verbose:
         i = 1
         for instance in instance_list:
@@ -98,7 +97,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
 
     print("")
     print(f"Currently Sparkle has {str(total_job_num)} remaining feature computation "
-          "jobs needed to be performed before creating an algorithm selector"
+          "jobs that need to be performed before creating an algorithm selector"
           + (":" if verbose else ""))
 
     if verbose:
@@ -138,7 +137,7 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
 
     print("")
     print(f"Currently Sparkle has {str(total_job_num)} remaining performance computation"
-          " jobs needed to be performed before creating an algorithm selector"
+          " jobs that need to be performed before creating an algorithm selector"
           + (":" if verbose else ""))
 
     if verbose:
@@ -165,7 +164,7 @@ def print_algorithm_selector_info():
     print("Status of algorithm selector in Sparkle:")
 
     key_str = "construct_sparkle_algorithm_selector"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    task_run_status_path = f"Tmp/{sgh.portfolio_job_path}/{key_str}.statusinfo"
     if Path(task_run_status_path).is_file():
         print("Currently Sparkle algorithm selector is constructing ...")
     elif Path(sparkle_algorithm_selector_path).is_file():
@@ -185,7 +184,7 @@ def print_parallel_portfolio_info():
     print("Status of parallel portfolio in Sparkle:")
 
     key_str = "construct_sparkle_parallel_portfolio"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    task_run_status_path = f"Tmp/{sgh.pap_sbatch_tmp_path}/{key_str}.statusinfo"
     if Path(task_run_status_path).is_file():
         print("Currently Sparkle parallel portfolio is constructing ...")
     elif Path(sparkle_parallel_portfolio_path).is_file():
@@ -201,15 +200,15 @@ def print_parallel_portfolio_info():
 def print_algorithm_configuration_info():
     """Print information about the Sparkle algorithm configuration."""
     print("")
-    print("Status of parallel portfolio in Sparkle:")
+    print("Status of algorithm configuration in Sparkle:")
 
     key_str = "algorithm_configuration"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
+    task_run_status_path = f"Tmp/{sgh.configuration_job_path}/{key_str}.statusinfo"
     if Path(task_run_status_path).is_file():
-        print("Currently Sparkle parallel portfolio is constructing ...")
+        print("Currently Sparkle configurator is constructing ...")
     elif sgh.latest_scenario is not None:
         solver = sgh.latest_scenario.get_config_solver()
-        instance_set_train = sgh.latest_scenario.set_config_instance_set_train()
+        instance_set_train = sgh.latest_scenario.get_config_instance_set_train()
         last_configuration_file_path = Path(
             sgh.smac_dir,
             "example_scenarios",
@@ -221,7 +220,7 @@ def print_algorithm_configuration_info():
             print("Last modified time: "
                   f"{get_file_modify_time(last_configuration_file_path)}")
     else:
-        print("No parallel portfolio exists!")
+        print("No configurator exists!")
     print("")
 
 
@@ -231,15 +230,15 @@ def print_algorithm_selection_report_info():
     print("")
     print("Status of algorithm selection report in Sparkle:")
 
-    key_str = f"generate_report_{sgh.ReportType.algorithm_selection}"
-    task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
+    key_str = f"generate_report_{sgh.ReportType.ALGORITHM_SELECTION}"
+    task_run_status_path = f"Tmp/{sgh.report_job_path}/{key_str}.statusinfo"
     if Path(task_run_status_path).is_file():
         print("Currently Sparkle algorithm selection report is generating ...")
     elif Path(sparkle_report_path).is_file():
-        print("Path: " + sparkle_report_path)
-        print("Last modified time: " + get_file_modify_time(sparkle_report_path))
+        print(f"Path :{sparkle_report_path}")
+        print(f"Last modified time: {get_file_modify_time(sparkle_report_path)}")
     else:
-        print("No report exists!")
+        print("No algorithm selection report exists!")
     print("")
     return
 
@@ -252,19 +251,19 @@ def print_algorithm_configuration_report_info():
     print("")
     print("Status of algorithm configuration report in Sparkle:")
 
-    key_str = f"generate_report_{sgh.ReportType.algorithm_configuration}"
-    task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
+    key_str = f"generate_report_{sgh.ReportType.ALGORITHM_CONFIGURATION}"
+    task_run_status_path = f"Tmp/{sgh.report_job_path}/{key_str}.statusinfo"
     if Path(task_run_status_path).is_file():
         print("Currently Sparkle algorithm configuration report is generating ...")
     elif sparkle_report_base_path.is_dir():
         for folder in [x for x in sparkle_report_base_path.iterdir() if x.is_dir()]:
             act_path = (folder / report_file_name)
             if act_path.is_file():
-                print("Path: " + str(act_path))
-                print("Last modified time: " + get_file_modify_time(act_path))
+                print(f"Path: {str(act_path)}")
+                print(f"Last modified time: {get_file_modify_time(act_path)}")
                 print("")
     else:
-        print("No report exists!")
+        print("No algorthm configuration report exists!")
     print("")
     return
 
@@ -276,15 +275,15 @@ def print_parallel_portfolio_report_info():
     print("")
     print("Status of parallel portfolio report in Sparkle:")
 
-    key_str = f"generate_report_{sgh.ReportType.algorithm_selection}"
-    task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
+    key_str = f"generate_report_{sgh.ReportType.ALGORITHM_SELECTION}"
+    task_run_status_path = f"Tmp/{sgh.report_job_path}/{key_str}.statusinfo"
     if Path(task_run_status_path).is_file():
         print("Currently Sparkle parallel portfolio report is generating ...")
     elif Path(sparkle_report_path).is_file():
-        print("Path: " + sparkle_report_path)
-        print("Last modified time: " + get_file_modify_time(sparkle_report_path))
+        print(f"Path: {sparkle_report_path}")
+        print(f"Last modified time: {get_file_modify_time(sparkle_report_path)}")
     else:
-        print("No report exists!")
+        print("No parallel portfolio report exists!")
     print("")
     return
 
@@ -325,6 +324,6 @@ def delete_task_run_status(command_name: sch.CommandName, job_path: str) -> None
     """
     key_str = command_name
     task_run_status_path = f"Tmp/{job_path}/{key_str}.statusinfo"
-    os.system("rm -rf " + task_run_status_path)
+    Path(task_run_status_path).unlink()
 
     return

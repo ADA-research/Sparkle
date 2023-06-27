@@ -111,7 +111,7 @@ def delete_report_task_run_status(report_type: sgh.ReportType):
     """
     key_str = f"generate_report_{report_type}"
     task_run_status_path = f"Tmp/{sgh.report_job_path}/{key_str}.statusinfo"
-    os.system("rm -rf " + task_run_status_path)
+    Path(task_run_status_path).unlink()
 
     return
 
@@ -187,7 +187,7 @@ if __name__ == "__main__":
             sys.exit()
 
         print("Generating report ...")
-        generate_report_task_run_status(sgh.ReportType.algorithm_selection)
+        generate_report_task_run_status(sgh.ReportType.ALGORITHM_SELECTION)
         if test_case_directory is None:
             sgrh.generate_report()
             print("Report generated ...")
@@ -195,18 +195,18 @@ if __name__ == "__main__":
             sgrh.generate_report(str(test_case_directory))
             print("Report for test generated ...")
 
-        delete_report_task_run_status(sgh.ReportType.algorithm_selection)
+        delete_report_task_run_status(sgh.ReportType.ALGORITHM_SELECTION)
     elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
-        generate_report_task_run_status(sgh.ReportType.parallel_portfolio)
+        generate_report_task_run_status(sgh.ReportType.PARALLEL_PORTFOLIO)
         sgrfpph.generate_report(parallel_portfolio_path, pap_instance_list)
         print("Parallel portfolio report generated ...")
-        delete_report_task_run_status(sgh.ReportType.parallel_portfolio)
+        delete_report_task_run_status(sgh.ReportType.PARALLEL_PORTFOLIO)
     else:
         # Reporting for algorithm configuration
-        generate_report_task_run_status(sgh.ReportType.algorithm_configuration)
+        generate_report_task_run_status(sgh.ReportType.ALGORITHM_CONFIGURATION)
         solver_name = sfh.get_last_level_directory_name(solver)
-        delete_report_task_run_status(sgh.ReportType.algorithm_configuration)
+        delete_report_task_run_status(sgh.ReportType.ALGORITHM_CONFIGURATION)
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
         # validate_configured_vs_default

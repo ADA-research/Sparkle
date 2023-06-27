@@ -30,20 +30,15 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    if args.verbose:
-        verbose = True
-    else:
-        verbose = False
-
     print("Reporting current system status of Sparkle ...")
-    sparkle_system_status_help.print_solver_list(verbose)
-    sparkle_system_status_help.print_extractor_list(verbose)
-    sparkle_system_status_help.print_instance_list(verbose)
+    sparkle_system_status_help.print_solver_list(args.verbose)
+    sparkle_system_status_help.print_extractor_list(args.verbose)
+    sparkle_system_status_help.print_instance_list(args.verbose)
     sparkle_system_status_help.print_list_remaining_feature_computation_job(
-        sparkle_global_help.feature_data_csv_path, verbose
+        sparkle_global_help.feature_data_csv_path, args.verbose
     )
     sparkle_system_status_help.print_list_remaining_performance_computation_job(
-        sparkle_global_help.performance_data_csv_path, verbose
+        sparkle_global_help.performance_data_csv_path, args.verbose
     )
     sparkle_system_status_help.print_algorithm_selector_info()
     sparkle_system_status_help.print_parallel_portfolio_info()

@@ -34,9 +34,9 @@ sparkle_global_output_dir = Path("Output")
 
 class ReportType(Enum):
     """enum for separating different types of reports."""
-    algorithm_selection = "algorithm_selection"
-    algorithm_configuration = "algorithm_configuration"
-    parallel_portfolio = "parallel_portfolio"
+    ALGORITHM_SELECTION = "algorithm_selection"
+    ALGORITHM_CONFIGURATION = "algorithm_configuration"
+    PARALLEL_PORTFOLIO = "parallel_portfolio"
 
 
 # Log that keeps track of which commands were executed and where output details can be
@@ -63,7 +63,7 @@ sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
 snapshot_dir = Path("Snapshots/")
 sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector/")
 
-sparkle_algorithm_selector_name = "sparkle_portfolio_selector" + sparkle_special_string
+sparkle_algorithm_selector_name = f"sparkle_portfolio_selector{sparkle_special_string}"
 
 sparkle_algorithm_selector_path = (
     sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name)
