@@ -11,7 +11,7 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Initialize
+# Initialise
 Commands/initialise.py > /dev/null
 
 # Save snapshot

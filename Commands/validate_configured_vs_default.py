@@ -88,7 +88,7 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
 
-    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
 
     if ac.set_by_user(args, "settings_file"):

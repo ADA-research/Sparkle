@@ -245,7 +245,7 @@ if __name__ == "__main__":
 
     print("Start running solvers ...")
 
-    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.RUN_SOLVERS])
 
     print("Start running solvers ...")

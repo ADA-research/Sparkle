@@ -59,7 +59,7 @@ if __name__ == "__main__":
         args.instance_path
     )  # Turn multiple instance files into a space separated string
 
-    sch.check_for_initialize(sys.argv,
+    sch.check_for_initialise(sys.argv,
                              sch.COMMAND_DEPENDENCIES[
                                  sch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR])
 

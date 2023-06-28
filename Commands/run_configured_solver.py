@@ -56,7 +56,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     instance_path = args.instance_path
 
-    sch.check_for_initialize(
+    sch.check_for_initialise(
         sys.argv, sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:

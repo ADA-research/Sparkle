@@ -112,7 +112,7 @@ COMMAND_DEPENDENCIES = {
 }
 
 
-def check_for_initialize(argv: list[str], requirements: list[CommandName] = None):
+def check_for_initialise(argv: list[str], requirements: list[CommandName] = None):
     """Function to check if initialize command was executed and execute it otherwise.
 
     Args:

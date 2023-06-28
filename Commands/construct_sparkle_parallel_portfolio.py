@@ -52,7 +52,7 @@ if __name__ == "__main__":
     portfolio_name = args.nickname
     list_of_solvers = args.solver
 
-    sch.check_for_initialize(sys.argv, sch.COMMAND_DEPENDENCIES[
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO])
 
     # If no solvers are given all previously added solvers are used
