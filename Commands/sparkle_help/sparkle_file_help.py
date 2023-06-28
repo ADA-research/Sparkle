@@ -696,7 +696,7 @@ def create_temporary_directories() -> None:
     Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
     Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
-    Path("Performance_Data/Tmp_Pap/").mkdir(parents=True, exist_ok=True)
+    sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
 
     return
@@ -710,7 +710,7 @@ def remove_temporary_files() -> None:
     shutil.rmtree(Path("Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Performance_Data/Tmp/"), ignore_errors=True)
-    shutil.rmtree(Path("Performance_Data/Tmp_PaP/"), ignore_errors=True)
+    shutil.rmtree(sgh.pap_performance_data_tmp_path, ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)
 
     for filename in Path(".").glob("slurm-*"):
