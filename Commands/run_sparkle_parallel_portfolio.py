@@ -7,13 +7,13 @@ import os
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
-from sparkle_help import sparkle_run_parallel_portfolio_help as srpp
-from sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
+from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 if __name__ == "__main__":

@@ -5,13 +5,13 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmc
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
 
 
 def parser_function():

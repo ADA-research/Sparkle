@@ -9,10 +9,10 @@ import shutil
 from pathlib import Path
 from pathlib import PurePath
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_instances_help as sih
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_slurm_help as ssh
 
 
 def get_ablation_scenario_directory(solver_name, instance_train_name, instance_test_name,

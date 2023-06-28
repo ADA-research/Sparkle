@@ -10,20 +10,12 @@ import shutil
 from pathlib import Path
 from pathlib import PurePath
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_run_solvers_help as srs
-    from sparkle_help.sparkle_settings import PerformanceMeasure
-    from sparkle_help import sparkle_settings
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help as sbh
-    import sparkle_file_help as sfh
-    import sparkle_run_solvers_help as srs
-    from sparkle_settings import PerformanceMeasure
-    import sparkle_settings
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_run_solvers_help as srs
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_settings
 
 
 if __name__ == "__main__":

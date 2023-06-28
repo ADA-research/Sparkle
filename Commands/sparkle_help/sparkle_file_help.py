@@ -9,16 +9,11 @@ import shutil
 import random
 import fcntl
 from pathlib import Path
-from sparkle_help import sparkle_logging as sl
 
-try:
-    from Commands.sparkle_help import sparkle_global_help as sgh
-    from Commands.sparkle_help import sparkle_snapshot_help as snh
-    from Commands.sparkle_help import sparkle_csv_help as scsv
-except ImportError:
-    import sparkle_snapshot_help as snh
-    import sparkle_csv_help as scsv
-    import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_snapshot_help as snh
+from Commands.sparkle_help import sparkle_csv_help as scsv
 
 
 def create_new_empty_file(filepath: str) -> None:
@@ -694,14 +689,14 @@ def create_temporary_directories() -> None:
         Path("Tmp/").mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
 
-    Path("Tmp/SBATCH_Extractor_Jobs/").mkdir(exist_ok=True)
-    Path("Tmp/SBATCH_Solver_Jobs/").mkdir(exist_ok=True)
-    Path("Tmp/SBATCH_Portfolio_Jobs/").mkdir(exist_ok=True)
-    Path("Tmp/SBATCH_Report_Jobs/").mkdir(exist_ok=True)
+    Path(sgh.extractor_job_path).mkdir(exist_ok=True)
+    Path(sgh.algorithm_selector_job_path).mkdir(exist_ok=True)
+    Path(sgh.report_job_path).mkdir(exist_ok=True)
+    Path(sgh.configuration_job_path).mkdir(exist_ok=True)
     Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
     Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
-    Path("Performance_Data/Tmp_Pap/").mkdir(parents=True, exist_ok=True)
+    sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
 
     return
@@ -715,7 +710,7 @@ def remove_temporary_files() -> None:
     shutil.rmtree(Path("Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Performance_Data/Tmp/"), ignore_errors=True)
-    shutil.rmtree(Path("Performance_Data/Tmp_PaP/"), ignore_errors=True)
+    shutil.rmtree(sgh.pap_performance_data_tmp_path, ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)
 
     for filename in Path(".").glob("slurm-*"):
@@ -748,10 +743,9 @@ def initialise_sparkle() -> None:
     sgh.solver_dir.mkdir()
     sgh.extractor_dir.mkdir()
     sgh.reference_list_dir.mkdir()
-    sgh.sparkle_portfolio_selector_dir.mkdir()
+    sgh.sparkle_algorithm_selector_dir.mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
     Path(f"{sgh.ablation_dir}scenarios/").mkdir()
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
-    sgh.pap_performance_data_tmp_path.mkdir()
     print("New Sparkle platform initialised!")

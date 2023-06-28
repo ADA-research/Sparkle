@@ -3,8 +3,8 @@
 
 import sys
 import argparse
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 __description__ = "Platform for evaluating empirical algorithms/solvers"
 __version__ = sgh.sparkle_version

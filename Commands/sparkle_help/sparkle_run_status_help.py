@@ -4,7 +4,8 @@
 
 from pathlib import Path
 import fcntl
-from sparkle_help import sparkle_file_help as sfh
+
+from Commands.sparkle_help import sparkle_file_help as sfh
 
 
 def get_list_running_extractor_jobs():
