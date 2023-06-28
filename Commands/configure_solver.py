@@ -7,22 +7,22 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_add_solver_help as sash
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_instances_help as sih
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help import sparkle_run_ablation_help as sah
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help import sparkle_system_status_help as sssh
-from sparkle_help import sparkle_command_help as sch
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_add_solver_help as sash
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_run_ablation_help as sah
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_system_status_help as sssh
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():

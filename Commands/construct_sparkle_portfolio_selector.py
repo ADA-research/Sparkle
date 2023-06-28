@@ -6,21 +6,21 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_construct_portfolio_selector_help as scps
-from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
-from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
-from sparkle_help import sparkle_system_status_help as sssh
-from sparkle_help import sparkle_command_help as sch
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
+from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
+from Commands.sparkle_help import sparkle_job_help
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_system_status_help as sssh
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():

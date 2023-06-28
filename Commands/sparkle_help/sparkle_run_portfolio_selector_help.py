@@ -9,32 +9,18 @@ import fcntl
 from pathlib import Path
 import ast
 
-try:
-    from sparkle_help import sparkle_basic_help
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-    from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-    from sparkle_help import sparkle_run_solvers_help as srs
-    from sparkle_help import sparkle_logging as sl
-    from sparkle_help.reporting_scenario import ReportingScenario
-    from sparkle_help.reporting_scenario import Scenario
-    from sparkle_help import sparkle_instances_help as sih
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help import sparkle_job_help as sjh
-except ImportError:
-    import sparkle_basic_help
-    import sparkle_file_help as sfh
-    import sparkle_global_help as sgh
-    import sparkle_feature_data_csv_help as sfdcsv
-    import sparkle_performance_data_csv_help as spdcsv
-    import sparkle_run_solvers_help as srs
-    import sparkle_logging as sl
-    from reporting_scenario import ReportingScenario
-    from reporting_scenario import Scenario
-    import sparkle_instances_help as sih
-    from sparkle_command_help import CommandName
-    import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_run_solvers_help as srs
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def get_list_feature_vector(extractor_path, instance_path, result_path,

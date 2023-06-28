@@ -2,12 +2,8 @@
 # -*- coding: UTF-8 -*-
 """Module to manage performance data CSV files and common operations on them."""
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_csv_help as scsv
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_csv_help as scsv
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_csv_help as scsv
 
 
 class SparklePerformanceDataCSV(scsv.SparkleCSV):

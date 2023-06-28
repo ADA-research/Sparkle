@@ -5,10 +5,11 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_logging as sl
+
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_logging as sl
 
 
 def parser_function():

@@ -8,12 +8,8 @@ import csv
 import time
 import sys
 
-try:
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
-except ImportError:
-    from sparkle_command_help import CommandName
-    from sparkle_command_help import COMMAND_DEPENDENCIES
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
 
 
 __active_jobs_path = Path("Output/active_jobs.csv")

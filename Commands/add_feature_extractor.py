@@ -5,13 +5,13 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_compute_features_help as scf
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
 
 
 def _check_existence_of_test_instance_list_file(extractor_directory: str):

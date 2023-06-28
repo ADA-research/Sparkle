@@ -6,18 +6,11 @@ import argparse
 from pathlib import Path
 from pathlib import PurePath
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_settings
-    from sparkle_help import sparkle_run_configured_solver_help as srcsh
-    from sparkle_help.sparkle_settings import PerformanceMeasure
-    from sparkle_help.reporting_scenario import ReportingScenario
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_settings
-    import sparkle_run_configured_solver_help as srcsh
-    from sparkle_settings import PerformanceMeasure
-    from reporting_scenario import ReportingScenario
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
 
 
 if __name__ == r"__main__":

@@ -5,12 +5,13 @@
 import os
 import time
 from pathlib import Path
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_command_help as sch
+
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_job_help
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def print_solver_list(verbose: bool = False):
