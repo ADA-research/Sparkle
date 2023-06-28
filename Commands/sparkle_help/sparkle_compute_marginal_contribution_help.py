@@ -433,8 +433,8 @@ def compute_actual_selector_marginal_contribution(
             "Tmp/tmp_actual_portfolio_selector_"
             f"{sparkle_basic_help.get_time_pid_random_string()}")
         tmp_actual_portfolio_selector_path = (
-            sgh.sparkle_algorithm_selector_dir / f"without_{solver_name}" /
-            f"{sgh.sparkle_algorithm_selector_name}")
+            sgh.sparkle_algorithm_selector_dir / f"without_{solver_name}"
+            / f"{sgh.sparkle_algorithm_selector_name}")
 
         if len(tmp_performance_data_csv.list_columns()) >= 1:
             scps.construct_sparkle_portfolio_selector(
