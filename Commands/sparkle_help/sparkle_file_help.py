@@ -748,5 +748,4 @@ def initialise_sparkle() -> None:
     Path(f"{sgh.ablation_dir}scenarios/").mkdir()
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
-    sgh.pap_performance_data_tmp_path.mkdir()
     print("New Sparkle platform initialised!")
