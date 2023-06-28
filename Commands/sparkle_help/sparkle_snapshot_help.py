@@ -7,9 +7,9 @@ import shutil
 import sys
 from pathlib import Path
 
-from sparkle_help import sparkle_basic_help as sbh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
 
 snapshot_log_file_path = sgh.sparkle_err_path
 

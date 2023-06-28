@@ -9,16 +9,11 @@ import shutil
 import random
 import fcntl
 from pathlib import Path
-from sparkle_help import sparkle_logging as sl
 
-try:
-    from Commands.sparkle_help import sparkle_global_help as sgh
-    from Commands.sparkle_help import sparkle_snapshot_help as snh
-    from Commands.sparkle_help import sparkle_csv_help as scsv
-except ImportError:
-    import sparkle_snapshot_help as snh
-    import sparkle_csv_help as scsv
-    import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_snapshot_help as snh
+from Commands.sparkle_help import sparkle_csv_help as scsv
 
 
 def create_new_empty_file(filepath: str) -> None:
