@@ -3,9 +3,9 @@
 import pytest
 from pathlib import Path
 
-from sparkle_help import sparkle_generate_report_for_configuration_help as sgr
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_generate_report_for_configuration_help as sgr
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_settings
 
 global settings
 sgh.settings = sparkle_settings.Settings()
@@ -16,13 +16,13 @@ def test_get_num_in_instance_set_reference_list_exists(mocker):
 
     Check that number of instances is retrieved from reference list when it exists.
     """
-    mock_check_existence = mocker.patch("sparkle_help.sparkle_instances_help."
+    mock_check_existence = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
                                         "check_existence_of_reference_instance_list",
                                         return_value=True)
-    mock_count_instances = mocker.patch("sparkle_help.sparkle_instances_help."
+    mock_count_instances = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("sparkle_help.sparkle_file_help."
+    mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
                                       "get_list_all_filename")
     instance_set_name = "test-instance"
 
@@ -40,13 +40,13 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker):
     Check that number of instances is retrieved by counting all files in instance
     directory when no reference list exists.
     """
-    mock_check_existence = mocker.patch("sparkle_help.sparkle_instances_help."
+    mock_check_existence = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
                                         "check_existence_of_reference_instance_list",
                                         return_value=False)
-    mock_count_instances = mocker.patch("sparkle_help.sparkle_instances_help."
+    mock_count_instances = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("sparkle_help.sparkle_file_help."
+    mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
                                       "get_list_all_filename",
                                       return_value=["instance-1", "instance-2"])
     instance_set_name = "test-instance"
@@ -69,8 +69,8 @@ def test_get_par_performance(mocker):
     """
     results_file = "example_file"
     cutoff = 42
-    mock_construct_list = mocker.patch("sparkle_help.sparkle_generate_report_for"
-                                       "_configuration_help."
+    mock_construct_list = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                       "report_for_configuration_help."
                                        "construct_list_instance_and_performance",
                                        return_value=[["one", 10], ["two", 5]])
 
@@ -97,7 +97,7 @@ def test_construct_list_instance_and_performance(mocker):
                          '"../../instances/instances/instance-2.cnf","null","1.0"\n'
                          '"../../instances/instances/instance-3.cnf","null","15"\n')
     mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
-    mocker.patch("sparkle_help.sparkle_configure_solver_help.get_smac_settings",
+    mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help.get_smac_settings",
                  return_value=("RUNTIME", "", "", "", "", ""))
 
     result_file = ""
@@ -114,7 +114,7 @@ def test_get_dict_instance_to_performance(mocker):
     instance_list = [["instance-1.cnf", 0.01001],
                      ["instance-2.cnf", 1.0],
                      ["instance-3.cnf", 100]]
-    mock_construct = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_construct = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                   "configuration_help."
                                   "construct_list_instance_and_performance",
                                   return_value=instance_list)
@@ -136,10 +136,10 @@ def test_get_performance_measure_par10(mocker):
 
     Return `PAR10` for RUNTIME with default penalty multiplier of 10.
     """
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
-    mock_multiplier = mocker.patch("sparkle_help.sparkle_global_help.settings."
+    mock_multiplier = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
                                    "get_general_penalty_multiplier",
                                    return_value=10)
 
@@ -155,10 +155,10 @@ def test_get_performance_measure_par5(mocker):
 
     Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
     """
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
-    mock_multiplier = mocker.patch("sparkle_help.sparkle_global_help.settings."
+    mock_multiplier = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
                                    "get_general_penalty_multiplier",
                                    return_value=5)
 
@@ -171,7 +171,7 @@ def test_get_performance_measure_par5(mocker):
 
 def test_get_performance_measure_performance(mocker):
     """Test get_performance_measure returns correct measure for QUALITY."""
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("QUALITY", "", "", "", "", ""))
 
@@ -183,7 +183,7 @@ def test_get_performance_measure_performance(mocker):
 
 def test_get_runtime_bool_runtime(mocker):
     """Test get_runtime_bool returns correct string for objective RUNTIME."""
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
 
@@ -195,7 +195,7 @@ def test_get_runtime_bool_runtime(mocker):
 
 def test_get_runtime_bool_quality(mocker):
     """Test get_runtime_bool returns correct string for objective QUALITY."""
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("QUALITY", "", "", "", "", ""))
 
@@ -207,7 +207,7 @@ def test_get_runtime_bool_quality(mocker):
 
 def test_get_runtime_bool_other(mocker):
     """Test get_runtime_bool returns correct string for no given objective."""
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("ERROR", "", "", "", "", ""))
 
@@ -219,7 +219,7 @@ def test_get_runtime_bool_other(mocker):
 
 def test_get_ablation_bool_true(mocker):
     """Test get_ablation_bool returns correct string if get_ablation_bool is True."""
-    mock_check = mocker.patch("sparkle_help.sparkle_run_ablation_help."
+    mock_check = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
                               "check_for_ablation",
                               return_value=True)
 
@@ -235,7 +235,7 @@ def test_get_ablation_bool_true(mocker):
 
 def test_get_ablation_bool_false(mocker):
     """Test get_ablation_bool returns correct string if get_ablation_bool is False."""
-    mock_check = mocker.patch("sparkle_help.sparkle_run_ablation_help."
+    mock_check = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
                               "check_for_ablation",
                               return_value=False)
 
@@ -257,7 +257,7 @@ def test_get_features_bool_false(mocker):
     solver_name = "test-solver"
     instance_set = "train-instance"
     solver_dir = "smac-solver-dir/"
-    mock_dir = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
                             "get_smac_solver_dir",
                             return_value=solver_dir)
@@ -280,7 +280,7 @@ def test_get_features_bool_true(mocker):
     solver_dir = "smac-solver-dir/"
     solver_name = "test-solver"
     instance_set = "train-instance"
-    mock_dir = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
                             "get_smac_solver_dir",
                             return_value=solver_dir)
@@ -303,7 +303,7 @@ def test_get_data_for_plot_same_instance(mocker):
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
@@ -329,7 +329,7 @@ def test_get_data_for_plot_instance_error(mocker):
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
@@ -369,15 +369,15 @@ def test_get_figure_configure_vs_default(mocker):
                    "limit": "relative",
                    "replace_zeros": False,
                    }
-    mock_data = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_data = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_data_for_plot",
                              return_value=points)
-    mock_performance = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_performance = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                     "configuration_help."
                                     "get_performance_measure",
                                     return_value=performance_measure)
-    mock_plot = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_plot = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "generate_comparison_plot")
 
@@ -418,18 +418,18 @@ def test_get_figure_configure_vs_default_par(mocker):
                    "penalty_time": 10,
                    "replace_zeros": True,
                    }
-    mock_data = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_data = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_data_for_plot",
                              return_value=points)
-    mock_performance = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_performance = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                     "configuration_help."
                                     "get_performance_measure",
                                     return_value=performance_measure)
-    mock_plot = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_plot = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "generate_comparison_plot")
-    mock_penalised = mocker.patch("sparkle_help.sparkle_global_help.settings."
+    mock_penalised = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
                                   "get_penalised_time",
                                   return_value=10)
 
@@ -456,7 +456,7 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker):
     train_instance = "train-instance"
     test_instance = "test-instance"
     cutoff = 0
-    mock_get_figure = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_get_figure = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                    "configuration_help."
                                    "get_figure_configure_vs_default",
                                    return_value="includegraphics")
@@ -500,10 +500,10 @@ def test_get_figure_configured_vs_default_on_train_instance_set(mocker):
     train_instance = "train-instance"
     configuration_reports_directory = "reports/"
     cutoff = 0
-    mock_config = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_config = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                "get_optimised_configuration",
                                return_value=("", "", seed))
-    mock_get_figure = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_get_figure = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                    "configuration_help."
                                    "get_figure_configure_vs_default",
                                    return_value="includegraphics")
@@ -550,11 +550,11 @@ def test_get_timeouts_test(mocker):
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
-    mock_timeouts = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_timeouts = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
                                  "get_timeouts",
                                  return_value=(0, 1, 2))
@@ -594,14 +594,14 @@ def test_get_timeouts_train(mocker):
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_config = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_config = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                "get_optimised_configuration",
                                return_value=("", "", optimised_configuration_seed))
-    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
-    mock_timeouts = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_timeouts = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
                                  "get_timeouts",
                                  return_value=(0, 1, 2))
@@ -645,7 +645,7 @@ def test_get_timeouts(mocker):
     }
     cutoff = 10
 
-    mock_multiplier = mocker.patch("sparkle_help.sparkle_global_help.settings."
+    mock_multiplier = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
                                    "get_general_penalty_multiplier",
                                    return_value=10)
 
@@ -668,7 +668,7 @@ def test_get_ablation_table(mocker):
          ["0", "-source-", "N/A", "N/A", "76.53275"],
          ["1", "sel_var_div", "3", "6", "68.41392"],
          ["2", "-target-", "N/A", "N/A", "92.06944"]])
-    mock_table = mocker.patch("sparkle_help.sparkle_run_ablation_help."
+    mock_table = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
                               "get_ablation_table",
                               return_value=sah_ablation_table)
 
@@ -706,11 +706,11 @@ def test_get_dict_variable_to_value_with_test(mocker):
         "test-1": "3",
         "test-2": "4"
     }
-    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                "configuration_help."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
-    mock_test = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_test = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
@@ -743,7 +743,7 @@ def test_get_dict_variable_to_value_without_test(mocker):
         "common-2": "2",
         "featuresBool": r"\featuresfalse"
     }
-    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                "configuration_help."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
@@ -780,11 +780,11 @@ def test_get_dict_variable_to_value_with_ablation(mocker):
         "test-1": "3",
         "test-2": "4"
     }
-    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                "configuration_help."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
-    mock_test = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_test = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
@@ -821,21 +821,21 @@ def test_get_dict_variable_to_value_with_features(mocker):
         "test-1": "3",
         "test-2": "4"
     }
-    mock_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                "configuration_help."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
-    mock_test = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_test = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
-    mock_num_extractors = mocker.patch("sparkle_help.sparkle_generate_report_help."
-                                       "get_num_feature_extractors",
+    mock_num_extractors = mocker.patch("Commands.sparkle_help.sparkle_generate_report_"
+                                       "help.get_num_feature_extractors",
                                        return_value="42")
-    mock_extractor_list = mocker.patch("sparkle_help.sparkle_generate_report_help."
-                                       "get_feature_extractor_list",
+    mock_extractor_list = mocker.patch("Commands.sparkle_help.sparkle_generate_report_"
+                                       "help.get_feature_extractor_list",
                                        return_value="43")
-    mock_cutoff = mocker.patch("sparkle_help.sparkle_generate_report_help."
+    mock_cutoff = mocker.patch("Commands.sparkle_help.sparkle_generate_report_help."
                                "get_feature_computation_cutoff_time",
                                return_value="44")
 
@@ -868,54 +868,54 @@ def test_get_dict_variable_to_value_common(mocker):
     report_dir = "reports/directory"
     seed = 13
     cutoff = "10"
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("OBJ", 100, cutoff, "", 11, ""))
-    mock_config = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_config = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                "get_optimised_configuration",
                                return_value=("123", "", seed))
-    mock_perf = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_perf = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_performance_measure",
                              return_value="PERF")
-    mock_runtime = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_runtime = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                 "configuration_help."
                                 "get_runtime_bool",
                                 return_value="runtimetrue")
-    mock_commands = mocker.patch("sparkle_help.sparkle_generate_report_help."
+    mock_commands = mocker.patch("Commands.sparkle_help.sparkle_generate_report_help."
                                  "get_custom_commands",
                                  return_value="commands")
-    mock_sparkle = mocker.patch("sparkle_help.sparkle_generate_report_help."
+    mock_sparkle = mocker.patch("Commands.sparkle_help.sparkle_generate_report_help."
                                 "get_sparkle",
                                 return_value="emph{Sparkle}")
-    mocker.patch("sparkle_help.sparkle_global_help."
+    mocker.patch("Commands.sparkle_help.sparkle_global_help."
                  "sparkle_version", "0.3")
-    mock_instance_num = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_instance_num = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                      "configuration_help."
                                      "get_num_instance_in_instance_set_smac_dir",
                                      return_value="4")
-    mock_par_perf = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_par_perf = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
                                  "get_par_performance",
                                  side_effect=[42.1, 42.2])
-    mock_figure = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_figure = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                "configuration_help."
                                "get_figure_configured_vs_default_on_train_"
                                "instance_set",
                                return_value="figure-string")
-    mock_timeouts = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_timeouts = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
                                  "get_timeouts_train",
                                  return_value=(2, 3, 1))
-    mock_ablation_bool = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                      "configuration_help."
+    mock_ablation_bool = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                      "report_for_configuration_help."
                                       "get_ablation_bool",
                                       return_value="ablationtrue")
-    mock_ablation_table = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                       "configuration_help."
+    mock_ablation_table = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                       "report_for_configuration_help."
                                        "get_ablation_table",
                                        return_value="ablation/path")
-    mock_features = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_features = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
                                  "get_features_bool",
                                  return_value="featurestrue")
@@ -991,32 +991,32 @@ def test_get_dict_variable_to_value_test(mocker):
     test_instance = "test-instance"
     cutoff = "10"
 
-    mock_instance_num = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_instance_num = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                      "configuration_help."
                                      "get_num_instance_in_instance_set_smac_dir",
                                      return_value="4")
-    mock_settings = mocker.patch("sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("OBJ", 100, cutoff, "", 11, ""))
-    mock_par_perf = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_par_perf = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
                                  "get_par_performance",
                                  side_effect=[42.1, 42.2])
-    mock_figure = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_figure = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                "configuration_help."
                                "get_figure_configured_vs_default_on_test_"
                                "instance_set",
                                return_value="figure-string")
-    mock_timeouts = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_timeouts = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
                                  "get_timeouts_test",
                                  return_value=(2, 3, 1))
-    mock_ablation_bool = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                      "configuration_help."
+    mock_ablation_bool = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                      "report_for_configuration_help."
                                       "get_ablation_bool",
                                       return_value="ablationtrue")
-    mock_ablation_table = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                       "configuration_help."
+    mock_ablation_table = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                       "report_for_configuration_help."
                                        "get_ablation_table",
                                        return_value="ablation/path")
 
@@ -1215,15 +1215,15 @@ def test_generate_report_for_configuration_train(mocker):
         "key-2": "value-2"
     }
 
-    mock_report_for_prep = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                        "configuration_help."
+    mock_report_for_prep = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                        "report_for_configuration_help."
                                         "generate_report_for_configuration_prep")
-    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_variable_to_value",
                              return_value=value_dict)
-    mock_report_for_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                          "configuration_help."
+    mock_report_for_common = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                          "report_for_configuration_help."
                                           "generate_report_for_configuration_common")
 
     sgr.generate_report_for_configuration_train(solver_name,
@@ -1252,15 +1252,15 @@ def test_generate_report_for_configuration(mocker):
         "key-2": "value-2"
     }
 
-    mock_report_for_prep = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                        "configuration_help."
+    mock_report_for_prep = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                        "report_for_configuration_help."
                                         "generate_report_for_configuration_prep")
-    mock_dict = mocker.patch("sparkle_help.sparkle_generate_report_for_"
+    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                              "configuration_help."
                              "get_dict_variable_to_value",
                              return_value=value_dict)
-    mock_report_for_common = mocker.patch("sparkle_help.sparkle_generate_report_for_"
-                                          "configuration_help."
+    mock_report_for_common = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                          "report_for_configuration_help."
                                           "generate_report_for_configuration_common")
 
     sgr.generate_report_for_configuration(solver_name, train_instance,
@@ -1289,9 +1289,9 @@ def test_generate_report_for_configuration_common(mocker):
     file_write = "value-1\nvalue-2"
     report_path = "path/report"
     mock_open = mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_read))
-    mock_check = mocker.patch("sparkle_help.sparkle_tex_help."
+    mock_check = mocker.patch("Commands.sparkle_help.sparkle_tex_help."
                               "check_tex_commands_exist")
-    mock_compile = mocker.patch("sparkle_help.sparkle_tex_help."
+    mock_compile = mocker.patch("Commands.sparkle_help.sparkle_tex_help."
                                 "compile_pdf",
                                 return_value=report_path)
     mock_print = mocker.patch("builtins.print")
