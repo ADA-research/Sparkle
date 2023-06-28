@@ -300,7 +300,7 @@ def get_file_modify_time(file_path):
     return timestamp_to_time(timestamp) + " (UTC+0)"
 
 
-def generate_task_run_status(command_name: sch.CommandName, job_path: str) -> None:
+def generate_task_run_status(command_name: sch.CommandName, job_path: Path) -> None:
     """Generate run status info files for Slurm batch jobs.
 
     Args:
@@ -314,7 +314,7 @@ def generate_task_run_status(command_name: sch.CommandName, job_path: str) -> No
     return
 
 
-def delete_task_run_status(command_name: sch.CommandName, job_path: str) -> None:
+def delete_task_run_status(command_name: sch.CommandName, job_path: Path) -> None:
     """Remove run status info files for Slurm batch jobs.
 
     Args:
