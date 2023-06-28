@@ -14,7 +14,7 @@ from sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from sparkle_help import sparkle_logging as sl
 from sparkle_help import sparkle_tex_help as stex
-import compute_marginal_contribution as cmc
+from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
 
 
 def underscore_for_latex(string: str) -> str:
@@ -194,7 +194,7 @@ def get_solver_perfect_ranking_list() -> str:
         Solvers in the VBS (virtual best solver) ranked by marginal contribution as LaTeX
         str.
     """
-    rank_list = cmc.compute_perfect()
+    rank_list = scmc.compute_perfect()
     str_value = ""
 
     for i in range(0, len(rank_list)):
@@ -213,7 +213,7 @@ def get_solver_actual_ranking_list() -> str:
         Solvers in the Sparkle portfolio selector ranked by marginal contribution as
         LaTeX str.
     """
-    rank_list = cmc.compute_actual()
+    rank_list = scmc.compute_actual()
     str_value = ""
 
     for i in range(0, len(rank_list)):
