@@ -4,6 +4,7 @@
 
 import sys
 import pandas as pd
+import numpy as np
 import fcntl
 from pathlib import Path
 
@@ -48,7 +49,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
             for column_name in self.list_columns():
                 flag_value_is_null = bool_array_isnull.at[row_name, column_name]
 
-                if len(flag_value_is_null) > 1:
+                if (type(flag_value_is_null) is not np.bool_
+                        and len(flag_value_is_null) > 1):
                     print("ERROR: Duplicate feature computation job.")
                     sys.exit(-1)
 

@@ -209,6 +209,8 @@ def remove_current_sparkle_platform() -> None:
     shutil.rmtree(sgh.solver_dir, ignore_errors=True)
     shutil.rmtree(sgh.test_data_dir, ignore_errors=True)
     shutil.rmtree(sgh.extractor_dir, ignore_errors=True)
+    shutil.rmtree(sgh.feature_data_dir, ignore_errors=True)
+    shutil.rmtree(sgh.performance_data_dir, ignore_errors=True)
     shutil.rmtree(sgh.reference_list_dir, ignore_errors=True)
     shutil.rmtree(sgh.sparkle_algorithm_selector_dir, ignore_errors=True)
     shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)
