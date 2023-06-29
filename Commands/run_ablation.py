@@ -17,6 +17,7 @@ from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -114,6 +115,9 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

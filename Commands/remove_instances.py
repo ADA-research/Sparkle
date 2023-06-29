@@ -12,6 +12,7 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -42,6 +43,9 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_path = args.instances_path
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.REMOVE_INSTANCES])
 
     if args.nickname:
         instances_path = "Instances/" + args.nickname

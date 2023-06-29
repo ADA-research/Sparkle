@@ -12,6 +12,7 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_compute_features_help as scf
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def _check_existence_of_test_instance_list_file(extractor_directory: str):
@@ -79,6 +80,10 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    sch.check_for_initialise(sys.argv,
+                             sch.COMMAND_DEPENDENCIES[
+                                 sch.CommandName.ADD_FEATURE_EXTRACTOR])
     extractor_source = args.extractor_path
     if not Path(extractor_source).exists():
         print(f'Feature extractor path "{extractor_source}" does not exist!')

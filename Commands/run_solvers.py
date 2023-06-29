@@ -5,7 +5,6 @@ import sys
 import argparse
 from pathlib import Path
 
-from Commands.sparkle_help import sparkle_snapshot_help as srh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_run_solvers_help as srsh
@@ -17,6 +16,7 @@ from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_command_help as sch
 
 import runrunner as rrr
 from runrunner.base import Runner
@@ -245,9 +245,8 @@ if __name__ == "__main__":
 
     print("Start running solvers ...")
 
-    if not srh.detect_current_sparkle_platform_exists():
-        print("No Sparkle platform found; please first run the initialise command")
-        sys.exit()
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.RUN_SOLVERS])
 
     print("Start running solvers ...")
 

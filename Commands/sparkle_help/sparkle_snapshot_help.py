@@ -14,32 +14,22 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 snapshot_log_file_path = sgh.sparkle_err_path
 
 
-def detect_current_sparkle_platform_exists() -> bool:
+def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
     """Return whether a Sparkle platform is currently active.
 
+    Args:
+        check_all_dirs: variable indicating, if all the directories for a sparkle
+            platform should be checked or if just finding one directory is fine
     Returns:
       Boolean value indicating whether a Sparkle platform is active or not.
     """
-    if sgh.instance_dir.exists():
-        return True
-    if sgh.output_dir.exists():
-        return True
-    if sgh.solver_dir.exists():
-        return True
-    if sgh.extractor_dir.exists():
-        return True
-    if sgh.feature_data_dir.exists():
-        return True
-    if sgh.performance_data_dir.exists():
-        return True
-    if sgh.reference_list_dir.exists():
-        return True
-    if sgh.sparkle_algorithm_selector_dir.exists():
-        return True
-    if sgh.sparkle_parallel_portfolio_dir.exists():
-        return True
-
-    return False
+    dirs = [sgh.instance_dir, sgh.output_dir, sgh.solver_dir, sgh.extractor_dir,
+            sgh.feature_data_dir, sgh.performance_data_dir, sgh.reference_list_dir,
+            sgh.sparkle_algorithm_selector_dir, sgh.sparkle_parallel_portfolio_dir]
+    if check_all_dirs:
+        return all([x.exists() for x in dirs])
+    else:
+        return any([x.exists() for x in dirs])
 
 
 def save_current_sparkle_platform() -> None:
@@ -219,6 +209,8 @@ def remove_current_sparkle_platform() -> None:
     shutil.rmtree(sgh.solver_dir, ignore_errors=True)
     shutil.rmtree(sgh.test_data_dir, ignore_errors=True)
     shutil.rmtree(sgh.extractor_dir, ignore_errors=True)
+    shutil.rmtree(sgh.feature_data_dir, ignore_errors=True)
+    shutil.rmtree(sgh.performance_data_dir, ignore_errors=True)
     shutil.rmtree(sgh.reference_list_dir, ignore_errors=True)
     shutil.rmtree(sgh.sparkle_algorithm_selector_dir, ignore_errors=True)
     shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)

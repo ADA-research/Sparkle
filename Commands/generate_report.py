@@ -19,6 +19,7 @@ from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help import \
     sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -140,6 +141,9 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.GENERATE_REPORT])
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):

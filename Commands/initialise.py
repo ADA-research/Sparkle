@@ -4,7 +4,6 @@
 import sys
 import argparse
 
-from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_file_help as sfh
 
 
@@ -22,7 +21,4 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    sfh.initialise_sparkle()
-
-    # Log command call
-    sl.log_command(sys.argv)
+    sfh.initialise_sparkle(sys.argv)

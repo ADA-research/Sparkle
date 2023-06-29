@@ -246,6 +246,7 @@ def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureData
         # remaining jobs
         list_feature_computation_job = (
             feature_data_csv.get_list_remaining_feature_computation_job())
+
     return list_feature_computation_job
 
 

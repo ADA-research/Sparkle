@@ -130,6 +130,9 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
     use_features = args.use_features
 
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.CONFIGURE_SOLVER])
+
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -161,7 +164,7 @@ if __name__ == "__main__":
             sys.exit()
 
         for index, column in enumerate(feature_data_df):
-            feature_data_df.rename(columns={column: f"Feature{index + 1}"}, inplace=True)
+            feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

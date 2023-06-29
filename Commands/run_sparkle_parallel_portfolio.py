@@ -14,6 +14,7 @@ from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 if __name__ == "__main__":
@@ -75,6 +76,9 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO])
 
     # Do first, so other command line options can override settings from the file
     if args.settings_file is not None:

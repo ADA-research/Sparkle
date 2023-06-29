@@ -2,7 +2,9 @@
 # -*- coding: UTF-8 -*-
 """Module to manage feature data CSV files and common operation son them."""
 
+import sys
 import pandas as pd
+import numpy as np
 import fcntl
 from pathlib import Path
 
@@ -31,18 +33,33 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return list_recompute_feature_computation_job
 
-    def get_list_remaining_feature_computation_job(self):
-        """Return a list of needed feature computations per instance and solver."""
+    def get_list_remaining_feature_computation_job(self) -> list[list[str, str]]:
+        """Return a list of needed feature computations per instance and solver.
+
+        Returns:
+            A list of feature computation jobs. Each job is a list containing a str row
+            name and a str column name.
+        """
         list_remaining_feature_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
+
         for row_name in self.list_rows():
             current_extractor_list = []
+
             for column_name in self.list_columns():
                 flag_value_is_null = bool_array_isnull.at[row_name, column_name]
+
+                if (type(flag_value_is_null) is not np.bool_
+                        and len(flag_value_is_null) > 1):
+                    print("ERROR: Duplicate feature computation job.")
+                    sys.exit(-1)
+
                 if flag_value_is_null:
                     extractor_path = self.get_extractor_path_from_feature(column_name)
+
                     if extractor_path not in current_extractor_list:
                         current_extractor_list.append(extractor_path)
+
             list_item = [row_name, current_extractor_list]
             list_remaining_feature_computation_job.append(list_item)
 

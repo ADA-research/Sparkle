@@ -16,6 +16,7 @@ from Commands.sparkle_help import sparkle_add_solver_help as sash
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -83,6 +84,10 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     solver_source = args.solver_path
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.ADD_SOLVER])
+
     if not Path(solver_source).exists():
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit()

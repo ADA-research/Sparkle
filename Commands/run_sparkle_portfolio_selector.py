@@ -12,6 +12,7 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
 def parser_function():
@@ -58,6 +59,10 @@ if __name__ == "__main__":
         args.instance_path
     )  # Turn multiple instance files into a space separated string
 
+    sch.check_for_initialise(sys.argv,
+                             sch.COMMAND_DEPENDENCIES[
+                                 sch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR])
+
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
@@ -68,8 +73,8 @@ if __name__ == "__main__":
         )
 
     if (
-        sgh.settings.get_general_performance_measure()
-        == PerformanceMeasure.QUALITY_ABSOLUTE
+            sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE
     ):
         print(
             "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"

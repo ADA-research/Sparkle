@@ -10,6 +10,7 @@ import random
 import fcntl
 from pathlib import Path
 
+
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_snapshot_help as snh
@@ -722,18 +723,25 @@ def remove_temporary_files() -> None:
     return
 
 
-def initialise_sparkle() -> None:
-    """Initialize a new Sparkle platform."""
+def initialise_sparkle(argv: list[str]) -> None:
+    """Initialize a new Sparkle platform.
+
+    Args:
+        argv: The argument list for the log_command
+    """
     print("Start initialising Sparkle platform ...")
 
     sgh.snapshot_dir.mkdir(exist_ok=True)
 
-    if snh.detect_current_sparkle_platform_exists():
+    if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
 
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
+
+    # Log command call
+    sl.log_command(argv)
 
     create_temporary_directories()
     pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
@@ -745,7 +753,9 @@ def initialise_sparkle() -> None:
     sgh.reference_list_dir.mkdir()
     sgh.sparkle_algorithm_selector_dir.mkdir()
     sgh.sparkle_parallel_portfolio_dir.mkdir()
-    Path(f"{sgh.ablation_dir}scenarios/").mkdir()
+    Path(f"{sgh.ablation_dir}scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
+    sgh.pap_performance_data_tmp_path.mkdir(exist_ok=True)
+
     print("New Sparkle platform initialised!")
