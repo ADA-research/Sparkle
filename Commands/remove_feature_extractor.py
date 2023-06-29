@@ -5,12 +5,12 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_command_help as sch
 
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_command_help as sch
 
 def parser_function():
     """Define the command line arguments."""
@@ -95,12 +95,12 @@ if __name__ == "__main__":
         command_line = "rm -rf " + extractor_path
         os.system(command_line)
 
-    if Path(sparkle_global_help.sparkle_portfolio_selector_path).exists():
-        command_line = "rm -f " + sparkle_global_help.sparkle_portfolio_selector_path
+    if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sparkle_global_help.sparkle_algorithm_selector_path
         os.system(command_line)
         print(
             "Removing Sparkle portfolio selector "
-            + sparkle_global_help.sparkle_portfolio_selector_path
+            + sparkle_global_help.sparkle_algorithm_selector_path
             + " done!"
         )
 

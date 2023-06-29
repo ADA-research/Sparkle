@@ -6,22 +6,13 @@ import sys
 import fcntl
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-    from sparkle_help import sparkle_job_help as sjh
-    from sparkle_help.sparkle_settings import PerformanceMeasure
-    from sparkle_help.sparkle_settings import SolutionVerifier
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help as sbh
-    import sparkle_file_help as sfh
-    import sparkle_performance_data_csv_help as spdcsv
-    import sparkle_job_help as sjh
-    from sparkle_settings import PerformanceMeasure
-    from sparkle_settings import SolutionVerifier
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 
 import functools
 print = functools.partial(print, flush=True)

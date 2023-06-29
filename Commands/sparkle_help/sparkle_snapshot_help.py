@@ -7,14 +7,9 @@ import shutil
 import sys
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_file_help as sfh
-except ImportError:
-    import sparkle_basic_help as sbh
-    import sparkle_global_help as sgh
-    import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
 
 snapshot_log_file_path = sgh.sparkle_err_path
 
@@ -30,7 +25,7 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
     """
     dirs = [sgh.instance_dir, sgh.output_dir, sgh.solver_dir, sgh.extractor_dir,
             sgh.feature_data_dir, sgh.performance_data_dir, sgh.reference_list_dir,
-            sgh.sparkle_portfolio_selector_dir, sgh.sparkle_parallel_portfolio_dir]
+            sgh.sparkle_algorithm_selector_dir, sgh.sparkle_parallel_portfolio_dir]
     if check_all_dirs:
         return all([x.exists() for x in dirs])
     else:
@@ -70,7 +65,7 @@ def save_current_sparkle_platform() -> None:
         flag_performance_data = True
     if sgh.reference_list_dir.exists():
         flag_reference_lists = True
-    if sgh.sparkle_portfolio_selector_dir.exists():
+    if sgh.sparkle_algorithm_selector_dir.exists():
         flag_sparkle_portfolio_selector = True
     if sgh.sparkle_parallel_portfolio_dir.exists():
         flag_sparkle_parallel_portfolio = True
@@ -215,7 +210,7 @@ def remove_current_sparkle_platform() -> None:
     shutil.rmtree(sgh.test_data_dir, ignore_errors=True)
     shutil.rmtree(sgh.extractor_dir, ignore_errors=True)
     shutil.rmtree(sgh.reference_list_dir, ignore_errors=True)
-    shutil.rmtree(sgh.sparkle_portfolio_selector_dir, ignore_errors=True)
+    shutil.rmtree(sgh.sparkle_algorithm_selector_dir, ignore_errors=True)
     shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)

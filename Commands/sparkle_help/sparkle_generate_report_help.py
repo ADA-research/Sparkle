@@ -8,13 +8,12 @@ import numpy as np
 from shutil import which
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_tex_help as stex
-from sparkle_help import sparkle_compute_marginal_contribution_help as scmc
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_tex_help as stex
 
 
 def underscore_for_latex(string: str) -> str:
@@ -194,7 +193,7 @@ def get_solver_perfect_ranking_list() -> str:
         Solvers in the VBS (virtual best solver) ranked by marginal contribution as LaTeX
         str.
     """
-    rank_list = scmc.compute_perfect()
+    rank_list = scmch.compute_perfect()
     str_value = ""
 
     for i in range(0, len(rank_list)):
@@ -213,7 +212,7 @@ def get_solver_actual_ranking_list() -> str:
         Solvers in the Sparkle portfolio selector ranked by marginal contribution as
         LaTeX str.
     """
-    rank_list = scmc.compute_actual()
+    rank_list = scmch.compute_actual()
     str_value = ""
 
     for i in range(0, len(rank_list)):
@@ -324,7 +323,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     mydict = {}
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
-    actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+    actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
 
     for instance in performance_data_csv.list_rows():
         used_time_for_this_instance, flag_successfully_solving = (

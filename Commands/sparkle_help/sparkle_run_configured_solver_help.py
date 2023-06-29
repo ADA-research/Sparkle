@@ -5,24 +5,14 @@
 import sys
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_run_solvers_help as srsh
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help import sparkle_configure_solver_help as scsh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_slurm_help as ssh
-    from sparkle_help import sparkle_instances_help as sih
-except ImportError:
-    import sparkle_file_help as sfh
-    import sparkle_global_help as sgh
-    import sparkle_run_solvers_help as srsh
-    from sparkle_command_help import CommandName
-    import sparkle_configure_solver_help as scsh
-    import sparkle_basic_help as sbh
-    import sparkle_slurm_help as ssh
-    import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_run_solvers_help as srsh
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_instances_help as sih
 
 
 def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> str:

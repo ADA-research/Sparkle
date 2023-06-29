@@ -1,7 +1,7 @@
 """Custom helper class and functions to process CLI arguments with argparse."""
 import argparse
 
-from sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help.sparkle_settings import SettingState
 
 
 class SetByUser(argparse.Action):

@@ -6,12 +6,8 @@ import pandas as pd
 import fcntl
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_global_help
-    from sparkle_help import sparkle_csv_help as scsv
-except ImportError:
-    import sparkle_global_help
-    import sparkle_csv_help as scsv
+from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_csv_help as scsv
 
 
 class SparkleFeatureDataCSV(scsv.SparkleCSV):

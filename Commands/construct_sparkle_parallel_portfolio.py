@@ -6,14 +6,15 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
-from sparkle_help import sparkle_command_help as sch
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_system_status_help as sssh
+from Commands.sparkle_help import sparkle_command_help as sch
 
 if __name__ == "__main__":
     # Initialise settings
@@ -73,6 +74,9 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle parallel portfolio ...")
 
+    sssh.generate_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO,
+                                  sgh.pap_sbatch_tmp_path)
+
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
 
@@ -85,6 +89,9 @@ if __name__ == "__main__":
         sgh.latest_scenario.set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
         # Set to default to overwrite instance from possible previous run
         sgh.latest_scenario.set_parallel_portfolio_instance_list()
+
+        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO,
+                                    sgh.pap_sbatch_tmp_path)
     else:
         print("An unexpected error occurred when constructing the portfolio, please "
               "check your input and try again.")

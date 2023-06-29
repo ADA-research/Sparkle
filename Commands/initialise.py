@@ -3,7 +3,9 @@
 
 import sys
 import argparse
-from sparkle_help import sparkle_file_help as sfh
+
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_file_help as sfh
 
 
 def parser_function():

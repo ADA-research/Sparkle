@@ -6,18 +6,17 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_run_solvers_help as srs
-from sparkle_help import sparkle_run_solvers_parallel_help as srsp
-from sparkle_help import sparkle_job_parallel_help
-from sparkle_help import sparkle_add_solver_help as sash
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_command_help import CommandName
-from sparkle_help import sparkle_command_help as sch
-
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_run_solvers_help as srs
+from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsp
+from Commands.sparkle_help import sparkle_job_parallel_help
+from Commands.sparkle_help import sparkle_add_solver_help as sash
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_command_help as sch
 
 def parser_function():
     """Define the command line arguments."""
@@ -139,11 +138,11 @@ if __name__ == "__main__":
     print(f"Adding solver {sfh.get_last_level_directory_name(solver_directory)} "
           "done!")
 
-    if Path(sgh.sparkle_portfolio_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
+    if Path(sgh.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
         os.system(command_line)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_portfolio_selector_path} done!")
+              f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
         command_line = "rm -f " + sgh.sparkle_report_path
