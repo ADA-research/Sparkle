@@ -4,7 +4,6 @@
 import sys
 import argparse
 
-from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_file_help as sfh
 
 

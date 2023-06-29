@@ -6,13 +6,14 @@ import argparse
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmc
+from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help import sparkle_command_help as sch
+
 
 def parser_function():
     """Define the command line arguments."""
@@ -81,7 +82,7 @@ if __name__ == "__main__":
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
 
-    scmc.compute_marginal_contribution(
+    scmch.compute_marginal_contribution(
         args.perfect, args.actual, args.recompute
     )
 

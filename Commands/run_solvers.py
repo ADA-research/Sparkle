@@ -5,7 +5,6 @@ import sys
 import argparse
 from pathlib import Path
 
-from Commands.sparkle_help import sparkle_snapshot_help as srh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_run_solvers_help as srsh

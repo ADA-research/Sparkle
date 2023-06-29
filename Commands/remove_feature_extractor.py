@@ -12,6 +12,7 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_command_help as sch
 
+
 def parser_function():
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()

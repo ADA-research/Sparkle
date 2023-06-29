@@ -15,6 +15,7 @@ from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 
+
 def parser_function():
     """Define the command line arguments."""
     sgh.settings = sparkle_settings.Settings()
