@@ -76,7 +76,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         cutoff_time_each_extractor_run = (
             sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
 
-    cutoff_time_each_run_option = r"--cpu-limit " + str(cutoff_time_each_extractor_run)
+    cutoff_time_each_run_option = f"--cpu-limit {str(cutoff_time_each_extractor_run)}"
     print("Cutoff time for each run on computing features is set to "
           f"{str(cutoff_time_each_extractor_run)} seconds")
 
@@ -93,7 +93,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         update_feature_data_id()
 
     current_job_num = 1
-    print("The number of total running jobs: " + str(total_job_num))
+    print(f"Total number of jobs to run: {str(total_job_num)}")
 
     for i in range(0, len(list_feature_computation_job)):
         instance_path = list_feature_computation_job[i][0]
