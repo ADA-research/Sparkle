@@ -29,7 +29,7 @@ def feature_data_csv_merge() -> None:
         tmp_feature_data_csv = sfdcsv.SparkleFeatureDataCSV(csv_path)
         feature_data_csv.combine(tmp_feature_data_csv)
         feature_data_csv.update_csv()
-        os.system("rm -f " + csv_path)
+        Path(csv_path).unlink(missing_ok=True)
     return
 
 
