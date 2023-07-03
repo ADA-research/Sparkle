@@ -93,7 +93,7 @@ if __name__ == "__main__":
     else:
         last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
-    instances_directory = sgh.instance_dir / "last_level_directory"
+    instances_directory = sgh.instance_dir / last_level_directory
     if not instances_directory.exists():
         instances_directory.mkdir(parents=True, exist_ok=True)
 
