@@ -118,7 +118,6 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                             f"{sgh.sparkle_run_default_wrapper} {extractor_path}/ "
                             f"{instance_path} {result_path} 2> {err_path}")
 
-            print("")
             print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)}"
                   " computing feature vector of instance "
                   f"{sfh.get_last_level_directory_name(instance_path)} ...")
@@ -127,7 +126,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                 os.system(command_line)
                 with Path(runsolver_value_data_path).open() as file:
                     if "TIMEOUT=true" in file.read():
-                        print(f"****** WARNING: Feature vector computing on instance "
+                        print(f"****** WARNING: Feature vector computation on instance "
                               f"{instance_path} timed out! ******")
             except Exception:
                 if not Path(result_path).exists():
@@ -136,7 +135,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             try:
                 tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
             except Exception:
-                print("****** WARNING: Feature vector computing on instance "
+                print("****** WARNING: Feature vector computation on instance "
                       f"{instance_path} failed! ******")
                 print("****** WARNING: The feature vector of this instance consists of "
                       "missing values ******")
@@ -164,7 +163,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             feature_data_csv.update_csv()
 
             print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)}"
-                  " computing feature vector of instance "
+                  " computation of feature vector of instance "
                   f"{sfh.get_last_level_directory_name(instance_path)} done!\n")
 
 
