@@ -139,22 +139,17 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                       f"{instance_path} failed! ******")
                 print("****** WARNING: The feature vector of this instance consists of "
                       "missing values ******")
-                command_line = "rm -f " + result_path
-                os.system(command_line)
+                Path(result_path).unlink(missing_ok=True)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
                     feature_data_csv, Path(instance_path), Path(extractor_path),
                     Path(result_path))
 
             feature_data_csv.combine(tmp_fdcsv)
 
-            command_line = f"rm -f {result_path}"
-            os.system(command_line)
-            command_line = f"rm -f {err_path}"
-            os.system(command_line)
-            command_line = f"rm -f {runsolver_watch_data_path}"
-            os.system(command_line)
-            command_line = f"rm -f {runsolver_value_data_path}"
-            os.system(command_line)
+            Path(result_path).unlink(missing_ok=True)
+            Path(err_path).unlink(missing_ok=True)
+            Path(runsolver_watch_data_path).unlink(missing_ok=True)
+            Path(runsolver_value_data_path).unlink(missing_ok=True)
 
             print(f"Executing Progress: {str(current_job_num)} out of "
                   f"{str(total_job_num)}")
