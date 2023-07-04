@@ -16,7 +16,7 @@ Commands/initialise.py > /dev/null
 
 # Add instances
 instances_path="Examples/Resources/Instances/PTN"
-output_true="Adding instances PTN done!"
+output_true="Adding instance set PTN done!"
 output_true_b="Removing Sparkle report Components/Sparkle-latex-generator/Sparkle_Report.pdf done!"
 output=$(Commands/add_instances.py $instances_path | tail -1)
 
@@ -30,7 +30,7 @@ fi
 
 # Add multi-file instances
 instances_path="Examples/Resources/CCAG/Instances/CCAG/"
-output_true="Adding instances CCAG done!"
+output_true="Adding instance set CCAG done!"
 output=$(Commands/add_instances.py $instances_path | tail -1)
 
 if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];
