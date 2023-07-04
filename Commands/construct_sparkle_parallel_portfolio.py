@@ -17,8 +17,12 @@ from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
-    """Define the command line arguments."""
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+        parser: The parser with the parsed command line arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--nickname", type=Path,
                         help="Give a nickname to the portfolio."

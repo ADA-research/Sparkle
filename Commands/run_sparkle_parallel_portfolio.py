@@ -17,10 +17,14 @@ from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
-    """Define the command line arguments."""
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+        parser: The parser with the parsed command line arguments
+    """
     if sgh.latest_scenario is None:
-        latest = "no scenario found"
+        latest = "no scenario found, you have to construct a parallel portfolio first."
     else:
         latest = sgh.latest_scenario.get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
