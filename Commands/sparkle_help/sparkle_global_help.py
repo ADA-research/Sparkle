@@ -15,7 +15,7 @@ def get_seed():
     return 1
 
 
-latest_scenario = ReportingScenario()
+latest_scenario = None
 
 sparkle_version = "0.3"
 
