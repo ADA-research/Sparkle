@@ -33,7 +33,8 @@ def parser_function():
                              f" directory is {sgh.sparkle_parallel_portfolio_dir}."
                              " (default: use the latest constructed portfolio)"
                              " (current latest: "
-                             f"{sgh.latest_scenario.get_parallel_portfolio_path() if not sgh.latest_scenario.get_parallel_portfolio_path() is None else ''}")
+                             f"""{sgh.latest_scenario.get_parallel_portfolio_path() if not sgh.latest_scenario is None
+                                else ''}""")
     parser.add_argument("--process-monitoring", choices=ProcessMonitoring.__members__,
                         type=ProcessMonitoring,
                         help="Specify whether the monitoring of the portfolio should "
