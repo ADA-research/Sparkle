@@ -16,17 +16,13 @@ from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
-if __name__ == "__main__":
-    # Initialise settings
-    sgh.settings = sparkle_settings.Settings()
 
-    # Initialise latest scenario
-    sgh.latest_scenario = ReportingScenario()
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
 
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+    Returns:
+        parser: The parser with the parsed command line arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--nickname", type=Path,
                         help="Give a nickname to the portfolio."
@@ -47,6 +43,21 @@ if __name__ == "__main__":
                         help="Specify the settings file to use in case you want to use "
                              "one other than the default"
                              f" (default: {sgh.settings.DEFAULT_settings_path}")
+    return parser
+
+
+if __name__ == "__main__":
+    # Initialise settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Initialise latest scenario
+    sgh.latest_scenario = ReportingScenario()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments;
     args = parser.parse_args()
