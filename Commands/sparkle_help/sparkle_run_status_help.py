@@ -45,14 +45,18 @@ def get_list_running_extractor_jobs():
     return list_running_extractor_jobs
 
 
-def print_running_extractor_jobs(mode: int = 1):
-    """Print whether currently a feature extraction job is active."""
+def print_running_extractor_jobs(verbose: bool = False):
+    """Print whether currently a feature extraction job is active.
+
+    Args:
+        verbose: Indicating if output should be verbose
+    """
     job_list = get_list_running_extractor_jobs()
     print("")
     print(
         f"Currently Sparkle has {str(len(job_list))} running feature computation jobs:")
 
-    if mode == 2:
+    if verbose:
         current_job_num = 1
 
         for i in range(0, len(job_list)):
@@ -103,14 +107,18 @@ def get_list_running_solver_jobs():
     return list_running_solver_jobs
 
 
-def print_running_solver_jobs(mode: int = 1):
-    """Print whether currently a run solvers job is active."""
+def print_running_solver_jobs(verbose: bool = False):
+    """Print whether currently a run solvers job is active.
+
+    Args:
+        verbose: Indicating if output should be verbose
+    """
     job_list = get_list_running_solver_jobs()
     print("")
     print(f"Currently Sparkle has {str(len(job_list))}"
           " running performance computation jobs:")
 
-    if mode == 2:
+    if verbose:
         current_job_num = 1
         for i in range(0, len(job_list)):
             status_str = job_list[i][0]
