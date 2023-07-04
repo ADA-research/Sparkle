@@ -19,6 +19,10 @@ from Commands.sparkle_help import sparkle_command_help as sch
 
 def parser_function():
     """Define the command line arguments."""
+    if sgh.latest_scenario is None:
+        latest = "no scenario found"
+    else:
+        latest = sgh.latest_scenario.get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance-paths", metavar="PATH",
                         nargs="+", type=str, required=True,
@@ -33,8 +37,7 @@ def parser_function():
                              f" directory is {sgh.sparkle_parallel_portfolio_dir}."
                              " (default: use the latest constructed portfolio)"
                              " (current latest: "
-                             f"""{sgh.latest_scenario.get_parallel_portfolio_path() if not sgh.latest_scenario is None
-                                else ''}""")
+                             f"{latest}")
     parser.add_argument("--process-monitoring", choices=ProcessMonitoring.__members__,
                         type=ProcessMonitoring,
                         help="Specify whether the monitoring of the portfolio should "

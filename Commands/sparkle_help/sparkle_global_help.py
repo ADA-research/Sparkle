@@ -6,8 +6,6 @@ from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
 
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
 def get_seed():
