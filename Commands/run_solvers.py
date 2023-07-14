@@ -74,7 +74,7 @@ def run_solvers_on_instances(
         recompute: bool = False,
         run_on: Runner = Runner.SLURM,
         also_construct_selector_and_report: bool = False):
-    """Run all the solvers on all the instances that were not not previously run.
+    """Run all the solvers on all the instances that were not previously run.
 
     If recompute is True, rerun everything even if previously run. Where the solvers are
     executed can be controlled with "run_on".
