@@ -13,7 +13,6 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
 from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.reporting_scenario import Scenario
-from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
 if __name__ == "__main__":
@@ -73,7 +72,6 @@ if __name__ == "__main__":
     portfolio_path = sgh.sparkle_parallel_portfolio_dir / portfolio_name
 
     print("Start constructing Sparkle parallel portfolio ...")
-
 
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)

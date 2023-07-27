@@ -102,7 +102,8 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
 
         for j in range(0, len_extractor_list):
             extractor_path = extractor_list[j]
-            basic_part = (f"{sgh.sparkle_tmp_path}/{sfh.get_last_level_directory_name(extractor_path)}_"
+            basic_part = (f"{sgh.sparkle_tmp_path}/"
+                          f"{sfh.get_last_level_directory_name(extractor_path)}_"
                           f"{sfh.get_last_level_directory_name(instance_path)}_"
                           f"{sparkle_basic_help.get_time_pid_random_string()}")
             result_path = f"{basic_part}.rawres"

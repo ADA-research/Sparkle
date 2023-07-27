@@ -21,7 +21,6 @@ from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
 

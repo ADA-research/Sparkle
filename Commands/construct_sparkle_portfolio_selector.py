@@ -19,7 +19,6 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.reporting_scenario import Scenario
-from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
@@ -126,7 +125,6 @@ if __name__ == "__main__":
         )
 
     print("Start constructing Sparkle portfolio selector ...")
-
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         sgh.feature_data_csv_path, sgh.performance_data_csv_path

@@ -14,7 +14,7 @@ from Commands.sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
 
 
 class JobState(Enum):
-    """enum for indicating different states of a job"""
+    """enum for indicating different states of a job."""
     RUNNING = "RUNNING"
     DONE = "DONE"
 
@@ -210,7 +210,7 @@ def check_job_exists(job_id: str, command: CommandName) -> bool:
 
 
 def read_active_jobs() -> list[dict[str, str, str]]:
-    """Read active jobs from file and return them as list of [job_id, command, state] dicts.
+    """Read active jobs from file and return them as list of [job_id, command, state].
 
     Returns:
       List of dictionaries with string keys and dict values.
@@ -266,7 +266,7 @@ def get_job_ids_for_command(command: CommandName) -> list[str]:
 
 
 def change_job_state(job_id: str) -> None:
-    """Change the state of the specified job
+    """Changes the state of the specified job.
 
     Args:
       job_id: String job identifier.
