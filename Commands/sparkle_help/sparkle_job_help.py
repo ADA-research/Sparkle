@@ -217,17 +217,13 @@ def read_active_jobs() -> list[dict[str, str, str]]:
     """
     jobs = []
     path = __jobs_path
-    try:
-        with Path(path).open("r", newline="") as infile:
-            reader = csv.DictReader(infile)
+    Path(path).touch(exist_ok=True)
+    with Path(path).open("r", newline="") as infile:
+        reader = csv.DictReader(infile)
 
-            for row in reader:
-                if row["state"] == JobState.RUNNING:
-                    jobs.append(row)
-    except FileNotFoundError:
-        print(f"The file {__jobs_path} was not found. "
-              "Most likely no jobs have yet been submitted, that we can wait for.")
-        sys.exit()
+        for row in reader:
+            if row["state"] == JobState.RUNNING:
+                jobs.append(row)
     return jobs
 
 
