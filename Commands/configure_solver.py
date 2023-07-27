@@ -194,8 +194,6 @@ if __name__ == "__main__":
         )
         sys.exit()
 
-    sssh.generate_task_run_status(sch.CommandName.CONFIGURE_SOLVER,
-                                  sgh.configuration_job_path)
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
     scsh.clean_configuration_directory(solver.name, instance_set_train.name)
@@ -271,8 +269,6 @@ if __name__ == "__main__":
     print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
           f"{job_id_str}")
 
-    sssh.delete_task_run_status(sch.CommandName.CONFIGURE_SOLVER,
-                                sgh.configuration_job_path)
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file
