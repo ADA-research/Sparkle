@@ -746,8 +746,8 @@ def initialise_sparkle(argv: list[str]) -> None:
     create_temporary_directories()
     pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
     pap_sbatch_path.mkdir(exist_ok=True)
-    for act_dir in sgh.working_dirs:
-        act_dir.mkdir(exist_ok=True)
+    for working_dir in sgh.working_dirs:
+        working_dir.mkdir(exist_ok=True)
     Path(f"{sgh.ablation_dir}scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)

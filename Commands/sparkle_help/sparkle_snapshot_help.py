@@ -36,9 +36,9 @@ def save_current_sparkle_platform() -> None:
 
     Path(snapshot_filename).mkdir(exist_ok=True)
 
-    for act_dir in sgh.working_dirs:
-        if act_dir.exists():
-            os.system(f"zip -g -r {snapshot_filename} {act_dir} >> "
+    for working_dir in sgh.working_dirs:
+        if working_dir.exists():
+            os.system(f"zip -g -r {snapshot_filename} {working_dir} >> "
                       f"{snapshot_log_file_path}")
 
     print(f"Snapshot file {snapshot_filename} saved successfully!")
@@ -50,8 +50,8 @@ def remove_current_sparkle_platform() -> None:
     print("Cleaning existing Sparkle platform ...")
     sfh.remove_temporary_files()
 
-    for act_dir in sgh.working_dirs:
-        shutil.rmtree(act_dir, ignore_errors=True)
+    for working_dir in sgh.working_dirs:
+        shutil.rmtree(working_dir, ignore_errors=True)
 
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
