@@ -6,7 +6,6 @@ from pathlib import Path
 import subprocess
 import csv
 import time
-import sys
 from enum import Enum
 
 from Commands.sparkle_help.sparkle_command_help import CommandName
