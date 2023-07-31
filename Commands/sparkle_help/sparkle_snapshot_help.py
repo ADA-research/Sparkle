@@ -23,13 +23,10 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
     Returns:
       Boolean value indicating whether a Sparkle platform is active or not.
     """
-    dirs = [sgh.instance_dir, sgh.output_dir, sgh.solver_dir, sgh.extractor_dir,
-            sgh.feature_data_dir, sgh.performance_data_dir, sgh.reference_list_dir,
-            sgh.sparkle_algorithm_selector_dir, sgh.sparkle_parallel_portfolio_dir]
     if check_all_dirs:
-        return all([x.exists() for x in dirs])
+        return all([x.exists() for x in sgh.working_dirs])
     else:
-        return any([x.exists() for x in dirs])
+        return any([x.exists() for x in sgh.working_dirs])
 
 
 def save_current_sparkle_platform() -> None:
@@ -37,164 +34,12 @@ def save_current_sparkle_platform() -> None:
     suffix = sbh.get_time_pid_random_string()
     snapshot_filename = f"{sgh.snapshot_dir}/My_Snapshot_{suffix}.zip"
 
-    flag_instances = False
-    flag_solvers = False
-    flag_extractors = False
-    flag_feature_data = False
-    flag_performance_data = False
-    flag_reference_lists = False
-    flag_sparkle_portfolio_selector = False
-    flag_sparkle_parallel_portfolio = False
+    Path(snapshot_filename).mkdir(exist_ok=True)
 
-    flag_test_data = False
-    flag_output_data = False
-
-    if sgh.test_data_dir.exists():
-        flag_test_data = True
-    if sgh.output_dir.exists():
-        flag_output_data = True
-    if sgh.instance_dir.exists():
-        flag_instances = True
-    if sgh.solver_dir.exists():
-        flag_solvers = True
-    if sgh.extractor_dir.exists():
-        flag_extractors = True
-    if sgh.feature_data_dir.exists():
-        flag_feature_data = True
-    if sgh.performance_data_dir.exists():
-        flag_performance_data = True
-    if sgh.reference_list_dir.exists():
-        flag_reference_lists = True
-    if sgh.sparkle_algorithm_selector_dir.exists():
-        flag_sparkle_portfolio_selector = True
-    if sgh.sparkle_parallel_portfolio_dir.exists():
-        flag_sparkle_parallel_portfolio = True
-
-    if not Path(sgh.sparkle_tmp_path).exists():
-        Path(sgh.sparkle_tmp_path).mkdir()
-
-    snapshot_filename_exist = Path(snapshot_filename).exists()
-
-    if not snapshot_filename_exist:
-        if flag_test_data:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Test_Data/ >> "
+    for working_dir in sgh.working_dirs:
+        if working_dir.exists():
+            os.system(f"zip -g -r {snapshot_filename} {working_dir} >> "
                       f"{snapshot_log_file_path}")
-    else:
-        if flag_test_data:
-            os.system(f"zip -g -r {snapshot_filename} Test_Data/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_output_data:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Output/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_output_data:
-            os.system(f"zip -g -r {snapshot_filename} Output/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_instances:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Instances/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_instances:
-            os.system(f"zip -g -r {snapshot_filename} Instances/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_solvers:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Solvers/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_solvers:
-            os.system(f"zip -g -r {snapshot_filename} Solvers/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_extractors:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Extractors/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_extractors:
-            os.system(f"zip -g -r {snapshot_filename} Extractors/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_feature_data:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Feature_Data/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_feature_data:
-            os.system(f"zip -g -r {snapshot_filename} Feature_Data/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_performance_data:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Performance_Data/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_performance_data:
-            os.system(f"zip -g -r {snapshot_filename} Performance_Data/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_reference_lists:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Reference_Lists/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_reference_lists:
-            os.system(f"zip -g -r {snapshot_filename} Reference_Lists/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_sparkle_portfolio_selector:
-            snapshot_filename_exist = True
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(f"zip -r {snapshot_filename} Sparkle_Portfolio_Selector/ >> "
-                      f"{snapshot_log_file_path}")
-    else:
-        if flag_sparkle_portfolio_selector:
-            os.system(f"zip -g -r {snapshot_filename} Sparkle_Portfolio_Selector/ >> "
-                      f"{snapshot_log_file_path}")
-
-    if not snapshot_filename_exist:
-        if flag_sparkle_parallel_portfolio:
-            print("Now recording current Sparkle platform in file "
-                  f"{snapshot_filename} ...")
-            os.system(
-                f"zip -r {snapshot_filename} "
-                f"{sgh.sparkle_parallel_portfolio_dir}/ >> {snapshot_log_file_path}")
-    else:
-        if flag_sparkle_parallel_portfolio:
-            os.system(
-                f"zip -g -r {snapshot_filename} "
-                f"{sgh.sparkle_parallel_portfolio_dir}/ >> {snapshot_log_file_path}")
 
     print(f"Snapshot file {snapshot_filename} saved successfully!")
     os.system("rm -f " + snapshot_log_file_path)
@@ -204,16 +49,10 @@ def remove_current_sparkle_platform() -> None:
     """Remove the current Sparkle platform."""
     print("Cleaning existing Sparkle platform ...")
     sfh.remove_temporary_files()
-    shutil.rmtree(sgh.output_dir, ignore_errors=True)
-    shutil.rmtree(sgh.instance_dir, ignore_errors=True)
-    shutil.rmtree(sgh.solver_dir, ignore_errors=True)
-    shutil.rmtree(sgh.test_data_dir, ignore_errors=True)
-    shutil.rmtree(sgh.extractor_dir, ignore_errors=True)
-    shutil.rmtree(sgh.feature_data_dir, ignore_errors=True)
-    shutil.rmtree(sgh.performance_data_dir, ignore_errors=True)
-    shutil.rmtree(sgh.reference_list_dir, ignore_errors=True)
-    shutil.rmtree(sgh.sparkle_algorithm_selector_dir, ignore_errors=True)
-    shutil.rmtree(sgh.sparkle_parallel_portfolio_dir, ignore_errors=True)
+
+    for working_dir in sgh.working_dirs:
+        shutil.rmtree(working_dir, ignore_errors=True)
+
     ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
     shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
     Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf").unlink(missing_ok=True)
