@@ -285,9 +285,12 @@ def change_job_states(job_ids: list[str]) -> None:
         reader = csv.DictReader(infile)
 
         for row in reader:
-            # Only keep entries with a job ID other than the one to be removed
-            if row["job_id"] not in job_ids:
+            # change state of jobs to done if they are in the list
+            # otherwise keep them as they were
+            if row["job_id"] in job_ids:
                 writer.writerow([row["job_id"], row["command"], JobState.DONE])
+            else:
+                writer.writerow([row["job_id"], row["command"], row["state"]])
 
     # Replace the old CSV
     outpath.rename(inpath)
