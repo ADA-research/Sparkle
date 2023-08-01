@@ -124,6 +124,11 @@ solver_list_path = str(reference_list_dir) + "/sparkle_solver_list.txt"
 instance_list_file = Path("sparkle" + instance_list_postfix)
 instance_list_path = Path(reference_list_dir / instance_list_file)
 
+working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
+                feature_data_dir, performance_data_dir, reference_list_dir,
+                sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
+                test_data_dir]
+
 solver_list = []
 solver_nickname_mapping = {}
 extractor_list = []
