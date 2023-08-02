@@ -25,12 +25,12 @@ def print_running_jobs():
     jobs = sjh.read_active_jobs()
     commands = list(set([x["command"] for x in jobs]))
     for command in commands:
-        command_specific_jobs = get_jobs_for_command(jobs, command)
-        command_specific_jobs_ids = " ".join([x["job_id"] for x in command_specific_jobs])
+        command_jobs = get_jobs_for_command(jobs, command)
+        command_jobs_ids = " ".join([x["job_id"] for x in command_jobs])
 
-        if len(command_specific_jobs) > 1:
+        if len(command_jobs) > 1:
             print(f"The command {command} is running "
-                  f"with job IDs {command_specific_jobs_ids}")
+                  f"with job IDs {command_jobs_ids}")
         else:
             print(f"The command {command} is running "
-                  f"with job ID {command_specific_jobs_ids}")
+                  f"with job ID {command_jobs_ids}")
