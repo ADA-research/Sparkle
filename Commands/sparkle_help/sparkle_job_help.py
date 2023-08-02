@@ -12,7 +12,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
 
 
-class JobState(Enum):
+class JobState(str, Enum):
     """enum for indicating different states of a job."""
     RUNNING = "RUNNING"
     DONE = "DONE"
@@ -193,7 +193,7 @@ def check_job_exists(job_id: str, command: CommandName) -> bool:
 
     Args:
       job_id: String job identifier.
-      command_to_run: Command name.
+      command: Command name.
 
     Returns:
       Boolean indicating whether the respective command and ID combination
@@ -245,7 +245,7 @@ def get_job_ids_for_command(command: CommandName) -> list[str]:
     """Return the IDs of active jobs for a given command.
 
     Args:
-      command_to_run: Command name.
+      command: Command name.
 
     Returns:
       List of job IDs (in string format).
