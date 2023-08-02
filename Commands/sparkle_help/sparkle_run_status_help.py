@@ -10,4 +10,4 @@ def print_running_jobs():
     sjh.cleanup_active_jobs()
     jobs = sjh.read_active_jobs()
     for job in jobs:
-        print(job)
+        print(f"The command {job['command']} is {job['state']} with job ID {job['job_id']}")
