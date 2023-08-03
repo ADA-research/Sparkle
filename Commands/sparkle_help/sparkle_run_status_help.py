@@ -2,7 +2,12 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to communicate run statuses of various commands."""
 
+
+from pathlib import Path
+
 from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.Structures.status_info import StatusInfo
 
 
 def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
@@ -34,3 +39,14 @@ def print_running_jobs():
         else:
             print(f"The command {command} is running "
                   f"with job ID {command_jobs_ids}")
+
+
+def print_running_solver_jobs():
+    """Return a list of currently active run solver job."""
+    tmp_directory = "Tmp/SBATCH_Solver_Jobs/"
+    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    for statusinfo_filename in list_all_statusinfo_filename:
+        statusinfo_filepath = Path(
+            tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
+        status_info = StatusInfo.from_file(statusinfo_filepath)
+        print(status_info.data)
