@@ -8,7 +8,7 @@ import fcntl
 from Commands.sparkle_help import sparkle_file_help as sfh
 
 
-def get_list_running_extractor_jobs():
+def get_list_running_extractor_jobs() -> list[list[str]]:
     """Return a list of currently active feature extraction jobs."""
     list_running_extractor_jobs = []
 
@@ -45,7 +45,7 @@ def get_list_running_extractor_jobs():
     return list_running_extractor_jobs
 
 
-def print_running_extractor_jobs(mode: int = 1):
+def print_running_extractor_jobs(mode: int = 1) -> None:
     """Print whether currently a feature extraction job is active."""
     job_list = get_list_running_extractor_jobs()
     print("")
@@ -70,7 +70,7 @@ def print_running_extractor_jobs(mode: int = 1):
     return
 
 
-def get_list_running_solver_jobs():
+def get_list_running_solver_jobs() -> list[list[str]]:
     """Return a list of currently active run solver job."""
     list_running_solver_jobs = []
 
@@ -103,7 +103,7 @@ def get_list_running_solver_jobs():
     return list_running_solver_jobs
 
 
-def print_running_solver_jobs(mode: int = 1):
+def print_running_solver_jobs(mode: int = 1) -> None:
     """Print whether currently a run solvers job is active."""
     job_list = get_list_running_solver_jobs()
     print("")
@@ -127,7 +127,7 @@ def print_running_solver_jobs(mode: int = 1):
     return
 
 
-def print_running_portfolio_selector_jobs():
+def print_running_portfolio_selector_jobs() -> None:
     """Print whether currently a portfolio construction job is active."""
     print("")
     key_str = "construct_sparkle_portfolio_selector"
@@ -140,7 +140,7 @@ def print_running_portfolio_selector_jobs():
     return
 
 
-def print_running_report_jobs():
+def print_running_report_jobs() -> None:
     """Print whether currently a report generation job is active."""
     print("")
     key_str = "generate_report"

@@ -14,7 +14,7 @@ from Commands.sparkle_help import sparkle_job_help
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def print_solver_list(verbose: bool = False):
+def print_solver_list(verbose: bool = False) -> None:
     """Print the list of solvers in Sparkle.
 
     Args:
@@ -35,7 +35,7 @@ def print_solver_list(verbose: bool = False):
     return
 
 
-def print_extractor_list(verbose: bool = False):
+def print_extractor_list(verbose: bool = False) -> None:
     """Print the list of feature extractors in Sparkle.
 
     Args:
@@ -57,7 +57,7 @@ def print_extractor_list(verbose: bool = False):
     return
 
 
-def print_instance_list(verbose: bool = False):
+def print_instance_list(verbose: bool = False) -> None:
     """Print the list of instances in Sparkle.
 
     Args:
@@ -80,7 +80,7 @@ def print_instance_list(verbose: bool = False):
 
 
 def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
-                                                 verbose: bool = False):
+                                                 verbose: bool = False) -> None:
     """Print a list of remaining feature computation jobs.
 
     Args:
@@ -119,7 +119,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
 
 
 def print_list_remaining_performance_computation_job(performance_data_csv_path: str,
-                                                     verbose: bool = False):
+                                                     verbose: bool = False) -> None:
     """Print a list of remaining performance computation jobs.
 
     Args:
@@ -158,7 +158,7 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
     return
 
 
-def print_algorithm_selector_info():
+def print_algorithm_selector_info() -> None:
     """Print information about the Sparkle algorithm selector."""
     sparkle_algorithm_selector_path = sgh.sparkle_algorithm_selector_path
     print("")
@@ -178,7 +178,7 @@ def print_algorithm_selector_info():
     return
 
 
-def print_parallel_portfolio_info():
+def print_parallel_portfolio_info() -> None:
     """Print information about the Sparkle parallel portfolio."""
     sparkle_parallel_portfolio_path = sgh.sparkle_parallel_portfolio_path
     print("")
@@ -198,7 +198,7 @@ def print_parallel_portfolio_info():
     return
 
 
-def print_algorithm_configuration_info():
+def print_algorithm_configuration_info() -> None:
     """Print information about the Sparkle algorithm configuration."""
     print("")
     print("Status of algorithm configuration in Sparkle:")
@@ -225,7 +225,7 @@ def print_algorithm_configuration_info():
     print("")
 
 
-def print_algorithm_selection_report_info():
+def print_algorithm_selection_report_info() -> None:
     """Print the current status of a Sparkle algorithm selection report."""
     sparkle_report_path = Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf")
     print("")
@@ -244,7 +244,7 @@ def print_algorithm_selection_report_info():
     return
 
 
-def print_algorithm_configuration_report_info():
+def print_algorithm_configuration_report_info() -> None:
     """Print the current status of the Sparkle algorithm configuration report."""
     sparkle_report_base_path = Path("Configuration_Reports")
     report_file_name = \
@@ -269,7 +269,7 @@ def print_algorithm_configuration_report_info():
     return
 
 
-def print_parallel_portfolio_report_info():
+def print_parallel_portfolio_report_info() -> None:
     """Print the current status of a Sparkle parallel portfolio report."""
     sparkle_report_path = Path("Components/Sparkle-latex-generator"
                                + "-for-parallel-portfolio/template-Sparkle.pdf")
@@ -289,13 +289,13 @@ def print_parallel_portfolio_report_info():
     return
 
 
-def timestamp_to_time(timestamp) -> str:
+def timestamp_to_time(timestamp: float) -> str:
     """Return a timestamp as a readable str."""
     time_struct = time.gmtime(timestamp)
     return time.strftime("%Y-%m-%d %H:%M:%S", time_struct)
 
 
-def get_file_modify_time(file_path):
+def get_file_modify_time(file_path: str) -> str:
     """Return the last time a file was modified."""
     timestamp = os.path.getmtime(file_path)
     return timestamp_to_time(timestamp) + " (UTC+0)"

@@ -9,7 +9,7 @@ from Commands.sparkle_help import sparkle_system_status_help
 from Commands.sparkle_help import sparkle_logging as sl
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(

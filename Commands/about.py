@@ -21,8 +21,12 @@ __authors__ = [
 __contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
 
 
-def parser_function():
-    """Define the command line arguments."""
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+      The argument parser.
+    """
     parser = argparse.ArgumentParser()
     return parser
 

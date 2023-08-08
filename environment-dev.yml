@@ -25,6 +25,7 @@ dependencies:
     - flake8-docstrings==1.6.0
     - flake8-use-fstring==1.4.0
     - flake8-use-pathlib==0.3.0
+    - flake8-annotations==3.0.1
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost

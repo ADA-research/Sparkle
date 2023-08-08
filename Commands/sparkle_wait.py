@@ -9,8 +9,12 @@ from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
 
-def parser_function():
-    """Define the command line arguments."""
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+      The argument parser.
+    """
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
