@@ -3,6 +3,7 @@
 """Command names and dependency associations."""
 
 from enum import Enum
+from __future__ import annotations
 
 from Commands.sparkle_help import sparkle_snapshot_help as srh
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -40,7 +41,7 @@ class CommandName(str, Enum):
     RUN_SPARKLE_PARALLEL_PORTFOLIO = "run_sparkle_parallel_portfolio"
 
     @staticmethod
-    def from_str(command_name: str):
+    def from_str(command_name: str) -> CommandName:
         """Convert a given str to a CommandName."""
         return CommandName(command_name)
 
@@ -112,7 +113,7 @@ COMMAND_DEPENDENCIES = {
 }
 
 
-def check_for_initialise(argv: list[str], requirements: list[CommandName] = None):
+def check_for_initialise(argv: list[str], requirements: list[CommandName] = None) -> None:
     """Function to check if initialize command was executed and execute it otherwise.
 
     Args:
