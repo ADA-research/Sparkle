@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 """Module to manage feature data CSV files and common operation son them."""
 
+from __future__ import annotations
 import sys
 import pandas as pd
 import numpy as np
 import fcntl
 from pathlib import Path
-from __future__ import annotations
 
 from Commands.sparkle_help import sparkle_global_help
 from Commands.sparkle_help import sparkle_csv_help as scsv
@@ -24,7 +24,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
         return
 
     def get_list_recompute_feature_computation_job(self: SparkleFeatureDataCSV)  \
-            ->  list[list[str | list[str]]]:
+            -> list[list[str | list[str]]]:
         """Return a list of feature computations to re-do per instance and solver."""
         list_recompute_feature_computation_job = []
         list_row_name = self.list_rows()
@@ -35,7 +35,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return list_recompute_feature_computation_job
 
-    def get_list_remaining_feature_computation_job(self: SparkleFeatureDataCSV) -> list[list[str, str]]:
+    def get_list_remaining_feature_computation_job(self: SparkleFeatureDataCSV)\
+            -> list[list[str, str]]:
         """Return a list of needed feature computations per instance and solver.
 
         Returns:
@@ -67,7 +68,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return list_remaining_feature_computation_job
 
-    def get_list_processed_feature_computation_job(self: SparkleFeatureDataCSV)  ->  list[list[str | list[str]]]:
+    def get_list_processed_feature_computation_job(self: SparkleFeatureDataCSV)\
+            -> list[list[str | list[str]]]:
         """Return a list of existing feature values per instance and solver."""
         list_processed_feature_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
@@ -84,7 +86,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return list_processed_feature_computation_job
 
-    def get_extractor_path_from_feature(self: SparkleFeatureDataCSV, given_column_name: str) -> str:
+    def get_extractor_path_from_feature(self: SparkleFeatureDataCSV,
+                                        given_column_name: str) -> str:
         """Return the path to the feature extractor for a given feature."""
         sparkle_special_string = sparkle_global_help.sparkle_special_string
         index = given_column_name.find(sparkle_special_string)
@@ -106,7 +109,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return ret
 
-    def combine(self: SparkleFeatureDataCSV, second_sfdcsv: SparkleFeatureDataCSV) -> None:
+    def combine(self: SparkleFeatureDataCSV, second_sfdcsv: SparkleFeatureDataCSV)\
+            -> None:
         """Combine this CSV with a given CSV."""
         list_columns_second_sfdcsv = second_sfdcsv.list_columns()
         list_rows_second_sfdcsv = second_sfdcsv.list_rows()
@@ -148,7 +152,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return
 
-    def reload_and_combine_and_update(self: SparkleFeatureDataCSV, second_sfdcsv: SparkleFeatureDataCSV) -> None:
+    def reload_and_combine_and_update(self: SparkleFeatureDataCSV,
+                                      second_sfdcsv: SparkleFeatureDataCSV) -> None:
         """Load this CSV from file, combine it with a given CSV and write it to file."""
         fo = Path(self.csv_filepath).open("r+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
@@ -170,7 +175,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return feature_vector_string.strip()
 
-    def calc_mean_over_all_non_missing_values_of_this_column(self: SparkleFeatureDataCSV, column_name: str)  -> float:
+    def calc_mean_over_all_non_missing_values_of_this_column(self: SparkleFeatureDataCSV,
+                                                             column_name: str) -> float:
         """Return the mean over all non-missing values for this column."""
         sum_value = 0
         num = 0
@@ -191,7 +197,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return mean_value
 
-    def generate_mean_value_feature_vector(self: SparkleFeatureDataCSV)  ->  list[float]:
+    def generate_mean_value_feature_vector(self: SparkleFeatureDataCSV) -> list[float]:
         """Return a list with the mean over all non-missing values for all columns."""
         list_mean_value_feature_vector = []
         for column_name in self.list_columns():
@@ -201,7 +207,8 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         return list_mean_value_feature_vector
 
-    def impute_missing_value_of_this_column(self: SparkleFeatureDataCSV, column_name: str) -> None:
+    def impute_missing_value_of_this_column(self: SparkleFeatureDataCSV,
+                                            column_name: str) -> None:
         """Impute missing data for a given column in this feature data CSV."""
         sum_value = 0
         num = 0

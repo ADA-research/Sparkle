@@ -20,7 +20,8 @@ from runrunner.base import Runner
 
 
 def generate_running_solvers_sbatch_shell_script(total_job_num: int,
-                                                 num_job_in_parallel: int, total_job_list
+                                                 num_job_in_parallel: int,
+                                                 total_job_list: list[tuple[str, str]],
                                                  ) -> (str, str, str):
     """Generate a Slurm shell script to run the solvers."""
     sbatch_script_name = ("running_solvers_sbatch_shell_script_"
@@ -60,13 +61,13 @@ def running_solvers_parallel(
         performance_data_csv_path: str,
         num_job_in_parallel: int,
         rerun: bool = False,
-        run_on: Runner = Runner.SLURM):
+        run_on: Runner = Runner.SLURM) -> str:
     """Run the solvers in parallel.
 
     Parameters
     ----------
     performance_data_csv_path: str
-        The path the the performance data file
+        The path the performance data file
     num_job_in_parallel: int
         The maximum number of jobs to run in parallel
     rerun: bool

@@ -1,5 +1,6 @@
 """Classes and Enums to control settings."""
 
+from __future__ import annotations
 import configparser
 from enum import Enum
 from pathlib import Path
@@ -7,7 +8,6 @@ from pathlib import PurePath
 
 from Commands.sparkle_help import sparkle_logging as slog
 from Commands.sparkle_help import sparkle_global_help as sgh
-from __future__ import annotations
 
 
 class PerformanceMeasure(Enum):
@@ -19,7 +19,7 @@ class PerformanceMeasure(Enum):
     # QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
 
     @staticmethod
-    def from_str(performance_measure: str ) -> PerformanceMeasure:
+    def from_str(performance_measure: str) -> PerformanceMeasure:
         """Return a given str as PerformanceMeasure."""
         if performance_measure == "RUNTIME":
             performance_measure = PerformanceMeasure.RUNTIME
@@ -60,7 +60,7 @@ class ProcessMonitoring(str, Enum):
     EXTENDED = "EXTENDED"
 
     @staticmethod
-    def from_str(process_monitoring: str )  -> ProcessMonitoring:
+    def from_str(process_monitoring: str) -> ProcessMonitoring:
         """Return a given str as ProcessMonitoring."""
         return ProcessMonitoring(process_monitoring)
 
@@ -312,8 +312,8 @@ class Settings:
 
         return
 
-    def __check_setting_state(self: Settings, current_state: SettingState, new_state: SettingState,
-                              name: str) -> bool:
+    def __check_setting_state(self: Settings, current_state: SettingState,
+                              new_state: SettingState, name: str) -> bool:
         change_setting_ok = True
 
         if current_state == SettingState.FILE and new_state == SettingState.DEFAULT:
@@ -335,7 +335,8 @@ class Settings:
     # General settings ###
 
     def set_general_performance_measure(
-            self: Settings, value: PerformanceMeasure = DEFAULT_general_performance_measure,
+            self: Settings,
+            value: PerformanceMeasure = DEFAULT_general_performance_measure,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the performance measure."""
         section = "general"
@@ -371,7 +372,7 @@ class Settings:
 
     def set_general_penalty_multiplier(
             self: Settings, value: int = DEFAULT_general_penalty_multiplier,
-            origin: SettingState = SettingState.DEFAULT)  -> None:
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the penalty multiplier."""
         section = "general"
         name = "penalty_multiplier"
@@ -563,8 +564,8 @@ class Settings:
 
         return int(self.__settings["slurm"]["number_of_runs_in_parallel"])
 
-    def set_slurm_clis_per_node(self, value: int = DEFAULT_slurm_clis_per_node,
-                                origin: SettingState = SettingState.DEFAULT):
+    def set_slurm_clis_per_node(self: Settings, value: int = DEFAULT_slurm_clis_per_node,
+                                origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of algorithms Slurm can run in parallel per node."""
         section = "slurm"
         name = "clis_per_node"
@@ -659,7 +660,8 @@ class Settings:
         return bool(self.__settings["parallel_portfolio"]["overwriting"])
 
     def set_paraport_process_monitoring(
-            self: Settings, value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
+            self: Settings,
+            value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the parallel portfolio process monitoring state."""
         section = "parallel_portfolio"

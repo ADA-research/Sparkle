@@ -2,8 +2,8 @@
 # -*- coding: UTF-8 -*-
 """Command names and dependency associations."""
 
-from enum import Enum
 from __future__ import annotations
+from enum import Enum
 
 from Commands.sparkle_help import sparkle_snapshot_help as srh
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -113,7 +113,8 @@ COMMAND_DEPENDENCIES = {
 }
 
 
-def check_for_initialise(argv: list[str], requirements: list[CommandName] = None) -> None:
+def check_for_initialise(argv: list[str], requirements: list[CommandName] = None)\
+        -> None:
     """Function to check if initialize command was executed and execute it otherwise.
 
     Args:

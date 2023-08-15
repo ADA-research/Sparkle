@@ -16,7 +16,8 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 
 
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
-                                    instance_test_name: str, exec_path: str = False) -> str:
+                                    instance_test_name: str, exec_path: str = False)\
+        -> str:
     """Return the directory where ablation analysis is executed.
 
     exec_path: overwrite of the default ablation path to put the scenario in
@@ -130,7 +131,8 @@ def generate_slurm_script(solver_name: str, instance_train_name: str,
 
 
 def generate_callback_slurm_script(solver_name: str, instance_train_name: str,
-                                   instance_test_name: str, dependency: str = None) -> str:
+                                   instance_test_name: str, dependency: str = None)\
+        -> str:
     """Create callback Slurm batch script for ablation analysis."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
         solver_name, instance_train_name, instance_test_name, postfix="_callback",
@@ -164,7 +166,8 @@ def generate_callback_slurm_script(solver_name: str, instance_train_name: str,
 
 
 def generate_validation_slurm_script(solver_name: str, instance_train_name: str,
-                                     instance_test_name: str, dependency: str = None) -> str:
+                                     instance_test_name: str, dependency: str = None)\
+        -> str:
     """Create a Slurm batch script for ablation analysis validation."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
         solver_name, instance_train_name, instance_test_name, postfix="_validation",
@@ -187,7 +190,8 @@ def generate_validation_slurm_script(solver_name: str, instance_train_name: str,
 
 
 def generate_validation_callback_slurm_script(solver_name: str, instance_train_name: str,
-                                              instance_test_name: str, dependency: str = None) \
+                                              instance_test_name: str,
+                                              dependency: str = None) \
         -> str:
     """Create callback Slurm batch script for ablation analysis validation."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
