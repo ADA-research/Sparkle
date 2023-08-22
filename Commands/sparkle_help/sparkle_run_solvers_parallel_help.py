@@ -67,7 +67,7 @@ def running_solvers_parallel(
     Parameters
     ----------
     performance_data_csv_path: str
-        The path the performance data file
+        The path to the performance data file
     num_job_in_parallel: int
         The maximum number of jobs to run in parallel
     rerun: bool

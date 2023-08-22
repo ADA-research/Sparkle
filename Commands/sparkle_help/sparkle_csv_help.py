@@ -204,7 +204,7 @@ class SparkleCSV:
 
         return
 
-    def update_row(self: SparkleCSV, row_name: str, value_list: str) -> None:
+    def update_row(self: SparkleCSV, row_name: str, value_list: list[str]) -> None:
         """Update the value of a given row."""
         self.dataframe.loc[row_name] = value_list
 
