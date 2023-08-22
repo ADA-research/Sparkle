@@ -44,7 +44,7 @@ def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> st
     return job_id_str
 
 
-def call_configured_solver_sequential(instances_list: list[list[Path]]):
+def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
     """Prepare to run and run the latest configured solver sequentially on instances."""
     for instance_path_list in instances_list:
         # Use original path for output string
@@ -138,7 +138,7 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
     return solver_name, config_str
 
 
-def run_configured_solver(instance_path_list: list[Path]):
+def run_configured_solver(instance_path_list: list[Path]) -> None:
     """Run the latest configured solver on the given instance."""
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()

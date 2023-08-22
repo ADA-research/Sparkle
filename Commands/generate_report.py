@@ -22,7 +22,7 @@ from Commands.sparkle_help import \
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description=("Without any arguments a report for the most recent algorithm "
@@ -91,7 +91,7 @@ def parser_function():
     return parser
 
 
-def generate_report_task_run_status(report_type: sgh.ReportType):
+def generate_report_task_run_status(report_type: sgh.ReportType) -> None:
     """Generate run status info files for report generation Slurm batch jobs.
 
     Args:
@@ -105,7 +105,7 @@ def generate_report_task_run_status(report_type: sgh.ReportType):
     return
 
 
-def delete_report_task_run_status(report_type: sgh.ReportType):
+def delete_report_task_run_status(report_type: sgh.ReportType) -> None:
     """Remove run status info files for report generation Slurm batch jobs.
 
     Args:

@@ -25,7 +25,7 @@ import functools
 print = functools.partial(print, flush=True)
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
 
@@ -73,7 +73,7 @@ def run_solvers_on_instances(
         parallel: bool = False,
         recompute: bool = False,
         run_on: Runner = Runner.SLURM,
-        also_construct_selector_and_report: bool = False):
+        also_construct_selector_and_report: bool = False) -> None:
     """Run all the solvers on all the instances that were not not previously run.
 
     If recompute is True, rerun everything even if previously run. Where the solvers are

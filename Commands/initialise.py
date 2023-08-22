@@ -7,7 +7,7 @@ import argparse
 from Commands.sparkle_help import sparkle_file_help as sfh
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
         description=("Initialise the Sparkle platform, this command does not have any "

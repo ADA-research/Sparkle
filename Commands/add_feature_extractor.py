@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def _check_existence_of_test_instance_list_file(extractor_directory: str):
+def _check_existence_of_test_instance_list_file(extractor_directory: str) -> bool:
     """Check whether a file exists with the list of test instances."""
     if not Path(extractor_directory).is_dir():
         return False
@@ -30,7 +30,7 @@ def _check_existence_of_test_instance_list_file(extractor_directory: str):
         return False
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
     parser = argparse.ArgumentParser()

@@ -11,7 +11,7 @@ dependencies:
     - --editable .  # self install !
     - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario@9ce38dd43dc6e2834cb8ef44cd837514e950a9c5
-    - attrs==21.2.0
+    - attrs==21.4.0
     - certifi==2021.5.30
     - click==8.0.1
     - cloudpickle==1.6.0
@@ -26,6 +26,7 @@ dependencies:
     - flake8-docstrings==1.6.0
     - flake8-use-fstring==1.4.0
     - flake8-use-pathlib==0.3.0
+    - flake8-annotations==3.0.1
     - fsspec==2021.7.0
     - HeapDict==1.0.1
     - iniconfig==1.1.1
