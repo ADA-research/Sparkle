@@ -5,17 +5,18 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_job_parallel_help as sjph
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
-from sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_compute_features_help as scf
+from Commands.sparkle_help import sparkle_job_parallel_help as sjph
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     sgh.settings = sparkle_settings.Settings()
     parser = argparse.ArgumentParser()
@@ -40,7 +41,7 @@ def parser_function():
     return parser
 
 
-def compute_features_parallel(recompute: bool):
+def compute_features_parallel(recompute: bool) -> None:
     """Compute features in parallel.
 
     Args:
@@ -82,6 +83,9 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

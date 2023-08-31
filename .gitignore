@@ -15,7 +15,7 @@ Sparkle_Parallel_Portfolio/*
 Tmp/*
 Log/*
 Output/*
-Records/*
+Snapshots/*
 Test_Cases/*
 Settings/latest.ini
 Components/ablationAnalysis-0.9.4/scenarios

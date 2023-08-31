@@ -9,18 +9,14 @@ from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
 
-try:
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_logging as sl
-    from sparkle_help.sparkle_settings import PerformanceMeasure
-    from sparkle_help import sparkle_instances_help as sih
-except ImportError:
-    import sparkle_file_help as sfh
-    import sparkle_global_help as sgh
-    import sparkle_logging as sl
-    from sparkle_settings import PerformanceMeasure
-    import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 class InstanceType(Enum):
@@ -50,7 +46,7 @@ def get_smac_run_obj() -> str:
     return smac_run_obj
 
 
-def get_smac_settings():
+def get_smac_settings() -> tuple[str]:
     """Return the SMAC settings.
 
     Returns:

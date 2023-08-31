@@ -5,20 +5,22 @@
 from __future__ import annotations
 
 import os
+import sys
 import csv
 from pathlib import Path
 
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help.sparkle_performance_data_csv_help import SparklePerformanceDataCSV
-from sparkle_help import sparkle_construct_portfolio_selector_help as scps
-from sparkle_help import sparkle_run_portfolio_selector_help as srps
-from sparkle_help import sparkle_logging as sl
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help.sparkle_performance_data_csv_help import \
+    SparklePerformanceDataCSV
+from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
+from Commands.sparkle_help import sparkle_run_portfolio_selector_help as srps
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
 
 
 def read_marginal_contribution_csv(path: Path) -> list[tuple[str, float]]:
@@ -387,7 +389,7 @@ def compute_actual_selector_marginal_contribution(
 
     # Compute performance of actual selector
     print("Computing actual performance for portfolio selector with all solvers ...")
-    actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+    actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
     scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
                                               performance_data_csv_path,
                                               feature_data_csv_path)
@@ -432,8 +434,8 @@ def compute_actual_selector_marginal_contribution(
             "Tmp/tmp_actual_portfolio_selector_"
             f"{sparkle_basic_help.get_time_pid_random_string()}")
         tmp_actual_portfolio_selector_path = (
-            f"{sgh.sparkle_portfolio_selector_dir}without_{solver_name}/"
-            f"{sgh.sparkle_portfolio_selector_name}")
+            sgh.sparkle_algorithm_selector_dir / f"without_{solver_name}"
+            / f"{sgh.sparkle_algorithm_selector_name}")
 
         if len(tmp_performance_data_csv.list_columns()) >= 1:
             scps.construct_sparkle_portfolio_selector(
@@ -510,3 +512,70 @@ def print_rank_list(rank_list: list, mode: int) -> None:
         print(f"#{str(i+1)}: {sfh.get_last_level_directory_name(solver)}\t Margi_Contr: "
               f"{str(marginal_contribution)}")
     print("******")
+
+
+def compute_perfect(flag_recompute: bool = False) -> list[tuple[str, float]]:
+    """Compute the marginal contribution for the perfect portfolio selector.
+
+    Args:
+        flag_recompute: Flag indicating whether marginal contributions
+            should be recalculated.
+
+    Returns:
+        rank_list: A list of 2-tuples of the form (solver name, marginal contribution).
+    """
+    print(
+        "Start computing each solver's marginal contribution to perfect selector ..."
+    )
+    rank_list = compute_perfect_selector_marginal_contribution(
+        flag_recompute=flag_recompute
+    )
+    print_rank_list(rank_list, 1)
+    print("Marginal contribution (perfect selector) computing done!")
+
+    return rank_list
+
+
+def compute_actual(flag_recompute: bool = False) -> list[tuple[str, float]]:
+    """Compute the marginal contribution for the actual portfolio selector.
+
+    Args:
+        flag_recompute: Flag indicating whether marginal contributions
+            should be recalculated.
+
+    Returns:
+        rank_list: A list of 2-tuples of the form (solver name, marginal contribution).
+    """
+    print(
+        "Start computing each solver's marginal contribution to actual selector ..."
+    )
+    rank_list = compute_actual_selector_marginal_contribution(
+        flag_recompute=flag_recompute
+    )
+    print_rank_list(rank_list, 2)
+    print("Marginal contribution (actual selector) computing done!")
+
+    return rank_list
+
+
+def compute_marginal_contribution(
+        flag_compute_perfect: bool, flag_compute_actual: bool,
+        flag_recompute: bool) -> None:
+    """Compute the marginal contribution.
+
+    Args:
+        flag_compute_perfect: Flag indicating if the contribution for the perfect
+            portfolio selector should be computed.
+        flag_compute_actual: Flag indicating if the contribution for the actual portfolio
+             selector should be computed.
+        flag_recompute: Flag indicating whether marginal contributions
+            should be recalculated.
+    """
+    if flag_compute_perfect:
+        compute_perfect(flag_recompute)
+    elif flag_compute_actual:
+        compute_actual(flag_recompute)
+    else:
+        print("ERROR: compute_marginal_contribution called without a flag set to"
+              " True, stopping execution")
+        sys.exit()

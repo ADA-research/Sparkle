@@ -5,13 +5,15 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_logging as sl
+
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -38,6 +40,9 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     solver_path = args.solver_path
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.REMOVE_SOLVER])
 
     if args.nickname:
         solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]
@@ -90,12 +95,12 @@ if __name__ == "__main__":
         command_line = "rm -rf " + smac_solver_path
         os.system(command_line)
 
-    if Path(sparkle_global_help.sparkle_portfolio_selector_path).exists():
-        command_line = "rm -f " + sparkle_global_help.sparkle_portfolio_selector_path
+    if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sparkle_global_help.sparkle_algorithm_selector_path
         os.system(command_line)
         print(
             "Removing Sparkle portfolio selector "
-            + sparkle_global_help.sparkle_portfolio_selector_path
+            + sparkle_global_help.sparkle_algorithm_selector_path
             + " done!"
         )
 

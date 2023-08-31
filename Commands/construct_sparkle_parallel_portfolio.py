@@ -6,25 +6,23 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_system_status_help as sssh
+from Commands.sparkle_help import sparkle_command_help as sch
 
-if __name__ == "__main__":
-    # Initialise settings
-    sgh.settings = sparkle_settings.Settings()
 
-    # Initialise latest scenario
-    sgh.latest_scenario = ReportingScenario()
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
 
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+    Returns:
+        parser: The parser with the parsed command line arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--nickname", type=Path,
                         help="Give a nickname to the portfolio."
@@ -45,11 +43,29 @@ if __name__ == "__main__":
                         help="Specify the settings file to use in case you want to use "
                              "one other than the default"
                              f" (default: {sgh.settings.DEFAULT_settings_path}")
+    return parser
+
+
+if __name__ == "__main__":
+    # Initialise settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Initialise latest scenario
+    sgh.latest_scenario = ReportingScenario()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments;
     args = parser.parse_args()
     portfolio_name = args.nickname
     list_of_solvers = args.solver
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO])
 
     # If no solvers are given all previously added solvers are used
     if list_of_solvers is None:
@@ -69,6 +85,9 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle parallel portfolio ...")
 
+    sssh.generate_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO,
+                                  sgh.pap_sbatch_tmp_path)
+
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
 
@@ -81,6 +100,9 @@ if __name__ == "__main__":
         sgh.latest_scenario.set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
         # Set to default to overwrite instance from possible previous run
         sgh.latest_scenario.set_parallel_portfolio_instance_list()
+
+        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO,
+                                    sgh.pap_sbatch_tmp_path)
     else:
         print("An unexpected error occurred when constructing the portfolio, please "
               "check your input and try again.")

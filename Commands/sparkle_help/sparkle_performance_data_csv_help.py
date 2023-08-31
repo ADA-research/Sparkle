@@ -2,24 +2,23 @@
 # -*- coding: UTF-8 -*-
 """Module to manage performance data CSV files and common operations on them."""
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_csv_help as scsv
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_csv_help as scsv
+from __future__ import annotations
+
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_csv_help as scsv
 
 
 class SparklePerformanceDataCSV(scsv.SparkleCSV):
     """Class to manage performance data CSV files and common operations on them."""
 
-    def __init__(self, csv_filepath) -> None:
+    def __init__(self: SparklePerformanceDataCSV, csv_filepath: str) -> None:
         """Initialise a SparklePerformanceDataCSV object."""
         scsv.SparkleCSV.__init__(self, csv_filepath)
         self.solver_list = sgh.solver_list
         return
 
-    def get_job_list(self, rerun: bool = False) -> list[tuple[str, str]]:
+    def get_job_list(self: SparklePerformanceDataCSV, rerun: bool = False) \
+            -> list[tuple[str, str]]:
         """Return a list of performance computation jobs thare are to be done.
 
         Get a list of tuple[instance, solver] to run from the performance data
@@ -33,7 +32,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         return df.index.tolist()
 
-    def get_list_recompute_performance_computation_job(self):
+    def get_list_recompute_performance_computation_job(self: SparklePerformanceDataCSV)\
+            -> list[list[list]]:
         """Return a list of performance computations to re-do per instance and solver."""
         list_recompute_performance_computation_job = []
         list_row_name = self.list_rows()
@@ -45,7 +45,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         return list_recompute_performance_computation_job
 
-    def get_list_remaining_performance_computation_job(self):
+    def get_list_remaining_performance_computation_job(self: SparklePerformanceDataCSV) \
+            -> list[list[list]]:
         """Return a list of needed performance computations per instance and solver."""
         list_remaining_performance_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
@@ -59,7 +60,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             list_remaining_performance_computation_job.append(list_item)
         return list_remaining_performance_computation_job
 
-    def get_list_processed_performance_computation_job(self):
+    def get_list_processed_performance_computation_job(self: SparklePerformanceDataCSV) \
+            -> list[list[list]]:
         """Return a list of existing performance values per instance and solver."""
         list_processed_performance_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
@@ -73,8 +75,9 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             list_processed_performance_computation_job.append(list_item)
         return list_processed_performance_computation_job
 
-    def get_maximum_performance_per_instance(self) -> list[float]:
-        """Return a list with the highest performance per isntance."""
+    def get_maximum_performance_per_instance(self: SparklePerformanceDataCSV) \
+            -> list[float]:
+        """Return a list with the highest performance per instance."""
         scores = []
 
         for instance in self.list_rows():
@@ -90,7 +93,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         return scores
 
-    def calc_score_of_solver_on_instance(self, solver: str, instance: str,
+    def calc_score_of_solver_on_instance(self: SparklePerformanceDataCSV,
+                                         solver: str, instance: str,
                                          num_instances: int, num_solvers: int,
                                          capvalue: float = None) -> float:
         """Return the performance of a solver on an instance."""
@@ -110,8 +114,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return score
 
     def calc_virtual_best_score_of_portfolio_on_instance(
-            self, instance: str, num_instances: int, num_solvers: int,
-            capvalue: float = None) -> float:
+            self: SparklePerformanceDataCSV, instance: str, num_instances: int,
+            num_solvers: int, capvalue: float = None) -> float:
         """Return the VBS performance for a specific instance."""
         # If capvalue is not set the objective is RUNTIME, so use the cutoff time as
         # capvalue
@@ -133,7 +137,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return virtual_best_score
 
     def calc_virtual_best_performance_of_portfolio(
-            self, num_instances: int, num_solvers: int,
+            self: SparklePerformanceDataCSV, num_instances: int, num_solvers: int,
             capvalue_list: list[float] = None) -> float:
         """Return the overall VBS performance."""
         virtual_best_performance = 0
@@ -152,7 +156,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         return virtual_best_performance
 
-    def get_dict_vbs_penalty_time_on_each_instance(self):
+    def get_dict_vbs_penalty_time_on_each_instance(self: SparklePerformanceDataCSV) \
+            -> dict:
         """Return a dictionary of penalised runtimes and instances for the VBS."""
         mydict = {}
         for instance in self.list_rows():
@@ -165,7 +170,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         return mydict
 
-    def calc_vbs_penalty_time(self):
+    def calc_vbs_penalty_time(self: SparklePerformanceDataCSV) -> float:
         """Return the penalised performance of the VBS."""
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
@@ -190,7 +195,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         return vbs_penalty_time
 
-    def get_solver_penalty_time_ranking_list(self):
+    def get_solver_penalty_time_ranking_list(self: SparklePerformanceDataCSV)\
+            -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         penalty_multiplier = sgh.settings.get_general_penalty_multiplier()

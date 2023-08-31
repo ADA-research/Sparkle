@@ -11,8 +11,6 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-# Initialise
-Commands/initialise.py > /dev/null
 
 # Cleanup temporary files
 output_true="Temporary files cleaned!"

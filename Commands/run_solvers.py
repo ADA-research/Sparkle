@@ -5,18 +5,18 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_record_help as srh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_run_solvers_help as srsh
-from sparkle_help import sparkle_run_solvers_parallel_help as srsph
-from sparkle_help import sparkle_job_parallel_help as sjph
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SolutionVerifier
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_run_solvers_help as srsh
+from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsph
+from Commands.sparkle_help import sparkle_job_parallel_help as sjph
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SolutionVerifier
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_command_help as sch
 
 import runrunner as rrr
 from runrunner.base import Runner
@@ -25,7 +25,7 @@ import functools
 print = functools.partial(print, flush=True)
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
 
@@ -73,7 +73,7 @@ def run_solvers_on_instances(
         parallel: bool = False,
         recompute: bool = False,
         run_on: Runner = Runner.SLURM,
-        also_construct_selector_and_report: bool = False):
+        also_construct_selector_and_report: bool = False) -> None:
     """Run all the solvers on all the instances that were not not previously run.
 
     If recompute is True, rerun everything even if previously run. Where the solvers are
@@ -245,9 +245,8 @@ if __name__ == "__main__":
 
     print("Start running solvers ...")
 
-    if not srh.detect_current_sparkle_platform_exists():
-        print("No Sparkle platform found; please first run the initialise command")
-        sys.exit()
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.RUN_SOLVERS])
 
     print("Start running solvers ...")
 

@@ -65,11 +65,11 @@ Commands/test/generate_report_for_test.sh
 # Test generate report for configuration
 Commands/test/generate_report_for_configuration.sh
 
-# Test save record
-Commands/test/save_record.sh
+# Test save snapshot
+Commands/test/save_snapshot.sh
 
-# Test load record
-Commands/test/load_record.sh
+# Test load snapshot
+Commands/test/load_snapshot.sh
 
 # Test remove feature extractor
 Commands/test/remove_feature_extractor.sh

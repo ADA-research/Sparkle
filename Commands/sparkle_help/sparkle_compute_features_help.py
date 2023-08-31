@@ -6,24 +6,14 @@ import os
 import sys
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_slurm_help as ssh
-    from sparkle_help import sparkle_logging as sl
-    from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-    from sparkle_help import sparkle_job_help
-    from sparkle_help.sparkle_command_help import CommandName
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help
-    import sparkle_file_help as sfh
-    import sparkle_slurm_help as ssh
-    import sparkle_logging as sl
-    import sparkle_feature_data_csv_help as sfdcsv
-    import sparkle_job_help
-    from sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_job_help
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
 
 def generate_missing_value_csv_like_feature_data_csv(
@@ -86,7 +76,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         cutoff_time_each_extractor_run = (
             sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
 
-    cutoff_time_each_run_option = r"--cpu-limit " + str(cutoff_time_each_extractor_run)
+    cutoff_time_each_run_option = f"--cpu-limit {str(cutoff_time_each_extractor_run)}"
     print("Cutoff time for each run on computing features is set to "
           f"{str(cutoff_time_each_extractor_run)} seconds")
 
@@ -103,7 +93,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         update_feature_data_id()
 
     current_job_num = 1
-    print("The number of total running jobs: " + str(total_job_num))
+    print(f"Total number of jobs to run: {str(total_job_num)}")
 
     for i in range(0, len(list_feature_computation_job)):
         instance_path = list_feature_computation_job[i][0]
@@ -128,7 +118,6 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                             f"{sgh.sparkle_run_default_wrapper} {extractor_path}/ "
                             f"{instance_path} {result_path} 2> {err_path}")
 
-            print("")
             print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)}"
                   " computing feature vector of instance "
                   f"{sfh.get_last_level_directory_name(instance_path)} ...")
@@ -137,7 +126,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                 os.system(command_line)
                 with Path(runsolver_value_data_path).open() as file:
                     if "TIMEOUT=true" in file.read():
-                        print(f"****** WARNING: Feature vector computing on instance "
+                        print(f"****** WARNING: Feature vector computation on instance "
                               f"{instance_path} timed out! ******")
             except Exception:
                 if not Path(result_path).exists():
@@ -146,26 +135,21 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             try:
                 tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
             except Exception:
-                print("****** WARNING: Feature vector computing on instance "
+                print("****** WARNING: Feature vector computation on instance "
                       f"{instance_path} failed! ******")
                 print("****** WARNING: The feature vector of this instance consists of "
                       "missing values ******")
-                command_line = "rm -f " + result_path
-                os.system(command_line)
+                Path(result_path).unlink(missing_ok=True)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
                     feature_data_csv, Path(instance_path), Path(extractor_path),
                     Path(result_path))
 
             feature_data_csv.combine(tmp_fdcsv)
 
-            command_line = f"rm -f {result_path}"
-            os.system(command_line)
-            command_line = f"rm -f {err_path}"
-            os.system(command_line)
-            command_line = f"rm -f {runsolver_watch_data_path}"
-            os.system(command_line)
-            command_line = f"rm -f {runsolver_value_data_path}"
-            os.system(command_line)
+            Path(result_path).unlink(missing_ok=True)
+            Path(err_path).unlink(missing_ok=True)
+            Path(runsolver_watch_data_path).unlink(missing_ok=True)
+            Path(runsolver_value_data_path).unlink(missing_ok=True)
 
             print(f"Executing Progress: {str(current_job_num)} out of "
                   f"{str(total_job_num)}")
@@ -174,7 +158,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             feature_data_csv.update_csv()
 
             print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)}"
-                  " computing feature vector of instance "
+                  " computation of feature vector of instance "
                   f"{sfh.get_last_level_directory_name(instance_path)} done!\n")
 
 
@@ -256,6 +240,7 @@ def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureData
         # remaining jobs
         list_feature_computation_job = (
             feature_data_csv.get_list_remaining_feature_computation_job())
+
     return list_feature_computation_job
 
 

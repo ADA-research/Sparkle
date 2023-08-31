@@ -3,8 +3,8 @@
 
 import sys
 import argparse
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 __description__ = "Platform for evaluating empirical algorithms/solvers"
 __version__ = sgh.sparkle_version
@@ -21,8 +21,12 @@ __authors__ = [
 __contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
 
 
-def parser_function():
-    """Define the command line arguments."""
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+      The argument parser.
+    """
     parser = argparse.ArgumentParser()
     return parser
 

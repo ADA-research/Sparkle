@@ -50,7 +50,7 @@ exclude =
     Performance_Data/,
     __pycache__,
     .pytest_cache,
-    Records/,
+    Snapshots/,
     Reference_Lists/,
     scratch/,
     Solvers/,

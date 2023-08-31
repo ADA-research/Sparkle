@@ -30,14 +30,6 @@
 
 ```
 
-(cmd-cleanup-current-sparkle-platform)=
-
-```{eval-rst}
-.. autoprogram:: cleanup_current_sparkle_platform:parser_function()
-   :prog: cleanup_current_sparkle_platform.py
-
-```
-
 (cmd-cleanup-temporary-files)=
 
 ```{eval-rst}
@@ -70,6 +62,14 @@
 
 ```
 
+(cmd-construct-sparkle-parallel-portfolio)=
+
+```{eval-rst}
+.. autoprogram:: construct_sparkle_parallel_portfolio:parser_function()
+   :prog: construct_sparkle_parallel_portfolio.py
+
+```
+
 (cmd-construct-sparkle-portfolio-selector)=
 
 ```{eval-rst}
@@ -94,11 +94,11 @@
 
 ```
 
-(cmd-load-record)=
+(cmd-load-snapshot)=
 
 ```{eval-rst}
-.. autoprogram:: load_record:parser_function()
-   :prog: load_record.py
+.. autoprogram:: load_snapshot:parser_function()
+   :prog: load_snapshot.py
 
 ```
 
@@ -150,6 +150,14 @@
 
 ```
 
+(cmd-run-sparkle-parallel-portfolio)=
+
+```{eval-rst}
+.. autoprogram:: run_sparkle_parallel_portfolio:parser_function()
+   :prog: run_sparkle_parallel_portfolio.py
+
+```
+
 (cmd-run-sparkle-portfolio-selector)=
 
 ```{eval-rst}
@@ -166,11 +174,11 @@
 
 ```
 
-(cmd-save-record)=
+(cmd-save-snapshot)=
 
 ```{eval-rst}
-.. autoprogram:: save_record:parser_function()
-   :prog: save_record.py
+.. autoprogram:: save_snapshot:parser_function()
+   :prog: save_snapshot.py
 
 ```
 

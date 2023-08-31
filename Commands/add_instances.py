@@ -6,19 +6,20 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_run_solvers_help as srs
-from sparkle_help import sparkle_run_solvers_parallel_help as srsp
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_compute_features_help as scf
+from Commands.sparkle_help import sparkle_run_solvers_help as srs
+from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsp
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -74,13 +75,17 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_source = args.instances_path
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.ADD_INSTANCES])
+
     if not Path(instances_source).exists():
         print(f'Instance set path "{instances_source}" does not exist!')
         sys.exit()
 
     nickname_str = args.nickname
 
-    print("Start adding all instances in directory " + instances_source + " ...")
+    print(f"Start adding all instances in directory {instances_source} ...")
 
     last_level_directory = ""
     if nickname_str is not None:
@@ -88,9 +93,9 @@ if __name__ == "__main__":
     else:
         last_level_directory = sfh.get_last_level_directory_name(instances_source)
 
-    instances_directory = "Instances/" + last_level_directory
-    if not Path(instances_directory).exists():
-        Path(instances_directory).mkdir(parents=True, exist_ok=True)
+    instances_directory = sgh.instance_dir / last_level_directory
+    if not instances_directory.exists():
+        instances_directory.mkdir(parents=True, exist_ok=True)
 
     if sih._check_existence_of_instance_list_file(instances_source):
         sih._copy_instance_list_to_reference(Path(instances_source))
@@ -101,7 +106,7 @@ if __name__ == "__main__":
             sgh.performance_data_csv_path)
 
         num_inst = len(list_instance)
-        print("The number of intended adding instances: " + str(num_inst))
+        print(f"Number of instances to be added: {str(num_inst)}")
 
         for i in range(0, num_inst):
             instance_line = list_instance[i]
@@ -110,7 +115,7 @@ if __name__ == "__main__":
 
             for related_file_name in instance_related_files:
                 source_file_path = Path(instances_source) / related_file_name
-                target_file_path = Path(instances_directory) / related_file_name
+                target_file_path = instances_directory / related_file_name
                 cmd = f"cp {source_file_path} {target_file_path}"
                 os.system(cmd)
                 intended_instance_line += str(target_file_path) + " "
@@ -122,15 +127,14 @@ if __name__ == "__main__":
             feature_data_csv.add_row(intended_instance_line)
             performance_data_csv.add_row(intended_instance_line)
 
-            print("Instance " + instance_line + " has been added!\n")
+            print(f"Instance {instance_line} has been added!\n")
 
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()
     else:
-        # os.system(r'cp ' + instances_source + r'/*.cnf ' + instances_directory)
         list_source_all_filename = sfh.get_list_all_filename(instances_source)
         list_source_all_directory = sfh.get_list_all_directory(instances_source)
-        list_target_all_filename = sfh.get_list_all_filename(instances_directory)
+        list_target_all_filename = sfh.get_list_all_filename(str(instances_directory))
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
@@ -138,22 +142,21 @@ if __name__ == "__main__":
 
         num_inst = len(list_source_all_filename)
 
-        print("The number of intended adding instances: " + str(num_inst))
+        print(f"Number of instances to be added: {str(num_inst)}")
 
         for i in range(0, len(list_source_all_filename)):
             intended_filename = list_source_all_filename[i]
             print("")
-            print("Adding " + intended_filename + " ...")
-            print("Executing Progress: " + str(i + 1) + " out of " + str(num_inst))
+            print(f"Adding {intended_filename} ... "
+                  f"({str(i + 1)} out of {str(num_inst)})")
 
             if intended_filename in list_target_all_filename:
                 print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
                       f" already exists in Directory {instances_directory}")
                 print("Ignore adding file "
                       f"{sfh.get_last_level_directory_name(intended_filename)}")
-                # continue
             else:
-                intended_filename_path = instances_directory + "/" + intended_filename
+                intended_filename_path = f"{instances_directory}/{intended_filename}"
                 sgh.instance_list.append(intended_filename_path)
                 sfh.add_new_instance_into_file(intended_filename_path)
                 feature_data_csv.add_row(intended_filename_path)
@@ -164,19 +167,19 @@ if __name__ == "__main__":
                 os.system(f"cp {list_source_all_directory[i]}/{intended_filename} "
                           f"{instances_directory}")
                 print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
-                      " has been added!\n")
+                      " has been added!")
 
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()
 
-    print(f"Adding instances {sfh.get_last_level_directory_name(instances_directory)} "
-          "done!")
+    print("\nAdding instance set "
+          f"{instances_directory.name} done!")
 
-    if Path(sgh.sparkle_portfolio_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
+    if Path(sgh.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
         os.system(command_line)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_portfolio_selector_path} done!")
+              f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
         command_line = "rm -f " + sgh.sparkle_report_path

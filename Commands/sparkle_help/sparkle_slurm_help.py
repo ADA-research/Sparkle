@@ -11,22 +11,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_configure_solver_help as scsh
-    from sparkle_help import sparkle_logging as sl
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help import sparkle_job_help as sjh
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help as sbh
-    import sparkle_configure_solver_help as scsh
-    import sparkle_logging as sl
-    import sparkle_file_help as sfh
-    from sparkle_command_help import CommandName
-    import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:

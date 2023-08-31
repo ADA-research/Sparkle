@@ -8,15 +8,15 @@ import os
 import sys
 from pathlib import Path
 
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_instances_help as sih
-from sparkle_help import sparkle_generate_report_help as sgrh
-from sparkle_help import sparkle_run_ablation_help as sah
-from sparkle_help import sparkle_tex_help as stex
-from sparkle_help.sparkle_generate_report_help import generate_comparison_plot
-from sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_generate_report_help as sgrh
+from Commands.sparkle_help import sparkle_run_ablation_help as sah
+from Commands.sparkle_help import sparkle_tex_help as stex
+from Commands.sparkle_help.sparkle_generate_report_help import generate_comparison_plot
+from Commands.sparkle_help.sparkle_configure_solver_help import get_smac_solver_dir
 
 
 def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
