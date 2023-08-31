@@ -349,7 +349,8 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
     file_name = Path(instance_set_name + "_train.txt")
     instance_list_file_path = Path(PurePath(Path(sgh.smac_dir)
                                    / Path("scenarios")
-                                   / Path(solver_name + "_" + instance_set_name)
+                                   / Path("instances")
+                                   / Path(instance_set_name)
                                    / file_name))
 
     all_good = instance_list_file_path.is_file()
