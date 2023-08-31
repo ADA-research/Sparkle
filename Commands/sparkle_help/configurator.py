@@ -15,7 +15,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 class Configurator:
     """Generic class to use different configurators like SMAC."""
 
-    def __init__(self, configurator_path: Path, scenario: ConfigurationScenario) -> None:
+    def __init__(self, configurator_path: Path) -> None:
         """Initialize Configurator.
 
         Args:
@@ -29,14 +29,16 @@ class Configurator:
                   "valid directory. Abort")
             sys.exit(-1)
 
-        self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=configurator_path)
+        self.scenario = None
 
         self.sbatch_filename = ""
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
-    def create_sbatch_script(self) -> None:
+    def create_sbatch_script(self, scenario: ConfigurationScenario) -> None:
         """Create sbatch script."""
+        self.scenario = scenario
+        self.scenario.create_scenario(parent_directory=self.configurator_path)
+
         number_of_runs = self.scenario.number_of_runs
         self.sbatch_filename = Path(f"{self.scenario.scenario_file_name}_"
                                     f"{number_of_runs}_exp_sbatch.sh")

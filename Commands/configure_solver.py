@@ -155,6 +155,7 @@ if __name__ == "__main__":
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.CONFIGURE_SOLVER])
 
+    feature_data_df = None
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -197,9 +198,9 @@ if __name__ == "__main__":
     number_of_runs = sgh.settings.get_config_number_of_runs()
     config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
                                             use_features, feature_data_df)
-    configurator = Configurator(configurator_path, config_scenario)
+    configurator = Configurator(configurator_path)
 
-    configurator.create_sbatch_script()
+    configurator.create_sbatch_script(config_scenario)
     configure_jobid = configurator.configure()
 
     # Update latest scenario

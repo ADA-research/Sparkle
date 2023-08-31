@@ -1,4 +1,4 @@
-"""Test public methods of solver class."""
+"""Test public methods of configuration scenario class."""
 
 import shutil
 
