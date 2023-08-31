@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Class to handle all activities around configuration scenarios."""
 
+from __future__ import annotations
 import shutil
 from pathlib import Path
 
@@ -15,7 +16,7 @@ from Commands.sparkle_help import sparkle_settings
 
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
-    def __init__(self, solver: Solver, instance_directory: Path,
+    def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
                  number_of_runs: int, use_features: bool,
                  feature_data_df: pd.DataFrame = None,) -> None:
         """Initialize scenario paths and names.
@@ -45,7 +46,7 @@ class ConfigurationScenario:
         self.feature_file = Path()
         self.instance_file = Path()
 
-    def create_scenario(self, parent_directory: Path) -> None:
+    def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
 
         This prepares all the necessary subdirectories related to configuration.
@@ -70,7 +71,7 @@ class ConfigurationScenario:
 
         self._create_scenario_file()
 
-    def _prepare_scenario_directory(self) -> None:
+    def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
         """Recreate scenario directory and create empty directories inside."""
         shutil.rmtree(self.directory, ignore_errors=True)
         self.directory.mkdir(parents=True)
@@ -81,12 +82,12 @@ class ConfigurationScenario:
 
         shutil.copy(self.solver.get_pcs_file(), self.directory)
 
-    def _prepare_result_directory(self) -> None:
+    def _prepare_result_directory(self: ConfigurationScenario) -> None:
         """Delete possible files in result directory."""
         shutil.rmtree(self.result_directory, ignore_errors=True)
         self.result_directory.mkdir(parents=True)
 
-    def _prepare_run_directories(self) -> None:
+    def _prepare_run_directories(self: ConfigurationScenario) -> None:
         """Create directories for each configurator run and copy solver files to them."""
         for i in range(self.number_of_runs):
             run_path = self.directory / str(i + 1)
@@ -94,7 +95,7 @@ class ConfigurationScenario:
             shutil.copytree(self.solver.directory, run_path)
             (run_path / "tmp").mkdir()
 
-    def _create_scenario_file(self) -> None:
+    def _create_scenario_file(self: ConfigurationScenario) -> None:
         """Create a file with the configuration scenario."""
         inner_directory = Path("scenarios", self.name)
 
@@ -124,12 +125,14 @@ class ConfigurationScenario:
                 file.write(f"feature_file = {self.feature_file}\n")
             file.write("validation = true" + "\n")
 
-    def _prepare_instances(self) -> None:
+    def _prepare_instances(self: ConfigurationScenario) -> None:
         """Create instance list file."""
         source_instance_list = (
             [f for f in self.instance_directory.rglob("*") if f.is_file()])
 
         instance_list_path = self.instance_file
+
+        instance_list_path.parent.mkdir(exist_ok=True, parents=True)
 
         with instance_list_path.open("w+") as file:
             for original_instance_path in source_instance_list:
@@ -137,7 +140,7 @@ class ConfigurationScenario:
                            f"{original_instance_path.parts[-2]}/"
                            f"{original_instance_path.name}\n")
 
-    def _get_run_objective(self) -> str:
+    def _get_run_objective(self: ConfigurationScenario) -> str:
         """Return the SMAC run objective.
 
         Returns:
@@ -157,7 +160,7 @@ class ConfigurationScenario:
 
         return run_objective
 
-    def _create_feature_file(self) -> None:
+    def _create_feature_file(self: ConfigurationScenario) -> None:
         """Create CSV file from feature data."""
         self.feature_file = Path(self.directory
                                  / f"{self.instance_directory.name}_features.csv")

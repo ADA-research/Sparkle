@@ -12,7 +12,7 @@ from Commands.sparkle_help.configurator import Configurator
 class TestConfigurator():
     """Class bundling all tests regarding Configurator."""
 
-    def test_init(self, mocker, scenario_fixture, configurator_path):
+    def test_init(self, mocker, scenario_fixture, configurator_path) -> None:
         """Test that Configurator initialization calls create_scenario() correctly."""
         mock_path = mocker.patch.object(Path, "mkdir")
 
@@ -29,7 +29,7 @@ class TestConfigurator():
 
     def test_create_sbatch_script(self, mocker,
                                   scenario_fixture: ConfigurationScenario,
-                                  configurator_path: Path):
+                                  configurator_path: Path) -> None:
         """Test correct sbatch script creation."""
         mocker.patch.object(Path, "mkdir")
         mocker.patch.object(ConfigurationScenario, "create_scenario", return_value=None)
@@ -51,14 +51,14 @@ class TestConfigurator():
 
 
 @pytest.fixture
-def solver_fixture():
+def solver_fixture() -> Solver:
     """Solver fixture for tests."""
     solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
     return Solver(solver_path)
 
 
 @pytest.fixture
-def scenario_fixture(solver_fixture):
+def scenario_fixture(solver_fixture) -> ConfigurationScenario:
     """Scenario fixture for tests."""
     instance_set_train = Path("Instances", "Test-Instance-Set")
     number_of_runs = 2
@@ -68,6 +68,6 @@ def scenario_fixture(solver_fixture):
 
 
 @pytest.fixture
-def configurator_path():
+def configurator_path() -> Path:
     """Configurator path fixture for tests."""
     return Path("tests/test_files/Configurators/smac-v2.10.03-master-778")

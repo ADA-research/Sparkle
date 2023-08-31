@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Class to handle a solver and its directories."""
 
+from __future__ import annotations
 import sys
 
 from pathlib import Path
@@ -11,7 +12,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 
 class Solver:
     """Class to handle a solver and its directories."""
-    def __init__(self, solver_directory: Path) -> None:
+    def __init__(self: Solver, solver_directory: Path) -> None:
         """Initialize solver.
 
         Args:
@@ -20,7 +21,7 @@ class Solver:
         self.directory = solver_directory
         self.name = solver_directory.name
 
-    def get_pcs_file(self) -> Path:
+    def get_pcs_file(self: Solver) -> Path:
         """Get path of the parameter file.
 
         Returns:
@@ -42,7 +43,7 @@ class Solver:
 
         return self.directory / file_name
 
-    def is_deterministic(self) -> str:
+    def is_deterministic(self: Solver) -> str:
         """Return a string indicating whether a given solver is deterministic or not.
 
         Returns:

@@ -12,7 +12,7 @@ from Commands.sparkle_help.solver import Solver
 
 class TestConfigurationScenario(TestCase):
     """Class bundling all tests regarding ConfigurationScenario."""
-    def setUp(self):
+    def setUp(self) -> None:
         """Setup executed before each test."""
         self.solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
         self.solver = Solver(self.solver_path)
@@ -32,11 +32,11 @@ class TestConfigurationScenario(TestCase):
                                               self.instance_directory,
                                               self.run_number, False)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Cleanup executed after each test."""
         shutil.rmtree(self.parent_directory, ignore_errors=True)
 
-    def test_configuration_scenario_init(self):
+    def test_configuration_scenario_init(self) -> None:
         """Test if all variables that are set in the init are correct."""
         self.assertEqual(self.scenario.solver, self.solver)
         self.assertEqual(self.scenario.instance_directory,
@@ -47,7 +47,7 @@ class TestConfigurationScenario(TestCase):
                          f"{self.solver.name}_{self.instance_directory.name}")
 
     @patch.object(Solver, "is_deterministic")
-    def test_configuration_scenario_check_scenario_directory(self, mock_deterministic):
+    def test_configuration_scenario_check_scenario_directory(self, mock_deterministic) -> None:
         """Test if create_scenario() correctly creates the scenario directory."""
         self.scenario.create_scenario(self.parent_directory)
 
@@ -61,14 +61,14 @@ class TestConfigurationScenario(TestCase):
                           / self.solver.get_pcs_file().name).is_file(), True)
 
     @patch.object(Solver, "is_deterministic")
-    def test_configuration_scenario_check_result_directory(self, mock_deterministic):
+    def test_configuration_scenario_check_result_directory(self, mock_deterministic) -> None:
         """Test if create_scenario() creates the result directory."""
         self.scenario.create_scenario(self.parent_directory)
 
         self.assertEqual(self.scenario.result_directory.is_dir(), True)
 
     @patch.object(Solver, "is_deterministic")
-    def test_configuration_scenario_check_run_folders(self, mock_deterministic):
+    def test_configuration_scenario_check_run_folders(self, mock_deterministic) -> None:
         """Test if create_scenario() correctly creates the run directories."""
         self.scenario.create_scenario(self.parent_directory)
 
@@ -79,7 +79,7 @@ class TestConfigurationScenario(TestCase):
             self.assertEqual((run_path / "tmp").is_dir(), True)
 
     @patch.object(Solver, "is_deterministic")
-    def test_configuration_scenario_check_instance_directory(self, mock_deterministic):
+    def test_configuration_scenario_check_instance_directory(self, mock_deterministic) -> None:
         """Test if create_scenario() creates the instance directory."""
         self.scenario.create_scenario(self.parent_directory)
 
@@ -88,7 +88,7 @@ class TestConfigurationScenario(TestCase):
     @patch.object(Solver, "is_deterministic")
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(self, mock_abs,
-                                                        mock_deterministic):
+                                                        mock_deterministic) -> None:
         """Test if create_scenario() correctly creates the scenario file."""
         mock_abs.side_effect = [Path("tests/test_files/test_configurator")]
         mock_deterministic.return_value = "0"

@@ -10,23 +10,23 @@ from Commands.sparkle_help.solver import Solver
 
 class TestSolver(TestCase):
     """Class bundling all tests regarding Solver."""
-    def setUp(self):
+    def setUp(self) -> None:
         """Setup executed before each test."""
         self.solver_path = Path("tests", "test_files", "test_solver")
         self.solver_path.mkdir(parents=True)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Cleanup executed after each test."""
         shutil.rmtree(self.solver_path)
 
-    def test_init_variables(self):
+    def test_init_variables(self) -> None:
         """Test if all variables that are set in the init are correct."""
         solver = Solver(Path("test/directory/solver_executable"))
 
         self.assertEqual(solver.directory, Path("test/directory/solver_executable"))
         self.assertEqual(solver.name, "solver_executable")
 
-    def test_pcs_file_correct_name(self):
+    def test_pcs_file_correct_name(self) -> None:
         """Test if get_pcs_file() returns the correct path if file exists."""
         (self.solver_path / "paramfile.pcs").open("a").close()
 
@@ -34,14 +34,14 @@ class TestSolver(TestCase):
 
         self.assertEqual(solver.get_pcs_file(), self.solver_path / "paramfile.pcs")
 
-    def test_pcs_file_none(self):
+    def test_pcs_file_none(self) -> None:
         """Test for SystemExit if get_pcs_file() is called, but file doesn't exist."""
         solver = Solver(self.solver_path)
 
         with self.assertRaises(SystemExit):
             solver.get_pcs_file()
 
-    def test_pcs_file_multiple(self):
+    def test_pcs_file_multiple(self) -> None:
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
         (self.solver_path / "paramfile1.pcs").open("a").close()
 
@@ -52,7 +52,7 @@ class TestSolver(TestCase):
         with self.assertRaises(SystemExit):
             solver.get_pcs_file()
 
-    def test_is_deterministic_false(self):
+    def test_is_deterministic_false(self) -> None:
         """Test if is_deterministic() correctly returns False."""
         file_string = "Solvers/test_solver 0 1"
         solver = Solver(self.solver_path)
@@ -62,7 +62,7 @@ class TestSolver(TestCase):
             self.assertEqual(solver.is_deterministic(), "0")
             mock_file.assert_called_with("r+")
 
-    def test_is_deterministic_true(self):
+    def test_is_deterministic_true(self) -> None:
         """Test if is_deterministic() correctly returns True."""
         file_string = "Solvers/test_solver 1 1"
         solver = Solver(self.solver_path)

@@ -100,7 +100,7 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-def apply_settings_from_args(args) -> None:
+def apply_settings_from_args(args: argparse.Namespace) -> None:
     """Apply command line arguments to settings.
 
     Args:

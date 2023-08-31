@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Configurator class to use different configurators like SMAC."""
 
+from __future__ import annotations
 from pathlib import Path
 import sys
 
@@ -15,7 +16,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 class Configurator:
     """Generic class to use different configurators like SMAC."""
 
-    def __init__(self, configurator_path: Path) -> None:
+    def __init__(self: Configurator, configurator_path: Path) -> None:
         """Initialize Configurator.
 
         Args:
@@ -34,7 +35,7 @@ class Configurator:
         self.sbatch_filename = ""
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
-    def create_sbatch_script(self, scenario: ConfigurationScenario) -> None:
+    def create_sbatch_script(self: Configurator, scenario: ConfigurationScenario) -> None:
         """Create sbatch script."""
         self.scenario = scenario
         self.scenario.create_scenario(parent_directory=self.configurator_path)
@@ -52,7 +53,7 @@ class Configurator:
         with (self.configurator_path / self.sbatch_filename).open("w+") as sbatch_script:
             sbatch_script.write(file_content)
 
-    def configure(self) -> int:
+    def configure(self: Configurator) -> int:
         """Submit sbatch script.
 
         Returns:
@@ -62,7 +63,7 @@ class Configurator:
                                         CommandName.CONFIGURE_SOLVER,
                                         self.configurator_path)
 
-    def _get_sbatch_options(self) -> str:
+    def _get_sbatch_options(self: Configurator) -> str:
         """Get sbatch options.
 
         Returns:
@@ -89,7 +90,7 @@ class Configurator:
 
         return options
 
-    def _get_run_parameter_list(self) -> str:
+    def _get_run_parameter_list(self: Configurator) -> str:
         """Get list for SBATCH script containing parameters for all configurator runs.
 
         Returns:
@@ -121,7 +122,7 @@ class Configurator:
         params += ")\n"
         return params
 
-    def _get_srun_command(self) -> str:
+    def _get_srun_command(self: Configurator) -> str:
         """Get srun command.
 
         Returns:
