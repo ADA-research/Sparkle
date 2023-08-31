@@ -12,11 +12,8 @@ from enum import Enum
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
-from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_instances_help as sih
-from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 class InstanceType(Enum):

@@ -5,7 +5,7 @@ import shutil
 from unittest import TestCase, mock
 from pathlib import Path
 
-from sparkle_help.solver import Solver
+from Commands.sparkle_help.solver import Solver
 
 
 class TestSolver(TestCase):

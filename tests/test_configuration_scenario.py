@@ -6,8 +6,8 @@ from unittest import TestCase
 from unittest.mock import patch
 from pathlib import Path
 
-from sparkle_help.configuration_scenario import ConfigurationScenario
-from sparkle_help.solver import Solver
+from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
+from Commands.sparkle_help.solver import Solver
 
 
 class TestConfigurationScenario(TestCase):

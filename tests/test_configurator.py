@@ -4,9 +4,9 @@ import pytest
 
 from pathlib import Path
 
-from sparkle_help.solver import Solver
-from sparkle_help.configuration_scenario import ConfigurationScenario
-from sparkle_help.configurator import Configurator
+from Commands.sparkle_help.solver import Solver
+from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
+from Commands.sparkle_help.configurator import Configurator
 
 
 class TestConfigurator():
