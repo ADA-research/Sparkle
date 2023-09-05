@@ -10,7 +10,7 @@ from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_job_help
 
 
-def print_solver_list(verbose: bool = False):
+def print_solver_list(verbose: bool = False) -> None:
     """Print the list of solvers in Sparkle.
 
     Args:
@@ -31,7 +31,7 @@ def print_solver_list(verbose: bool = False):
     return
 
 
-def print_extractor_list(verbose: bool = False):
+def print_extractor_list(verbose: bool = False) -> None:
     """Print the list of feature extractors in Sparkle.
 
     Args:
@@ -53,7 +53,7 @@ def print_extractor_list(verbose: bool = False):
     return
 
 
-def print_instance_list(verbose: bool = False):
+def print_instance_list(verbose: bool = False) -> None:
     """Print the list of instances in Sparkle.
 
     Args:
@@ -76,7 +76,7 @@ def print_instance_list(verbose: bool = False):
 
 
 def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
-                                                 verbose: bool = False):
+                                                 verbose: bool = False) -> None:
     """Print a list of remaining feature computation jobs.
 
     Args:
@@ -115,7 +115,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
 
 
 def print_list_remaining_performance_computation_job(performance_data_csv_path: str,
-                                                     verbose: bool = False):
+                                                     verbose: bool = False) -> None:
     """Print a list of remaining performance computation jobs.
 
     Args:

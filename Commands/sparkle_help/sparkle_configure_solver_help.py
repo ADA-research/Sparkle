@@ -47,7 +47,7 @@ def get_smac_run_obj() -> str:
     return smac_run_obj
 
 
-def get_smac_settings():
+def get_smac_settings() -> tuple[str]:
     """Return the SMAC settings.
 
     Returns:

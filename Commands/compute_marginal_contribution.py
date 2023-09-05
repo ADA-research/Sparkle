@@ -15,7 +15,7 @@ from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)

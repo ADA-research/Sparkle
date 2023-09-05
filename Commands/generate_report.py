@@ -22,7 +22,7 @@ from Commands.sparkle_help import \
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description=("Without any arguments a report for the most recent algorithm "

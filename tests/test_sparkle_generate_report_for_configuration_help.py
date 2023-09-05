@@ -3,6 +3,8 @@
 import pytest
 from pathlib import Path
 
+from pytest_mock import MockFixture
+
 from Commands.sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
@@ -11,7 +13,7 @@ global settings
 sgh.settings = sparkle_settings.Settings()
 
 
-def test_get_num_in_instance_set_reference_list_exists(mocker):
+def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> None:
     """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
 
     Check that number of instances is retrieved from reference list when it exists.
@@ -34,7 +36,7 @@ def test_get_num_in_instance_set_reference_list_exists(mocker):
     assert number == "3"
 
 
-def test_get_num_in_instance_set_reference_list_not_exists(mocker):
+def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) -> None:
     """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
 
     Check that number of instances is retrieved by counting all files in instance
@@ -61,7 +63,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker):
     assert number == "2"
 
 
-def test_get_par_performance(mocker):
+def test_get_par_performance(mocker: MockFixture) -> None:
     """Test get_par_performance returns correct PAR value.
 
     A performance list should be retrieved from results file.
@@ -80,7 +82,7 @@ def test_get_par_performance(mocker):
     assert par == 7.5
 
 
-def test_get_instance_name_from_path():
+def test_get_instance_name_from_path() -> None:
     """Test get_instance_name_from_path returns the last part of the given path."""
     path_string = "parent/directory/instance-name"
 
@@ -89,7 +91,7 @@ def test_get_instance_name_from_path():
     assert name == "instance-name"
 
 
-def test_construct_list_instance_and_performance(mocker):
+def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
     """Test construct_list_instance_and_performance creates list from file content."""
     file_content_mock = ('"Problem Instance","Seed",'
                          '"Objective of validation config #1"\n'
@@ -109,7 +111,7 @@ def test_construct_list_instance_and_performance(mocker):
     )
 
 
-def test_get_dict_instance_to_performance(mocker):
+def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     """Test get_dict_instance_to_performance creates dict from performance list."""
     instance_list = [["instance-1.cnf", 0.01001],
                      ["instance-2.cnf", 1.0],
@@ -131,7 +133,7 @@ def test_get_dict_instance_to_performance(mocker):
     }
 
 
-def test_get_performance_measure_par10(mocker):
+def test_get_performance_measure_par10(mocker: MockFixture) -> None:
     """Test get_performance_measure returns correct measure.
 
     Return `PAR10` for RUNTIME with default penalty multiplier of 10.
@@ -150,7 +152,7 @@ def test_get_performance_measure_par10(mocker):
     assert measure == "PAR10"
 
 
-def test_get_performance_measure_par5(mocker):
+def test_get_performance_measure_par5(mocker: MockFixture) -> None:
     """Test get_performance_measure returns correct measure.
 
     Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
@@ -169,7 +171,7 @@ def test_get_performance_measure_par5(mocker):
     assert measure == "PAR5"
 
 
-def test_get_performance_measure_performance(mocker):
+def test_get_performance_measure_performance(mocker: MockFixture) -> None:
     """Test get_performance_measure returns correct measure for QUALITY."""
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
@@ -181,7 +183,7 @@ def test_get_performance_measure_performance(mocker):
     assert measure == "performance"
 
 
-def test_get_runtime_bool_runtime(mocker):
+def test_get_runtime_bool_runtime(mocker: MockFixture) -> None:
     """Test get_runtime_bool returns correct string for objective RUNTIME."""
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
@@ -193,7 +195,7 @@ def test_get_runtime_bool_runtime(mocker):
     assert runtime_bool == r"\runtimetrue"
 
 
-def test_get_runtime_bool_quality(mocker):
+def test_get_runtime_bool_quality(mocker: MockFixture) -> None:
     """Test get_runtime_bool returns correct string for objective QUALITY."""
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
@@ -205,7 +207,7 @@ def test_get_runtime_bool_quality(mocker):
     assert runtime_bool == r"\runtimefalse"
 
 
-def test_get_runtime_bool_other(mocker):
+def test_get_runtime_bool_other(mocker: MockFixture) -> None:
     """Test get_runtime_bool returns correct string for no given objective."""
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
@@ -217,7 +219,7 @@ def test_get_runtime_bool_other(mocker):
     assert runtime_bool == ""
 
 
-def test_get_ablation_bool_true(mocker):
+def test_get_ablation_bool_true(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is True."""
     mock_check = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
                               "check_for_ablation",
@@ -233,7 +235,7 @@ def test_get_ablation_bool_true(mocker):
     assert ablation_bool == r"\ablationtrue"
 
 
-def test_get_ablation_bool_false(mocker):
+def test_get_ablation_bool_false(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is False."""
     mock_check = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
                               "check_for_ablation",
@@ -249,7 +251,7 @@ def test_get_ablation_bool_false(mocker):
     assert ablation_bool == r"\ablationfalse"
 
 
-def test_get_features_bool_false(mocker):
+def test_get_features_bool_false(mocker: MockFixture) -> None:
     """Test get_features_bool returns correct string if no feature file is given.
 
     The function should check the scenario file for a link to the feature file.
@@ -272,7 +274,7 @@ def test_get_features_bool_false(mocker):
     assert features_bool == r"\featuresfalse"
 
 
-def test_get_features_bool_true(mocker):
+def test_get_features_bool_true(mocker: MockFixture) -> None:
     """Test get_features_bool returns correct string if feature file is given.
 
     The function should check the scenario file for a link to the feature file.
@@ -295,7 +297,7 @@ def test_get_features_bool_true(mocker):
     assert features_bool == r"\featurestrue"
 
 
-def test_get_data_for_plot_same_instance(mocker):
+def test_get_data_for_plot_same_instance(mocker: MockFixture) -> None:
     """Test get_data_for_plot returns list of values if dicts are correct."""
     dict_configured = {
         "instance-1.cnf": 1.0
@@ -318,7 +320,7 @@ def test_get_data_for_plot_same_instance(mocker):
     assert points == [[1.0, 0.01]]
 
 
-def test_get_data_for_plot_instance_error(mocker):
+def test_get_data_for_plot_instance_error(mocker: MockFixture) -> None:
     """Test get_data_for_plot raises a SystemExit if dicts to not fit.
 
     If the two dicts do not contain the same instances, an error is raised.
@@ -344,7 +346,7 @@ def test_get_data_for_plot_instance_error(mocker):
     mock_dict.assert_any_call(configured_dir, cutoff)
 
 
-def test_get_figure_configure_vs_default(mocker):
+def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     """Test get_figure_configure_vs_default creates plot and returns correct string.
 
     The function `generate_comparison_plot()` should be called with the correct
@@ -393,7 +395,7 @@ def test_get_figure_configure_vs_default(mocker):
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
 
 
-def test_get_figure_configure_vs_default_par(mocker):
+def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     """Test get_figure_configure_vs_default adds params for performance measure PAR.
 
     If the performance measure starts with PAR, `generate_comparison_plot()` should
@@ -446,7 +448,8 @@ def test_get_figure_configure_vs_default_par(mocker):
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
 
 
-def test_get_figure_configured_vs_default_on_test_instance_set(mocker):
+def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixture)\
+        -> None:
     """Test get_figure_configured_vs_default_on_test_instance_set returns correct string.
 
     This should call `get_figure_configure_vs_default()` with correct values and return
@@ -489,7 +492,8 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker):
     assert figure_string == "includegraphics"
 
 
-def test_get_figure_configured_vs_default_on_train_instance_set(mocker):
+def test_get_figure_configured_vs_default_on_train_instance_set(mocker: MockFixture)\
+        -> None:
     """Test get_figure_configured_vs_default_on_train_instance_set return correct string.
 
     This should call `get_figure_configure_vs_default()` with correct values and return
@@ -538,7 +542,7 @@ def test_get_figure_configured_vs_default_on_train_instance_set(mocker):
     assert figure_string == "includegraphics"
 
 
-def test_get_timeouts_test(mocker):
+def test_get_timeouts_test(mocker: MockFixture) -> None:
     """Test get_timeouts_test returns correct number of timeouts from test set."""
     solver_name = "test-solver"
     train_instance = "train-instance"
@@ -582,7 +586,7 @@ def test_get_timeouts_test(mocker):
     assert overlapping == 2
 
 
-def test_get_timeouts_train(mocker):
+def test_get_timeouts_train(mocker: MockFixture) -> None:
     """Test get_timeouts_test returns correct number of timeouts from train set."""
     optimised_configuration_seed = "3"
     solver_name = "test-solver"
@@ -629,7 +633,7 @@ def test_get_timeouts_train(mocker):
     assert overlapping == 2
 
 
-def test_get_timeouts(mocker):
+def test_get_timeouts(mocker: MockFixture) -> None:
     """Test get_timeouts correctly computes timeouts and overlapping values for dicts."""
     conf_dict = {
         "instance-1.cnf": 100.0,
@@ -657,7 +661,7 @@ def test_get_timeouts(mocker):
     assert overlapping == 1
 
 
-def test_get_ablation_table(mocker):
+def test_get_ablation_table(mocker: MockFixture) -> None:
     """Test get_ablation_table calls sah.get_ablation_table and transforms its string."""
     solver_name = "test-solver"
     train_instance = "train-instance"
@@ -685,7 +689,7 @@ def test_get_ablation_table(mocker):
                             r"\end{tabular}")
 
 
-def test_get_dict_variable_to_value_with_test(mocker):
+def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
     """Test get_dict_variable_to_value returns correct dictionary.
 
     If a test instance is present, the function should add the corresponding entry
@@ -727,7 +731,7 @@ def test_get_dict_variable_to_value_with_test(mocker):
     } | common_dict | test_dict
 
 
-def test_get_dict_variable_to_value_without_test(mocker):
+def test_get_dict_variable_to_value_without_test(mocker: MockFixture) -> None:
     """Test get_dict_variable_to_value returns correct dictionary.
 
     If no test instance is present, the function should add the corresponding entry
@@ -759,7 +763,7 @@ def test_get_dict_variable_to_value_without_test(mocker):
     } | common_dict
 
 
-def test_get_dict_variable_to_value_with_ablation(mocker):
+def test_get_dict_variable_to_value_with_ablation(mocker: MockFixture) -> None:
     """Test get_dict_variable_to_value returns correct dictionary.
 
     If `ablation` is set to True, the key `ablationBool` should not be set in the
@@ -800,7 +804,7 @@ def test_get_dict_variable_to_value_with_ablation(mocker):
     } | common_dict | test_dict
 
 
-def test_get_dict_variable_to_value_with_features(mocker):
+def test_get_dict_variable_to_value_with_features(mocker: MockFixture) -> None:
     """Test get_dict_variable_to_value returns correct dictionary.
 
     If the key `featuresBool` in the common dictionary is found and set to true,
@@ -856,7 +860,7 @@ def test_get_dict_variable_to_value_with_features(mocker):
     } | common_dict | test_dict
 
 
-def test_get_dict_variable_to_value_common(mocker):
+def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     """Test get_dict_variable_to_value_common creates the correct dictionary.
 
     Test that all needed functions are called to retrieve values and that these
@@ -980,7 +984,7 @@ def test_get_dict_variable_to_value_common(mocker):
     }
 
 
-def test_get_dict_variable_to_value_test(mocker):
+def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     """Test get_dict_variable_to_value_test creates the correct dictionary.
 
     Test that all needed functions are called to retrieve values and that these
@@ -1064,7 +1068,7 @@ def test_get_dict_variable_to_value_test(mocker):
     }
 
 
-def test_check_results_exist_all_good(mocker):
+def test_check_results_exist_all_good(mocker: MockFixture) -> None:
     """Test check_results_exist does not produce an error if all paths exist."""
     solver_name = "test-solver"
     train_instance = "train-instance"
@@ -1077,7 +1081,7 @@ def test_check_results_exist_all_good(mocker):
     mock_exists.assert_called()
 
 
-def test_check_results_exist_all_error(mocker):
+def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     """Test check_results_exist produces the correct error if no path exists.
 
     If none of the tested paths exist, test that a SystemExit is raised.
@@ -1115,7 +1119,7 @@ def test_check_results_exist_all_error(mocker):
     mock_exists.assert_called()
 
 
-def test_get_most_recent_test_run_full(mocker):
+def test_get_most_recent_test_run_full(mocker: MockFixture) -> None:
     """Test get_most_recent_test_run returns the correct tuple if present in file.
 
     If the last test file contains information on train and test instances, return the
@@ -1137,7 +1141,7 @@ def test_get_most_recent_test_run_full(mocker):
     assert test_flag
 
 
-def test_get_most_recent_test_run_empty(mocker):
+def test_get_most_recent_test_run_empty(mocker: MockFixture) -> None:
     """Test get_most_recent_test_run returns empyt strings if values not present in file.
 
     If the last test file contains no information on train and test instances, return the
@@ -1157,7 +1161,7 @@ def test_get_most_recent_test_run_empty(mocker):
     assert not test_flag
 
 
-def test_generate_report_for_configuration_prep_exists_not(mocker):
+def test_generate_report_for_configuration_prep_exists_not(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_prep creates directory if necessary.
 
     Also test that the function then copies the latex templates to the report directory.
@@ -1182,7 +1186,7 @@ def test_generate_report_for_configuration_prep_exists_not(mocker):
     ])
 
 
-def test_generate_report_for_configuration_prep_exists(mocker):
+def test_generate_report_for_configuration_prep_exists(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_prep copies files to report directory."""
     report_directory = "report/directory"
 
@@ -1200,7 +1204,7 @@ def test_generate_report_for_configuration_prep_exists(mocker):
     mock_system.assert_called_once_with(cp_command)
 
 
-def test_generate_report_for_configuration_train(mocker):
+def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_train generates report.
 
     The function should call functions to prepare report generation and call
@@ -1236,7 +1240,7 @@ def test_generate_report_for_configuration_train(mocker):
     mock_report_for_common.assert_called_once_with(config_report_dir, value_dict)
 
 
-def test_generate_report_for_configuration(mocker):
+def test_generate_report_for_configuration(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration generates report.
 
     The function should call functions to prepare report generation and call
@@ -1274,7 +1278,7 @@ def test_generate_report_for_configuration(mocker):
     mock_report_for_common.assert_called_once_with(config_report_dir, value_dict)
 
 
-def test_generate_report_for_configuration_common(mocker):
+def test_generate_report_for_configuration_common(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_common triggers report generation.
 
     Test that the function reads the template, replaces all variables with values from

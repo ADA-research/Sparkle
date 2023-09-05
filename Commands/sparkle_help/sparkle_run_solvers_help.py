@@ -45,7 +45,7 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
 def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
                            instance_path: str, raw_result_path: str,
                            runsolver_values_path: str, seed_str: str = None,
-                           custom_cutoff: int = None):
+                           custom_cutoff: int = None) -> None:
     """Prepare for execution, run the solver on an instance, check output for errors."""
     if not Path(solver_wrapper_path).is_file():
         print(f'ERROR: Wrapper named "{solver_wrapper_path}" not found, stopping '
@@ -165,7 +165,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         return raw_result_path
 
 
-def check_solver_output_for_errors(raw_result_path: Path):
+def check_solver_output_for_errors(raw_result_path: Path) -> None:
     """Check solver output for known errors."""
     error_lines = [ \
         # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found:
@@ -212,7 +212,7 @@ def run_solver_on_instance_and_process_results(
     return cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path
 
 
-def running_solvers(performance_data_csv_path: str, rerun: bool):
+def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     """Run solvers on all instances.
 
     If rerun is True, rerun for instances with existing performance data.
@@ -318,7 +318,8 @@ def handle_timeouts(runtime: float, status: str,
     return runtime_penalised, status
 
 
-def verify(instance_path, raw_result_path, solver_path, status):
+def verify(instance_path: str, raw_result_path: str, solver_path: str, status: str)\
+        -> str:
     """Run a solution verifier on the solution and update the status if needed."""
     verifier = sgh.settings.get_general_solution_verifier()
 
@@ -480,7 +481,7 @@ def sparkle_sat_parser(raw_result_path: str, runtime: float) -> str:
     return status
 
 
-def remove_faulty_solver(solver_path, instance_path) -> None:
+def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     """Remove a faulty solver from Sparkle.
 
     Input: Path to solver, path to instance it failed on
@@ -552,7 +553,7 @@ def sat_get_result_status(raw_result_path: str) -> str:
     return status
 
 
-def sat_get_verify_string(tmp_verify_result_path):
+def sat_get_verify_string(tmp_verify_result_path: str) -> str:
     """Return the status of the SAT verifier.
 
     Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
@@ -589,7 +590,7 @@ def sat_get_verify_string(tmp_verify_result_path):
     return ret
 
 
-def sat_judge_correctness_raw_result(instance_path, raw_result_path):
+def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -> str:
     """Run a SAT verifier to determine correctness of a result."""
     sat_verifier_path = sgh.sat_verifier_path
     tmp_verify_result_path = (
@@ -611,7 +612,7 @@ def sat_judge_correctness_raw_result(instance_path, raw_result_path):
     return ret
 
 
-def update_performance_data_id():
+def update_performance_data_id() -> None:
     """Update the performance data ID."""
     # Get current pd_id
     pd_id = get_performance_data_id()

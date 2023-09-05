@@ -16,7 +16,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     sgh.settings = sparkle_settings.Settings()
     parser = argparse.ArgumentParser()
@@ -41,7 +41,7 @@ def parser_function():
     return parser
 
 
-def compute_features_parallel(recompute: bool):
+def compute_features_parallel(recompute: bool) -> None:
     """Compute features in parallel.
 
     Args:

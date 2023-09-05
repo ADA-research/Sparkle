@@ -683,7 +683,7 @@ def generate_comparison_plot(points: list,
                              penalty_time: float = None,
                              replace_zeros: bool = True,
                              magnitude_lines: int = sgh.sparkle_maximum_int,
-                             cwd=None) -> None:
+                             cwd: str = None) -> None:
     """Create comparison plots between two different solvers/portfolios.
 
     Args:

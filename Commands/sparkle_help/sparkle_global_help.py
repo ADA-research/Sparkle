@@ -8,7 +8,7 @@ from enum import Enum
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
-def get_seed():
+def get_seed() -> int:
     """Return a seed."""
     return 1
 

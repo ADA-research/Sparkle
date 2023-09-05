@@ -22,7 +22,7 @@ from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -50,7 +50,8 @@ def parser_function():
     return parser
 
 
-def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path) -> bool:
+def judge_exist_remaining_jobs(feature_data_csv_path: str,
+                               performance_data_csv_path: str) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_feature_computation_job = (

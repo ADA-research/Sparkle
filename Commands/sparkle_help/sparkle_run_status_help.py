@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to communicate run statuses of various commands."""
 
-
 from pathlib import Path
 import os
 import time
