@@ -16,7 +16,7 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_settings
-from Commands.Structures.status_info import StatusInfo
+from Commands.Structures.status_info import SolverRunStatusInfo
 
 
 if __name__ == "__main__":
@@ -65,12 +65,8 @@ if __name__ == "__main__":
     raw_result_path = r"Tmp/" + key_str + r".rawres"
     processed_result_path = r"Performance_Data/Tmp/" + key_str + r".result"
 
-    if run_status_path == sgh.pap_sbatch_tmp_path:
-        processed_result_path = f"{sgh.pap_performance_data_tmp_path}/{key_str}.result"
-
     # create statusinfo file
-    task_run_status_path = f"{str(run_status_path)}/{key_str}.statusinfo"
-    status_info = StatusInfo(Path(task_run_status_path))
+    status_info = SolverRunStatusInfo(key_str)
     status_info.set_status("Running")
     status_info.set_solver(sfh.get_last_level_directory_name(solver_path))
     status_info.set_instance(sfh.get_last_level_directory_name(instance_path))
@@ -104,6 +100,7 @@ if __name__ == "__main__":
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
 
     sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
+    # status_info.delete()
 
     if run_status_path != sgh.pap_sbatch_tmp_path:
         if solver_path.startswith(sgh.sparkle_tmp_path):

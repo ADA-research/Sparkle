@@ -4,17 +4,17 @@
 from pathlib import Path
 import json
 import fcntl
+from enum import Enum
+
+from Commands.sparkle_help import sparkle_global_help as sgh
+
+
+class StatusInfoType(str, Enum):
+    SOLVER_RUN = "SBATCH_Solver_Run_Jobs"
 
 
 class StatusInfo:
     """A class to represent a status info file."""
-
-    status = "Status"
-    solver = "Solver"
-    instance = "Instance"
-    start_time = "Start Time"
-    start_timestamp = "Start Timestamp"
-    cutoff_time = "Cutoff Time"
 
     def __init__(self, path: Path):
         """Constructs the data dictionary.
@@ -36,6 +36,33 @@ class StatusInfo:
         status_info = cls(path)
         status_info.data = data
         return status_info
+
+    def save(self):
+        """Saves the data to the file."""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        f = self.path.open("w")
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        f.write(json.dumps(self.data))
+        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+
+    def delete(self):
+        """Deletes the statusinfo file"""
+        self.path.unlink()
+
+
+class SolverRunStatusInfo(StatusInfo):
+
+    status = "Status"
+    solver = "Solver"
+    instance = "Instance"
+    start_time = "Start Time"
+    start_timestamp = "Start Timestamp"
+    cutoff_time = "Cutoff Time"
+
+    def __init__(self, key_str: str):
+        job_path = StatusInfoType.SOLVER_RUN
+        path = Path(f"{sgh.sparkle_tmp_path}/{job_path}/{key_str}.statusinfo")
+        super().__init__(path)
 
     def set_status(self, status: str):
         """Sets the status attribute.
@@ -85,18 +112,6 @@ class StatusInfo:
         """
         self.data[self.cutoff_time] = cutoff_time
 
-    def save(self):
-        """Saves the data to the file."""
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        f = self.path.open("w")
-        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        f.write(json.dumps(self.data))
-        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-
-    def delete(self):
-        """Deletes the statusinfo file"""
-        self.path.unlink()
-
     def get_status(self) -> str:
         """Access to status."""
         return self.data[self.status]
@@ -120,3 +135,4 @@ class StatusInfo:
     def get_cutoff_time(self) -> str:
         """Access to cutoff time."""
         return self.data[self.cutoff_time]
+

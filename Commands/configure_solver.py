@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
+from Commands.Structures.status_info import StatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_add_solver_help as sash
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
@@ -192,6 +193,9 @@ if __name__ == "__main__":
             "None or multiple .pcs files found. Solver is not valid for configuration."
         )
         sys.exit()
+
+    task_run_status_path = f"{str(sgh.configuration_job_path)}/{key_str}.statusinfo"
+    status_info = StatusInfo(Path(sgh.configuration_job_path))
 
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
