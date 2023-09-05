@@ -93,6 +93,10 @@ class StatusInfo:
         f.write(json.dumps(self.data))
         fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
+    def delete(self):
+        """Deletes the statusinfo file"""
+        self.path.unlink()
+
     def get_status(self) -> str:
         """Access to status."""
         return self.data[self.status]
