@@ -152,5 +152,3 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
 
     print("")
     return
-
-

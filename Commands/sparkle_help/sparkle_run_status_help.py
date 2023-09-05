@@ -2,15 +2,15 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to communicate run statuses of various commands."""
 
-from pathlib import Path
 import os
 import time
+from pathlib import Path
 
+from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_command_help as sch
-from Commands.Structures.status_info import *
+from Commands.Structures.status_info import SolverRunStatusInfo, StatusInfoType
 
 
 def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
@@ -27,7 +27,7 @@ def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
     return [x for x in jobs if x["command"] == command]
 
 
-def print_running_jobs():
+def print_running_jobs() -> None:
     """Print all the running jobs."""
     sjh.cleanup_active_jobs()
     jobs = sjh.read_active_jobs()
@@ -44,7 +44,7 @@ def print_running_jobs():
                   f"with job ID {command_jobs_ids}")
 
 
-def print_running_solver_jobs():
+def print_running_solver_jobs() -> None:
     """Return a list of currently active run solver job."""
     tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
@@ -60,7 +60,7 @@ def print_running_solver_jobs():
         print()
 
 
-def print_algorithm_selector_info():
+def print_algorithm_selector_info() -> None:
     """Print information about the Sparkle algorithm selector."""
     sparkle_algorithm_selector_path = sgh.sparkle_algorithm_selector_path
     print("")
@@ -80,7 +80,7 @@ def print_algorithm_selector_info():
     return
 
 
-def print_parallel_portfolio_info():
+def print_parallel_portfolio_info() -> None:
     """Print information about the Sparkle parallel portfolio."""
     sparkle_parallel_portfolio_path = sgh.sparkle_parallel_portfolio_path
     print("")
@@ -100,7 +100,7 @@ def print_parallel_portfolio_info():
     return
 
 
-def print_algorithm_configuration_info():
+def print_algorithm_configuration_info() -> None:
     """Print information about the Sparkle algorithm configuration."""
     print("")
     print("Status of algorithm configuration in Sparkle:")
@@ -127,7 +127,7 @@ def print_algorithm_configuration_info():
     print("")
 
 
-def print_algorithm_selection_report_info():
+def print_algorithm_selection_report_info() -> None:
     """Print the current status of a Sparkle algorithm selection report."""
     sparkle_report_path = Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf")
     print("")
@@ -146,7 +146,7 @@ def print_algorithm_selection_report_info():
     return
 
 
-def print_algorithm_configuration_report_info():
+def print_algorithm_configuration_report_info() -> None:
     """Print the current status of the Sparkle algorithm configuration report."""
     sparkle_report_base_path = Path("Configuration_Reports")
     report_file_name = \
@@ -171,7 +171,7 @@ def print_algorithm_configuration_report_info():
     return
 
 
-def print_parallel_portfolio_report_info():
+def print_parallel_portfolio_report_info() -> None:
     """Print the current status of a Sparkle parallel portfolio report."""
     sparkle_report_path = Path("Components/Sparkle-latex-generator"
                                + "-for-parallel-portfolio/template-Sparkle.pdf")
@@ -191,13 +191,13 @@ def print_parallel_portfolio_report_info():
     return
 
 
-def timestamp_to_time(timestamp) -> str:
+def timestamp_to_time(timestamp: float) -> str:
     """Return a timestamp as a readable str."""
     time_struct = time.gmtime(timestamp)
     return time.strftime("%Y-%m-%d %H:%M:%S", time_struct)
 
 
-def get_file_modify_time(file_path):
+def get_file_modify_time(file_path: str) -> str:
     """Return the last time a file was modified."""
     timestamp = os.path.getmtime(file_path)
     return timestamp_to_time(timestamp) + " (UTC+0)"
