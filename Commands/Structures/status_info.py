@@ -20,6 +20,7 @@ class StatusInfoType(str, Enum):
     CONFIGURE_SOLVER = "SBATCH_Configure_Solver_Jobs"
     CONSTRUCT_PARALLEL_PORTFOLIO = "SBATCH_Construct_Parallel_Portfolio_Jobs"
     CONSTRUCT_PORTFOLIO_SELECTOR = "SBATCH_Construct_Portfolio_Selector_Jobs"
+    GENERATE_REPORT = "SBATCH_Generate_Report_Jobs"
 
 
 class StatusInfo(ABC):
@@ -280,6 +281,7 @@ class ConstructPortfolioSelectorStatusInfo(StatusInfo):
         return self.data[self.algorithm_selector_path_key]
 
     def get_key_string(self: ConstructPortfolioSelectorStatusInfo) -> str:
+        """Create key string."""
         algorithm_selector = self.get_algorithm_selector_path().split("/")[-1]
         feature_data = self.get_feature_data_csv_path().split("/")[-1]
         performance_data = self.get_performance_data_csv_path().split("/")[-1]
@@ -288,3 +290,20 @@ class ConstructPortfolioSelectorStatusInfo(StatusInfo):
         return f"{algorithm_selector}_{feature_data}_{performance_data}_{random_string}"
 
 
+class GenerateReportStatusInfo(StatusInfo):
+    """Status info for generation of reports."""
+    job_path = StatusInfoType.GENERATE_REPORT
+    report_type_key = "Report Type"
+
+    def set_report_type(self: GenerateReportStatusInfo, report_type: sgh.ReportType)\
+            -> None:
+        """Set the report type."""
+        self.data[self.report_type_key] = report_type
+
+    def get_report_type(self: GenerateReportStatusInfo) -> str:
+        """Access to the report type."""
+        return self.data[self.report_type_key]
+
+    def get_key_string(self: GenerateReportStatusInfo) -> str:
+        """Create key string."""
+        return f"{self.get_report_type()}_{sbh.get_time_pid_random_string()}"

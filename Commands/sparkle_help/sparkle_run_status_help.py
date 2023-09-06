@@ -2,18 +2,16 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to communicate run statuses of various commands."""
 
-import os
-import time
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.Structures.status_info import (SolverRunStatusInfo, StatusInfoType,
                                              ConfigureSolverStatusInfo,
                                              ConstructParallelPortfolioStatusInfo,
-                                             ConstructPortfolioSelectorStatusInfo)
+                                             ConstructPortfolioSelectorStatusInfo,
+                                             GenerateReportStatusInfo)
 
 
 def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
@@ -119,7 +117,27 @@ def print_running_portfolio_selector_construction_jobs() -> None:
             print(f"Start Time: {status_info.get_start_time()}")
             print(f"Algorithm Selector: {status_info.get_algorithm_selector_path()}")
             print(f"Feature data csv: {str(status_info.get_feature_data_csv_path())}")
-            print(f"Performance data csv: {str(status_info.get_performance_data_csv_path())}")
+            print(f"Performance data csv: "
+                  f"{str(status_info.get_performance_data_csv_path())}")
             print()
     else:
         print("No running PS construction jobs")
+
+
+def print_running_generate_report_jobs() -> None:
+    """Print a list of currently active generate report jobs."""
+    tmp_directory = (f"{sgh.sparkle_tmp_path}/"
+                     f"{StatusInfoType.GENERATE_REPORT}/")
+    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    if len(list_all_statusinfo_filename) > 0:
+        print("Running generate report jobs:")
+        for statusinfo_filename in list_all_statusinfo_filename:
+            statusinfo_filepath = Path(
+                tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
+            status_info = (GenerateReportStatusInfo
+                           .from_file(statusinfo_filepath))
+            print(f"Start Time: {status_info.get_start_time()}")
+            print(f"Report Type: {status_info.get_report_type()}")
+            print()
+    else:
+        print("No running generate report jobs")

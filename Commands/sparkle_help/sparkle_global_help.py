@@ -32,7 +32,7 @@ sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 sparkle_global_output_dir = Path("Output")
 
 
-class ReportType(Enum):
+class ReportType(str, Enum):
     """enum for separating different types of reports."""
     ALGORITHM_SELECTION = "algorithm_selection"
     ALGORITHM_CONFIGURATION = "algorithm_configuration"

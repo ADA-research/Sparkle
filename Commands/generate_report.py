@@ -5,6 +5,7 @@ import sys
 import argparse
 from pathlib import Path
 
+from Commands.Structures.status_info import GenerateReportStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
 from Commands.sparkle_help import \
@@ -165,18 +166,30 @@ if __name__ == "__main__":
             sys.exit()
 
         print("Generating report ...")
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.ALGORITHM_SELECTION)
+        status_info.save()
         if test_case_directory is None:
             sgrh.generate_report()
             print("Report generated ...")
         else:
             sgrh.generate_report(str(test_case_directory))
             print("Report for test generated ...")
+        status_info.delete()
 
     elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.PARALLEL_PORTFOLIO)
+        status_info.save()
+
         sgrfpph.generate_report(parallel_portfolio_path, pap_instance_list)
         print("Parallel portfolio report generated ...")
+        status_info.delete()
     else:
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.ALGORITHM_CONFIGURATION)
+        status_info.save()
         # Reporting for algorithm configuration
         solver_name = sfh.get_last_level_directory_name(solver)
 
@@ -227,6 +240,8 @@ if __name__ == "__main__":
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
             sys.exit(-1)
+
+        status_info.delete()
 
     # Write used settings to file
     sgh.settings.write_used_settings()
