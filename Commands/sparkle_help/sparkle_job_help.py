@@ -297,7 +297,7 @@ def change_job_states(job_ids: list[str]) -> None:
 
 
 def cleanup_active_jobs() -> int:
-    """Change the state of completed jobs to done.
+    """Change the state of completed jobs to be done.
 
     Returns:
       Number of active jobs (after changing the state of the completed jobs).

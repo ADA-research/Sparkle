@@ -10,7 +10,8 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_command_help as sch
-from Commands.Structures.status_info import SolverRunStatusInfo, StatusInfoType
+from Commands.Structures.status_info import (SolverRunStatusInfo, StatusInfoType,
+                                             ConfigureSolverStatusInfo)
 
 
 def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
@@ -48,16 +49,37 @@ def print_running_solver_jobs() -> None:
     """Return a list of currently active run solver job."""
     tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
-    print("Running Solver Jobs:")
-    for statusinfo_filename in list_all_statusinfo_filename:
-        statusinfo_filepath = Path(
-            tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
-        status_info = SolverRunStatusInfo.from_file(statusinfo_filepath)
-        print(status_info.get_solver())
-        print(status_info.get_instance())
-        print(status_info.get_status())
-        print(status_info.get_start_time())
-        print()
+    if len(list_all_statusinfo_filename) > 0:
+        print("Running solver jobs:")
+        for statusinfo_filename in list_all_statusinfo_filename:
+            statusinfo_filepath = Path(
+                tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
+            status_info = SolverRunStatusInfo.from_file(statusinfo_filepath)
+            print(f"Start Time: {status_info.get_start_time()}")
+            print(f"Solver: {status_info.get_solver()}")
+            print(f"Instance: {status_info.get_instance()}")
+            print()
+    else:
+        print("No running solver jobs")
+
+
+def print_running_configuration_jobs() -> None:
+    """Return a list of currently active run solver job."""
+    tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.CONFIGURE_SOLVER}/"
+    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    if len(list_all_statusinfo_filename) > 0:
+        print("Running configuration jobs:")
+        for statusinfo_filename in list_all_statusinfo_filename:
+            statusinfo_filepath = Path(
+                tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
+            status_info = ConfigureSolverStatusInfo.from_file(statusinfo_filepath)
+            print(f"Start Time: {status_info.get_start_time()}")
+            print(f"Solver: {status_info.get_solver()}")
+            print(f"Instance set test: {status_info.get_instance_set_test()}")
+            print(f"Instance set train: {status_info.get_instance_set_train()}")
+            print()
+    else:
+        print("No running configuration jobs")
 
 
 def print_algorithm_selector_info() -> None:
