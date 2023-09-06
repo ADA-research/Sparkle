@@ -6,6 +6,7 @@ import sys
 import argparse
 from pathlib import Path
 
+from Commands.Structures.status_info import ConstructPortfolioSelectorStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -127,6 +128,12 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle portfolio selector ...")
 
+    status_info = ConstructPortfolioSelectorStatusInfo()
+    status_info.set_algorithm_selector_path(str(sgh.sparkle_algorithm_selector_path))
+    status_info.set_feature_data_csv_path(str(sgh.feature_data_csv_path))
+    status_info.set_performance_data_csv_path(str(sgh.performance_data_csv_path))
+    status_info.save()
+
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         sgh.feature_data_csv_path, sgh.performance_data_csv_path
     )
@@ -165,6 +172,8 @@ if __name__ == "__main__":
         # selectors
         scmch.compute_perfect(flag_recompute_marg_cont)
         scmch.compute_actual(flag_recompute_marg_cont)
+
+        status_info.delete()
 
         delete_log_files()
 

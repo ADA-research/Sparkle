@@ -19,6 +19,7 @@ class StatusInfoType(str, Enum):
     SOLVER_RUN = "SBATCH_Solver_Run_Jobs"
     CONFIGURE_SOLVER = "SBATCH_Configure_Solver_Jobs"
     CONSTRUCT_PARALLEL_PORTFOLIO = "SBATCH_Construct_Parallel_Portfolio_Jobs"
+    CONSTRUCT_PORTFOLIO_SELECTOR = "SBATCH_Construct_Portfolio_Selector_Jobs"
 
 
 class StatusInfo(ABC):
@@ -242,3 +243,48 @@ class ConstructParallelPortfolioStatusInfo(StatusInfo):
     def get_key_string(self: ConstructParallelPortfolioStatusInfo) -> str:
         """Create key string."""
         return f"{self.get_portfolio_name()}_{sbh.get_time_pid_random_string()}"
+
+
+class ConstructPortfolioSelectorStatusInfo(StatusInfo):
+    """Status info for construction of portfolio selectors."""
+    job_path = StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR
+    algorithm_selector_path_key = "Algorithm selector path"
+    feature_data_csv_path_key = "Feature data csv path"
+    performance_data_csv_path_key = "Performance data csv path"
+
+    def set_algorithm_selector_path(self: ConstructPortfolioSelectorStatusInfo,
+                                    algorithm_selector_path: str) -> None:
+        """Set algorithm selector path."""
+        self.data[self.algorithm_selector_path_key] = algorithm_selector_path
+
+    def set_feature_data_csv_path(self: ConstructPortfolioSelectorStatusInfo,
+                                  feature_data_csv_path: str) -> None:
+        """Set feature data csv path."""
+        self.data[self.feature_data_csv_path_key] = feature_data_csv_path
+
+    def set_performance_data_csv_path(self: ConstructPortfolioSelectorStatusInfo,
+                                      performance_data_csv_path: str) -> None:
+        """Set performance data csv path."""
+        self.data[self.performance_data_csv_path_key] = performance_data_csv_path
+
+    def get_performance_data_csv_path(self: ConstructPortfolioSelectorStatusInfo) -> str:
+        """"Access to performance data csv path."""
+        return self.data[self.performance_data_csv_path_key]
+
+    def get_feature_data_csv_path(self: ConstructPortfolioSelectorStatusInfo) -> str:
+        """Access to feature data csv path."""
+        return self.data[self.feature_data_csv_path_key]
+
+    def get_algorithm_selector_path(self: ConstructPortfolioSelectorStatusInfo) -> str:
+        """Access to algorithm selector path."""
+        return self.data[self.algorithm_selector_path_key]
+
+    def get_key_string(self: ConstructPortfolioSelectorStatusInfo) -> str:
+        algorithm_selector = self.get_algorithm_selector_path().split("/")[-1]
+        feature_data = self.get_feature_data_csv_path().split("/")[-1]
+        performance_data = self.get_performance_data_csv_path().split("/")[-1]
+        random_string = sbh.get_time_pid_random_string()
+
+        return f"{algorithm_selector}_{feature_data}_{performance_data}_{random_string}"
+
+
