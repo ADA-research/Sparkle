@@ -38,4 +38,5 @@ if __name__ == "__main__":
     sparkle_run_status_help.print_running_jobs()
     sparkle_run_status_help.print_running_solver_jobs()
     sparkle_run_status_help.print_running_configuration_jobs()
+    sparkle_run_status_help.print_running_parallel_portfolio_construction_jobs()
     print("Current running status of Sparkle reported!")

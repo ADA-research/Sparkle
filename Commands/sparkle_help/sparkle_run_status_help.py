@@ -11,7 +11,8 @@ from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.Structures.status_info import (SolverRunStatusInfo, StatusInfoType,
-                                             ConfigureSolverStatusInfo)
+                                             ConfigureSolverStatusInfo,
+                                             ConstructParallelPortfolioStatusInfo)
 
 
 def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
@@ -46,7 +47,7 @@ def print_running_jobs() -> None:
 
 
 def print_running_solver_jobs() -> None:
-    """Return a list of currently active run solver job."""
+    """Print a list of currently active run solver job."""
     tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
     if len(list_all_statusinfo_filename) > 0:
@@ -64,7 +65,7 @@ def print_running_solver_jobs() -> None:
 
 
 def print_running_configuration_jobs() -> None:
-    """Return a list of currently active run solver job."""
+    """Print a list of currently active run solver job."""
     tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.CONFIGURE_SOLVER}/"
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
     if len(list_all_statusinfo_filename) > 0:
@@ -82,44 +83,24 @@ def print_running_configuration_jobs() -> None:
         print("No running configuration jobs")
 
 
-def print_algorithm_selector_info() -> None:
-    """Print information about the Sparkle algorithm selector."""
-    sparkle_algorithm_selector_path = sgh.sparkle_algorithm_selector_path
-    print("")
-    print("Status of algorithm selector in Sparkle:")
-
-    key_str = "construct_sparkle_algorithm_selector"
-    task_run_status_path = f"Tmp/{sgh.algorithm_selector_job_path}/{key_str}.statusinfo"
-    if Path(task_run_status_path).is_file():
-        print("Currently Sparkle algorithm selector is constructing ...")
-    elif Path(sparkle_algorithm_selector_path).is_file():
-        print(f"Path: {sparkle_algorithm_selector_path}")
-        print("Last modified time: "
-              f"{get_file_modify_time(sparkle_algorithm_selector_path)}")
+def print_running_parallel_portfolio_construction_jobs() -> None:
+    """Print a list of currently active pap construction jobs."""
+    tmp_directory = (f"{sgh.sparkle_tmp_path}/"
+                     f"{StatusInfoType.CONSTRUCT_PARALLEL_PORTFOLIO}/")
+    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    if len(list_all_statusinfo_filename) > 0:
+        print("Running PaP construction jobs:")
+        for statusinfo_filename in list_all_statusinfo_filename:
+            statusinfo_filepath = Path(
+                tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
+            status_info = (ConstructParallelPortfolioStatusInfo
+                           .from_file(statusinfo_filepath))
+            print(f"Start Time: {status_info.get_start_time()}")
+            print(f"Portfolio Name: {status_info.get_portfolio_name()}")
+            print(f"Solver List: {str(status_info.get_list_of_solvers())}")
+            print()
     else:
-        print("No algorithm selector exists!")
-    print("")
-    return
-
-
-def print_parallel_portfolio_info() -> None:
-    """Print information about the Sparkle parallel portfolio."""
-    sparkle_parallel_portfolio_path = sgh.sparkle_parallel_portfolio_path
-    print("")
-    print("Status of parallel portfolio in Sparkle:")
-
-    key_str = "construct_sparkle_parallel_portfolio"
-    task_run_status_path = f"Tmp/{sgh.pap_sbatch_tmp_path}/{key_str}.statusinfo"
-    if Path(task_run_status_path).is_file():
-        print("Currently Sparkle parallel portfolio is constructing ...")
-    elif Path(sparkle_parallel_portfolio_path).is_file():
-        print(f"Path: {sparkle_parallel_portfolio_path}")
-        print("Last modified time: "
-              f"{get_file_modify_time(sparkle_parallel_portfolio_path)}")
-    else:
-        print("No parallel portfolio exists!")
-    print("")
-    return
+        print("No running PaP construction jobs")
 
 
 def print_algorithm_configuration_info() -> None:

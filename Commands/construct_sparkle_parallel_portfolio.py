@@ -6,6 +6,7 @@ import sys
 import argparse
 from pathlib import Path
 
+from Commands.Structures.status_info import ConstructParallelPortfolioStatusInfo
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
@@ -84,6 +85,12 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle parallel portfolio ...")
 
+    # create status info
+    status_info = ConstructParallelPortfolioStatusInfo()
+    status_info.set_portfolio_name(str(portfolio_name))
+    status_info.set_list_of_solvers(list_of_solvers)
+    status_info.save()
+
     success = scpp.construct_sparkle_parallel_portfolio(portfolio_path, args.overwrite,
                                                         list_of_solvers)
 
@@ -96,6 +103,8 @@ if __name__ == "__main__":
         sgh.latest_scenario.set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
         # Set to default to overwrite instance from possible previous run
         sgh.latest_scenario.set_parallel_portfolio_instance_list()
+
+        status_info.delete()
 
     else:
         print("An unexpected error occurred when constructing the portfolio, please "

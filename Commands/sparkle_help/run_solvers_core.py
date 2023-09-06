@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     start_time = time.time()
     # create statusinfo file
-    status_info = SolverRunStatusInfo(key_str)
+    status_info = SolverRunStatusInfo()
     status_info.set_solver(sfh.get_last_level_directory_name(solver_path))
     status_info.set_instance(sfh.get_last_level_directory_name(instance_path))
     cutoff_str = str(sgh.settings.get_general_target_cutoff_time())

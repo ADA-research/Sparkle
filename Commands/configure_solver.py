@@ -194,13 +194,11 @@ if __name__ == "__main__":
         )
         sys.exit()
 
+    status_info = ConfigureSolverStatusInfo()
+    status_info.set_solver(str(solver.name))
+    status_info.set_instance_set_train(str(instance_set_train.name))
     ins_t_str = instance_set_test.name if instance_set_test is not None else "_"
-    status_info = (
-        ConfigureSolverStatusInfo(f"{solver.name}_{instance_set_train.name}_"
-                                  f"{ins_t_str}"))
-    status_info.set_solver(str(solver))
     status_info.set_instance_set_test(str(instance_set_test))
-    status_info.set_instance_set_train(str(instance_set_train))
     status_info.save()
 
     # Clean the configuration and ablation directories for this solver to make sure
