@@ -39,6 +39,7 @@ class StatusInfo(ABC):
         self.set_start_time(time.strftime("%Y-%m-%d %H:%M:%S",
                             time.localtime(start_time)))
         self.set_start_timestamp(str(start_time))
+        self.path = None
 
     def set_status(self: SolverRunStatusInfo, status: str) -> None:
         """Sets the status attribute.
@@ -74,6 +75,7 @@ class StatusInfo(ABC):
         data = dict(json.load(open(path)))
         status_info = cls()
         status_info.data = data
+        status_info.path = path
         return status_info
 
     @abstractmethod
@@ -84,15 +86,16 @@ class StatusInfo(ABC):
     def save(self: StatusInfo) -> None:
         """Saves the data to the file."""
         key_str = self.get_key_string()
-        path = Path(f"{sgh.sparkle_tmp_path}/{self.job_path}/{key_str}.statusinfo")
-        path.parent.mkdir(parents=True, exist_ok=True)
-        f = path.open("w")
+        if self.path is None:
+            self.path = Path(f"{sgh.sparkle_tmp_path}/{self.job_path}/{key_str}.statusinfo")
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+        f = self.path.open("w")
         fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         f.write(json.dumps(self.data))
         fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
     def delete(self: StatusInfo) -> None:
-        """Deletes the statusinfo file."""
+        """Deletes the status info file."""
         self.path.unlink()
 
     def get_start_time(self: SolverRunStatusInfo) -> str:
