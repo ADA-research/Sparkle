@@ -88,7 +88,7 @@ def print_running_parallel_portfolio_construction_jobs() -> None:
                      f"{StatusInfoType.CONSTRUCT_PARALLEL_PORTFOLIO}/")
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
     if len(list_all_statusinfo_filename) > 0:
-        print("Running PaP construction jobs:")
+        print("Running parallel portfolio construction jobs:")
         for statusinfo_filename in list_all_statusinfo_filename:
             statusinfo_filepath = Path(
                 tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
@@ -99,7 +99,7 @@ def print_running_parallel_portfolio_construction_jobs() -> None:
             print(f"Solver List: {str(status_info.get_list_of_solvers())}")
             print()
     else:
-        print("No running PaP construction jobs")
+        print("No running parallel portfolio construction jobs")
 
 
 def print_running_portfolio_selector_construction_jobs() -> None:
@@ -108,7 +108,7 @@ def print_running_portfolio_selector_construction_jobs() -> None:
                      f"{StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR}/")
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
     if len(list_all_statusinfo_filename) > 0:
-        print("Running PS construction jobs:")
+        print("Running portfolio selector construction jobs:")
         for statusinfo_filename in list_all_statusinfo_filename:
             statusinfo_filepath = Path(
                 tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
@@ -121,7 +121,7 @@ def print_running_portfolio_selector_construction_jobs() -> None:
                   f"{str(status_info.get_performance_data_csv_path())}")
             print()
     else:
-        print("No running PS construction jobs")
+        print("No running portfolio selector construction jobs")
 
 
 def print_running_generate_report_jobs() -> None:
