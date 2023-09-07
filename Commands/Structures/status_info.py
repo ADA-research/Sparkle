@@ -87,7 +87,8 @@ class StatusInfo(ABC):
         """Saves the data to the file."""
         key_str = self.get_key_string()
         if self.path is None:
-            self.path = Path(f"{sgh.sparkle_tmp_path}/{self.job_path}/{key_str}.statusinfo")
+            self.path = Path(f"{sgh.sparkle_tmp_path}/"
+                             f"{self.job_path}/{key_str}.statusinfo")
             self.path.parent.mkdir(parents=True, exist_ok=True)
         f = self.path.open("w")
         fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
