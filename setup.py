@@ -1,8 +1,8 @@
 """Setup file for Sparkle."""
 from setuptools import setup, find_packages
 
-from Commands import about
+from Commands.sparkle_help.sparkle_global_help import sparkle_version
 
 setup(name="sparkle",
-      version=about.__version__,
+      version=sparkle_version,
       packages=find_packages())
