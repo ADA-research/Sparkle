@@ -41,10 +41,4 @@ if __name__ == "__main__":
     sparkle_system_status_help.print_list_remaining_performance_computation_job(
         sparkle_global_help.performance_data_csv_path, args.verbose
     )
-    sparkle_system_status_help.print_algorithm_selector_info()
-    sparkle_system_status_help.print_parallel_portfolio_info()
-    sparkle_system_status_help.print_algorithm_configuration_info()
-    sparkle_system_status_help.print_algorithm_configuration_report_info()
-    sparkle_system_status_help.print_parallel_portfolio_report_info()
-    sparkle_system_status_help.print_algorithm_selection_report_info()
     print("Current system status of Sparkle reported!")

@@ -6,6 +6,7 @@ import sys
 import argparse
 from pathlib import Path
 
+from Commands.Structures.status_info import ConstructPortfolioSelectorStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
@@ -19,7 +20,6 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.reporting_scenario import Scenario
-from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
@@ -128,8 +128,11 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle portfolio selector ...")
 
-    sssh.generate_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-                                  sgh.algorithm_selector_job_path)
+    status_info = ConstructPortfolioSelectorStatusInfo()
+    status_info.set_algorithm_selector_path(str(sgh.sparkle_algorithm_selector_path))
+    status_info.set_feature_data_csv_path(str(sgh.feature_data_csv_path))
+    status_info.set_performance_data_csv_path(str(sgh.performance_data_csv_path))
+    status_info.save()
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         sgh.feature_data_csv_path, sgh.performance_data_csv_path
@@ -141,8 +144,7 @@ if __name__ == "__main__":
         print("Please first execute all unperformed jobs before constructing Sparkle "
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
-        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-                                    sgh.algorithm_selector_job_path)
+
         sys.exit()
 
     delete_log_files()  # Make sure no old log files remain
@@ -171,8 +173,8 @@ if __name__ == "__main__":
         scmch.compute_perfect(flag_recompute_marg_cont)
         scmch.compute_actual(flag_recompute_marg_cont)
 
-        sssh.delete_task_run_status(sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-                                    sgh.algorithm_selector_job_path)
+        status_info.delete()
+
         delete_log_files()
 
     # Write used settings to file

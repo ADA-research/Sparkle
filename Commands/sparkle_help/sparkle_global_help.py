@@ -32,7 +32,7 @@ sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 sparkle_global_output_dir = Path("Output")
 
 
-class ReportType(Enum):
+class ReportType(str, Enum):
     """enum for separating different types of reports."""
     ALGORITHM_SELECTION = "algorithm_selection"
     ALGORITHM_CONFIGURATION = "algorithm_configuration"
@@ -48,11 +48,6 @@ sparkle_global_log_dir = "Log/"
 sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_log_file)
 
 sparkle_tmp_path = "Tmp/"
-
-extractor_job_path = Path(f"{sparkle_tmp_path}SBATCH_Extractor_Jobs/")
-algorithm_selector_job_path = Path(f"{sparkle_tmp_path}SBATCH_Portfolio_Jobs/")
-report_job_path = Path(f"{sparkle_tmp_path}SBATCH_Report_Jobs/")
-configuration_job_path = Path(f"{sparkle_tmp_path}SBATCH_Configuration_Jobs")
 
 sparkle_log_path = sparkle_tmp_path + "sparkle_log.out"
 sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"

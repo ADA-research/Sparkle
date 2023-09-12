@@ -5,6 +5,7 @@ import sys
 import argparse
 from pathlib import Path
 
+from Commands.Structures.status_info import GenerateReportStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
 from Commands.sparkle_help import \
@@ -91,33 +92,6 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-def generate_report_task_run_status(report_type: sgh.ReportType) -> None:
-    """Generate run status info files for report generation Slurm batch jobs.
-
-    Args:
-        report_type: type of the report, the run status is generated for
-    """
-    key_str = f"generate_report_{report_type}"
-    task_run_status_path = f"Tmp/{sgh.report_job_path}/{key_str}.statusinfo"
-    status_info_str = "Status: Running\n"
-    sfh.write_string_to_file(Path(task_run_status_path), status_info_str)
-
-    return
-
-
-def delete_report_task_run_status(report_type: sgh.ReportType) -> None:
-    """Remove run status info files for report generation Slurm batch jobs.
-
-    Args:
-        report_type: type of the report, the run status is deleted for
-    """
-    key_str = f"generate_report_{report_type}"
-    task_run_status_path = f"Tmp/{sgh.report_job_path}/{key_str}.statusinfo"
-    Path(task_run_status_path).unlink()
-
-    return
-
-
 if __name__ == "__main__":
     # Initialise settings
     global settings
@@ -192,26 +166,32 @@ if __name__ == "__main__":
             sys.exit()
 
         print("Generating report ...")
-        generate_report_task_run_status(sgh.ReportType.ALGORITHM_SELECTION)
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.ALGORITHM_SELECTION)
+        status_info.save()
         if test_case_directory is None:
             sgrh.generate_report()
             print("Report generated ...")
         else:
             sgrh.generate_report(str(test_case_directory))
             print("Report for test generated ...")
+        status_info.delete()
 
-        delete_report_task_run_status(sgh.ReportType.ALGORITHM_SELECTION)
     elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
-        generate_report_task_run_status(sgh.ReportType.PARALLEL_PORTFOLIO)
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.PARALLEL_PORTFOLIO)
+        status_info.save()
+
         sgrfpph.generate_report(parallel_portfolio_path, pap_instance_list)
         print("Parallel portfolio report generated ...")
-        delete_report_task_run_status(sgh.ReportType.PARALLEL_PORTFOLIO)
+        status_info.delete()
     else:
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.ALGORITHM_CONFIGURATION)
+        status_info.save()
         # Reporting for algorithm configuration
-        generate_report_task_run_status(sgh.ReportType.ALGORITHM_CONFIGURATION)
         solver_name = sfh.get_last_level_directory_name(solver)
-        delete_report_task_run_status(sgh.ReportType.ALGORITHM_CONFIGURATION)
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
         # validate_configured_vs_default
@@ -260,6 +240,8 @@ if __name__ == "__main__":
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
             sys.exit(-1)
+
+        status_info.delete()
 
     # Write used settings to file
     sgh.settings.write_used_settings()
