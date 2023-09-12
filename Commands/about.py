@@ -4,10 +4,9 @@
 import sys
 import argparse
 from Commands.sparkle_help import sparkle_logging as sl
-from Commands.sparkle_help import sparkle_global_help as sgh
 
 __description__ = "Platform for evaluating empirical algorithms/solvers"
-__version__ = sgh.sparkle_version
+__version__ = 0.3
 __licence__ = "MIT"
 __authors__ = [
     # Alphabetical order on family name first
