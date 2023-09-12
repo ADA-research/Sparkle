@@ -6,8 +6,6 @@ from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
 
-from Commands import about
-
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
 def get_seed() -> int:
@@ -17,7 +15,7 @@ def get_seed() -> int:
 
 latest_scenario = None
 
-sparkle_version = about.__version__
+sparkle_version = "0.3"
 
 sparkle_maximum_int = 2147483647
 sparkle_missing_value = -(sparkle_maximum_int - 1)
