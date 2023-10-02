@@ -125,7 +125,7 @@ if __name__ == "__main__":
         test_instance_files = infile.readline().strip().split()
         instance_path = ""
         for test_instance_file in test_instance_files:
-            instance_path += Path(extractor_directory) / test_instance_file + " "
+            instance_path += extractor_directory + "/" + test_instance_file + " "
         instance_path = instance_path.strip()
         infile.close()
 
