@@ -240,6 +240,12 @@ def compute_actual_selector_performance(
                 compute_actual_used_time_for_instance(
                     actual_portfolio_selector_path, instance, feature_data_csv_path,
                     performance_data_csv))
+
+            if flag_successfully_solving:
+                score_this_instance = (1 + (capvalue - performance_this_instance)
+                                       / (num_instances * num_solvers * capvalue + 1))
+            else:
+                score_this_instance = 0
         else:
             # QUALITY_ABSOLUTE
             capvalue = capvalue_list[instance_idx]
@@ -248,11 +254,10 @@ def compute_actual_selector_performance(
                     actual_portfolio_selector_path, instance, feature_data_csv_path,
                     performance_data_csv))
 
-        if flag_successfully_solving:
-            score_this_instance = (1 + (capvalue - performance_this_instance)
-                                   / (num_instances * num_solvers * capvalue + 1))
-        else:
-            score_this_instance = 0
+            if flag_successfully_solving:
+                score_this_instance = performance_this_instance / capvalue
+            else:
+                score_this_instance = 0
 
         actual_selector_performance = actual_selector_performance + score_this_instance
 
@@ -281,7 +286,7 @@ def compute_actual_performance_for_instance(
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)
-    performance_this_instance = sgh.sparkle_maximum_int
+    performance_this_instance = 0
     flag_successfully_solving = True
 
     for i in range(0, len(list_predict_schedule)):
@@ -289,7 +294,7 @@ def compute_actual_performance_for_instance(
         performance = performance_data_csv.get_value(instance, solver)
 
         # Take best performance from the scheduled solvers
-        if performance < performance_this_instance:
+        if performance > performance_this_instance:
             performance_this_instance = performance
 
     return performance_this_instance, flag_successfully_solving
