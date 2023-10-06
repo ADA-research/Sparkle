@@ -17,6 +17,7 @@ from Commands.sparkle_help import sparkle_command_help as sch
 
 from runrunner.base import Runner
 
+
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     sgh.settings = sparkle_settings.Settings()
@@ -40,15 +41,16 @@ def parser_function() -> argparse.ArgumentParser:
               "the default"),
     )
     parser.add_argument(
-    "--run-on",
-    default= Runner.SLURM,
-    help=("On which computer or cluster environment to execute the calculation."
-            "Available: Local, Slurm. Default: Slurm"))
+        "--run-on",
+        default= Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+                "Available: Local, Slurm. Default: Slurm")
+    )
     
     return parser
 
 
-def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM ) -> None:
+def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) -> None:
     """Compute features in parallel.
 
     Args:
@@ -79,7 +81,8 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM ) -
         print(f"Computing features in parallel. Waiting for Slurm job(s) with id(s): "
             f"{job_id_str}")
     else:
-        runs = [ scf.computing_features_parallel(Path(sgh.feature_data_csv_path), recompute) ]
+        runs = [scf.computing_features_parallel( Path(sgh.feature_data_csv_path),
+                                                  recompute)]
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
@@ -89,8 +92,6 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM ) -
             print("Running solvers done!")
 
             return
-        
-        #TODO: Do we have to do more?
 
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
