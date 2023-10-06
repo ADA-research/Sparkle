@@ -59,7 +59,6 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             On which computer or cluster environment to run the solvers.
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
     """
-
     if run_on == ac.SLURM:
         compute_features_parallel_jobid = scf.computing_features_parallel(
             Path(sgh.feature_data_csv_path), recompute
@@ -79,7 +78,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
 
         job_id_str = ",".join(dependency_jobid_list)
         print(f"Computing features in parallel. Waiting for Slurm job(s) with id(s): "
-                f"{job_id_str}")
+              f"{job_id_str}")
     else:
         runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
                                                 recompute)]

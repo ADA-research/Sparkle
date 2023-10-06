@@ -226,11 +226,11 @@ def computing_features_parallel(feature_data_csv_path: Path,
         execution_dir = "./"
         sbatch_script_path = sbatch_script_dir + sbatch_script_name
         run = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES,
-                                        execution_dir)
+                                       execution_dir)
 
         # Log output paths
         sl.add_output(sbatch_script_path,
-                        "Slurm batch script to compute features in parallel")
+                      "Slurm batch script to compute features in parallel")
     else:
         batch = SlurmBatch(sbatch_script_path)
         # Execute the batch locally
