@@ -42,11 +42,11 @@ def parser_function() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--run-on",
-        default= Runner.SLURM,
+        default=Runner.SLURM,
         help=("On which computer or cluster environment to execute the calculation."
-                "Available: Local, Slurm. Default: Slurm")
+              "Available: Local, Slurm. Default: Slurm")
     )
-    
+
     return parser
 
 
@@ -79,10 +79,10 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
 
         job_id_str = ",".join(dependency_jobid_list)
         print(f"Computing features in parallel. Waiting for Slurm job(s) with id(s): "
-            f"{job_id_str}")
+                f"{job_id_str}")
     else:
-        runs = [scf.computing_features_parallel( Path(sgh.feature_data_csv_path),
-                                                  recompute)]
+        runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
+                                                recompute)]
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
@@ -92,7 +92,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             print("Running solvers done!")
 
             return
-
+        # TODO: Do we need to do more here?
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
