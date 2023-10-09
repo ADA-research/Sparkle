@@ -24,8 +24,8 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
-import runrunner as rrr
 from runrunner.base import Runner
+
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -266,7 +266,6 @@ if __name__ == "__main__":
         # Set to default to overwrite possible old path
         sgh.latest_scenario.set_config_instance_set_test()
 
-    
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = ssh.generate_validation_callback_slurm_script(

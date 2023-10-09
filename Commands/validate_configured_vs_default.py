@@ -23,6 +23,7 @@ from sparkle.slurm_parsing import SlurmBatch
 from runrunner.base import Runner
 import runrunner as rrr
 
+
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
@@ -163,7 +164,7 @@ if __name__ == "__main__":
         )
 
         print(f"Running validation in parallel. Waiting for Slurm job with id: "
-            f"{validate_jobid}")
+              f"{validate_jobid}")
     else:
         batch = SlurmBatch(sbatch_script_path)
         cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
@@ -174,13 +175,12 @@ if __name__ == "__main__":
             path=sbatch_script_dir,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
-        
-        
+
         if run is not None:
             print(f"Running validation in parallel. Waiting for local job with id: "
                   f"{run.run_id}")
             run.wait()
-        
+
         print("Running validation done!")
 
     # Write most recent run to file

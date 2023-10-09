@@ -512,6 +512,7 @@ def submit_sbatch_script(sbatch_script_name: str,
 
     return jobid
 
+
 def generate_validation_callback_slurm_script(solver: Path,
                                               instance_set_train: Path,
                                               instance_set_test: Path,

@@ -17,7 +17,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
-from runrunner.base import Runner
+
 
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
                                     instance_test_name: str, exec_path: str = False)\
@@ -170,7 +170,7 @@ def generate_callback_slurm_script(solver_name: str, instance_train_name: str,
 
 
 def generate_validation_slurm_script(solver_name: str, instance_train_name: str,
-                               instance_test_name: str, dependency: str = None)\
+                                     instance_test_name: str, dependency: str = None)\
         -> str:
     """Create a Slurm batch script for ablation analysis validation."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
@@ -375,17 +375,18 @@ def get_ablation_table(solver_name: str, instance_train_name: str,
 
     return results
 
+
 def submit_ablation_slurm(solver_name: str,
                           instance_set_test: str,
                           instance_set_train_name: str,
                           instance_set_test_name: str,
                           ablation_scenario_dir: str) -> [str]:
-    
+    """Sends an ablation to Slurm"""
+
     sbatch_script_path = generate_slurm_script( #Create the script with 
             solver_name, instance_set_train_name, instance_set_test_name
     )
-    """Sends an ablation to Slurm"""
-    
+
     print(f"Created {sbatch_script_path}")
 
     dependency_jobid_list = []
