@@ -8,6 +8,7 @@ import os
 import sys
 import csv
 from pathlib import Path
+from typing import Callable
 
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -249,15 +250,13 @@ def compute_actual_selector_performance(
         else:
             # QUALITY_ABSOLUTE
             capvalue = capvalue_list[instance_idx]
-            performance_this_instance, flag_successfully_solving = (
+            performance_this_instance = (
                 compute_actual_performance_for_instance(
                     actual_portfolio_selector_path, instance, feature_data_csv_path,
-                    performance_data_csv))
+                    performance_data_csv, sum))
 
-            if flag_successfully_solving:
-                score_this_instance = performance_this_instance / capvalue
-            else:
-                score_this_instance = 0
+            score_this_instance = (1 + performance_this_instance
+                                   / (num_instances * num_solvers * capvalue + 1))
 
         actual_selector_performance = actual_selector_performance + score_this_instance
 
@@ -268,8 +267,9 @@ def compute_actual_performance_for_instance(
         actual_portfolio_selector_path: str,
         instance: str,
         feature_data_csv_path: str,
-        performance_data_csv: SparklePerformanceDataCSV) -> tuple[float, bool]:
-    """Return the total time of the selector on a given instance.
+        performance_data_csv: SparklePerformanceDataCSV,
+        aggregation_function: Callable[[list[float]], float]) -> float:
+    """Return the quality performance of the selector on a given instance.
 
     Args:
       actual_portfolio_selector_path: Path to the portfolio selector.
@@ -277,27 +277,25 @@ def compute_actual_performance_for_instance(
       feature_data_csv_path: Path to the CSV file with the feature data.
       performance_data_csv: SparklePerformanceDataCSV object that holds the
         performance data.
+      aggregation_function: function to aggregate performance values
 
     Returns:
-      A 2-tuple where the first entry is the numeric performance value and
-      the second entry is a Boolean indicating whether the instance was solved
-      to optimality within the cutoff time.
+      Returns a performance score for an instance
     """
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)
-    performance_this_instance = 0
-    flag_successfully_solving = True
+    performance_list = []
 
     for i in range(0, len(list_predict_schedule)):
         solver = list_predict_schedule[i][0]
-        performance = performance_data_csv.get_value(instance, solver)
+        performance = float(performance_data_csv.get_value(instance, solver))
 
-        # Take best performance from the scheduled solvers
-        if performance > performance_this_instance:
-            performance_this_instance = performance
+        performance_list.append(performance)
 
-    return performance_this_instance, flag_successfully_solving
+    performance_this_instance = aggregation_function(performance_list)
+
+    return performance_this_instance
 
 
 def compute_actual_used_time_for_instance(
