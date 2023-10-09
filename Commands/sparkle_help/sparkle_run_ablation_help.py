@@ -382,8 +382,7 @@ def submit_ablation_slurm(solver_name: str,
                           instance_set_test_name: str,
                           ablation_scenario_dir: str) -> [str]:
     """Sends an ablation to Slurm"""
-
-    sbatch_script_path = generate_slurm_script( #Create the script with 
+    sbatch_script_path = generate_slurm_script(
             solver_name, instance_set_train_name, instance_set_test_name
     )
 
@@ -417,8 +416,8 @@ def submit_ablation_slurm(solver_name: str,
         jobid = ssh.submit_sbatch_script(
             sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir)
         dependency_jobid_list.append(jobid)
-        print(
-            f"Launched validation sbatch script {sbatch_script_path} with jobid {jobid}")
+        print(f"Launched validation sbatch script {sbatch_script_path}"
+              f"with jobid {jobid}")
 
         # Submit intermediate actions (copy validation table from log)
         sbatch_script_path = generate_validation_callback_slurm_script(
@@ -478,7 +477,7 @@ def submit_ablation_local(solver_name: str,
     dependency_jobid_list.append(jobid)
     print(f"Launched callback sbatch script {sbatch_script_path} with jobid {jobid}")
 
-    #3. Submit ablation validation run when nessesary, here we repeat the process for the test set
+    #3. Submit ablation validation run when nessesary, repeat process for the test set
     if instance_set_test is not None:
         sbatch_script_path = generate_validation_slurm_script(
             solver_name,
