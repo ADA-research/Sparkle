@@ -381,9 +381,9 @@ def submit_ablation_slurm(solver_name: str,
                           instance_set_train_name: str,
                           instance_set_test_name: str,
                           ablation_scenario_dir: str) -> [str]:
-    """Sends an ablation to Slurm"""
+    """Sends an ablation to Slurm."""
     sbatch_script_path = generate_slurm_script(
-            solver_name, instance_set_train_name, instance_set_test_name
+        solver_name, instance_set_train_name, instance_set_test_name
     )
 
     print(f"Created {sbatch_script_path}")
@@ -432,8 +432,9 @@ def submit_ablation_slurm(solver_name: str,
         dependency_jobid_list.append(jobid)
         print(f"Launched validation callback sbatch script {sbatch_script_path} with "
               f"jobid {jobid}")
-    
+
     return dependency_jobid_list
+
 
 def submit_ablation_local(solver_name: str,
                           instance_set_test: str,
@@ -441,10 +442,10 @@ def submit_ablation_local(solver_name: str,
                           instance_set_test_name: str,
                           ablation_scenario_dir: str,
                           run_on: str) -> list:
-    """Sends an ablation to the RunRunner queue"""
-    #1 submit the ablation to the runrunner queue
+    """Sends an ablation to the RunRunner queue."""
+    # 1. submit the ablation to the runrunner queue
     sbatch_script_path = generate_slurm_script(
-            solver_name, instance_set_train_name, instance_set_test_name
+        solver_name, instance_set_train_name, instance_set_test_name
     )
     batch = SlurmBatch(sbatch_script_path)
     cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
@@ -455,12 +456,12 @@ def submit_ablation_local(solver_name: str,
         path=ablation_scenario_dir,
         sbatch_options=batch.sbatch_options,
         srun_options=batch.srun_options)
-    
+
     print(f"Created {batch.Path}")
     jobid = run.run_id
     dependency_jobid_list = [jobid]
-    
-    #2. Submit intermediate actions (copy path from log)
+
+    # 2. Submit intermediate actions (copy path from log)
     sbatch_script_path = generate_callback_slurm_script(
         solver_name, instance_set_train_name, instance_set_test_name, dependency=jobid
     )
@@ -477,14 +478,14 @@ def submit_ablation_local(solver_name: str,
     dependency_jobid_list.append(jobid)
     print(f"Launched callback sbatch script {sbatch_script_path} with jobid {jobid}")
 
-    #3. Submit ablation validation run when nessesary, repeat process for the test set
+    # 3. Submit ablation validation run when nessesary, repeat process for the test set
     if instance_set_test is not None:
         sbatch_script_path = generate_validation_slurm_script(
             solver_name,
             instance_set_train_name,
             instance_set_test_name,
             dependency=jobid)
-        
+
         batch = SlurmBatch(sbatch_script_path)
         cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
         run = rrr.add_to_queue(
