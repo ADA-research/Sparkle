@@ -34,6 +34,10 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         return df.index.tolist()
 
+    def get_number_of_instances(self: SparklePerformanceDataCSV) -> int:
+        """Return the number of instances."""
+        return len(self.list_rows())
+
     def get_list_recompute_performance_computation_job(self: SparklePerformanceDataCSV)\
             -> list[list[list]]:
         """Return a list of performance computations to re-do per instance and solver."""
@@ -115,29 +119,26 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
     def calc_virtual_best_performance_of_portfolio(
             self: SparklePerformanceDataCSV, num_instances: int, num_solvers: int,
-            capvalue_list: list[float] = None) -> float:
+            aggregation_function: Callable[[list[float]], float],
+            minimise: bool,
+            capvalue_list: list[float]) -> float:
         """Return the overall VBS performance."""
         virtual_best_performance = 0
 
         for instance_idx in range(0, len(self.list_rows())):
 
             instance = self.get_row_name(instance_idx)
+            capvalue = capvalue_list[instance_idx]
 
-            if capvalue_list is None:
-                capvalue = sgh.settings.get_general_target_cutoff_time()
+            score = (
+                self.calc_virtual_best_score_of_portfolio_on_instance(
+                    instance, aggregation_function, capvalue))
 
-                score = (
-                    self.calc_virtual_best_score_of_portfolio_on_instance(
-                        instance, min, capvalue))
-                virtual_best_score = (1 + (capvalue - score)
-                                      / (num_instances * num_solvers * capvalue + 1))
-            else:
-                capvalue = capvalue_list[instance_idx]
-                score = (
-                    self.calc_virtual_best_score_of_portfolio_on_instance(
-                        instance, max, capvalue))
-                virtual_best_score = (1 + score
-                                      / (num_instances * num_solvers * capvalue + 1))
+            if minimise:
+                score = capvalue - score
+
+            virtual_best_score = (1 + score
+                                  / (num_instances * num_solvers * capvalue + 1))
             virtual_best_performance = virtual_best_performance + virtual_best_score
 
         return virtual_best_performance

@@ -82,11 +82,17 @@ def get_capvalue_list(
 
 
 def compute_perfect_selector_marginal_contribution(
+        aggregation_function: Callable[[list[float]], float],
+        capvalue_list: list[float],
+        minimise: bool,
         performance_data_csv_path: Path = sgh.performance_data_csv_path,
         flag_recompute: bool = False) -> list[tuple[str, float]]:
     """Return the marginal contributions of solvers for the VBS.
 
     Args:
+      aggregation_function: function to aggregate the per instance scores
+      capvalue_list: list of cap values
+      minimise: flag indicating if scores should be minimised or maximised
       performance_data_csv_path: Path to the CSV file containing the performance data.
       flag_recompute: Boolean indicating whether a recomputation of the marginal
         contribution is enforced.
@@ -109,13 +115,12 @@ def compute_perfect_selector_marginal_contribution(
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     num_instances = performance_data_csv.get_row_size()
     num_solvers = performance_data_csv.get_column_size()
-    capvalue_list = get_capvalue_list(performance_data_csv)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
     virtual_best_performance = (
         performance_data_csv.calc_virtual_best_performance_of_portfolio(
-            num_instances, num_solvers, capvalue_list))
+            num_instances, num_solvers, aggregation_function, minimise, capvalue_list))
     print("Virtual best performance for portfolio selector with all solvers is "
           f"{str(virtual_best_performance)}")
     print("Computing done!")
@@ -128,7 +133,8 @@ def compute_perfect_selector_marginal_contribution(
         tmp_performance_data_csv.delete_column(solver)
         tmp_virtual_best_performance = (
             tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
-                num_instances, num_solvers, capvalue_list))
+                num_instances, num_solvers, aggregation_function,
+                minimise, capvalue_list))
         print("Virtual best performance for portfolio selector excluding solver "
               f"{sfh.get_last_level_directory_name(solver)} is "
               f"{str(tmp_virtual_best_performance)}")
@@ -398,24 +404,21 @@ def compute_actual_selector_marginal_contribution(
                                               feature_data_csv_path)
 
     if not Path(actual_portfolio_selector_path).exists():
-        print(f"****** WARNING: {actual_portfolio_selector_path} does not exist! ******")
-        print("****** WARNING: AutoFolio constructing the actual portfolio selector with"
+        print(f"****** ERROR: {actual_portfolio_selector_path} does not exist! ******")
+        print("****** ERROR: AutoFolio constructing the actual portfolio selector with"
               " all solvers failed! ******")
-        print("****** WARNING: Using virtual best performance instead of actual "
+        print("****** Use virtual best performance instead of actual "
               "performance for this portfolio selector! ******")
-        virtual_best_performance = (
-            performance_data_csv.calc_virtual_best_performance_of_portfolio(
-                num_instances, num_solvers, capvalue_list))
-        actual_selector_performance = virtual_best_performance
+        sys.exit()
     else:
         actual_selector_performance = (
             compute_actual_selector_performance(
                 actual_portfolio_selector_path, performance_data_csv_path,
                 feature_data_csv_path, num_instances, num_solvers, capvalue_list))
 
-    print("Actual performance for portfolio selector with all solvers is "
-          f"{str(actual_selector_performance)}")
-    print("Computing done!")
+        print("Actual performance for portfolio selector with all solvers is "
+              f"{str(actual_selector_performance)}")
+        print("Computing done!")
 
     # Compute contribution per solver
     for solver in performance_data_csv.list_columns():
@@ -448,28 +451,27 @@ def compute_actual_selector_marginal_contribution(
             print("****** WARNING: No solver exists ! ******")
 
         if not Path(tmp_actual_portfolio_selector_path).exists():
-            print(f"****** WARNING: {tmp_actual_portfolio_selector_path} does not exist!"
+            print(f"****** ERROR: {tmp_actual_portfolio_selector_path} does not exist!"
                   " ******")
-            print("****** WARNING: AutoFolio constructing the actual portfolio selector "
+            print("****** ERROR: AutoFolio constructing the actual portfolio selector "
                   f"excluding solver {solver_name} failed! ******")
-            print("****** WARNING: Using virtual best performance instead of actual "
+            print("****** Use virtual best performance instead of actual "
                   "performance for this portfolio selector! ******")
-            tmp_virtual_best_performance = (
-                tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
-                    num_instances, num_solvers, capvalue_list))
-            tmp_actual_selector_performance = tmp_virtual_best_performance
+            sys.exit()
+
         else:
             tmp_actual_selector_performance = (
                 compute_actual_selector_performance(
                     tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path,
                     feature_data_csv_path, num_instances, num_solvers, capvalue_list))
 
-        print(f"Actual performance for portfolio selector excluding solver {solver_name}"
-              f" is {str(tmp_actual_selector_performance)}")
-        os.system("rm -f " + tmp_performance_data_csv_path)
-        sl.add_output(tmp_performance_data_csv_path,
-                      "[removed] Temporary performance data")
-        print("Computing done!")
+            print(f"Actual performance for portfolio selector excluding solver "
+                  f"{solver_name}"
+                  f" is {str(tmp_actual_selector_performance)}")
+            os.system("rm -f " + tmp_performance_data_csv_path)
+            sl.add_output(tmp_performance_data_csv_path,
+                          "[removed] Temporary performance data")
+            print("Computing done!")
 
         marginal_contribution = (
             actual_selector_performance - tmp_actual_selector_performance)
@@ -485,7 +487,6 @@ def compute_actual_selector_marginal_contribution(
     # Write actual selector contributions to file
     write_marginal_contribution_csv(actual_margi_cont_path, rank_list)
 
-#    os.system(r'rm -f ' + actual_portfolio_selector_path)
     return rank_list
 
 
@@ -517,12 +518,17 @@ def print_rank_list(rank_list: list, mode: int) -> None:
     print("******")
 
 
-def compute_perfect(flag_recompute: bool = False) -> list[tuple[str, float]]:
+def compute_perfect(aggregation_function: Callable[[list[float]], float],
+                    capvalue_list: list[float], minimise: bool,
+                    flag_recompute: bool = False) -> list[tuple[str, float]]:
     """Compute the marginal contribution for the perfect portfolio selector.
 
     Args:
         flag_recompute: Flag indicating whether marginal contributions
             should be recalculated.
+        aggregation_function: function to aggregate the per instance scores
+        capvalue_list: list of cap values
+        minimise: flag indicating if scores should be mininmised or maximised
 
     Returns:
         rank_list: A list of 2-tuples of the form (solver name, marginal contribution).
@@ -531,6 +537,9 @@ def compute_perfect(flag_recompute: bool = False) -> list[tuple[str, float]]:
         "Start computing each solver's marginal contribution to perfect selector ..."
     )
     rank_list = compute_perfect_selector_marginal_contribution(
+        aggregation_function,
+        capvalue_list,
+        minimise,
         flag_recompute=flag_recompute
     )
     print_rank_list(rank_list, 1)
@@ -574,10 +583,31 @@ def compute_marginal_contribution(
         flag_recompute: Flag indicating whether marginal contributions
             should be recalculated.
     """
+    performance_data_csv = (
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+    if (
+            sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE
+    ):
+        aggregation_function_actual = sum
+        aggregation_function_perfect = max
+
+        capvalue_list = get_capvalue_list(performance_data_csv)
+        minimise = False
+    else:
+        # assume runtime optimization
+        aggregation_function_actual = sum
+        aggregation_function_perfect = min
+        num_of_instances = performance_data_csv.get_number_of_instances()
+        capvalue = sgh.settings.get_general_target_cutoff_time()
+        capvalue_list = [capvalue for x in range(0, num_of_instances)]
+        minimise = True
+
     if flag_compute_perfect:
-        compute_perfect(flag_recompute)
+        compute_perfect(aggregation_function_perfect, capvalue_list, minimise,
+                        flag_recompute)
     elif flag_compute_actual:
-        compute_actual(flag_recompute)
+        compute_actual(aggregation_function_actual, flag_recompute)
     else:
         print("ERROR: compute_marginal_contribution called without a flag set to"
               " True, stopping execution")
