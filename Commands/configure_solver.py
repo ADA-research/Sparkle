@@ -24,6 +24,8 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_command_help as sch
 
+import runrunner as rrr
+from runrunner.base import Runner
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -102,7 +104,11 @@ def parser_function() -> argparse.ArgumentParser:
         action="store_true",
         help="use the training set's features for configuration",
     )
-
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm"))
     return parser
 
 
@@ -129,6 +135,7 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     use_features = args.use_features
+    run_on = args.run_on
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.CONFIGURE_SOLVER])
@@ -137,7 +144,7 @@ if __name__ == "__main__":
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
-            print("given training set path is not an existing directory")
+            print("Given training set path is not an existing directory")
             sys.exit()
 
         data_dict = {}
@@ -259,10 +266,11 @@ if __name__ == "__main__":
         # Set to default to overwrite possible old path
         sgh.latest_scenario.set_config_instance_set_test()
 
+    
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = ssh.generate_validation_callback_slurm_script(
-            solver, instance_set_train, instance_set_test, configure_jobid
+            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(validate_jobid)
 
@@ -273,7 +281,7 @@ if __name__ == "__main__":
         dependency_jobid_list.append(ablation_jobid)
 
     job_id_str = ",".join(dependency_jobid_list)
-    print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+    print(f"Running configuration in parallel. Waiting for {run_on} job(s) with id(s): "
           f"{job_id_str}")
 
     status_info.delete()

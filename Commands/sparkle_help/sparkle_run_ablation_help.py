@@ -13,7 +13,11 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
+from sparkle.slurm_parsing import SlurmBatch
+import runrunner as rrr
+from runrunner.base import Runner
 
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
                                     instance_test_name: str, exec_path: str = False)\
@@ -166,7 +170,7 @@ def generate_callback_slurm_script(solver_name: str, instance_train_name: str,
 
 
 def generate_validation_slurm_script(solver_name: str, instance_train_name: str,
-                                     instance_test_name: str, dependency: str = None)\
+                               instance_test_name: str, dependency: str = None)\
         -> str:
     """Create a Slurm batch script for ablation analysis validation."""
     scenario_dir, sbatch_script_name, sbatch_options_list = get_slurm_params(
@@ -370,3 +374,150 @@ def get_ablation_table(solver_name: str, instance_train_name: str,
         fh.close()
 
     return results
+
+def submit_ablation_slurm(solver_name: str,
+                          instance_set_test: str,
+                          instance_set_train_name: str,
+                          instance_set_test_name: str,
+                          ablation_scenario_dir: str) -> [str]:
+    
+    sbatch_script_path = generate_slurm_script( #Create the script with 
+            solver_name, instance_set_train_name, instance_set_test_name
+    )
+    """Sends an ablation to Slurm"""
+    
+    print(f"Created {sbatch_script_path}")
+
+    dependency_jobid_list = []
+
+    jobid = ssh.submit_sbatch_script(
+        sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
+    )
+    dependency_jobid_list.append(jobid)
+    print(f"Launched sbatch script {sbatch_script_path} with jobid {jobid}")
+
+    # Submit intermediate actions (copy path from log)
+    sbatch_script_path = generate_callback_slurm_script(
+        solver_name, instance_set_train_name, instance_set_test_name, dependency=jobid
+    )
+    jobid = ssh.submit_sbatch_script(
+        sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
+    )
+    dependency_jobid_list.append(jobid)
+    print(f"Launched callback sbatch script {sbatch_script_path} with jobid {jobid}")
+
+    # Submit ablation validation run when nessesary
+    if instance_set_test is not None:
+        sbatch_script_path = generate_validation_slurm_script(
+            solver_name,
+            instance_set_train_name,
+            instance_set_test_name,
+            dependency=jobid)
+        jobid = ssh.submit_sbatch_script(
+            sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir)
+        dependency_jobid_list.append(jobid)
+        print(
+            f"Launched validation sbatch script {sbatch_script_path} with jobid {jobid}")
+
+        # Submit intermediate actions (copy validation table from log)
+        sbatch_script_path = generate_validation_callback_slurm_script(
+            solver_name,
+            instance_set_train_name,
+            instance_set_test_name,
+            dependency=jobid,
+        )
+        jobid = ssh.submit_sbatch_script(
+            sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
+        )
+        dependency_jobid_list.append(jobid)
+        print(f"Launched validation callback sbatch script {sbatch_script_path} with "
+              f"jobid {jobid}")
+    
+    return dependency_jobid_list
+
+def submit_ablation_local(solver_name: str,
+                          instance_set_test: str,
+                          instance_set_train_name: str,
+                          instance_set_test_name: str,
+                          ablation_scenario_dir: str,
+                          run_on: str) -> list:
+    """Sends an ablation to the RunRunner queue"""
+    #1 submit the ablation to the runrunner queue
+    sbatch_script_path = generate_slurm_script(
+            solver_name, instance_set_train_name, instance_set_test_name
+    )
+    batch = SlurmBatch(sbatch_script_path)
+    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.RUN_ABLATION,
+        path=ablation_scenario_dir,
+        sbatch_options=batch.sbatch_options,
+        srun_options=batch.srun_options)
+    
+    print(f"Created {batch.Path}")
+    jobid = run.run_id
+    dependency_jobid_list = [jobid]
+    
+    #2. Submit intermediate actions (copy path from log)
+    sbatch_script_path = generate_callback_slurm_script(
+        solver_name, instance_set_train_name, instance_set_test_name, dependency=jobid
+    )
+    batch = SlurmBatch(sbatch_script_path)
+    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.RUN_ABLATION,
+        path=ablation_scenario_dir,
+        sbatch_options=batch.sbatch_options,
+        srun_options=batch.srun_options)
+    jobid = run.run_id
+    dependency_jobid_list.append(jobid)
+    print(f"Launched callback sbatch script {sbatch_script_path} with jobid {jobid}")
+
+    #3. Submit ablation validation run when nessesary, here we repeat the process for the test set
+    if instance_set_test is not None:
+        sbatch_script_path = generate_validation_slurm_script(
+            solver_name,
+            instance_set_train_name,
+            instance_set_test_name,
+            dependency=jobid)
+        
+        batch = SlurmBatch(sbatch_script_path)
+        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name=CommandName.RUN_ABLATION,
+            path=ablation_scenario_dir,
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+        jobid = run.run_id
+        dependency_jobid_list.append(jobid)
+        print(
+            f"Launched validation sbatch script {sbatch_script_path} with jobid {jobid}")
+
+        # Submit intermediate actions (copy validation table from log)
+        sbatch_script_path = generate_validation_callback_slurm_script(
+            solver_name,
+            instance_set_train_name,
+            instance_set_test_name,
+            dependency=jobid,
+        )
+        batch = SlurmBatch(sbatch_script_path)
+        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name=CommandName.RUN_ABLATION,
+            path=ablation_scenario_dir,
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+        jobid = run.run_id
+        dependency_jobid_list.append(jobid)
+        print(f"Launched validation callback sbatch script {sbatch_script_path} with "
+              f"jobid {jobid}")
+
+    return dependency_jobid_list

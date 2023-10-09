@@ -19,6 +19,8 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
 
+from runrunner.base import Runner
+
 
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:
     """Return a list with the Slurm options given in the Slurm settings file.
@@ -510,11 +512,11 @@ def submit_sbatch_script(sbatch_script_name: str,
 
     return jobid
 
-
 def generate_validation_callback_slurm_script(solver: Path,
                                               instance_set_train: Path,
                                               instance_set_test: Path,
-                                              dependency: str) -> str:
+                                              dependency: str,
+                                              run_on: Runner = Runner.SLURM) -> str:
     """Generate a callback Slurm batch script for validation.
 
     Args:
@@ -531,6 +533,7 @@ def generate_validation_callback_slurm_script(solver: Path,
                      "--settings-file Settings/latest.ini")
     command_line += f" --solver {solver}"
     command_line += f" --instance-set-train {instance_set_train}"
+    command_line += f" --run_on {run_on}"
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
@@ -544,7 +547,8 @@ def generate_validation_callback_slurm_script(solver: Path,
 def generate_ablation_callback_slurm_script(solver: Path,
                                             instance_set_train: Path,
                                             instance_set_test: Path,
-                                            dependency: str) -> str:
+                                            dependency: str,
+                                            run_on: Runner = Runner.SLURM) -> str:
     """Generate a callback Slurm batch script for ablation.
 
     Args:
@@ -561,6 +565,7 @@ def generate_ablation_callback_slurm_script(solver: Path,
                      "Settings/latest.ini")
     command_line += f" --solver {solver}"
     command_line += f" --instance-set-train {instance_set_train}"
+    command_line += f" --run_on {run_on}"
 
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"

@@ -19,6 +19,9 @@ from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 
+from sparkle.slurm_parsing import SlurmBatch
+from runrunner.base import Runner
+import runrunner as rrr
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -65,6 +68,12 @@ def parser_function() -> argparse.ArgumentParser:
         action=ac.SetByUser,
         help="specify the settings file to use instead of the default",
     )
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm")
+    )
     return parser
 
 
@@ -87,6 +96,7 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+    run_on = args.run_on
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
@@ -145,14 +155,33 @@ if __name__ == "__main__":
     sbatch_script_dir = sgh.smac_dir
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
 
-    validate_jobid = ssh.submit_sbatch_script(
-        sbatch_script_name,
-        CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-        sbatch_script_dir,
-    )
+    if run_on == Runner.SLURM:
+        validate_jobid = ssh.submit_sbatch_script(
+            sbatch_script_name,
+            CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
+            sbatch_script_dir,
+        )
 
-    print(f"Running validation in parallel. Waiting for Slurm job with id: "
-          f"{validate_jobid}")
+        print(f"Running validation in parallel. Waiting for Slurm job with id: "
+            f"{validate_jobid}")
+    else:
+        batch = SlurmBatch(sbatch_script_path)
+        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name=CommandName.RUN_ABLATION,
+            path=sbatch_script_dir,
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+        
+        
+        if run is not None:
+            print(f"Running validation in parallel. Waiting for local job with id: "
+                  f"{run.run_id}")
+            run.wait()
+        
+        print("Running validation done!")
 
     # Write most recent run to file
     last_test_file_path = Path(
