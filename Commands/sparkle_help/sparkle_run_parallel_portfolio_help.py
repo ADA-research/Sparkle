@@ -701,7 +701,7 @@ def remove_result_files(instances: list[str]) -> None:
 
 
 def run_parallel_portfolio(instances: list[str],
-                           portfolio_path: Path, 
+                           portfolio_path: Path,
                            run_on: Runner = Runner.SLURM) -> bool:
     """Run the parallel algorithm portfolio and return whether this was successful.
 
@@ -735,7 +735,7 @@ def run_parallel_portfolio(instances: list[str],
         execution_dir = "./"
         if run_on == Runner.SLURM:
             job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
-                                                execution_dir)
+                                              execution_dir)
         else:
             # Remove the below if block once runrunner works satisfactorily
             if run_on == Runner.SLURM_RR:
