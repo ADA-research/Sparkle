@@ -17,7 +17,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
-
+from runrunner.base import Runner
 
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
                                     instance_test_name: str, exec_path: str = False)\
@@ -441,9 +441,12 @@ def submit_ablation_local(solver_name: str,
                           instance_set_train_name: str,
                           instance_set_test_name: str,
                           ablation_scenario_dir: str,
-                          run_on: str) -> list:
+                          run_on: Runner = Runner.SLURM) -> list:
     """Sends an ablation to the RunRunner queue."""
     # 1. submit the ablation to the runrunner queue
+    # Remove the below if block once runrunner works satisfactorily
+    if run_on == Runner.SLURM_RR:
+        run_on = Runner.SLURM
     sbatch_script_path = generate_slurm_script(
         solver_name, instance_set_train_name, instance_set_test_name
     )
@@ -520,5 +523,7 @@ def submit_ablation_local(solver_name: str,
         dependency_jobid_list.append(jobid)
         print(f"Launched validation callback sbatch script {sbatch_script_path} with "
               f"jobid {jobid}")
-
+    # Remove the below if block once runrunner works satisfactorily
+    if run_on == Runner.SLURM_RR:
+        run_on = Runner.SLURM
     return dependency_jobid_list

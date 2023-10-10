@@ -166,6 +166,9 @@ if __name__ == "__main__":
         print(f"Running validation in parallel. Waiting for Slurm job with id: "
               f"{validate_jobid}")
     else:
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
         batch = SlurmBatch(sbatch_script_path)
         cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
         run = rrr.add_to_queue(
@@ -180,7 +183,9 @@ if __name__ == "__main__":
             print(f"Running validation in parallel. Waiting for local job with id: "
                   f"{run.run_id}")
             run.wait()
-
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
         print("Running validation done!")
 
     # Write most recent run to file
