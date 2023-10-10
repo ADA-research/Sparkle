@@ -62,6 +62,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instance_path = args.instance_path
+    run_on = args.run_on
 
     sch.check_for_initialise(
         sys.argv, sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
@@ -80,19 +81,16 @@ if __name__ == "__main__":
     if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Call the configured solver
-        job_id_str = srcsh.call_configured_solver(args.instance_path, args.parallel)
+        job_id_str = srcsh.call_configured_solver(args.instance_path, args.parallel, run_on=run_on)
     else:
         sys.exit("ERROR: Faulty input instance or instance directory!")
 
     # Print result
-    if args.run_on == Runner.SLURM:
-        if args.parallel:
-            print("Running configured solver in parallel. Waiting for Slurm job(s) with "
-                f"id(s): {job_id_str}")
-        else:
-            print("Running configured solver done!")
+    if args.parallel:
+        print(f"Running configured solver in parallel. Waiting for {run_on} "
+              f"job(s) with id(s): {job_id_str}")
     else:
-        test = ""
+        print("Running configured solver done!")
 
     # Write used settings to file
     sgh.settings.write_used_settings()

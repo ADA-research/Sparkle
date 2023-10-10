@@ -50,7 +50,8 @@ def call_configured_solver(instance_path_list: list[Path],
     return job_id_str
 
 
-def call_configured_solver_sequential(instances_list: list[list[Path]], run_on: Runner = Runner.SLURM) -> None:
+def call_configured_solver_sequential(instances_list: list[list[Path]], 
+                                      run_on: Runner = Runner.SLURM) -> None:
     """Prepare to run and run the latest configured solver sequentially on instances."""
     for instance_path_list in instances_list:
         # Use original path for output string
@@ -115,10 +116,12 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
         num_jobs, instance_list)
 
     # Run batch script
+    cmd_name = CommandName.RUN_CONFIGURED_SOLVER
+    exec_dir = "./"
     if run_on == Runner.SLURM:
         jobid_str = ssh.submit_sbatch_script(sbatch_script_name=str(sbatch_script_path),
-                                            command_name=CommandName.RUN_CONFIGURED_SOLVER,
-                                            execution_dir="./")
+                                             command_name=cmd_name,
+                                             execution_dir=exec_dir)
     else:
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM_RR:
@@ -129,8 +132,8 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name="run_solvers",
-            base_dir="Tmp",
+            name=cmd_name,
+            path=exec_dir,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
         jobid_str = run.run_id
@@ -138,7 +141,7 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
-        
+
     print("Submitted sbatch script for configured solver, "
           "output and results will be written to: "
           f"{sbatch_script_path}.txt")
@@ -165,7 +168,8 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
     return solver_name, config_str
 
 
-def run_configured_solver(instance_path_list: list[Path], run_on: Runner = Runner.SLURM) -> None:
+def run_configured_solver(instance_path_list: list[Path],
+                          run_on: Runner = Runner.SLURM) -> None:
     """Run the latest configured solver on the given instance."""
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
