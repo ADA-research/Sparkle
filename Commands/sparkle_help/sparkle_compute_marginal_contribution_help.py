@@ -625,7 +625,8 @@ def compute_marginal_contribution(
         compute_perfect(aggregation_function_perfect, capvalue_list, minimise,
                         flag_recompute)
     if flag_compute_actual:
-        compute_actual(aggregation_function_actual, capvalue_list, minimise, flag_recompute)
+        compute_actual(aggregation_function_actual, capvalue_list, minimise,
+                       flag_recompute)
     if not (flag_compute_perfect | flag_compute_perfect):
         print("ERROR: compute_marginal_contribution called without a flag set to"
               " True, stopping execution")
