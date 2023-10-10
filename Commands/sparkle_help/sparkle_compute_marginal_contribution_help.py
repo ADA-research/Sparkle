@@ -219,6 +219,7 @@ def compute_actual_selector_performance(
         num_instances: int,
         num_solvers: int,
         minimise: bool,
+        aggregation_function: Callable[[list[float]], float],
         capvalue_list: list[float] | None = None) -> float:
     """Return the performance of the selector over all instances.
 
@@ -229,6 +230,7 @@ def compute_actual_selector_performance(
       num_instances: The number of instances.
       num_solvers: The number of solvers in the portfolio.
       minimise: Flag indicating, if scores should be minimised.
+      aggregation_function: function to aggregate the quality scores
       capvalue_list: Optional list of cap-values.
 
     Returns:
@@ -252,7 +254,7 @@ def compute_actual_selector_performance(
             performance_this_instance = (
                 compute_actual_performance_for_instance(
                     actual_portfolio_selector_path, instance, feature_data_csv_path,
-                    performance_data_csv, sum))
+                    performance_data_csv, aggregation_function))
 
         else:
             # RUNTIME
@@ -424,7 +426,7 @@ def compute_actual_selector_marginal_contribution(
             compute_actual_selector_performance(
                 actual_portfolio_selector_path, performance_data_csv_path,
                 feature_data_csv_path, num_instances, num_solvers, minimise,
-                capvalue_list))
+                aggregation_function, capvalue_list))
 
         print("Actual performance for portfolio selector with all solvers is "
               f"{str(actual_selector_performance)}")
@@ -474,7 +476,7 @@ def compute_actual_selector_marginal_contribution(
                 compute_actual_selector_performance(
                     tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path,
                     feature_data_csv_path, num_instances, num_solvers, minimise,
-                    capvalue_list))
+                    aggregation_function, capvalue_list))
 
             print(f"Actual performance for portfolio selector excluding solver "
                   f"{solver_name}"
@@ -618,7 +620,7 @@ def compute_marginal_contribution(
         aggregation_function_perfect = min
         num_of_instances = performance_data_csv.get_number_of_instances()
         capvalue = sgh.settings.get_general_target_cutoff_time()
-        capvalue_list = [capvalue for x in range(0, num_of_instances)]
+        capvalue_list = [capvalue for _ in range(0, num_of_instances)]
         minimise = True
 
     if flag_compute_perfect:
