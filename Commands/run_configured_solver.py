@@ -14,6 +14,8 @@ from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
 from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help import sparkle_command_help as sch
 
+from runrunner.base import Runner
+
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -38,6 +40,11 @@ def parser_function() -> argparse.ArgumentParser:
         "--parallel",
         action="store_true",
         help="run the solver on multiple instances in parallel")
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm"))
     return parser
 
 
@@ -78,11 +85,14 @@ if __name__ == "__main__":
         sys.exit("ERROR: Faulty input instance or instance directory!")
 
     # Print result
-    if args.parallel:
-        print("Running configured solver in parallel. Waiting for Slurm job(s) with "
-              f"id(s): {job_id_str}")
+    if args.run_on == Runner.SLURM:
+        if args.parallel:
+            print("Running configured solver in parallel. Waiting for Slurm job(s) with "
+                f"id(s): {job_id_str}")
+        else:
+            print("Running configured solver done!")
     else:
-        print("Running configured solver done!")
+        test = ""
 
     # Write used settings to file
     sgh.settings.write_used_settings()
