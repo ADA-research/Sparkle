@@ -21,6 +21,10 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
+from sparkle.slurm_parsing import SlurmBatch
+import runrunner as rrr
+from runrunner.base import Runner
+
 import functools
 print = functools.partial(print, flush=True)
 
@@ -696,7 +700,7 @@ def remove_result_files(instances: list[str]) -> None:
         os.system(cmd_line)
 
 
-def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
+def run_parallel_portfolio(instances: list[str], portfolio_path: Path, run_on: Runner = Runner.SLURM) -> bool:
     """Run the parallel algorithm portfolio and return whether this was successful.
 
     Args:
@@ -727,8 +731,26 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
-        job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
-                                          execution_dir)
+        if run_on == Runner.SLURM:
+            job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
+                                                execution_dir)
+        else:
+            # Remove the below if block once runrunner works satisfactorily
+            if run_on == Runner.SLURM_RR:
+                run_on = Runner.SLURM
+            batch = SlurmBatch(sbatch_script_path)
+            cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+            run = rrr.add_to_queue(
+                runner=run_on,
+                cmd=cmd_list,
+                name=command_name,
+                path=execution_dir,
+                sbatch_options=batch.sbatch_options,
+                srun_options=batch.srun_options)
+            job_id = run.run_id 
+            # Remove the below if block once runrunner works satisfactorily
+            if run_on == Runner.SLURM_RR:
+                run_on = Runner.SLURM
 
         if (sgh.settings.get_general_performance_measure()
                 == PerformanceMeasure.RUNTIME):

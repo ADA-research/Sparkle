@@ -16,6 +16,8 @@ from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_command_help as sch
 
+from runrunner.base import Runner
+
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments.
@@ -28,50 +30,59 @@ def parser_function() -> argparse.ArgumentParser:
     else:
         latest = sgh.latest_scenario.get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance-paths", metavar="PATH",
-                        nargs="+", type=str, required=True,
-                        help="Specify the instance_path(s) on which the portfolio will "
-                             "run. This can be a space-separated list of instances "
-                             "contain instance sets and/or singular instances. For "
-                             "example --instance-paths Instances/PTN/Ptn-7824-b01.cnf "
-                             "Instances/PTN2/")
-    parser.add_argument("--portfolio-name", type=Path,
-                        help="Specify the name of the portfolio. If the portfolio is not"
-                             " in the standard directory, use its full path, the default"
-                             f" directory is {sgh.sparkle_parallel_portfolio_dir}."
-                             " (default: use the latest constructed portfolio)"
-                             " (current latest: "
-                             f"{latest}")
-    parser.add_argument("--process-monitoring", choices=ProcessMonitoring.__members__,
-                        type=ProcessMonitoring,
-                        help="Specify whether the monitoring of the portfolio should "
-                             "cancel all solvers within a portfolio once a solver "
-                             "finishes (REALISTIC). Or allow all solvers within a "
-                             "portfolio to get an equal chance to have the shortest "
-                             "running time on an instance (EXTENDED), e.g., when this "
-                             "information is needed in an experiment."
-                             " (default: "
-                             f"{sgh.settings.DEFAULT_paraport_process_monitoring})"
-                             " (current value: "
-                             f"{sgh.settings.get_paraport_process_monitoring()})")
-    parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
-                        help="The performance measure, e.g., RUNTIME (for decision "
-                             "algorithms) or QUALITY_ABSOLUTE (for optimisation "
-                             "algorithms)"
-                             " (default: "
-                             f"{sgh.settings.DEFAULT_general_performance_measure.name})"
-                             " (current value: "
-                             f"{sgh.settings.get_general_performance_measure().name})")
-    parser.add_argument("--cutoff-time", type=int,
-                        help="The duration the portfolio will run before the solvers "
-                             "within the portfolio will be stopped"
-                             " (default: "
-                             f"{sgh.settings.DEFAULT_general_target_cutoff_time})"
-                             " (current value: "
-                             f"{sgh.settings.get_general_target_cutoff_time()})")
-    parser.add_argument("--settings-file", type=Path,
-                        help="Specify the settings file to use instead of the default"
-                             f" (default: {sgh.settings.DEFAULT_settings_path}")
+    parser.add_argument(
+        "--instance-paths",
+        metavar="PATH",
+        nargs="+", 
+        type=str, 
+        required=True,
+        help="Specify the instance_path(s) on which the portfolio will run. This can be "
+             "a space-separated list of instances containing instance sets and/or "
+             " singular instances. For example --instance-paths "
+             "Instances/PTN/Ptn-7824-b01.cnf Instances/PTN2/")
+    parser.add_argument(
+        "--portfolio-name",
+        type=Path,
+        help="Specify the name of the portfolio. If the portfolio is not in the standard"
+             " directory, use its full path, the default directory is "
+             f"{sgh.sparkle_parallel_portfolio_dir}. (default: use the latest "
+             f"constructed portfolio) (current latest: {latest})")
+    parser.add_argument(
+        "--process-monitoring",
+        choices=ProcessMonitoring.__members__,
+        type=ProcessMonitoring,
+        help="Specify whether the monitoring of the portfolio should cancel all solvers"
+             " within a portfolio once a solver finishes (REALISTIC). Or allow all "
+             "solvers within a portfolio to get an equal chance to have the shortest "
+             "running time on an instance (EXTENDED), e.g., when this information is "
+             "needed in an experiment."
+             f" (default: {sgh.settings.DEFAULT_paraport_process_monitoring})"
+             f" (current value: {sgh.settings.get_paraport_process_monitoring()})")
+    parser.add_argument(
+        "--performance-measure",
+        choices=PerformanceMeasure.__members__,
+        help="The performance measure, e.g., RUNTIME (for decision algorithms) or "
+             "QUALITY_ABSOLUTE (for optimisation algorithms)"
+             f" (default: {sgh.settings.DEFAULT_general_performance_measure.name})"
+             f" (current value: {sgh.settings.get_general_performance_measure().name})")
+    parser.add_argument(
+        "--cutoff-time",
+        type=int,
+        help="The duration the portfolio will run before the solvers "
+             "within the portfolio will be stopped (default: "
+             f"{sgh.settings.DEFAULT_general_target_cutoff_time})"
+             " (current value: "
+             f"{sgh.settings.get_general_target_cutoff_time()})")
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm"))
+    parser.add_argument(
+        "--settings-file",
+        type=Path,
+        help="Specify the settings file to use instead of the default"
+             f" (default: {sgh.settings.DEFAULT_settings_path}")
     return parser
 
 
@@ -99,6 +110,7 @@ if __name__ == "__main__":
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     portfolio_path = args.portfolio_name
+    run_on = args.run_on
 
     if args.portfolio_name is None:
         portfolio_path = sgh.latest_scenario.get_parallel_portfolio_path()
