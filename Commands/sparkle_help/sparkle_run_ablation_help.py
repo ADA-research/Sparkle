@@ -19,6 +19,7 @@ from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
 from runrunner.base import Runner
 
+
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
                                     instance_test_name: str, exec_path: str = False)\
         -> str:
