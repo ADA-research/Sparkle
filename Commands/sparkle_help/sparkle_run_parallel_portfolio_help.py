@@ -700,7 +700,9 @@ def remove_result_files(instances: list[str]) -> None:
         os.system(cmd_line)
 
 
-def run_parallel_portfolio(instances: list[str], portfolio_path: Path, run_on: Runner = Runner.SLURM) -> bool:
+def run_parallel_portfolio(instances: list[str],
+                           portfolio_path: Path, 
+                           run_on: Runner = Runner.SLURM) -> bool:
     """Run the parallel algorithm portfolio and return whether this was successful.
 
     Args:
@@ -747,7 +749,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path, run_on: R
                 path=execution_dir,
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
-            job_id = run.run_id 
+            job_id = run.run_id
             # Remove the below if block once runrunner works satisfactorily
             if run_on == Runner.SLURM_RR:
                 run_on = Runner.SLURM

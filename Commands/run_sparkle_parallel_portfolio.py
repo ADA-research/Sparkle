@@ -33,8 +33,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--instance-paths",
         metavar="PATH",
-        nargs="+", 
-        type=str, 
+        nargs="+",
+        type=str,
         required=True,
         help="Specify the instance_path(s) on which the portfolio will run. This can be "
              "a space-separated list of instances containing instance sets and/or "
