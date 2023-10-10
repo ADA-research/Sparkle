@@ -50,7 +50,7 @@ def call_configured_solver(instance_path_list: list[Path],
     return job_id_str
 
 
-def call_configured_solver_sequential(instances_list: list[list[Path]], 
+def call_configured_solver_sequential(instances_list: list[list[Path]],
                                       run_on: Runner = Runner.SLURM) -> None:
     """Prepare to run and run the latest configured solver sequentially on instances."""
     for instance_path_list in instances_list:
@@ -127,7 +127,7 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
 
-        batch = SlurmBatch( sbatch_script_path )
+        batch = SlurmBatch(sbatch_script_path)
         cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
         run = rrr.add_to_queue(
             runner=run_on,

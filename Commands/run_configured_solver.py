@@ -81,7 +81,9 @@ if __name__ == "__main__":
     if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Call the configured solver
-        job_id_str = srcsh.call_configured_solver(args.instance_path, args.parallel, run_on=run_on)
+        job_id_str = srcsh.call_configured_solver(args.instance_path,
+                                                  args.parallel,
+                                                  run_on=run_on)
     else:
         sys.exit("ERROR: Faulty input instance or instance directory!")
 
