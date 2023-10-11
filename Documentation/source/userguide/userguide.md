@@ -86,7 +86,7 @@ Configuring an algorithm has the following minimal requirements for the
 algorithm (for an example of a solver directory see {numref}`dir-solvers`):
 
 - A working solver executable
-- An algorithm wrapper called `sprakle_smac_wrapper.py`
+- An algorithm wrapper called `sparkle_smac_wrapper.py`
 - A PCS (parameter configuration space) file
 - The runsolver binary (e.g. from `Examples/Resources/Solvers/PbO-CCSAT-Generic/`)
 
@@ -236,7 +236,7 @@ Solver/
 ```
 
 Here `solver` is a binary executable of the solver that is to be
-configured. The `sprakle_smac_wrapper.py` is a wrapper that Sparkle
+configured. The `sparkle_smac_wrapper.py` is a wrapper that Sparkle
 should call to run the solver with specific settings, and then returns a
 result for the configurator. In `parameters.pcs` the configurable
 parameters are described in the PCS format. Finally, `runsolver` is a
@@ -261,7 +261,7 @@ Solver/
 ```
 
 Here `solver` is a binary executable of a solver that is to be
-included in a portfolio selector. The `sprakle_run_default_wrapper.py`
+included in a portfolio selector. The `sparkle_run_default_wrapper.py`
 is a wrapper that Sparkle should call to run the solver on a specific
 instance.
 
