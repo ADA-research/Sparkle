@@ -37,9 +37,10 @@ class Configurator:
     def create_sbatch_script(self: Configurator,
                              scenario: ConfigurationScenario) -> None:
         """Create sbatch script.
-        
+
         Args:
-            scenario: ConfiguraitonScenario object"""
+            scenario: ConfiguraitonScenario object
+        """
         self.scenario = scenario
         self.scenario.create_scenario(parent_directory=self.configurator_path)
 
