@@ -1,6 +1,9 @@
 """Test public methods of configurator class."""
 
+from __future__ import annotations
+
 import pytest
+from pytest_mock import MockerFixture
 
 from pathlib import Path
 
@@ -12,22 +15,21 @@ from Commands.sparkle_help.configurator import Configurator
 class TestConfigurator():
     """Class bundling all tests regarding Configurator."""
 
-    def test_init(self, mocker, scenario_fixture, configurator_path) -> None:
+    def test_init(self: TestConfigurator,
+                  mocker: MockerFixture,
+                  scenario_fixture: MockerFixture,
+                  configurator_path: MockerFixture) -> None:
         """Test that Configurator initialization calls create_scenario() correctly."""
         mock_path = mocker.patch.object(Path, "mkdir")
 
-        mock_configurator = mocker.patch.object(ConfigurationScenario, "create_scenario",
-                                                return_value=False)
-
-        configurator = Configurator(configurator_path, scenario_fixture)
+        configurator = Configurator(configurator_path)
 
         assert configurator.configurator_path == configurator_path
-        assert configurator.scenario == scenario_fixture
 
         mock_path.assert_called_once()
-        mock_configurator.assert_called_with(parent_directory=configurator_path)
 
-    def test_create_sbatch_script(self, mocker,
+    def test_create_sbatch_script(self: TestConfigurator,
+                                  mocker: MockerFixture,
                                   scenario_fixture: ConfigurationScenario,
                                   configurator_path: Path) -> None:
         """Test correct sbatch script creation."""
@@ -37,7 +39,10 @@ class TestConfigurator():
                                           scenario_fixture.name)
         scenario_fixture.scenario_file_name = f"{scenario_fixture.name}_scenario.txt"
 
-        configurator = Configurator(configurator_path, scenario_fixture)
+        mock_config_scenario = mocker.patch.object(ConfigurationScenario, "create_scenario",
+                                                return_value=False)
+
+        configurator = Configurator(configurator_path)
 
         reference_file_path = Path("tests", "test_files", "reference_files", "sbatch.sh")
         with reference_file_path.open("r") as file:
@@ -45,9 +50,10 @@ class TestConfigurator():
 
         mocked_file = mocker.patch("pathlib.Path.open", mocker.mock_open())
 
-        configurator.create_sbatch_script()
+        configurator.create_sbatch_script(scenario_fixture)
 
         mocked_file().write.assert_called_with(reference_file_content)
+        mock_config_scenario.assert_called_with(parent_directory=configurator_path)
 
 
 @pytest.fixture
@@ -58,7 +64,7 @@ def solver_fixture() -> Solver:
 
 
 @pytest.fixture
-def scenario_fixture(solver_fixture) -> ConfigurationScenario:
+def scenario_fixture(solver_fixture: MockerFixture) -> ConfigurationScenario:
     """Scenario fixture for tests."""
     instance_set_train = Path("Instances", "Test-Instance-Set")
     number_of_runs = 2

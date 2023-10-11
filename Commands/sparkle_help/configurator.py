@@ -21,7 +21,6 @@ class Configurator:
 
         Args:
             configurator_path: Path to the configurator
-            scenario: ConfigurationScenario object used for configuration
         """
         self.configurator_path = configurator_path
 
@@ -35,8 +34,12 @@ class Configurator:
         self.sbatch_filename = ""
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
-    def create_sbatch_script(self: Configurator, scenario: ConfigurationScenario) -> None:
-        """Create sbatch script."""
+    def create_sbatch_script(self: Configurator,
+                             scenario: ConfigurationScenario) -> None:
+        """Create sbatch script.
+        
+        Args:
+            scenario: ConfiguraitonScenario object"""
         self.scenario = scenario
         self.scenario.create_scenario(parent_directory=self.configurator_path)
 
