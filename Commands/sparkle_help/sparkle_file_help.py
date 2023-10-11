@@ -690,10 +690,6 @@ def create_temporary_directories() -> None:
         Path("Tmp/").mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
 
-    Path(sgh.extractor_job_path).mkdir(exist_ok=True)
-    Path(sgh.algorithm_selector_job_path).mkdir(exist_ok=True)
-    Path(sgh.report_job_path).mkdir(exist_ok=True)
-    Path(sgh.configuration_job_path).mkdir(exist_ok=True)
     Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
     Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
@@ -744,8 +740,7 @@ def initialise_sparkle(argv: list[str]) -> None:
     sl.log_command(argv)
 
     create_temporary_directories()
-    pap_sbatch_path = Path(sgh.sparkle_tmp_path) / "SBATCH_Parallel_Portfolio_Jobs"
-    pap_sbatch_path.mkdir(exist_ok=True)
+
     for working_dir in sgh.working_dirs:
         working_dir.mkdir(exist_ok=True)
     Path(f"{sgh.ablation_dir}scenarios/").mkdir(exist_ok=True)

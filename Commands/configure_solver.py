@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
+from Commands.Structures.status_info import ConfigureSolverStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
@@ -17,7 +18,6 @@ from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help.configurator import Configurator
 from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
@@ -193,8 +193,13 @@ if __name__ == "__main__":
 
     solver = Solver(solver_path)
 
-    sssh.generate_task_run_status(sch.CommandName.CONFIGURE_SOLVER,
-                                  sgh.configuration_job_path)
+    status_info = ConfigureSolverStatusInfo()
+    status_info.set_solver(str(solver.name))
+    status_info.set_instance_set_train(str(instance_set_train.name))
+    ins_t_str = instance_set_test.name if instance_set_test is not None else "_"
+    status_info.set_instance_set_test(str(instance_set_test))
+    status_info.save()
+
     number_of_runs = sgh.settings.get_config_number_of_runs()
     config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
                                             use_features, feature_data_df)
@@ -233,8 +238,7 @@ if __name__ == "__main__":
     print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
           f"{job_id_str}")
 
-    sssh.delete_task_run_status(sch.CommandName.CONFIGURE_SOLVER,
-                                sgh.configuration_job_path)
+    status_info.delete()
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file
