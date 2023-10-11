@@ -39,8 +39,9 @@ class TestConfigurator():
                                           scenario_fixture.name)
         scenario_fixture.scenario_file_name = f"{scenario_fixture.name}_scenario.txt"
 
-        mock_config_scenario = mocker.patch.object(ConfigurationScenario, "create_scenario",
-                                                return_value=False)
+        mock_config_scenario = mocker.patch.object(ConfigurationScenario,
+                                                   "create_scenario",
+                                                   return_value=False)
 
         configurator = Configurator(configurator_path)
 
