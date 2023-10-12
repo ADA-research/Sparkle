@@ -1,0 +1,39 @@
+name: sparkle-mac
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Basic conda install
+  - python=3.9
+  - gnuplot
+  - pip
+  - pip:
+    - --editable .  # self install !
+    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
+    # For Sparkle
+    - swig==3.0.6 #Changed from 3.0 to 3.0.6
+    - numpy
+    - pandas
+    # Testing
+    - pytest
+    - pytest-mock==3.10.0
+    - flake8==5.0.4
+    - flake8-quotes==3.3.1
+    - flake8-bandit==4.1.1
+    - pep8-naming==0.13.2
+    - flake8-docstrings==1.6.0
+    - flake8-use-fstring==1.4.0
+    - flake8-use-pathlib==0.3.0
+    - flake8-annotations==3.0.1
+    # For AutoFolio
+    - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
+    - xgboost
+    - scikit-learn
+    - ConfigSpace
+    - smac
+    #- scipy==1.6.3  # 1.7.x removed a private function used by smac #This one will be solved with newer autofolio
+    - pynisher<1.0  # smac requirement
+    - scikit-learn<1.1.0  # 1.1.0 contains a fix for SimpleImputer that breaks AutoFolio
+    # To build documentation
+    - latexmk.py #For some reason in linux referring to it as latexmk is good enough but not for mac
+    - -r Documentation/requirements.txt
