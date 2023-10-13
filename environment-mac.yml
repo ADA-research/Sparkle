@@ -1,3 +1,4 @@
+# Experimental Mac Environment, not all Sparkle commands may run correctly.
 name: sparkle-mac
 channels:
   - conda-forge
@@ -31,9 +32,9 @@ dependencies:
     - scikit-learn
     - ConfigSpace
     - smac
-    #- scipy==1.6.3  # 1.7.x removed a private function used by smac #This one will be solved with newer autofolio
+    #- scipy==1.6.3  # TODO: Fix when Autofolio is updated
     - pynisher<1.0  # smac requirement
     - scikit-learn<1.1.0  # 1.1.0 contains a fix for SimpleImputer that breaks AutoFolio
     # To build documentation
-    - latexmk.py #For some reason in linux referring to it as latexmk is good enough but not for mac
+    - latexmk.py # Mac requires the .py extension, while linux does not
     - -r Documentation/requirements.txt
