@@ -16,6 +16,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 
 from runrunner.base import Runner
+import runrunner as rrr
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -93,6 +94,14 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             print("Running solvers done!")
 
             return
+
+        # Update performance data csv after the last job is done
+        runs.append(rrr.add_to_queue(
+            runner=run_on,
+            cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
+            name="sprkl_csv_merge",
+            dependencies=runs[-1],
+            base_dir="Tmp"))
 
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
