@@ -22,9 +22,9 @@ LIB = -llpk -lvarsat -lm -lz
 
 LIBDIRS = -Llp_solve_4.0 -LVARSAT 
 
-RELEASEFLAGS = -static -O5 -DDEBUG -g
+RELEASEFLAGS = -O5 -DDEBUG -g
 
-DEBUGFLAGS = -static -Wall -DDEBUG -g
+DEBUGFLAGS = -Wall -DDEBUG -g
 
 SOLVERLIB =  
 
