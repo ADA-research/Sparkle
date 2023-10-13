@@ -93,7 +93,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             print("Running solvers done!")
 
             return
-        # TODO: Do we need to do more here?
+
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
