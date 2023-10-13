@@ -29,7 +29,7 @@ Commands/add_feature_extractor.py $extractor_path > /dev/null
 
 # Compute features
 output_true="Computing features done!"
-output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
