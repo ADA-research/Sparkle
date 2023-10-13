@@ -16,6 +16,10 @@
 
 # Settings
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+slurm_true="slurm"
+slurm_available=$(detect_slurm)
+
+echo "Running tests on: $slurm_available"
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN"
@@ -27,7 +31,7 @@ Commands/add_feature_extractor.py $extractor_path > /dev/null
 
 # Compute features
 output_true="Computing features done!"
-output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -39,16 +43,27 @@ fi
 
 # Compute features parallel
 output_true="Computing features in parallel. Waiting for Slurm job(s) with id(s): "
-output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
+if ! [[ $slurm_available =~ "${slurm_true}" ]];
+then
+	output_true="Computing Features in parallel done!"
+fi
+
+output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] compute_features --parallel test succeeded"
     jobid=${output##* }
-	scancel $jobid
+
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
 	echo "[failure] compute_features --parallel test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
-

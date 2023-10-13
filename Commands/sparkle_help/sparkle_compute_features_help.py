@@ -220,11 +220,10 @@ def computing_features_parallel(feature_data_csv_path: Path,
     sbatch_script_name, sbatch_script_dir = (
         ssh.generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
                                                            total_job_list))
-
+    sbatch_script_path = sbatch_script_dir + sbatch_script_name
     if run_on == Runner.SLURM:
         # Execute the sbatch script via slurm
         execution_dir = "./"
-        sbatch_script_path = sbatch_script_dir + sbatch_script_name
         run = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES,
                                        execution_dir)
 
@@ -241,7 +240,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name="compute_features",
+            name=CommandName.COMPUTE_FEATURES,
             base_dir="Tmp",
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)

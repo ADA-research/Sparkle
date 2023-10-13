@@ -59,7 +59,8 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             On which computer or cluster environment to run the solvers.
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
     """
-    if run_on == ac.SLURM:
+    if run_on == Runner.SLURM:
+        print("Running on Slurm")
         compute_features_parallel_jobid = scf.computing_features_parallel(
             Path(sgh.feature_data_csv_path), recompute
         )
@@ -80,8 +81,9 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
         print(f"Computing features in parallel. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
     else:
+        print("Running Locally")
         runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
-                                                recompute)]
+                                                recompute, run_on=run_on)]
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
@@ -101,7 +103,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             for run in runs:
                 if run is not None:
                     run.wait()
-            print("Running solvers done!")
+            print("Computing Features in parallel done!")
 
     return
 
@@ -137,7 +139,7 @@ if __name__ == "__main__":
         print("Feature data file " + sgh.feature_data_csv_path + " has been updated!")
         print("Computing features done!")
     else:
-        compute_features_parallel(args.recompute)
+        compute_features_parallel(args.recompute, run_on=args.run_on)
 
     # Write used settings to file
     sgh.settings.write_used_settings()
