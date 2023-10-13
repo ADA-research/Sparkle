@@ -19,8 +19,6 @@ sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
-echo "Running tests on: $slurm_available"
-
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
@@ -52,7 +50,7 @@ output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_pat
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] compute_features --parallel test succeeded"
+	echo "[success] ($slurm_available) compute_features --parallel test succeeded"
     jobid=${output##* }
 
 	if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -60,7 +58,7 @@ then
 		scancel $jobid
 	fi
 else              
-	echo "[failure] compute_features --parallel test failed with output:"
+	echo "[failure] ($slurm_available) compute_features --parallel test failed with output:"
 	echo $output
 	if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
