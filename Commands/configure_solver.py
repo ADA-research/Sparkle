@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.CONFIGURE_SOLVER])
-
+    
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -220,6 +220,7 @@ if __name__ == "__main__":
     sih.copy_instances_to_smac(
         list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
     )
+    
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver.name, instance_set_train.name)
         feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
@@ -233,14 +234,25 @@ if __name__ == "__main__":
     scsh.copy_solver_files_to_smac_dir(
         solver.name, instance_set_train.name
     )
-    smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
-        solver.name, instance_set_train.name
-    )
-    configure_jobid = scsh.submit_smac_configure_sbatch_script(
-        smac_configure_sbatch_script_name
-    )
+    if run_on == Runner.SLURM:
+        smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
+            solver.name, instance_set_train.name
+        )
 
-    dependency_jobid_list = [configure_jobid]
+        configure_jobid = scsh.submit_smac_configure_sbatch_script(
+            smac_configure_sbatch_script_name, run_on=run_on
+        )
+        dependency_jobid_list = [configure_jobid]
+    else:
+        run = scsh.execute_smac_configure_sbatch_script_local(
+            solver.name, instance_set_train.name, run_on=run_on
+        )
+
+        if run_on == Runner.LOCAL:
+            dependency_jobid_list = []
+            run.wait()
+        elif run_on == Runner.SLURM_RR:
+            dependency_jobid_list = [run.run_id]
 
     # Write most recent run to file
     last_configuration_file_path = Path(
@@ -268,14 +280,14 @@ if __name__ == "__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = ssh.generate_validation_callback_slurm_script(
+        validate_jobid = ssh.generate_validation_callback_script(
             solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(validate_jobid)
 
     if ablation:
         ablation_jobid = ssh.generate_ablation_callback_slurm_script(
-            solver, instance_set_train, instance_set_test, configure_jobid
+            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(ablation_jobid)
 

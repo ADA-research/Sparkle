@@ -45,11 +45,17 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] ($slurm_available) configure_solver test succeeded"
     jobid=${output##* }
-	scancel $jobid
-else              
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
+else
 	echo "[failure] ($slurm_available) configure_solver test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -61,11 +67,17 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] ($slurm_available) configure_solver performance measure RUNTIME option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
 	echo "[failure] ($slurm_available) configure_solver performance measure RUNTIME option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -79,11 +91,17 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] ($slurm_available) configure_solver cutoff time option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
 	echo "[failure] ($slurm_available) configure_solver cutoff time option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -95,11 +113,17 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] ($slurm_available) configure_solver budget per run option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
 	echo "[failure] ($slurm_available) configure_solver budget per run option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -111,11 +135,17 @@ if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] ($slurm_available) configure_solver number of runs option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
 	echo "[failure] ($slurm_available) configure_solver number of runs option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 # Restore original settings

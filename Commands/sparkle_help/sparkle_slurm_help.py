@@ -20,7 +20,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
 
 from runrunner.base import Runner
-
+import runrunner as rrr
 
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:
     """Return a list with the Slurm options given in the Slurm settings file.
@@ -513,7 +513,7 @@ def submit_sbatch_script(sbatch_script_name: str,
     return jobid
 
 
-def generate_validation_callback_slurm_script(solver: Path,
+def generate_validation_callback_script(solver: Path,
                                               instance_set_train: Path,
                                               instance_set_test: Path,
                                               dependency: str,
@@ -530,17 +530,23 @@ def generate_validation_callback_slurm_script(solver: Path,
       String job identifier.
     """
     command_line = "echo $(pwd) $(date)\n"
-    command_line += ("srun -N1 -n1 ./Commands/validate_configured_vs_default.py "
+    command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
+    command_line += ("./Commands/validate_configured_vs_default.py "
                      "--settings-file Settings/latest.ini")
     command_line += f" --solver {solver}"
     command_line += f" --instance-set-train {instance_set_train}"
     command_line += f" --run_on {run_on}"
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
-
-    jobid = generate_generic_callback_slurm_script(
-        "validation", solver, instance_set_train, instance_set_test,
-        dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+    
+    if run_on == Runner.SLURM:
+        jobid = generate_generic_callback_slurm_script(
+            "validation", solver, instance_set_train, instance_set_test, dependency,
+            command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+    else:
+        jobid = generate_generic_callback_local_script(
+            "validation", solver, instance_set_train, instance_set_test, dependency,
+            command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
 
     return jobid
 
@@ -562,8 +568,8 @@ def generate_ablation_callback_slurm_script(solver: Path,
       String job identifier.
     """
     command_line = "echo $(pwd) $(date)\n"
-    command_line += ("srun -N1 -n1 ./Commands/run_ablation.py --settings-file "
-                     "Settings/latest.ini")
+    command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
+    command_line += "./Commands/run_ablation.py --settings-file Settings/latest.ini" 
     command_line += f" --solver {solver}"
     command_line += f" --instance-set-train {instance_set_train}"
     command_line += f" --run_on {run_on}"
@@ -576,6 +582,86 @@ def generate_ablation_callback_slurm_script(solver: Path,
         dependency, command_line, CommandName.RUN_ABLATION)
 
     return jobid
+
+
+def create_generic_callback_options_list(name: str,
+                                         solver: Path,
+                                         instance_set_train: Path,
+                                         instance_set_test: Path) -> (str, list):
+    """Create the options for the callback script
+    
+    Args:
+      name: Name of the script (used as prefix for the file name).
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      
+    Returns:
+      str: The delayed job file path
+      list: List of strings containing the job options"""
+    delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
+
+    if instance_set_test is not None:
+        delayed_job_file_name += f"_{instance_set_test.name}"
+
+    delayed_job_file_name += "_script.sh"
+
+    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
+    sparkle_tmp_path.mkdir(parents=True, exist_ok=True)
+    delayed_job_file_path = sparkle_tmp_path / delayed_job_file_name
+    delayed_job_output = f"{delayed_job_file_path}.txt"
+    delayed_job_error = f"{delayed_job_file_path}.err"
+
+    job_name = f"--job-name={delayed_job_file_name}"
+    output = f"--output={delayed_job_output}"
+    error = f"--error={delayed_job_error}"
+
+    sl.add_output(str(delayed_job_file_path), f"Delayed {name} script")
+    sl.add_output(delayed_job_output, f"Delayed {name} standard output")
+    sl.add_output(delayed_job_error, f"Delayed {name} error output")
+
+    return delayed_job_file_path, [job_name, output, error]
+
+
+def generate_generic_callback_local_script(name: str,
+                                           solver: Path,
+                                           instance_set_train: Path,
+                                           instance_set_test: Path,
+                                           dependency: str,
+                                           command_line: str,
+                                           command_name: CommandName,
+                                           run_on: Runner = Runner.LOCAL) -> str:
+    """Generate a generic callback script to be executed locally
+
+    Args:
+      name: Name of the script (used as prefix for the file name).
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      dependency: String of job dependencies.
+      command_line: String representation of the actual command line
+        that is to be executed.
+      command_name: Command name for job that shall be exectuted if the
+        job was successfully submitted to the batch system.
+
+    Returns:
+      String job identifier.
+    """
+    # delayed_job_file_path, options_list = create_generic_callback_options_list(name=name,
+    #                                                                           solver=solver,
+    #                                                                           instance_set_train=instance_set_train,
+    #                                                                           instance_set_test=instance_set_test)
+
+    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
+
+    run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=command_line,
+            name=command_name,
+            dependencies=dependency,
+            base_dir=sparkle_tmp_path)
+
+    return run.run_id
 
 
 def generate_generic_callback_slurm_script(name: str,
@@ -601,28 +687,10 @@ def generate_generic_callback_slurm_script(name: str,
     Returns:
       String job identifier.
     """
-    delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
-
-    if instance_set_test is not None:
-        delayed_job_file_name += f"_{instance_set_test.name}"
-
-    delayed_job_file_name += "_script.sh"
-
-    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
-    sparkle_tmp_path.mkdir(parents=True, exist_ok=True)
-    delayed_job_file_path = sparkle_tmp_path / delayed_job_file_name
-    delayed_job_output = f"{delayed_job_file_path}.txt"
-    delayed_job_error = f"{delayed_job_file_path}.err"
-
-    job_name = f"--job-name={delayed_job_file_name}"
-    output = f"--output={delayed_job_output}"
-    error = f"--error={delayed_job_error}"
-
-    sl.add_output(str(delayed_job_file_path), f"Delayed {name} script")
-    sl.add_output(delayed_job_output, f"Delayed {name} standard output")
-    sl.add_output(delayed_job_error, f"Delayed {name} error output")
-
-    sbatch_options_list = [job_name, output, error]
+    delayed_job_file_path, sbatch_options_list = create_generic_callback_options_list(name=name,
+                                                                                      solver=solver,
+                                                                                      instance_set_train=instance_set_train,
+                                                                                      instance_set_test=instance_set_test)
     sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(get_slurm_sbatch_user_options_list())
