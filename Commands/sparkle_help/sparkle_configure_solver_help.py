@@ -481,7 +481,7 @@ def create_smac_configure_sbatch_script(solver_name: str,
 def execute_smac_configure_sbatch_script_local(solver_name: str,
                                                instance_set_name: str,
                                                run_on: Runner = Runner.LOCAL)\
-    -> rrr.LocalRun | rrr.SlurmRun:
+    -> rrr.LocalRun:
     """Adds a process to the local queue for algorithm configuration with SMAC.
     Args:
         solver_name: Name of the solver

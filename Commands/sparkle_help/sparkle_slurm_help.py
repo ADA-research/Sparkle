@@ -658,7 +658,10 @@ def generate_generic_callback_local_script(name: str,
                            dependencies=dependency,
                            base_dir=sparkle_tmp_path)
 
-    return run.run_id
+    if run_on == Runner.SLURM:
+      return run.run_id
+    else:
+        return ""
 
 
 def generate_generic_callback_slurm_script(name: str,
