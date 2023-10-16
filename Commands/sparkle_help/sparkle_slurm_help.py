@@ -22,6 +22,7 @@ from Commands.sparkle_help import sparkle_job_help as sjh
 from runrunner.base import Runner
 import runrunner as rrr
 
+
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:
     """Return a list with the Slurm options given in the Slurm settings file.
 
@@ -514,10 +515,10 @@ def submit_sbatch_script(sbatch_script_name: str,
 
 
 def generate_validation_callback_script(solver: Path,
-                                              instance_set_train: Path,
-                                              instance_set_test: Path,
-                                              dependency: str,
-                                              run_on: Runner = Runner.SLURM) -> str:
+                                        instance_set_train: Path,
+                                        instance_set_test: Path,
+                                        dependency: str,
+                                        run_on: Runner = Runner.SLURM) -> str:
     """Generate a callback Slurm batch script for validation.
 
     Args:
@@ -538,7 +539,7 @@ def generate_validation_callback_script(solver: Path,
     command_line += f" --run_on {run_on}"
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
-    
+
     if run_on == Runner.SLURM:
         jobid = generate_generic_callback_slurm_script(
             "validation", solver, instance_set_train, instance_set_test, dependency,
@@ -569,7 +570,7 @@ def generate_ablation_callback_slurm_script(solver: Path,
     """
     command_line = "echo $(pwd) $(date)\n"
     command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
-    command_line += "./Commands/run_ablation.py --settings-file Settings/latest.ini" 
+    command_line += "./Commands/run_ablation.py --settings-file Settings/latest.ini"
     command_line += f" --solver {solver}"
     command_line += f" --instance-set-train {instance_set_train}"
     command_line += f" --run_on {run_on}"
@@ -584,21 +585,22 @@ def generate_ablation_callback_slurm_script(solver: Path,
     return jobid
 
 
-def create_generic_callback_options_list(name: str,
-                                         solver: Path,
-                                         instance_set_train: Path,
-                                         instance_set_test: Path) -> (str, list):
-    """Create the options for the callback script
-    
+def create_callback_options_list(name: str,
+                                 solver: Path,
+                                 instance_set_train: Path,
+                                 instance_set_test: Path) -> (str, list):
+    """Create the options for the callback script.
+
     Args:
       name: Name of the script (used as prefix for the file name).
       solver: Path (object) to solver.
       instance_set_train: Path (object) to instances used for training.
       instance_set_test: Path (object) to instances used for testing.
-      
+
     Returns:
       str: The delayed job file path
-      list: List of strings containing the job options"""
+      list: List of strings containing the job options
+    """
     delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
 
     if instance_set_test is not None:
@@ -631,7 +633,7 @@ def generate_generic_callback_local_script(name: str,
                                            command_line: str,
                                            command_name: CommandName,
                                            run_on: Runner = Runner.LOCAL) -> str:
-    """Generate a generic callback script to be executed locally
+    """Generate a generic callback script to be executed locally.
 
     TODO: Currently does not use the first four parameters (Original slurm).
           How should these be used? Were made(?) for creating .sh name
@@ -659,7 +661,7 @@ def generate_generic_callback_local_script(name: str,
                            base_dir=sparkle_tmp_path)
 
     if run_on == Runner.SLURM:
-      return run.run_id
+        return run.run_id
     else:
         return ""
 
@@ -687,11 +689,11 @@ def generate_generic_callback_slurm_script(name: str,
     Returns:
       String job identifier.
     """
-    delayed_job_file_path, sbatch_options_list =\
-      create_generic_callback_options_list(name=name,
-                                           solver=solver,
-                                           instance_set_train=instance_set_train,
-                                           instance_set_test=instance_set_test)
+    result = create_callback_options_list(name,
+                                          solver,
+                                          instance_set_train,
+                                          instance_set_test)
+    delayed_job_file_path, sbatch_options_list = result[0], result[1]
     sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(get_slurm_sbatch_user_options_list())

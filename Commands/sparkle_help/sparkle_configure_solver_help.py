@@ -478,11 +478,11 @@ def create_smac_configure_sbatch_script(solver_name: str,
     return sbatch_script_path
 
 
-def execute_smac_configure_sbatch_script_local(solver_name: str,
-                                               instance_set_name: str,
-                                               run_on: Runner = Runner.LOCAL)\
-    -> rrr.LocalRun:
+def execute_smac_configure_local(solver_name: str,
+                                 instance_set_name: str,
+                                 run_on: Runner = Runner.LOCAL) -> rrr.LocalRun:
     """Adds a process to the local queue for algorithm configuration with SMAC.
+
     Args:
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
@@ -513,6 +513,7 @@ def execute_smac_configure_sbatch_script_local(solver_name: str,
         sbatch_options=sbatch_options_list)
 
     return run
+
 
 def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file: Path,
                                          result_directory: Path, num_job_total: int,
@@ -608,7 +609,7 @@ def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) 
         # Add job to active job CSV
         sjh.write_active_job(jobid, CommandName.CONFIGURE_SOLVER)
     else:
-        jobid = ""    
+        jobid = ""
 
     return jobid
 

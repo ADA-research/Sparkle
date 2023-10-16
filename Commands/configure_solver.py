@@ -244,7 +244,7 @@ if __name__ == "__main__":
         )
         dependency_jobid_list = [configure_jobid]
     else:
-        run = scsh.execute_smac_configure_sbatch_script_local(
+        run = scsh.execute_smac_configure_local(
             solver.name, instance_set_train.name, run_on=run_on
         )
 
@@ -300,4 +300,3 @@ if __name__ == "__main__":
     sgh.settings.write_used_settings()
     # Write used scenario to file
     sgh.latest_scenario.write_scenario_ini()
-    
