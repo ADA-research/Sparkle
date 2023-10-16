@@ -21,7 +21,6 @@ from Commands.sparkle_help import sparkle_job_help as sjh
 
 from runrunner.base import Runner
 import runrunner as rrr
-from sparkle.slurm_parsing import SlurmBatch
 
 
 class InstanceType(Enum):
@@ -471,23 +470,25 @@ def create_smac_configure_sbatch_script(solver_name: str,
 
     sbatch_script_path = Path(f"{smac_file_scenario_name}_"
                               f"{num_of_smac_run}_exp_sbatch.sh")
-    
+
     generate_configuration_sbatch_script(sbatch_script_path, scenario_file, result_part,
                                          num_of_smac_run, num_of_smac_run_in_parallel,
                                          execdir)
 
     return sbatch_script_path
 
+
 def execute_smac_configure_sbatch_script_local(solver_name: str,
                                                instance_set_name: str,
-                                               run_on: Runner = Runner.LOCAL) -> rrr.LocalRun:
+                                               run_on: Runner = Runner.LOCAL)\
+    -> rrr.LocalRun | rrr.SlurmRun:
     """Adds a process to the local queue for algorithm configuration with SMAC.
     Args:
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
 
     Returns:
-        job_id of the run
+        The LocalRun Object
     """
     execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
     sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
@@ -500,7 +501,8 @@ def execute_smac_configure_sbatch_script_local(solver_name: str,
     cmd_srun_prefix += ssh.get_slurm_srun_user_options_str()
     cmd_smac_prefix = "./each_smac_run_core.sh "
 
-    cmd_list = f"{cmd_srun_prefix} {cmd_smac_prefix} " + "${params[$SLURM_ARRAY_TASK_ID]}"
+    cmd_list = f"{cmd_srun_prefix} {cmd_smac_prefix} " +\
+               "${params[$SLURM_ARRAY_TASK_ID]}"
 
     run = rrr.add_to_queue(
         runner=run_on,
@@ -508,8 +510,7 @@ def execute_smac_configure_sbatch_script_local(solver_name: str,
         path=execdir,
         name="smac_configure",
         base_dir=Path(sgh.smac_dir, "tmp"),
-        sbatch_options=sbatch_options_list
-        )
+        sbatch_options=sbatch_options_list)
 
     return run
 

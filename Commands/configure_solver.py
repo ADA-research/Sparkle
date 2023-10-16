@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.CONFIGURE_SOLVER])
-    
+
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     sih.copy_instances_to_smac(
         list_all_path, str(instance_set_train), smac_inst_dir_prefix, "train"
     )
-    
+
     if use_features:
         smac_solver_dir = scsh.get_smac_solver_dir(solver.name, instance_set_train.name)
         feature_file_name = f"{smac_solver_dir}{instance_set_train.name}_features.csv"
@@ -300,3 +300,4 @@ if __name__ == "__main__":
     sgh.settings.write_used_settings()
     # Write used scenario to file
     sgh.latest_scenario.write_scenario_ini()
+    

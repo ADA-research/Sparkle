@@ -633,6 +633,9 @@ def generate_generic_callback_local_script(name: str,
                                            run_on: Runner = Runner.LOCAL) -> str:
     """Generate a generic callback script to be executed locally
 
+    TODO: Currently does not use the first four parameters (Original slurm).
+          How should these be used? Were made(?) for creating .sh name
+
     Args:
       name: Name of the script (used as prefix for the file name).
       solver: Path (object) to solver.
@@ -647,19 +650,13 @@ def generate_generic_callback_local_script(name: str,
     Returns:
       String job identifier.
     """
-    # delayed_job_file_path, options_list = create_generic_callback_options_list(name=name,
-    #                                                                           solver=solver,
-    #                                                                           instance_set_train=instance_set_train,
-    #                                                                           instance_set_test=instance_set_test)
-
     sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
 
-    run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=command_line,
-            name=command_name,
-            dependencies=dependency,
-            base_dir=sparkle_tmp_path)
+    run = rrr.add_to_queue(runner=run_on,
+                           cmd=command_line,
+                           name=command_name,
+                           dependencies=dependency,
+                           base_dir=sparkle_tmp_path)
 
     return run.run_id
 
@@ -687,10 +684,11 @@ def generate_generic_callback_slurm_script(name: str,
     Returns:
       String job identifier.
     """
-    delayed_job_file_path, sbatch_options_list = create_generic_callback_options_list(name=name,
-                                                                                      solver=solver,
-                                                                                      instance_set_train=instance_set_train,
-                                                                                      instance_set_test=instance_set_test)
+    delayed_job_file_path, sbatch_options_list =\
+      create_generic_callback_options_list(name=name,
+                                           solver=solver,
+                                           instance_set_train=instance_set_train,
+                                           instance_set_test=instance_set_test)
     sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(get_slurm_sbatch_user_options_list())
