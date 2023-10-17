@@ -234,6 +234,8 @@ if __name__ == "__main__":
     scsh.copy_solver_files_to_smac_dir(
         solver.name, instance_set_train.name
     )
+
+    configure_jobid = ""
     if run_on == Runner.SLURM:
         smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
             solver.name, instance_set_train.name
@@ -252,7 +254,8 @@ if __name__ == "__main__":
             dependency_jobid_list = []
             run.wait()
         elif run_on == Runner.SLURM_RR:
-            dependency_jobid_list = [run.run_id]
+            configure_jobid = run.run_id
+            dependency_jobid_list = [configure_jobid]
 
     # Write most recent run to file
     last_configuration_file_path = Path(
@@ -292,7 +295,8 @@ if __name__ == "__main__":
         dependency_jobid_list.append(ablation_jobid)
 
     job_id_str = ",".join(dependency_jobid_list)
-    print(f"Running configuration in parallel. Waiting for {run_on} job(s) with id(s): "
+
+    print(f"Running configuration in parallel. Waiting for job(s) with id(s): "
           f"{job_id_str}")
 
     status_info.delete()

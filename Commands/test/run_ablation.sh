@@ -27,6 +27,8 @@ mv $slurm_settings_path $slurm_settings_tmp # Save user settings
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+slurm_true="slurm"
+slurm_available=$(detect_slurm)
 
 # Prepare for test
 examples_path="Examples/Resources/"
@@ -50,50 +52,68 @@ Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 mv $smac_results_path $smac_results_path_tmp &> /dev/null # Save user results
 
 # Configure solver
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation | tail -1)
-output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation --run-on $slurm_available | tail -1)
+output_true="Running configuration in parallel. Waiting for "
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] configure_solver with sequential ablation run test succeeded"
+	echo "[success] ($slurm_available) configure_solver with sequential ablation run test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else
-	echo "[failure] configure_solver with sequential ablation run test failed with output:"
+	echo "[failure] ($slurm_available) configure_solver with sequential ablation run test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 # Copy configuration results to simulate the configuration command (it won't have finished yet)
 cp -r $configuration_results_path $smac_path # Place test results
 
 # Run ablation on train set
-output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train | tail -1)
-output_true="Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --run-on $slurm_available | tail -1)
+output_true="Ablation analysis running. Waiting for "
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] run_ablation test succeeded"
+	echo "[success] ($slurm_available) run_ablation test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
-	echo "[failure] run_ablation test failed with output:"
+	echo "[failure] ($slurm_available) run_ablation test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 # Run ablation on test set
-output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test | tail -1)
+output=$(Commands/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] run_ablation with test set test succeeded"
+	echo "[success] ($slurm_available) run_ablation with test set test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else
-	echo "[failure] run_ablation with test set test failed with output:"
+	echo "[failure] ($slurm_available) run_ablation with test set test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 rm -r $smac_results_path # Remove test results

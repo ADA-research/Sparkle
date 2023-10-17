@@ -19,6 +19,7 @@ from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
 
+from sparkle.slurm_parsing import SlurmBatch
 from runrunner.base import Runner
 import runrunner as rrr
 
@@ -490,27 +491,26 @@ def execute_smac_configure_local(solver_name: str,
     Returns:
         The LocalRun Object
     """
-    execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
-    sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
+    # Remove once Runner is running properly
+    if run_on == Runner.SLURM_RR:
+        run_on = Runner.SLURM
+    sbatch_script_path = create_smac_configure_sbatch_script(
+        solver_name, instance_set_name
+    )
 
-    _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
-    smac_setting = f"--array=0-{num_of_smac_run}%{num_of_smac_run_in_parallel}\n"
-    sbatch_options_list.append(smac_setting)
+    batch = SlurmBatch(Path(f"{sgh.smac_dir}{sbatch_script_path}"))
 
-    cmd_srun_prefix = "srun -N1 -n1 "
-    cmd_srun_prefix += ssh.get_slurm_srun_user_options_str()
-    cmd_smac_prefix = "./each_smac_run_core.sh "
-
-    cmd_list = f"{cmd_srun_prefix} {cmd_smac_prefix} " +\
-               "${params[$SLURM_ARRAY_TASK_ID]}"
-
+    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        path=execdir,
         name="smac_configure",
-        base_dir=Path(sgh.smac_dir, "tmp"),
-        sbatch_options=sbatch_options_list)
+        base_dir=sgh.smac_dir,
+        sbatch_options=batch.sbatch_options)
+
+    # Remove once Runner is running properly
+    if run_on == Runner.SLURM:
+        run_on = Runner.SLURM_RR
 
     return run
 
@@ -852,9 +852,9 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
 
-    smac_results_dir = f"{sgh.smac_dir}/results/{solver_name}_{instance_set_name}/"
-    list_file_result_name = os.listdir(smac_results_dir)
+    smac_results_dir = f"{sgh.smac_dir}results/{solver_name}_{instance_set_name}/"
 
+    list_file_result_name = os.listdir(smac_results_dir)
     key_str_1 = "Estimated mean quality of final incumbent config"
 
     # Compare results of each run on the training set to find the best configuration

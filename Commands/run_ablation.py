@@ -202,7 +202,6 @@ if __name__ == "__main__":
     )
     print("Submit ablation run")
     # Submit ablation run
-    # TODO: Move to help -> Done?
     if args.run_on == Runner.SLURM:
         ids = sah.submit_ablation_slurm(solver_name=solver_name,
                                         instance_set_test=instance_set_test,

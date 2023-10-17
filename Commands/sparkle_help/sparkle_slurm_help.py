@@ -578,9 +578,14 @@ def generate_ablation_callback_slurm_script(solver: Path,
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
-    jobid = generate_generic_callback_slurm_script(
-        "ablation", solver, instance_set_train, instance_set_test,
-        dependency, command_line, CommandName.RUN_ABLATION)
+    if run_on == Runner.SLURM:
+        jobid = generate_generic_callback_slurm_script(
+            "ablation", solver, instance_set_train, instance_set_test,
+            dependency, command_line, CommandName.RUN_ABLATION)
+    else:
+        jobid = generate_generic_callback_local_script(
+            "ablation", solver, instance_set_train, instance_set_test,
+            dependency, command_line, CommandName.RUN_ABLATION)
 
     return jobid
 
