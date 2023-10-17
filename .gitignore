@@ -102,3 +102,12 @@ Components/Sparkle-latex-generator-for-parallel-portfolio/*.plt
 
 *.tmp
 *.swp
+features
+BinSolver.o
+BuildSolvers.o
+features.o
+stopwatch.o
+SATinstance.o
+libvarsat.a
+Main.o
+Solver.o
