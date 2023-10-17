@@ -39,7 +39,7 @@ def call_configured_solver(instance_path_list: list[Path],
     # Else single instance turn it into list[list[Path]]
     else:
         instances_list = [instance_path_list]
-
+    
     # If parallel, pass instances list to parallel function
     if parallel:
         job_id_str = call_configured_solver_parallel(instances_list, run_on=run_on)
@@ -173,7 +173,7 @@ def run_configured_solver(instance_path_list: list[Path],
     """Run the latest configured solver on the given instance."""
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
-
+    
     # a) Create cmd_solver_call that could call sparkle_smac_wrapper
     instance_path_str = " ".join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
