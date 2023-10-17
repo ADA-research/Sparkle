@@ -118,10 +118,14 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
     # Run batch script
     cmd_name = CommandName.RUN_CONFIGURED_SOLVER
     exec_dir = "./"
+    jobid_str = ""
     if run_on == Runner.SLURM:
         jobid_str = ssh.submit_sbatch_script(sbatch_script_name=str(sbatch_script_path),
                                              command_name=cmd_name,
                                              execution_dir=exec_dir)
+        print("Submitted sbatch script for configured solver, "
+              "output and results will be written to: "
+              f"{sbatch_script_path}.txt")
     else:
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM_RR:
@@ -133,18 +137,15 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
             runner=run_on,
             cmd=cmd_list,
             name=cmd_name,
-            path=exec_dir,
+            base_dir=exec_dir,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
-        jobid_str = run.run_id
-
+        #jobid_str = run.run_id
+        print(f"Configured solver added to {run_on} queue.")
+        
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
-
-    print("Submitted sbatch script for configured solver, "
-          "output and results will be written to: "
-          f"{sbatch_script_path}.txt")
 
     return jobid_str
 
@@ -173,7 +174,6 @@ def run_configured_solver(instance_path_list: list[Path],
     """Run the latest configured solver on the given instance."""
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
-    
     # a) Create cmd_solver_call that could call sparkle_smac_wrapper
     instance_path_str = " ".join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
@@ -185,14 +185,14 @@ def run_configured_solver(instance_path_list: list[Path],
     seed_str = str(sgh.get_seed())
     cmd_solver_call = (f"{sgh.sparkle_smac_wrapper} {instance_path_str} {specifics} "
                        f"{cutoff_time_str} {run_length} {seed_str} {config_str}")
-
+    
     # Prepare paths
     solver_path = Path(f"Solvers/{solver_name}")
     instance_name = "_".join([path.name for path in instance_path_list])
     raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
                            f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
-
+    
     # b) Run the solver
     rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
                                                          raw_result_path,
