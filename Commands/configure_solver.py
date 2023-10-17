@@ -240,7 +240,7 @@ if __name__ == "__main__":
         )
 
         configure_jobid = scsh.submit_smac_configure_sbatch_script(
-            smac_configure_sbatch_script_name, run_on=run_on
+            smac_configure_sbatch_script_name
         )
         dependency_jobid_list = [configure_jobid]
     else:
