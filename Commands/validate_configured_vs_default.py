@@ -5,21 +5,22 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_instances_help as sih
-from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
-from sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description=("Test the performance of the configured solver and the default "
@@ -86,6 +87,9 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
@@ -157,7 +161,7 @@ if __name__ == "__main__":
         f"{solver.name}_{sgh.sparkle_last_test_file_name}"
     )
 
-    fout = open(last_test_file_path, "w+")
+    fout = Path(last_test_file_path).open("w+")
     fout.write(f"solver {solver}\n")
     fout.write(f"train {instance_set_train}\n")
     if instance_set_test is not None:

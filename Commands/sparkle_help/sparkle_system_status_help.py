@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Helper functions to inform about Sparkle's sytem status."""
-
-import os
-import time
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_job_help
+"""Helper functions to inform about Sparkle's system status."""
 
 
-def print_solver_list(mode: int = 1):
-    """Print the list of solvers in Sparkle."""
-    solver_list = sparkle_global_help.solver_list
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_job_help
+
+
+def print_solver_list(verbose: bool = False) -> None:
+    """Print the list of solvers in Sparkle.
+
+    Args:
+        verbose: Indicating if output should be verbose
+    """
+    solver_list = sgh.solver_list
     print("")
-    print("Currently Sparkle has " + str(len(solver_list)) + " solvers:")
+    print("Currently Sparkle has " + str(len(solver_list)) + " solvers"
+          + (":" if verbose else ""))
 
-    if mode == 2:
+    if verbose:
         i = 1
         for solver in solver_list:
             print(f"[{str(i)}]: Solver: {sfh.get_last_level_directory_name(solver)}")
@@ -27,13 +31,18 @@ def print_solver_list(mode: int = 1):
     return
 
 
-def print_extractor_list(mode: int = 1):
-    """Print the list of feature extractors in Sparkle."""
-    extractor_list = sparkle_global_help.extractor_list
-    print("")
-    print("Currently Sparkle has " + str(len(extractor_list)) + " feature extractors:")
+def print_extractor_list(verbose: bool = False) -> None:
+    """Print the list of feature extractors in Sparkle.
 
-    if mode == 2:
+    Args:
+        verbose: Indicating if output should be verbose
+    """
+    extractor_list = sgh.extractor_list
+    print("")
+    print("Currently Sparkle has " + str(len(extractor_list)) + " feature extractors"
+          + (":" if verbose else ""))
+
+    if verbose:
         i = 1
         for extractor in extractor_list:
             print(
@@ -44,24 +53,36 @@ def print_extractor_list(mode: int = 1):
     return
 
 
-def print_instance_list(mode: int = 1):
-    """Print the list of instances in Sparkle."""
-    instance_list = sparkle_global_help.instance_list
-    print("")
-    print("Currently Sparkle has " + str(len(instance_list)) + " instances:")
+def print_instance_list(verbose: bool = False) -> None:
+    """Print the list of instances in Sparkle.
 
-    if mode == 2:
+    Args:
+        verbose: Indicating, if output should be verbose
+    """
+    instance_list = sgh.instance_list
+    print("")
+    print("Currently Sparkle has " + str(len(instance_list)) + " instances"
+          + (":" if verbose else ""))
+    if verbose:
         i = 1
         for instance in instance_list:
-            print(f"[{str(i)}]: Instance: {sfh.get_last_level_directory_name(instance)}")
+            instance_dir = sfh.get_directory(instance).split("Instances/")[1][:-1]
+            print(f"[{str(i)}]: [{instance_dir}] Instance: ",
+                  f"{sfh.get_last_level_directory_name(instance)}")
             i += 1
 
     print("")
     return
 
 
-def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: int = 1):
-    """Print a list of remaining feature computation jobs."""
+def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
+                                                 verbose: bool = False) -> None:
+    """Print a list of remaining feature computation jobs.
+
+    Args:
+        feature_data_csv_path: path to the feature data csv
+        verbose: Indicating, if output should be verbose
+    """
     try:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
         list_feature_computation_job = (
@@ -73,9 +94,10 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: in
 
     print("")
     print(f"Currently Sparkle has {str(total_job_num)} remaining feature computation "
-          "jobs needed to be performed:")
+          "jobs that need to be performed before creating an algorithm selector"
+          + (":" if verbose else ""))
 
-    if mode == 2:
+    if verbose:
         current_job_num = 1
         for i in range(0, len(list_feature_computation_job)):
             instance_path = list_feature_computation_job[i][0]
@@ -92,9 +114,14 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path, mode: in
     return
 
 
-def print_list_remaining_performance_computation_job(performance_data_csv_path,
-                                                     mode: int = 1):
-    """Print a list of remaining performance computation jobs."""
+def print_list_remaining_performance_computation_job(performance_data_csv_path: str,
+                                                     verbose: bool = False) -> None:
+    """Print a list of remaining performance computation jobs.
+
+    Args:
+        performance_data_csv_path: path to the performance data csv
+        verbose: Indicating, if output should be verbose
+    """
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
@@ -107,9 +134,10 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path,
 
     print("")
     print(f"Currently Sparkle has {str(total_job_num)} remaining performance computation"
-          " jobs needed to be performed:")
+          " jobs that need to be performed before creating an algorithm selector"
+          + (":" if verbose else ""))
 
-    if mode == 2:
+    if verbose:
         current_job_num = 1
         for i in range(0, len(list_performance_computation_job)):
             instance_path = list_performance_computation_job[i][0]
@@ -124,54 +152,3 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path,
 
     print("")
     return
-
-
-def print_portfolio_selector_info():
-    """Print information about the Sparkle portfolio selector."""
-    sparkle_portfolio_selector_path = sparkle_global_help.sparkle_portfolio_selector_path
-    print("")
-    print("Status of portfolio selector in Sparkle:")
-
-    key_str = "construct_sparkle_portfolio_selector"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
-        print("Currently Sparkle portfolio selector is constructing ...")
-    elif os.path.isfile(sparkle_portfolio_selector_path):
-        print("Path: " + sparkle_portfolio_selector_path)
-        print("Last modified time: "
-              f"{get_file_modify_time(sparkle_portfolio_selector_path)}")
-    else:
-        print("No portfolio selector exists!")
-    print("")
-    return
-
-
-def print_report_info():
-    """Print the current status of a the Sparkle algorithm selection report."""
-    sparkle_report_path = sparkle_global_help.sparkle_report_path
-    print("")
-    print("Status of report in Sparkle:")
-
-    key_str = "generate_report"
-    task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
-        print("Currently Sparkle report is generating ...")
-    elif os.path.isfile(sparkle_report_path):
-        print("Path: " + sparkle_report_path)
-        print("Last modified time: " + get_file_modify_time(sparkle_report_path))
-    else:
-        print("No report exists!")
-    print("")
-    return
-
-
-def timestamp_to_time(timestamp) -> str:
-    """Return a timestamp as a readable str."""
-    time_struct = time.gmtime(timestamp)
-    return time.strftime("%Y-%m-%d %H:%M:%S", time_struct)
-
-
-def get_file_modify_time(file_path):
-    """Return the last time a file was modified."""
-    timestamp = os.path.getmtime(file_path)
-    return timestamp_to_time(timestamp) + " (UTC+0)"

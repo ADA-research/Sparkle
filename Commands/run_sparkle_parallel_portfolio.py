@@ -7,26 +7,26 @@ import os
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
-from sparkle_help import sparkle_run_parallel_portfolio_help as srpp
-from sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
+from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-if __name__ == "__main__":
-    # Initialise settings
-    sgh.settings = sparkle_settings.Settings()
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
 
-    # Initialise latest scenario
-    sgh.latest_scenario = ReportingScenario()
-
-    # Log command call
-    sl.log_command(sys.argv)
-
-    # Define command line arguments
+    Returns:
+        parser: The parser with the parsed command line arguments
+    """
+    if sgh.latest_scenario is None:
+        latest = "no scenario found, you have to construct a parallel portfolio first."
+    else:
+        latest = sgh.latest_scenario.get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance-paths", metavar="PATH",
                         nargs="+", type=str, required=True,
@@ -41,7 +41,7 @@ if __name__ == "__main__":
                              f" directory is {sgh.sparkle_parallel_portfolio_dir}."
                              " (default: use the latest constructed portfolio)"
                              " (current latest: "
-                             f"{sgh.latest_scenario.get_parallel_portfolio_path()})")
+                             f"{latest}")
     parser.add_argument("--process-monitoring", choices=ProcessMonitoring.__members__,
                         type=ProcessMonitoring,
                         help="Specify whether the monitoring of the portfolio should "
@@ -72,9 +72,27 @@ if __name__ == "__main__":
     parser.add_argument("--settings-file", type=Path,
                         help="Specify the settings file to use instead of the default"
                              f" (default: {sgh.settings.DEFAULT_settings_path}")
+    return parser
+
+
+if __name__ == "__main__":
+    # Initialise settings
+    sgh.settings = sparkle_settings.Settings()
+
+    # Initialise latest scenario
+    sgh.latest_scenario = ReportingScenario()
+
+    # Log command call
+    sl.log_command(sys.argv)
+
+    # Define command line arguments
+    parser = parser_function()
 
     # Process command line arguments
     args = parser.parse_args()
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO])
 
     # Do first, so other command line options can override settings from the file
     if args.settings_file is not None:

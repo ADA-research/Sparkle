@@ -9,36 +9,22 @@ import fcntl
 from pathlib import Path
 import ast
 
-try:
-    from sparkle_help import sparkle_basic_help
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-    from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-    from sparkle_help import sparkle_run_solvers_help as srs
-    from sparkle_help import sparkle_logging as sl
-    from sparkle_help.reporting_scenario import ReportingScenario
-    from sparkle_help.reporting_scenario import Scenario
-    from sparkle_help import sparkle_instances_help as sih
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help import sparkle_job_help as sjh
-except ImportError:
-    import sparkle_basic_help
-    import sparkle_file_help as sfh
-    import sparkle_global_help as sgh
-    import sparkle_feature_data_csv_help as sfdcsv
-    import sparkle_performance_data_csv_help as spdcsv
-    import sparkle_run_solvers_help as srs
-    import sparkle_logging as sl
-    from reporting_scenario import ReportingScenario
-    from reporting_scenario import Scenario
-    import sparkle_instances_help as sih
-    from sparkle_command_help import CommandName
-    import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_run_solvers_help as srs
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
-def get_list_feature_vector(extractor_path, instance_path, result_path,
-                            cutoff_time_each_extractor_run):
+def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
+                            cutoff_time_each_extractor_run: float) -> list[str]:
     """Return the feature vector for an instance as a list."""
     runsolver_path = sgh.runsolver_path
 
@@ -57,12 +43,12 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
 
     try:
         os.system(command_line)
-        with open(runsolver_value_data_path) as file:
+        with Path(runsolver_value_data_path).open() as file:
             if "TIMEOUT=true" in file.read():
                 print(f"****** WARNING: Feature vector computing on instance "
                       f"{instance_path} timed out! ******")
     except Exception:
-        if not os.path.exists(result_path):
+        if not Path(result_path).exists():
             sfh.create_new_empty_file(result_path)
 
     try:
@@ -75,7 +61,7 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
     else:
-        fin = open(result_path, "r+")
+        fin = Path(result_path).open("r+")
         fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
         myline = fin.readline().strip()
         myline = fin.readline().strip()
@@ -97,7 +83,7 @@ def get_list_feature_vector(extractor_path, instance_path, result_path,
 
 def print_predict_schedule(predict_schedule_result_path: str) -> None:
     """Print the predicted algorithm schedule."""
-    fin = open(predict_schedule_result_path, "r+")
+    fin = Path(predict_schedule_result_path).open("r+")
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
     myline = fin.readline().strip()
     print(myline)
@@ -106,11 +92,11 @@ def print_predict_schedule(predict_schedule_result_path: str) -> None:
     return
 
 
-def get_list_predict_schedule_from_file(predict_schedule_result_path: str):
+def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> list:
     """Return the predicted algorithm schedule as a list."""
     list_predict_schedule = []
     prefix_string = "Selected Schedule [(algorithm, budget)]: "
-    fin = open(predict_schedule_result_path, "r+")
+    fin = Path(predict_schedule_result_path).open("r+")
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
     predict_schedule = fin.readline().strip()
 
@@ -129,9 +115,9 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str):
     return list_predict_schedule
 
 
-def print_solution(raw_result_path) -> None:
+def print_solution(raw_result_path: str) -> None:
     """Print the solution from a raw result."""
-    fin = open(raw_result_path, "r+")
+    fin = Path(raw_result_path).open("r+")
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
 
     while True:
@@ -152,7 +138,8 @@ def print_solution(raw_result_path) -> None:
 
 def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: str,
                                              cutoff_time: int,
-                                             performance_data_csv_path: str = None):
+                                             performance_data_csv_path: str = None)\
+        -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
     _, _, cpu_time_penalised, _, status, raw_result_path = (
         srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
@@ -165,7 +152,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
     if performance_data_csv_path is not None:
         solver_name = "Sparkle_Portfolio_Selector"
         check_selector_status(solver_name)
-        fo = open(performance_data_csv_path, "r+")
+        fo = Path(performance_data_csv_path).open("r+")
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
@@ -186,7 +173,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str, instance_path: st
 
 
 def call_sparkle_portfolio_selector_solve_instance(
-        instance_path: str, performance_data_csv_path: str = None):
+        instance_path: str, performance_data_csv_path: str = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance."""
     # Create instance strings to accommodate multi-file instances
     instance_path_list = instance_path.split()
@@ -201,8 +188,8 @@ def call_sparkle_portfolio_selector_solve_instance(
     print("Start running Sparkle portfolio selector on solving instance "
           f"{instance_files_str} ...")
     python_executable = sgh.python_executable
-    if not os.path.exists("Tmp/"):
-        os.mkdir("Tmp/")
+    if not Path("Tmp/").exists():
+        Path("Tmp/").mkdir()
 
     print("Sparkle computing features of instance " + instance_files_str + " ...")
     list_feature_vector = []
@@ -228,7 +215,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     print("Sparkle computing features of instance " + instance_files_str + " done!")
 
     command_line = (f"{python_executable} {sgh.autofolio_path} --load "
-                    f'{sgh.sparkle_portfolio_selector_path} --feature_vec "')
+                    f'{sgh.sparkle_algorithm_selector_path} --feature_vec "')
     for i in range(0, len(list_feature_vector)):
         command_line = command_line + str(list_feature_vector[i])
 
@@ -272,8 +259,9 @@ def call_sparkle_portfolio_selector_solve_instance(
 
 
 def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
-        sbatch_shell_script_path, test_case_directory_path, performance_data_csv_path,
-        list_jobs, start_index, end_index):
+        sbatch_shell_script_path: str, test_case_directory_path: str,
+        performance_data_csv_path: str,
+        list_jobs: list[list[str]], start_index: int, end_index: int) -> None:
     """Generate a Slurm batch script to run the Sparkle portfolio selector."""
     num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
     # specify the name of this sbatch script
@@ -288,7 +276,7 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
     command_prefix = ("srun -N1 -n1 --exclusive python "
                       "Commands/sparkle_help/run_sparkle_portfolio_core.py ")
 
-    fout = open(sbatch_shell_script_path, "w+")  # open the file of sbatch script
+    fout = Path(sbatch_shell_script_path).open("w+")  # open the file of sbatch script
     # using the UNIX file lock to prevent other attempts to visit this sbatch script
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 
@@ -344,7 +332,7 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
 
 
 def call_sparkle_portfolio_selector_solve_instance_directory(
-        instance_directory_path: str):
+        instance_directory_path: str) -> None:
     """Call the Sparkle portfolio selector to solve all instances in a directory."""
     if instance_directory_path[-1] != "/":
         instance_directory_path += "/"
@@ -367,7 +355,7 @@ def call_sparkle_portfolio_selector_solve_instance_directory(
     # Write used scenario to file
     sgh.latest_scenario.write_scenario_ini()
 
-    if not os.path.exists("Test_Cases/"):
+    if not Path("Test_Cases/").exists():
         os.system("mkdir Test_Cases/")
     os.system("mkdir -p " + test_case_directory_path)
     os.system("mkdir -p " + test_case_directory_path + "Tmp/")
@@ -423,8 +411,8 @@ def call_sparkle_portfolio_selector_solve_instance_directory(
     return
 
 
-def check_selector_status(solver_name):
-    """Check if there is an selector at the given path.
+def check_selector_status(solver_name: str) -> None:
+    """Check if there is a selector at the given path.
 
     If it does not exist the function will terminate the whole program.
     """

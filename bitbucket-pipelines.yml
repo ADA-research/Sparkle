@@ -26,10 +26,12 @@ pipelines:
               # flake8-quotes and pep8-naming are plugins for flake8 that are automatically used when installed
               - pip install flake8==5.0.4
               - pip install flake8-docstrings==1.6.0
+              - pip install flake8-annotations==3.0.1
               - pip install flake8-quotes==3.3.1
               - pip install pep8-naming==0.13.2
               - pip install flake8-use-fstring==1.4.0
               - pip install flake8-bandit==4.1.1
+              - pip install flake8-use-pathlib==0.3.0
               - flake8
               
 definitions:

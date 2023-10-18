@@ -4,6 +4,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 if __name__ == "__main__":
     if len(sys.argv) != 7:
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     sbs_name_path = sbs_name.replace("\\", "")
     output_gnuplot_script = f"{parallel_portfolio_sparkle_name}_vs_{sbs_name}.plt"
 
-    with open(output_gnuplot_script, "w+") as outfile:
+    with Path(output_gnuplot_script).open("w+") as outfile:
         outfile.write(f"set xlabel '{sbs_name}, {performance_measure}'\n")
         outfile.write(f"set ylabel '{parallel_portfolio_sparkle_name}, "
                       f"{performance_measure}'\n")

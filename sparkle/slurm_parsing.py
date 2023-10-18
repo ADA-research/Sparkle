@@ -1,6 +1,7 @@
 """This module helps to extract and structure information from Slurm sbatch files."""
 
 # Standard libs
+from __future__ import annotations
 import re
 from pathlib import Path
 
@@ -29,11 +30,11 @@ class SlurmBatch:
         The loaded file Path
     """
 
-    def __init__(self, srcfile: Path):
+    def __init__(self: SlurmBatch, srcfile: Path) -> None:
         """Parse the data contained in srcfile and localy store the information."""
         self.file = Path(srcfile)
 
-        with open(self.file) as f:
+        with Path(self.file).open() as f:
             filestr = f.read()
 
         self.sbatch_options = re_sbatch.findall(filestr)

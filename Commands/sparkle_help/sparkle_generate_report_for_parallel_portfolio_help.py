@@ -6,16 +6,23 @@ import os
 import sys
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_generate_report_help as sgrh
-from sparkle_help import sparkle_tex_help as stex
-from sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_generate_report_help as sgrh
+from Commands.sparkle_help import sparkle_tex_help as stex
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def get_num_solvers(parallel_portfolio_path: Path) -> str:
-    """Return the number of solvers as string, counting each solver-seed combination."""
+    """Return the number of solvers as string, counting each solver-seed combination.
+
+    Args:
+        parallel_portfolio_path: Path to the parallel portfolio.
+
+    Returns:
+        The number of solvers as string.
+    """
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     num_solvers = len(solver_list)
 
@@ -32,7 +39,14 @@ def get_num_solvers(parallel_portfolio_path: Path) -> str:
 
 
 def get_solver_list(parallel_portfolio_path: Path) -> str:
-    """Return the list of solvers as string, including each solver-seed combination."""
+    """Return the list of solvers as string, including each solver-seed combination.
+
+    Args:
+        parallel_portfolio_path: Path to the parallel portfolio.
+
+    Returns:
+        A list of solvers in the parallel portfolio as str.
+    """
     str_value = ""
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
 
@@ -70,7 +84,14 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
 
 
 def get_num_instance_sets(instance_list: list[str]) -> str:
-    """Return the number of instance sets as a string."""
+    """Return the number of instance sets in the given list as string.
+
+    Args:
+        instance_list: list of instance sets
+
+    Returns:
+        Number of instance sets in the given list as string
+    """
     list_instance_sets = []
 
     for instance_path in instance_list:
@@ -90,10 +111,14 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
     return str(n_sets)
 
 
-def get_instance_set_list(instance_list: list[str]) -> (str, int):
-    """Return a list of instance sets and the number of instances in the set as string.
+def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
+    """Retrieve a list of instance sets in LaTeX format.
 
-    Also returns the total number of instances.
+    Args:
+        instance_list: List of paths to instance sets.
+
+    Returns:
+        The instance sets as itemize elements, and the number of instances in the set.
     """
     str_value = ""
     n_instances = 0
@@ -121,8 +146,9 @@ def get_instance_set_list(instance_list: list[str]) -> (str, int):
 def get_results() -> dict[str, list[str, str]]:
     """Return a dict with the performance results on each instance.
 
-    The dict consists of a string indicating the instance name, and a list which contains
-    the solver name followed by the performance (both as string).
+    Returns:
+        A dict consists of a string indicating the instance name, and a list which
+        contains the solver name followed by the performance (both as string).
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(str(solutions_dir))
@@ -136,7 +162,7 @@ def get_results() -> dict[str, list[str, str]]:
     for result in results:
         result_path = Path(solutions_dir / result)
 
-        with open(result_path, "r") as result_file:
+        with Path(result_path).open("r") as result_file:
             lines = result_file.readlines()
 
         result_lines = [line.strip() for line in lines]
@@ -154,11 +180,16 @@ def get_results() -> dict[str, list[str, str]]:
     return results_dict
 
 
-def get_solvers_with_solution() -> (str, dict[str, int], int):
-    """Return a string with the number of instances solved per successful solver.
+def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
+    """Retrieve the number of solved and unsolved instances per solver.
 
-    solver_dict contains the same information as dict.
-    unsolved_instances is an int indicating the number of unsolved instances.
+    Returns:
+        A three-tuple:
+            str_value: a string with the number of instances solved per successful
+                solver.
+            solver_dict: a dict with solver name as key, and number of solved instances
+                for the corresponding solver as value
+            unsolved_instances: number of unsolved instances.
     """
     results_on_instances = get_results()
     str_value = ""
@@ -205,12 +236,18 @@ def get_solvers_with_solution() -> (str, dict[str, int], int):
 
 def get_dict_sbs_penalty_time_on_each_instance(
         parallel_portfolio_path: Path,
-        instance_list: list[str]) -> (dict[str, float], str, dict[str, float]):
+        instance_list: list[str]) -> tuple[dict[str, float], str, dict[str, float]]:
     """Return the penalised run time for the single best solver and per solver.
 
-    The first returned dict contains the run time per instance for the single best
-    solver, the returned string contains the name of the single best solver, and the
-    second returned dict contains penalised average run time per solver.
+    Args:
+        parallel_portfolio_path: Path to the parallel portfolio.
+        instance_list: List of paths to instance sets.
+
+    Returns:
+        A three-tuple:
+            A dict containing the run time per instance for the single best solver.
+            A string containing the name of the single best solver.
+            A second dict containing penalised average run time per solver.
     """
     # Collect full solver list, including solver variants
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
@@ -293,7 +330,14 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
         instance_list: list[str]) -> dict[str, float]:
-    """Return a dict of instance names and the penalised running time of the PaP."""
+    """Returns the instance names and corresponding penalised running times of the PaP.
+
+    Args:
+        instance_list: List of instances.
+
+    Returns:
+        A dict of instance names and the penalised running time of the PaP.
+    """
     mydict = {}
 
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
@@ -314,13 +358,21 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
-        parallel_portfolio_path: Path, instances: list[str]) -> (
-        str, dict[str, float], dict[str, float]):
+        parallel_portfolio_path: Path, instances: list[str]) -> tuple[
+        str, dict[str, float], dict[str, float]]:
     """Generate PaP vs SBS figure and return a string to include it in LaTeX.
 
-    dict_all_solvers is a dict containing the penalised average run time per solver.
-    dict_actual_parallel_portfolio_penalty_time_on_each_instance is a dict with instance
-    names and the penalised running time of the PaP.
+    Args:
+        parallel_portfolio_path: Parallel portfolio path.
+        instances: List of instances.
+
+    Returns:
+        a three tuple:
+            str_value: A string to include the PaP vs SBS figure in LaTeX
+            dict_all_solvers: A dict containing the penalised average run time per
+                solver.
+            dict_actual_parallel_portfolio_penalty_time_on_each_instance: A dict with
+                instance names and the penalised running time of the PaP.
     """
     str_value = ""
     dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = (
@@ -333,7 +385,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     data_filename = "data_parallel_portfolio_sparkle_vs_sbs.dat"
     data_filepath = latex_directory_path + data_filename
 
-    with open(data_filepath, "w+") as outfile:
+    with Path(data_filepath).open("w+") as outfile:
         for instance in dict_sbs_penalty_time_on_each_instance:
             sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
             sparkle_penalty_time = (
@@ -360,7 +412,22 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
                       dict_portfolio: dict[str, float],
                       solver_with_solutions: dict[str, int],
                       n_unsolved_instances: int, n_instances: int) -> str:
-    """Return a string containing LaTeX code for a table with the portfolio results."""
+    """Returns a LaTeX table with the portfolio results.
+
+    Args:
+        results: A dict containing the penalised average run time per solver.
+        parallel_portfolio_path: Parallel portfolio path
+        dict_portfolio: A dict with instance names and the penalised running time of the
+            PaP.
+        solver_with_solutions: A dict with solver name as key, and number of solved
+            instances for the corresponding solver as value, see
+            get_solvers_with_solution.
+        n_unsolved_instances: Number of unsolved instances.
+        n_instances: Number of instances.
+
+    Returns:
+        A string containing LaTeX code for a table with the portfolio results.
+    """
     portfolio_par = 0.0
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
@@ -416,7 +483,15 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
 
 def get_dict_variable_to_value(parallel_portfolio_path: Path,
                                instances: list[str]) -> dict[str, str]:
-    """Return a dictionary that maps variables used in the LaTeX report to values."""
+    """Returns a mapping between LaTeX report variables and their values.
+
+    Args:
+        parallel_portfolio_path: Parallel portfolio path.
+        instances: List of instances.
+
+    Returns:
+        A dictionary that maps variables used in the LaTeX report to values.
+    """
     mydict = {}
 
     variable = "customCommands"
@@ -479,8 +554,13 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     return mydict
 
 
-def generate_report(parallel_portfolio_path: Path, instances: list[str]):
-    """Generate a report for a parallel algorithm portfolio."""
+def generate_report(parallel_portfolio_path: Path, instances: list[str]) -> None:
+    """Generate a report for a parallel algorithm portfolio.
+
+    Args:
+        parallel_portfolio_path: Parallel portfolio path.
+        instances: List of instances.
+    """
     latex_report_filename = Path("Sparkle_Report")
     dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path,
                                                         instances)
@@ -491,7 +571,7 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ""
 
-    with open(latex_template_filepath, "r") as infile:
+    with Path(latex_template_filepath).open("r") as infile:
         for line in infile:
             report_content += line
 
@@ -502,7 +582,7 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
 
-    with open(latex_report_filepath, "w+") as outfile:
+    with Path(latex_report_filepath).open("w+") as outfile:
         for line in report_content:
             outfile.write(line)
 
@@ -512,5 +592,3 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]):
 
     print(f"Report is placed at: {report_path}")
     sl.add_output(str(report_path), "Sparkle parallel portfolio report")
-
-    return

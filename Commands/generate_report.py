@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 """Sparkle command to generate a report for an executed experiment."""
 
-import os
 import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_generate_report_help as sgrh
-from sparkle_help import sparkle_generate_report_for_configuration_help as sgrfch
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
-from sparkle_help import sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
+from Commands.Structures.status_info import GenerateReportStatusInfo
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_generate_report_help as sgrh
+from Commands.sparkle_help import \
+    sparkle_generate_report_for_configuration_help as sgrfch
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import \
+    sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description=("Without any arguments a report for the most recent algorithm "
@@ -89,25 +92,6 @@ def parser_function():
     return parser
 
 
-def generate_task_run_status():
-    """Generate run status info files for report generation Slurm batch jobs."""
-    key_str = "generate_report"
-    task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
-    status_info_str = "Status: Running\n"
-    sfh.write_string_to_file(task_run_status_path, status_info_str)
-
-    return
-
-
-def delete_task_run_status():
-    """Remove run status info files for report generation Slurm batch jobs."""
-    key_str = "generate_report"
-    task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
-    os.system("rm -rf " + task_run_status_path)
-
-    return
-
-
 if __name__ == "__main__":
     # Initialise settings
     global settings
@@ -131,6 +115,9 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.GENERATE_REPORT])
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):
@@ -172,27 +159,37 @@ if __name__ == "__main__":
                   " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
             sys.exit()
 
-        if not os.path.isfile(sgh.sparkle_portfolio_selector_path):
+        if not Path(sgh.sparkle_algorithm_selector_path).is_file():
             print("Before generating a Sparkle report, please first construct the "
                   "Sparkle portfolio selector!")
             print("Not generating a Sparkle report, stopping execution!")
             sys.exit()
 
         print("Generating report ...")
-        generate_task_run_status()
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.ALGORITHM_SELECTION)
+        status_info.save()
         if test_case_directory is None:
             sgrh.generate_report()
             print("Report generated ...")
         else:
             sgrh.generate_report(str(test_case_directory))
             print("Report for test generated ...")
+        status_info.delete()
 
-        delete_task_run_status()
     elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.PARALLEL_PORTFOLIO)
+        status_info.save()
+
         sgrfpph.generate_report(parallel_portfolio_path, pap_instance_list)
         print("Parallel portfolio report generated ...")
+        status_info.delete()
     else:
+        status_info = GenerateReportStatusInfo()
+        status_info.set_report_type(sgh.ReportType.ALGORITHM_CONFIGURATION)
+        status_info.save()
         # Reporting for algorithm configuration
         solver_name = sfh.get_last_level_directory_name(solver)
 
@@ -243,6 +240,8 @@ if __name__ == "__main__":
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
             sys.exit(-1)
+
+        status_info.delete()
 
     # Write used settings to file
     sgh.settings.write_used_settings()

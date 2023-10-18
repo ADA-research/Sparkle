@@ -2,34 +2,34 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for interaction with Slurm."""
 
+from __future__ import annotations
+
 import os
 import fcntl
 import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_configure_solver_help as scsh
-    from sparkle_help import sparkle_logging as sl
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help import sparkle_job_help as sjh
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help as sbh
-    import sparkle_configure_solver_help as scsh
-    import sparkle_logging as sl
-    import sparkle_file_help as sfh
-    from sparkle_command_help import CommandName
-    import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
-def get_slurm_options_list(path_modifier=None):
-    """Return a list with the Slurm options given in the Slurm settings file."""
+def get_slurm_options_list(path_modifier: str = None) -> list[str]:
+    """Return a list with the Slurm options given in the Slurm settings file.
+
+    Args:
+      path_modifier: An optional prefix path for the sparkle Slurm settings.
+        Default is None which is interpreted as an empty prefix.
+
+    Returns:
+      List of strings (the actual Slurm settings, e.g., ['--mem-per-cpu=3000']).
+    """
     if path_modifier is None:
         path_modifier = ""
 
@@ -37,7 +37,7 @@ def get_slurm_options_list(path_modifier=None):
 
     sparkle_slurm_settings_path = str(path_modifier) + sgh.sparkle_slurm_settings_path
 
-    settings_file = open(sparkle_slurm_settings_path, "r")
+    settings_file = Path(sparkle_slurm_settings_path).open("r")
     while True:
         current_line = settings_file.readline()
         if not current_line:
@@ -50,23 +50,51 @@ def get_slurm_options_list(path_modifier=None):
     return slurm_options_list
 
 
-def get_slurm_sbatch_user_options_list(path_modifier=None):
-    """Return a list with Slurm batch options given by the user."""
+def get_slurm_sbatch_user_options_list(path_modifier: str = None) -> list[str]:
+    """Return a list with Slurm batch options given by the user.
+
+    Args:
+      path_modifier: An optional prefix path for the sparkle Slurm settings.
+        Default is None which is interpreted as an empty prefix.
+
+    Returns:
+      List of strings (the actual Slurm settings, e.g., ['--mem-per-cpu=3000']).
+    """
     return get_slurm_options_list(path_modifier)
 
 
-def get_slurm_sbatch_default_options_list():
-    """Return the default list of Slurm batch options."""
+def get_slurm_sbatch_default_options_list() -> list[str]:
+    """Return the default list of Slurm batch options.
+
+    Returns:
+      List of strings. Currently, this is the empty list.
+    """
     return list()
 
 
-def get_slurm_srun_user_options_list(path_modifier=None):
-    """Return a list with the Slurm run options given by the user."""
+def get_slurm_srun_user_options_list(path_modifier: str = None) -> list[str]:
+    """Return a list with the Slurm run options given by the user.
+
+    Args:
+      path_modifier: An optional prefix path for the sparkle Slurm settings.
+        Default is None which is interpreted as an empty prefix.
+
+    Returns:
+      List of strings (the actual Slurm settings, e.g., ['--mem-per-cpu=3000']).
+    """
     return get_slurm_options_list(path_modifier)
 
 
-def get_slurm_srun_user_options_str(path_modifier=None) -> str:
-    """Return a str with the Slurm run option given by the user."""
+def get_slurm_srun_user_options_str(path_modifier: str = None) -> str:
+    """Return a single string with the Slurm run option given by the user.
+
+    Args:
+      path_modifier: An optional prefix path for the sparkle Slurm settings.
+        Default is None which is interpreted as an empty prefix.
+
+    Returns:
+      A single string of Slurm options.
+    """
     srun_options_list = get_slurm_srun_user_options_list(path_modifier)
     srun_options_str = ""
 
@@ -77,7 +105,16 @@ def get_slurm_srun_user_options_str(path_modifier=None) -> str:
 
 
 def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str]:
-    """Check if the given srun_option_string is compatible with the Slurm cluster."""
+    """Check if the given srun_option_string is compatible with the Slurm cluster.
+
+    Args:
+      srun_option_string: Specific run option string.
+
+    Returns:
+      A 2-tuple of type (combatible, message). The first entry is a Boolean
+      incidating the compatibility and the second is a additional informative
+      string message.
+    """
     args = shlex.split(srun_option_string)
     kwargs = {}
 
@@ -120,24 +157,36 @@ def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str
 
 
 def generate_sbatch_script_generic(sbatch_script_path: str,
-                                   sbatch_options_list: List[str],
-                                   job_params_list: List[str], srun_options_str: str,
+                                   sbatch_options_list: list[str],
+                                   job_params_list: list[str],
+                                   srun_options_str: str,
                                    target_call_str: str,
-                                   job_output_list: List[str] = None):
-    """Generate the generic components of a Slurm batch script."""
-    fout = open(sbatch_script_path, "w+")  # open the file of sbatch script
+                                   job_output_list: list[str] = None) -> None:
+    """Generate the generic components of a Slurm batch script.
+
+    Args:
+      sbatch_script_path: Path to batch script.
+      sbatch_options_list: List of Slurm options for batch script execution.
+      job_params_list: List of job parameters.
+      srun_options_str: A string with run options.
+      target_call_str: The target call string.
+      job_output_list: Optional list of job outputs that should be appended to
+        the job output. Default is None.
+    """
+    fout = Path(sbatch_script_path).open("w+")  # open the file of sbatch script
+
     # using the UNIX file lock to prevent other attempts to visit this sbatch script
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 
     # specify the options of sbatch in the top of this sbatch script
-    fout.write("#!/bin/bash" + "\n")  # use bash to execute this script
-    fout.write("###" + "\n")
-    fout.write("###" + "\n")
+    fout.write("#!/bin/bash\n")
+    fout.write("###\n")
+    fout.write("###\n")
 
     for i in sbatch_options_list:
         fout.write("#SBATCH " + str(i) + "\n")
 
-    fout.write("###" + "\n")
+    fout.write("###\n")
 
     # specify the array of parameters for each command
     if len(job_params_list) > 0:
@@ -172,14 +221,24 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
     fout.write(command_line + "\n")
     fout.close()  # close the file of the sbatch script
 
-    return
 
+def get_sbatch_options_list(sbatch_script_path: Path,
+                            num_jobs: int,
+                            job: str,
+                            smac: bool = True) -> list[str]:
+    """Return and write output paths for a list of standardised Slurm batch options.
 
-def get_sbatch_options_list(sbatch_script_path: Path, num_jobs: int,
-                            job: str, smac: bool = True) -> list[str]:
-    """Return and write output paths for a list of standardised Slurm batch options."""
+    Args:
+      sbatch_script_path: Path object representing the batch script.
+      num_jobs: The number of jobs.
+      job: The job identifier.
+      smac: A Boolean indicating whether SMAC should be used. Default is True.
+
+    Returns:
+      A list of batch options for Slurm.
+    """
     if smac:
-        tmp_dir = "tmp/"
+        tmp_dir = sgh.smac_dir + "tmp/"
     else:
         tmp_dir = "Tmp/"
 
@@ -199,25 +258,31 @@ def get_sbatch_options_list(sbatch_script_path: Path, num_jobs: int,
 
     # Log script and output paths
     sl.add_output(str(sbatch_script_path), f"Slurm batch script for {job}")
-    sl.add_output(sgh.smac_dir + std_out,
+    sl.add_output(std_out,
                   f"Standard output of Slurm batch script for {job}")
-    sl.add_output(sgh.smac_dir + std_err,
+    sl.add_output(std_err,
                   f"Error output of Slurm batch script for {job}")
 
     # Remove possible old output
-    if smac:
-        sfh.rmfile(Path(sgh.smac_dir + std_out))
-        sfh.rmfile(Path(sgh.smac_dir + std_err))
-    else:
-        sfh.rmfile(Path(std_out))
-        sfh.rmfile(Path(std_err))
+    sfh.rmfile(Path(std_out))
+    sfh.rmfile(Path(std_err))
 
     return sbatch_options_list
 
 
-def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_name: str,
+def generate_sbatch_script_for_validation(solver_name: str,
+                                          instance_set_train_name: str,
                                           instance_set_test_name: str = None) -> str:
-    """Generate a Slurm batch script for algorithm configuration validation."""
+    """Generate a Slurm batch script for algorithm configuration validation.
+
+    Args:
+      solver_name: Name of the solver.
+      instance_set_train_name: The name of the instance set for training.
+      instance_set_test_name: Optional name of the instance set for testing.
+
+    Returns:
+      Path to the generated Slurm batch script file.
+    """
     # Set script name and path
     if instance_set_test_name is not None:
         sbatch_script_name = (f"{solver_name}_{instance_set_train_name}_"
@@ -282,7 +347,7 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
         # Write configuration to file to be used by smac-validate
         config_file_path = scenario_dir + "/configuration_for_validation.txt"
         # open the file of sbatch script
-        fout = open(sgh.smac_dir + config_file_path, "w+")
+        fout = Path(sgh.smac_dir + config_file_path).open("w+")
         # using the UNIX file lock to prevent other attempts to visit this sbatch script
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
         fout.write(optimised_configuration_str + "\n")
@@ -350,9 +415,21 @@ def generate_sbatch_script_for_validation(solver_name: str, instance_set_train_n
     return sbatch_script_name
 
 
-def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
-                                                   list_jobs):
-    """Generate a Slurm batch script for feature computation."""
+def generate_sbatch_script_for_feature_computation(
+        n_jobs: int,
+        feature_data_csv_path: str,
+        list_jobs: list[str]) -> tuple[str, str]:
+    """Generate a Slurm batch script for feature computation.
+
+    Args:
+      n_jobs: The number of jobs.
+      feature_data_csv_path: Path to the feature data in CSV format.
+      list_jobs: List of job IDs.
+
+    Returns:
+      A 2-tuple: Name of the generated Slurm batch script file and the full path
+      to this file.
+    """
     # Set script name and path
     sbatch_script_name = (f"computing_features_sbatch_shell_script_{str(n_jobs)}_"
                           f"{sbh.get_time_pid_random_string()}.sh")
@@ -398,14 +475,26 @@ def generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path
     return sbatch_script_name, sbatch_script_dir
 
 
-def submit_sbatch_script(sbatch_script_name: str, command_name: CommandName,
-                         execution_dir: str = None) -> str:
-    """Submit a Slurm batch script."""
+def submit_sbatch_script(sbatch_script_name: str,
+                         command_name: CommandName,
+                         execution_dir: str | None = None) -> str:
+    """Submit a Slurm batch script.
+
+    Args:
+      sbatch_script_name: Name of the batch script.
+      command_name: Command name.
+      execution_dir: Optionallly the directory from which the batch script is
+        to be executed.
+
+    Returns:
+      String job identifier or empty string if the job was not submitted
+      successfully. Defaults to the SMAC directory.
+    """
     if execution_dir is None:
         execution_dir = sgh.smac_dir
 
     sbatch_script_path = sbatch_script_name
-    ori_path = os.getcwd()
+    ori_path = Path.cwd()
     os.system(f"cd {execution_dir} ; chmod a+x {sbatch_script_path} ; cd {ori_path}")
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
     command = f"cd {execution_dir} ; unset SLURM_CPU_BIND;" \
@@ -413,20 +502,30 @@ def submit_sbatch_script(sbatch_script_name: str, command_name: CommandName,
 
     output_list = os.popen(command).readlines()
 
+    jobid = ""
     if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
         jobid = output_list[0].strip().split()[-1]
         # Add job to active job CSV
         sjh.write_active_job(jobid, command_name)
-    else:
-        jobid = ""
 
     return jobid
 
 
-def generate_validation_callback_slurm_script(solver: Path, instance_set_train: Path,
+def generate_validation_callback_slurm_script(solver: Path,
+                                              instance_set_train: Path,
                                               instance_set_test: Path,
                                               dependency: str) -> str:
-    """Generate a callback Slurm batch script for validation."""
+    """Generate a callback Slurm batch script for validation.
+
+    Args:
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      dependency: String of job dependencies.
+
+    Returns:
+      String job identifier.
+    """
     command_line = "echo $(pwd) $(date)\n"
     command_line += ("srun -N1 -n1 ./Commands/validate_configured_vs_default.py "
                      "--settings-file Settings/latest.ini")
@@ -442,10 +541,21 @@ def generate_validation_callback_slurm_script(solver: Path, instance_set_train: 
     return jobid
 
 
-def generate_ablation_callback_slurm_script(solver: Path, instance_set_train: Path,
+def generate_ablation_callback_slurm_script(solver: Path,
+                                            instance_set_train: Path,
                                             instance_set_test: Path,
                                             dependency: str) -> str:
-    """Generate a callback Slurm batch script for ablation."""
+    """Generate a callback Slurm batch script for ablation.
+
+    Args:
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      dependency: String of job dependencies.
+
+    Returns:
+      String job identifier.
+    """
     command_line = "echo $(pwd) $(date)\n"
     command_line += ("srun -N1 -n1 ./Commands/run_ablation.py --settings-file "
                      "Settings/latest.ini")
@@ -462,12 +572,29 @@ def generate_ablation_callback_slurm_script(solver: Path, instance_set_train: Pa
     return jobid
 
 
-def generate_generic_callback_slurm_script(name: str, solver: Path,
+def generate_generic_callback_slurm_script(name: str,
+                                           solver: Path,
                                            instance_set_train: Path,
-                                           instance_set_test: Path, dependency: str,
+                                           instance_set_test: Path,
+                                           dependency: str,
                                            command_line: str,
                                            command_name: CommandName) -> str:
-    """Generate a callback Slurm batch script."""
+    """Generate a generic callback Slurm batch script.
+
+    Args:
+      name: Name of the script (used as prefix for the file name).
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      dependency: String of job dependencies.
+      command_line: String representation of the actual command line
+        that is to be executed.
+      command_name: Command name for job that shall be exectuted if the
+        job was successfully submitted to the batch system.
+
+    Returns:
+      String job identifier.
+    """
     delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
 
     if instance_set_test is not None:
@@ -500,7 +627,7 @@ def generate_generic_callback_slurm_script(name: str, solver: Path,
     sbatch_options_list.append("--ntasks=1")
     sbatch_options_list.append("-c1")
 
-    fout = open(delayed_job_file_path, "w")
+    fout = Path(delayed_job_file_path).open("w")
     fout.write("#!/bin/bash\n")  # Use bash to execute this script
     fout.write("###\n")
     fout.write("###\n")
@@ -516,12 +643,11 @@ def generate_generic_callback_slurm_script(name: str, solver: Path,
 
     output_list = os.popen(f"sbatch ./{delayed_job_file_path}").readlines()
 
+    jobid = ""
     if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
         jobid = output_list[0].strip().split()[-1]
         # Add job to active job CSV
         sjh.write_active_job(jobid, command_name)
-    else:
-        jobid = ""
 
     print(f"Callback script to launch {name} is placed at {delayed_job_file_path}")
     print(f"Once configuration is finished, {name} will automatically start as a Slurm "

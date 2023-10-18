@@ -3,9 +3,10 @@
 """Automatically generate a gnuplot script for portfolio selection."""
 
 import os
-from os.path import abspath, dirname, join
+from os.path import dirname, join
 import sys
 from shutil import which
+import pathlib
 
 if __name__ == "__main__":
     if len(sys.argv) != 6:
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     vbs_name = vbs_name.replace("/", "_")
     output_gnuplot_script = portfolio_selector_sparkle_name + "_vs_" + vbs_name + ".plt"
 
-    fout = open(output_gnuplot_script, "w+")
+    fout = pathlib.Path(output_gnuplot_script).open("w+")
     fout.write(f"set xlabel '{vbs_name}, PAR10'" + "\n")
     fout.write(f"set ylabel '{portfolio_selector_sparkle_name}, PAR10'\n")
     fout.write(f"set title '{portfolio_selector_sparkle_name} vs {vbs_name}'\n")
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     os.system(cmd)
 
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = abspath(join(dirname(__file__), "..", "epstopdf.pl"))
+    epsbackup = pathlib.Path(join(dirname(__file__), "..", "epstopdf.pl")).resolve()
     epstopdf = which("epstopdf") or epsbackup
     os.system(f"{epstopdf} '{output_eps_file}'")
 

@@ -8,32 +8,38 @@ import numpy as np
 from shutil import which
 from pathlib import Path
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_compute_marginal_contribution_help as scmch
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_tex_help as stex
-import compute_marginal_contribution as cmc
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_tex_help as stex
 
 
 def underscore_for_latex(string: str) -> str:
-    """Return the input str with the underscores escaped for use in LaTeX."""
+    """Return the input str with the underscores escaped for use in LaTeX.
+
+    Args:
+        string: A given str with underscores.
+
+    Returns:
+        The corresponding str with underscores escaped.
+    """
     updated_string = string.replace("_", "\\_")
 
     return updated_string
 
 
-def get_custom_commands():
+def get_custom_commands() -> str:
     """Return an empty str.
 
     NOTE: Re-evaluate the need for this.
     """
-    str_value = r""
+    str_value = ""
     return str_value
 
 
-def get_sparkle():
+def get_sparkle() -> str:
     """Return Sparkle as LaTeX str.
 
     NOTE: Consider deprecating, could easily be in the LaTeX tempalte itself.
@@ -43,7 +49,11 @@ def get_sparkle():
 
 
 def get_num_solvers() -> str:
-    """Return the number of solvers."""
+    """Get the number of solvers.
+
+    Returns:
+        The number of solvers in solver_list as a string value.
+    """
     num_solvers = len(sgh.solver_list)
     str_value = str(num_solvers)
 
@@ -54,18 +64,28 @@ def get_num_solvers() -> str:
     return str_value
 
 
-def get_solver_list():
-    """Return the list of solvers as LaTeX str."""
-    str_value = r""
+def get_solver_list() -> str:
+    """Get the list of solvers for use in a LaTeX document.
+
+    Returns:
+        The list of solver names as LaTeX str.
+    """
+    str_value = ""
     solver_list = sgh.solver_list
+
     for solver_path in solver_list:
         solver_name = sfh.get_file_name(solver_path)
-        str_value += r"\item \textbf{" + solver_name + r"}" + "\n"
+        str_value += r"\item \textbf{" + solver_name + r"}\n"
+
     return str_value
 
 
 def get_num_feature_extractors() -> str:
-    """Return the number of feature extractors."""
+    """Get the number of feature extractors.
+
+    Returns:
+        The number of feature extractors.
+    """
     num_feature_extractors = len(sgh.extractor_list)
     str_value = str(num_feature_extractors)
 
@@ -76,24 +96,37 @@ def get_num_feature_extractors() -> str:
     return str_value
 
 
-def get_feature_extractor_list():
-    """Return the list of feature extractors as LaTeX str."""
-    str_value = r""
+def get_feature_extractor_list() -> str:
+    """Get the feature extractors for use in a LaTeX document.
+
+    Returns:
+        The list of feature extractors as LaTeX str.
+    """
+    str_value = ""
     extractor_list = sgh.extractor_list
+
     for extractor_path in extractor_list:
         extractor_name = sfh.get_file_name(extractor_path)
-        str_value += r"\item \textbf{" + extractor_name + r"}" + "\n"
+        str_value += r"\item \textbf{" + extractor_name + r"}\n"
+
     return str_value
 
 
 def get_num_instance_classes() -> str:
-    """Return the number of instance sets."""
+    """Get the number of instance sets.
+
+    Returns:
+        The number of instance sets as LaTeX str.
+    """
     list_instance_class = []
     instance_list = sgh.instance_list
+
     for instance_path in instance_list:
         instance_class = sfh.get_current_directory_name(instance_path)
+
         if not (instance_class in list_instance_class):
             list_instance_class.append(instance_class)
+
     str_value = str(len(list_instance_class))
 
     if int(str_value) < 1:
@@ -103,14 +136,20 @@ def get_num_instance_classes() -> str:
     return str_value
 
 
-def get_instance_class_list():
-    """Return the list of instance sets as LaTeX str."""
-    str_value = r""
+def get_instance_class_list() -> str:
+    """Get the instance sets for use in a LaTeX document.
+
+    Returns:
+        The list of instance sets as LaTeX str.
+    """
+    str_value = ""
     list_instance_class = []
     dict_number_of_instances_in_instance_class = {}
     instance_list = sgh.instance_list
+
     for instance_path in instance_list:
         instance_class = sfh.get_current_directory_name(instance_path)
+
         if not (instance_class in list_instance_class):
             list_instance_class.append(instance_class)
             dict_number_of_instances_in_instance_class[instance_class] = 1
@@ -125,22 +164,37 @@ def get_instance_class_list():
     return str_value
 
 
-def get_feature_computation_cutoff_time():
-    """Return the feature computation ,cutoff time as str."""
+def get_feature_computation_cutoff_time() -> str:
+    """Get the cutoff time used for feature computation.
+
+    Returns:
+        The feature computation cutoff time as str.
+    """
     str_value = str(sgh.settings.get_general_extractor_cutoff_time())
+
     return str_value
 
 
 def get_performance_computation_cutoff_time() -> str:
-    """Return the performance computation cutoff time as str."""
+    """Get the cutoff time used for performance computation.
+
+    Returns:
+        The performance computation cutoff time as str.
+    """
     str_value = str(sgh.settings.get_general_target_cutoff_time())
+
     return str_value
 
 
-def get_solver_perfect_ranking_list():
-    """Return solvers in the VBS ranked by marginal contribution as LaTeX str."""
-    rank_list = cmc.compute_perfect()
-    str_value = r""
+def get_solver_perfect_ranking_list() -> str:
+    """Get solvers ranked by marginal contribution to the VBS (virtual best solver).
+
+    Returns:
+        Solvers in the VBS (virtual best solver) ranked by marginal contribution as LaTeX
+        str.
+    """
+    rank_list = scmch.compute_perfect()
+    str_value = ""
 
     for i in range(0, len(rank_list)):
         solver = rank_list[i][0]
@@ -151,10 +205,15 @@ def get_solver_perfect_ranking_list():
     return str_value
 
 
-def get_solver_actual_ranking_list():
-    """Return solvers in the selector ranked by marginal contribution as LaTeX str."""
-    rank_list = cmc.compute_actual()
-    str_value = r""
+def get_solver_actual_ranking_list() -> str:
+    """Get solvers ranked by marginal contribution to the Sparkle portfolio selector.
+
+    Returns:
+        Solvers in the Sparkle portfolio selector ranked by marginal contribution as
+        LaTeX str.
+    """
+    rank_list = scmch.compute_actual()
+    str_value = ""
 
     for i in range(0, len(rank_list)):
         solver = rank_list[i][0]
@@ -165,8 +224,12 @@ def get_solver_actual_ranking_list():
     return str_value
 
 
-def get_par_ranking_list():
-    """Return the list of solvers ranked by PAR as LaTeX str."""
+def get_par_ranking_list() -> str:
+    """Get a list of the solvers ranked by PAR (Penalised Average Runtime).
+
+    Returns:
+        The list of solvers ranked by PAR as LaTeX str.
+    """
     str_value = ""
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -182,29 +245,42 @@ def get_par_ranking_list():
     return str_value
 
 
-def get_vbs_par():
-    """Return the PAR of the VBS over a set of instances."""
-    str_value = r""
+def get_vbs_par() -> str:
+    """PAR (Penalised Average Runtime) of the VBS (virtual best solver).
+
+    Returns:
+        The PAR (Penalised Average Runtime) of the VBS (virtual best solver) over a set
+        of instances.
+    """
+    str_value = ""
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     vbs_penalty_time = performance_data_csv.calc_vbs_penalty_time()
 
     str_value = str(vbs_penalty_time)
+
     return str_value
 
 
 def get_actual_par() -> str:
-    """Return the PAR of the selector over a set of instances.
+    """PAR (Penalised Average Runtime) of the Sparkle portfolio selector.
 
-    @return string formatted mean performance.
+    Returns:
+        The PAR (Penalised Average Runtime) of the Sparkle portfolio selector over a set
+        of instances.
     """
     performance_dict = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
     mean_performance = sum(performance_dict.values()) / len(performance_dict)
+
     return str(mean_performance)
 
 
-def get_dict_sbs_penalty_time_on_each_instance():
-    """Return a dictionary with the penalised performance of the SBS on each instance."""
+def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
+    """Returns a dictionary with the penalised performance of the SBS on each instance.
+
+    Returns:
+        A dict that maps instance name str to their penalised performance int.
+    """
     mydict = {}
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
@@ -216,30 +292,38 @@ def get_dict_sbs_penalty_time_on_each_instance():
 
     for instance in performance_data_csv.list_rows():
         this_run_time = performance_data_csv.get_value(instance, sbs_solver)
+
         if this_run_time <= cutoff_time:
             mydict[instance] = this_run_time
         else:
             mydict[instance] = sgh.settings.get_penalised_time()
+
     return mydict
 
 
-def get_dict_vbs_penalty_time_on_each_instance():
-    """Return a dictionary with the penalised performance of the VBS on each instance."""
+def get_dict_vbs_penalty_time_on_each_instance() -> dict[str, int]:
+    """Returns a dictionary with the penalised performance of the VBS on each instance.
+
+    Returns:
+        A dict that maps instance name str to their penalised performance int.
+    """
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
+
     return mydict
 
 
-def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict:
-    """Return a dictionary with the portfolio selector performance on each instance.
+def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[str, int]:
+    """Returns a dictionary with the portfolio selector performance on each instance.
 
-    @return A dictionary with for each instance the portfolio selector's performance
+    Returns:
+        A dict that maps instance name str to their penalised performance int.
     """
     mydict = {}
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
-    actual_portfolio_selector_path = sgh.sparkle_portfolio_selector_path
+    actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
 
     for instance in performance_data_csv.list_rows():
         used_time_for_this_instance, flag_successfully_solving = (
@@ -251,15 +335,18 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict:
             mydict[instance] = used_time_for_this_instance
         else:
             mydict[instance] = sgh.settings.get_penalised_time()
+
     return mydict
 
 
 def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
-    """Create a plot comparing the selector and the SBS and return as LaTeX str.
+    """Create a LaTeX plot comparing the selector and the SBS.
 
-    Creates a comparison plot of performance between the portfolio selector and the
-    single best solver for each instance.
-    @return the LaTeX code to include the figure.
+    The plot compares the performance on each instance of the portfolio selector created
+    by Sparkle and the SBS (single best solver).
+
+    Returns:
+        LaTeX str to include the comparison plot in a LaTeX report.
     """
     dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance()
     dict_actual_portfolio_selector_penalty_time_on_each_instance = (
@@ -308,11 +395,13 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
 
 
 def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
-    """Create a plot comparing the selector and the VBS and return as LaTeX str.
+    """Create a LaTeX plot comparing the selector and the VBS.
 
-    Creates a comparison plot of performance between the portfolio selector and the
-    virtual best solver for each instance.
-    @return the LaTeX code to include the figure.
+    The plot compares the performance on each instance of the portfolio selector created
+    by Sparkle and the VBS (virtual best solver).
+
+    Returns:
+        LaTeX str to include the comparison plot in a LaTeX report.
     """
     dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
     dict_actual_portfolio_selector_penalty_time_on_each_instance = (
@@ -350,27 +439,51 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
         "\\includegraphics[width=0.6\\textwidth]"
         f"{figure_portfolio_selector_sparkle_vs_vbs_filename}"
     )
+
     return str_value
 
 
 def get_test_instance_class(test_case_directory: str) -> str:
-    """Return the name of the test instance set."""
+    """Get the name of the test instance set.
+
+    Args:
+        test_case_directory: Path to the test case directory.
+
+    Returns:
+        The name of the test instance set.
+    """
     str_value = sfh.get_last_level_directory_name(test_case_directory)
     str_value = r"\textbf{" + str_value + r"}"
+
     return str_value
 
 
 def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
-    """Return the number of instances in a test instance set."""
+    """Return the number of instances in a test instance set.
+
+    Args:
+        test_case_directory: Path to the test case directory.
+
+    Returns:
+        The number of instances in a test instance set as string.
+    """
     str_value = ""
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + "sparkle_performance_data.csv")
     str_value = str(len(performance_data_csv.list_rows()))
+
     return str_value
 
 
 def get_test_actual_par(test_case_directory: str) -> str:
-    """Return the true PAR score on a test set."""
+    """Return the true PAR (Penalised Average Runtime) score on a test set.
+
+    Args:
+        test_case_directory: Path to the test case directory.
+
+    Returns:
+        PAR score (Penalised Average Runtime) as string.
+    """
     str_value = ""
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + "sparkle_performance_data.csv")
@@ -394,8 +507,15 @@ def get_test_actual_par(test_case_directory: str) -> str:
     return str_value
 
 
-def get_dict_variable_to_value(test_case_directory: str = None):
-    """Return a dict matching variables in the latex template with their values."""
+def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str]:
+    """Returns: a dict matching variables in the LaTeX template with their values.
+
+    Args:
+        test_case_directory: Path to the test case directory. Defaults to None.
+
+    Returns:
+        A dict matching str variables in the LaTeX template with their value str.
+    """
     mydict = {}
 
     variable = "customCommands"
@@ -495,11 +615,15 @@ def get_dict_variable_to_value(test_case_directory: str = None):
     return mydict
 
 
-def generate_report(test_case_directory: str = None):
-    """Generate a report for algorithm selection."""
+def generate_report(test_case_directory: str = None) -> None:
+    """Generate a report for algorithm selection.
+
+    Args:
+        test_case_directory: Path to the test case directory. Defaults to None.
+    """
     # Include results on the test set if a test case directory is given
     if test_case_directory is not None:
-        if not os.path.exists(test_case_directory):
+        if not Path(test_case_directory).exists():
             print("ERROR: The given directory", test_case_directory, "does not exist!")
             sys.exit(-1)
 
@@ -518,7 +642,7 @@ def generate_report(test_case_directory: str = None):
 
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ""
-    fin = open(latex_template_filepath, "r")
+    fin = Path(latex_template_filepath).open("r")
     while True:
         myline = fin.readline()
         if not myline:
@@ -535,7 +659,7 @@ def generate_report(test_case_directory: str = None):
 
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-    fout = open(latex_report_filepath, "w+")
+    fout = Path(latex_report_filepath).open("w+")
     fout.write(report_content)
     fout.close()
 
@@ -545,8 +669,6 @@ def generate_report(test_case_directory: str = None):
 
     print(f"Report is placed at: {report_path}")
     sl.add_output(str(report_path), "Sparkle portfolio selector report")
-
-    return
 
 
 def generate_comparison_plot(points: list,
@@ -561,7 +683,7 @@ def generate_comparison_plot(points: list,
                              penalty_time: float = None,
                              replace_zeros: bool = True,
                              magnitude_lines: int = sgh.sparkle_maximum_int,
-                             cwd=None):
+                             cwd: str = None) -> None:
     """Create comparison plots between two different solvers/portfolios.
 
     Args:
@@ -590,7 +712,7 @@ def generate_comparison_plot(points: list,
         cwd: directory path to place the figure and its intermediate files in (default:
         current working directory)
     """
-    pwd = os.getcwd()
+    pwd = Path.cwd()
     if cwd is not None:
         os.chdir(cwd)
 
@@ -637,13 +759,13 @@ def generate_comparison_plot(points: list,
     output_eps_file = f"{figure_filename}.eps"
 
     # Create data file
-    with open(output_data_file, "w") as fout:
+    with Path(output_data_file).open("w") as fout:
         for point in points:
             fout.write(" ".join([str(c) for c in point]) + "\n")
         fout.close()
 
     # Generate plot script
-    with open(output_gnuplot_script, "w") as fout:
+    with Path(output_gnuplot_script).open("w") as fout:
         fout.write(f"set xlabel '{xlabel}'\n")
         fout.write(f"set ylabel '{ylabel}'\n")
         fout.write(f"set title '{title}'\n")
@@ -690,7 +812,7 @@ def generate_comparison_plot(points: list,
     os.system(cmd)
 
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = os.path.join(os.path.abspath(pwd), "Components/epstopdf.pl")
+    epsbackup = Path(os.path.abspath(pwd)) / "Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
     os.system(f"{epstopdf} '{output_eps_file}'")
 

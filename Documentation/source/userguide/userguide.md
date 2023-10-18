@@ -134,7 +134,7 @@ following minimal requirements (for an example of a solver directory see
 {numref}`dir-solvers-selection`):
 
 - A working solver executable
-- An algorithm wrapper called `sprakle_run_default_wrapper.py`
+- An algorithm wrapper called `sparkle_run_default_wrapper.py`
 
 Further, training and testing instance sets are needed (for an example
 of an instances directory see {numref}`dir-instances`). For
@@ -317,25 +317,22 @@ to get a description of the required arguments and other options.
 % *  add_feature_extractor
 % *  add_instances.py
 % *  :ref:`cmd:add_solver`
-% *  cleanup_current_sparkle_platform.py
 % *  cleanup_temporary_files.py
-% *  compute_features_parallel.py
 % *  compute_features.py
 % *  compute_marginal_contribution.py
 % *  :ref:`cmd:configure_solver`
 % *  construct_sparkle_portfolio_selector.py
 % *  :ref:`cmd:generate_report`
 % *  :ref:`cmd:initialise`
-% *  load_record.py
+% *  load_snapshot.py
 % *  remove_feature_extractor.py
 % *  remove_instances.py
-% *  remove_record.py
 % *  remove_solver.py
 % *  run_ablation.py
 % *  run_solvers.py
 % *  run_sparkle_portfolio_selector.py
 % *  run_status.py
-% *  save_record.py
+% *  save_snapshot.py
 % *  system_status.py
 % *  :ref:`cmd:validate_configured_vs_default`
 

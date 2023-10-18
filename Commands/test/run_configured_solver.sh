@@ -12,6 +12,8 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
+Commands/initialise.py > /dev/null
+
 # Copy configuration results and other files to simulate the configuration command
 configuration_results_path="Commands/test/test_files/results/"
 configuration_files_path="Commands/test/test_files/PbO-CCSAT-Generic_PTN/PTN_train.txt"
@@ -26,7 +28,7 @@ cp $configuration_files_path $smac_configuration_files_path
 scenario_path="Output/latest_scenario.ini"
 scenario_tmp="Output/latest_scenario.tmp"
 scenario_test="Commands/test/test_files/Output/latest_scenario.ini"
-mv $scenario_path $scenario_tmp # Save user scenario
+mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
 cp $scenario_test $scenario_path # Activate test scenario
 
 # Slurm settings
@@ -44,7 +46,7 @@ instance_path_test="Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 # Run commands to prepare Sparkle for the test
-Commands/initialise.py > /dev/null
+
 Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run configured solver on a single instance

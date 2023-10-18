@@ -5,24 +5,14 @@
 import sys
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_run_solvers_help as srsh
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help import sparkle_configure_solver_help as scsh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_slurm_help as ssh
-    from sparkle_help import sparkle_instances_help as sih
-except ImportError:
-    import sparkle_file_help as sfh
-    import sparkle_global_help as sgh
-    import sparkle_run_solvers_help as srsh
-    from sparkle_command_help import CommandName
-    import sparkle_configure_solver_help as scsh
-    import sparkle_basic_help as sbh
-    import sparkle_slurm_help as ssh
-    import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_run_solvers_help as srsh
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_instances_help as sih
 
 
 def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> str:
@@ -54,7 +44,7 @@ def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> st
     return job_id_str
 
 
-def call_configured_solver_sequential(instances_list: list[list[Path]]):
+def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
     """Prepare to run and run the latest configured solver sequentially on instances."""
     for instance_path_list in instances_list:
         # Use original path for output string
@@ -148,7 +138,7 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
     return solver_name, config_str
 
 
-def run_configured_solver(instance_path_list: list[Path]):
+def run_configured_solver(instance_path_list: list[Path]) -> None:
     """Run the latest configured solver on the given instance."""
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
@@ -179,7 +169,7 @@ def run_configured_solver(instance_path_list: list[Path]):
                                                          is_configured=True)
 
     # Process 'Result for SMAC' line from raw_result_path
-    with open(raw_result_path, "r") as infile:
+    with Path(raw_result_path).open("r") as infile:
         results_good = False
 
         for line in infile:

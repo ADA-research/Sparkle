@@ -7,28 +7,28 @@ import time
 from pathlib import Path
 from pathlib import PurePath
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-except ImportError:
-    import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 # Keep track of which command called Sparkle
+global caller
 caller: str = "unknown"
 
 # Current caller file path
+global caller_log_path
 caller_log_path: str | PurePath = "not set"
 
 # Root output directory for the calling command in the form of
 # Output/<timestamp>_<command_name>/
+global caller_out_dir
 caller_out_dir: Path = Path(".")
 
 # Log directory for the calling command in the form of
 # Output/<timestamp>_<command_name>/Log/
+global caller_log_dir
 caller_log_dir: Path = Path(".")
 
-
-def _update_caller(argv: list[str]) -> None:
+def update_caller(argv: list[str]) -> None:
     """Update which command is currently active.
 
     Args:
@@ -39,7 +39,7 @@ def _update_caller(argv: list[str]) -> None:
     caller = Path(argv[0]).stem
 
 
-def _update_caller_file_path(timestamp: str) -> None:
+def update_caller_file_path(timestamp: str) -> None:
     """Create a new file path for the caller with the given timestamp.
 
     Args:
@@ -67,7 +67,7 @@ def _update_caller_file_path(timestamp: str) -> None:
     if not Path(caller_log_path).is_file():
         output_header = ("     Timestamp                              Path           "
                          "                  Description\n")
-        with open(str(caller_log_path), "a") as output_file:
+        with Path(str(caller_log_path)).open("a") as output_file:
             output_file.write(output_header)
 
 
@@ -84,7 +84,7 @@ def add_output(output_path: str, description: str) -> None:
     output_str = timestamp + "   " + output_path + "   " + description + "\n"
 
     # Write output path and description to caller file
-    with open(str(caller_log_path), "a") as output_file:
+    with Path(str(caller_log_path)).open("a") as output_file:
         output_file.write(output_str)
 
 
@@ -99,11 +99,11 @@ def log_command(argv: list[str]) -> None:
 
     """
     # Determine caller
-    _update_caller(argv)
+    update_caller(argv)
 
     # Prepare logging information
     timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    _update_caller_file_path(timestamp)
+    update_caller_file_path(timestamp)
     output_file = caller_log_path
     args = " ".join(argv[0:])
     log_str = timestamp + "   " + args + "   " + str(output_file) + "\n"
@@ -117,9 +117,9 @@ def log_command(argv: list[str]) -> None:
     if not Path(log_path).is_file():
         log_header = ("     Timestamp                              Command            "
                       "                 Output details\n")
-        with open(str(log_path), "a") as log_file:
+        with Path(str(log_path)).open("a") as log_file:
             log_file.write(log_header)
 
     # Write to log file
-    with open(str(log_path), "a") as log_file:
+    with Path(str(log_path)).open("a") as log_file:
         log_file.write(log_str)

@@ -7,6 +7,7 @@ import time
 import random
 import sys
 import ast
+from pathlib import Path
 
 
 def get_time_pid_random_string() -> str:
@@ -20,7 +21,7 @@ def get_time_pid_random_string() -> str:
     return my_time_pid_random_str
 
 
-def get_last_level_directory_name(filepath):
+def get_last_level_directory_name(filepath: str) -> str:
     """Return the final path component for a given string; similar to Path.name."""
     if filepath[-1] == "/":
         filepath = filepath[0:-1]
@@ -32,7 +33,7 @@ def get_last_level_directory_name(filepath):
     return filepath
 
 
-def _is_a_number(input_str: str):
+def _is_a_number(input_str: str) -> bool:
     """Check if an input string is a number (float or int)."""
     try:
         # eval insecure, so use ast.literal_eval instead
@@ -45,7 +46,7 @@ def _is_a_number(input_str: str):
         return False
 
 
-def parse_output(output_list) -> (str, float):
+def parse_output(output_list: list[str]) -> (str, float):
     """Parse problem specific output and return it."""
     # Read solution quality from output_list
     solution_quality = sys.maxsize
@@ -91,7 +92,7 @@ runsolver_binary = relative_path + "runsolver"
 solver_binary = relative_path + "FastCA"
 
 tmp_directory = relative_path + "tmp/"
-if not os.path.exists(tmp_directory):
+if not Path(tmp_directory).exists():
     os.system("mkdir -p " + tmp_directory)
 
 instance_model_name = get_last_level_directory_name(inst_model)

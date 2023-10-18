@@ -3,12 +3,17 @@
 
 import sys
 import argparse
-from sparkle_help import sparkle_run_status_help
-from sparkle_help import sparkle_logging as sl
+
+from Commands.sparkle_help import sparkle_run_status_help
+from Commands.sparkle_help import sparkle_logging as sl
 
 
-def parser_function():
-    """Define the command line arguments."""
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+      The argument parser.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--verbose",
@@ -28,16 +33,11 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    my_flag_verbose = args.verbose
-
-    if my_flag_verbose:
-        mode = 2
-    else:
-        mode = 1
 
     print("Reporting current running status of Sparkle ...")
-    sparkle_run_status_help.print_running_extractor_jobs(mode)
-    sparkle_run_status_help.print_running_solver_jobs(mode)
-    sparkle_run_status_help.print_running_portfolio_selector_jobs()
-    sparkle_run_status_help.print_running_report_jobs()
+    sparkle_run_status_help.print_running_solver_jobs()
+    sparkle_run_status_help.print_running_configuration_jobs()
+    sparkle_run_status_help.print_running_parallel_portfolio_construction_jobs()
+    sparkle_run_status_help.print_running_portfolio_selector_construction_jobs()
+    sparkle_run_status_help.print_running_generate_report_jobs()
     print("Current running status of Sparkle reported!")

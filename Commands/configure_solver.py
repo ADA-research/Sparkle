@@ -7,23 +7,25 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_add_solver_help as sash
-from sparkle_help import sparkle_configure_solver_help as scsh
-from sparkle_help import sparkle_instances_help as sih
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help import sparkle_run_ablation_help as sah
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_slurm_help as ssh
+from Commands.Structures.status_info import ConfigureSolverStatusInfo
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_add_solver_help as sash
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
+from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_run_ablation_help as sah
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Configure a solver in the Sparkle platform.",
@@ -128,6 +130,9 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
     use_features = args.use_features
 
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.CONFIGURE_SOLVER])
+
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -189,6 +194,13 @@ if __name__ == "__main__":
         )
         sys.exit()
 
+    status_info = ConfigureSolverStatusInfo()
+    status_info.set_solver(str(solver.name))
+    status_info.set_instance_set_train(str(instance_set_train.name))
+    ins_t_str = instance_set_test.name if instance_set_test is not None else "_"
+    status_info.set_instance_set_test(str(instance_set_test))
+    status_info.save()
+
     # Clean the configuration and ablation directories for this solver to make sure
     # we start with a clean slate
     scsh.clean_configuration_directory(solver.name, instance_set_train.name)
@@ -231,7 +243,7 @@ if __name__ == "__main__":
         sgh.sparkle_last_configuration_file_name
     )
 
-    fout = open(last_configuration_file_path, "w+")
+    fout = Path(last_configuration_file_path).open("w+")
     fout.write(f"solver {solver}\n")
     fout.write(f"train {instance_set_train}\n")
     fout.close()
@@ -264,6 +276,7 @@ if __name__ == "__main__":
     print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
           f"{job_id_str}")
 
+    status_info.delete()
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file
