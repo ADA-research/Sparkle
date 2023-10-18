@@ -662,7 +662,7 @@ def handle_waiting_and_removal_process(
                     finished_instances_dict[instance][1] = solving_time
                     print(f"{str(instance)} has been solved with an improved solving "
                           f"time of {str(solving_time)} seconds!")
-    
+
     # Monitors the running jobs waiting for a solver that finishes
     finished_solver_id_list, pending_job_with_new_cutoff, started = (
         wait_for_finished_solver(
@@ -752,7 +752,7 @@ def run_parallel_portfolio(instances: list[str],
                 path=execution_dir,
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
-            
+
             if hasattr(run, "run_id"):
                 job_id = run.run_id
 
@@ -762,8 +762,8 @@ def run_parallel_portfolio(instances: list[str],
 
         # TODO: Should the IF statement below be considering local as well?
         # As running runtime based performance may be less relevant
-        if ( run_on == Runner.SLURM and sgh.settings.get_general_performance_measure()
-              == PerformanceMeasure.RUNTIME):
+        if (run_on == Runner.SLURM and sgh.settings.get_general_performance_measure()
+                == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))
