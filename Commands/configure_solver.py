@@ -289,7 +289,7 @@ if __name__ == "__main__":
         dependency_jobid_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = ssh.generate_ablation_callback_slurm_script(
+        ablation_jobid = ssh.generate_ablation_callback_script(
             solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(ablation_jobid)

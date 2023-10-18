@@ -500,14 +500,19 @@ def execute_smac_configure_local(solver_name: str,
 
     batch = SlurmBatch(Path(f"{sgh.smac_dir}{sbatch_script_path}"))
 
+    result_part = Path(f"{solver_name}_{instance_set_name}")
+    result_dir = sgh.smac_results_dir / result_part
+
     cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name="smac_configure",
-        base_dir=sgh.smac_dir,
+        base_dir=result_dir,
         sbatch_options=batch.sbatch_options)
-
+    run.wait()
+    print(result_dir)
+    sys.exit(-1)
     # Remove once Runner is running properly
     if run_on == Runner.SLURM:
         run_on = Runner.SLURM_RR
@@ -785,7 +790,7 @@ def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) 
                   "parameters of the most recent configuration process as default "
                   "values")
 
-
+#Goes wrong here in test 2 and 3
 def check_optimised_configuration_params(params: str) -> None:
     """Check if a given configuration parameter string appears to be valid.
 
@@ -819,7 +824,7 @@ def check_optimised_configuration_seed(seed: str) -> None:
         print("ERROR: Invalid optimised_configuration_seed; Stopping execution!")
         sys.exit(-1)
 
-
+#Goes wrong here in test 2 and 3
 def get_optimised_configuration_params(solver_name: str, instance_set_name: str) -> str:
     """Return the optimised configuration parameter string.
 
@@ -832,6 +837,8 @@ def get_optimised_configuration_params(solver_name: str, instance_set_name: str)
     """
     optimised_configuration_str, _, _ = get_optimised_configuration_from_file(
         solver_name, instance_set_name)
+    #print(f"{sgh.smac_dir}results/{solver_name}_{instance_set_name}/")
+    #sys.exit(-1)
     check_optimised_configuration_params(optimised_configuration_str)
 
     return optimised_configuration_str
@@ -852,15 +859,18 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
 
-    smac_results_dir = f"{sgh.smac_dir}results/{solver_name}_{instance_set_name}/"
+    conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"
 
-    list_file_result_name = os.listdir(smac_results_dir)
+    list_file_result_name = os.listdir(conf_results_dir)
     key_str_1 = "Estimated mean quality of final incumbent config"
+    #print("Components/smac-v2.10.03-master-778/results/" + " ------ " f"{sgh.smac_dir}results/{solver_name}_{instance_set_name}/")
+    #print(os.listdir("Components/smac-v2.10.03-master-778/results/PbO-CCSAT-Generic_PTN"))
+    #sys.exit(-1)
 
     # Compare results of each run on the training set to find the best configuration
     # among them
     for file_result_name in list_file_result_name:
-        file_result_path = smac_results_dir + file_result_name
+        file_result_path = conf_results_dir + file_result_name
         fin = Path(file_result_path).open("r+")
 
         while True:

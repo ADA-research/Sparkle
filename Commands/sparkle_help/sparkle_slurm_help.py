@@ -552,12 +552,12 @@ def generate_validation_callback_script(solver: Path,
     return jobid
 
 
-def generate_ablation_callback_slurm_script(solver: Path,
+def generate_ablation_callback_script(solver: Path,
                                             instance_set_train: Path,
                                             instance_set_test: Path,
                                             dependency: str,
                                             run_on: Runner = Runner.SLURM) -> str:
-    """Generate a callback Slurm batch script for ablation.
+    """Generate a callback script for ablation.
 
     Args:
       solver: Path (object) to solver.
@@ -584,8 +584,7 @@ def generate_ablation_callback_slurm_script(solver: Path,
             dependency, command_line, CommandName.RUN_ABLATION)
     else:
         jobid = generate_generic_callback_local_script(
-            "ablation", solver, instance_set_train, instance_set_test,
-            dependency, command_line, CommandName.RUN_ABLATION)
+            "ablation", command_line, CommandName.RUN_ABLATION)
 
     return jobid
 
