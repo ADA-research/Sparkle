@@ -29,7 +29,7 @@ global caller_log_dir
 caller_log_dir: Path = Path(".")
 
 
-def update_caller(argv: list[str]) -> None:
+def _update_caller(argv: list[str]) -> None:
     """Update which command is currently active.
 
     Args:
@@ -40,7 +40,7 @@ def update_caller(argv: list[str]) -> None:
     caller = Path(argv[0]).stem
 
 
-def update_caller_file_path(timestamp: str) -> None:
+def _update_caller_file_path(timestamp: str) -> None:
     """Create a new file path for the caller with the given timestamp.
 
     Args:
@@ -100,11 +100,11 @@ def log_command(argv: list[str]) -> None:
 
     """
     # Determine caller
-    update_caller(argv)
+    _update_caller(argv)
 
     # Prepare logging information
     timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    update_caller_file_path(timestamp)
+    _update_caller_file_path(timestamp)
     output_file = caller_log_path
     args = " ".join(argv[0:])
     log_str = timestamp + "   " + args + "   " + str(output_file) + "\n"
