@@ -21,10 +21,12 @@ from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_slurm_help as ssh
 
-from sparkle.slurm_parsing import SlurmBatch
-import runrunner as rrr
+# from sparkle.slurm_parsing import SlurmBatch
+# import runrunner as rrr
 from runrunner.base import Runner
+
 
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
                             cutoff_time_each_extractor_run: float) -> list[str]:
@@ -139,7 +141,7 @@ def print_solution(raw_result_path: str) -> None:
     return
 
 
-def call_solver_solve_instance_within_cutoff(solver_path: str, 
+def call_solver_solve_instance_within_cutoff(solver_path: str,
                                              instance_path: str,
                                              cutoff_time: int,
                                              performance_data_csv_path: str = None)\
@@ -177,7 +179,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
 
 
 def call_sparkle_portfolio_selector_solve_instance(
-        instance_path: str, 
+        instance_path: str,
         performance_data_csv_path: str = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance."""
     # Create instance strings to accommodate multi-file instances
@@ -262,7 +264,8 @@ def call_sparkle_portfolio_selector_solve_instance(
 
     return
 
-#This func has sbatc'h 20 times and one sru'n
+
+# This func has sbatc'h 20 times and one sru'n
 def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
         sbatch_shell_script_path: str,
         test_case_directory_path: str,
@@ -271,50 +274,43 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
         start_index: int,
         end_index: int,
         run_on: Runner = Runner.SLURM) -> None:
-    """Generate a Slurm batch script to run the Sparkle portfolio selector."""
-    num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
+    """Generate a Slurm batch script to run the Sparkle portfolio selector.
+    
+    Args:
+    
+    Returns:
+        None
+    """
     # calculate the total number of jobs to be handled in this sbatch script
     num_job_total = end_index - start_index
-    num_job_in_parallel = min(end_index - start_index, num_job_in_parallel)
+    num_job_in_parallel = min(end_index - start_index, sgh.settings.get_slurm_number_of_runs_in_parallel() )
 
     # TODO: Use generic slurm batch generator -> ssh.generate_sbatch_script_generic
     # sbatch_script_path -> sbatch_shell_script_path
     # sbatch_options_list --> [--job-name, --output, --error, --array=0-, ]
-    # job_params_list --> params=() 
+    # job_params_list --> params=()
     # srun options --> command prefix part 1
     # target_call_str --> command prefix part 2
     # job_output_list = ???
-
     # specify the name of this sbatch script
     job_name = sfh.get_file_name(sbatch_shell_script_path)
-    # specify the job name in this sbatch script
-    fout.write("#SBATCH --job-name=" + job_name + "\n")
     std_out_path = test_case_directory_path + "Tmp/" + job_name + ".txt"
-    # specify the file for normal output
-    fout.write("#SBATCH --output=" + std_out_path + "\n")
     std_err_path = test_case_directory_path + "Tmp/" + job_name + ".err"
-    # specify the file for error output
-    fout.write("#SBATCH --error=" + std_err_path + "\n")
-    fout.write("###" + "\n")
-    # using slurm job array and specify the number of jobs executing in parallel in this
-    # sbatch script
-    fout.write(f"#SBATCH --array=0-{str(num_job_total-1)}%{str(num_job_in_parallel)}\n")
-    fout.write("###" + "\n")
+    sbatch_options = ssh.get_sbatch_options_list(sfh.get_file_name(sbatch_shell_script_path),
+                                                 num_job_total,
+                                                 job_name,
+                                                 smac=False)
 
-    
+    job_params_list = [f" --instance {instance_path[0]}" for instance_path in list_jobs]
 
-    job_params = "params=( \\" + "\n"
-
-    for i in range(start_index, end_index):
-        instance_path = list_jobs[i][0]
-        job_params += f"' --instance {instance_path}' \\\n"
-
-    job_params += "\n"
-
-    srun_options = "srun -N1 -n1 --exclusive python"
+    srun_options = "-N1 -n1 --exclusive python"
     target_call = "Commands/sparkle_help/run_sparkle_portfolio_core.py"
-
-
+    ssh.generate_sbatch_script_generic(sbatch_shell_script_path,
+                                       sbatch_options,
+                                       job_params_list,
+                                       srun_options,
+                                       target_call)
+    """
     #TODO: delete old way
     # specify the prefix of the executing command
     command_prefix = ("srun -N1 -n1 --exclusive python "
@@ -364,7 +360,7 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
     fout.write(command_line + "\n")  # write the complete command in this sbatch script
 
     fout.close()  # close the file of the sbatch script
-
+    """
     # Log the sbatch file and (error) output locations
     sl.add_output(sbatch_shell_script_path,
                   "Slurm batch script to run the portfolio selector")
@@ -374,6 +370,7 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
                   "Slurm batch script to run the portfolio selector error output")
 
     return
+
 
 # This one 7
 def call_sparkle_portfolio_selector_solve_instance_directory(
