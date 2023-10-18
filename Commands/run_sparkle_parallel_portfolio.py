@@ -157,7 +157,7 @@ if __name__ == "__main__":
     print("Sparkle parallel portfolio is running ...")
     # instance_paths = list of paths to all instances
     # portfolio_path = Path to the portfolio containing the solvers
-    succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path)
+    succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path, run_on=run_on)
 
     if succes:
         sgh.latest_scenario.set_parallel_portfolio_instance_list(instance_paths)
@@ -166,4 +166,4 @@ if __name__ == "__main__":
         # Write used settings to file
         sgh.settings.write_used_settings()
     else:
-        print("An unexpected error occurred, please check your input an try again.")
+        print("An unexpected error occurred, please check your input and try again.")

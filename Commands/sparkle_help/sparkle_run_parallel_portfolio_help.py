@@ -662,7 +662,7 @@ def handle_waiting_and_removal_process(
                     finished_instances_dict[instance][1] = solving_time
                     print(f"{str(instance)} has been solved with an improved solving "
                           f"time of {str(solving_time)} seconds!")
-
+    
     # Monitors the running jobs waiting for a solver that finishes
     finished_solver_id_list, pending_job_with_new_cutoff, started = (
         wait_for_finished_solver(
@@ -733,6 +733,7 @@ def run_parallel_portfolio(instances: list[str],
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
+        job_id = ""
         if run_on == Runner.SLURM:
             job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
                                               execution_dir)
@@ -740,8 +741,10 @@ def run_parallel_portfolio(instances: list[str],
             # Remove the below if block once runrunner works satisfactorily
             if run_on == Runner.SLURM_RR:
                 run_on = Runner.SLURM
+
             batch = SlurmBatch(sbatch_script_path)
             cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+
             run = rrr.add_to_queue(
                 runner=run_on,
                 cmd=cmd_list,
@@ -749,13 +752,18 @@ def run_parallel_portfolio(instances: list[str],
                 path=execution_dir,
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
-            job_id = run.run_id
+            
+            if hasattr(run, "run_id"):
+                job_id = run.run_id
+
             # Remove the below if block once runrunner works satisfactorily
             if run_on == Runner.SLURM_RR:
                 run_on = Runner.SLURM
 
-        if (sgh.settings.get_general_performance_measure()
-                == PerformanceMeasure.RUNTIME):
+        # TODO: Should the IF statement below be considering local as well?
+        # As running runtime based performance may be less relevant
+        if ( run_on == Runner.SLURM and sgh.settings.get_general_performance_measure()
+              == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))
@@ -771,7 +779,7 @@ def run_parallel_portfolio(instances: list[str],
             remove_temp_files_unfinished_solvers(solver_instance_list,
                                                  sbatch_script_path,
                                                  temp_solvers)
-        else:
+        elif run_on == Runner.SLURM:
             done = False
             wait_cutoff_time = False
             n_seconds = 4
@@ -799,6 +807,8 @@ def run_parallel_portfolio(instances: list[str],
                         n_seconds = 1  # Start checking often
 
                 sjh.sleep(n_seconds)
+        else:
+            run.wait()
 
         finished_instances_dict = {}
 
@@ -833,7 +843,9 @@ def run_parallel_portfolio(instances: list[str],
             else:
                 print(f"{str(instances)} was not solved in the given cutoff-time.")
     except Exception as except_msg:
+        import time
+        time.sleep(8.0)
         print(except_msg)
+        sys.exit(-1)
         return False
-
     return True
