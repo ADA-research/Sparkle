@@ -6,11 +6,12 @@ Only removes files not affecting the sparkle state.
 
 import sys
 import argparse
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_logging as sl
+
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_logging as sl
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
 

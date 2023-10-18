@@ -3,6 +3,7 @@
 """Helper functions for parallel portfolio construction."""
 
 from pathlib import Path
+
 from Commands.sparkle_help import sparkle_file_help as sfh
 
 

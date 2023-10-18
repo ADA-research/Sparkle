@@ -10,7 +10,7 @@ from pathlib import Path
 # TODO: Add imports required by your changes
 
 
-def get_time_pid_random_string():
+def get_time_pid_random_string() -> str:
     """Return a combination of time, PID, and random str."""
     my_time_str = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     my_pid = os.getpid()
@@ -21,7 +21,7 @@ def get_time_pid_random_string():
     return my_time_pid_random_str
 
 
-def get_last_level_directory_name(filepath):
+def get_last_level_directory_name(filepath: str) -> str:
     """Return the final path component for a given string; similar to Path.name."""
     if filepath[-1] == "/":
         filepath = filepath[0:-1]

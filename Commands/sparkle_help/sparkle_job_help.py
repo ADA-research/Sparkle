@@ -6,18 +6,20 @@ from pathlib import Path
 import subprocess
 import csv
 import time
-import sys
+from enum import Enum
 
-try:
-    from sparkle_help.sparkle_command_help import CommandName
-    from sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
-except ImportError:
-    from sparkle_command_help import CommandName
-    from sparkle_command_help import COMMAND_DEPENDENCIES
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
 
 
-__active_jobs_path = Path("Output/active_jobs.csv")
-__active_jobs_csv_header = ["job_id", "command"]
+class JobState(str, Enum):
+    """enum for indicating different states of a job."""
+    RUNNING = "RUNNING"
+    DONE = "DONE"
+
+
+__jobs_path = Path("Output/jobs.csv")
+__jobs_csv_header = ["job_id", "command", "state"]
 
 
 def get_num_of_total_job_from_list(list_jobs: list) -> int:
@@ -101,7 +103,7 @@ def check_job_is_done_slurm(job_id: str) -> bool:
         done = True
 
     if done:
-        delete_active_job(job_id)
+        change_job_state(job_id)
 
     return done
 
@@ -169,19 +171,19 @@ def write_active_job(job_id: str, command: CommandName) -> None:
       job_id: String job identifier.
       command: Command name.
     """
-    path = __active_jobs_path
+    path = __jobs_path
 
     # Write header if the file does not exist
     if not path.is_file():
         with Path(path).open("w", newline="") as outfile:
             writer = csv.writer(outfile)
-            writer.writerow(__active_jobs_csv_header)
+            writer.writerow(__jobs_csv_header)
 
     # Write job row if it did not finish yet
     if not check_job_is_done(job_id) and not check_job_exists(job_id, command):
         with Path(path).open("a", newline="") as outfile:
             writer = csv.writer(outfile)
-            writer.writerow([job_id, command.name])
+            writer.writerow([job_id, command.name, JobState.RUNNING])
 
     return
 
@@ -191,7 +193,7 @@ def check_job_exists(job_id: str, command: CommandName) -> bool:
 
     Args:
       job_id: String job identifier.
-      command_to_run: Command name.
+      command: Command name.
 
     Returns:
       Boolean indicating whether the respective command and ID combination
@@ -206,24 +208,21 @@ def check_job_exists(job_id: str, command: CommandName) -> bool:
     return False
 
 
-def read_active_jobs() -> list[dict[str, str]]:
-    """Read active jobs from file and return them as list of [job_id, command] dicts.
+def read_active_jobs() -> list[dict[str, str, str]]:
+    """Read active jobs from file and return them as list of [job_id, command, state].
 
     Returns:
       List of dictionaries with string keys and dict values.
     """
     jobs = []
-    path = __active_jobs_path
-    try:
-        with Path(path).open("r", newline="") as infile:
-            reader = csv.DictReader(infile)
+    path = __jobs_path
+    Path(path).touch(exist_ok=True)
+    with Path(path).open("r", newline="") as infile:
+        reader = csv.DictReader(infile)
 
-            for row in reader:
+        for row in reader:
+            if row["state"] == JobState.RUNNING:
                 jobs.append(row)
-    except FileNotFoundError:
-        print(f"The file {__active_jobs_path} was not found. "
-              "Most likely no jobs have yet been submitted, that we can wait for.")
-        sys.exit()
     return jobs
 
 
@@ -246,7 +245,7 @@ def get_job_ids_for_command(command: CommandName) -> list[str]:
     """Return the IDs of active jobs for a given command.
 
     Args:
-      command_to_run: Command name.
+      command: Command name.
 
     Returns:
       List of job IDs (in string format).
@@ -261,57 +260,60 @@ def get_job_ids_for_command(command: CommandName) -> list[str]:
     return job_ids
 
 
-def delete_active_job(job_id: str) -> None:
-    """Remove the specified job from the active jobs file.
+def change_job_state(job_id: str) -> None:
+    """Changes the state of the specified job.
 
     Args:
       job_id: String job identifier.
     """
-    delete_active_jobs([job_id])
+    change_job_states([job_id])
 
 
-def delete_active_jobs(job_ids: list[str]) -> None:
-    """Remove the specified jobs from the active jobs file.
+def change_job_states(job_ids: list[str]) -> None:
+    """Change the state of the specified jobs.
 
     Args:
       job_ids: List of string job identifiers.
     """
-    inpath = __active_jobs_path
-    outpath = __active_jobs_path.with_suffix(".tmp")
+    inpath = __jobs_path
+    outpath = __jobs_path.with_suffix(".tmp")
 
     with (Path(inpath).open("r", newline="") as infile,
           Path(outpath).open("w", newline="") as outfile):
         writer = csv.writer(outfile)
-        writer.writerow(__active_jobs_csv_header)
+        writer.writerow(__jobs_csv_header)
         reader = csv.DictReader(infile)
 
         for row in reader:
-            # Only keep entries with a job ID other than the one to be removed
-            if row["job_id"] not in job_ids:
-                writer.writerow([row["job_id"], row["command"]])
+            # change state of jobs to done if they are in the list
+            # otherwise keep them as they were
+            if row["job_id"] in job_ids:
+                writer.writerow([row["job_id"], row["command"], JobState.DONE])
+            else:
+                writer.writerow([row["job_id"], row["command"], row["state"]])
 
     # Replace the old CSV
     outpath.rename(inpath)
 
 
 def cleanup_active_jobs() -> int:
-    """Remove completed jobs from the active jobs file and return the number remaining.
+    """Change the state of completed jobs to be done.
 
     Returns:
-      Number of remaining jobs (after removing the completed jobs).
+      Number of active jobs (after changing the state of the completed jobs).
     """
     jobs_list = read_active_jobs()
-    delete_ids = []
+    change_ids = []
     remaining_jobs = 0
 
     for job in jobs_list:
         job_id = job["job_id"]
 
         if check_job_is_done(job_id):
-            delete_ids.append(job_id)
+            change_ids.append(job_id)
         else:
             remaining_jobs += 1
 
-    delete_active_jobs(delete_ids)
+    change_job_states(change_ids)
 
     return remaining_jobs

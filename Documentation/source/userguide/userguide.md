@@ -134,7 +134,7 @@ following minimal requirements (for an example of a solver directory see
 {numref}`dir-solvers-selection`):
 
 - A working solver executable
-- An algorithm wrapper called `sprakle_run_default_wrapper.py`
+- An algorithm wrapper called `sparkle_run_default_wrapper.py`
 
 Further, training and testing instance sets are needed (for an example
 of an instances directory see {numref}`dir-instances`). For

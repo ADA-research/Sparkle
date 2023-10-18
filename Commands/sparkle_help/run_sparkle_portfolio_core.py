@@ -6,14 +6,9 @@ import argparse
 from pathlib import Path
 from pathlib import PurePath
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_settings
-    from sparkle_help import sparkle_run_portfolio_selector_help as srpsh
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_settings
-    import sparkle_run_portfolio_selector_help as srpsh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_run_portfolio_selector_help as srpsh
 
 
 if __name__ == "__main__":

@@ -10,20 +10,13 @@ import shutil
 from pathlib import Path
 from pathlib import PurePath
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_run_solvers_help as srs
-    from sparkle_help.sparkle_settings import PerformanceMeasure
-    from sparkle_help import sparkle_settings
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help as sbh
-    import sparkle_file_help as sfh
-    import sparkle_run_solvers_help as srs
-    from sparkle_settings import PerformanceMeasure
-    import sparkle_settings
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_run_solvers_help as srs
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_settings
+from Commands.Structures.status_info import SolverRunStatusInfo
 
 
 if __name__ == "__main__":
@@ -72,22 +65,16 @@ if __name__ == "__main__":
     raw_result_path = r"Tmp/" + key_str + r".rawres"
     processed_result_path = r"Performance_Data/Tmp/" + key_str + r".result"
 
-    if run_status_path == sgh.pap_sbatch_tmp_path:
-        processed_result_path = f"{sgh.pap_performance_data_tmp_path}/{key_str}.result"
-
-    task_run_status_path = f"{str(run_status_path)}/{key_str}.statusinfo"
-    status_info_str = (
-        f"Status: Running\nSolver: {sfh.get_last_level_directory_name(solver_path)}\n"
-        f"Instance: {sfh.get_last_level_directory_name(instance_path)}\n")
-
     start_time = time.time()
-    status_info_str += (
-        f"Start Time: {time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time))}\n")
-    status_info_str += "Start Timestamp: " + str(start_time) + "\n"
-    cutoff_str = (f"Cutoff Time: {str(sgh.settings.get_general_target_cutoff_time())}"
-                  " second(s)\n")
-    status_info_str += cutoff_str
-    sfh.write_string_to_file(task_run_status_path, status_info_str)
+    # create statusinfo file
+    status_info = SolverRunStatusInfo()
+    status_info.set_solver(sfh.get_last_level_directory_name(solver_path))
+    status_info.set_instance(sfh.get_last_level_directory_name(instance_path))
+    cutoff_str = str(sgh.settings.get_general_target_cutoff_time())
+    status_info.set_cutoff_time(f"{cutoff_str}"
+                                f" second(s)")
+    print("Writing run status to file")
+    status_info.save()
 
     cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = (
         srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
@@ -109,7 +96,7 @@ if __name__ == "__main__":
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
 
     sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
-    os.system("rm -f " + task_run_status_path)
+    status_info.delete()
 
     if run_status_path != sgh.pap_sbatch_tmp_path:
         if solver_path.startswith(sgh.sparkle_tmp_path):

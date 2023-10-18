@@ -7,7 +7,7 @@ from pathlib import Path
 import os
 
 
-def check_tex_commands_exist(latex_directory_path: Path):
+def check_tex_commands_exist(latex_directory_path: Path) -> None:
     """Raise an exception if one of the latex commands is not present."""
     if which("bibtex") is None or which("pdflatex") is None:
         raise Exception("Error: It seems like latex is not available on your system.\n"

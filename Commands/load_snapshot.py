@@ -3,11 +3,12 @@
 
 import sys
 import argparse
-from sparkle_help import sparkle_snapshot_help
-from sparkle_help import sparkle_logging as sl
+
+from Commands.sparkle_help import sparkle_snapshot_help
+from Commands.sparkle_help import sparkle_logging as sl
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(

@@ -5,16 +5,17 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_compute_features_help as scf
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_compute_features_help as scf
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def _check_existence_of_test_instance_list_file(extractor_directory: str):
+def _check_existence_of_test_instance_list_file(extractor_directory: str) -> bool:
     """Check whether a file exists with the list of test instances."""
     if not Path(extractor_directory).is_dir():
         return False
@@ -29,7 +30,7 @@ def _check_existence_of_test_instance_list_file(extractor_directory: str):
         return False
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
     parser = argparse.ArgumentParser()
@@ -79,6 +80,10 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    sch.check_for_initialise(sys.argv,
+                             sch.COMMAND_DEPENDENCIES[
+                                 sch.CommandName.ADD_FEATURE_EXTRACTOR])
     extractor_source = args.extractor_path
     if not Path(extractor_source).exists():
         print(f'Feature extractor path "{extractor_source}" does not exist!')
@@ -120,7 +125,7 @@ if __name__ == "__main__":
         test_instance_files = infile.readline().strip().split()
         instance_path = ""
         for test_instance_file in test_instance_files:
-            instance_path += Path(extractor_directory) / test_instance_file + " "
+            instance_path += extractor_directory + "/" + test_instance_file + " "
         instance_path = instance_path.strip()
         infile.close()
 
@@ -189,12 +194,12 @@ if __name__ == "__main__":
         + " done!"
     )
 
-    if Path(sgh.sparkle_portfolio_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_portfolio_selector_path
+    if Path(sgh.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
         os.system(command_line)
         print(
             "Removing Sparkle portfolio selector "
-            + sgh.sparkle_portfolio_selector_path
+            + sgh.sparkle_algorithm_selector_path
             + " done!"
         )
 

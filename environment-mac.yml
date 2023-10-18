@@ -1,18 +1,18 @@
-name: sparkle-dev
+# Experimental Mac Environment, not all Sparkle commands may run correctly.
+name: sparkle-mac
 channels:
   - conda-forge
   - defaults
 dependencies:
   # Basic conda install
   - python=3.9
-  - swig=3.0
   - gnuplot
-  - latexmk
   - pip
   - pip:
     - --editable .  # self install !
     - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
     # For Sparkle
+    - swig==3.0.6 #Changed from 3.0 to 3.0.6
     - numpy
     - pandas
     # Testing
@@ -32,8 +32,9 @@ dependencies:
     - scikit-learn
     - ConfigSpace
     - smac
-    - scipy==1.6.3  # 1.7.x removed a private function used by smac
+    #- scipy==1.6.3  # TODO: Fix when Autofolio is updated
     - pynisher<1.0  # smac requirement
     - scikit-learn<1.1.0  # 1.1.0 contains a fix for SimpleImputer that breaks AutoFolio
     # To build documentation
+    - latexmk.py # Mac requires the .py extension, while linux does not
     - -r Documentation/requirements.txt

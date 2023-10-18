@@ -6,10 +6,7 @@ import time
 from pathlib import Path
 from pathlib import PurePath
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-except ImportError:
-    import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 # Keep track of which command called Sparkle
@@ -31,7 +28,7 @@ global caller_log_dir
 caller_log_dir = Path(".")
 
 
-def update_caller(argv):
+def update_caller(argv: list[str]) -> None:
     """Update which command is currently active."""
     global caller
     caller = Path(argv[0]).stem
@@ -79,7 +76,7 @@ def add_output(output_path: str, description: str) -> None:
     return
 
 
-def log_command(argv) -> None:
+def log_command(argv: list[str]) -> None:
     """Write to file which command was executed.
 
     Includes information on when it was executed, with which arguments, and

@@ -3,12 +3,13 @@
 """Helper functions for parallel job execution."""
 
 import os
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_basic_help as sbh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help.sparkle_command_help import CommandName
-from sparkle_help import sparkle_job_help as sjh
+
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def get_dependency_list_str(dependency_jobid_list: list[str]) -> str:

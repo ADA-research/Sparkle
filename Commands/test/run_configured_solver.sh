@@ -28,7 +28,7 @@ cp $configuration_files_path $smac_configuration_files_path
 scenario_path="Output/latest_scenario.ini"
 scenario_tmp="Output/latest_scenario.tmp"
 scenario_test="Commands/test/test_files/Output/latest_scenario.ini"
-mv $scenario_path $scenario_tmp # Save user scenario
+mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
 cp $scenario_test $scenario_path # Activate test scenario
 
 # Slurm settings

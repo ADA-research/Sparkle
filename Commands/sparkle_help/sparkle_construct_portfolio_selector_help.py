@@ -7,14 +7,14 @@ import sys
 from pathlib import Path, PurePath
 
 
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_run_solvers_help as srsh
-from sparkle_help import sparkle_compute_features_help as scfh
-from sparkle_help import sparkle_logging as sl
-from sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_run_solvers_help as srsh
+from Commands.sparkle_help import sparkle_compute_features_help as scfh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
@@ -126,14 +126,14 @@ def selector_exists(sparkle_portfolio_selector_path: Path) -> bool:
     return sparkle_portfolio_selector_path.is_file()
 
 
-def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
+def construct_sparkle_portfolio_selector(selector_path: Path,
                                          performance_data_csv_path: str,
                                          feature_data_csv_path: str,
                                          flag_recompute: bool = False) -> bool:
     """Create the Sparkle portfolio selector.
 
     Args:
-        sparkle_portfolio_selector_path: Portfolio selector path.
+        selector_path: Portfolio selector path.
         performance_data_csv_path: Performance data csv path.
         feature_data_csv_path: Feature data csv path.
         flag_recompute: Whether or not to recompute if the selector exists and no data
@@ -142,9 +142,6 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
     Returns:
         True if portfolio construction is successful.
     """
-    # Convert to pathlib Path (remove when everything is pathlib compliant)
-    selector_path = Path(sparkle_portfolio_selector_path)
-
     # If the selector exists and the data didn't change, do nothing;
     # unless the recompute flag is set
     if (selector_exists(selector_path) and data_unchanged(selector_path)
@@ -209,7 +206,7 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
     command_line = (f"{python_executable} {sgh.autofolio_path} --performance_csv "
                     f"{performance_data_csv_path} --feature_csv {feature_data_csv_path} "
                     f"{objective_function} --runtime_cutoff {cutoff_time_str} --tune "
-                    f"--save {sparkle_portfolio_selector_path} 1>> {log_path_str} 2>> "
+                    f"--save {str(selector_path)} 1>> {log_path_str} 2>> "
                     f"{err_path_str}")
 
     # Write command line to log
@@ -235,8 +232,8 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
         sys.exit()
 
     # Update data IDs associated with this selector
-    write_selector_pd_id(Path(sparkle_portfolio_selector_path))
-    write_selector_fd_id(Path(sparkle_portfolio_selector_path))
+    write_selector_pd_id(selector_path)
+    write_selector_fd_id(selector_path)
 
     # If we reach this point portfolio construction should be successful
     return True

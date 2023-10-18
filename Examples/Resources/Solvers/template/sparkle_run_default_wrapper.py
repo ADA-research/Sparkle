@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 
-def print_command(instance_file, seed_str: str, cutoff_time_str: str):
+def print_command(instance_file: str, seed_str: str, cutoff_time_str: str) -> None:
     """Print a command line call for the target algorithm with a given instance file."""
     # TODO: Change executable_name to the name of your solver executable
     executable_name = "MetaVC"
@@ -34,7 +34,7 @@ def print_command(instance_file, seed_str: str, cutoff_time_str: str):
     print(command_line)
 
 
-def print_output(terminal_output_file: str):
+def print_output(terminal_output_file: str) -> None:
     """Parse problem specific output and print it for Sparkle.
 
     Alternatively ask Sparkle to use it's own parser (SAT only)
