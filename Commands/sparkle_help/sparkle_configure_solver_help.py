@@ -509,7 +509,7 @@ def execute_smac_configure_local(solver_name: str,
         name="smac_configure",
         base_dir=result_dir,
         sbatch_options=batch.sbatch_options)
-    
+
     # Remove once Runner is running properly
     if run_on == Runner.SLURM:
         run_on = Runner.SLURM_RR
@@ -787,7 +787,7 @@ def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) 
                   "parameters of the most recent configuration process as default "
                   "values")
 
-#Goes wrong here in test 2 and 3
+
 def check_optimised_configuration_params(params: str) -> None:
     """Check if a given configuration parameter string appears to be valid.
 
@@ -821,7 +821,7 @@ def check_optimised_configuration_seed(seed: str) -> None:
         print("ERROR: Invalid optimised_configuration_seed; Stopping execution!")
         sys.exit(-1)
 
-#Goes wrong here in test 2 and 3
+
 def get_optimised_configuration_params(solver_name: str, instance_set_name: str) -> str:
     """Return the optimised configuration parameter string.
 

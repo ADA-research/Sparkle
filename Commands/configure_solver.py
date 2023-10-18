@@ -297,10 +297,9 @@ if __name__ == "__main__":
     if run_on == Runner.SLURM:
         job_id_str = ",".join(dependency_jobid_list)
         print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
-            f"{job_id_str}")
+              f"{job_id_str}")
     else:
         print("Running configuration finished!")
-    
 
     status_info.delete()
     # Write used settings to file

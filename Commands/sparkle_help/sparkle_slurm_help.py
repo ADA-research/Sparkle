@@ -553,10 +553,10 @@ def generate_validation_callback_script(solver: Path,
 
 
 def generate_ablation_callback_script(solver: Path,
-                                            instance_set_train: Path,
-                                            instance_set_test: Path,
-                                            dependency: str,
-                                            run_on: Runner = Runner.SLURM) -> str:
+                                      instance_set_train: Path,
+                                      instance_set_test: Path,
+                                      dependency: str,
+                                      run_on: Runner = Runner.SLURM) -> str:
     """Generate a callback script for ablation.
 
     Args:

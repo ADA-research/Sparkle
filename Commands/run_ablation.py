@@ -221,4 +221,4 @@ if __name__ == "__main__":
             ablation_scenario_dir=ablation_scenario_dir,
             run_on=run_on)
 
-        print(f"Ablation analysis finished!")
+        print("Ablation analysis finished!")

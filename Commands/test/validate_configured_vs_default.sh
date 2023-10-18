@@ -32,7 +32,7 @@ instances_src_path_train="${examples_path}${instances_path_train}"
 instances_src_path_test="${examples_path}${instances_path_test}"
 solver_src_path="${examples_path}${solver_path}"
 
-configuration_results_path="Commands/test/test_files/results/"
+configuration_results_path="Commands/test/test_files/results"
 configuration_files_path="Commands/test/test_files/PbO-CCSAT-Generic_PTN/PTN_train.txt"
 smac_path="Components/smac-v2.10.03-master-778/"
 smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic/"

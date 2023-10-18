@@ -232,7 +232,7 @@ def generate_validation_callback_slurm_script(solver_name: str, instance_train_n
 
     return sbatch_script_name
 
-#test 2 and 3 go wrong here
+
 def create_configuration_file(solver_name: str, instance_train_name: str,
                               instance_test_name: str) -> None:
     """Create a configuration file for ablation analysis."""

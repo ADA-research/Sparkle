@@ -40,7 +40,10 @@ class SlurmBatch:
         self.sbatch_options = re_sbatch.findall(filestr)
 
         # First find the cmd_params block ...
-        cmd_block = re_params_all.findall(filestr)[0] if len(re_params_all.findall(filestr)) > 0 else ""
+        cmd_block = ""
+        if len(re_params_all.findall(filestr)) > 0:
+            cmd_block = re_params_all.findall(filestr)[0]
+
         # ... then parse it
         self.cmd_params = re_params_items.findall(cmd_block)
 
