@@ -28,6 +28,7 @@ caller_out_dir: Path = Path(".")
 global caller_log_dir
 caller_log_dir: Path = Path(".")
 
+
 def update_caller(argv: list[str]) -> None:
     """Update which command is currently active.
 
