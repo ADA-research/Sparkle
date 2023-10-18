@@ -658,6 +658,7 @@ def generate_generic_callback_local_script(dependency: str,
     if run_on == Runner.SLURM:
         return run.run_id
     else:
+        run.wait()
         return ""
 
 

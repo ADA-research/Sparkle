@@ -213,7 +213,7 @@ if __name__ == "__main__":
         print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
     else:
-        ids = sah.submit_ablation_runrunner(
+        sah.submit_ablation_runrunner(
             solver_name=solver_name,
             instance_set_test=instance_set_test,
             instance_set_train_name=instance_set_train_name,
@@ -221,6 +221,4 @@ if __name__ == "__main__":
             ablation_scenario_dir=ablation_scenario_dir,
             run_on=run_on)
 
-        job_id_str = ",".join(ids)
-        print(f"Ablation analysis running. Waiting for local job(s) with id(s): "
-              f"{job_id_str}")
+        print(f"Ablation analysis finished!")

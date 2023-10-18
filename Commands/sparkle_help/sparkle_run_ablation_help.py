@@ -532,6 +532,7 @@ def submit_ablation_runrunner(solver_name: str,
             srun_options=batch.srun_options)
 
         print(f"Launched validation callback sbatch script {sbatch_script_path}")
+        run.wait()
     # Remove the below if block once runrunner works satisfactorily
     if run_on == Runner.SLURM_RR:
         run_on = Runner.SLURM
