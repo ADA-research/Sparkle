@@ -474,11 +474,10 @@ def submit_ablation_runrunner(solver_name: str,
     sbatch_script_path = generate_slurm_script(
         solver_name, instance_set_train_name, instance_set_test_name
     )
-    batch = SlurmBatch(sbatch_script_path)
-    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+    batch = SlurmBatch(ablation_scenario_dir + sbatch_script_path)
     run = rrr.add_to_queue(
         runner=run_on,
-        cmd=cmd_list,
+        cmd=batch.cmd,
         name=CommandName.RUN_ABLATION,
         path=ablation_scenario_dir,
         sbatch_options=batch.sbatch_options,
@@ -493,10 +492,9 @@ def submit_ablation_runrunner(solver_name: str,
         solver_name, instance_set_train_name, instance_set_test_name, dependency=jobid
     )
     batch = SlurmBatch(sbatch_script_path)
-    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
     run = rrr.add_to_queue(
         runner=run_on,
-        cmd=cmd_list,
+        cmd=batch.cmd,
         name=CommandName.RUN_ABLATION,
         path=ablation_scenario_dir,
         sbatch_options=batch.sbatch_options,
@@ -514,10 +512,9 @@ def submit_ablation_runrunner(solver_name: str,
             dependency=jobid)
 
         batch = SlurmBatch(sbatch_script_path)
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
         run = rrr.add_to_queue(
             runner=run_on,
-            cmd=cmd_list,
+            cmd=batch.cmd,
             name=CommandName.RUN_ABLATION,
             path=ablation_scenario_dir,
             sbatch_options=batch.sbatch_options,
@@ -535,10 +532,9 @@ def submit_ablation_runrunner(solver_name: str,
             dependency=jobid,
         )
         batch = SlurmBatch(sbatch_script_path)
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
         run = rrr.add_to_queue(
             runner=run_on,
-            cmd=cmd_list,
+            cmd=batch.cmd,
             name=CommandName.RUN_ABLATION,
             path=ablation_scenario_dir,
             sbatch_options=batch.sbatch_options,

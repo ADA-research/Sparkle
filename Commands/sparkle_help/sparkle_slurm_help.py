@@ -593,7 +593,7 @@ def generate_ablation_callback_slurm_script(solver: Path,
 def create_callback_options_list(name: str,
                                  solver: Path,
                                  instance_set_train: Path,
-                                 instance_set_test: Path) -> (str, list):
+                                 instance_set_test: Path) -> (str, list[str]):
     """Create the options for the callback script.
 
     Args:
@@ -630,18 +630,11 @@ def create_callback_options_list(name: str,
     return delayed_job_file_path, [job_name, output, error]
 
 
-def generate_generic_callback_local_script(name: str,
-                                           solver: Path,
-                                           instance_set_train: Path,
-                                           instance_set_test: Path,
-                                           dependency: str,
+def generate_generic_callback_local_script(dependency: str,
                                            command_line: str,
                                            command_name: CommandName,
                                            run_on: Runner = Runner.LOCAL) -> str:
     """Generate a generic callback script to be executed locally.
-
-    TODO: Currently does not use the first four parameters (Original slurm).
-          How should these be used? Were made(?) for creating .sh name
 
     Args:
       name: Name of the script (used as prefix for the file name).
@@ -657,13 +650,11 @@ def generate_generic_callback_local_script(name: str,
     Returns:
       String job identifier.
     """
-    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
-
     run = rrr.add_to_queue(runner=run_on,
                            cmd=command_line,
                            name=command_name,
                            dependencies=dependency,
-                           base_dir=sparkle_tmp_path)
+                           base_dir=sgh.sparkle_tmp_path)
 
     if run_on == Runner.SLURM:
         return run.run_id
