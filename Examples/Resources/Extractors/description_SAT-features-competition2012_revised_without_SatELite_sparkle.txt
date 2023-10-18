@@ -5,3 +5,4 @@ Paper: Xu et al 2012 - Features for SAT
 License: Permission from the authors
 License location: -
 Modifications: The main modification of this component is to disable calling the SAT instance preprocessor called SatELite
+               (CHANGES FOR MAC) Second modification is in Solver.C, where the access to a friend construct is invisible for gcc thus moved it partially 

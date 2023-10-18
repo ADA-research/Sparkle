@@ -134,7 +134,11 @@ bool Solver::addClause(vec<Lit>& ps)
         uncheckedEnqueue(ps[0]);
         return ok = (propagate() == NULL);
     }else{
-        Clause* c = Clause_new(ps, false);
+		// CHANGE FOR MAC: The 'friend' constructor is not visible for gcc, thus moved (partially) here
+		void* mem = malloc(sizeof(Clause) + sizeof(uint32_t)*(ps.size()));
+		Clause cobj = *( new (mem) Clause(ps, false) );
+		Clause* c = &cobj;
+        //Clause* c = Clause_new(ps, false);
         clauses.push(c);
         attachClause(*c);
 
@@ -649,7 +653,11 @@ lbool Solver::search(int nof_conflicts, int nof_learnts)
             if (learnt_clause.size() == 1){
                 uncheckedEnqueue(learnt_clause[0]);
             }else{
-                Clause* c = Clause_new(learnt_clause, true);
+				// CHANGE FOR MAC: The 'friend' constructor is not visible for gcc, thus moved (partially) here
+				void* mem = malloc(sizeof(Clause) + sizeof(uint32_t)*(learnt_clause.size()));
+				Clause cobj = *( new (mem) Clause(learnt_clause, false) );
+				Clause* c = & cobj;
+                //Clause* c = Clause_new(learnt_clause, true);
                 learnts.push(c);
                 attachClause(*c);
                 claBumpActivity(*c);

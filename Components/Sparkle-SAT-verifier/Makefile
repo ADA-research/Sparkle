@@ -7,5 +7,5 @@ clean:
 	rm -f SAT
 
 SAT: SAT.cc
-	g++ SAT.cc -o SAT -O2 -static
+	g++ SAT.cc -o SAT -O2
 	rm -f *~
