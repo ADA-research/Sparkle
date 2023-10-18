@@ -57,6 +57,8 @@ The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta
 
 If you use Sparkle for one of your papers and want to cite it, please cite our [paper](https://doi.org/10.1109/TEVC.2022.3215013) describing Sparkle:
 
+K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, "Sparkle: Toward Accessible Meta-Algorithmics for Improving the State of the Art in Solving Challenging Problems," in _IEEE Transactions on Evolutionary Computation_, vol. 26, no. 6, pp. 1351-1364, Dec. 2022, doi: 10.1109/TEVC.2022.3215013.
+
 ```
 @article{BloEtAl22,
   title={Sparkle: Toward Accessible Meta-Algorithmics for Improving the State of the Art in Solving Challenging Problems}, 
