@@ -377,12 +377,23 @@ def get_ablation_table(solver_name: str, instance_train_name: str,
     return results
 
 
-def submit_ablation_slurm(solver_name: str,
-                          instance_set_test: str,
-                          instance_set_train_name: str,
-                          instance_set_test_name: str,
-                          ablation_scenario_dir: str) -> [str]:
-    """Sends an ablation to Slurm."""
+def submit_ablation_sparkle(solver_name: str,
+                            instance_set_test: str,
+                            instance_set_train_name: str,
+                            instance_set_test_name: str,
+                            ablation_scenario_dir: str) -> [str]:
+    """Sends an ablation to Slurm using Sparkle's internal mechanics.
+
+    Args:
+        solver_name:
+        instance_set_test:
+        instance_set_train_name:
+        instance_set_test_name:
+        ablation_scenario_dir:
+
+    Returns:
+        List of job id's corresponding to jobs launched in this method
+    """
     sbatch_script_path = generate_slurm_script(
         solver_name, instance_set_train_name, instance_set_test_name
     )
@@ -437,13 +448,25 @@ def submit_ablation_slurm(solver_name: str,
     return dependency_jobid_list
 
 
-def submit_ablation_local(solver_name: str,
-                          instance_set_test: str,
-                          instance_set_train_name: str,
-                          instance_set_test_name: str,
-                          ablation_scenario_dir: str,
-                          run_on: Runner = Runner.SLURM) -> list:
-    """Sends an ablation to the RunRunner queue."""
+def submit_ablation_runrunner(solver_name: str,
+                              instance_set_test: str,
+                              instance_set_train_name: str,
+                              instance_set_test_name: str,
+                              ablation_scenario_dir: str,
+                              run_on: Runner = Runner.SLURM) -> list:
+    """Sends an ablation to the RunRunner queue.
+
+    Args:
+        solver_name:
+        instance_set_test:
+        instance_set_train_name:
+        instance_set_test_name:
+        ablation_scenario_dir:
+        run_on: Determines to which RunRunner queue the job is added
+
+    Returns:
+        List of job id's created in this method
+    """
     # 1. submit the ablation to the runrunner queue
     # Remove the below if block once runrunner works satisfactorily
     if run_on == Runner.SLURM_RR:
