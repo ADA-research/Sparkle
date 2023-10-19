@@ -179,9 +179,10 @@ if __name__ == "__main__":
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
 
-        if run is not None:
+        if run_on == Runner.SLURM:
             print(f"Running validation in parallel. Waiting for local job with id: "
                   f"{run.run_id}")
+        else:
             run.wait()
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:

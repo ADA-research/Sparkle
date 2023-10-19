@@ -22,6 +22,8 @@ mv $slurm_settings_path $slurm_settings_tmp # Save user settings
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+slurm_true="slurm"
+slurm_available=$(detect_slurm)
 
 # Prepare for test
 examples_path="Examples/Resources/"
@@ -48,32 +50,49 @@ mkdir -p $smac_configuration_files_path # Make sure directory exists
 cp $configuration_files_path $smac_configuration_files_path
 
 # Test configured solver and default solver with both train and test sets
-output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
-output_true="Running validation in parallel. Waiting for Slurm job with id: "
+output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+
+output_true="Running validation done!"
+if [[ $slurm_available =~ "${slurm_true}" ]];
+then
+	output_true="Running validation in parallel. Waiting for Slurm job with id: "
+fi
 
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] validate_configured_vs_default with both train and test sets test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
 	echo "[failure] validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 # Test configured solver and default solver with just training set
-output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] validate_configured_vs_default with just training set test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
 	echo "[failure] validate_configured_vs_default with just training set test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 # Restore original settings
