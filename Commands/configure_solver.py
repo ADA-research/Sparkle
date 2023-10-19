@@ -235,27 +235,10 @@ if __name__ == "__main__":
         solver.name, instance_set_train.name
     )
 
-    configure_jobid = ""
-    if run_on == Runner.SLURM:
-        smac_configure_sbatch_script_name = scsh.create_smac_configure_sbatch_script(
-            solver.name, instance_set_train.name
-        )
-
-        configure_jobid = scsh.submit_smac_configure_sbatch_script(
-            smac_configure_sbatch_script_name
-        )
-        dependency_jobid_list = [configure_jobid]
-    else:
-        run = scsh.execute_smac_configure_local(
-            solver.name, instance_set_train.name, run_on=run_on
-        )
-
-        if run_on == Runner.LOCAL:
-            dependency_jobid_list = []
-            run.wait()
-        elif run_on == Runner.SLURM_RR:
-            configure_jobid = run.run_id
-            dependency_jobid_list = [configure_jobid]
+    configure_jobid = scsh.run_smac_configure(solver.name,
+                                              instance_set_train.name,
+                                              run_on=run_on)
+    dependency_jobid_list = [configure_jobid] if configure_jobid else []
 
     # Write most recent run to file
     last_configuration_file_path = Path(

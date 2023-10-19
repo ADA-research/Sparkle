@@ -479,6 +479,56 @@ def create_smac_configure_sbatch_script(solver_name: str,
     return sbatch_script_path
 
 
+def run_smac_configure(solver_name: str,
+                       instance_set_name: str,
+                       run_on: Runner = Runner.LOCAL) -> str:
+    """Runs the smac configuration for a solver and instance set.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        str: The Slurm Job ID string, if relevant
+    """
+    sbatch_script_path = create_smac_configure_sbatch_script(
+        solver_name, instance_set_name
+    )
+    configure_jobid = ""
+    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
+    # runrunner works properly everything under 'if' should be removed leaving only the
+    # 'else', and the SLURM_RR replaced by just SLURM.
+    if run_on == Runner.SLURM:
+        configure_jobid = submit_smac_configure_sbatch_script(
+            sbatch_script_path
+        )
+    else:
+        # Remove once Runner is running properly
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+
+        batch = SlurmBatch(Path(f"{sgh.smac_dir}{sbatch_script_path}"))
+
+        result_part = Path(f"{solver_name}_{instance_set_name}")
+        result_dir = sgh.smac_results_dir / result_part
+
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=batch.cmd,
+            name="smac_configure",
+            base_dir=result_dir,
+            sbatch_options=batch.sbatch_options)
+
+        # Remove once Runner is running properly
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
+
+        if run_on == Runner.SLURM_RR:
+            configure_jobid = run.run_id
+
+    return configure_jobid
+
+
 def execute_smac_configure_local(solver_name: str,
                                  instance_set_name: str,
                                  run_on: Runner = Runner.LOCAL) -> rrr.LocalRun:
