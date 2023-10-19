@@ -158,7 +158,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     else:
         smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
-    smac_instance_file = (f"scenarios/{solver_name}_{instance_set_train_name}/"
+    smac_instance_file = (f"scenarios/instances/{instance_set_train_name}/"
                           f"{instance_set_val_name}_{inst_type}.txt")
     smac_test_instance_file = smac_instance_file
 
@@ -193,7 +193,7 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     Returns:
         String containing the scenario directory inside SMAC
     """
-    smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
+    smac_scenario_dir = f"{sgh.smac_dir}/scenarios"
     smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
 
     return smac_solver_dir
