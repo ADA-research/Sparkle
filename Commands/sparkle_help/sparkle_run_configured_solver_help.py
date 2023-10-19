@@ -21,7 +21,7 @@ from runrunner.base import Runner
 
 def call_configured_solver(instance_path_list: list[Path],
                            parallel: bool,
-                           run_on: Runner = Runner.SLURM) -> str:
+                           run_on: Runner = Runner.SLURM) -> str | None:
     """Create list of instance path lists, and call solver in parallel or sequential."""
     job_id_str = None
 
@@ -39,7 +39,7 @@ def call_configured_solver(instance_path_list: list[Path],
     # Else single instance turn it into list[list[Path]]
     else:
         instances_list = [instance_path_list]
-    
+
     # If parallel, pass instances list to parallel function
     if parallel:
         job_id_str = call_configured_solver_parallel(instances_list, run_on=run_on)
@@ -132,17 +132,16 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
             run_on = Runner.SLURM
 
         batch = SlurmBatch(sbatch_script_path)
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-        run = rrr.add_to_queue(
+        rrr.add_to_queue(
             runner=run_on,
-            cmd=cmd_list,
+            cmd=batch.cmd,
             name=cmd_name,
             base_dir=exec_dir,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
-        #jobid_str = run.run_id
+
         print(f"Configured solver added to {run_on} queue.")
-        
+
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
@@ -171,7 +170,14 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
 
 def run_configured_solver(instance_path_list: list[Path],
                           run_on: Runner = Runner.SLURM) -> None:
-    """Run the latest configured solver on the given instance."""
+    """Run the latest configured solver on the given instance.
+
+    Args:
+        instance_path_list:
+
+    Returns:
+        None
+    """
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
     # a) Create cmd_solver_call that could call sparkle_smac_wrapper
@@ -185,14 +191,14 @@ def run_configured_solver(instance_path_list: list[Path],
     seed_str = str(sgh.get_seed())
     cmd_solver_call = (f"{sgh.sparkle_smac_wrapper} {instance_path_str} {specifics} "
                        f"{cutoff_time_str} {run_length} {seed_str} {config_str}")
-    
+
     # Prepare paths
     solver_path = Path(f"Solvers/{solver_name}")
     instance_name = "_".join([path.name for path in instance_path_list])
     raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
                            f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
-    
+
     # b) Run the solver
     rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
                                                          raw_result_path,

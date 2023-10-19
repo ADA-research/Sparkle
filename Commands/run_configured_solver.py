@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     # Print result
     if args.parallel:
-        print(f"Running configured solver in parallel. Waiting for {run_on} "
+        print(f"Running configured solver in parallel. Waiting for Slurm "
               f"job(s) with id(s): {job_id_str}")
     else:
         print("Running configured solver done!")
