@@ -62,15 +62,16 @@ The coding style consistency is a work in progress, and existing code may not ad
 2. Ensure comments explain code that cannot be written in an easily readable and understandable way.
 3. Adhere to the [PEP8](https://pep8.org/) style guide. Deviations are documented in `.flake8` (only larger line length).
 3. Make sure the code style rules pass by running `flake8`.
-4. Ensure useful and accurate docstrings are included, and follow the [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for them.
+4. Ensure useful and accurate docstrings are included, and follow the [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for them. End parameter description sentences always with a dot.
 5. Ensure useful and accurate type hints are included.
 6. Use fstrings over other string formatting.
-7. Use pathlib over other path manipulators.
+7. Use `pathlib` over other path manipulators.
 8. Prefer interpretable function names over shorter ones.
+9. Do not add a return statement in functions that do not return anything. Use `None` as a return type hint.
 
 ### Testing
 1. Make sure the unit tests pass by running `pytest`.
-2. Make sure the integration tests (see `Commands/test/`) relevant for the commands affected by the changes pass by running them. Optionally run all of them with `Commands/test/all.sh`.
+2. Make sure the integration tests (see `Commands/test/`) relevant for the commands affected by the changes pass by running them. Ideally, run all of them with `Commands/test/all.sh`.
 3. Make sure the examples relevant to the changes execute correctly (see the `.sh` files in `Examples/`).
 
 ## Release protocol
