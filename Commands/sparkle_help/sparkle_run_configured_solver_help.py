@@ -21,9 +21,9 @@ from runrunner.base import Runner
 
 def call_configured_solver(instance_path_list: list[Path],
                            parallel: bool,
-                           run_on: Runner = Runner.SLURM) -> str | None:
+                           run_on: Runner = Runner.SLURM) -> str:
     """Create list of instance path lists, and call solver in parallel or sequential."""
-    job_id_str = None
+    job_id_str = ""
 
     # If directory, get instance list from directory as list[list[Path]]
     if len(instance_path_list) == 1 and instance_path_list[0].is_dir():

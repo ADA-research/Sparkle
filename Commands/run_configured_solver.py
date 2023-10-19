@@ -85,10 +85,11 @@ if __name__ == "__main__":
                                                   args.parallel,
                                                   run_on=run_on)
     else:
-        sys.exit("ERROR: Faulty input instance or instance directory!")
+        print("ERROR: Faulty input instance or instance directory!")
+        sys.exit(-1)
 
     # Print result
-    if args.parallel:
+    if args.parallel and run_on == Runner.SLURM:
         print(f"Running configured solver in parallel. Waiting for Slurm "
               f"job(s) with id(s): {job_id_str}")
     else:
