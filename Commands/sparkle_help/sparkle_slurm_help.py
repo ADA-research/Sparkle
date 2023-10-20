@@ -238,7 +238,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
       A list of batch options for Slurm.
     """
     if smac:
-        tmp_dir = sgh.smac_dir + "tmp/"
+        tmp_dir = "tmp/"
     else:
         tmp_dir = "Tmp/"
 
