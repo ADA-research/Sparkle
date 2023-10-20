@@ -43,7 +43,7 @@ To make changes to Sparkle, please create a branch from `development` and add yo
 When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
-1. Before a pull request is reviewed, the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied.
+1. Before a pull request is reviewed, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid burning through our build minutes on Bitbucket, this is easily tested locally by running "flake8" or "pytest" in the main sparkle directory in your branch.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
 3. Once all reviewers have approved the pull request it can be merged. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches. In principle the last reviewer to approve should do the merge immediately. However, if this does not work because, e.g., a final (minor) change is requested, or they forget, someone else can take over the responsibility.
 
@@ -96,6 +96,7 @@ The file `CHANGELOG.md` aims to track changes between versions.
 When making changes, please add a short description in the `[Unreleased]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
 
 ## Tests
+Sparkle has a variety of tests to make sure our changes impact the code base in the intended manner of the developer.
 
 ### Unit tests
 
@@ -114,5 +115,5 @@ pytest is installed with the base requirements of Sparkle and is run automatical
 ### Integration tests
 
 In addition to the unit tests, Sparkle also has a series of integration tests verifying that the commands run without errors.
-These tests are in `Commands/test/*` and must be run on a Slurm cluster.
+These tests are in `Commands/test/*`. In general these have been designed to run on a Slurm cluster, however some have been ported to run locally and on MacOS. A noteable exception to this is `run_configured_solver.sh` as it uses a Linux specific library to measure the run time of the subprocesses.
 
