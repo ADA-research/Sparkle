@@ -138,7 +138,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
                 score = capvalue - score
 
             virtual_best_score = (1 + score
-                                  / (num_instances * num_solvers * capvalue + 1))
+                                  / (num_instances * num_solvers * abs(capvalue) + 1))
             virtual_best_performance = virtual_best_performance + virtual_best_score
 
         return virtual_best_performance

@@ -272,7 +272,7 @@ def compute_actual_selector_performance(
                 performance_this_instance = capvalue - performance_this_instance
 
         score_this_instance = (1 + performance_this_instance
-                               / (num_instances * num_solvers * capvalue + 1))
+                               / (num_instances * num_solvers * abs(capvalue) + 1))
 
         if not flag_successfully_solving:
             score_this_instance = 0
