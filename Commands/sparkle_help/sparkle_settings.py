@@ -13,19 +13,19 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 class PerformanceMeasure(Enum):
     """Possible performance measures."""
 
-    RUNTIME = 0
-    QUALITY_ABSOLUTE = 1
-    QUALITY = 1  # If not specified, assume ABSOLUTE QUALITY
-    # QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
+    RUNTIME_MINIMISATION = 0
+    QUALITY_ABSOLUTE_MAXIMISATION = 1
+    QUALITY_ABSOLUTE_MINIMISATION = 2  # If not specified, assume ABSOLUTE QUALITY
 
     @staticmethod
     def from_str(performance_measure: str) -> PerformanceMeasure:
         """Return a given str as PerformanceMeasure."""
-        if performance_measure == "RUNTIME":
-            performance_measure = PerformanceMeasure.RUNTIME
-        elif (performance_measure == "QUALITY_ABSOLUTE"
-              or performance_measure == "QUALITY"):
-            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
+        if performance_measure == "RUNTIME_MINIMSATION":
+            performance_measure = PerformanceMeasure.RUNTIME_MINIMISATION
+        elif performance_measure == "QUALITY_ABSOLUTE_MAXIMISATION":
+            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
+        elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
+            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
 
         return performance_measure
 
@@ -83,7 +83,7 @@ class Settings:
     DEFAULT_settings_path = PurePath(__settings_dir / __settings_file)
 
     # Constant default values
-    DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME
+    DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME_MINIMISATION
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
@@ -362,7 +362,7 @@ class Settings:
         """Return a string describing the full performance metric, e.g. PAR10."""
         performance_measure = self.get_general_performance_measure()
 
-        if performance_measure is PerformanceMeasure.RUNTIME:
+        if performance_measure is PerformanceMeasure.RUNTIME_MINIMISATION:
             penalty_multiplier_str = str(self.get_general_penalty_multiplier())
             performance_measure_str = f"PAR{penalty_multiplier_str}"
         else:

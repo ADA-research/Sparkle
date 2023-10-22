@@ -195,7 +195,7 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
     str_value = ""
 
     # Count the number of solved instances per solver, and the unsolved instances
-    if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME:
+    if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME_MINIMISATION:
         solver_dict = dict()
         unsolved_instances = 0
 
@@ -213,8 +213,10 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
             else:
                 unsolved_instances += 1
 
-    if (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE):
+    if ((sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+        | (sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)):
         for instances in results_on_instances:
             str_value += (r"\item \textbf{" + sgrh.underscore_for_latex(instances)
                           + "}, was scored by: " + r"\textbf{"
@@ -543,7 +545,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     str_value = r"\decisiontrue"
 
     if (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE):
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
         str_value = r"\decisionfalse"
     mydict[variable] = str_value
 

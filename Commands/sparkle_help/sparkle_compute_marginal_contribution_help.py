@@ -76,7 +76,9 @@ def get_capvalue_list(
 
     # If QUALITY_ABSOLUTE is the performance measure, use the maximum performance per
     # instance as capvalue; otherwise the cutoff time is used
-    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+    if ((performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+        |
+        (performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)):
         return performance_data_csv.get_maximum_performance_per_instance()
     return None
 
@@ -247,14 +249,17 @@ def compute_actual_selector_performance(
         flag_successfully_solving = True
 
         if (
-                sgh.settings.get_general_performance_measure()
-                == PerformanceMeasure.QUALITY_ABSOLUTE
+                (sgh.settings.get_general_performance_measure()
+                == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+            |
+                (sgh.settings.get_general_performance_measure()
+                 == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)
         ):
             # QUALITY_ABSOLUTE
             performance_this_instance = (
                 compute_actual_performance_for_instance(
                     actual_portfolio_selector_path, instance, feature_data_csv_path,
-                    performance_data_csv, aggregation_function))
+                    performance_data_csv, aggregation_function, minimise, capvalue))
 
         else:
             # RUNTIME
@@ -263,8 +268,8 @@ def compute_actual_selector_performance(
                     actual_portfolio_selector_path, instance, feature_data_csv_path,
                     performance_data_csv))
 
-        if minimise:
-            performance_this_instance = capvalue - performance_this_instance
+            if minimise:
+                performance_this_instance = capvalue - performance_this_instance
 
         score_this_instance = (1 + performance_this_instance
                                / (num_instances * num_solvers * capvalue + 1))
@@ -282,7 +287,9 @@ def compute_actual_performance_for_instance(
         instance: str,
         feature_data_csv_path: str,
         performance_data_csv: SparklePerformanceDataCSV,
-        aggregation_function: Callable[[list[float]], float]) -> float:
+        aggregation_function: Callable[[list[float]], float],
+        minimise: bool,
+        capvalue: float) -> float:
     """Return the quality performance of the selector on a given instance.
 
     Args:
@@ -292,6 +299,8 @@ def compute_actual_performance_for_instance(
       performance_data_csv: SparklePerformanceDataCSV object that holds the
         performance data.
       aggregation_function: function to aggregate performance values
+      minimise: Indicator, if quality measure should be minimised
+      capvalue: Cap value for this instance
 
     Returns:
       Returns a performance score for an instance
@@ -304,6 +313,9 @@ def compute_actual_performance_for_instance(
     for i in range(0, len(list_predict_schedule)):
         solver = list_predict_schedule[i][0]
         performance = float(performance_data_csv.get_value(instance, solver))
+
+        if minimise:
+            performance = capvalue - performance
 
         performance_list.append(performance)
 
@@ -607,13 +619,22 @@ def compute_marginal_contribution(
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     if (
             sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
     ):
         aggregation_function_actual = sum
         aggregation_function_perfect = max
 
         capvalue_list = get_capvalue_list(performance_data_csv)
         minimise = False
+    elif (
+            sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
+    ):
+        aggregation_function_actual = sum
+        aggregation_function_perfect = max
+
+        capvalue_list = get_capvalue_list(performance_data_csv)
+        minimise = True
     else:
         # assume runtime optimization
         aggregation_function_actual = sum

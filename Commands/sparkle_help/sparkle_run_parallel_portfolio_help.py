@@ -731,7 +731,7 @@ def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
                                           execution_dir)
 
         if (sgh.settings.get_general_performance_measure()
-                == PerformanceMeasure.RUNTIME):
+                == PerformanceMeasure.RUNTIME_MINIMISATION):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))

@@ -171,9 +171,10 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     cutoff_time_str = str(cutoff_time)
     python_executable = sgh.python_executable
     performance_measure = sgh.settings.get_general_performance_measure()
-    if performance_measure == PerformanceMeasure.RUNTIME:
+    if performance_measure == PerformanceMeasure.RUNTIME_MINIMISATION:
         objective_function = "--objective runtime"
-    elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+    elif ((performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+            |(performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)):
         objective_function = "--objective solution_quality"
     else:
         print("ERROR: Unknown performance measure in "

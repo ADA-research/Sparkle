@@ -102,10 +102,10 @@ if __name__ == "__main__":
         if solver_path.startswith(sgh.sparkle_tmp_path):
             shutil.rmtree(solver_path)
 
-    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
-        obj_str = str(quality[0])  # TODO: Handle the multi-objective case
-    else:
+    if performance_measure == PerformanceMeasure.RUNTIME_MINIMISATION:
         obj_str = str(cpu_time_penalised)
+    else:
+        obj_str = str(quality[0])  # TODO: Handle the multi-objective case
 
     fout = Path(processed_result_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)

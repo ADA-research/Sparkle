@@ -152,8 +152,11 @@ if __name__ == "__main__":
     # Reporting for algorithm selection
     if selection or test_case_directory is not None:
         if (
-            sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE
+            (sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+            |
+                (sgh.settings.get_general_performance_measure()
+                 == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)
         ):
             print("ERROR: The generate_report command is not yet implemented for the"
                   " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")

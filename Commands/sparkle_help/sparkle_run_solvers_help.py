@@ -265,7 +265,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
 
             # Handle timeouts
             penalised_str = ""
-            if (performance_measure == PerformanceMeasure.RUNTIME
+            if (performance_measure == PerformanceMeasure.RUNTIME_MINIMISATION
                and (status == "TIMEOUT" or status == "UNKNOWN")):
                 penalised_str = " (penalised)"
 
@@ -279,7 +279,9 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
                 continue  # Skip to the next job
 
             # Update performance CSV
-            if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+            if ((performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+                |
+                (performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)):
                 # TODO: Handle the multi-objective case for quality
                 performance_data_csv.set_value(instance_path, solver_path, quality[0])
                 print(f"Running Result: Status: {status}, Quality{penalised_str}: "
