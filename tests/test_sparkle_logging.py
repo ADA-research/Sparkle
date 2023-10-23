@@ -2,18 +2,18 @@
 
 from pathlib import Path, PurePath
 
-import sparkle_help.sparkle_logging as sl
-import sparkle_help.sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
-def test__update_caller():
+def test__update_caller() -> None:
     """Test caller is correctly updated when _update_caller is called."""
     argv = ["test.py"]
     sl._update_caller(argv)
     assert sl.caller == "test"
 
 
-def test__update_caller_file_path():
+def test__update_caller_file_path() -> None:
     """Test _update_caller_file_path uses the right file name and creates it."""
     timestamp = "18-08-2023_12:34:56"
     sl._update_caller_file_path(timestamp)
@@ -27,12 +27,12 @@ def test__update_caller_file_path():
     assert Path(sl.caller_log_path).is_file()
 
 
-def test_add_output():
+def test_add_output() -> None:
     """Test add_output correctly extends the log file with given output."""
     argv = ["test.py"]
     sl.log_command(argv)
     sl.add_output("test.txt", "functionality test.")
-    with open(str(sl.caller_log_path), "r") as output_file:
+    with Path(str(sl.caller_log_path)).open(mode="r") as output_file:
         for line in output_file:
             continue
         last_line = line
@@ -40,12 +40,12 @@ def test_add_output():
     assert "functionality test." in last_line
 
 
-def test_log_command():
+def test_log_command() -> None:
     """Test log_command correctly logs the call to a command."""
     argv = ["test.py"]
     sl.log_command(argv)
     log_path = sgh.sparkle_global_log_path
-    with open(str(log_path), "r") as log_file:
+    with Path(str(log_path)).open(mode="r") as log_file:
         for line in log_file:
             continue
         last_line = line
