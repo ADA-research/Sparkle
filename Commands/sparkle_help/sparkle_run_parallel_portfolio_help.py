@@ -734,6 +734,7 @@ def run_parallel_portfolio(instances: list[str],
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
         job_id = ""
+        # NOTE: Once runrunner works satisfactorily this should be refactored
         if run_on == Runner.SLURM:
             job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
                                               execution_dir)
@@ -753,14 +754,14 @@ def run_parallel_portfolio(instances: list[str],
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
 
-            if hasattr(run, "run_id"):
+            if run_on == Runner.SLURM:
                 job_id = run.run_id
 
             # Remove the below if block once runrunner works satisfactorily
             if run_on == Runner.SLURM_RR:
                 run_on = Runner.SLURM
 
-        # TODO: Should the IF statement below be considering local as well?
+        # NOTE: the IF statement below is Slurm only as well?
         # As running runtime based performance may be less relevant
         if (run_on == Runner.SLURM and sgh.settings.get_general_performance_measure()
                 == PerformanceMeasure.RUNTIME):
@@ -807,7 +808,7 @@ def run_parallel_portfolio(instances: list[str],
                         n_seconds = 1  # Start checking often
 
                 sjh.sleep(n_seconds)
-        else:
+        else:  # In case of local we only have to wait for the job to finish
             run.wait()
 
         finished_instances_dict = {}

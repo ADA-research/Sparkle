@@ -2,8 +2,8 @@
 
 from pathlib import Path, PurePath
 
-import sparkle_help.sparkle_logging as sl
-import sparkle_help.sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 def test__update_caller():
