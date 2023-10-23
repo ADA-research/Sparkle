@@ -32,7 +32,7 @@ def test_add_output() -> None:
     argv = ["test.py"]
     sl.log_command(argv)
     sl.add_output("test.txt", "functionality test.")
-    with Path(str(sl.caller_log_path)).open("r") as output_file:
+    with Path(str(sl.caller_log_path)).open(mode="r") as output_file:
         for line in output_file:
             continue
         last_line = line
@@ -44,7 +44,8 @@ def test_log_command() -> None:
     """Test log_command correctly logs the call to a command."""
     argv = ["test.py"]
     sl.log_command(argv)
-    with Path(str(sgh.sparkle_global_log_path)).open("r") as log_file:
+    log_path = sgh.sparkle_global_log_path
+    with Path(str(log_path)).open(mode="r") as log_file:
         for line in log_file:
             continue
         last_line = line
