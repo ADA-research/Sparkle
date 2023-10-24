@@ -36,7 +36,7 @@ def get_smac_run_obj() -> str:
     smac_run_obj = sgh.settings.get_general_performance_measure()
 
     # Convert to SMAC format
-    if smac_run_obj == PerformanceMeasure.RUNTIME_MINIMISATION:
+    if smac_run_obj == PerformanceMeasure.RUNTIME:
         smac_run_obj = smac_run_obj.name
     elif ((smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
             |

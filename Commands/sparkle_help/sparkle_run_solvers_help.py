@@ -265,7 +265,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
 
             # Handle timeouts
             penalised_str = ""
-            if (performance_measure == PerformanceMeasure.RUNTIME_MINIMISATION
+            if (performance_measure == PerformanceMeasure.RUNTIME
                and (status == "TIMEOUT" or status == "UNKNOWN")):
                 penalised_str = " (penalised)"
 

@@ -137,7 +137,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             if minimise:
                 score = capvalue - score
 
-            virtual_best_score = (1 + score
+            virtual_best_score = (score
                                   / (num_instances * num_solvers * abs(capvalue) + 1))
             virtual_best_performance = virtual_best_performance + virtual_best_score
 

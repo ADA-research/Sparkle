@@ -195,7 +195,7 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
     str_value = ""
 
     # Count the number of solved instances per solver, and the unsolved instances
-    if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME_MINIMISATION:
+    if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME:
         solver_dict = dict()
         unsolved_instances = 0
 

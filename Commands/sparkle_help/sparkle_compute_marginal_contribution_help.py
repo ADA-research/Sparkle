@@ -271,7 +271,7 @@ def compute_actual_selector_performance(
             if minimise:
                 performance_this_instance = capvalue - performance_this_instance
 
-        score_this_instance = (1 + performance_this_instance
+        score_this_instance = (performance_this_instance
                                / (num_instances * num_solvers * abs(capvalue) + 1))
 
         if not flag_successfully_solving:

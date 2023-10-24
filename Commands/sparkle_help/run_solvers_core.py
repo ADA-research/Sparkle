@@ -102,7 +102,7 @@ if __name__ == "__main__":
         if solver_path.startswith(sgh.sparkle_tmp_path):
             shutil.rmtree(solver_path)
 
-    if performance_measure == PerformanceMeasure.RUNTIME_MINIMISATION:
+    if performance_measure == PerformanceMeasure.RUNTIME:
         obj_str = str(cpu_time_penalised)
     else:
         obj_str = str(quality[0])  # TODO: Handle the multi-objective case
