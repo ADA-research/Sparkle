@@ -621,7 +621,7 @@ def compute_marginal_contribution(
             sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
     ):
-        aggregation_function_actual = sum
+        aggregation_function_actual = max
         aggregation_function_perfect = max
 
         capvalue_list = get_capvalue_list(performance_data_csv)
@@ -630,7 +630,7 @@ def compute_marginal_contribution(
             sgh.settings.get_general_performance_measure()
             == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
     ):
-        aggregation_function_actual = sum
+        aggregation_function_actual = max
         aggregation_function_perfect = max
 
         capvalue_list = get_capvalue_list(performance_data_csv)
