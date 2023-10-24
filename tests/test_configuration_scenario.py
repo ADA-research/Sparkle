@@ -44,7 +44,7 @@ class TestConfigurationScenario(TestCase):
         self.assertEqual(self.scenario.solver, self.solver)
         self.assertEqual(self.scenario.instance_directory,
                          self.instance_directory)
-        self.assertEqual(self.scenario.use_features, False)
+        self.assertFalse(self.scenario.use_features)
         self.assertEqual(self.scenario.feature_data, None)
         self.assertEqual(self.scenario.name,
                          f"{self.solver.name}_{self.instance_directory.name}")
@@ -57,14 +57,14 @@ class TestConfigurationScenario(TestCase):
         """Test if create_scenario() correctly creates the scenario directory."""
         self.scenario.create_scenario(self.parent_directory)
 
-        self.assertEqual(self.scenario.directory.is_dir(), True)
+        self.assertTrue(self.scenario.directory.is_dir())
         self.assertEqual((self.scenario.directory
                           / "outdir_train_configuration").is_dir(),
                          True)
-        self.assertEqual((self.scenario.directory / "tmp").is_dir(), True)
+        self.assertTrue((self.scenario.directory / "tmp").is_dir())
 
-        self.assertEqual((self.scenario.directory
-                          / self.solver.get_pcs_file().name).is_file(), True)
+        self.assertTrue((self.scenario.directory
+                         / self.solver.get_pcs_file().name).is_file())
 
     @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_result_directory(
@@ -74,7 +74,7 @@ class TestConfigurationScenario(TestCase):
         """Test if create_scenario() creates the result directory."""
         self.scenario.create_scenario(self.parent_directory)
 
-        self.assertEqual(self.scenario.result_directory.is_dir(), True)
+        self.assertTrue(self.scenario.result_directory.is_dir())
 
     @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_run_folders(self: TestConfigurationScenario,
@@ -84,9 +84,9 @@ class TestConfigurationScenario(TestCase):
 
         for i in range(self.run_number):
             run_path = self.scenario.directory / str(i + 1)
-            self.assertEqual(run_path.is_dir(), True)
-            self.assertEqual((run_path / "PbO-CCSAT").is_file(), True)
-            self.assertEqual((run_path / "tmp").is_dir(), True)
+            self.assertTrue(run_path.is_dir())
+            self.assertTrue((run_path / "PbO-CCSAT").is_file())
+            self.assertTrue((run_path / "tmp").is_dir())
 
     @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_instance_directory(
@@ -118,6 +118,6 @@ class TestConfigurationScenario(TestCase):
         # Use to show full diff of file
         self.maxDiff = None
 
-        self.assertEqual(scenario_file_path.is_file(), True)
+        self.assertTrue(scenario_file_path.is_file())
         self.assertEqual(scenario_file_path.open().read(),
                          reference_scenario_file.open().read())

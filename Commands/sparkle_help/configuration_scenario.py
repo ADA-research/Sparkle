@@ -43,8 +43,8 @@ class ConfigurationScenario:
         self.directory = Path()
         self.result_directory = Path()
         self.scenario_file_name = ""
-        self.feature_file = Path()
-        self.instance_file = Path()
+        self.feature_file_path = Path()
+        self.instance_file_path = Path()
 
     def create_scenario(self: ConfigurationScenario, parent_directory: Path) -> None:
         """Create scenario with solver and instances in the parent directory.
@@ -57,7 +57,7 @@ class ConfigurationScenario:
         self.parent_directory = parent_directory.absolute()
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.parent_directory / "results" / self.name
-        self.instance_file = (
+        self.instance_file_path = (
             Path(self.parent_directory / "scenarios"
                  / "instances" / self.instance_directory.name)
             / Path(str(self.instance_directory.name + "_train.txt")))
@@ -72,7 +72,7 @@ class ConfigurationScenario:
         self._create_scenario_file()
 
     def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
-        """Recreate scenario directory and create empty directories inside."""
+        """Delete old scenario dir, recreate it, create empty dirs inside."""
         shutil.rmtree(self.directory, ignore_errors=True)
         self.directory.mkdir(parents=True)
 
@@ -106,10 +106,10 @@ class ConfigurationScenario:
         solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
 
-        scenario_file = (self.directory
-                         / f"{self.name}_scenario.txt")
-        self.scenario_file_name = scenario_file.name
-        with scenario_file.open("w") as file:
+        scenario_file_path = (self.directory
+                              / f"{self.name}_scenario.txt")
+        self.scenario_file_name = scenario_file_path.name
+        with scenario_file_path.open("w") as file:
             file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
             file.write(f"execdir = {inner_directory}/\n")
             file.write(f"deterministic = {self.solver.is_deterministic()}\n")
@@ -119,10 +119,10 @@ class ConfigurationScenario:
             file.write(f"cutoff_length = {cutoff_length}\n")
             file.write(f"paramfile = {solver_param_file_path}\n")
             file.write(f"outdir = {config_output_directory}\n")
-            file.write(f"instance_file = {self.instance_file}\n")
-            file.write(f"test_instance_file = {self.instance_file}\n")
+            file.write(f"instance_file = {self.instance_file_path}\n")
+            file.write(f"test_instance_file = {self.instance_file_path}\n")
             if self.use_features:
-                file.write(f"feature_file = {self.feature_file}\n")
+                file.write(f"feature_file = {self.feature_file_path}\n")
             file.write("validation = true" + "\n")
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
@@ -130,7 +130,7 @@ class ConfigurationScenario:
         source_instance_list = (
             [f for f in self.instance_directory.rglob("*") if f.is_file()])
 
-        instance_list_path = self.instance_file
+        instance_list_path = self.instance_file_path
 
         instance_list_path.parent.mkdir(exist_ok=True, parents=True)
 
@@ -162,7 +162,7 @@ class ConfigurationScenario:
 
     def _create_feature_file(self: ConfigurationScenario) -> None:
         """Create CSV file from feature data."""
-        self.feature_file = Path(self.directory
-                                 / f"{self.instance_directory.name}_features.csv")
+        self.feature_file_path = Path(self.directory
+                                      / f"{self.instance_directory.name}_features.csv")
         self.feature_data.to_csv(self.directory
-                                 / self.feature_file, index_label="INSTANCE_NAME")
+                                 / self.feature_file_path, index_label="INSTANCE_NAME")
