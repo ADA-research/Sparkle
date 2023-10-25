@@ -300,7 +300,7 @@ The `alias` is based on the command and a timestamp.
 
 The `Logs` directory should contain the history of commands and their output such that one can easily know what has been done in which order and find enough pointers to debug unwanted behaviour.
 
-Other directories are cut into two subdirectories: `Raw_Data` contains the data produced by the main command, often time consumming to generate, handle with care; `Analysis` contains information extracted from the raw data, easy to generate, plots and reports.
+Other directories are cut into two subdirectories: `Raw_Data` contains the data produced by the main command, often time consuming to generate, handle with care; `Analysis` contains information extracted from the raw data, easy to generate, plots and reports.
 
 For each type of task run by Sparkle, the `related files` differ. The aim is always to have all required files for reproducibility. A copy of the sparkle configuration file at the time of the run and of all files relevant to the run, a copy of any log or error file that could help with debugging or a link to it, and the output of the executed task.
 
@@ -310,7 +310,7 @@ For each type of task run by Sparkle, the `related files` differ. The aim is alw
 
 *For selection* the algorithms and their performance on the training set, the model(s) generated if available and the resulting selector. The performance evaluation of the selector will be in the Analysis folder.
 
-*For analysis* a link to the folder on which the analysis was performed (confguration, portfolio or selection), the performance evaluation from it and the report if it was generated.
+*For analysis* a link to the folder on which the analysis was performed (configuration, portfolio or selection), the performance evaluation from it and the report if it was generated.
 
 ## Wrappers
 
