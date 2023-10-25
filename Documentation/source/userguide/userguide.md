@@ -265,6 +265,53 @@ included in a portfolio selector. The `sprakle_run_default_wrapper.py`
 is a wrapper that Sparkle should call to run the solver on a specific
 instance.
 
+### The output directory
+
+```{note}
+This section describes a desirable behaviour but has not been implemented fully yet.
+```
+
+The output directory is located at the root of the Sparkle directory. Its structure is as follows:
+
+```
+Output/
+  Logs/
+  Common/
+    Raw_Data/
+    Analysis/
+  Configuration/
+    Raw_Data/
+      run_<alias>/
+        related files
+    Analysis/
+  Parallel_Portfolio/
+    Raw_Data/
+      run_<alias>/
+        related files
+    Analysis/
+  Selection/
+    Raw_Data/
+      run_<alias>/
+        related files
+    Analysis/
+```
+
+The `alias` is based on the command and a timestamp.
+
+The `Logs` directory should contain the history of commands and their output such that one can easily know what has been done in which order and find enough pointers to debug unwanted behaviour.
+
+Other directories are cut into two subdirectories: `Raw_Data` contains the data produced by the main command, often time consuming to generate, handle with care; `Analysis` contains information extracted from the raw data, easy to generate, plots and reports.
+
+For each type of task run by Sparkle, the `related files` differ. The aim is always to have all required files for reproducibility. A copy of the sparkle configuration file at the time of the run and of all files relevant to the run, a copy of any log or error file that could help with debugging or a link to it, and the output of the executed task.
+
+*For configuration* the configuration trajectory if available, the training and testing sets, the default configuration and the final found configuration. The performance of those will be in the Analysis folder.
+
+*For parallel portfolio* the resulting portfolio and its components. The performance of the portfolio will be in the Analysis folder.
+
+*For selection* the algorithms and their performance on the training set, the model(s) generated if available and the resulting selector. The performance evaluation of the selector will be in the Analysis folder.
+
+*For analysis* a link to the folder on which the analysis was performed (configuration, portfolio or selection), the performance evaluation from it and the report if it was generated.
+
 ## Wrappers
 
 ### `sparkle_run_default_wrapper.py`
