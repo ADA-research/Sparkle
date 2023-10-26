@@ -495,7 +495,7 @@ def submit_sbatch_script(sbatch_script_name: str,
 
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
     command_bugfix = ["unset", "SLURM_CPU_BIND"]
-    subprocess.run(command_bugfix, cwd=execution_dir)
+    subprocess.run(command_bugfix, cwd=execution_dir, shell=True)
 
     command = ["sbatch", sbatch_script_name]
     output = subprocess.run(command, cwd=execution_dir, capture_output=True, text=True)
