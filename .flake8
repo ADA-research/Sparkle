@@ -33,7 +33,6 @@ exclude =
     Components/runsolver/,
     Components/smac-v2.10.03-master-778/,
     Configuration_Reports/,
-    Examples/Resources/Configurators/smac-v2.10.03-master-778/,
     Examples/Resources/CVRP/,
     Examples/Resources/CCAG/,
     Examples/Resources/Solvers/CSCCSat/,

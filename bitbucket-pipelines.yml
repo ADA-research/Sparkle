@@ -16,8 +16,8 @@ pipelines:
               - condacache
             script:
               - conda info
-              - conda env create -f environment-dev.yml 
-              - conda activate sparkle-dev
+              - conda env create -f environment.yml 
+              - conda activate sparkle
               - pytest -v tests/* --junitxml=test-reports/report.xml
         - step:
             name: Lint code

@@ -493,8 +493,11 @@ def submit_sbatch_script(sbatch_script_name: str,
     command_chmod = ["chmod", "a+x", sbatch_script_name]
     subprocess.run(command_chmod, cwd=execution_dir)
 
-    command = ["sbatch", sbatch_script_name]
+    # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
+    command_bugfix = ["unset", "SLURM_CPU_BIND"]
+    subprocess.run(command_bugfix, cwd=execution_dir)
 
+    command = ["sbatch", sbatch_script_name]
     output = subprocess.run(command, cwd=execution_dir, capture_output=True, text=True)
 
     if output.stderr != "":
