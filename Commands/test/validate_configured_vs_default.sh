@@ -60,14 +60,14 @@ fi
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] validate_configured_vs_default with both train and test sets test succeeded"
+	echo "[success] ($slurm_available) validate_configured_vs_default with both train and test sets test succeeded"
     jobid=${output##* }
 	if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
 		scancel $jobid
 	fi
 else              
-	echo "[failure] validate_configured_vs_default with both train and test sets test failed with output:"
+	echo "[failure] ($slurm_available) validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
@@ -80,14 +80,14 @@ output=$(Commands/validate_configured_vs_default.py --solver $solver_path --inst
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] validate_configured_vs_default with just training set test succeeded"
+	echo "[success] ($slurm_available) validate_configured_vs_default with just training set test succeeded"
     jobid=${output##* }
 	if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
 		scancel $jobid
 	fi
 else              
-	echo "[failure] validate_configured_vs_default with just training set test failed with output:"
+	echo "[failure] ($slurm_available) validate_configured_vs_default with just training set test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
