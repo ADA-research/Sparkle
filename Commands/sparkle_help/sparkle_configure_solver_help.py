@@ -5,7 +5,6 @@
 import os
 import sys
 import fcntl
-import shutil
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
@@ -13,11 +12,8 @@ from enum import Enum
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
-from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_instances_help as sih
-from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 class InstanceType(Enum):
@@ -77,7 +73,7 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     file_postfix = f"_{instance_type}.txt"
 
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
-    smac_file_instance_path_ori = (f"{sgh.smac_dir}example_scenarios/instances/"
+    smac_file_instance_path_ori = (f"{sgh.smac_dir}scenarios/instances/"
                                    f"{instance_set_target_name}{file_postfix}")
     smac_file_instance_path_target = (
         smac_solver_dir + instance_set_target_name + file_postfix)
@@ -154,21 +150,21 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
-    smac_paramfile = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+    smac_paramfile = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                       f"{get_pcs_file_from_solver_directory(Path(smac_solver_dir))}")
     if instance_type == InstanceType.TRAIN:
-        smac_outdir = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+        smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{inst_type}_{config_type}/")
     else:
-        smac_outdir = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+        smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
-    smac_instance_file = (f"example_scenarios/{solver_name}_{instance_set_train_name}/"
+    smac_instance_file = (f"scenarios/instances/{instance_set_train_name}/"
                           f"{instance_set_val_name}_{inst_type}.txt")
     smac_test_instance_file = smac_instance_file
 
     fout = Path(smac_file_scenario).open("w+")
     fout.write("algo = ./" + sgh.sparkle_smac_wrapper + "\n")
-    fout.write(f"execdir = example_scenarios/{solver_name}_{instance_set_train_name}/\n")
+    fout.write(f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n")
     fout.write("deterministic = " + get_solver_deterministic(solver_name) + "\n")
     fout.write("run_obj = " + smac_run_obj + "\n")
     fout.write("wallclock-limit = " + str(smac_whole_time_budget) + "\n")
@@ -187,78 +183,6 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     return scenario_file_name
 
 
-def create_file_scenario_configuration(solver_name: str, instance_set_name: str,
-                                       use_features: bool = False) -> None:
-    """Create a file with the configuration scenario in the solver directory.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of instance set used for configuration
-        use_features: Whether features should be used. Defaults to False.
-    """
-    solver_instance_name = f"{solver_name}_{instance_set_name}"
-    solver_instance_dir = Path("example_scenarios", solver_instance_name)
-
-    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
-    smac_file_scenario = Path(smac_solver_dir, f"{solver_instance_name}_scenario.txt")
-    smac_paramfile = get_pcs_file_from_solver_directory(smac_solver_dir)
-
-    smac_paramfile_dir = solver_instance_dir / smac_paramfile
-    smac_outdir = solver_instance_dir / "outdir_train_configuration/"
-    smac_instance_file = solver_instance_dir / f"{instance_set_name}_train.txt"
-    smac_feature_file = solver_instance_dir / f"{instance_set_name}_features.csv"
-
-    (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
-     smac_each_run_cutoff_length, _, _) = get_smac_settings()
-
-    fout = Path(smac_file_scenario).open("w")
-    fout.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
-    fout.write(f"execdir = {solver_instance_dir}/\n")
-    fout.write(f"deterministic = {get_solver_deterministic(solver_name)}\n")
-    fout.write(f"run_obj = {smac_run_obj}\n")
-    fout.write(f"wallclock-limit = {smac_whole_time_budget}\n")
-    fout.write(f"cutoffTime = {smac_each_run_cutoff_time}\n")
-    fout.write(f"cutoff_length = {smac_each_run_cutoff_length}\n")
-    fout.write(f"paramfile = {smac_paramfile_dir}\n")
-    fout.write(f"outdir = {smac_outdir}\n")
-    fout.write(f"instance_file = {smac_instance_file}\n")
-    fout.write(f"test_instance_file = {smac_instance_file}\n")
-    if use_features:
-        fout.write(f"feature_file = {smac_feature_file}\n")
-    fout.write("validation = true" + "\n")
-    fout.close()
-
-    sl.add_output(str(smac_file_scenario),
-                  "SMAC configuration scenario on the training set")
-    sl.add_output(f"{sgh.smac_dir}{smac_outdir}",
-                  "SMAC configuration output on the training set")
-
-
-def remove_configuration_directory(solver_name: str, smac_solver_dir: Path) -> None:
-    """Remove and recreate the configuration directory.
-
-    Args:
-        solver_name: Name of the solver
-        smac_solver_dir: Directory of the solver in SMAC directory
-    """
-    # Delete directory and then create it new with necessary files
-    shutil.rmtree(smac_solver_dir, ignore_errors=True)
-    create_configuration_directory(smac_solver_dir, solver_name)
-
-
-def clean_configuration_directory(solver_name: str, instance_set_name: str) -> None:
-    """Prepare clean configuration directory.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set
-    """
-    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
-
-    remove_configuration_directory(solver_name, smac_solver_dir)
-    create_configuration_directory(smac_solver_dir, solver_name)
-
-
 def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     """Return the directory of a solver under the SMAC directory.
 
@@ -269,41 +193,10 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     Returns:
         String containing the scenario directory inside SMAC
     """
-    smac_scenario_dir = f"{sgh.smac_dir}/example_scenarios"
+    smac_scenario_dir = f"{sgh.smac_dir}/scenarios"
     smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
 
     return smac_solver_dir
-
-
-def create_configuration_directory(smac_solver_dir: Path, solver_name: str) -> None:
-    """Create a directory for the configuration of a solver+instance-set combination.
-
-    Args:
-        smac_solver_dir: Name of the scenario directory inside SMAC
-        solver_name: Name of the solver
-    """
-    create_necessary_files_for_configured_solver(smac_solver_dir)
-
-    # Copy PCS file to smac_solver_dir
-    solver_directory = Path("Solvers", solver_name)
-    pcs_file = solver_directory / get_pcs_file_from_solver_directory(solver_directory)
-    command_line = f"cp {pcs_file} {smac_solver_dir}"
-    os.system(command_line)
-
-
-def create_necessary_files_for_configured_solver(smac_solver_dir: Path) -> None:
-    """Create directories needed for configuration of a solver.
-
-    Args:
-        smac_solver_dir: Name of the scenario directory inside SMAC
-    """
-    outdir_dir = smac_solver_dir / "outdir_train_configuration"
-    command_line = f"mkdir -p {outdir_dir}"
-    os.system(command_line)
-
-    tmp_dir = smac_solver_dir / "tmp"
-    command_line = f"mkdir -p {tmp_dir}"
-    os.system(command_line)
 
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
@@ -324,27 +217,6 @@ def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
             return file_path.name
 
     return ""
-
-
-def copy_solver_files_to_smac_dir(solver_name: str, instance_set_name: str) -> None:
-    """Create and copy required directories and files for configuration with SMAC.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set
-    """
-    smac_solver_dir = Path(get_smac_solver_dir(solver_name, instance_set_name))
-    _, _, _, _, num_of_smac_run, _ = get_smac_settings()
-
-    for i in range(1, num_of_smac_run + 1):
-        smac_solver_path_i = smac_solver_dir / str(i)
-        # Create directories, -p makes sure any missing parents are also created
-        cmd = f"mkdir -p {smac_solver_path_i}"
-        os.system(cmd)
-
-        solver_directory = Path("Solvers", solver_name, "*")
-        cmd = f"cp -r {solver_directory} {smac_solver_path_i}"
-        os.system(cmd)
 
 
 def remove_validation_directories_execution_or_output(solver_name: str,
@@ -443,138 +315,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
             os.system(cmd)
 
 
-def create_smac_configure_sbatch_script(solver_name: str,
-                                        instance_set_name: str) -> Path:
-    """Generate a Slurm batch script for algorithm configuration with SMAC.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set
-
-    Returns:
-        Path to the sbatch script
-    """
-    execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
-    smac_file_scenario_name = Path(f"{solver_name}_{instance_set_name}_scenario.txt")
-    _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
-
-    # Remove possible old results for this scenario
-    result_part = Path("results", f"{solver_name}_{instance_set_name}")
-    result_dir = sgh.smac_dir / result_part
-    [path.unlink() for path in result_dir.glob("*") if path.is_file()]
-
-    scenario_file = execdir / smac_file_scenario_name
-
-    sbatch_script_path = Path(f"{smac_file_scenario_name}_"
-                              f"{num_of_smac_run}_exp_sbatch.sh")
-
-    generate_configuration_sbatch_script(sbatch_script_path, scenario_file, result_part,
-                                         num_of_smac_run, num_of_smac_run_in_parallel,
-                                         execdir)
-
-    return sbatch_script_path
-
-
-def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file: Path,
-                                         result_directory: Path, num_job_total: int,
-                                         num_job_in_parallel: int,
-                                         smac_execdir: Path) -> None:
-    """Generate a Slurm batch script for algorithm configuration.
-
-    Args:
-        sbatch_script_path: Filepath for sbatch script
-        scenario_file: Filepath for the scenario file
-        result_directory: Directory for configuration results
-        num_job_total: Total number of slurm jobs
-        num_job_in_parallel: Maximum number of parallel jobs
-        smac_execdir: Scenario directory
-    """
-    sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
-    num_job_in_parallel = max(num_job_in_parallel, num_job_total)
-
-    output_log_path = Path(sgh.smac_dir, "tmp", f"{sbatch_script_path}.txt")
-    error_log_path = Path(sgh.smac_dir, "tmp", f"{sbatch_script_path}.err")
-
-    # Remove possible old output
-    output_log_path.unlink(missing_ok=True)
-    error_log_path.unlink(missing_ok=True)
-
-    # Log output paths
-    sl.add_output(str(output_log_path),
-                  "Output log of batch script for parallel configuration runs with SMAC")
-    sl.add_output(str(error_log_path),
-                  "Error log of batch script for parallel configuration runs with SMAC")
-
-    (sgh.smac_dir / result_directory).mkdir(parents=True, exist_ok=True)
-    Path(sgh.smac_dir, "tmp").mkdir(parents=True, exist_ok=True)
-
-    fout = Path(f"{sgh.smac_dir}{sbatch_script_path}").open("w+")
-    fout.write("#!/bin/bash\n")
-    fout.write("###\n")
-    fout.write(f"#SBATCH --job-name={sbatch_script_path}\n")
-    fout.write(f"#SBATCH --output=tmp/{sbatch_script_path}.txt\n")
-    fout.write(f"#SBATCH --error=tmp/{sbatch_script_path}.err\n")
-    fout.write("###\n")
-    fout.write("###\n")
-    fout.write(f"#SBATCH --array=0-{num_job_total}%{num_job_in_parallel}\n")
-    fout.write("###\n")
-    # Options from the slurm/sbatch settings file
-    for i in sbatch_options_list:
-        fout.write(f"#SBATCH {i}\n")
-    fout.write("###\n")
-
-    fout.write("params=( \\\n")
-
-    sl.add_output(
-        f"{sgh.smac_dir}{result_directory}/{sbatch_script_path}_seed_N_smac.txt",
-        f"Configuration log for SMAC run 1 < N <= {num_job_total}")
-
-    for i in range(0, num_job_total):
-        seed = i + 1
-        result_path = f"{result_directory}/{sbatch_script_path}_seed_{seed}_smac.txt"
-        smac_execdir_i = smac_execdir / str(seed)
-        sl.add_output(sgh.smac_dir + result_path,
-                      f"Configuration log for SMAC run {num_job_total}")
-
-        fout.write(f"'{scenario_file} {seed} {result_path} {smac_execdir_i}' \\\n")
-
-    fout.write(")\n")
-
-    cmd_srun_prefix = "srun -N1 -n1 "
-    cmd_srun_prefix += ssh.get_slurm_srun_user_options_str()
-    cmd_smac_prefix = "./each_smac_run_core.sh "
-
-    cmd = f"{cmd_srun_prefix} {cmd_smac_prefix} " + "${params[$SLURM_ARRAY_TASK_ID]}"
-    fout.write(cmd + "\n")
-    fout.close()
-
-
-def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) -> str:
-    """Submit a Slurm batch script for algorithm configuration with SMAC.
-
-    Args:
-        smac_configure_sbatch_script_name: Name of the script to execute
-
-    Returns:
-        String containing the slurm job ID
-    """
-    ori_path = Path.cwd()
-    command_line = (f"cd {sgh.smac_dir} ; sbatch {smac_configure_sbatch_script_name} ; "
-                    f"cd {ori_path}")
-
-    output_list = os.popen(command_line).readlines()
-
-    if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-        jobid = output_list[0].strip().split()[-1]
-        # Add job to active job CSV
-        sjh.write_active_job(jobid, CommandName.CONFIGURE_SOLVER)
-    else:
-        jobid = ""
-
-    return jobid
-
-
-def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
+def check_configuration_exists(solver_name: str, instance_set_name: str) -> None:
     """Check if the results directory for the solver and instance set combination exists.
 
     NOTE: This function assumes SMAC output
@@ -607,8 +348,9 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
     """
     file_name = Path(instance_set_name + "_train.txt")
     instance_list_file_path = Path(PurePath(Path(sgh.smac_dir)
-                                   / Path("example_scenarios")
-                                   / Path(solver_name + "_" + instance_set_name)
+                                   / Path("scenarios")
+                                   / Path("instances")
+                                   / Path(instance_set_name)
                                    / file_name))
 
     all_good = instance_list_file_path.is_file()
