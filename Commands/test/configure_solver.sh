@@ -37,8 +37,14 @@ Commands/initialise.py > /dev/null
 Commands/add_instances.py $instances_src_path > /dev/null
 Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
+# Set up output conditions
+output_true="Running configuration finished!"
+if [[ $slurm_available =~ "${slurm_true}" ]];
+then
+	output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+fi
+
 # Configure solver
-output_true="Running configuration in parallel. Waiting for"
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];

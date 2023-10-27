@@ -214,7 +214,7 @@ if __name__ == "__main__":
     configurator = Configurator(configurator_path)
 
     configurator.create_sbatch_script(config_scenario)
-    configure_jobid = configurator.configure()
+    configure_jobid = configurator.configure(run_on=run_on)
 
     # Update latest scenario
     sgh.latest_scenario.set_config_solver(solver.directory)
@@ -231,13 +231,13 @@ if __name__ == "__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = ssh.generate_validation_callback_script(
+        validate_jobid = ssh.run_validation_callback(
             solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = ssh.generate_ablation_callback_script(
+        ablation_jobid = ssh.run_ablation_callback(
             solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(ablation_jobid)
