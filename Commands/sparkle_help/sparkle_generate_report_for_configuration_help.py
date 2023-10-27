@@ -38,7 +38,15 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
     else:
         instance_dir = f"{sgh.smac_dir}/scenarios/instances/{instance_set_name}/"
         list_instance = sfh.get_list_all_filename(instance_dir)
-        str_value = str(len(list_instance))
+
+        # If there is only an instance file and not the actual instances in the directory,
+        # count number of lines in instance file
+        if f"{instance_set_name}_train.txt" in os.listdir(instance_dir):
+            str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}_train.txt").open("r")))
+        elif f"{instance_set_name}_test.txt" in os.listdir(instance_dir):
+            str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}_test.txt").open("r")))
+        else:
+            str_value = str(len(list_instance))
 
     return str_value
 
