@@ -15,8 +15,10 @@ class PerformanceMeasure(Enum):
 
     RUNTIME = 0
     QUALITY_ABSOLUTE = 1
-    QUALITY_ABSOLUTE_MAXIMISATION = 1
-    QUALITY_ABSOLUTE_MINIMISATION = 2
+    QUALITY = 1
+    QUALITY_ABSOLUTE_MINIMISATION = 1
+    QUALITY_ABSOLUTE_MAXIMISATION = 2
+
 
     @staticmethod
     def from_str(performance_measure: str) -> PerformanceMeasure:
