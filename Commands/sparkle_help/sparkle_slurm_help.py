@@ -238,7 +238,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
       A list of batch options for Slurm.
     """
     if smac:
-        tmp_dir = sgh.smac_dir + "tmp/"
+        tmp_dir = "tmp/"
     else:
         tmp_dir = "Tmp/"
 
@@ -299,7 +299,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
     sbatch_options_list = get_sbatch_options_list(Path(sbatch_script_path), num_jobs,
                                                   job)
 
-    scenario_dir = "example_scenarios/" + solver_name + "_" + instance_set_train_name
+    scenario_dir = "scenarios/" + solver_name + "_" + instance_set_train_name
 
     # Train default
     default = True
@@ -490,25 +490,26 @@ def submit_sbatch_script(sbatch_script_name: str,
       String job identifier or empty string if the job was not submitted
       successfully. Defaults to the SMAC directory.
     """
-    if execution_dir is None:
-        execution_dir = sgh.smac_dir
+    command_chmod = ["chmod", "a+x", sbatch_script_name]
+    subprocess.run(command_chmod, cwd=execution_dir)
 
-    sbatch_script_path = sbatch_script_name
-    ori_path = Path.cwd()
-    os.system(f"cd {execution_dir} ; chmod a+x {sbatch_script_path} ; cd {ori_path}")
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
-    command = f"cd {execution_dir} ; unset SLURM_CPU_BIND;" \
-              f"sbatch {sbatch_script_path} ; cd {ori_path}"
+    command_bugfix = ["unset", "SLURM_CPU_BIND"]
+    subprocess.run(command_bugfix, cwd=execution_dir, shell=True)  # noqa: S602
 
-    output_list = os.popen(command).readlines()
+    command = ["sbatch", sbatch_script_name]
+    output = subprocess.run(command, cwd=execution_dir, capture_output=True, text=True)
 
-    jobid = ""
-    if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-        jobid = output_list[0].strip().split()[-1]
-        # Add job to active job CSV
-        sjh.write_active_job(jobid, command_name)
+    if output.stderr != "":
+        print("An error occurred during the script submission:")
+        print(output.stderr)
+        print("Depending on the error, the configurator might still run.")
 
-    return jobid
+    # Get last token of the output ("Submitted batch job XXXXX") for job id
+    job_id = output.stdout.split()[-1]
+    sjh.write_active_job(job_id, command_name)
+
+    return job_id
 
 
 def generate_validation_callback_slurm_script(solver: Path,
