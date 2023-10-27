@@ -36,9 +36,19 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
         str_value = str(instance_count)
     # For single-file instances just count the number of instance files
     else:
-        instance_dir = f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_name}/"
+        instance_dir = f"{sgh.smac_dir}/scenarios/instances/{instance_set_name}/"
         list_instance = sfh.get_list_all_filename(instance_dir)
-        str_value = str(len(list_instance))
+
+        # If there is only an instance file and not the actual instances in the
+        # directory, count number of lines in instance file
+        if f"{instance_set_name}_train.txt" in list_instance:
+            str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}"
+                                                "_train.txt").open("r")))
+        elif f"{instance_set_name}_test.txt" in list_instance:
+            str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}"
+                                                "_test.txt").open("r")))
+        else:
+            str_value = str(len(list_instance))
 
     return str_value
 
@@ -359,7 +369,7 @@ def get_figure_configured_vs_default_on_test_instance_set(
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
                               f"_test_configured/{configured_results_file}")
     default_results_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
@@ -401,7 +411,7 @@ def get_figure_configured_vs_default_on_train_instance_set(
                                f"{optimised_configuration_seed}-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{instance_set_train_name}_scenario/"
                               f"{configured_results_file}")
@@ -433,7 +443,7 @@ def get_timeouts_test(solver_name: str, instance_set_train_name: str,
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
                               f"_test_configured/{configured_results_file}")
     default_results_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
@@ -466,7 +476,7 @@ def get_timeouts_train(solver_name: str, instance_set_name: str,
                                f"{optimised_configuration_seed}-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_name}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_name}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{instance_set_name}_scenario/"
                               f"{configured_results_file}")
@@ -697,7 +707,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     common_dict[variable] = str(optimised_configuration_str)
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
 
     variable = "optimisedConfigurationTrainingPerformancePAR"
     (optimised_configuration_str, optimised_configuration_performance_par,
@@ -784,7 +794,7 @@ def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: s
      num_of_smac_run_in_parallel_str) = scsh.get_smac_settings()
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
 
     variable = "optimisedConfigurationTestingPerformancePAR"
     configured_results_test_file = (
@@ -848,7 +858,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
 
     # Check train instance dir exists
     instance_train_dir = (
-        f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_train_name}/")
+        f"{sgh.smac_dir}/scenarios/instances/{instance_set_train_name}/")
 
     if not Path(instance_train_dir).exists():
         all_good = False
@@ -857,7 +867,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
 
     # Check train results exist: configured+default
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set_train_name}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
     configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                                     f"{solver_name}_{instance_set_train_name}_scenario/")
     default_results_train_dir = smac_solver_dir + "outdir_train_default/"
@@ -874,14 +884,14 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
     if instance_set_test_name is not None:
         # Check test instance dir exists
         instance_test_dir = (
-            f"{sgh.smac_dir}/example_scenarios/instances/{instance_set_test_name}/")
+            f"{sgh.smac_dir}/scenarios/instances/{instance_set_test_name}/")
         if not Path(instance_test_dir).exists():
             all_good = False
             err_str += (" testing set not found in configuration directory "
                         f"{instance_test_dir};")
 
         # Check test results exist: configured+default
-        smac_solver_dir = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
+        smac_solver_dir = (f"{sgh.smac_dir}/scenarios/{solver_name}_"
                            f"{instance_set_train_name}/")
         configured_results_test_dir = (
             smac_solver_dir + "outdir_" + instance_set_test_name + "_test_configured/")
@@ -922,7 +932,7 @@ def get_most_recent_test_run(solver_name: str) -> tuple[str, str, bool, bool]:
     flag_instance_set_test = False
 
     # Read most recent run from file
-    last_test_file_path = (f"{sgh.smac_dir}/example_scenarios/{solver_name}_"
+    last_test_file_path = (f"{sgh.smac_dir}/scenarios/{solver_name}_"
                            f"{sgh.sparkle_last_test_file_name}")
     try:
         fin = Path(last_test_file_path).open("r")
