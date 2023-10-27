@@ -45,6 +45,11 @@ def parser_function() -> argparse.ArgumentParser:
         help="path to testing instance set",
     )
     parser.add_argument(
+        "--configurator",
+        type=Path,
+        help="path to configurator"
+    )
+    parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
@@ -87,6 +92,10 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+    if args.configurator is not None:
+        configurator_path = Path(args.configurator)
+    else:
+        configurator_path = Path("Components", "smac-v2.10.03-master-778")
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
@@ -122,7 +131,7 @@ if __name__ == "__main__":
         instances_directory_test = Path("Instances/", instance_set_test_name)
         list_path = sih.get_list_all_path(instances_directory_test)
         inst_dir_prefix = instances_directory_test
-        smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
+        smac_inst_dir_prefix = Path(configurator_path, "scenarios/instances",
                                     instance_set_test_name)
         sih.copy_instances_to_smac(
             list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
@@ -142,13 +151,12 @@ if __name__ == "__main__":
     sbatch_script_name = ssh.generate_sbatch_script_for_validation(
         solver.name, instance_set_train.name, instance_set_test_name
     )
-    sbatch_script_dir = sgh.smac_dir
-    sbatch_script_path = sbatch_script_dir + sbatch_script_name
+    sbatch_script_path = configurator_path / sbatch_script_name
 
     validate_jobid = ssh.submit_sbatch_script(
         sbatch_script_name,
         CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-        sbatch_script_dir,
+        configurator_path,
     )
 
     print(f"Running validation in parallel. Waiting for Slurm job with id: "
@@ -156,8 +164,8 @@ if __name__ == "__main__":
 
     # Write most recent run to file
     last_test_file_path = Path(
-        sgh.smac_dir,
-        "example_scenarios",
+        configurator_path,
+        "scenarios",
         f"{solver.name}_{sgh.sparkle_last_test_file_name}"
     )
 
