@@ -67,7 +67,6 @@ class Configurator:
         Returns:
             ID of the submitted job.
         """
-
         if run_on == Runner.SLURM:
             return ssh.submit_sbatch_script(self.sbatch_filename,
                                             CommandName.CONFIGURE_SOLVER,
@@ -77,7 +76,7 @@ class Configurator:
             # Remove when RunRunner works satisfactorily
             if run_on == Runner.SLURM_RR:
                 run_on = Runner.SLURM
-            
+
             # code to run through run runner
             sbatch_script_path = self.configurator_path / self.sbatch_filename
             batch = SlurmBatch(sbatch_script_path)
@@ -88,7 +87,7 @@ class Configurator:
                 base_dir="Tmp",
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
-            
+
             if run_on == Runner.SLURM:
                 jobid = run.run_id
             elif run_on == Runner.LOCAL:
@@ -99,7 +98,6 @@ class Configurator:
                 run_on = Runner.SLURM_RR
 
             return jobid
-
 
     def _get_sbatch_options(self: Configurator) -> str:
         """Get sbatch options.
