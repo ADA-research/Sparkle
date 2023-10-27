@@ -41,10 +41,10 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
 
         # If there is only an instance file and not the actual instances in the
         # directory, count number of lines in instance file
-        if f"{instance_set_name}_train.txt" in os.listdir(instance_dir):
+        if f"{instance_set_name}_train.txt" in list_instance:
             str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}"
                                                 "_train.txt").open("r")))
-        elif f"{instance_set_name}_test.txt" in os.listdir(instance_dir):
+        elif f"{instance_set_name}_test.txt" in list_instance:
             str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}"
                                                 "_test.txt").open("r")))
         else:
