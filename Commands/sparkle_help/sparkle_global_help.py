@@ -16,7 +16,7 @@ def get_seed() -> int:
 
 latest_scenario = None
 
-sparkle_version = about.about_info["version"]
+sparkle_version = str(about.about_info["version"])
 
 sparkle_maximum_int = 2147483647
 sparkle_missing_value = -(sparkle_maximum_int - 1)
