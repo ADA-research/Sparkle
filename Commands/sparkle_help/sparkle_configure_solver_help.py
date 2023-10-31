@@ -788,14 +788,13 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
 
     # Compare results of each run on the training set to find the best configuration
     # among them
+    
     for file_result_name in list_file_result_name:
         file_result_path = conf_results_dir + file_result_name
-        fin = Path(file_result_path).open("r+")
+        fin = Path(file_result_path).open("r+", errors='ignore')
 
-        while True:
-            myline = fin.readline()
-            if not myline:
-                break
+        myline = fin.readline()
+        while myline:
             myline = myline.strip()
 
             if myline.find(key_str_1) == 0:
@@ -834,7 +833,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     myline_3 = fin.readline()
                     mylist_3 = myline_3.strip().split()
                     optimised_configuration_seed = mylist_3[4]
-
+            myline = fin.readline()
         fin.close()
 
     return (optimised_configuration_str, optimised_configuration_performance,
