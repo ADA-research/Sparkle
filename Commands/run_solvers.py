@@ -158,22 +158,22 @@ def run_solvers_on_instances(
             cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
             name="sprkl_csv_merge",
             dependencies=runs[-1],
-            base_dir="Tmp"))
+            base_dir=sgh.sparkle_tmp_path))
 
         if also_construct_selector_and_report:
             runs.append(rrr.add_to_queue(
                 runner=run_on,
                 cmd="Commands/construct_sparkle_portfolio_selector.py",
-                name="sprkl_portfolio_selector",
+                name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
                 dependencies=runs[-1],
-                base_dir="Tmp"))
+                base_dir=sgh.sparkle_tmp_path))
 
             runs.append(rrr.add_to_queue(
                 runner=run_on,
                 cmd="Commands/generate_report.py",
-                name="sprkl_report",
+                name=CommandName.GENERATE_REPORT,
                 dependencies=runs[-1],
-                base_dir="Tmp"))
+                base_dir=sgh.sparkle_tmp_path))
 
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:

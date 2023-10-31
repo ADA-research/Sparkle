@@ -84,7 +84,8 @@ class Configurator:
                 runner=run_on,
                 cmd=batch.cmd,
                 name=CommandName.CONFIGURE_SOLVER,
-                base_dir="Tmp",
+                base_dir=sgh.sparkle_tmp_path,
+                path=sgh.smac_dir,
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
 
