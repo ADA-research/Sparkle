@@ -788,10 +788,9 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
 
     # Compare results of each run on the training set to find the best configuration
     # among them
-    
     for file_result_name in list_file_result_name:
         file_result_path = conf_results_dir + file_result_name
-        fin = Path(file_result_path).open("r+", errors='ignore')
+        fin = Path(file_result_path).open("r+", errors="ignore")
 
         myline = fin.readline()
         while myline:
