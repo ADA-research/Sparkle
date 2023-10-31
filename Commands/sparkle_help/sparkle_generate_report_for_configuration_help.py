@@ -315,7 +315,7 @@ def get_figure_configure_vs_default(configured_results_dir: str,
         A string containing the latex command to include the figure
     """
     latex_directory_path = (
-        configuration_reports_directory + "Sparkle-latex-generator-for-configuration/")
+        configuration_reports_directory)
     points = get_data_for_plot(configured_results_dir, default_results_dir,
                                smac_each_run_cutoff_time)
 
@@ -1031,13 +1031,14 @@ def generate_report_for_configuration_common(configuration_reports_directory: st
         dict_variable_to_value: Dictionary containing values for LaTeX
     """
     latex_directory_path = Path(
-        f"{configuration_reports_directory}Sparkle-latex-generator-for-configuration/")
+        f"{configuration_reports_directory}")
     latex_template_filename = "template-Sparkle-for-configuration.tex"
     latex_report_filename = Path("Sparkle_Report_for_Configuration")
 
     # Read in the report template from file
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
     report_content = ""
+
     fin = Path(latex_template_filepath).open("r")
 
     while True:
