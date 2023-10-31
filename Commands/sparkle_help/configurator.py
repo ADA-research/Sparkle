@@ -80,7 +80,7 @@ class Configurator:
             # code to run through run runner
             sbatch_script_path = self.configurator_path / self.sbatch_filename
             batch = SlurmBatch(sbatch_script_path)
-            cmd = batch.cmd + ' ' + ' '.join(batch.cmd_params)
+            cmd = batch.cmd + " " + " ".join(batch.cmd_params)
             run = rrr.add_to_queue(
                 runner=run_on,
                 cmd=cmd,
