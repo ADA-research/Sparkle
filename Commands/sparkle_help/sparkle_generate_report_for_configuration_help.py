@@ -863,7 +863,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
     if not Path(instance_train_dir).exists():
         all_good = False
         err_str += (" training set not found in configuration directory "
-                    f"{instance_train_dir};")
+                    f"{instance_train_dir};\n")
 
     # Check train results exist: configured+default
     smac_solver_dir = (
@@ -874,11 +874,11 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
 
     if not Path(configured_results_train_dir).exists():
         err_str += (" configured parameter results on the training set not found in "
-                    f"{configured_results_train_dir};")
+                    f"{configured_results_train_dir};\n")
         all_good = False
     if not Path(default_results_train_dir).exists():
         err_str += (" default parameter results on the training set not found in "
-                    f"{default_results_train_dir};")
+                    f"{default_results_train_dir};\n")
         all_good = False
 
     if instance_set_test_name is not None:
@@ -888,7 +888,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
         if not Path(instance_test_dir).exists():
             all_good = False
             err_str += (" testing set not found in configuration directory "
-                        f"{instance_test_dir};")
+                        f"{instance_test_dir};\n")
 
         # Check test results exist: configured+default
         smac_solver_dir = (f"{sgh.smac_dir}/scenarios/{solver_name}_"
@@ -900,11 +900,11 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
 
         if not Path(configured_results_test_dir).exists():
             err_str += (" configured parameter results on the testing set not found in "
-                        f"{configured_results_test_dir};")
+                        f"{configured_results_test_dir};\n")
             all_good = False
         if not Path(default_results_test_dir).exists():
             err_str += (" default parameter results on the testing set not found in "
-                        f"{default_results_test_dir};")
+                        f"{default_results_test_dir};\n")
             all_good = False
 
     if not all_good:
