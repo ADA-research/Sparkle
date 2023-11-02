@@ -182,7 +182,7 @@ if __name__ == "__main__":
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name=CommandName.RUN_ABLATION,
+            name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
             path=configurator_path,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
