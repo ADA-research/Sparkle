@@ -584,7 +584,8 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
 
     if not all_good:
         print("ERROR: Instance list file not found, make sure configuration was "
-              "completed correctly for this solver and instance set combination.")
+              "completed correctly for this solver and instance set combination.\n"
+              f"Missing file:\n{instance_list_file_path}\n")
         sys.exit(-1)
 
 
