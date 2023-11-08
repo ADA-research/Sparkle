@@ -178,10 +178,10 @@ if __name__ == "__main__":
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
         batch = SlurmBatch(sbatch_script_path)
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        cmd = batch.cmd + " " + " ".join(batch.cmd_params)
         run = rrr.add_to_queue(
             runner=run_on,
-            cmd=cmd_list,
+            cmd=cmd,
             name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
             path=configurator_path,
             sbatch_options=batch.sbatch_options,

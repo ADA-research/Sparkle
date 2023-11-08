@@ -393,7 +393,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
     sbatch_options_list.extend(get_slurm_sbatch_user_options_list())
 
     # Set srun options
-    srun_options_str = "--nodes=1 --ntasks=1 --cpus-per-task " + str(n_cpus)
+    srun_options_str = "--nodes=1 --ntasks=1 --cpus-per-task=" + str(n_cpus)
     srun_options_str = srun_options_str + " " + get_slurm_srun_user_options_str()
 
     result, msg = check_slurm_option_compatibility(srun_options_str)
