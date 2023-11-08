@@ -867,7 +867,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
 
     # Check train results exist: configured+default
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
+        f"{sgh.smac_dir}scenarios/{solver_name}_{instance_set_train_name}/")
     configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                                     f"{solver_name}_{instance_set_train_name}_scenario/")
     default_results_train_dir = smac_solver_dir + "outdir_train_default/"
@@ -884,14 +884,14 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
     if instance_set_test_name is not None:
         # Check test instance dir exists
         instance_test_dir = (
-            f"{sgh.smac_dir}/scenarios/instances/{instance_set_test_name}/")
+            f"{sgh.smac_dir}scenarios/instances/{instance_set_test_name}/")
         if not Path(instance_test_dir).exists():
             all_good = False
             err_str += (" testing set not found in configuration directory "
                         f"{instance_test_dir};\n")
 
         # Check test results exist: configured+default
-        smac_solver_dir = (f"{sgh.smac_dir}/scenarios/{solver_name}_"
+        smac_solver_dir = (f"{sgh.smac_dir}scenarios/{solver_name}_"
                            f"{instance_set_train_name}/")
         configured_results_test_dir = (
             smac_solver_dir + "outdir_" + instance_set_test_name + "_test_configured/")
