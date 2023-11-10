@@ -52,3 +52,5 @@ class SlurmBatch:
 
         self.srun_options = srun_args.split()
         self.cmd = cmd.replace("${params[$SLURM_ARRAY_TASK_ID]}", "").strip()
+        self.cmd = self.cmd.replace("${output[$SLURM_ARRAY_TASK_ID]}", "").strip()
+        self.cmd = self.cmd.replace(">", "").strip()

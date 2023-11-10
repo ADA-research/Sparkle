@@ -178,7 +178,14 @@ if __name__ == "__main__":
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
         batch = SlurmBatch(sbatch_script_path)
-        cmd = batch.cmd + " " + " ".join(batch.cmd_params)
+        n_jobs = int(len(batch.cmd_params) / 2)
+        cmd = []
+        for i in range(n_jobs):
+            # TODO:
+            # The second half of the params contain the destination files for bash output
+            # This should be given to runrunner as pipe dest
+            cmd.append(batch.cmd + " " + batch.cmd_params[i])
+
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
