@@ -53,7 +53,11 @@ mv $smac_results_path $smac_results_path_tmp &> /dev/null # Save user results
 
 # Configure solver
 output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation --run-on $slurm_available | tail -1)
-output_true="Running configuration "
+output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+if ! [[ $slurm_available =~ "${slurm_true}" ]];
+then
+	output_true="Running configuration finished!"
+fi
 
 if [[ $output =~ "${output_true}" ]];
 then
