@@ -754,8 +754,11 @@ def run_parallel_portfolio(instances: list[str],
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
 
-            if run_on == Runner.SLURM:
+            # Remove SLURM_RR once runrunner works satisfactorily
+            if run_on == Runner.SLURM or run_on == Runner.SLURM_RR:
                 job_id = run.run_id
+            elif run_on == Runner.LOCAL:
+                run.wait()
 
             # Remove the below if block once runrunner works satisfactorily
             if run_on == Runner.SLURM_RR:
