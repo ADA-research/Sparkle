@@ -782,7 +782,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
 
-    conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"    
+    conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"
     list_file_result_name = os.listdir(conf_results_dir)
     key_str_1 = "Estimated mean quality of final incumbent config"
 
