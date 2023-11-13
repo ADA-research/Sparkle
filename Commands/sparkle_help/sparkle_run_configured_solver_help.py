@@ -131,8 +131,8 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
             run_on = Runner.SLURM
 
         batch = SlurmBatch(sbatch_script_path)
-        cmd_list = [batch.cmd + " " + p for p in batch.cmd_params]
-        rrr.add_to_queue(
+        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
             name=cmd_name,
@@ -140,7 +140,10 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
 
-        print(f"Configured solver added to {run_on} queue.")
+        if run_on == Runner.LOCAL:
+            run.wait()
+        else:
+            print(f"Configured solver added to {run_on} queue.")
 
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
