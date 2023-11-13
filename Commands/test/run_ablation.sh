@@ -42,7 +42,7 @@ solver_src_path="${examples_path}${solver_path}"
 configuration_results_path="Commands/test/test_files/results"
 smac_path="Components/smac-v2.10.03-master-778/"
 smac_results_path="${smac_path}results/"
-smac_results_path_tmp="${smac_path}results_tmp/"
+smac_results_path_tmp="${smac_path}results/"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py $instances_src_path_train > /dev/null

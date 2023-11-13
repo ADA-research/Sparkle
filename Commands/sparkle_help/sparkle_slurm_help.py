@@ -536,9 +536,9 @@ def run_validation_callback(solver: Path,
     command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
     command_line += ("./Commands/validate_configured_vs_default.py "
                      "--settings-file Settings/latest.ini")
-    command_line += f" --solver {solver}"
+    command_line += f" --solver {solver.name}"
     command_line += f" --instance-set-train {instance_set_train}"
-    command_line += f" --run_on {run_on}"
+    command_line += f" --run-on {run_on}"
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
@@ -600,9 +600,9 @@ def run_ablation_callback(solver: Path,
     command_line = "echo $(pwd) $(date)\n"
     command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
     command_line += "./Commands/run_ablation.py --settings-file Settings/latest.ini"
-    command_line += f" --solver {solver}"
+    command_line += f" --solver {solver.name}"
     command_line += f" --instance-set-train {instance_set_train}"
-    command_line += f" --run_on {run_on}"
+    command_line += f" --run-on {run_on}"
 
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
