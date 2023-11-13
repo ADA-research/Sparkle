@@ -47,7 +47,6 @@ cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
 sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
 
-
 # Instance and solver paths
 instances_path_test="Examples/Resources/Instances/PTN2"
 instance_path_test="Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf"
