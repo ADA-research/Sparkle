@@ -160,7 +160,6 @@ if __name__ == "__main__":
     else:
         instance_set_test = instance_set_train
         instance_set_test_name = instance_set_train_name
-    # print(solver_name, instance_set_train_name, instance_set_test_name)
 
     if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
         print("Error: No configuration results found for the given solver and training"
@@ -213,7 +212,7 @@ if __name__ == "__main__":
         print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
     else:
-        sah.submit_ablation_runrunner(
+        ids = sah.submit_ablation_runrunner(
             solver_name=solver_name,
             instance_set_test=instance_set_test,
             instance_set_train_name=instance_set_train_name,
@@ -221,4 +220,9 @@ if __name__ == "__main__":
             ablation_scenario_dir=ablation_scenario_dir,
             run_on=run_on)
 
-        print("Ablation analysis finished!")
+        if run_on == Runner.LOCAL:
+            print("Ablation analysis finished!")
+        else:
+            job_id_str = ",".join(ids)
+            print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+                  f"{job_id_str}")
