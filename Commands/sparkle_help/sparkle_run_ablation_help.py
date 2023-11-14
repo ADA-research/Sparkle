@@ -222,7 +222,7 @@ def generate_validation_callback_slurm_script(solver_name: str, instance_train_n
     os.system(f"chmod 755 {sgh.ablation_dir + callback_script_path}")
 
     srun_options_str = "-N1 -n1 -c1"
-    target_call_str = callback_script_name
+    target_call_str = "./" + callback_script_name
 
     job_params_list = []
     ssh.generate_sbatch_script_generic(f"{sgh.ablation_dir}{sbatch_script_path}",
