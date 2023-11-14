@@ -380,7 +380,7 @@ def submit_ablation_sparkle(solver_name: str,
                             instance_set_test: str,
                             instance_set_train_name: str,
                             instance_set_test_name: str,
-                            ablation_scenario_dir: str) -> [str]:
+                            ablation_scenario_dir: str) -> list[str]:
     """Sends an ablation to Slurm using Sparkle's internal mechanics.
 
     Args:
@@ -452,7 +452,7 @@ def submit_ablation_runrunner(solver_name: str,
                               instance_set_train_name: str,
                               instance_set_test_name: str,
                               ablation_scenario_dir: str,
-                              run_on: Runner = Runner.SLURM) -> [str]:
+                              run_on: Runner = Runner.SLURM) -> list[str]:
     """Sends an ablation to the RunRunner queue.
 
     Args:
