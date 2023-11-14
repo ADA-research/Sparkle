@@ -37,7 +37,7 @@ solver_src_path="${examples_path}${solver_path}"
 configuration_results_path="Commands/test/test_files/results"
 configuration_files_path="Commands/test/test_files/PbO-CCSAT-Generic_PTN/PTN_train.txt"
 smac_path="Components/smac-v2.10.03-master-778/"
-smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic/"
+smac_configuration_files_path="$smac_path/scenarios/instances/PTN/"
 
 Commands/initialise.py > /dev/null
 Commands/add_instances.py $instances_src_path_train > /dev/null
