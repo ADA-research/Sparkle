@@ -464,7 +464,7 @@ def submit_ablation_runrunner(solver_name: str,
         run_on: Determines to which RunRunner queue the job is added
 
     Returns:
-        None
+        A (potential empty) list of job id strings 
     """
     # 1. submit the ablation to the runrunner queue
     # Remove the below if block once runrunner works satisfactorily
