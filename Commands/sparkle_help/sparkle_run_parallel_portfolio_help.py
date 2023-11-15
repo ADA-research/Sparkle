@@ -847,9 +847,7 @@ def run_parallel_portfolio(instances: list[str],
             else:
                 print(f"{str(instances)} was not solved in the given cutoff-time.")
     except Exception as except_msg:
-        import time
-        time.sleep(8.0)
-        print(except_msg)
-        sys.exit(-1)
+        sjh.sleep(8)
+        print(f"Exception thrown during {command_name} call: {except_msg}")
         return False
     return True
