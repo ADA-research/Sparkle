@@ -708,6 +708,7 @@ def run_parallel_portfolio(instances: list[str],
     Args:
         instances: List of instance names.
         portfolio_path: Path to the parallel portfolio.
+        run_on: RunRunner argument to determine Local or Slurm.
 
     Returns:
         True if successful; False otherwise.
@@ -847,7 +848,6 @@ def run_parallel_portfolio(instances: list[str],
             else:
                 print(f"{str(instances)} was not solved in the given cutoff-time.")
     except Exception as except_msg:
-        sjh.sleep(8)
         print(f"Exception thrown during {command_name} call: {except_msg}")
         return False
     return True
