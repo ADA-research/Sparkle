@@ -140,8 +140,8 @@ def running_solvers_parallel(
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name="run_solvers",
-            base_dir="Tmp",
+            name=CommandName.RUN_SOLVERS,
+            base_dir=sgh.sparkle_tmp_path,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
 
