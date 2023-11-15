@@ -10,14 +10,14 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
-from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
+
+from runrunner.base import Runner
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -33,63 +33,69 @@ def parser_function() -> argparse.ArgumentParser:
         "--instance-set-train",
         required=False,
         type=str,
-        help="path to training instance set",
+        help="Path to training instance set",
     )
     parser.add_argument(
         "--instance-set-test",
         required=False,
         type=str,
-        help="path to testing instance set",
+        help="Path to testing instance set",
     )
     parser.add_argument(
         "--ablation-settings-help",
         required=False,
         dest="ablation_settings_help",
         action="store_true",
-        help="prints a list of setting that can be used for the ablation analysis",
+        help="Prints a list of setting that can be used for the ablation analysis",
     )
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
         action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
+        help="The performance measure, e.g. runtime",
     )
     parser.add_argument(
         "--target-cutoff-time",
         type=int,
         default=sgh.settings.DEFAULT_general_target_cutoff_time,
         action=ac.SetByUser,
-        help="cutoff time per target algorithm run in seconds",
+        help="Cutoff time per target algorithm run in seconds",
     )
     parser.add_argument(
         "--budget-per-run",
         type=int,
         default=sgh.settings.DEFAULT_config_budget_per_run,
         action=ac.SetByUser,
-        help="configuration budget per configurator run in seconds",
+        help="Configuration budget per configurator run in seconds",
     )
     parser.add_argument(
         "--number-of-runs",
         type=int,
         default=sgh.settings.DEFAULT_config_number_of_runs,
         action=ac.SetByUser,
-        help="number of configuration runs to execute",
+        help="Number of configuration runs to execute",
     )
     parser.add_argument(
         "--racing",
         type=bool,
         default=sgh.settings.DEFAULT_ablation_racing,
         action=ac.SetByUser,
-        help="performs abaltion analysis with racing",
+        help="Performs abaltion analysis with racing",
     )
     parser.add_argument(
         "--settings-file",
         type=Path,
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than "
+        help=("Specify the settings file to use in case you want to use one other than "
               "the default"),
+    )
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm")
     )
     parser.set_defaults(ablation_settings_help=False)
     return parser
@@ -115,6 +121,7 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+    run_on = args.run_on
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.RUN_ABLATION])
@@ -153,7 +160,6 @@ if __name__ == "__main__":
     else:
         instance_set_test = instance_set_train
         instance_set_test_name = instance_set_train_name
-    # print(solver_name, instance_set_train_name, instance_set_test_name)
 
     if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
         print("Error: No configuration results found for the given solver and training"
@@ -195,57 +201,28 @@ if __name__ == "__main__":
     )
     print("Submit ablation run")
     # Submit ablation run
-    # TODO: Move to help
-    sbatch_script_path = sah.generate_slurm_script(
-        solver_name, instance_set_train_name, instance_set_test_name
-    )
-    print(f"Created {sbatch_script_path}")
+    if args.run_on == Runner.SLURM:
+        ids = sah.submit_ablation_sparkle(
+            solver_name=solver_name,
+            instance_set_test=instance_set_test,
+            instance_set_train_name=instance_set_train_name,
+            instance_set_test_name=instance_set_test_name,
+            ablation_scenario_dir=ablation_scenario_dir)
+        job_id_str = ",".join(ids)
+        print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+              f"{job_id_str}")
+    else:
+        ids = sah.submit_ablation_runrunner(
+            solver_name=solver_name,
+            instance_set_test=instance_set_test,
+            instance_set_train_name=instance_set_train_name,
+            instance_set_test_name=instance_set_test_name,
+            ablation_scenario_dir=ablation_scenario_dir,
+            run_on=run_on)
 
-    dependency_jobid_list = []
-
-    jobid = ssh.submit_sbatch_script(
-        sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
-    )
-    dependency_jobid_list.append(jobid)
-    print(f"Launched sbatch script {sbatch_script_path} with jobid {jobid}")
-
-    # Submit intermediate actions (copy path from log)
-    sbatch_script_path = sah.generate_callback_slurm_script(
-        solver_name, instance_set_train_name, instance_set_test_name, dependency=jobid
-    )
-    jobid = ssh.submit_sbatch_script(
-        sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
-    )
-    dependency_jobid_list.append(jobid)
-    print(f"Launched callback sbatch script {sbatch_script_path} with jobid {jobid}")
-
-    # Submit ablation validation run when nessesary
-    if instance_set_test is not None:
-        sbatch_script_path = sah.generate_validation_slurm_script(
-            solver_name,
-            instance_set_train_name,
-            instance_set_test_name,
-            dependency=jobid)
-        jobid = ssh.submit_sbatch_script(
-            sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir)
-        dependency_jobid_list.append(jobid)
-        print(
-            f"Launched validation sbatch script {sbatch_script_path} with jobid {jobid}")
-
-        # Submit intermediate actions (copy validation table from log)
-        sbatch_script_path = sah.generate_validation_callback_slurm_script(
-            solver_name,
-            instance_set_train_name,
-            instance_set_test_name,
-            dependency=jobid,
-        )
-        jobid = ssh.submit_sbatch_script(
-            sbatch_script_path, CommandName.RUN_ABLATION, ablation_scenario_dir
-        )
-        dependency_jobid_list.append(jobid)
-        print(f"Launched validation callback sbatch script {sbatch_script_path} with "
-              f"jobid {jobid}")
-
-    job_id_str = ",".join(dependency_jobid_list)
-    print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
-          f"{job_id_str}")
+        if run_on == Runner.LOCAL:
+            print("Ablation analysis finished!")
+        else:
+            job_id_str = ",".join(ids)
+            print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+                  f"{job_id_str}")

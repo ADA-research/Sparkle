@@ -12,6 +12,10 @@ from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
+import runrunner as rrr
+from runrunner import Runner
+from sparkle.slurm_parsing import SlurmBatch
+
 
 class Configurator:
     """Generic class to use different configurators like SMAC."""
@@ -57,15 +61,45 @@ class Configurator:
         with (self.configurator_path / self.sbatch_filename).open("w+") as sbatch_script:
             sbatch_script.write(file_content)
 
-    def configure(self: Configurator) -> int:
+    def configure(self: Configurator, run_on: Runner = Runner.SLURM) -> int:
         """Submit sbatch script.
 
         Returns:
             ID of the submitted job.
         """
-        return ssh.submit_sbatch_script(self.sbatch_filename,
-                                        CommandName.CONFIGURE_SOLVER,
-                                        self.configurator_path)
+        if run_on == Runner.SLURM:
+            return ssh.submit_sbatch_script(self.sbatch_filename,
+                                            CommandName.CONFIGURE_SOLVER,
+                                            self.configurator_path)
+        else:
+            jobid = None
+            # Remove when RunRunner works satisfactorily
+            if run_on == Runner.SLURM_RR:
+                run_on = Runner.SLURM
+
+            # code to run through run runner
+            sbatch_script_path = self.configurator_path / self.sbatch_filename
+            batch = SlurmBatch(sbatch_script_path)
+            cmd = batch.cmd + " " + " ".join(batch.cmd_params)
+            run = rrr.add_to_queue(
+                runner=run_on,
+                cmd=cmd,
+                name=CommandName.CONFIGURE_SOLVER,
+                base_dir=sgh.sparkle_tmp_path,
+                path=sgh.smac_dir,
+                sbatch_options=batch.sbatch_options,
+                srun_options=batch.srun_options)
+
+            if run_on == Runner.SLURM:
+                jobid = run.run_id
+            elif run_on == Runner.LOCAL:
+                run.wait()
+
+            # Remove when RunRunner works satisfactorily
+            if run_on == Runner.SLURM:
+                run_on = Runner.SLURM_RR
+
+            return jobid
 
     def _get_sbatch_options(self: Configurator) -> str:
         """Get sbatch options.
