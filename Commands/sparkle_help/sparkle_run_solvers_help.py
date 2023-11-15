@@ -106,19 +106,19 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         # Return to original directory
         cmd_cd_back = f"cd {original_path}"
 
-    # Finalise command
-    command_line_run_solver = (
-        f"{runsolver_path} {runsolver_option} "
-        f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
-        f"{runsolver_values_log} {raw_result_path_option} {str(solver_path)}/"
-        f"{cmd_solver_call}")
-
-    if is_configured:
+        # Finalise command
         command_line_run_solver = (
             f"{cmd_cd} ; {runsolver_path} {runsolver_option} "
             f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
             f"{runsolver_values_log} {raw_result_path_option} ./{cmd_solver_call} ; "
             f"{cmd_cd_back}")
+    else:
+        # Finalise command without extra is_configured steps
+        command_line_run_solver = (
+            f"{runsolver_path} {runsolver_option} "
+            f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
+            f"{runsolver_values_log} {raw_result_path_option} {str(solver_path)}/"
+            f"{cmd_solver_call}")
 
     # Execute command
     try:
