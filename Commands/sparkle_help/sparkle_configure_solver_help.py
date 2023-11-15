@@ -15,6 +15,14 @@ from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_instances_help as sih
 
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help.sparkle_command_help import CommandName
+
+from sparkle.slurm_parsing import SlurmBatch
+from runrunner.base import Runner
+import runrunner as rrr
+
 
 class InstanceType(Enum):
     """Enum of possible instance types."""
@@ -315,7 +323,226 @@ def prepare_smac_execution_directories_validation(solver_name: str,
             os.system(cmd)
 
 
-def check_configuration_exists(solver_name: str, instance_set_name: str) -> None:
+def create_smac_configure_sbatch_script(solver_name: str,
+                                        instance_set_name: str) -> Path:
+    """Generate a Slurm batch script for algorithm configuration with SMAC.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        Path to the sbatch script
+    """
+    execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
+    smac_file_scenario_name = Path(f"{solver_name}_{instance_set_name}_scenario.txt")
+    _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
+
+    # Remove possible old results for this scenario
+    result_part = Path("results", f"{solver_name}_{instance_set_name}")
+    result_dir = sgh.smac_dir / result_part
+    [path.unlink() for path in result_dir.glob("*") if path.is_file()]
+
+    scenario_file = execdir / smac_file_scenario_name
+
+    sbatch_script_path = Path(f"{smac_file_scenario_name}_"
+                              f"{num_of_smac_run}_exp_sbatch.sh")
+
+    generate_configuration_sbatch_script(sbatch_script_path, scenario_file, result_part,
+                                         num_of_smac_run, num_of_smac_run_in_parallel,
+                                         execdir)
+
+    return sbatch_script_path
+
+
+def run_smac_configure(solver_name: str,
+                       instance_set_name: str,
+                       run_on: Runner = Runner.LOCAL) -> str:
+    """Runs the smac configuration for a solver and instance set.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        str: The Slurm Job ID string, if relevant
+    """
+    sbatch_script_path = create_smac_configure_sbatch_script(
+        solver_name, instance_set_name
+    )
+    configure_jobid = ""
+    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
+    # runrunner works properly everything under 'if' should be removed leaving only the
+    # 'else', and the SLURM_RR replaced by just SLURM.
+    if run_on == Runner.SLURM:
+        configure_jobid = submit_smac_configure_sbatch_script(
+            sbatch_script_path
+        )
+    else:
+        # Remove once Runner is running properly
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+
+        batch = SlurmBatch(Path(f"{sgh.smac_dir}{sbatch_script_path}"))
+
+        result_part = Path(f"{solver_name}_{instance_set_name}")
+        result_dir = sgh.smac_results_dir / result_part
+
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=batch.cmd,
+            name="smac_configure",
+            base_dir=result_dir,
+            sbatch_options=batch.sbatch_options)
+
+        # Remove once Runner is running properly
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
+
+        if run_on == Runner.SLURM_RR:
+            configure_jobid = run.run_id
+
+    return configure_jobid
+
+
+def execute_smac_configure_local(solver_name: str,
+                                 instance_set_name: str,
+                                 run_on: Runner = Runner.LOCAL) -> rrr.LocalRun:
+    """Adds a process to the local queue for algorithm configuration with SMAC.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_name: Name of the instance set
+
+    Returns:
+        The LocalRun Object
+    """
+    # Remove once Runner is running properly
+    if run_on == Runner.SLURM_RR:
+        run_on = Runner.SLURM
+    sbatch_script_path = create_smac_configure_sbatch_script(
+        solver_name, instance_set_name
+    )
+
+    batch = SlurmBatch(Path(f"{sgh.smac_dir}{sbatch_script_path}"))
+
+    result_part = Path(f"{solver_name}_{instance_set_name}")
+    result_dir = sgh.smac_results_dir / result_part
+
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=batch.cmd,
+        name="smac_configure",
+        base_dir=result_dir,
+        sbatch_options=batch.sbatch_options)
+
+    # Remove once Runner is running properly
+    if run_on == Runner.SLURM:
+        run_on = Runner.SLURM_RR
+
+    return run
+
+
+def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file: Path,
+                                         result_directory: Path, num_job_total: int,
+                                         num_job_in_parallel: int,
+                                         smac_execdir: Path) -> None:
+    """Generate a Slurm batch script for algorithm configuration.
+
+    Args:
+        sbatch_script_path: Filepath for sbatch script
+        scenario_file: Filepath for the scenario file
+        result_directory: Directory for configuration results
+        num_job_total: Total number of slurm jobs
+        num_job_in_parallel: Maximum number of parallel jobs
+        smac_execdir: Scenario directory
+    """
+    sbatch_options_list = ssh.get_slurm_sbatch_user_options_list()
+    num_job_in_parallel = max(num_job_in_parallel, num_job_total)
+
+    output_log_path = Path(sgh.smac_dir, "tmp", f"{sbatch_script_path}.txt")
+    error_log_path = Path(sgh.smac_dir, "tmp", f"{sbatch_script_path}.err")
+
+    # Remove possible old output
+    output_log_path.unlink(missing_ok=True)
+    error_log_path.unlink(missing_ok=True)
+
+    # Log output paths
+    sl.add_output(str(output_log_path),
+                  "Output log of batch script for parallel configuration runs with SMAC")
+    sl.add_output(str(error_log_path),
+                  "Error log of batch script for parallel configuration runs with SMAC")
+
+    (sgh.smac_dir / result_directory).mkdir(parents=True, exist_ok=True)
+    Path(sgh.smac_dir, "tmp").mkdir(parents=True, exist_ok=True)
+
+    fout = Path(f"{sgh.smac_dir}{sbatch_script_path}").open("w+")
+    fout.write("#!/bin/bash\n")
+    fout.write("###\n")
+    fout.write(f"#SBATCH --job-name={sbatch_script_path}\n")
+    fout.write(f"#SBATCH --output=tmp/{sbatch_script_path}.txt\n")
+    fout.write(f"#SBATCH --error=tmp/{sbatch_script_path}.err\n")
+    fout.write("###\n")
+    fout.write("###\n")
+    fout.write(f"#SBATCH --array=0-{num_job_total}%{num_job_in_parallel}\n")
+    fout.write("###\n")
+    # Options from the slurm/sbatch settings file
+    for i in sbatch_options_list:
+        fout.write(f"#SBATCH {i}\n")
+    fout.write("###\n")
+
+    fout.write("params=( \\\n")
+
+    sl.add_output(
+        f"{sgh.smac_dir}{result_directory}/{sbatch_script_path}_seed_N_smac.txt",
+        f"Configuration log for SMAC run 1 < N <= {num_job_total}")
+
+    for i in range(0, num_job_total):
+        seed = i + 1
+        result_path = f"{result_directory}/{sbatch_script_path}_seed_{seed}_smac.txt"
+        smac_execdir_i = smac_execdir / str(seed)
+        sl.add_output(sgh.smac_dir + result_path,
+                      f"Configuration log for SMAC run {num_job_total}")
+
+        fout.write(f"'{scenario_file} {seed} {result_path} {smac_execdir_i}' \\\n")
+
+    fout.write(")\n")
+
+    cmd_srun_prefix = "srun -N1 -n1 "
+    cmd_srun_prefix += ssh.get_slurm_srun_user_options_str()
+    cmd_smac_prefix = "./each_smac_run_core.sh "
+
+    cmd = f"{cmd_srun_prefix} {cmd_smac_prefix} " + "${params[$SLURM_ARRAY_TASK_ID]}"
+    fout.write(cmd + "\n")
+    fout.close()
+
+
+def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) -> str:
+    """Submit a Slurm batch script for algorithm configuration with SMAC.
+
+    Args:
+        smac_configure_sbatch_script_name: Name of the script to execute
+
+    Returns:
+        String containing the slurm job ID
+    """
+    ori_path = Path.cwd()
+    command_line = (f"cd {sgh.smac_dir} ; sbatch {smac_configure_sbatch_script_name} ; "
+                    f"cd {ori_path}")
+
+    output_list = os.popen(command_line).readlines()
+
+    if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
+        jobid = output_list[0].strip().split()[-1]
+        # Add job to active job CSV
+        sjh.write_active_job(jobid, CommandName.CONFIGURE_SOLVER)
+    else:
+        jobid = ""
+
+    return jobid
+
+
+def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
     """Check if the results directory for the solver and instance set combination exists.
 
     NOTE: This function assumes SMAC output
@@ -357,7 +584,8 @@ def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> 
 
     if not all_good:
         print("ERROR: Instance list file not found, make sure configuration was "
-              "completed correctly for this solver and instance set combination.")
+              "completed correctly for this solver and instance set combination.\n"
+              f"Missing file:\n{instance_list_file_path}\n")
         sys.exit(-1)
 
 
@@ -554,20 +782,18 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
 
-    smac_results_dir = f"{sgh.smac_dir}results/{solver_name}_{instance_set_name}/"
-    list_file_result_name = os.listdir(smac_results_dir)
+    conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"
+    list_file_result_name = os.listdir(conf_results_dir)
     key_str_1 = "Estimated mean quality of final incumbent config"
 
     # Compare results of each run on the training set to find the best configuration
     # among them
     for file_result_name in list_file_result_name:
-        file_result_path = smac_results_dir + file_result_name
+        file_result_path = conf_results_dir + file_result_name
         fin = Path(file_result_path).open("r+")
 
-        while True:
-            myline = fin.readline()
-            if not myline:
-                break
+        myline = fin.readline()
+        while myline:
             myline = myline.strip()
 
             if myline.find(key_str_1) == 0:
@@ -606,7 +832,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     myline_3 = fin.readline()
                     mylist_3 = myline_3.strip().split()
                     optimised_configuration_seed = mylist_3[4]
-
+            myline = fin.readline()
         fin.close()
 
     return (optimised_configuration_str, optimised_configuration_performance,

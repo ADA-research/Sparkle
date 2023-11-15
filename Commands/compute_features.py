@@ -101,7 +101,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
             name="sprkl_csv_merge",
             dependencies=runs[-1],
-            base_dir="Tmp"))
+            base_dir=sgh.sparkle_tmp_path))
 
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:

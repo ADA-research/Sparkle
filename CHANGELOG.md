@@ -2,6 +2,15 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.6] - 202
+
+### Added
+- Added support for commands to run without Slurm, accessible through new --run-on local argument
+
+### Changed
+
+### Fixed
+
 ## [0.5] - 2023/03/16
 
 ### Added

@@ -23,6 +23,8 @@ from Commands.sparkle_help.configurator import Configurator
 from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help.solver import Solver
 
+from runrunner.base import Runner
+
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -96,6 +98,11 @@ def parser_function() -> argparse.ArgumentParser:
         action="store_true",
         help="run ablation after configuration",
     )
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm"))
 
     return parser
 
@@ -147,6 +154,7 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     use_features = args.use_features
+    run_on = args.run_on
     if args.configurator is not None:
         configurator_path = args.configurator
     else:
@@ -160,7 +168,7 @@ if __name__ == "__main__":
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
-            print("given training set path is not an existing directory")
+            print("Given training set path is not an existing directory")
             sys.exit()
 
         data_dict = {}
@@ -206,7 +214,7 @@ if __name__ == "__main__":
     configurator = Configurator(configurator_path)
 
     configurator.create_sbatch_script(config_scenario)
-    configure_jobid = configurator.configure()
+    configure_jobid = configurator.configure(run_on=run_on)
 
     # Update latest scenario
     sgh.latest_scenario.set_config_solver(solver.directory)
@@ -223,20 +231,23 @@ if __name__ == "__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = ssh.generate_validation_callback_slurm_script(
-            solver_path, instance_set_train, instance_set_test, configure_jobid
+        validate_jobid = ssh.run_validation_callback(
+            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = ssh.generate_ablation_callback_slurm_script(
-            solver_path, instance_set_train, instance_set_test, configure_jobid
+        ablation_jobid = ssh.run_ablation_callback(
+            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
         )
         dependency_jobid_list.append(ablation_jobid)
 
-    job_id_str = ",".join(dependency_jobid_list)
-    print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
-          f"{job_id_str}")
+    if run_on == Runner.SLURM:
+        job_id_str = ",".join(dependency_jobid_list)
+        print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+              f"{job_id_str}")
+    else:
+        print("Running configuration finished!")
 
     status_info.delete()
     # Write used settings to file
