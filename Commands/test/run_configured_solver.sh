@@ -30,6 +30,7 @@ cp $configuration_files_path $smac_configuration_files_path
 #Check if Slurm is present in the env
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
+slurm_available="local"
 
 # Copy scenario
 scenario_path="Output/latest_scenario.ini"
@@ -69,7 +70,10 @@ else
 fi
 
 # Run configured solver on an instance directory
-output_true="Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
+if [[ $slurm_available == $slurm_true ]];
+then
+	output_true="Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
+fi
 output=$(Commands/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --parallel --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
