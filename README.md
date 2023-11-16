@@ -53,6 +53,24 @@ Sparkle is distributed with a number of external components, solvers, and instan
 
 The SATzilla 2012 feature extractor is used from `http://www.cs.ubc.ca/labs/beta/Projects/SATzilla/` with some modifications. The main modification of this component is to disable calling the SAT instance preprocessor called SatELite. It is located in: `Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle/`
 
+## Citation
+
+If you use Sparkle for one of your papers and want to cite it, please cite our [paper](https://doi.org/10.1109/TEVC.2022.3215013) describing Sparkle:
+K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible Meta-Algorithmics for Improving the State of the Art in Solving Challenging Problems**, in _IEEE Transactions on Evolutionary Computation_, vol. 26, no. 6, pp. 1351-1364, Dec. 2022, doi: 10.1109/TEVC.2022.3215013.
+```
+@article{BloEtAl22,
+  title={Sparkle: Toward Accessible Meta-Algorithmics for Improving the State of the Art in Solving Challenging Problems}, 
+  author={van der Blom, Koen and Hoos, Holger H. and Luo, Chuan and Rook, Jeroen G.},
+  journal={IEEE Transactions on Evolutionary Computation}, 
+  year={2022},
+  volume={26},
+  number={6},
+  pages={1351--1364},
+  doi={10.1109/TEVC.2022.3215013}
+}
+```
+
+
 ## Maintainers
 Koen van der Blom,
 Jeroen Rook,

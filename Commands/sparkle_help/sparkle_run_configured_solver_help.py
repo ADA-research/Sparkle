@@ -22,7 +22,16 @@ from runrunner.base import Runner
 def call_configured_solver(instance_path_list: list[Path],
                            parallel: bool,
                            run_on: Runner = Runner.SLURM) -> str:
-    """Create list of instance path lists, and call solver in parallel or sequential."""
+    """Create list of instance path lists, and call solver in parallel or sequential.
+
+    Args:
+        instance_path_list: List of paths to all the instances.
+        parallel: Boolean indicating a parallel call if True. Sequential otherwise.
+        run_on: Whether the command is run with Slurm or not.
+
+    Returns:
+        str: The Slurm job id, or empty string if local run.
+    """
     job_id_str = ""
 
     # If directory, get instance list from directory as list[list[Path]]
@@ -51,7 +60,14 @@ def call_configured_solver(instance_path_list: list[Path],
 
 
 def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
-    """Prepare to run and run the latest configured solver sequentially on instances."""
+    """Prepare to run and run the latest configured solver sequentially on instances.
+
+    Args:
+        instances_list: The paths to all the instances
+
+    Returns:
+        None.
+    """
     for instance_path_list in instances_list:
         # Use original path for output string
         instance_path_str = " ".join([str(path) for path in instance_path_list])
@@ -69,7 +85,15 @@ def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
 
 def generate_sbatch_script_for_configured_solver(num_jobs: int,
                                                  instance_list: list[str]) -> Path:
-    """Return the path to a Slurm batch script to run the solver on all instances."""
+    """Return the path to a Slurm batch script to run the solver on all instances.
+
+    Args:
+        num_jobs: The number of jobs.
+        instance_list: The list of instances locations.
+
+    Returns:
+        Path: The path to the sbatch script file.
+    """
     # Set script name and path
     solver_name, _ = get_latest_configured_solver_and_configuration()
     sbatch_script_name = (f"run_{solver_name}_configured_sbatch_"
@@ -102,7 +126,15 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
 
 def call_configured_solver_parallel(instances_list: list[list[Path]],
                                     run_on: Runner = Runner.SLURM) -> str:
-    """Run the latest configured solver in parallel on all given instances."""
+    """Run the latest configured solver in parallel on all given instances.
+
+    Args:
+        instance_list: A list of all paths in a directory of instances.
+        run_on: Whether the command is run with Slurm or not.
+
+    Returns:
+        str: The Slurm job id str, or empty string if local run
+    """
     # Create an instance list[str] keeping in mind possible multi-file instances
     instance_list = []
 
@@ -171,12 +203,12 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
     return solver_name, config_str
 
 
-def run_configured_solver(instance_path_list: list[Path],
-                          run_on: Runner = Runner.SLURM) -> None:
+def run_configured_solver(instance_path_list: list[Path]) -> None:
     """Run the latest configured solver on the given instance.
 
     Args:
-        instance_path_list:
+        instance_path_list: List of paths to the instances.
+        run_on: Whether the command is run with Slurm or not.
 
     Returns:
         None
