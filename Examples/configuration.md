@@ -90,3 +90,8 @@ Wait for the previous example to be completed
 
 `Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/ --ablation --validate`
 
+### Running a configured solver
+
+Now let the solver be executed on an instance
+
+`Commands/run_configured_solver.py Instances/PTN2/Ptn-7824-b18.cnf`
