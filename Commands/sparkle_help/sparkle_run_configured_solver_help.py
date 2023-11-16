@@ -64,9 +64,6 @@ def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
 
     Args:
         instances_list: The paths to all the instances
-
-    Returns:
-        None.
     """
     for instance_path_list in instances_list:
         # Use original path for output string
@@ -185,7 +182,11 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
 
 
 def get_latest_configured_solver_and_configuration() -> (str, str):
-    """Return the name and parameter string of the latest configured solver."""
+    """Return the name and parameter string of the latest configured solver.
+
+    Returns:
+        Tuple(str, str): A tuple containing the solver name and its configuration string.
+    """
     # Get latest configured solver + instance set
     solver_name = sfh.get_last_level_directory_name(
         str(sgh.latest_scenario.get_config_solver()))
@@ -209,9 +210,6 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     Args:
         instance_path_list: List of paths to the instances.
         run_on: Whether the command is run with Slurm or not.
-
-    Returns:
-        None
     """
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()

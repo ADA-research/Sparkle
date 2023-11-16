@@ -94,7 +94,3 @@ Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-
 # Now let the solver be executed on an instance
 
 Commands/run_configured_solver.py Instances/PTN2/Ptn-7824-b18.cnf
-
-# Wait for the run to be completed
-
-Commands/sparkle_wait.py
