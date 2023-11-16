@@ -58,7 +58,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
 
-    instance_directory = f"{sgh.smac_dir}/example_scenarios/instances/test-instance/"
+    instance_directory = f"{sgh.smac_dir}/scenarios/instances/test-instance/"
     mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
@@ -470,7 +470,7 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixtu
         test_instance,
         cutoff)
 
-    smac_solver_dir = f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/"
+    smac_solver_dir = f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/"
 
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
@@ -523,7 +523,7 @@ def test_get_figure_configured_vs_default_on_train_instance_set(mocker: MockFixt
     configured_results_file = ("validationObjectiveMatrix-traj-run-"
                                f"{seed}-walltime.csv")
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{train_instance}_scenario/"
                               f"{configured_results_file}")
@@ -572,7 +572,7 @@ def test_get_timeouts_test(mocker: MockFixture) -> None:
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
                               f"_test_configured/{configured_results_file}")
     default_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
@@ -618,7 +618,7 @@ def test_get_timeouts_train(mocker: MockFixture) -> None:
                                f"{optimised_configuration_seed}-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{instance_set}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{instance_set}_scenario/"
                               f"{configured_results_file}")
@@ -928,7 +928,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                                         test_instance, report_dir)
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
     configured_results_train_file = ("validationObjectiveMatrix-traj-run-" + str(seed)
                                      + "-walltime.csv")
     configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
@@ -1029,7 +1029,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                     test_instance)
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/example_scenarios/{solver_name}_{train_instance}/")
+        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
 
     configured_results_test_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
@@ -1101,19 +1101,19 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
         "Error: Results not found for the given solver and instance set(s) combination. "
         'Make sure the "configure_solver" and "validate_configured_vs_default" commands '
         "were correctly executed. \nDetected errors:\n training set not found in "
-        "configuration directory Components/smac-v2.10.03-master-778//example_scenarios/"
+        "configuration directory Components/smac-v2.10.03-master-778//scenarios/"
         "instances/train-instance/; configured parameter results on the training set not"
-        " found in Components/smac-v2.10.03-master-778//example_scenarios/test-solver_"
+        " found in Components/smac-v2.10.03-master-778//scenarios/test-solver_"
         "train-instance/outdir_train_configuration/test-solver_train-instance_scenario/;"
         " default parameter results on the training set not found in Components/"
-        "smac-v2.10.03-master-778//example_scenarios/test-solver_train-instance/"
+        "smac-v2.10.03-master-778//scenarios/test-solver_train-instance/"
         "outdir_train_default/; testing set not found in configuration directory "
-        "Components/smac-v2.10.03-master-778//example_scenarios/instances/test-"
+        "Components/smac-v2.10.03-master-778//scenarios/instances/test-"
         "instance/; configured parameter results on the testing set not found in "
-        "Components/smac-v2.10.03-master-778//example_scenarios/test-solver_train-"
+        "Components/smac-v2.10.03-master-778//scenarios/test-solver_train-"
         "instance/outdir_test-instance_test_configured/; default parameter results on "
         "the testing set not found in Components/smac-v2.10.03-master-778//"
-        "example_scenarios/test-solver_train-instance/"
+        "scenarios/test-solver_train-instance/"
         "outdir_test-instance_test_default/;")
 
     mock_exists.assert_called()

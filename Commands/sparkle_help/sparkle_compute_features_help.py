@@ -10,10 +10,16 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_job_help
 from Commands.sparkle_help.sparkle_command_help import CommandName
+
+from sparkle.slurm_parsing import SlurmBatch
+
+import runrunner as rrr
+from runrunner.base import Runner
 
 
 def generate_missing_value_csv_like_feature_data_csv(
@@ -163,7 +169,9 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                   f"{sfh.get_last_level_directory_name(instance_path)} done!\n")
 
 
-def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) -> str:
+def computing_features_parallel(feature_data_csv_path: Path,
+                                recompute: bool,
+                                run_on: Runner = Runner.SLURM) -> str:
     """Compute features for all instance and feature extractor combinations in parallel.
 
     A sbatch job is submitted for the computation of the features. The results are then
@@ -173,6 +181,9 @@ def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) ->
         feature_data_csv_path: Create a new feature data CSV file in the path
             specified by this parameter.
         recompute: Specifies if features should be recomputed.
+        run_on: Runner
+            On which computer or cluster environment to run the solvers.
+            Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
 
     Returns:
         The Slurm job ID of the sbatch job will be returned as a str
@@ -199,23 +210,50 @@ def computing_features_parallel(feature_data_csv_path: Path, recompute: bool) ->
     total_job_list = (
         sparkle_job_help.expand_total_job_from_list(list_feature_computation_job))
 
+    if run_on == Runner.LOCAL:
+        print("Running the solvers locally")
+    elif run_on == Runner.SLURM:
+        print("Running the solvers through Slurm")
+
     # Generate the sbatch script
     n_jobs = len(total_job_list)
     sbatch_script_name, sbatch_script_dir = (
         ssh.generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
                                                            total_job_list))
-
-    # Execute the sbatch script via slurm
-    execution_dir = "./"
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
-    jobid = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES,
-                                     execution_dir)
+    if run_on == Runner.SLURM:
+        # Execute the sbatch script via slurm
+        execution_dir = "./"
+        run = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES,
+                                       execution_dir)
 
-    # Log output paths
-    sl.add_output(sbatch_script_path,
-                  "Slurm batch script to compute features in parallel")
+        # Log output paths
+        sl.add_output(sbatch_script_path,
+                      "Slurm batch script to compute features in parallel")
+    else:
+        batch = SlurmBatch(sbatch_script_path)
+        # Execute the batch locally
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
 
-    return jobid
+        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name=CommandName.COMPUTE_FEATURES,
+            base_dir=sgh.sparkle_tmp_path,
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
+
+    if run_on == Runner.SLURM_RR:  # Change to SLURM once runrunner works satisfactorily
+        # Add the run to the list of active job.
+        sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
+
+    return run
 
 
 def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureDataCSV,

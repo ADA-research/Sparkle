@@ -40,7 +40,10 @@ class SlurmBatch:
         self.sbatch_options = re_sbatch.findall(filestr)
 
         # First find the cmd_params block ...
-        cmd_block = re_params_all.findall(filestr)[0]
+        cmd_block = ""
+        if len(re_params_all.findall(filestr)) > 0:
+            cmd_block = re_params_all.findall(filestr)[0]
+
         # ... then parse it
         self.cmd_params = re_params_items.findall(cmd_block)
 
@@ -48,4 +51,7 @@ class SlurmBatch:
         srun_args, cmd = re_srun_split.split(srun, maxsplit=1)
 
         self.srun_options = srun_args.split()
+
         self.cmd = cmd.replace("${params[$SLURM_ARRAY_TASK_ID]}", "").strip()
+        self.cmd = self.cmd.replace("${output[$SLURM_ARRAY_TASK_ID]}", "").strip()
+        self.cmd = self.cmd.replace(">", "").strip()

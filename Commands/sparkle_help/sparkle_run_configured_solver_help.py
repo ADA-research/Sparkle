@@ -14,10 +14,25 @@ from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_instances_help as sih
 
+from sparkle.slurm_parsing import SlurmBatch
+import runrunner as rrr
+from runrunner.base import Runner
 
-def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> str:
-    """Create list of instance path lists, and call solver in parallel or sequential."""
-    job_id_str = None
+
+def call_configured_solver(instance_path_list: list[Path],
+                           parallel: bool,
+                           run_on: Runner = Runner.SLURM) -> str:
+    """Create list of instance path lists, and call solver in parallel or sequential.
+
+    Args:
+        instance_path_list: List of paths to all the instances.
+        parallel: Boolean indicating a parallel call if True. Sequential otherwise.
+        run_on: Whether the command is run with Slurm or not.
+
+    Returns:
+        str: The Slurm job id, or empty string if local run.
+    """
+    job_id_str = ""
 
     # If directory, get instance list from directory as list[list[Path]]
     if len(instance_path_list) == 1 and instance_path_list[0].is_dir():
@@ -36,7 +51,7 @@ def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> st
 
     # If parallel, pass instances list to parallel function
     if parallel:
-        job_id_str = call_configured_solver_parallel(instances_list)
+        job_id_str = call_configured_solver_parallel(instances_list, run_on=run_on)
     # Else, pass instances list to sequential function
     else:
         call_configured_solver_sequential(instances_list)
@@ -45,7 +60,11 @@ def call_configured_solver(instance_path_list: list[Path], parallel: bool) -> st
 
 
 def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
-    """Prepare to run and run the latest configured solver sequentially on instances."""
+    """Prepare to run and run the latest configured solver sequentially on instances.
+
+    Args:
+        instances_list: The paths to all the instances
+    """
     for instance_path_list in instances_list:
         # Use original path for output string
         instance_path_str = " ".join([str(path) for path in instance_path_list])
@@ -63,7 +82,15 @@ def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
 
 def generate_sbatch_script_for_configured_solver(num_jobs: int,
                                                  instance_list: list[str]) -> Path:
-    """Return the path to a Slurm batch script to run the solver on all instances."""
+    """Return the path to a Slurm batch script to run the solver on all instances.
+
+    Args:
+        num_jobs: The number of jobs.
+        instance_list: The list of instances locations.
+
+    Returns:
+        Path: The path to the sbatch script file.
+    """
     # Set script name and path
     solver_name, _ = get_latest_configured_solver_and_configuration()
     sbatch_script_name = (f"run_{solver_name}_configured_sbatch_"
@@ -94,8 +121,17 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
     return sbatch_script_path
 
 
-def call_configured_solver_parallel(instances_list: list[list[Path]]) -> str:
-    """Run the latest configured solver in parallel on all given instances."""
+def call_configured_solver_parallel(instances_list: list[list[Path]],
+                                    run_on: Runner = Runner.SLURM) -> str:
+    """Run the latest configured solver in parallel on all given instances.
+
+    Args:
+        instance_list: A list of all paths in a directory of instances.
+        run_on: Whether the command is run with Slurm or not.
+
+    Returns:
+        str: The Slurm job id str, or empty string if local run
+    """
     # Create an instance list[str] keeping in mind possible multi-file instances
     instance_list = []
 
@@ -108,19 +144,49 @@ def call_configured_solver_parallel(instances_list: list[list[Path]]) -> str:
         num_jobs, instance_list)
 
     # Run batch script
-    command_name = CommandName.RUN_CONFIGURED_SOLVER
-    execution_dir = "./"
-    jobid_str = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
-                                         execution_dir)
-    print("Submitted sbatch script for configured solver, "
-          "output and results will be written to: "
-          f"{sbatch_script_path}.txt")
+    cmd_name = CommandName.RUN_CONFIGURED_SOLVER
+    exec_dir = "./"
+    jobid_str = ""
+    if run_on == Runner.SLURM:
+        jobid_str = ssh.submit_sbatch_script(sbatch_script_name=str(sbatch_script_path),
+                                             command_name=cmd_name,
+                                             execution_dir=exec_dir)
+        print("Submitted sbatch script for configured solver, "
+              "output and results will be written to: "
+              f"{sbatch_script_path}.txt")
+    else:
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+
+        batch = SlurmBatch(sbatch_script_path)
+        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name=cmd_name,
+            base_dir=exec_dir,
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+
+        if run_on == Runner.LOCAL:
+            run.wait()
+        else:
+            print(f"Configured solver added to {run_on} queue.")
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
 
     return jobid_str
 
 
 def get_latest_configured_solver_and_configuration() -> (str, str):
-    """Return the name and parameter string of the latest configured solver."""
+    """Return the name and parameter string of the latest configured solver.
+
+    Returns:
+        Tuple(str, str): A tuple containing the solver name and its configuration string.
+    """
     # Get latest configured solver + instance set
     solver_name = sfh.get_last_level_directory_name(
         str(sgh.latest_scenario.get_config_solver()))
@@ -139,10 +205,14 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
 
 
 def run_configured_solver(instance_path_list: list[Path]) -> None:
-    """Run the latest configured solver on the given instance."""
+    """Run the latest configured solver on the given instance.
+
+    Args:
+        instance_path_list: List of paths to the instances.
+        run_on: Whether the command is run with Slurm or not.
+    """
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
-
     # a) Create cmd_solver_call that could call sparkle_smac_wrapper
     instance_path_str = " ".join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to

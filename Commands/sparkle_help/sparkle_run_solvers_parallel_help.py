@@ -113,8 +113,6 @@ def running_solvers_parallel(
     sl.add_output(std_err_path,
                   "Error output of Slurm batch script to run solvers in parallel")
 
-    batch = SlurmBatch(sbatch_script_path)
-
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:
@@ -126,14 +124,14 @@ def running_solvers_parallel(
         # Execute the sbatch script via slurm
         command_line = f"sbatch {sbatch_script_path}"
         output_list = os.popen(command_line).readlines()
-
+        run = ""
         if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
             run = output_list[0].strip().split()[-1]
             # Add job to active job CSV
             sjh.write_active_job(run, CommandName.RUN_SOLVERS)
-        else:
-            run = ""
     else:
+        batch = SlurmBatch(sbatch_script_path)
+
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
@@ -142,8 +140,8 @@ def running_solvers_parallel(
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name="run_solvers",
-            base_dir="Tmp",
+            name=CommandName.RUN_SOLVERS,
+            base_dir=sgh.sparkle_tmp_path,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
 
