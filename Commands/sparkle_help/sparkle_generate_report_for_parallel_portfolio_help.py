@@ -151,10 +151,11 @@ def get_results() -> dict[str, list[str, str]]:
         contains the solver name followed by the performance (both as string).
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
-    results = sfh.get_list_all_result_filename(str(solutions_dir))
+    results = sfh.get_list_all_result_filename(solutions_dir)
 
     if len(results) == 0:
         print("ERROR: No result files found for parallel portfolio! Stopping execution.")
+        print(solutions_dir)
         sys.exit(-1)
 
     results_dict = dict()

@@ -21,10 +21,6 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
-from sparkle.slurm_parsing import SlurmBatch
-import runrunner as rrr
-from runrunner.base import Runner
-
 import functools
 print = functools.partial(print, flush=True)
 
@@ -207,8 +203,8 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
     # was manually cancelled or it gave an error the template will ensure that all
     # solver on that instance will be cancelled.
     time_in_format_str = "-1:00"
-    solutions_dir = f"{str(sgh.pap_performance_data_tmp_path)}/"
-    results = sfh.get_list_all_result_filename(solutions_dir)
+    results = sfh.get_list_all_result_filename(sgh.pap_performance_data_tmp_path)
+    solutions_dir = str(sgh.pap_performance_data_tmp_path)
 
     for result in results:
         if "_" in finished_job_array_nr:
@@ -700,15 +696,12 @@ def remove_result_files(instances: list[str]) -> None:
         os.system(cmd_line)
 
 
-def run_parallel_portfolio(instances: list[str],
-                           portfolio_path: Path,
-                           run_on: Runner = Runner.SLURM) -> bool:
+def run_parallel_portfolio(instances: list[str], portfolio_path: Path) -> bool:
     """Run the parallel algorithm portfolio and return whether this was successful.
 
     Args:
         instances: List of instance names.
         portfolio_path: Path to the parallel portfolio.
-        run_on: RunRunner argument to determine Local or Slurm.
 
     Returns:
         True if successful; False otherwise.
@@ -734,40 +727,10 @@ def run_parallel_portfolio(instances: list[str],
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
-        job_id = ""
-        # NOTE: Once runrunner works satisfactorily this should be refactored
-        if run_on == Runner.SLURM:
-            job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
-                                              execution_dir)
-        else:
-            # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM_RR:
-                run_on = Runner.SLURM
+        job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
+                                          execution_dir)
 
-            batch = SlurmBatch(sbatch_script_path)
-            cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-
-            run = rrr.add_to_queue(
-                runner=run_on,
-                cmd=cmd_list,
-                name=command_name,
-                path=execution_dir,
-                sbatch_options=batch.sbatch_options,
-                srun_options=batch.srun_options)
-
-            # Remove SLURM_RR once runrunner works satisfactorily
-            if run_on == Runner.SLURM or run_on == Runner.SLURM_RR:
-                job_id = run.run_id
-            elif run_on == Runner.LOCAL:
-                run.wait()
-
-            # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM_RR:
-                run_on = Runner.SLURM
-
-        # NOTE: the IF statement below is Slurm only as well?
-        # As running runtime based performance may be less relevant
-        if (run_on == Runner.SLURM and sgh.settings.get_general_performance_measure()
+        if (sgh.settings.get_general_performance_measure()
                 == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
@@ -784,7 +747,7 @@ def run_parallel_portfolio(instances: list[str],
             remove_temp_files_unfinished_solvers(solver_instance_list,
                                                  sbatch_script_path,
                                                  temp_solvers)
-        elif run_on == Runner.SLURM:
+        else:
             done = False
             wait_cutoff_time = False
             n_seconds = 4
@@ -812,8 +775,6 @@ def run_parallel_portfolio(instances: list[str],
                         n_seconds = 1  # Start checking often
 
                 sjh.sleep(n_seconds)
-        else:  # In case of local we only have to wait for the job to finish
-            run.wait()
 
         finished_instances_dict = {}
 
@@ -848,6 +809,7 @@ def run_parallel_portfolio(instances: list[str],
             else:
                 print(f"{str(instances)} was not solved in the given cutoff-time.")
     except Exception as except_msg:
-        print(f"Exception thrown during {command_name} call: {except_msg}")
+        print(except_msg)
         return False
+
     return True
