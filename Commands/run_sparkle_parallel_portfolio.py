@@ -112,6 +112,10 @@ if __name__ == "__main__":
     portfolio_path = args.portfolio_name
     run_on = args.run_on
 
+    if run_on == Runner.LOCAL:
+        print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")
+        sys.exit(-1)
+
     if args.portfolio_name is None:
         portfolio_path = sgh.latest_scenario.get_parallel_portfolio_path()
     elif not portfolio_path.is_dir():
