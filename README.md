@@ -79,7 +79,8 @@ Malte Schwerin,
 Yingliu Lu,
 Tarek Junied,
 Marie Anastacio,
-Jakob Bossek
+Jakob Bossek,
+Thijs Snelleman
 
 ## Contributors
 Chuan Luo,
