@@ -8,6 +8,7 @@ import os
 import sys
 import csv
 from pathlib import Path
+from enum import Enum
 
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -38,7 +39,7 @@ def read_marginal_contribution_csv(path: Path) -> list[tuple[str, float]]:
         reader = csv.reader(input_file)
         for row in reader:
             # 0 is the solver, 1 the marginal contribution
-            content.append((row[0], row[1]))
+            content.append((row[0], float(row[1])))
 
     return content
 
@@ -61,8 +62,8 @@ def write_marginal_contribution_csv(path: Path,
                       "Marginal contributions to the portfolio selector per solver.")
 
 
-def get_capvalue_list(
-        performance_data_csv: SparklePerformanceDataCSV) -> list[float] | None:
+def get_capvalue_list(performance_data_csv: SparklePerformanceDataCSV,
+                      performance_measure: Enum) -> list[float] | None:
     """Return a list of cap-values if the performance measure is QUALITY, else None.
 
     Args:
@@ -71,8 +72,6 @@ def get_capvalue_list(
     Returns:
         A list of floating point numbers or None.
     """
-    performance_measure = sgh.settings.get_general_performance_measure()
-
     # If QUALITY_ABSOLUTE is the performance measure, use the maximum performance per
     # instance as capvalue; otherwise the cutoff time is used
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
@@ -108,7 +107,8 @@ def compute_perfect_selector_marginal_contribution(
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     num_instances = performance_data_csv.get_row_size()
     num_solvers = performance_data_csv.get_column_size()
-    capvalue_list = get_capvalue_list(performance_data_csv)
+    performance_measure = sgh.settings.get_general_performance_measure()
+    capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
@@ -180,7 +180,8 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
                     f'{actual_portfolio_selector_path} --feature_vec "'
                     f'{feature_vector_string}" 1> {predict_schedule_result_path_str}'
                     f" 2> {err_path_str}")
-
+    print(command_line)
+    input()
     with log_path.open("a+") as log_file:
         print("Running command below to get predicted schedule from autofolio:\n",
               command_line, file=log_file)
@@ -382,7 +383,8 @@ def compute_actual_selector_marginal_contribution(
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     num_instances = performance_data_csv.get_row_size()
     num_solvers = performance_data_csv.get_column_size()
-    capvalue_list = get_capvalue_list(performance_data_csv)
+    performance_measure = sgh.settings.get_general_performance_measure()
+    capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
 
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()

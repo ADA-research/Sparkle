@@ -139,7 +139,17 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def calc_virtual_best_performance_of_portfolio(
             self: SparklePerformanceDataCSV, num_instances: int, num_solvers: int,
             capvalue_list: list[float] = None) -> float:
-        """Return the overall VBS performance."""
+        """Return the overall VBS performance.
+
+        Args:
+            self: The data matrix of Instances and Solver performances.
+            num_instances: The amount of instances to be considered in VBS formula.
+            num_solvers: The amount of solvers to be considered in VBS formula.
+            capvalue_list: The cap value for each instance, or None.
+
+        Returns:
+            The Virtual Best Performance of the Portfolio
+        """
         virtual_best_performance = 0
 
         for instance_idx in range(0, len(self.list_rows())):
@@ -152,6 +162,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             virtual_best_score = (
                 self.calc_virtual_best_score_of_portfolio_on_instance(
                     instance, num_instances, num_solvers, capvalue))
+            print(f"Instance {instance_idx} contributing vbs {virtual_best_score}")
             virtual_best_performance = virtual_best_performance + virtual_best_score
 
         return virtual_best_performance
