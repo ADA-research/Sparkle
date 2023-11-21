@@ -180,8 +180,6 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
                     f'{actual_portfolio_selector_path} --feature_vec "'
                     f'{feature_vector_string}" 1> {predict_schedule_result_path_str}'
                     f" 2> {err_path_str}")
-    print(command_line)
-    input()
     with log_path.open("a+") as log_file:
         print("Running command below to get predicted schedule from autofolio:\n",
               command_line, file=log_file)
