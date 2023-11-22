@@ -100,24 +100,26 @@ class TestMarginalContribution(TestCase):
 
     def test_compute_actual_selector_performance(self: TestCase) -> None:
         """Test for method compute_actual_selector_performance."""
-        portfiolio_path = "actual_portfolio_selector_path"
-        performance_path = "performance_data_csv_path"
-        feature_csv_path = "feature_data_csv_path"
-        num_instances = -1
-        num_solvers = -1
-        capvalue_list = list[float] | None
+        pth = "Commands/test/test_files/Sparkle_Portfolio_Selector/"\
+              "sparkle_portfolio_selector__@@SPARKLE@@__"
+        perf_path = "Commands/test/test_files/Performance_Data/"\
+                    "test_construct_sparkle_portfolio_selector.csv"
+        feature_csv_path = "Commands/test/test_files/Feature_Data/"\
+                           "test_construct_sparkle_portfolio_selector.csv"
+        num_instances = 12
+        num_solvers = 2
+        capvalue_list = None
 
-        result = -1.0  # Expected Actual Performance result
+        result = 2.068482775510204
 
-        output = scmch.compute_actual_selector_performance(portfiolio_path,
-                                                           performance_path,
+        output = scmch.compute_actual_selector_performance(pth,
+                                                           perf_path,
                                                            feature_csv_path,
                                                            num_instances,
                                                            num_solvers,
                                                            capvalue_list)
 
-        assert result == -1.0
-        assert output is not None
+        assert output == result
 
     def test_compute_actual_performance_for_instance(self: TestCase) -> None:
         """Test for method compute_actual_performance_for_instance."""
