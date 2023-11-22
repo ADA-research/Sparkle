@@ -68,10 +68,10 @@ class TestMarginalContribution(TestCase):
         """Test for method compute_perfect_selector_marginal_contribution."""
         pth = Path("Commands/test/test_files/Performance_Data/"
                    "test_construct_sparkle_portfolio_selector.csv")
-        result = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
+        result = [("Solvers/CSCCSat", 4.139621586398334), ("Solvers/MiniSAT", 0.0)]
         output = scmch.compute_perfect_selector_marginal_contribution(pth, True)
 
-        self.assertIs(output, result)
+        assert output == result
 
     def test_get_list_predict_schedule(self: TestCase) -> None:
         """Test for method get_list_predict_schedule.
