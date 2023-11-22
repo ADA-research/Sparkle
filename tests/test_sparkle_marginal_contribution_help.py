@@ -8,7 +8,8 @@ from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as 
 from Commands.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
-
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help.sparkle_settings import Settings
 
 class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
@@ -118,13 +119,13 @@ class TestMarginalContribution(TestCase):
         capvalue_list = None
 
         result = 2.068482775510204
-
+        sgh.settings = Settings("Commands/test/test_files/sparkle_settings.ini")
         output = scmch.compute_actual_selector_performance(pth,
-                                                           perf_path,
-                                                           feature_csv_path,
-                                                           num_instances,
-                                                           num_solvers,
-                                                           capvalue_list)
+                                                            perf_path,
+                                                            feature_csv_path,
+                                                            num_instances,
+                                                            num_solvers,
+                                                            capvalue_list)
 
         assert output == result
 
