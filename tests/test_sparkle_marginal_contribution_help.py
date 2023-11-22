@@ -14,12 +14,16 @@ class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
     def test_read_marginal_contribution_csv(self: TestCase) -> None:
         """Test for method read_marginal_contribution_csv."""
-        pth = Path("Test_data/test_marginal_contribution.csv")
-        Path.write_text(pth, "Solvers/CSCCSat,2.068482775510204\nSolvers/MiniSAT,0.0")
+        pth = Path("Test_Data/test_marginal_contribution.csv")
+        if not pth.exists():
+            Path.write_text(pth,
+                            "Solvers/CSCCSat,2.068482775510204\nSolvers/MiniSAT,0.0")
 
         result = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
         output = scmch.read_marginal_contribution_csv(pth)
         assert result == output
+
+        pth.unlink()
 
     def test_write_marginal_contribution_csv(self: TestCase) -> None:
         """Test for method write_marginal_contribution_csv."""
@@ -34,6 +38,7 @@ class TestMarginalContribution(TestCase):
             output = file.read()
 
         assert result == output
+        pth.unlink()
 
     def test_get_cap_value_list(self: TestCase) -> None:
         """Test for method get_cap_value_list."""
@@ -63,6 +68,7 @@ class TestMarginalContribution(TestCase):
         output = scmch.get_capvalue_list(csv_obj, PerformanceMeasure.QUALITY_ABSOLUTE)
 
         assert output == result
+        csv_path.unlink()
 
     def test_compute_perfect_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_perfect_selector_marginal_contribution."""
