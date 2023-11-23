@@ -162,7 +162,6 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             virtual_best_score = (
                 self.calc_virtual_best_score_of_portfolio_on_instance(
                     instance, num_instances, num_solvers, capvalue))
-            print(f"Instance {instance_idx} contributing vbs {virtual_best_score}")
             virtual_best_performance = virtual_best_performance + virtual_best_score
 
         return virtual_best_performance
