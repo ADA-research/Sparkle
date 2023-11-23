@@ -78,7 +78,7 @@ class TestMarginalContribution(TestCase):
         pth = Path("Commands/test/test_files/Performance_Data/"
                    "test_construct_sparkle_portfolio_selector.csv")
         result_mac = [("Solvers/CSCCSat", 4.139621586398334), ("Solvers/MiniSAT", 0.0)]
-        result_linux = [('Solvers/CSCCSat', 2.068482775510204), ('Solvers/MiniSAT', 0.0)]
+        result_linux = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
 
         output = scmch.compute_perfect_selector_marginal_contribution(pth, True)
 
