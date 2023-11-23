@@ -85,8 +85,7 @@ class TestMarginalContribution(TestCase):
 
         Does not work yet due to issues with Autofolio run
         """
-        pth = "Commands/test/test_files/Sparkle_Portfolio_Selector/"\
-              "sparkle_portfolio_selector__@@SPARKLE@@__"
+        pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
         file = "Commands/test/test_files/Feature_Data/"\
                "test_construct_sparkle_portfolio_selector.csv"
         featurecsv = SparkleFeatureDataCSV(file)
@@ -98,13 +97,10 @@ class TestMarginalContribution(TestCase):
                         prefix + "Ptn-7824-b01.cnf", prefix + "Ptn-7824-b11.cnf",
                         prefix + "Ptn-7824-b09.cnf", prefix + "Ptn-7824-b07.cnf"]
         result = [("Solvers/MiniSAT", 3.0)]
-        assert type(pth) is str
-        assert featurecsv is not None
-        assert type(instance_ids) is list
-        assert type(result) is list
-        # for instance in instance_ids:
-        # output = scmch.get_list_predict_schedule(pth, featurecsv, instance)
-        # assert output == result
+        #assert scmch.get_list_predict_schedule(pth, featurecsv, instance_ids[0]) == result
+        for instance in instance_ids:
+            output = scmch.get_list_predict_schedule(pth, featurecsv, instance)
+            assert output == result
 
     def test_compute_actual_selector_performance(self: TestCase) -> None:
         """Test for method compute_actual_selector_performance."""
