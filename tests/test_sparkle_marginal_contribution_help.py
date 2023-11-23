@@ -98,7 +98,7 @@ class TestMarginalContribution(TestCase):
                         prefix + "Ptn-7824-b17.cnf", prefix + "bce7824.cnf",
                         prefix + "Ptn-7824-b01.cnf", prefix + "Ptn-7824-b11.cnf",
                         prefix + "Ptn-7824-b09.cnf", prefix + "Ptn-7824-b07.cnf"]
-        result = [("Solvers/MiniSAT", 3.0)]
+        result = [("Solvers/CSCCSat", 3.0)]
 
         for instance in instance_ids:
             output = scmch.get_list_predict_schedule(pth, featurecsv, instance)
