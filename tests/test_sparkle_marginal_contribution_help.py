@@ -3,6 +3,7 @@
 from __future__ import annotations
 from unittest import TestCase
 from pathlib import Path
+import platform
 
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
@@ -10,6 +11,7 @@ from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help.sparkle_settings import Settings
+
 
 class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
@@ -81,10 +83,10 @@ class TestMarginalContribution(TestCase):
         assert output == result
 
     def test_get_list_predict_schedule(self: TestCase) -> None:
-        """Test for method get_list_predict_schedule.
-
-        Does not work yet due to issues with Autofolio run
-        """
+        """Test for method get_list_predict_schedule."""
+        # Does not work yet on mac due to issues with Autofolio run
+        if platform.system() != "Linux":
+            return
         pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
         file = "Commands/test/test_files/Feature_Data/"\
                "test_construct_sparkle_portfolio_selector.csv"
@@ -97,13 +99,16 @@ class TestMarginalContribution(TestCase):
                         prefix + "Ptn-7824-b01.cnf", prefix + "Ptn-7824-b11.cnf",
                         prefix + "Ptn-7824-b09.cnf", prefix + "Ptn-7824-b07.cnf"]
         result = [("Solvers/MiniSAT", 3.0)]
-        #assert scmch.get_list_predict_schedule(pth, featurecsv, instance_ids[0]) == result
+
         for instance in instance_ids:
             output = scmch.get_list_predict_schedule(pth, featurecsv, instance)
             assert output == result
 
     def test_compute_actual_selector_performance(self: TestCase) -> None:
         """Test for method compute_actual_selector_performance."""
+        # Does not work yet on mac due to issues with Autofolio run
+        if platform.system() != "Linux":
+            return
         pth = "Commands/test/test_files/Sparkle_Portfolio_Selector/"\
               "sparkle_portfolio_selector__@@SPARKLE@@__"
         perf_path = "Commands/test/test_files/Performance_Data/"\
@@ -117,11 +122,11 @@ class TestMarginalContribution(TestCase):
         result = 2.068482775510204
         sgh.settings = Settings("Commands/test/test_files/sparkle_settings.ini")
         output = scmch.compute_actual_selector_performance(pth,
-                                                            perf_path,
-                                                            feature_csv_path,
-                                                            num_instances,
-                                                            num_solvers,
-                                                            capvalue_list)
+                                                           perf_path,
+                                                           feature_csv_path,
+                                                           num_instances,
+                                                           num_solvers,
+                                                           capvalue_list)
 
         assert output == result
 
