@@ -114,8 +114,6 @@ class TestMarginalContribution(TestCase):
         # Does not work yet on mac due to issues with Autofolio run
         if platform.system() != "Linux":
             return
-        pth = "Commands/test/test_files/Sparkle_Portfolio_Selector/"\
-              "sparkle_portfolio_selector__@@SPARKLE@@__"
         pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
         perf_path = "Commands/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
@@ -138,13 +136,26 @@ class TestMarginalContribution(TestCase):
 
     def test_compute_actual_performance_for_instance(self: TestCase) -> None:
         """Test for method compute_actual_performance_for_instance."""
-        # TODO: Write test
+        # TODO: This method is currently not touched by the .sh test. Think of a test.
         pass
 
     def test_compute_actual_used_time_for_instance(self: TestCase) -> None:
         """Test for method compute_actual_used_time_for_instance."""
-        # TODO: Write test
-        pass
+        pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
+        instance = "Instances/PTN/Ptn-7824-b03.cnf"
+        perf_path = "Commands/test/test_files/Performance_Data/"\
+                    "test_construct_sparkle_portfolio_selector.csv"
+        feature_csv_path = "Commands/test/test_files/Feature_Data/"\
+                           "test_construct_sparkle_portfolio_selector.csv"
+        perfcsv = SparkleFeatureDataCSV(perf_path)
+
+        result = (3.0, False)
+
+        output = scmch.compute_actual_used_time_for_instance(pth,
+                                                             instance,
+                                                             feature_csv_path,
+                                                             perfcsv)
+        assert output == result
 
     def test_compute_actual_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
