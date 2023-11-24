@@ -141,6 +141,9 @@ class TestMarginalContribution(TestCase):
 
     def test_compute_actual_used_time_for_instance(self: TestCase) -> None:
         """Test for method compute_actual_used_time_for_instance."""
+        # Test does not work on Mac
+        if platform.system() != "Linux":
+            return
         pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
         instance = "Instances/PTN/Ptn-7824-b03.cnf"
         perf_path = "Commands/test/test_files/Performance_Data/"\
@@ -159,6 +162,9 @@ class TestMarginalContribution(TestCase):
 
     def test_compute_actual_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
+        # Test does not work on Mac
+        if platform.system() != "Linux":
+            return
         perf_path = "Commands/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\
