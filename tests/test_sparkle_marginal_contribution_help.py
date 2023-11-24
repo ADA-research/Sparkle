@@ -170,10 +170,9 @@ class TestMarginalContribution(TestCase):
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
         flag_recompute = True
-        
-        #result = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
+
         result = [("Solvers/CSCCSat", 4.139621586398334), ("Solvers/MiniSAT", 0.0)]
-        
+
         output = scmch.compute_actual_selector_marginal_contribution(perf_path,
                                                                      feature_csv_path,
                                                                      flag_recompute)
