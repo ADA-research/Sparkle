@@ -509,7 +509,8 @@ def compute_marginal_contribution(
               " True, stopping execution")
         sys.exit(-1)
     if flag_compute_perfect:
-        print("Start computing each solver's marginal contribution to perfect selector ...")
+        print("Start computing each solver's marginal contribution "
+              "to perfect selector ...")
         rank_list = compute_perfect_selector_marginal_contribution(
             aggregation_function,
             capvalue_list,
@@ -519,7 +520,8 @@ def compute_marginal_contribution(
         print_rank_list(rank_list, "perfect selector")
         print("Marginal contribution (perfect selector) computing done!")
     if flag_compute_actual:
-        print("Start computing each solver's marginal contribution to actual selector ...")
+        print("Start computing each solver's marginal contribution "
+              "to actual selector ...")
         rank_list = compute_actual_selector_marginal_contribution(
             aggregation_function,
             capvalue_list, minimise,
