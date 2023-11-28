@@ -99,7 +99,6 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
     fin = Path(predict_schedule_result_path).open("r+")
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
     predict_schedule = fin.readline().strip()
-
     if predict_schedule == "":
         print("ERROR: Failed to get schedule from algorithm portfolio. Stopping "
               "execution!\n"

@@ -9,6 +9,7 @@ import sys
 import csv
 from pathlib import Path
 from typing import Callable
+from statistics import mean
 
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -228,8 +229,6 @@ def compute_actual_selector_performance(
       actual_portfolio_selector_path: Path to portfolio selector.
       performance_data_csv_path: Path to the CSV file with the performance data.
       feature_data_csv_path: path to the CSV file with the features.
-      num_instances: The number of instances.
-      num_solvers: The number of solvers in the portfolio.
       minimise: Flag indicating, if scores should be minimised.
       aggregation_function: function to aggregate the quality scores
       capvalue_list: Optional list of cap-values.
@@ -248,7 +247,8 @@ def compute_actual_selector_performance(
             performance_data_csv, aggregation_function, minimise, perf_measure, capvalue)
 
         if flag_ss:
-            performance_instance *= penalty_factor
+            performance_instance = capvalue * penalty_factor
+
         performances.append(performance_instance)
 
     return aggregation_function(performances)
@@ -272,6 +272,8 @@ def compute_actual_performance_for_instance(
       performance_data_csv: SparklePerformanceDataCSV object that holds the
         performance data.
       aggregation_function: function to aggregate performance values
+      minimise: Whether the performance value should be minimized or maximized
+      objective_type: Whether we are dealing with run time or not.
       capvalue: Cap value for this instance
 
     Returns:
@@ -288,6 +290,7 @@ def compute_actual_performance_for_instance(
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     if objective_type == PerformanceMeasure.RUNTIME:
         performance_list = []
+
         for prediction in list_predict_schedule:
             performance = float(performance_data_csv.get_value(instance, prediction[0]))
             performance_list.append(performance)
@@ -300,6 +303,7 @@ def compute_actual_performance_for_instance(
 
             if aggregation_function(performance_list) > cutoff_time:
                 break
+
         performance = min(performance_list)
     else:
         solver = list_predict_schedule[0][0]
@@ -417,25 +421,29 @@ def compute_actual_selector_marginal_contribution(
                   "performance for this portfolio selector! ******")
             sys.exit(-1)
 
-        tmp_actual_selector_performance = compute_actual_selector_performance(
+        tmp_asp = compute_actual_selector_performance(
             tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path,
             feature_data_csv_path, minimise, aggregation_function, capvalue_list)
 
         print(f"Actual performance for portfolio selector excluding solver "
-              f"{solver_name} is {str(tmp_actual_selector_performance)}")
+              f"{solver_name} is {str(tmp_asp)}")
         os.system("rm -f " + tmp_performance_data_csv_path)
         sl.add_output(tmp_performance_data_csv_path,
                       "[removed] Temporary performance data")
         print("Computing done!")
 
-        # If there is a performance decay without this solver, it has a contribution
-        if minimise and tmp_actual_selector_performance > actual_selector_performance or\
-                not minimise and\
-                tmp_actual_selector_performance < actual_selector_performance:
-            marginal_contribution = \
-                tmp_actual_selector_performance / actual_selector_performance
-        else:
+        # 1. If the performance remains equal, this solver has no contribution
+        # 2. If there is a performance decay without this solver, it has a contribution
+        # 3. If there is a performance improvement, we have a bad selector
+        if tmp_asp == actual_selector_performance:
             marginal_contribution = 0
+        elif minimise and tmp_asp > actual_selector_performance or not minimise and\
+                tmp_asp < actual_selector_performance:
+            marginal_contribution = tmp_asp / actual_selector_performance
+        else:
+            print(f"****** WARNING: The omission of solver{solver_name} yields an "
+                  "improvement. This indicates a selector worse than average "
+                  "best solver. ******")
 
         solver_tuple = (solver, marginal_contribution)
         rank_list.append(solver_tuple)
@@ -458,9 +466,7 @@ def print_rank_list(rank_list: list, mode: str) -> None:
       rank_list: A list of 2-tuples as returned by function
         compute_actual_selector_marginal_contribution of the form
         (solver name, marginal contribution).
-      mode: This integer parameter determines the reference for the solver ranking.
-         Available options are 1 for 'perfect selector' and 2 for
-         'actual selector'.
+      mode: The marginal contribution mode used to calculate the rank.
     """
     print("******")
     print("Solver ranking list via marginal contribution (Margi_Contr) with regards to "
@@ -489,14 +495,14 @@ def compute_marginal_contribution(
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     perf_m = sgh.settings.get_general_performance_measure()
-    if (perf_m == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
-        aggregation_function = max
+    if perf_m == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         capvalue_list = get_capvalue_list(performance_data_csv)
         minimise = False
-    elif (perf_m == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
-        aggregation_function = min
+        aggregation_function = mean
+    elif perf_m == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         capvalue_list = get_capvalue_list(performance_data_csv)
         minimise = True
+        aggregation_function = mean
     else:
         # assume runtime optimization
         aggregation_function = sum
