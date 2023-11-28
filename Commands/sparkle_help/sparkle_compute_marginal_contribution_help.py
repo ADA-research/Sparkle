@@ -114,14 +114,12 @@ def compute_perfect_selector_marginal_contribution(
 
     rank_list = []
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-    num_instances = performance_data_csv.get_row_size()
-    num_solvers = performance_data_csv.get_column_size()
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
     virtual_best_performance = (
         performance_data_csv.calc_virtual_best_performance_of_portfolio(
-            num_instances, num_solvers, aggregation_function, minimise, capvalue_list))
+            aggregation_function, minimise, capvalue_list))
     print("Virtual best performance for portfolio selector with all solvers is "
           f"{str(virtual_best_performance)}")
     print("Computing done!")
@@ -134,8 +132,7 @@ def compute_perfect_selector_marginal_contribution(
         tmp_performance_data_csv.delete_column(solver)
         tmp_vbp = (
             tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
-                num_instances, num_solvers, aggregation_function,
-                minimise, capvalue_list))
+                aggregation_function, minimise, capvalue_list))
         print("Virtual best performance for portfolio selector excluding solver "
               f"{sfh.get_last_level_directory_name(solver)} is "
               f"{str(tmp_vbp)}")
@@ -241,8 +238,8 @@ def compute_actual_selector_performance(
       The selector performance as a single floating point number.
     """
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-
-    actual_selector_performance = 0
+    penalty_factor = sgh.settings.get_general_penalty_multiplier()
+    performances = []
     perf_measure = sgh.settings.get_general_performance_measure()
     for index, instance in enumerate(performance_data_csv.list_rows()):
         capvalue = capvalue_list[index]
@@ -250,10 +247,11 @@ def compute_actual_selector_performance(
             actual_portfolio_selector_path, instance, feature_data_csv_path,
             performance_data_csv, aggregation_function, minimise, perf_measure, capvalue)
 
-        if minimise or flag_ss:
-            actual_selector_performance += performance_instance
+        if flag_ss:
+            performance_instance *= penalty_factor
+        performances.append(performance_instance)
 
-    return actual_selector_performance
+    return aggregation_function(performances)
 
 
 def compute_actual_performance_for_instance(
@@ -285,14 +283,14 @@ def compute_actual_performance_for_instance(
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)
 
-    performance_list = []
+    performance = None
     flag_successfully_solving = False
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
-    for prediction in list_predict_schedule:
-        performance = float(performance_data_csv.get_value(instance, prediction[0]))
-        performance_list.append(performance)
-
-        if objective_type == PerformanceMeasure.RUNTIME:
+    if objective_type == PerformanceMeasure.RUNTIME:
+        performance_list = []
+        for prediction in list_predict_schedule:
+            performance = float(performance_data_csv.get_value(instance, prediction[0]))
+            performance_list.append(performance)
             scheduled_cutoff_time_this_run = prediction[1]
             if performance <= scheduled_cutoff_time_this_run:
                 if aggregation_function(performance_list) < cutoff_time:
@@ -302,12 +300,15 @@ def compute_actual_performance_for_instance(
 
             if aggregation_function(performance_list) > cutoff_time:
                 break
-        elif not flag_successfully_solving:
-            if minimise and performance < capvalue or\
-               not minimise and performance > capvalue:
-                flag_successfully_solving = True
+        performance = min(performance_list)
+    else:
+        solver = list_predict_schedule[0][0]
+        performance = float(performance_data_csv.get_value(instance, solver))
+        if minimise and performance < capvalue or\
+                not minimise and performance > capvalue:
+            flag_successfully_solving = True
 
-    return aggregation_function(performance_list), flag_successfully_solving
+    return performance, flag_successfully_solving
 
 
 def compute_actual_selector_marginal_contribution(
@@ -382,8 +383,8 @@ def compute_actual_selector_marginal_contribution(
         solver_name = sfh.get_last_level_directory_name(solver)
         print("Computing actual performance for portfolio selector excluding solver "
               f"{solver_name} ...")
-        tmp_performance_data_csv = (
-            spdcsv.SparklePerformanceDataCSV(performance_data_csv_path))
+        tmp_performance_data_csv = \
+            spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
         tmp_performance_data_csv.delete_column(solver)
         tmp_performance_data_csv_file = (
             f"tmp_performance_data_csv_without_{solver_name}_"

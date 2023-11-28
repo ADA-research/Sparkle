@@ -100,8 +100,8 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return scores
 
     def calc_virtual_best_score_of_portfolio_on_instance(
-            self: SparklePerformanceDataCSV, instance: str, num_instances: int,
-            num_solvers: int, minimise: bool, capvalue: float = None) -> float:
+            self: SparklePerformanceDataCSV, instance: str,
+            minimise: bool, capvalue: float = None) -> float:
         """Return the VBS performance for a specific instance."""
         # If capvalue is not set the objective is RUNTIME, so use the cutoff time as
         # capvalue
@@ -122,7 +122,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return virtual_best_score
 
     def calc_virtual_best_performance_of_portfolio(
-            self: SparklePerformanceDataCSV, num_instances: int, num_solvers: int,
+            self: SparklePerformanceDataCSV,
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
             capvalue_list: list[float]) -> float:
@@ -134,7 +134,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
             virtual_best_score = (
                 self.calc_virtual_best_score_of_portfolio_on_instance(
-                    instance, num_instances, num_solvers, minimise, capvalue))
+                    instance, minimise, capvalue))
             virtual_best.append(virtual_best_score)
 
         return aggregation_function(virtual_best)
