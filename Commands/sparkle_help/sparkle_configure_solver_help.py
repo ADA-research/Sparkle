@@ -42,10 +42,8 @@ def get_smac_run_obj() -> str:
     # Convert to SMAC format
     if smac_run_obj == PerformanceMeasure.RUNTIME:
         smac_run_obj = smac_run_obj.name
-    elif ((smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
-            |
-          (smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)
-        ):
+    elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
+            smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         smac_run_obj = "QUALITY"
     else:
         print("Warning: Unknown performance measure", smac_run_obj,

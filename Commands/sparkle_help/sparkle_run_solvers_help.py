@@ -218,7 +218,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     If rerun is True, rerun for instances with existing performance data.
     """
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    performance_measure = sgh.settings.get_general_performance_measure()
+    perf_measure = sgh.settings.get_general_performance_measure()
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 
     if rerun is False:
@@ -265,7 +265,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
 
             # Handle timeouts
             penalised_str = ""
-            if (performance_measure == PerformanceMeasure.RUNTIME
+            if (perf_measure == PerformanceMeasure.RUNTIME
                and (status == "TIMEOUT" or status == "UNKNOWN")):
                 penalised_str = " (penalised)"
 
@@ -279,9 +279,8 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
                 continue  # Skip to the next job
 
             # Update performance CSV
-            if ((performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
-                |
-                (performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)):
+            if perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
+               perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
                 # TODO: Handle the multi-objective case for quality
                 performance_data_csv.set_value(instance_path, solver_path, quality[0])
                 print(f"Running Result: Status: {status}, Quality{penalised_str}: "

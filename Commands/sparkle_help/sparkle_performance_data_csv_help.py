@@ -100,48 +100,44 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         return scores
 
     def calc_virtual_best_score_of_portfolio_on_instance(
-            self: SparklePerformanceDataCSV, instance: str,
-            aggregation_function: Callable[[list[float]], float],
-            capvalue: float = None) -> float:
+            self: SparklePerformanceDataCSV, instance: str, num_instances: int,
+            num_solvers: int, minimise: bool, capvalue: float = None) -> float:
         """Return the VBS performance for a specific instance."""
         # If capvalue is not set the objective is RUNTIME, so use the cutoff time as
         # capvalue
         if capvalue is None:
             capvalue = sgh.settings.get_general_target_cutoff_time()
 
-        virtual_best_score_list = []
-
+        virtual_best_score = None
         for solver in self.list_columns():
             score_solver = float(self.get_value(instance, solver))
-            virtual_best_score_list.append(score_solver)
+            if virtual_best_score is None or\
+                    minimise and virtual_best_score > score_solver or\
+                    not minimise and virtual_best_score < score_solver:
+                virtual_best_score = score_solver
 
-        return aggregation_function(virtual_best_score_list)
+        if virtual_best_score is None and len(self.list_columns()) == 0:
+            virtual_best_score = 0
+
+        return virtual_best_score
 
     def calc_virtual_best_performance_of_portfolio(
             self: SparklePerformanceDataCSV, num_instances: int, num_solvers: int,
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
             capvalue_list: list[float]) -> float:
-        """Return the overall VBS performance."""
-        virtual_best_performance = 0
-
+        """Return the overall VBS performance on the portfolio."""
+        virtual_best = []
         for instance_idx in range(0, len(self.list_rows())):
-
             instance = self.get_row_name(instance_idx)
             capvalue = capvalue_list[instance_idx]
 
-            score = (
+            virtual_best_score = (
                 self.calc_virtual_best_score_of_portfolio_on_instance(
-                    instance, aggregation_function, capvalue))
+                    instance, num_instances, num_solvers, minimise, capvalue))
+            virtual_best.append(virtual_best_score)
 
-            if minimise:
-                score = capvalue - score
-
-            virtual_best_score = (score
-                                  / (num_instances * num_solvers * abs(capvalue) + 1))
-            virtual_best_performance = virtual_best_performance + virtual_best_score
-
-        return virtual_best_performance
+        return aggregation_function(virtual_best)
 
     def get_dict_vbs_penalty_time_on_each_instance(self: SparklePerformanceDataCSV) \
             -> dict:

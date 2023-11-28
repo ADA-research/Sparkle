@@ -19,7 +19,6 @@ class PerformanceMeasure(Enum):
     QUALITY_ABSOLUTE_MINIMISATION = 1
     QUALITY_ABSOLUTE_MAXIMISATION = 2
 
-
     @staticmethod
     def from_str(performance_measure: str) -> PerformanceMeasure:
         """Return a given str as PerformanceMeasure."""
