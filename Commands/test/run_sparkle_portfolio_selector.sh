@@ -57,7 +57,10 @@ else
 fi
 
 # Run portfolio selector on an instance directory
-output_true="Sparkle portfolio selector is running ..."
+if [[ $slurm_available == $slurm_true ]];
+then
+	output_true="Sparkle portfolio selector is running ..."
+fi
 output=$(Commands/run_sparkle_portfolio_selector.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available| tail -1)
 
 if [[ $output == $output_true ]];
