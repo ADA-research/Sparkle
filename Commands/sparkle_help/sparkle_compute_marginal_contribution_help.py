@@ -63,7 +63,7 @@ def write_marginal_contribution_csv(path: Path,
 
 
 def get_capvalue_list(performance_data_csv: SparklePerformanceDataCSV,
-                      performance_measure: Enum) -> list[float] | None:
+                      performance_measure: PerformanceMeasure) -> list[float] | None:
     """Return a list of cap-values if the performance measure is QUALITY, else None.
 
     Args:
