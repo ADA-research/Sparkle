@@ -241,7 +241,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
             runner=run_on,
             cmd=cmd_list,
             name=CommandName.COMPUTE_FEATURES,
-            base_dir="Tmp",
+            base_dir=sgh.sparkle_tmp_path,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
 

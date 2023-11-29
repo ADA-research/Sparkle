@@ -14,6 +14,9 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
+slurm_true="slurm"
+slurm_available=$(detect_slurm)
+
 # Settings
 slurm_settings_path="Settings/sparkle_slurm_settings.txt"
 slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
@@ -34,35 +37,53 @@ Commands/initialise.py > /dev/null
 Commands/add_instances.py $instances_src_path > /dev/null
 Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
+# Set up output conditions
+output_true="Running configuration finished!"
+if [[ $slurm_available =~ "${slurm_true}" ]];
+then
+	output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+fi
+
 # Configure solver
-output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] configure_solver test succeeded"
+	echo "[success] ($slurm_available) configure_solver test succeeded"
     jobid=${output##* }
-	scancel $jobid
-else              
-	echo "[failure] configure_solver test failed with output:"
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
+else
+	echo "[failure] ($slurm_available) configure_solver test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with performance measure option RUNTIME
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] configure_solver performance measure RUNTIME option test succeeded"
+	echo "[success] ($slurm_available) configure_solver performance measure RUNTIME option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
-	echo "[failure] configure_solver performance measure RUNTIME option test failed with output:"
+	echo "[failure] ($slurm_available) configure_solver performance measure RUNTIME option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
@@ -70,49 +91,67 @@ sleep 1 # Sleep to avoid interference from previous test
 # TODO: Add test: Configure solver with performance measure option QUALITY (needs a quality configuration solver+instances)
 
 # Configure solver with cutoff time option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --target-cutoff-time 3 --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --target-cutoff-time 3 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] configure_solver cutoff time option test succeeded"
+	echo "[success] ($slurm_available) configure_solver cutoff time option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
-	echo "[failure] configure_solver cutoff time option test failed with output:"
+	echo "[failure] ($slurm_available) configure_solver cutoff time option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with budget per run option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] configure_solver budget per run option test succeeded"
+	echo "[success] ($slurm_available) configure_solver budget per run option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
-	echo "[failure] configure_solver budget per run option test failed with output:"
+	echo "[failure] ($slurm_available) configure_solver budget per run option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with number of runs option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path | tail -1)
+output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] configure_solver number of runs option test succeeded"
+	echo "[success] ($slurm_available) configure_solver number of runs option test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		scancel $jobid
+	fi
 else              
-	echo "[failure] configure_solver number of runs option test failed with output:"
+	echo "[failure] ($slurm_available) configure_solver number of runs option test failed with output:"
 	echo $output
-    kill_started_jobs_slurm
+    if [[ $slurm_available =~ "${slurm_true}" ]];
+	then
+		kill_started_jobs_slurm
+	fi
 fi
 
 # Restore original settings

@@ -332,7 +332,7 @@ def get_list_all_csv_filename(filepath: str) -> list[str]:
     return csv_list
 
 
-def get_list_all_result_filename(filepath: str) -> list[str]:
+def get_list_all_result_filename(filepath: Path) -> list[str]:
     """Return a list of result files in a given path.
 
     Args:
@@ -342,7 +342,7 @@ def get_list_all_result_filename(filepath: str) -> list[str]:
       List of result files.
     """
     result_list = []
-    if not Path(filepath).exists():
+    if not filepath.exists():
         return result_list
 
     list_all_items = os.listdir(filepath)
