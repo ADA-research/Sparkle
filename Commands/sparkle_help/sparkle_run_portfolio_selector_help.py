@@ -320,7 +320,12 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
 def call_sparkle_portfolio_selector_solve_directory(
         instance_directory_path: str,
         run_on: Runner = Runner.SLURM) -> None:
-    """Call the Sparkle portfolio selector to solve all instances in a directory."""
+    """Call the Sparkle portfolio selector to solve all instances in a directory.
+
+    Args:
+        instance_directory_path: The path to the directory of instances.
+        run_on: Whether to run with Slurm or Local.
+    """
     if instance_directory_path[-1] != "/":
         instance_directory_path += "/"
 
