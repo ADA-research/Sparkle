@@ -241,13 +241,15 @@ def compute_actual_selector_performance(
     penalty_factor = sgh.settings.get_general_penalty_multiplier()
     performances = []
     perf_measure = sgh.settings.get_general_performance_measure()
+    capvalue = None
     for index, instance in enumerate(performance_data_csv.list_rows()):
-        capvalue = capvalue_list[index]
+        if capvalue_list is not None:
+            capvalue = capvalue_list[index]
         performance_instance, flag_ss = compute_actual_performance_for_instance(
             actual_portfolio_selector_path, instance, feature_data_csv_path,
             performance_data_csv, aggregation_function, minimise, perf_measure, capvalue)
 
-        if flag_ss:
+        if flag_ss and capvalue is not None:
             performance_instance = capvalue * penalty_factor
 
         performances.append(performance_instance)
@@ -357,7 +359,9 @@ def compute_actual_selector_marginal_contribution(
     # Get values from CSV while all solvers and instances are included
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     performance_measure = sgh.settings.get_general_performance_measure()
-    capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
+
+    if capvalue_list is None:
+        capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
 
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
@@ -439,14 +443,14 @@ def compute_actual_selector_marginal_contribution(
         # 2. If there is a performance decay without this solver, it has a contribution
         # 3. If there is a performance improvement, we have a bad selector
         if tmp_asp == actual_selector_performance:
-            marginal_contribution = 0
+            marginal_contribution = 0.0
         elif minimise and tmp_asp > actual_selector_performance or not minimise and\
                 tmp_asp < actual_selector_performance:
             marginal_contribution = tmp_asp / actual_selector_performance
         else:
-            print(f"****** WARNING: The omission of solver{solver_name} yields an "
-                  "improvement. This indicates a selector worse than average "
-                  "best solver. ******")
+            print("****** WARNING DUBIOUS SELECTOR:"
+                  f" The omission of solver {solver_name} yields an improvement."
+                  "This indicates a selector worse than average best solver. ******")
 
         solver_tuple = (solver, marginal_contribution)
         rank_list.append(solver_tuple)

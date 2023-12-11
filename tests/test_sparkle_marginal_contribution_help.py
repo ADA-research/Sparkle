@@ -184,14 +184,16 @@ class TestMarginalContribution(TestCase):
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
-        flag_recompute = True
 
-        result = [("Solvers/CSCCSat", 4.139621586398334), ("Solvers/MiniSAT", 0.0)]
+        result = [("Solvers/CSCCSat", 1.3895076764357648), ("Solvers/MiniSAT", 0.0)]
 
-        output = scmch.compute_actual_selector_marginal_contribution(perf_path,
-                                                                     feature_csv_path,
-                                                                     flag_recompute)
-        assert output == result
+        output = scmch.compute_actual_selector_marginal_contribution(aggregation_function=sum,
+                                                                     capvalue_list=None,
+                                                                     minimise=True,
+                                                                     performance_data_csv_path=perf_path,
+                                                                     feature_data_csv_path=feature_csv_path,
+                                                                     flag_recompute=True)
+        self.assertEqual( output, result )
 
     def test_print_rank_list(self: TestCase) -> None:
         """Test for method print_rank_list. Could be irrelevant."""
