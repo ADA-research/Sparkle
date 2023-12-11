@@ -89,11 +89,15 @@ class TestMarginalContribution(TestCase):
                    "test_construct_sparkle_portfolio_selector.csv")
 
         # Strange behaviour, keeps changing its output 'randomly' between these two
-        resulta = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
-        resultb = [("Solvers/CSCCSat", 4.139621586398334), ("Solvers/MiniSAT", 0.0)]
+        resulta = [("Solvers/CSCCSat", 1.387803880042905), ("Solvers/MiniSAT", 0.0)]
+        #resultb = [("Solvers/CSCCSat", 4.139621586398334), ("Solvers/MiniSAT", 0.0)]
 
-        output = scmch.compute_perfect_selector_marginal_contribution(pth, True)
-        assert output == resulta or output == resultb
+        output = scmch.compute_perfect_selector_marginal_contribution(aggregation_function=sum,
+                                                                      capvalue_list=None,
+                                                                      minimise=True,
+                                                                      performance_data_csv_path=pth,
+                                                                      flag_recompute=True)
+        assert output == resulta #or output == resultb
 
     def test_get_list_predict_schedule(self: TestCase) -> None:
         """Test for method get_list_predict_schedule."""

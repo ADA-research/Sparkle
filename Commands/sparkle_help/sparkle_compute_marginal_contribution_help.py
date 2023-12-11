@@ -113,10 +113,9 @@ def compute_perfect_selector_marginal_contribution(
 
     rank_list = []
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-    num_instances = performance_data_csv.get_row_size()
-    num_solvers = performance_data_csv.get_column_size()
     performance_measure = sgh.settings.get_general_performance_measure()
-    capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
+    if capvalue_list is None:
+        capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
@@ -357,8 +356,6 @@ def compute_actual_selector_marginal_contribution(
 
     # Get values from CSV while all solvers and instances are included
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-    num_instances = performance_data_csv.get_row_size()
-    num_solvers = performance_data_csv.get_column_size()
     performance_measure = sgh.settings.get_general_performance_measure()
     capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
 

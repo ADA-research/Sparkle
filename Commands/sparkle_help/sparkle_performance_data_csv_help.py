@@ -149,9 +149,11 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             The combined virtual best performance of the portfolio over all instances.
         """
         virtual_best = []
+        capvalue = None
         for instance_idx in range(0, len(self.list_rows())):
             instance = self.get_row_name(instance_idx)
-            capvalue = capvalue_list[instance_idx]
+            if capvalue_list is not None:
+                capvalue = capvalue_list[instance_idx]
 
             virtual_best_score = (
                 self.calc_virtual_best_score_of_portfolio_on_instance(
