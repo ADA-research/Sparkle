@@ -91,6 +91,11 @@ Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-
 
 ### Running a configured solver
 
-# Now let the solver be executed on an instance
+#Now that we have a configured solver, we can run it on a single instance to get a result.
 
-Commands/run_configured_solver.py Instances/PTN2/Ptn-7824-b18.cnf
+Commands/run_configured_solver.py Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf
+
+## Run configured solver on an instance directory
+#It is also possible to run a configured solver directly on an entire directory of instances in parallel.
+
+Commands/run_configured_solver.py Examples/Resources/Instances/PTN2 --parallel
