@@ -1,6 +1,6 @@
 # Use Sparkle to run a configured solver
 
-These steps can also be found as a Bash script in `Examples/configured_solver.sh` The first few steps overlap with the example from configuration, as we need a configured solver first
+These steps can also be found as a Bash script in `Examples/configured_solver.sh` The first few steps overlap with the example from configuration, as we need a configured solver first.
 
 ## Initialise the Sparkle platform
 
