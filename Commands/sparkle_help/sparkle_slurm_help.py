@@ -248,9 +248,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
     sbatch_script_name = sfh.get_file_name(str(sbatch_script_path))
 
     # Set sbatch options
-    max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
-    if num_jobs < max_jobs:
-        max_jobs = num_jobs
+    max_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
     std_out = f"{tmp_dir}{sbatch_script_name}.txt"
     std_err = f"{tmp_dir}{sbatch_script_name}.err"
     job_name = f"--job-name={sbatch_script_name}"
