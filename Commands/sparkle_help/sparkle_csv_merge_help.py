@@ -38,7 +38,7 @@ def performance_data_csv_merge() -> None:
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sparkle_global_help.performance_data_csv_path)
-        tmp_performance_data_result_directory = "Performance_Data/Tmp/"
+        tmp_performance_data_result_directory = Path("Performance_Data/Tmp/")
         result_list = sfh.get_list_all_result_filename(
             tmp_performance_data_result_directory)
     except Exception:
@@ -48,7 +48,7 @@ def performance_data_csv_merge() -> None:
 
     for i in range(0, len(result_list)):
         result_name = result_list[i]
-        result_path = tmp_performance_data_result_directory + result_name
+        result_path = str(tmp_performance_data_result_directory) + result_name
 
         try:
             fin = Path(result_path).open("r+")

@@ -19,6 +19,9 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
 
+from runrunner.base import Runner
+import runrunner as rrr
+
 
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:
     """Return a list with the Slurm options given in the Slurm settings file.
@@ -238,7 +241,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
       A list of batch options for Slurm.
     """
     if smac:
-        tmp_dir = sgh.smac_dir + "tmp/"
+        tmp_dir = "tmp/"
     else:
         tmp_dir = "Tmp/"
 
@@ -299,7 +302,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
     sbatch_options_list = get_sbatch_options_list(Path(sbatch_script_path), num_jobs,
                                                   job)
 
-    scenario_dir = "example_scenarios/" + solver_name + "_" + instance_set_train_name
+    scenario_dir = "scenarios/" + solver_name + "_" + instance_set_train_name
 
     # Train default
     default = True
@@ -390,7 +393,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
     sbatch_options_list.extend(get_slurm_sbatch_user_options_list())
 
     # Set srun options
-    srun_options_str = "--nodes=1 --ntasks=1 --cpus-per-task " + str(n_cpus)
+    srun_options_str = "--nodes=1 --ntasks=1 --cpus-per-task=" + str(n_cpus)
     srun_options_str = srun_options_str + " " + get_slurm_srun_user_options_str()
 
     result, msg = check_slurm_option_compatibility(srun_options_str)
@@ -490,86 +493,195 @@ def submit_sbatch_script(sbatch_script_name: str,
       String job identifier or empty string if the job was not submitted
       successfully. Defaults to the SMAC directory.
     """
-    if execution_dir is None:
-        execution_dir = sgh.smac_dir
+    command_chmod = ["chmod", "a+x", sbatch_script_name]
+    subprocess.run(command_chmod, cwd=execution_dir)
 
-    sbatch_script_path = sbatch_script_name
-    ori_path = Path.cwd()
-    os.system(f"cd {execution_dir} ; chmod a+x {sbatch_script_path} ; cd {ori_path}")
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
-    command = f"cd {execution_dir} ; unset SLURM_CPU_BIND;" \
-              f"sbatch {sbatch_script_path} ; cd {ori_path}"
+    command_bugfix = ["unset", "SLURM_CPU_BIND"]
+    subprocess.run(command_bugfix, cwd=execution_dir, shell=True)  # noqa: S602
 
-    output_list = os.popen(command).readlines()
+    command = ["sbatch", sbatch_script_name]
+    output = subprocess.run(command, cwd=execution_dir, capture_output=True, text=True)
+
+    if output.stderr != "":
+        print("An error occurred during the script submission:")
+        print(output.stderr)
+        print("Depending on the error, the configurator might still run.")
+
+    # Get last token of the output ("Submitted batch job XXXXX") for job id
+    job_id = output.stdout.split()[-1]
+    sjh.write_active_job(job_id, command_name)
+
+    return job_id
+
+
+def run_validation_callback(solver: Path,
+                            instance_set_train: Path,
+                            instance_set_test: Path,
+                            dependency: str,
+                            run_on: Runner = Runner.SLURM) -> str:
+    """Generate a callback Slurm batch script for validation and run it.
+
+    Args:
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      dependency: String of job dependencies.
+      run_on: Whether the job is executed on Slurm or locally.
+
+    Returns:
+      String job identifier.
+    """
+    command_line = "echo $(pwd) $(date)\n"
+    command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
+    command_line += ("./Commands/validate_configured_vs_default.py "
+                     "--settings-file Settings/latest.ini")
+    command_line += f" --solver {solver.name}"
+    command_line += f" --instance-set-train {instance_set_train}"
+    command_line += f" --run-on {run_on}"
+    if instance_set_test is not None:
+        command_line += f" --instance-set-test {instance_set_test}"
 
     jobid = ""
-    if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-        jobid = output_list[0].strip().split()[-1]
-        # Add job to active job CSV
-        sjh.write_active_job(jobid, command_name)
+
+    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
+    # runrunner works properly everything under 'if' should be removed leaving only the
+    # 'else', and the SLURM_RR replaced by just SLURM.
+    if run_on == Runner.SLURM:
+        jobid = generate_generic_callback_slurm_script(
+            "validation", solver, instance_set_train, instance_set_test,
+            dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+    else:
+        result = create_callback_options_list("validation",
+                                              solver,
+                                              instance_set_train,
+                                              instance_set_test)
+        run = rrr.add_to_queue(runner=run_on,
+                               cmd=command_line,
+                               name="validation",
+                               dependencies=dependency,
+                               base_dir=sgh.sparkle_tmp_path,
+                               sbatch_options=result)
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+
+        if run_on == Runner.SLURM:
+            jobid = run.run_id
+        else:
+            print("Waiting for the local calculations to finish.")
+            run.wait()
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
 
     return jobid
 
 
-def generate_validation_callback_slurm_script(solver: Path,
-                                              instance_set_train: Path,
-                                              instance_set_test: Path,
-                                              dependency: str) -> str:
-    """Generate a callback Slurm batch script for validation.
+def run_ablation_callback(solver: Path,
+                          instance_set_train: Path,
+                          instance_set_test: Path,
+                          dependency: str,
+                          run_on: Runner = Runner.SLURM) -> str:
+    """Generate a callback script for ablation and execute it.
 
     Args:
       solver: Path (object) to solver.
       instance_set_train: Path (object) to instances used for training.
       instance_set_test: Path (object) to instances used for testing.
       dependency: String of job dependencies.
+      run_on: Whether the job is executed on Slurm or Locally.
 
     Returns:
       String job identifier.
     """
     command_line = "echo $(pwd) $(date)\n"
-    command_line += ("srun -N1 -n1 ./Commands/validate_configured_vs_default.py "
-                     "--settings-file Settings/latest.ini")
-    command_line += f" --solver {solver}"
+    command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
+    command_line += "./Commands/run_ablation.py --settings-file Settings/latest.ini"
+    command_line += f" --solver {solver.name}"
     command_line += f" --instance-set-train {instance_set_train}"
+    command_line += f" --run-on {run_on}"
+
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
+    jobid = ""
 
-    jobid = generate_generic_callback_slurm_script(
-        "validation", solver, instance_set_train, instance_set_test,
-        dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
+    # runrunner works properly everything under 'if' should be removed leaving only the
+    # 'else', and the SLURM_RR replaced by just SLURM.
+    if run_on == Runner.SLURM:
+        jobid = generate_generic_callback_slurm_script(
+            "ablation", solver, instance_set_train, instance_set_test,
+            dependency, command_line, CommandName.RUN_ABLATION)
+    else:
+        result = create_callback_options_list("ablation",
+                                              solver,
+                                              instance_set_train,
+                                              instance_set_test)
+        run = rrr.add_to_queue(runner=run_on,
+                               cmd=command_line,
+                               name="ablation",
+                               dependencies=dependency,
+                               base_dir=sgh.sparkle_tmp_path,
+                               sbatch_options=result)
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+
+        if run_on == Runner.SLURM:
+            jobid = run.run_id
+        else:
+            print("Waiting for the local calculations to finish.")
+            run.wait()
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
 
     return jobid
 
 
-def generate_ablation_callback_slurm_script(solver: Path,
-                                            instance_set_train: Path,
-                                            instance_set_test: Path,
-                                            dependency: str) -> str:
-    """Generate a callback Slurm batch script for ablation.
+def create_callback_options_list(name: str,
+                                 solver: Path,
+                                 instance_set_train: Path,
+                                 instance_set_test: Path) -> (str, list[str]):
+    """Create the options for the callback script.
 
     Args:
+      name: Name of the script (used as prefix for the file name).
       solver: Path (object) to solver.
       instance_set_train: Path (object) to instances used for training.
       instance_set_test: Path (object) to instances used for testing.
-      dependency: String of job dependencies.
 
     Returns:
-      String job identifier.
+      str: The delayed job file path
+      list: List of strings containing the job options
     """
-    command_line = "echo $(pwd) $(date)\n"
-    command_line += ("srun -N1 -n1 ./Commands/run_ablation.py --settings-file "
-                     "Settings/latest.ini")
-    command_line += f" --solver {solver}"
-    command_line += f" --instance-set-train {instance_set_train}"
+    delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
 
     if instance_set_test is not None:
-        command_line += f" --instance-set-test {instance_set_test}"
+        delayed_job_file_name += f"_{instance_set_test.name}"
 
-    jobid = generate_generic_callback_slurm_script(
-        "ablation", solver, instance_set_train, instance_set_test,
-        dependency, command_line, CommandName.RUN_ABLATION)
+    delayed_job_file_name += "_script.sh"
 
-    return jobid
+    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
+    sparkle_tmp_path.mkdir(parents=True, exist_ok=True)
+    delayed_job_file_path = sparkle_tmp_path / delayed_job_file_name
+    delayed_job_output = f"{delayed_job_file_path}.txt"
+    delayed_job_error = f"{delayed_job_file_path}.err"
+
+    job_name = f"--job-name={delayed_job_file_name}"
+    output = f"--output={delayed_job_output}"
+    error = f"--error={delayed_job_error}"
+
+    sl.add_output(str(delayed_job_file_path), f"Delayed {name} script")
+    sl.add_output(delayed_job_output, f"Delayed {name} standard output")
+    sl.add_output(delayed_job_error, f"Delayed {name} error output")
+
+    return delayed_job_file_path, [job_name, output, error]
 
 
 def generate_generic_callback_slurm_script(name: str,
@@ -595,28 +707,11 @@ def generate_generic_callback_slurm_script(name: str,
     Returns:
       String job identifier.
     """
-    delayed_job_file_name = f"delayed_{name}_{solver.name}_{instance_set_train.name}"
-
-    if instance_set_test is not None:
-        delayed_job_file_name += f"_{instance_set_test.name}"
-
-    delayed_job_file_name += "_script.sh"
-
-    sparkle_tmp_path = Path(sgh.sparkle_tmp_path)
-    sparkle_tmp_path.mkdir(parents=True, exist_ok=True)
-    delayed_job_file_path = sparkle_tmp_path / delayed_job_file_name
-    delayed_job_output = f"{delayed_job_file_path}.txt"
-    delayed_job_error = f"{delayed_job_file_path}.err"
-
-    job_name = f"--job-name={delayed_job_file_name}"
-    output = f"--output={delayed_job_output}"
-    error = f"--error={delayed_job_error}"
-
-    sl.add_output(str(delayed_job_file_path), f"Delayed {name} script")
-    sl.add_output(delayed_job_output, f"Delayed {name} standard output")
-    sl.add_output(delayed_job_error, f"Delayed {name} error output")
-
-    sbatch_options_list = [job_name, output, error]
+    result = create_callback_options_list(name,
+                                          solver,
+                                          instance_set_train,
+                                          instance_set_test)
+    delayed_job_file_path, sbatch_options_list = result[0], result[1]
     sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(get_slurm_sbatch_user_options_list())

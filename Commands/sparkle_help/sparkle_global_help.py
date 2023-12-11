@@ -5,6 +5,7 @@ import fcntl
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
+from sparkle import about
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
@@ -15,7 +16,7 @@ def get_seed() -> int:
 
 latest_scenario = None
 
-sparkle_version = "0.3"
+sparkle_version = str(about.about_info["version"])
 
 sparkle_maximum_int = 2147483647
 sparkle_missing_value = -(sparkle_maximum_int - 1)
@@ -84,8 +85,6 @@ sparkle_marginal_contribution_actual_path = (
 
 sparkle_last_test_file_name = "last_test_configured_default.txt"
 
-sparkle_last_configuration_file_name = "last_configuration.txt"
-
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
 
 runsolver_path = "Components/runsolver/src/runsolver"
@@ -93,6 +92,7 @@ sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
 autofolio_path = "Components/AutoFolio-master/scripts/autofolio"
 
 smac_dir = "Components/smac-v2.10.03-master-778/"
+smac_results_dir = smac_dir + "results/"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 

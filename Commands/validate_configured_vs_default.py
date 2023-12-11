@@ -19,6 +19,10 @@ from Commands.sparkle_help.reporting_scenario import Scenario
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 
+from sparkle.slurm_parsing import SlurmBatch
+from runrunner.base import Runner
+import runrunner as rrr
+
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -45,6 +49,11 @@ def parser_function() -> argparse.ArgumentParser:
         help="path to testing instance set",
     )
     parser.add_argument(
+        "--configurator",
+        type=Path,
+        help="path to configurator"
+    )
+    parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
         default=sgh.settings.DEFAULT_general_performance_measure,
@@ -64,6 +73,12 @@ def parser_function() -> argparse.ArgumentParser:
         default=sgh.settings.DEFAULT_settings_path,
         action=ac.SetByUser,
         help="specify the settings file to use instead of the default",
+    )
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        help=("On which computer or cluster environment to execute the calculation."
+              "Available: local, slurm. Default: slurm")
     )
     return parser
 
@@ -87,6 +102,11 @@ if __name__ == "__main__":
     solver = args.solver
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
+    run_on = args.run_on
+    if args.configurator is not None:
+        configurator_path = Path(args.configurator)
+    else:
+        configurator_path = Path("Components", "smac-v2.10.03-master-778")
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
@@ -122,7 +142,7 @@ if __name__ == "__main__":
         instances_directory_test = Path("Instances/", instance_set_test_name)
         list_path = sih.get_list_all_path(instances_directory_test)
         inst_dir_prefix = instances_directory_test
-        smac_inst_dir_prefix = Path(sgh.smac_dir, "example_scenarios/instances",
+        smac_inst_dir_prefix = Path(configurator_path, "scenarios/instances",
                                     instance_set_test_name)
         sih.copy_instances_to_smac(
             list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
@@ -142,22 +162,53 @@ if __name__ == "__main__":
     sbatch_script_name = ssh.generate_sbatch_script_for_validation(
         solver.name, instance_set_train.name, instance_set_test_name
     )
-    sbatch_script_dir = sgh.smac_dir
-    sbatch_script_path = sbatch_script_dir + sbatch_script_name
+    sbatch_script_path = configurator_path / sbatch_script_name
 
-    validate_jobid = ssh.submit_sbatch_script(
-        sbatch_script_name,
-        CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-        sbatch_script_dir,
-    )
+    if run_on == Runner.SLURM:
+        validate_jobid = ssh.submit_sbatch_script(
+            sbatch_script_name,
+            CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
+            configurator_path,
+        )
 
-    print(f"Running validation in parallel. Waiting for Slurm job with id: "
-          f"{validate_jobid}")
+        print(f"Running validation in parallel. Waiting for Slurm job with id: "
+              f"{validate_jobid}")
+    else:
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM_RR:
+            run_on = Runner.SLURM
+        batch = SlurmBatch(sbatch_script_path)
+        n_jobs = int(len(batch.cmd_params) / 2)
+        cmd = []
+        for i in range(n_jobs):
+            # TODO:
+            # The second half of the params contain the destination files for bash output
+            # This should be given to runrunner as pipe dest
+            cmd.append(batch.cmd + " " + batch.cmd_params[i])
+
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd,
+            name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
+            path=configurator_path,
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+
+        if run_on == Runner.SLURM:
+            print(f"Running validation in parallel. Waiting for local job with id: "
+                  f"{run.run_id}")
+        else:
+            run.wait()
+
+        # Remove the below if block once runrunner works satisfactorily
+        if run_on == Runner.SLURM:
+            run_on = Runner.SLURM_RR
+        print("Running validation done!")
 
     # Write most recent run to file
     last_test_file_path = Path(
-        sgh.smac_dir,
-        "example_scenarios",
+        configurator_path,
+        "scenarios",
         f"{solver.name}_{sgh.sparkle_last_test_file_name}"
     )
 

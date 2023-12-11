@@ -43,7 +43,7 @@ To make changes to Sparkle, please create a branch from `development` and add yo
 When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
-1. Before a pull request is reviewed, the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied.
+1. Prior to creating a pull request, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid burning through our build minutes on Bitbucket, this is easily tested locally by running "flake8" or "pytest" in the main sparkle directory in your branch.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
 3. Once all reviewers have approved the pull request it can be merged. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches. In principle the last reviewer to approve should do the merge immediately. However, if this does not work because, e.g., a final (minor) change is requested, or they forget, someone else can take over the responsibility.
 
@@ -65,13 +65,12 @@ The coding style consistency is a work in progress, and existing code may not ad
 4. Ensure useful and accurate docstrings are included, and follow the [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for them. End parameter description sentences always with a dot.
 5. Ensure useful and accurate type hints are included.
 6. Use fstrings over other string formatting.
-7. Use `pathlib` over other path manipulators.
+7. Use pathlib over other path manipulators.
 8. Prefer interpretable function names over shorter ones.
-9. Do not add a return statement in functions that do not return anything. Use `None` as a return type hint.
 
 ### Testing
 1. Make sure the unit tests pass by running `pytest`.
-2. Make sure the integration tests (see `Commands/test/`) relevant for the commands affected by the changes pass by running them. Ideally, run all of them with `Commands/test/all.sh`.
+2. Make sure the integration tests (see `Commands/test/`) relevant for the commands affected by the changes pass by running them. Optionally run all of them with `Commands/test/all.sh`.
 3. Make sure the examples relevant to the changes execute correctly (see the `.sh` files in `Examples/`).
 
 ## Release protocol
@@ -97,6 +96,7 @@ The file `CHANGELOG.md` aims to track changes between versions.
 When making changes, please add a short description in the `[Unreleased]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
 
 ## Tests
+Sparkle has a variety of tests to make sure our changes impact the code base in the intended manner of the developer.
 
 ### Unit tests
 
@@ -115,5 +115,5 @@ pytest is installed with the base requirements of Sparkle and is run automatical
 ### Integration tests
 
 In addition to the unit tests, Sparkle also has a series of integration tests verifying that the commands run without errors.
-These tests are in `Commands/test/*` and must be run on a Slurm cluster.
+These tests are in `Commands/test/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux/MacOS. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm. 
 
