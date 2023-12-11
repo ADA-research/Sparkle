@@ -8,7 +8,6 @@ import os
 import sys
 import csv
 from pathlib import Path
-from enum import Enum
 
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
