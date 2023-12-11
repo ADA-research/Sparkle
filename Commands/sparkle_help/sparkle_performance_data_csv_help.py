@@ -102,7 +102,16 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def calc_virtual_best_score_of_portfolio_on_instance(
             self: SparklePerformanceDataCSV, instance: str,
             minimise: bool, capvalue: float = None) -> float:
-        """Return the VBS performance for a specific instance."""
+        """Return the VBS performance for a specific instance.
+
+        Args:
+            instance: For which instance we shall calculate the VBS
+            minimise: Whether we should minimise or maximise the score
+            capvalue: The minimum/maximum scoring value the VBS is allowed to have
+
+        Returns:
+            The virtual best solver performance for this instance.
+        """
         # If capvalue is not set the objective is RUNTIME, so use the cutoff time as
         # capvalue
         if capvalue is None:
@@ -118,6 +127,9 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         if virtual_best_score is None and len(self.list_columns()) == 0:
             virtual_best_score = 0
+        elif minimise and virtual_best_score > capvalue or\
+                not minimise and virtual_best_score < capvalue:
+            virtual_best_score = capvalue
 
         return virtual_best_score
 
@@ -126,7 +138,16 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
             capvalue_list: list[float]) -> float:
-        """Return the overall VBS performance on the portfolio."""
+        """Return the overall VBS performance of the portfolio.
+
+        Args:
+            aggregation_function: The method of combining all VBS scores together
+            minimise: Whether the scores are minimised or not
+            capvalue_list: List of capvalue per instance
+
+        Returns:
+            The combined virtual best performance of the portfolio over all instances.
+        """
         virtual_best = []
         for instance_idx in range(0, len(self.list_rows())):
             instance = self.get_row_name(instance_idx)

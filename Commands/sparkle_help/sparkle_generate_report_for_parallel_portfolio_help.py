@@ -546,7 +546,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     str_value = r"\decisiontrue"
 
     if (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
         str_value = r"\decisionfalse"
     mydict[variable] = str_value
 
