@@ -4,6 +4,7 @@ from __future__ import annotations
 from unittest import TestCase
 from pathlib import Path
 import platform
+import os
 
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
@@ -11,6 +12,9 @@ from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help.sparkle_settings import Settings
+
+
+BITBUCKET_KEY = os.environ.get("AM_I_IN_A_DOCKER_CONTAINER", False)
 
 
 class TestMarginalContribution(TestCase):
@@ -86,7 +90,7 @@ class TestMarginalContribution(TestCase):
         """Test for method get_list_predict_schedule."""
         # Does not work yet on mac due to issues with Autofolio run
         # Does not work yet with Bitbucket Pipelines because reading from files(?)
-        if platform.system() != "Linux" or True:
+        if platform.system() != "Linux" or BITBUCKET_KEY:
             return
         pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
         file = "Commands/test/test_files/Feature_Data/"\
@@ -109,7 +113,7 @@ class TestMarginalContribution(TestCase):
         """Test for method compute_actual_selector_performance."""
         # Does not work yet on mac due to issues with Autofolio run
         # Does not work yet on Bitbucket due to issues with get_list..._from_file()
-        if platform.system() != "Linux" or True:
+        if platform.system() != "Linux" or BITBUCKET_KEY:
             return
         pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
         perf_path = "Commands/test/test_files/Performance_Data/"\
@@ -140,7 +144,7 @@ class TestMarginalContribution(TestCase):
         """Test for method compute_actual_used_time_for_instance."""
         # Test does not work on Mac
         # Does not work yet on Bitbucket due to issues with get_list..._from_file()
-        if platform.system() != "Linux" or True:
+        if platform.system() != "Linux" or BITBUCKET_KEY:
             return
         pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
         instance = "Instances/PTN/Ptn-7824-b03.cnf"
