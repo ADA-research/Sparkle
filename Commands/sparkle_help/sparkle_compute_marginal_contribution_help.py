@@ -108,8 +108,8 @@ def compute_perfect_selector_marginal_contribution(
               "from file instead! Use --recompute to force recomputation.")
         return read_marginal_contribution_csv(perfect_margi_cont_path)
 
-    cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    print(f"In this calculation, cutoff time for each run is {cutoff_time_str} seconds")
+    print("In this calculation, cutoff time for each run is "
+          f"{sgh.settings.get_general_target_cutoff_time()} seconds")
 
     rank_list = []
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
@@ -351,8 +351,8 @@ def compute_actual_selector_marginal_contribution(
 
         return rank_list
 
-    cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    print(f"In this calculation, cutoff time for each run is {cutoff_time_str} seconds")
+    print("In this calculation, cutoff time for each run is "
+          f"{sgh.settings.get_general_target_cutoff_time()} seconds")
 
     rank_list = []
 

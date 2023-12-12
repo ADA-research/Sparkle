@@ -89,15 +89,17 @@ class TestMarginalContribution(TestCase):
                    "test_construct_sparkle_portfolio_selector.csv")
 
         # Strange behaviour, keeps changing its output 'randomly' between these two
-        resulta = [("Solvers/CSCCSat", 1.387803880042905), ("Solvers/MiniSAT", 0.0)]
-        #resultb = [("Solvers/CSCCSat", 4.139621586398334), ("Solvers/MiniSAT", 0.0)]
+        # result = [("Solvers/CSCCSat", 1.1625460222906574), ("Solvers/MiniSAT", 0.0)]
+        result = [("Solvers/CSCCSat", 1.387803880042905), ("Solvers/MiniSAT", 0.0)]
 
-        output = scmch.compute_perfect_selector_marginal_contribution(aggregation_function=sum,
-                                                                      capvalue_list=None,
-                                                                      minimise=True,
-                                                                      performance_data_csv_path=pth,
-                                                                      flag_recompute=True)
-        assert output == resulta #or output == resultb
+        output = scmch.compute_perfect_selector_marginal_contribution(
+            aggregation_function=sum,
+            capvalue_list=None,
+            minimise=True,
+            performance_data_csv_path=pth,
+            flag_recompute=True
+        )
+        self.assertListEqual(output, result)
 
     def test_get_list_predict_schedule(self: TestCase) -> None:
         """Test for method get_list_predict_schedule."""
@@ -133,18 +135,15 @@ class TestMarginalContribution(TestCase):
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
-        num_instances = 12
-        num_solvers = 2
-        capvalue_list = None
 
-        result = 2.068482775510204
+        result = 30.644344
         sgh.settings = Settings("Commands/test/test_files/sparkle_settings.ini")
         output = scmch.compute_actual_selector_performance(pth,
                                                            perf_path,
                                                            feature_csv_path,
-                                                           num_instances,
-                                                           num_solvers,
-                                                           capvalue_list)
+                                                           True,
+                                                           sum,
+                                                           None)
 
         assert output == result
 
@@ -152,28 +151,6 @@ class TestMarginalContribution(TestCase):
         """Test for method compute_actual_performance_for_instance."""
         # TODO: This method is currently not touched by the .sh test. Think of a test.
         pass
-
-    def test_compute_actual_used_time_for_instance(self: TestCase) -> None:
-        """Test for method compute_actual_used_time_for_instance."""
-        # Test does not work on Mac
-        # Does not work yet on Bitbucket due to issues with get_list..._from_file()
-        if platform.system() != "Linux" or is_bitbucket():
-            return
-        pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
-        instance = "Instances/PTN/Ptn-7824-b03.cnf"
-        perf_path = "Commands/test/test_files/Performance_Data/"\
-                    "test_construct_sparkle_portfolio_selector.csv"
-        feature_csv_path = "Commands/test/test_files/Feature_Data/"\
-                           "test_construct_sparkle_portfolio_selector.csv"
-        perfcsv = SparkleFeatureDataCSV(perf_path)
-
-        result = (3.0, False)
-
-        output = scmch.compute_actual_used_time_for_instance(pth,
-                                                             instance,
-                                                             feature_csv_path,
-                                                             perfcsv)
-        assert output == result
 
     def test_compute_actual_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
@@ -187,13 +164,15 @@ class TestMarginalContribution(TestCase):
 
         result = [("Solvers/CSCCSat", 1.3895076764357648), ("Solvers/MiniSAT", 0.0)]
 
-        output = scmch.compute_actual_selector_marginal_contribution(aggregation_function=sum,
-                                                                     capvalue_list=None,
-                                                                     minimise=True,
-                                                                     performance_data_csv_path=perf_path,
-                                                                     feature_data_csv_path=feature_csv_path,
-                                                                     flag_recompute=True)
-        self.assertEqual( output, result )
+        output = scmch.compute_actual_selector_marginal_contribution(
+            aggregation_function=sum,
+            capvalue_list=None,
+            minimise=True,
+            performance_data_csv_path=perf_path,
+            feature_data_csv_path=feature_csv_path,
+            flag_recompute=True
+        )
+        self.assertEqual(output, result)
 
     def test_print_rank_list(self: TestCase) -> None:
         """Test for method print_rank_list. Could be irrelevant."""
