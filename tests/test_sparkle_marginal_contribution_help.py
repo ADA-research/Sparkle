@@ -7,8 +7,6 @@ import platform
 
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help.sparkle_settings import Settings
 
@@ -52,36 +50,6 @@ class TestMarginalContribution(TestCase):
 
         assert result == output
         pth.unlink()
-
-    def test_get_cap_value_list(self: TestCase) -> None:
-        """Test for method get_cap_value_list."""
-        csv_obj = None
-        output = scmch.get_capvalue_list(csv_obj, PerformanceMeasure.RUNTIME)
-        assert output is None
-
-        csv_data = ",Solvers/MiniSAT,Solvers/CSCCSat\n"\
-                   "Instances/PTN/Ptn-7824-b03.cnf,3000.0,3000.0\n"\
-                   "Instances/PTN/Ptn-7824-b15.cnf,3000.0,28.1747\n"\
-                   "Instances/PTN/Ptn-7824-b05.cnf,3000.0,3000.0\n"\
-                   "Instances/PTN/Ptn-7824-b13.cnf,3000.0,9.98625\n"\
-                   "Instances/PTN/Ptn-7824-b21.cnf,117.589,0.107158\n"\
-                   "Instances/PTN/Ptn-7824-b19.cnf,3000.0,183.437\n"\
-                   "Instances/PTN/Ptn-7824-b17.cnf,3000.0,0.537186\n"\
-                   "Instances/PTN/bce7824.cnf,3000.0,3000.0\n"\
-                   "Instances/PTN/Ptn-7824-b01.cnf,3000.0,3000.0\n"\
-                   "Instances/PTN/Ptn-7824-b11.cnf,3000.0,3000.0\n"\
-                   "Instances/PTN/Ptn-7824-b09.cnf,3000.0,196.792\n"\
-                   "Instances/PTN/Ptn-7824-b07.cnf,3000.0,3000.0\n"
-        csv_path = Path("Test_Data/test_sparkle_performance_data.csv")
-        Path.write_text(csv_path, csv_data)
-        csv_obj = spdcsv.SparklePerformanceDataCSV(csv_path)
-        assert csv_obj.get_column_size() == 2
-        result = [3000.0, 3000.0, 3000.0, 3000.0, 117.589, 3000.0,
-                  3000.0, 3000.0, 3000.0, 3000.0, 3000.0, 3000.0]
-        output = scmch.get_capvalue_list(csv_obj, PerformanceMeasure.QUALITY_ABSOLUTE)
-
-        assert output == result
-        csv_path.unlink()
 
     def test_compute_perfect_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_perfect_selector_marginal_contribution."""

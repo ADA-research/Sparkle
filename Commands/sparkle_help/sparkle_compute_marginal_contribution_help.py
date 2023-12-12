@@ -9,7 +9,6 @@ import sys
 import csv
 from pathlib import Path
 from typing import Callable
-from statistics import mean
 
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -95,9 +94,6 @@ def compute_perfect_selector_marginal_contribution(
 
     rank_list = []
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-    performance_measure = sgh.settings.get_general_performance_measure()
-    if capvalue_list is None:
-        capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
@@ -284,13 +280,13 @@ def compute_actual_performance_for_instance(
             scheduled_cutoff_time_this_run = prediction[1]
             # 1. if performance <= predicted runtime we have a successfull solver
             if performance <= scheduled_cutoff_time_this_run:
-                # 2. Succes if the tried solvers < selector cutoff_time 
+                # 2. Succes if the tried solvers < selector cutoff_time
                 if sum(performance_list) <= cutoff_time:
                     flag_successfully_solving = True
                 break
             # 3. Else, we sett the failed solver to the cutoff time
             performance_list[-1] = scheduled_cutoff_time_this_run
-            
+
             # 4. If we have exceeded cutoff_time, we are done
             if sum(performance_list) > cutoff_time:
                 break
@@ -417,8 +413,6 @@ def compute_actual_selector_marginal_contribution(
                   " ******")
             print("****** ERROR: AutoFolio constructing the actual portfolio selector "
                   f"excluding solver {solver_name} failed! ******")
-            print("****** Use virtual best performance instead of actual "
-                  "performance for this portfolio selector! ******")
             sys.exit(-1)
 
         tmp_asp = compute_actual_selector_performance(
@@ -503,16 +497,20 @@ def compute_marginal_contribution(
         minimise = False
         aggregation_function = max
     elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        capvalue_list = sgh.settings.get_general_cap_value()
+        capvalue = sgh.settings.get_general_cap_value()
         minimise = True
         aggregation_function = min
     else:
         # assume runtime optimization
         aggregation_function = sum
-        num_of_instances = performance_data_csv.get_number_of_instances()
         capvalue = sgh.settings.get_general_target_cutoff_time()
-        capvalue_list = [capvalue for _ in range(0, num_of_instances)]
         minimise = True
+
+    num_of_instances = performance_data_csv.get_number_of_instances()
+    if capvalue is list or capvalue is None:
+        capvalue_list = capvalue
+    else:
+        capvalue_list = [capvalue for _ in range(num_of_instances)]
 
     if not (flag_compute_perfect | flag_compute_actual):
         print("ERROR: compute_marginal_contribution called without a flag set to"
