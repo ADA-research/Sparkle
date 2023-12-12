@@ -63,24 +63,6 @@ def write_marginal_contribution_csv(path: Path,
                       "Marginal contributions to the portfolio selector per solver.")
 
 
-def get_capvalue_list(performance_data_csv: SparklePerformanceDataCSV,
-                      performance_measure: PerformanceMeasure) -> list[float] | None:
-    """Return a list of cap-values if the performance measure is QUALITY, else None.
-
-    Args:
-        performance_data_csv: The CSV data as a SparklePerformanceDataCSV object.
-
-    Returns:
-        A list of floating point numbers or None.
-    """
-    # If QUALITY_ABSOLUTE is the performance measure, use the maximum performance per
-    # instance as capvalue; otherwise the cutoff time is used
-    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
-            performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        return performance_data_csv.get_maximum_performance_per_instance()
-    return None
-
-
 def compute_perfect_selector_marginal_contribution(
         aggregation_function: Callable[[list[float]], float],
         capvalue_list: list[float],
@@ -247,7 +229,7 @@ def compute_actual_selector_performance(
             capvalue = capvalue_list[index]
         performance_instance, flag_success = compute_actual_performance_for_instance(
             actual_portfolio_selector_path, instance, feature_data_csv_path,
-            performance_data_csv, aggregation_function, minimise, perf_measure, capvalue)
+            performance_data_csv, minimise, perf_measure, capvalue)
 
         if not flag_success and capvalue is not None:
             performance_instance = capvalue * penalty_factor
@@ -262,7 +244,6 @@ def compute_actual_performance_for_instance(
         instance: str,
         feature_data_csv_path: str,
         performance_data_csv: SparklePerformanceDataCSV,
-        aggregation_function: Callable[[list[float]], float],
         minimise: bool,
         objective_type: PerformanceMeasure,
         capvalue: float) -> tuple[float, bool]:
@@ -295,27 +276,41 @@ def compute_actual_performance_for_instance(
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     if objective_type == PerformanceMeasure.RUNTIME:
         performance_list = []
+        # In case of Runtime, we loop through the selected solvers
         for prediction in list_predict_schedule:
             # A prediction is a solver and its score given by the Selector
             performance = float(performance_data_csv.get_value(instance, prediction[0]))
             performance_list.append(performance)
             scheduled_cutoff_time_this_run = prediction[1]
+            # 1. if performance <= predicted runtime we have a successfull solver
             if performance <= scheduled_cutoff_time_this_run:
+                # 2. Succes if the tried solvers < selector cutoff_time 
                 if sum(performance_list) <= cutoff_time:
                     flag_successfully_solving = True
                 break
+            # 3. Else, we sett the failed solver to the cutoff time
             performance_list[-1] = scheduled_cutoff_time_this_run
-
-            if aggregation_function(performance_list) > cutoff_time:
+            
+            # 4. If we have exceeded cutoff_time, we are done
+            if sum(performance_list) > cutoff_time:
                 break
 
-        performance = min(performance_list)
+        performance = sum(performance_list)
     else:
-        solver = list_predict_schedule[0][0]
-        performance = float(performance_data_csv.get_value(instance, solver))
-        if minimise and performance < capvalue or\
-                not minimise and performance > capvalue:
-            flag_successfully_solving = True
+        # Minimum or maximum of predicted solvers (Aggregation function)
+        performance_list = []
+        for prediction in list_predict_schedule:
+            solver_performance = performance_data_csv.get_value(instance, prediction[0])
+            performance_list.append(float(solver_performance))
+
+        if minimise:
+            performance = min(performance_list)
+            if performance <= capvalue:
+                flag_successfully_solving = True
+        else:
+            performance = max(performance_list)
+            if performance >= capvalue:
+                flag_successfully_solving = True
 
     return performance, flag_successfully_solving
 
@@ -360,10 +355,6 @@ def compute_actual_selector_marginal_contribution(
 
     # Get values from CSV while all solvers and instances are included
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-    performance_measure = sgh.settings.get_general_performance_measure()
-
-    if capvalue_list is None:
-        capvalue_list = get_capvalue_list(performance_data_csv, performance_measure)
 
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
@@ -450,9 +441,11 @@ def compute_actual_selector_marginal_contribution(
                 tmp_asp < actual_selector_performance:
             marginal_contribution = tmp_asp / actual_selector_performance
         else:
-            print("****** WARNING DUBIOUS SELECTOR:"
+            print("****** WARNING DUBIOUS SELECTOR/SOLVER:"
                   f" The omission of solver {solver_name} yields an improvement."
-                  "This indicates a selector worse than average best solver. ******")
+                  "The selector improves better without this solver. It may be usefull"
+                  " to construct a portfolio without this solver.")
+            marginal_contribution = 0.0
 
         solver_tuple = (solver, marginal_contribution)
         rank_list.append(solver_tuple)
@@ -506,13 +499,13 @@ def compute_marginal_contribution(
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     performance_measure = sgh.settings.get_general_performance_measure()
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-        capvalue_list = get_capvalue_list(performance_data_csv)
+        capvalue_list = sgh.settings.get_general_cap_value()
         minimise = False
-        aggregation_function = mean
+        aggregation_function = max
     elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        capvalue_list = get_capvalue_list(performance_data_csv)
+        capvalue_list = sgh.settings.get_general_cap_value()
         minimise = True
-        aggregation_function = mean
+        aggregation_function = min
     else:
         # assume runtime optimization
         aggregation_function = sum

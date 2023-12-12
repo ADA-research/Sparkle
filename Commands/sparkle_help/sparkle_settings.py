@@ -115,6 +115,7 @@ class Settings:
         self.__general_performance_measure_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
+        self.__general_cap_value_set = SettingState.NOT_SET
         self.__general_penalty_multiplier_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
 
@@ -373,6 +374,27 @@ class Settings:
             performance_measure_str = performance_measure.name
 
         return performance_measure_str
+
+    def set_general_cap_value(
+            self: Settings, value: float = None,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the cap value."""
+        section = "general"
+        name = "cap_value"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_cap_value_set, origin, name):
+            self.__init_section(section)
+            self.__general_cap_value_set = origin
+            self.__settings[section][name] = str(value)
+
+        return
+
+    def get_general_cap_value():
+        if self.__general_cap_value_set == SettingState.NOT_SET:
+            self.set_general_cap_value()
+
+        return float(self.__settings["general"]["cap_value"])
 
     def set_general_penalty_multiplier(
             self: Settings, value: int = DEFAULT_general_penalty_multiplier,

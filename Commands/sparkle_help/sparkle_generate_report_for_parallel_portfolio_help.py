@@ -213,11 +213,12 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
                     solver_dict[solver_name] = 1
             else:
                 unsolved_instances += 1
-
-    if ((sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
-        | (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION)):
+    if (sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
+        print("*** ERROR: Parallel Portfolio is not available currently for"
+              f" performance measure: {sgh.settings.get_general_performance_measure()}")
+    elif (sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
         for instances in results_on_instances:
             str_value += (r"\item \textbf{" + sgrh.underscore_for_latex(instances)
                           + "}, was scored by: " + r"\textbf{"
