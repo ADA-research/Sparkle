@@ -213,9 +213,12 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
                     solver_dict[solver_name] = 1
             else:
                 unsolved_instances += 1
-
     if (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE):
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
+        print("*** ERROR: Parallel Portfolio is not available currently for"
+              f" performance measure: {sgh.settings.get_general_performance_measure()}")
+    elif (sgh.settings.get_general_performance_measure()
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
         for instances in results_on_instances:
             str_value += (r"\item \textbf{" + sgrh.underscore_for_latex(instances)
                           + "}, was scored by: " + r"\textbf{"
@@ -544,7 +547,7 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     str_value = r"\decisiontrue"
 
     if (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE):
+            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
         str_value = r"\decisionfalse"
     mydict[variable] = str_value
 

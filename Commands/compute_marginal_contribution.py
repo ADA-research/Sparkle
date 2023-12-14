@@ -72,7 +72,7 @@ if __name__ == "__main__":
                              sch.CommandName.COMPUTE_MARGINAL_CONTRIBUTION])
 
     print("[Deprecated] command, functionality is called automatically by other commands"
-          "when needed.")
+          " when needed.")
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE

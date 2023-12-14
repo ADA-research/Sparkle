@@ -193,7 +193,8 @@ def get_solver_perfect_ranking_list() -> str:
         Solvers in the VBS (virtual best solver) ranked by marginal contribution as LaTeX
         str.
     """
-    rank_list = scmch.compute_perfect()
+    # TODO: This method call is missing arguments?
+    rank_list = scmch.compute_perfect_selector_marginal_contribution()
     str_value = ""
 
     for i in range(0, len(rank_list)):
@@ -212,7 +213,8 @@ def get_solver_actual_ranking_list() -> str:
         Solvers in the Sparkle portfolio selector ranked by marginal contribution as
         LaTeX str.
     """
-    rank_list = scmch.compute_actual()
+    # TODO: This method call is missing arguments?
+    rank_list = scmch.compute_actual_selector_marginal_contribution()
     str_value = ""
 
     for i in range(0, len(rank_list)):

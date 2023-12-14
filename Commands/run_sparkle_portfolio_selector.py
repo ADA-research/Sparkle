@@ -80,8 +80,8 @@ if __name__ == "__main__":
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
 
-    if (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE):
+    if sgh.settings.get_general_performance_measure()\
+            == PerformanceMeasure.QUALITY_ABSOLUTE:
         print(
             "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
             " for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)"

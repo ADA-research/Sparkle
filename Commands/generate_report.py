@@ -151,19 +151,18 @@ if __name__ == "__main__":
 
     # Reporting for algorithm selection
     if selection or test_case_directory is not None:
-        if (
-            sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE
-        ):
+        performance_measure = sgh.settings.get_general_performance_measure()
+        if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
+           performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
             print("ERROR: The generate_report command is not yet implemented for the"
                   " QUALITY_ABSOLUTE performance measure! (functionality coming soon)")
-            sys.exit()
+            sys.exit(-1)
 
         if not Path(sgh.sparkle_algorithm_selector_path).is_file():
             print("Before generating a Sparkle report, please first construct the "
                   "Sparkle portfolio selector!")
             print("Not generating a Sparkle report, stopping execution!")
-            sys.exit()
+            sys.exit(-1)
 
         print("Generating report ...")
         status_info = GenerateReportStatusInfo()

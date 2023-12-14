@@ -5,6 +5,9 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+from typing import Callable
+import builtins
+import statistics
 
 from Commands.sparkle_help import sparkle_logging as slog
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -15,17 +18,21 @@ class PerformanceMeasure(Enum):
 
     RUNTIME = 0
     QUALITY_ABSOLUTE = 1
-    QUALITY = 1  # If not specified, assume ABSOLUTE QUALITY
-    # QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
+    QUALITY = 1
+    QUALITY_ABSOLUTE_MINIMISATION = 1
+    QUALITY_ABSOLUTE_MAXIMISATION = 2
 
     @staticmethod
     def from_str(performance_measure: str) -> PerformanceMeasure:
         """Return a given str as PerformanceMeasure."""
         if performance_measure == "RUNTIME":
             performance_measure = PerformanceMeasure.RUNTIME
-        elif (performance_measure == "QUALITY_ABSOLUTE"
-              or performance_measure == "QUALITY"):
+        elif performance_measure == "QUALITY_ABSOLUTE":
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
+        elif performance_measure == "QUALITY_ABSOLUTE_MAXIMISATION":
+            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
+        elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
+            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
 
         return performance_measure
 
@@ -111,7 +118,9 @@ class Settings:
         self.__general_performance_measure_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
+        self.__general_cap_value_set = SettingState.NOT_SET
         self.__general_penalty_multiplier_set = SettingState.NOT_SET
+        self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
 
         self.__config_budget_per_run_set = SettingState.NOT_SET
@@ -170,6 +179,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_target_cutoff_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cap_value",)
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_general_cap_value(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("penalty_multiplier", "penalty_number")
@@ -370,6 +386,28 @@ class Settings:
 
         return performance_measure_str
 
+    def set_general_cap_value(
+            self: Settings, value: float = None,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general cap value."""
+        section = "general"
+        name = "cap_value"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_cap_value_set, origin, name):
+            self.__init_section(section)
+            self.__general_cap_value_set = origin
+            self.__settings[section][name] = float(value)
+
+        return
+
+    def get_general_cap_value(self: Settings) -> float:
+        """Get the general cap value."""
+        if self.__general_cap_value_set == SettingState.NOT_SET:
+            self.set_general_cap_value()
+
+        return self.__settings["general"]["cap_value"]
+
     def set_general_penalty_multiplier(
             self: Settings, value: int = DEFAULT_general_penalty_multiplier,
             origin: SettingState = SettingState.DEFAULT) -> None:
@@ -391,6 +429,36 @@ class Settings:
             self.set_general_penalty_multiplier()
 
         return int(self.__settings["general"]["penalty_multiplier"])
+
+    def set_general_metric_aggregation_function(
+            self: Settings, value: str = "mean",
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general aggregation function of performance measure."""
+        section = "general"
+        name = "metric_aggregation_function"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_metric_aggregation_function_set, origin, name):
+            self.__init_section(section)
+            self.__general_metric_aggregation_function_set = origin
+            self.__settings[section][name] = value
+
+        return
+
+    def get_general_metric_aggregation_function(self: Settings) -> Callable:
+        """Set the general aggregation function of performance measure."""
+        if self.__general_metric_aggregation_function_set == SettingState.NOT_SET:
+            self.set_general_metric_aggregation_function()
+        method = self.__settings["general"]["metric_aggregation_function"]
+        libraries = (builtins, statistics)
+        for lib in libraries:
+            if not isinstance(method, str):
+                break
+            try:
+                method = getattr(lib, method)
+            except AttributeError:
+                continue
+        return method
 
     def get_penalised_time(self: Settings, custom_cutoff: int = None) -> int:
         """Return the penalised time associated with the cutoff time."""

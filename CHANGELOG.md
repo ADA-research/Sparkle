@@ -2,14 +2,19 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.6] - 202
+## [0.6] - 2023/12/14
 
 ### Added
-- Added support for commands to run without Slurm, accessible through new --run-on local argument
+- Added support for several commands to run without Slurm, accessible through new --run-on local argument
+- Added configurable aggregation function for Marginal Contribution
+- Added documentation for running configured solver
+- Added type hints
 
 ### Changed
+- Marginal Contribution of a solver is now implemented according to mathematical definition
 
 ### Fixed
+- Minor bug fixes and more unit test support added to avoid bugs
 
 ## [0.5] - 2023/03/16
 

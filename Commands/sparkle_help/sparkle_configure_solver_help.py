@@ -42,8 +42,10 @@ def get_smac_run_obj() -> str:
     # Convert to SMAC format
     if smac_run_obj == PerformanceMeasure.RUNTIME:
         smac_run_obj = smac_run_obj.name
-    elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE:
+    elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         smac_run_obj = "QUALITY"
+    elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
+        print("Warning: Performance measure not available for SMAC: {smac_run_obj}")
     else:
         print("Warning: Unknown performance measure", smac_run_obj,
               "! This is a bug in Sparkle.")
