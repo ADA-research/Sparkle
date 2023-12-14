@@ -56,9 +56,17 @@ class TestMarginalContribution(TestCase):
         pth = Path("Commands/test/test_files/Performance_Data/"
                    "test_construct_sparkle_portfolio_selector.csv")
 
-        # Strange behaviour, keeps changing its output 'randomly' between these two
-        # result = [("Solvers/CSCCSat", 1.1625460222906574), ("Solvers/MiniSAT", 0.0)]
-        result = [("Solvers/CSCCSat", 1.387803880042905), ("Solvers/MiniSAT", 0.0)]
+        # Settings have no impact yet on the unit test, this needs to be reconfigured
+        tmp_settings = ""
+        source_settings = Path("tests/test_files/Settings/mc-settings.ini")
+        with Path("Settings/sparkle_settings.ini").open("r+") as file_target:
+            tmp_settings = file_target.read()
+            file_target.truncate()
+            with source_settings.open("r") as file_source:
+                source_settings = file_source.read()
+                file_target.write(source_settings)
+
+        result = [("Solvers/CSCCSat", 1.7980089765503102), ("Solvers/MiniSAT", 0.0)]
 
         output = scmch.compute_perfect_selector_marginal_contribution(
             aggregation_function=sum,
@@ -67,6 +75,11 @@ class TestMarginalContribution(TestCase):
             performance_data_csv_path=pth,
             flag_recompute=True
         )
+
+        with Path("Settings/sparkle_settings.ini").open("w") as f:
+            f.truncate()
+            f.write(tmp_settings)
+
         self.assertListEqual(output, result)
 
     def test_get_list_predict_schedule(self: TestCase) -> None:

@@ -209,7 +209,7 @@ def compute_actual_selector_performance(
       performance_data_csv_path: Path to the CSV file with the performance data.
       feature_data_csv_path: path to the CSV file with the features.
       minimise: Flag indicating, if scores should be minimised.
-      aggregation_function: function to aggregate the quality scores
+      aggregation_function: function to aggregate the performance per instance
       capvalue_list: Optional list of cap-values.
 
     Returns:
@@ -251,7 +251,6 @@ def compute_actual_performance_for_instance(
       feature_data_csv_path: Path to the CSV file with the feature data.
       performance_data_csv: SparklePerformanceDataCSV object that holds the
         performance data.
-      aggregation_function: function to aggregate performance values
       minimise: Whether the performance value should be minimized or maximized
       objective_type: Whether we are dealing with run time or not.
       capvalue: Cap value for this instance
@@ -492,17 +491,15 @@ def compute_marginal_contribution(
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     performance_measure = sgh.settings.get_general_performance_measure()
+    aggregation_function = sgh.settings.get_general_metric_aggregation_function()
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         capvalue_list = sgh.settings.get_general_cap_value()
         minimise = False
-        aggregation_function = max
     elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         capvalue = sgh.settings.get_general_cap_value()
         minimise = True
-        aggregation_function = min
     else:
         # assume runtime optimization
-        aggregation_function = sum
         capvalue = sgh.settings.get_general_target_cutoff_time()
         minimise = True
 

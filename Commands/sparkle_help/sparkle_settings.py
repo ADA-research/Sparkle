@@ -5,6 +5,9 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+from typing import Callable
+import builtins
+import statistics
 
 from Commands.sparkle_help import sparkle_logging as slog
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -117,6 +120,7 @@ class Settings:
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_cap_value_set = SettingState.NOT_SET
         self.__general_penalty_multiplier_set = SettingState.NOT_SET
+        self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
 
         self.__config_budget_per_run_set = SettingState.NOT_SET
@@ -425,6 +429,36 @@ class Settings:
             self.set_general_penalty_multiplier()
 
         return int(self.__settings["general"]["penalty_multiplier"])
+
+    def set_general_metric_aggregation_function(
+            self: Settings, value: str = "mean",
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general aggregation function of performance measure."""
+        section = "general"
+        name = "metric_aggregation_function"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_metric_aggregation_function_set, origin, name):
+            self.__init_section(section)
+            self.__general_metric_aggregation_function_set = origin
+            self.__settings[section][name] = value
+
+        return
+
+    def get_general_metric_aggregation_function(self: Settings) -> Callable:
+        """Set the general aggregation function of performance measure."""
+        if self.__general_metric_aggregation_function_set == SettingState.NOT_SET:
+            self.set_general_metric_aggregation_function()
+        method = self.__settings["general"]["metric_aggregation_function"]
+        libraries = (builtins, statistics)
+        for lib in libraries:
+            if not isinstance(method, str):
+                break
+            try:
+                method = getattr(lib, method)
+            except AttributeError:
+                continue
+        return method
 
     def get_penalised_time(self: Settings, custom_cutoff: int = None) -> int:
         """Return the penalised time associated with the cutoff time."""

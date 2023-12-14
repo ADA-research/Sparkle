@@ -112,11 +112,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         Returns:
             The virtual best solver performance for this instance.
         """
-        # If capvalue is not set the objective is RUNTIME, so use the cutoff time as
-        # capvalue
-        if capvalue is None:
-            capvalue = sgh.settings.get_general_target_cutoff_time()
-
+        penalty_factor = sgh.settings.get_general_penalty_multiplier()
         virtual_best_score = None
         for solver in self.list_columns():
             score_solver = float(self.get_value(instance, solver))
@@ -125,11 +121,13 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
                     not minimise and virtual_best_score < score_solver:
                 virtual_best_score = score_solver
 
+        # Shouldn't this throw an error?
         if virtual_best_score is None and len(self.list_columns()) == 0:
             virtual_best_score = 0
-        elif minimise and virtual_best_score > capvalue or\
-                not minimise and virtual_best_score < capvalue:
-            virtual_best_score = capvalue
+        elif capvalue is not None:
+            if minimise and virtual_best_score > capvalue or not minimise and\
+                    virtual_best_score < capvalue:
+                virtual_best_score = capvalue * penalty_factor
 
         return virtual_best_score
 
