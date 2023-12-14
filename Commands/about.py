@@ -3,11 +3,11 @@
 
 import sys
 import argparse
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help.sparkle_global_help import sparkle_version
 
 __description__ = "Platform for evaluating empirical algorithms/solvers"
-__version__ = sgh.sparkle_version
+__version__ = sparkle_version
 __licence__ = "MIT"
 __authors__ = [
     # Alphabetical order on family name first
@@ -16,13 +16,18 @@ __authors__ = [
     "Holger H. Hoos",
     "Chuan Luo",
     "Richard Middelkoop",
-    "Jeroen Rook"]
+    "Jeroen Rook",
+    "Thijs Snelleman"]
 
-__contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
+__contact__ = "snelleman@aim.rwth-aachen.de"
 
 
-def parser_function():
-    """Define the command line arguments."""
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+      The argument parser.
+    """
     parser = argparse.ArgumentParser()
     return parser
 

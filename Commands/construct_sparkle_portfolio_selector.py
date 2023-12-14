@@ -6,23 +6,24 @@ import sys
 import argparse
 from pathlib import Path
 
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_construct_portfolio_selector_help as scps
-import compute_marginal_contribution as cmc
-from sparkle_help import sparkle_job_help
-from sparkle_help import sparkle_logging as sl
-from sparkle_help import sparkle_settings
-from sparkle_help.sparkle_settings import PerformanceMeasure
-from sparkle_help.sparkle_settings import SettingState
-from sparkle_help import argparse_custom as ac
-from sparkle_help.reporting_scenario import ReportingScenario
-from sparkle_help.reporting_scenario import Scenario
+from Commands.Structures.status_info import ConstructPortfolioSelectorStatusInfo
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
+from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
+from Commands.sparkle_help import sparkle_job_help
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SettingState
+from Commands.sparkle_help import argparse_custom as ac
+from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -50,7 +51,8 @@ def parser_function():
     return parser
 
 
-def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path) -> bool:
+def judge_exist_remaining_jobs(feature_data_csv_path: str,
+                               performance_data_csv_path: str) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_feature_computation_job = (
@@ -77,25 +79,6 @@ def judge_exist_remaining_jobs(feature_data_csv_path, performance_data_csv_path)
         return True
 
     return False
-
-
-def generate_task_run_status() -> None:
-    """Generate run status info files for portfolio selector Slurm batch jobs."""
-    key_str = "construct_sparkle_portfolio_selector"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    status_info_str = "Status: Running\n"
-    sfh.write_string_to_file(task_run_status_path, status_info_str)
-
-    return
-
-
-def delete_task_run_status() -> None:
-    """Remove run status info files for portfolio selector Slurm batch jobs."""
-    key_str = "construct_sparkle_portfolio_selector"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    os.system("rm -rf " + task_run_status_path)
-
-    return
 
 
 def delete_log_files() -> None:
@@ -134,6 +117,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     flag_recompute_portfolio = args.recompute_portfolio_selector
     flag_recompute_marg_cont = args.recompute_marginal_contribution
+
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR])
+
     if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_performance_measure(
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
@@ -141,7 +128,11 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle portfolio selector ...")
 
-    generate_task_run_status()
+    status_info = ConstructPortfolioSelectorStatusInfo()
+    status_info.set_algorithm_selector_path(str(sgh.sparkle_algorithm_selector_path))
+    status_info.set_feature_data_csv_path(str(sgh.feature_data_csv_path))
+    status_info.set_performance_data_csv_path(str(sgh.performance_data_csv_path))
+    status_info.save()
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         sgh.feature_data_csv_path, sgh.performance_data_csv_path
@@ -153,12 +144,12 @@ if __name__ == "__main__":
         print("Please first execute all unperformed jobs before constructing Sparkle "
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
-        delete_task_run_status()
+
         sys.exit()
 
     delete_log_files()  # Make sure no old log files remain
     success = scps.construct_sparkle_portfolio_selector(
-        sgh.sparkle_portfolio_selector_path,
+        sgh.sparkle_algorithm_selector_path,
         sgh.performance_data_csv_path,
         sgh.feature_data_csv_path,
         flag_recompute_portfolio,
@@ -167,11 +158,11 @@ if __name__ == "__main__":
     if success:
         print("Sparkle portfolio selector constructed!")
         print("Sparkle portfolio selector located at "
-              f"{sgh.sparkle_portfolio_selector_path}")
+              f"{sgh.sparkle_algorithm_selector_path}")
 
         # Update latest scenario
         sgh.latest_scenario.set_selection_portfolio_path(
-            Path(sgh.sparkle_portfolio_selector_path)
+            Path(sgh.sparkle_algorithm_selector_path)
         )
         sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
         # Set to default to overwrite possible old path
@@ -179,10 +170,12 @@ if __name__ == "__main__":
 
         # Compute and print marginal contributions of the perfect and actual portfolio
         # selectors
-        cmc.compute_perfect(flag_recompute_marg_cont)
-        cmc.compute_actual(flag_recompute_marg_cont)
+        scmch.compute_marginal_contribution(flag_compute_perfect=True,
+                                            flag_compute_actual=True,
+                                            flag_recompute=flag_recompute_marg_cont)
 
-        delete_task_run_status()
+        status_info.delete()
+
         delete_log_files()
 
     # Write used settings to file

@@ -1,16 +1,16 @@
 """Classes and Enums to control settings."""
 
+from __future__ import annotations
 import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+from typing import Callable
+import builtins
+import statistics
 
-try:
-    from sparkle_help import sparkle_logging as slog
-    from sparkle_help import sparkle_global_help as sgh
-except ImportError:
-    import sparkle_logging as slog
-    import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as slog
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 class PerformanceMeasure(Enum):
@@ -18,17 +18,21 @@ class PerformanceMeasure(Enum):
 
     RUNTIME = 0
     QUALITY_ABSOLUTE = 1
-    QUALITY = 1  # If not specified, assume ABSOLUTE QUALITY
-    # QUALITY_RELATIVE = 2 # TODO: Add when this functionality is implemented
+    QUALITY = 1
+    QUALITY_ABSOLUTE_MINIMISATION = 1
+    QUALITY_ABSOLUTE_MAXIMISATION = 2
 
     @staticmethod
-    def from_str(performance_measure):
+    def from_str(performance_measure: str) -> PerformanceMeasure:
         """Return a given str as PerformanceMeasure."""
         if performance_measure == "RUNTIME":
             performance_measure = PerformanceMeasure.RUNTIME
-        elif (performance_measure == "QUALITY_ABSOLUTE"
-              or performance_measure == "QUALITY"):
+        elif performance_measure == "QUALITY_ABSOLUTE":
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
+        elif performance_measure == "QUALITY_ABSOLUTE_MAXIMISATION":
+            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
+        elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
+            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
 
         return performance_measure
 
@@ -40,7 +44,7 @@ class SolutionVerifier(Enum):
     SAT = 1
 
     @staticmethod
-    def from_str(verifier):
+    def from_str(verifier: str) -> SolutionVerifier:
         """Return a given str as SolutionVerifier."""
         if verifier == "NONE":
             verifier = SolutionVerifier.NONE
@@ -63,7 +67,7 @@ class ProcessMonitoring(str, Enum):
     EXTENDED = "EXTENDED"
 
     @staticmethod
-    def from_str(process_monitoring):
+    def from_str(process_monitoring: str) -> ProcessMonitoring:
         """Return a given str as ProcessMonitoring."""
         return ProcessMonitoring(process_monitoring)
 
@@ -105,7 +109,7 @@ class Settings:
     DEFAULT_paraport_overwriting = False
     DEFAULT_paraport_process_monitoring = ProcessMonitoring.REALISTIC
 
-    def __init__(self, file_path: PurePath = None):
+    def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
         # Settings 'dictionary' in configparser format
         self.__settings = configparser.ConfigParser()
@@ -114,7 +118,9 @@ class Settings:
         self.__general_performance_measure_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
+        self.__general_cap_value_set = SettingState.NOT_SET
         self.__general_penalty_multiplier_set = SettingState.NOT_SET
+        self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
 
         self.__config_budget_per_run_set = SettingState.NOT_SET
@@ -140,8 +146,8 @@ class Settings:
 
         return
 
-    def read_settings_ini(self, file_path: PurePath = DEFAULT_settings_path,
-                          state: SettingState = SettingState.FILE):
+    def read_settings_ini(self: Settings, file_path: PurePath = DEFAULT_settings_path,
+                          state: SettingState = SettingState.FILE) -> None:
         """Read the settings from an INI file."""
         # Read file
         file_settings = configparser.ConfigParser()
@@ -173,6 +179,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_general_target_cutoff_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("cap_value",)
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getfloat(section, option)
+                    self.set_general_cap_value(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("penalty_multiplier", "penalty_number")
@@ -281,7 +294,7 @@ class Settings:
 
         return
 
-    def write_used_settings(self):
+    def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
         # Write to general output directory
         file_path_output = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
@@ -294,14 +307,14 @@ class Settings:
 
         return
 
-    def write_settings_ini(self, file_path: Path):
+    def write_settings_ini(self: Settings, file_path: Path) -> None:
         """Write the settings to an INI file."""
         # Create needed directories if they don't exist
         file_dir = file_path.parents[0]
         file_dir.mkdir(parents=True, exist_ok=True)
 
         # Write the settings to file
-        with open(str(file_path), "w") as settings_file:
+        with Path(str(file_path)).open("w") as settings_file:
             self.__settings.write(settings_file)
 
             # Log the settings file location
@@ -309,14 +322,14 @@ class Settings:
 
         return
 
-    def __init_section(self, section: str):
+    def __init_section(self: Settings, section: str) -> None:
         if section not in self.__settings:
             self.__settings[section] = {}
 
         return
 
-    def __check_setting_state(self, current_state: SettingState, new_state: SettingState,
-                              name: str) -> bool:
+    def __check_setting_state(self: Settings, current_state: SettingState,
+                              new_state: SettingState, name: str) -> bool:
         change_setting_ok = True
 
         if current_state == SettingState.FILE and new_state == SettingState.DEFAULT:
@@ -338,8 +351,9 @@ class Settings:
     # General settings ###
 
     def set_general_performance_measure(
-            self, value: PerformanceMeasure = DEFAULT_general_performance_measure,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings,
+            value: PerformanceMeasure = DEFAULT_general_performance_measure,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the performance measure."""
         section = "general"
         name = "performance_measure"
@@ -352,7 +366,7 @@ class Settings:
 
         return
 
-    def get_general_performance_measure(self) -> PerformanceMeasure:
+    def get_general_performance_measure(self: Settings) -> PerformanceMeasure:
         """Return the performance measure."""
         if self.__general_performance_measure_set == SettingState.NOT_SET:
             self.set_general_performance_measure()
@@ -360,7 +374,7 @@ class Settings:
         return PerformanceMeasure.from_str(
             self.__settings["general"]["performance_measure"])
 
-    def get_performance_metric_for_report(self) -> str:
+    def get_performance_metric_for_report(self: Settings) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""
         performance_measure = self.get_general_performance_measure()
 
@@ -372,9 +386,34 @@ class Settings:
 
         return performance_measure_str
 
+    def set_general_cap_value(
+            self: Settings, value: float = None,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general cap value."""
+        section = "general"
+        name = "cap_value"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_cap_value_set, origin, name):
+            self.__init_section(section)
+            self.__general_cap_value_set = origin
+            self.__settings[section][name] = float(value)
+
+        return
+
+    def get_general_cap_value(self: Settings) -> float:
+        """Get the general cap value."""
+        if self.__general_cap_value_set == SettingState.NOT_SET:
+            self.set_general_cap_value()
+
+        if "cap_value" in self.__settings["general"]:
+            return self.__settings["general"]["cap_value"]
+        else:
+            return None
+
     def set_general_penalty_multiplier(
-            self, value: int = DEFAULT_general_penalty_multiplier,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: int = DEFAULT_general_penalty_multiplier,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the penalty multiplier."""
         section = "general"
         name = "penalty_multiplier"
@@ -387,14 +426,44 @@ class Settings:
 
         return
 
-    def get_general_penalty_multiplier(self) -> int:
+    def get_general_penalty_multiplier(self: Settings) -> int:
         """Return the penalty multiplier."""
         if self.__general_penalty_multiplier_set == SettingState.NOT_SET:
             self.set_general_penalty_multiplier()
 
         return int(self.__settings["general"]["penalty_multiplier"])
 
-    def get_penalised_time(self, custom_cutoff: int = None) -> int:
+    def set_general_metric_aggregation_function(
+            self: Settings, value: str = "mean",
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general aggregation function of performance measure."""
+        section = "general"
+        name = "metric_aggregation_function"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_metric_aggregation_function_set, origin, name):
+            self.__init_section(section)
+            self.__general_metric_aggregation_function_set = origin
+            self.__settings[section][name] = value
+
+        return
+
+    def get_general_metric_aggregation_function(self: Settings) -> Callable:
+        """Set the general aggregation function of performance measure."""
+        if self.__general_metric_aggregation_function_set == SettingState.NOT_SET:
+            self.set_general_metric_aggregation_function()
+        method = self.__settings["general"]["metric_aggregation_function"]
+        libraries = (builtins, statistics)
+        for lib in libraries:
+            if not isinstance(method, str):
+                break
+            try:
+                method = getattr(lib, method)
+            except AttributeError:
+                continue
+        return method
+
+    def get_penalised_time(self: Settings, custom_cutoff: int = None) -> int:
         """Return the penalised time associated with the cutoff time."""
         if custom_cutoff is None:
             cutoff_time = self.get_general_target_cutoff_time()
@@ -407,8 +476,8 @@ class Settings:
         return penalised_time
 
     def set_general_solution_verifier(
-            self, value: SolutionVerifier = DEFAULT_general_solution_verifier,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: SolutionVerifier = DEFAULT_general_solution_verifier,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the solution verifier to use."""
         section = "general"
         name = "solution_verifier"
@@ -421,7 +490,7 @@ class Settings:
 
         return
 
-    def get_general_solution_verifier(self) -> SolutionVerifier:
+    def get_general_solution_verifier(self: Settings) -> SolutionVerifier:
         """Return the solution verifier to use."""
         if self.__general_solution_verifier_set == SettingState.NOT_SET:
             self.set_general_solution_verifier()
@@ -429,8 +498,8 @@ class Settings:
         return SolutionVerifier.from_str(self.__settings["general"]["solution_verifier"])
 
     def set_general_target_cutoff_time(
-            self, value: int = DEFAULT_general_target_cutoff_time,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: int = DEFAULT_general_target_cutoff_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the cutoff time in seconds for target algorithms."""
         section = "general"
         name = "target_cutoff_time"
@@ -443,7 +512,7 @@ class Settings:
 
         return
 
-    def get_general_target_cutoff_time(self) -> int:
+    def get_general_target_cutoff_time(self: Settings) -> int:
         """Return the cutoff time in seconds for target algorithms."""
         if self.__general_target_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_target_cutoff_time()
@@ -451,8 +520,8 @@ class Settings:
         return int(self.__settings["general"]["target_cutoff_time"])
 
     def set_general_extractor_cutoff_time(
-            self, value: int = DEFAULT_general_extractor_cutoff_time,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: int = DEFAULT_general_extractor_cutoff_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the cutoff time in seconds for feature extraction."""
         section = "general"
         name = "extractor_cutoff_time"
@@ -465,7 +534,7 @@ class Settings:
 
         return
 
-    def get_general_extractor_cutoff_time(self) -> int:
+    def get_general_extractor_cutoff_time(self: Settings) -> int:
         """Return the cutoff time in seconds for feature extraction."""
         if self.__general_extractor_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_extractor_cutoff_time()
@@ -475,8 +544,8 @@ class Settings:
     # Configuration settings ###
 
     def set_config_budget_per_run(
-            self, value: int = DEFAULT_config_budget_per_run,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: int = DEFAULT_config_budget_per_run,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the budget per configuration run in seconds."""
         section = "configuration"
         name = "budget_per_run"
@@ -489,7 +558,7 @@ class Settings:
 
         return
 
-    def get_config_budget_per_run(self) -> int:
+    def get_config_budget_per_run(self: Settings) -> int:
         """Return the budget per configuration run in seconds."""
         if self.__config_budget_per_run_set == SettingState.NOT_SET:
             self.set_config_budget_per_run()
@@ -497,8 +566,8 @@ class Settings:
         return int(self.__settings["configuration"]["budget_per_run"])
 
     def set_config_number_of_runs(
-            self, value: int = DEFAULT_config_number_of_runs,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: int = DEFAULT_config_number_of_runs,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of configuration runs."""
         section = "configuration"
         name = "number_of_runs"
@@ -511,7 +580,7 @@ class Settings:
 
         return
 
-    def get_config_number_of_runs(self) -> int:
+    def get_config_number_of_runs(self: Settings) -> int:
         """Return the number of configuration runs."""
         if self.__config_number_of_runs_set == SettingState.NOT_SET:
             self.set_config_number_of_runs()
@@ -521,8 +590,8 @@ class Settings:
     # Configuration: SMAC specific settings ###
 
     def set_smac_target_cutoff_length(
-            self, value: str = DEFAULT_smac_target_cutoff_length,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: str = DEFAULT_smac_target_cutoff_length,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the target algorithm cutoff length."""
         section = "smac"
         name = "target_cutoff_length"
@@ -535,7 +604,7 @@ class Settings:
 
         return
 
-    def get_smac_target_cutoff_length(self) -> str:
+    def get_smac_target_cutoff_length(self: Settings) -> str:
         """Return the target algorithm cutoff length."""
         if self.__smac_target_cutoff_length_set == SettingState.NOT_SET:
             self.set_smac_target_cutoff_length()
@@ -545,8 +614,8 @@ class Settings:
     # Slurm settings ###
 
     def set_slurm_number_of_runs_in_parallel(
-            self, value: int = DEFAULT_slurm_number_of_runs_in_parallel,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: int = DEFAULT_slurm_number_of_runs_in_parallel,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of runs Slurm can do in parallel."""
         section = "slurm"
         name = "number_of_runs_in_parallel"
@@ -559,15 +628,15 @@ class Settings:
 
         return
 
-    def get_slurm_number_of_runs_in_parallel(self) -> int:
+    def get_slurm_number_of_runs_in_parallel(self: Settings) -> int:
         """Return the number of runs Slurm can do in parallel."""
         if self.__slurm_number_of_runs_in_parallel_set == SettingState.NOT_SET:
             self.set_slurm_number_of_runs_in_parallel()
 
         return int(self.__settings["slurm"]["number_of_runs_in_parallel"])
 
-    def set_slurm_clis_per_node(self, value: int = DEFAULT_slurm_clis_per_node,
-                                origin: SettingState = SettingState.DEFAULT):
+    def set_slurm_clis_per_node(self: Settings, value: int = DEFAULT_slurm_clis_per_node,
+                                origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of algorithms Slurm can run in parallel per node."""
         section = "slurm"
         name = "clis_per_node"
@@ -580,7 +649,7 @@ class Settings:
 
         return
 
-    def get_slurm_clis_per_node(self) -> int:
+    def get_slurm_clis_per_node(self: Settings) -> int:
         """Return the number of algorithms Slurm can run in parallel per node."""
         if self.__slurm_clis_per_node_set == SettingState.NOT_SET:
             self.set_slurm_clis_per_node()
@@ -589,8 +658,8 @@ class Settings:
 
     # SLURM extra options
 
-    def add_slurm_extra_option(self, name: str, value: str,
-                               origin: SettingState = SettingState.DEFAULT):
+    def add_slurm_extra_option(self: Settings, name: str, value: str,
+                               origin: SettingState = SettingState.DEFAULT) -> None:
         """Add additional Slurm options."""
         section = "slurm_extra"
 
@@ -603,7 +672,7 @@ class Settings:
             self.__slurm_extra_options_set[name] = origin
             self.__settings[section][name] = str(value)
 
-    def get_slurm_extra_options(self) -> dict:
+    def get_slurm_extra_options(self: Settings) -> dict:
         """Return a dict with additional Slurm options."""
         section = "slurm_extra"
         options = dict()
@@ -616,8 +685,8 @@ class Settings:
 
     # Ablation settings ###
 
-    def set_ablation_racing_flag(self, value: bool = DEFAULT_ablation_racing,
-                                 origin: SettingState = SettingState.DEFAULT):
+    def set_ablation_racing_flag(self: Settings, value: bool = DEFAULT_ablation_racing,
+                                 origin: SettingState = SettingState.DEFAULT) -> None:
         """Set a flag indicating whether racing should be used for ablation."""
         section = "ablation"
         name = "racing"
@@ -630,7 +699,7 @@ class Settings:
 
         return
 
-    def get_ablation_racing_flag(self) -> bool:
+    def get_ablation_racing_flag(self: Settings) -> bool:
         """Return a bool indicating whether the racing flag is set for ablation."""
         if self.__ablation_racing_flag_set == SettingState.NOT_SET:
             self.set_ablation_racing_flag()
@@ -640,8 +709,8 @@ class Settings:
     # Parallel Portfolio settings ###
 
     def set_paraport_overwriting_flag(
-            self, value: bool = DEFAULT_paraport_overwriting,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings, value: bool = DEFAULT_paraport_overwriting,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the parallel portfolio overwriting flag to a given value."""
         section = "parallel_portfolio"
         name = "overwriting"
@@ -654,7 +723,7 @@ class Settings:
 
         return
 
-    def get_paraport_overwriting_flag(self) -> bool:
+    def get_paraport_overwriting_flag(self: Settings) -> bool:
         """Return the parallel portfolio overwriting flag state."""
         if self.__paraport_overwriting_flag_set == SettingState.NOT_SET:
             self.set_paraport_overwriting_flag()
@@ -662,8 +731,9 @@ class Settings:
         return bool(self.__settings["parallel_portfolio"]["overwriting"])
 
     def set_paraport_process_monitoring(
-            self, value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
-            origin: SettingState = SettingState.DEFAULT):
+            self: Settings,
+            value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the parallel portfolio process monitoring state."""
         section = "parallel_portfolio"
         name = "process_monitoring"
@@ -676,7 +746,7 @@ class Settings:
 
         return
 
-    def get_paraport_process_monitoring(self) -> ProcessMonitoring:
+    def get_paraport_process_monitoring(self: Settings) -> ProcessMonitoring:
         """Return the parallel portfolio process monitoring state."""
         if self.__paraport_process_monitoring_set == SettingState.NOT_SET:
             self.set_paraport_process_monitoring()

@@ -30,14 +30,6 @@
 
 ```
 
-(cmd-cleanup-current-sparkle-platform)=
-
-```{eval-rst}
-.. autoprogram:: cleanup_current_sparkle_platform:parser_function()
-   :prog: cleanup_current_sparkle_platform.py
-
-```
-
 (cmd-cleanup-temporary-files)=
 
 ```{eval-rst}
@@ -54,14 +46,6 @@
 
 ```
 
-(cmd-compute-features-parallel)=
-
-```{eval-rst}
-.. autoprogram:: compute_features_parallel:parser_function()
-   :prog: compute_features_parallel.py
-
-```
-
 (cmd-compute-marginal-contribution)=
 
 ```{eval-rst}
@@ -75,6 +59,14 @@
 ```{eval-rst}
 .. autoprogram:: configure_solver:parser_function()
    :prog: configure_solver.py
+
+```
+
+(cmd-construct-sparkle-parallel-portfolio)=
+
+```{eval-rst}
+.. autoprogram:: construct_sparkle_parallel_portfolio:parser_function()
+   :prog: construct_sparkle_parallel_portfolio.py
 
 ```
 
@@ -102,11 +94,11 @@
 
 ```
 
-(cmd-load-record)=
+(cmd-load-snapshot)=
 
 ```{eval-rst}
-.. autoprogram:: load_record:parser_function()
-   :prog: load_record.py
+.. autoprogram:: load_snapshot:parser_function()
+   :prog: load_snapshot.py
 
 ```
 
@@ -123,14 +115,6 @@
 ```{eval-rst}
 .. autoprogram:: remove_instances:parser_function()
    :prog: remove_instances.py
-
-```
-
-(cmd-remove-record)=
-
-```{eval-rst}
-.. autoprogram:: remove_record:parser_function()
-   :prog: remove_record.py
 
 ```
 
@@ -166,6 +150,14 @@
 
 ```
 
+(cmd-run-sparkle-parallel-portfolio)=
+
+```{eval-rst}
+.. autoprogram:: run_sparkle_parallel_portfolio:parser_function()
+   :prog: run_sparkle_parallel_portfolio.py
+
+```
+
 (cmd-run-sparkle-portfolio-selector)=
 
 ```{eval-rst}
@@ -182,11 +174,11 @@
 
 ```
 
-(cmd-save-record)=
+(cmd-save-snapshot)=
 
 ```{eval-rst}
-.. autoprogram:: save_record:parser_function()
-   :prog: save_record.py
+.. autoprogram:: save_snapshot:parser_function()
+   :prog: save_snapshot.py
 
 ```
 

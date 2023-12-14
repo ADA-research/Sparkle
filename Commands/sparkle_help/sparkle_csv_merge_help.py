@@ -4,17 +4,12 @@
 
 import os
 import fcntl
+from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_global_help
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-    from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-except ImportError:
-    import sparkle_global_help
-    import sparkle_file_help as sfh
-    import sparkle_feature_data_csv_help as sfdcsv
-    import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 
 
 def feature_data_csv_merge() -> None:
@@ -34,7 +29,7 @@ def feature_data_csv_merge() -> None:
         tmp_feature_data_csv = sfdcsv.SparkleFeatureDataCSV(csv_path)
         feature_data_csv.combine(tmp_feature_data_csv)
         feature_data_csv.update_csv()
-        os.system("rm -f " + csv_path)
+        Path(csv_path).unlink(missing_ok=True)
     return
 
 
@@ -43,7 +38,7 @@ def performance_data_csv_merge() -> None:
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sparkle_global_help.performance_data_csv_path)
-        tmp_performance_data_result_directory = "Performance_Data/Tmp/"
+        tmp_performance_data_result_directory = Path("Performance_Data/Tmp/")
         result_list = sfh.get_list_all_result_filename(
             tmp_performance_data_result_directory)
     except Exception:
@@ -53,10 +48,10 @@ def performance_data_csv_merge() -> None:
 
     for i in range(0, len(result_list)):
         result_name = result_list[i]
-        result_path = tmp_performance_data_result_directory + result_name
+        result_path = str(tmp_performance_data_result_directory) + result_name
 
         try:
-            fin = open(result_path, "r+")
+            fin = Path(result_path).open("r+")
             fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
             instance_path = fin.readline().strip()
             if not instance_path:

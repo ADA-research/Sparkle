@@ -4,21 +4,28 @@
 
 import os
 import sys
-from pathlib import Path
-from pathlib import PurePath
+from pathlib import Path, PurePath
 
-from sparkle_help import sparkle_basic_help
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle_help import sparkle_run_solvers_help as srsh
-from sparkle_help import sparkle_compute_features_help as scfh
-from sparkle_help import sparkle_logging as sl
-from sparkle_help.sparkle_settings import PerformanceMeasure
+
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_run_solvers_help as srsh
+from Commands.sparkle_help import sparkle_compute_features_help as scfh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
-    """Return whether data has changed since the last portfolio selector construction."""
+    """Return whether data has changed since the last portfolio selector construction.
+
+    Args:
+        sparkle_portfolio_selector_path: Portfolio selector path.
+
+    Returns:
+        True if neither performance data id and feature data id remain the same.
+    """
     unchanged = False
     pd_id = srsh.get_performance_data_id()
     fd_id = scfh.get_feature_data_id()
@@ -33,7 +40,11 @@ def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
 
 
 def write_selector_pd_id(sparkle_portfolio_selector_path: Path) -> None:
-    """Write the IDF of the performance data used to construct the portfolio selector."""
+    """Write the ID of the performance data used to construct the portfolio selector.
+
+    Args:
+        sparkle_portfolio_selector_path: Portfolio selector path.
+    """
     # Get pd_id
     pd_id = srsh.get_performance_data_id()
 
@@ -47,11 +58,16 @@ def write_selector_pd_id(sparkle_portfolio_selector_path: Path) -> None:
         sl.add_output(str(pd_id_path), "ID of the performance data used to construct "
                       "the portfolio selector.")
 
-    return
-
 
 def get_selector_pd_id(selector_dir: PurePath) -> int:
-    """Return the ID of the performance data used to construct the portfolio selector."""
+    """Return the ID of the performance data used to construct the portfolio selector.
+
+    Args:
+        selector_dir: Selector directory path.
+
+    Returns:
+        Selector performance data ID, -1 if no file with a saved ID is found.
+    """
     pd_id = -1
     pd_id_path = Path(selector_dir / "pd.id")
 
@@ -65,7 +81,11 @@ def get_selector_pd_id(selector_dir: PurePath) -> int:
 
 
 def write_selector_fd_id(sparkle_portfolio_selector_path: Path) -> None:
-    """Write the ID of the feature data used to construct the portfolio selector."""
+    """Write the ID of the feature data used to construct the portfolio selector.
+
+    Args:
+        sparkle_portfolio_selector_path: Portfolio selector path.
+    """
     # Get fd_id
     fd_id = scfh.get_feature_data_id()
 
@@ -79,11 +99,16 @@ def write_selector_fd_id(sparkle_portfolio_selector_path: Path) -> None:
         sl.add_output(str(fd_id_path),
                       "ID of the feature data used to construct the portfolio selector.")
 
-    return
-
 
 def get_selector_fd_id(selector_dir: PurePath) -> int:
-    """Return the ID of the feature data used to construct the portfolio selector."""
+    """Return the ID of the feature data used to construct the portfolio selector.
+
+    Args:
+        selector_dir: Selector directory path.
+
+    Returns:
+        Selector feature data ID, -1 if no file with a saved ID is found.
+    """
     fd_id = -1
     fd_id_path = Path(selector_dir / "fd.id")
 
@@ -98,21 +123,27 @@ def get_selector_fd_id(selector_dir: PurePath) -> int:
 
 def selector_exists(sparkle_portfolio_selector_path: Path) -> bool:
     """Return whether a Sparkle portfolio selector exists or not."""
-    exists = sparkle_portfolio_selector_path.is_file()
-
-    return exists
+    return sparkle_portfolio_selector_path.is_file()
 
 
-def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
+def construct_sparkle_portfolio_selector(selector_path: Path,
                                          performance_data_csv_path: str,
                                          feature_data_csv_path: str,
                                          flag_recompute: bool = False) -> bool:
-    """Create the Sparkle portfolio selector."""
-    # Convert to pathlib Path (remove when everything is pathlib compliant)
-    selector_path = Path(sparkle_portfolio_selector_path)
+    """Create the Sparkle portfolio selector.
 
-    # If the selector exists and the data didn't change, do nothing; unless the recompute
-    # flag is set
+    Args:
+        selector_path: Portfolio selector path.
+        performance_data_csv_path: Performance data csv path.
+        feature_data_csv_path: Feature data csv path.
+        flag_recompute: Whether or not to recompute if the selector exists and no data
+            was changed. Defaults to False.
+
+    Returns:
+        True if portfolio construction is successful.
+    """
+    # If the selector exists and the data didn't change, do nothing;
+    # unless the recompute flag is set
     if (selector_exists(selector_path) and data_unchanged(selector_path)
        and not flag_recompute):
         print("Portfolio selector already exists for the current feature and performance"
@@ -139,18 +170,19 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
 
     cutoff_time_str = str(cutoff_time)
     python_executable = sgh.python_executable
-    performance_measure = sgh.settings.get_general_performance_measure()
-    if performance_measure == PerformanceMeasure.RUNTIME:
+    perf_measure = sgh.settings.get_general_performance_measure()
+    if perf_measure == PerformanceMeasure.RUNTIME:
         objective_function = "--objective runtime"
-    elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+    elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
+            perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         objective_function = "--objective solution_quality"
     else:
         print("ERROR: Unknown performance measure in "
               "construct_sparkle_portfolio_selector")
         sys.exit(-1)
 
-    if not os.path.exists(r"Tmp/"):
-        os.mkdir(r"Tmp/")
+    if not Path(r"Tmp/").exists():
+        Path(r"Tmp/").mkdir()
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()
@@ -175,7 +207,7 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
     command_line = (f"{python_executable} {sgh.autofolio_path} --performance_csv "
                     f"{performance_data_csv_path} --feature_csv {feature_data_csv_path} "
                     f"{objective_function} --runtime_cutoff {cutoff_time_str} --tune "
-                    f"--save {sparkle_portfolio_selector_path} 1>> {log_path_str} 2>> "
+                    f"--save {str(selector_path)} 1>> {log_path_str} 2>> "
                     f"{err_path_str}")
 
     # Write command line to log
@@ -201,8 +233,8 @@ def construct_sparkle_portfolio_selector(sparkle_portfolio_selector_path: str,
         sys.exit()
 
     # Update data IDs associated with this selector
-    write_selector_pd_id(Path(sparkle_portfolio_selector_path))
-    write_selector_fd_id(Path(sparkle_portfolio_selector_path))
+    write_selector_pd_id(selector_path)
+    write_selector_fd_id(selector_path)
 
     # If we reach this point portfolio construction should be successful
     return True

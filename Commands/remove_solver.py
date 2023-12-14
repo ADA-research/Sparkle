@@ -4,13 +4,16 @@
 import os
 import sys
 import argparse
-from sparkle_help import sparkle_file_help as sfh
-from sparkle_help import sparkle_global_help
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_logging as sl
+from pathlib import Path
+
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help import sparkle_command_help as sch
 
 
-def parser_function():
+def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -38,9 +41,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     solver_path = args.solver_path
 
+    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                             sch.CommandName.REMOVE_SOLVER])
+
     if args.nickname:
         solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]
-    if not os.path.exists(solver_path):
+    if not Path(solver_path).exists():
         print(f'Solver path "{solver_path}" does not exist!')
         sys.exit()
 
@@ -65,7 +71,7 @@ if __name__ == "__main__":
                 break
         sfh.write_solver_nickname_mapping()
 
-    if os.path.exists(sparkle_global_help.performance_data_csv_path):
+    if Path(sparkle_global_help.performance_data_csv_path).exists():
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sparkle_global_help.performance_data_csv_path
         )
@@ -85,20 +91,20 @@ if __name__ == "__main__":
         + solver_name
         + "_*/"
     )
-    if os.path.exists(smac_solver_path):
+    if Path(smac_solver_path).exists():
         command_line = "rm -rf " + smac_solver_path
         os.system(command_line)
 
-    if os.path.exists(sparkle_global_help.sparkle_portfolio_selector_path):
-        command_line = "rm -f " + sparkle_global_help.sparkle_portfolio_selector_path
+    if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
+        command_line = "rm -f " + sparkle_global_help.sparkle_algorithm_selector_path
         os.system(command_line)
         print(
             "Removing Sparkle portfolio selector "
-            + sparkle_global_help.sparkle_portfolio_selector_path
+            + sparkle_global_help.sparkle_algorithm_selector_path
             + " done!"
         )
 
-    if os.path.exists(sparkle_global_help.sparkle_report_path):
+    if Path(sparkle_global_help.sparkle_report_path).exists():
         command_line = "rm -f " + sparkle_global_help.sparkle_report_path
         os.system(command_line)
         print(

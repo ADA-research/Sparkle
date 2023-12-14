@@ -2,151 +2,170 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to communicate run statuses of various commands."""
 
-import os
-import fcntl
-from sparkle_help import sparkle_file_help as sfh
+from pathlib import Path
+
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.Structures.status_info import (SolverRunStatusInfo, StatusInfoType,
+                                             ConfigureSolverStatusInfo,
+                                             ConstructParallelPortfolioStatusInfo,
+                                             ConstructPortfolioSelectorStatusInfo,
+                                             GenerateReportStatusInfo)
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
 
-def get_list_running_extractor_jobs():
-    """Return a list of currently active feature extraction jobs."""
-    list_running_extractor_jobs = []
+def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
+        -> list[dict[str, str, str]]:
+    """Filter jobs by a command.
 
-    tmp_directory = "Tmp/SBATCH_Extractor_Jobs/"
+    Args:
+      jobs: List of jobs
+      command: The command to filter for
+
+    Returns:
+      Jobs that belong to the given command.
+    """
+    return [x for x in jobs if x["command"] == command]
+
+
+def get_running_jobs_for_command(command: CommandName) -> str:
+    """Print all the running jobs.
+
+    Args:
+        command: name of the command to search for.
+
+    Returns:
+        string with job ids.
+    """
+    sjh.cleanup_active_jobs()
+    jobs = sjh.read_active_jobs()
+
+    command_jobs = get_jobs_for_command(jobs, command.name)
+    command_jobs_ids = " ".join([x["job_id"] for x in command_jobs])
+
+    return command_jobs_ids
+
+
+def print_running_solver_jobs() -> None:
+    """Print a list of currently active run solver job."""
+    command = CommandName.RUN_SOLVERS
+    command_jobs_ids = get_running_jobs_for_command(command)
+    tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
-    for statusinfo_filename in list_all_statusinfo_filename:
-        statusinfo_filepath = (
-            tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
-        try:
-            fin = open(statusinfo_filepath, "r+")
-            fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-            mylist1 = fin.readline().strip().split()
-            status_str = mylist1[1]
-            if not status_str == "Running":
-                fin.close()
-                continue
-            else:
-                mylist2 = fin.readline().strip().split()
-                extractor_name = mylist2[1]
-                mylist3 = fin.readline().strip().split()
-                instance_name = mylist3[1]
-                mylist4 = fin.readline().strip().split()
-                start_time_str = mylist4[2] + " " + mylist4[3]
-                fin.readline()
-                mylist5 = fin.readline().strip().split()
-                cutoff_time_str = mylist5[2]
-                fin.close()
-                list_running_extractor_jobs.append([status_str, extractor_name,
-                                                    instance_name, start_time_str,
-                                                    cutoff_time_str])
-        except OSError:
-            continue
-
-    return list_running_extractor_jobs
+    if len(command_jobs_ids) > 0:
+        print(f"The command {command} is running "
+              f"with job IDs {command_jobs_ids}")
+        if len(list_all_statusinfo_filename) > 0:
+            print("Running solver jobs:")
+            for statusinfo_filename in list_all_statusinfo_filename:
+                statusinfo_filepath = Path(
+                    tmp_directory
+                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                status_info = SolverRunStatusInfo.from_file(statusinfo_filepath)
+                print(f"Start Time: {status_info.get_start_time()}")
+                print(f"Solver: {status_info.get_solver()}")
+                print(f"Instance: {status_info.get_instance()}")
+                print()
+    else:
+        print("No running solver jobs")
 
 
-def print_running_extractor_jobs(mode: int = 1):
-    """Print whether currently a feature extraction job is active."""
-    job_list = get_list_running_extractor_jobs()
-    print("")
-    print(
-        f"Currently Sparkle has {str(len(job_list))} running feature computation jobs:")
-
-    if mode == 2:
-        current_job_num = 1
-
-        for i in range(0, len(job_list)):
-            status_str = job_list[i][0]
-            instance_name = job_list[i][1]
-            extractor_name = job_list[i][2]
-            start_time_str = job_list[i][3]
-            cutoff_time_str = job_list[i][4]
-            print(f"[{str(current_job_num)}]: Extractor: {extractor_name}, Instance: "
-                  f"{instance_name}, Start Time: {start_time_str}, Cutoff Time: "
-                  f"{cutoff_time_str} second(s), Status: {status_str}")
-            current_job_num += 1
-
-    print("")
-    return
-
-
-def get_list_running_solver_jobs():
-    """Return a list of currently active run solver job."""
-    list_running_solver_jobs = []
-
-    tmp_directory = "Tmp/SBATCH_Solver_Jobs/"
+def print_running_configuration_jobs() -> None:
+    """Print a list of currently active run solver job."""
+    command = CommandName.CONFIGURE_SOLVER
+    command_jobs_ids = get_running_jobs_for_command(command)
+    tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.CONFIGURE_SOLVER}/"
     list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
-
-    for statusinfo_filename in list_all_statusinfo_filename:
-        statusinfo_filepath = (
-            tmp_directory + sfh.get_last_level_directory_name(statusinfo_filename))
-        fin = open(statusinfo_filepath, "r+")
-        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-        mylist1 = fin.readline().strip().split()
-        status_str = mylist1[1]
-        if not status_str == "Running":
-            fin.close()
-            continue
-        else:
-            mylist2 = fin.readline().strip().split()
-            solver_name = mylist2[1]
-            mylist3 = fin.readline().strip().split()
-            instance_name = mylist3[1]
-            mylist4 = fin.readline().strip().split()
-            start_time_str = mylist4[2] + " " + mylist4[3]
-            fin.readline()
-            mylist5 = fin.readline().strip().split()
-            cutoff_time_str = mylist5[2]
-            fin.close()
-            list_running_solver_jobs.append([status_str, solver_name, instance_name,
-                                             start_time_str, cutoff_time_str])
-    return list_running_solver_jobs
-
-
-def print_running_solver_jobs(mode: int = 1):
-    """Print whether currently a run solvers job is active."""
-    job_list = get_list_running_solver_jobs()
-    print("")
-    print(f"Currently Sparkle has {str(len(job_list))}"
-          " running performance computation jobs:")
-
-    if mode == 2:
-        current_job_num = 1
-        for i in range(0, len(job_list)):
-            status_str = job_list[i][0]
-            instance_name = job_list[i][1]
-            solver_name = job_list[i][2]
-            start_time_str = job_list[i][3]
-            cutoff_time_str = job_list[i][4]
-            print(f"[{str(current_job_num)}]: Solver: {solver_name}, Instance: "
-                  f"{instance_name}, Start Time: {start_time_str}, Cutoff Time: "
-                  f"{cutoff_time_str} second(s), Status: {status_str}")
-            current_job_num += 1
-
-    print("")
-    return
-
-
-def print_running_portfolio_selector_jobs():
-    """Print whether currently a portfolio construction job is active."""
-    print("")
-    key_str = "construct_sparkle_portfolio_selector"
-    task_run_status_path = "Tmp/SBATCH_Portfolio_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
-        print("Currently Sparkle portfolio selecotr is constructing ...")
+    if len(command_jobs_ids) > 0:
+        print(f"The command {command} is running "
+              f"with job IDs {command_jobs_ids}")
+        if len(list_all_statusinfo_filename) > 0:
+            print("Running configuration jobs:")
+            for statusinfo_filename in list_all_statusinfo_filename:
+                statusinfo_filepath = Path(
+                    tmp_directory
+                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                status_info = ConfigureSolverStatusInfo.from_file(statusinfo_filepath)
+                print(f"Start Time: {status_info.get_start_time()}")
+                print(f"Solver: {status_info.get_solver()}")
+                print(f"Instance set test: {status_info.get_instance_set_test()}")
+                print(f"Instance set train: {status_info.get_instance_set_train()}")
+                print()
     else:
-        print("No currently running Sparkle portfolio selector construction job!")
-    print("")
-    return
+        print("No running configuration jobs")
 
 
-def print_running_report_jobs():
-    """Print whether currently a report generation job is active."""
-    print("")
-    key_str = "generate_report"
-    task_run_status_path = "Tmp/SBATCH_Report_Jobs/" + key_str + ".statusinfo"
-    if os.path.isfile(task_run_status_path):
-        print("Currently Sparkle report is generating ...")
+def print_running_parallel_portfolio_construction_jobs() -> None:
+    """Print a list of currently active pap construction jobs."""
+    command = CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO
+    command_jobs_ids = get_running_jobs_for_command(command)
+    tmp_directory = (f"{sgh.sparkle_tmp_path}/"
+                     f"{StatusInfoType.CONSTRUCT_PARALLEL_PORTFOLIO}/")
+    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    if len(command_jobs_ids) > 0:
+        print(f"The command {command} is running "
+              f"with job IDs {command_jobs_ids}")
+        if len(list_all_statusinfo_filename) > 0:
+            print("Running parallel portfolio construction jobs:")
+            for statusinfo_filename in list_all_statusinfo_filename:
+                statusinfo_filepath = Path(
+                    tmp_directory
+                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                status_info = (ConstructParallelPortfolioStatusInfo
+                               .from_file(statusinfo_filepath))
+                print(f"Start Time: {status_info.get_start_time()}")
+                print(f"Portfolio Name: {status_info.get_portfolio_name()}")
+                print(f"Solver List: {str(status_info.get_list_of_solvers())}")
+                print()
     else:
-        print("No currently running Sparkle report generation job!")
-    print("")
-    return
+        print("No running parallel portfolio construction jobs")
+
+
+def print_running_portfolio_selector_construction_jobs() -> None:
+    """Print a list of currently active ps construction jobs."""
+    command = CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR
+    command_jobs_ids = get_running_jobs_for_command(command)
+    tmp_directory = (f"{sgh.sparkle_tmp_path}/"
+                     f"{StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR}/")
+    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    if len(command_jobs_ids) > 0:
+        print(f"The command {command} is running "
+              f"with job IDs {command_jobs_ids}")
+        if len(list_all_statusinfo_filename) > 0:
+            print("Running portfolio selector construction jobs:")
+            for statusinfo_filename in list_all_statusinfo_filename:
+                statusinfo_filepath = Path(
+                    tmp_directory
+                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                status_info = (ConstructPortfolioSelectorStatusInfo
+                               .from_file(statusinfo_filepath))
+                print(f"Start Time: {status_info.get_start_time()}")
+                print(f"Algorithm Selector: {status_info.get_algorithm_selector_path()}")
+                print(f"Feature data csv: "
+                      f"{str(status_info.get_feature_data_csv_path())}")
+                print(f"Performance data csv: "
+                      f"{str(status_info.get_performance_data_csv_path())}")
+                print()
+    else:
+        print("No running portfolio selector construction jobs")
+
+
+def print_running_generate_report_jobs() -> None:
+    """Print a list of currently active generate report jobs."""
+    tmp_directory = (f"{sgh.sparkle_tmp_path}/"
+                     f"{StatusInfoType.GENERATE_REPORT}/")
+    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    if len(list_all_statusinfo_filename) > 0:
+        print("Running generate report jobs:")
+        for statusinfo_filename in list_all_statusinfo_filename:
+            statusinfo_filepath = Path(
+                tmp_directory
+                + sfh.get_last_level_directory_name(statusinfo_filename))
+            status_info = (GenerateReportStatusInfo
+                           .from_file(statusinfo_filepath))
+            print(f"Start Time: {status_info.get_start_time()}")
+            print(f"Report Type: {status_info.get_report_type()}")
+            print()
+    else:
+        print("No running generate report jobs")

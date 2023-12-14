@@ -8,20 +8,12 @@ import argparse
 from pathlib import Path
 from pathlib import PurePath
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-    from sparkle_help import sparkle_compute_features_help as scf
-    from sparkle_help import sparkle_settings
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help
-    import sparkle_file_help as sfh
-    import sparkle_feature_data_csv_help as sfdcsv
-    import sparkle_compute_features_help as scf
-    import sparkle_settings
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_compute_features_help as scf
+from Commands.sparkle_help import sparkle_settings
 
 
 if __name__ == "__main__":
@@ -43,9 +35,9 @@ if __name__ == "__main__":
 
     # Process command line arguments
     # Turn multiple instance files into a space separated string
-    instance_path = " ".join(args.instance)
-    extractor_path = args.extractor
-    feature_data_csv_path = args.feature_csv
+    instance_path = Path(" ".join(args.instance))
+    extractor_path = Path(args.extractor)
+    feature_data_csv_path = Path(args.feature_csv)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     runsolver_path = sgh.runsolver_path
@@ -58,10 +50,11 @@ if __name__ == "__main__":
 
     cutoff_time_each_run_option = "--cpu-limit " + str(cutoff_time_each_extractor_run)
 
-    key_str = (f"{sfh.get_last_level_directory_name(extractor_path)}_"
-               f"{sfh.get_last_level_directory_name(instance_path)}_"
+    # TODO: Handle multi-file instances
+    key_str = (f"{extractor_path.name}_"
+               f"{instance_path.name}_"
                f"{sparkle_basic_help.get_time_pid_random_string()}")
-    result_path = "Feature_Data/Tmp/" + key_str + ".csv"
+    result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
     basic_part = "Tmp/" + key_str
     err_path = basic_part + ".err"
     runsolver_watch_data_path = basic_part + ".log"
@@ -72,11 +65,11 @@ if __name__ == "__main__":
                     f"{instance_path} {result_path} 2> {err_path}")
 
     try:
-        task_run_status_path = "Tmp/SBATCH_Extractor_Jobs/" + key_str + ".statusinfo"
+        task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
         status_info_str = (
             "Status: Running\nExtractor: "
-            f"{sfh.get_last_level_directory_name(extractor_path)}\n"
-            f"Instance: {sfh.get_last_level_directory_name(instance_path)}\n")
+            f"{extractor_path.name}\n"
+            f"Instance: {instance_path.name}\n")
 
         start_time = time.time()
         status_info_str += (
@@ -89,27 +82,27 @@ if __name__ == "__main__":
         os.system(command_line)
         end_time = time.time()
     except Exception:
-        if not os.path.exists(result_path):
+        if not Path(result_path).exists():
             sfh.create_new_empty_file(result_path)
 
     try:
         tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
         result_string = "Successful"
     except Exception:
-        print(f"****** WARNING: Feature vector computing on instance {instance_path}"
+        print(f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
         print("****** WARNING: The feature vector of this instace consists of missing "
               "values ******")
 
-        command_line = "rm -f " + result_path
-        os.system(command_line)
+        result_path.unlink(missing_ok=True)
         tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(
             feature_data_csv, instance_path, extractor_path, result_path)
         result_string = "Failed -- using missing value instead"
 
+    # TODO: Handle multi-file instances
     description_str = (
-        f"[Extractor: {sfh.get_last_level_directory_name(extractor_path)},"
-        f" Instance: {sfh.get_last_level_directory_name(instance_path)}]")
+        f"[Extractor: {extractor_path.name},"
+        f" Instance: {instance_path.name}]")
     start_time_str = (
         "[Start Time: "
         f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}]")

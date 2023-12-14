@@ -6,22 +6,13 @@ import sys
 import fcntl
 from pathlib import Path
 
-try:
-    from sparkle_help import sparkle_global_help as sgh
-    from sparkle_help import sparkle_basic_help as sbh
-    from sparkle_help import sparkle_file_help as sfh
-    from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-    from sparkle_help import sparkle_job_help as sjh
-    from sparkle_help.sparkle_settings import PerformanceMeasure
-    from sparkle_help.sparkle_settings import SolutionVerifier
-except ImportError:
-    import sparkle_global_help as sgh
-    import sparkle_basic_help as sbh
-    import sparkle_file_help as sfh
-    import sparkle_performance_data_csv_help as spdcsv
-    import sparkle_job_help as sjh
-    from sparkle_settings import PerformanceMeasure
-    from sparkle_settings import SolutionVerifier
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 
 import functools
 print = functools.partial(print, flush=True)
@@ -54,7 +45,7 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
 def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
                            instance_path: str, raw_result_path: str,
                            runsolver_values_path: str, seed_str: str = None,
-                           custom_cutoff: int = None):
+                           custom_cutoff: int = None) -> None:
     """Prepare for execution, run the solver on an instance, check output for errors."""
     if not Path(solver_wrapper_path).is_file():
         print(f'ERROR: Wrapper named "{solver_wrapper_path}" not found, stopping '
@@ -92,7 +83,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     raw_result_path_option = f"-o {str(raw_result_path)}"
 
     # For configured solvers change the directory to accommodate sparkle_smac_wrapper
-    original_path = os.getcwd()
+    original_path = Path.cwd()
 
     if is_configured:
         # Change paths to accommodate configured execution directory
@@ -115,19 +106,19 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         # Return to original directory
         cmd_cd_back = f"cd {original_path}"
 
-    # Finalise command
-    command_line_run_solver = (
-        f"{runsolver_path} {runsolver_option} "
-        f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
-        f"{runsolver_values_log} {raw_result_path_option} {str(solver_path)}/"
-        f"{cmd_solver_call}")
-
-    if is_configured:
+        # Finalise command
         command_line_run_solver = (
             f"{cmd_cd} ; {runsolver_path} {runsolver_option} "
             f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
             f"{runsolver_values_log} {raw_result_path_option} ./{cmd_solver_call} ; "
             f"{cmd_cd_back}")
+    else:
+        # Finalise command without extra is_configured steps
+        command_line_run_solver = (
+            f"{runsolver_path} {runsolver_option} "
+            f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
+            f"{runsolver_values_log} {raw_result_path_option} {str(solver_path)}/"
+            f"{cmd_solver_call}")
 
     # Execute command
     try:
@@ -174,7 +165,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         return raw_result_path
 
 
-def check_solver_output_for_errors(raw_result_path: Path):
+def check_solver_output_for_errors(raw_result_path: Path) -> None:
     """Check solver output for known errors."""
     error_lines = [ \
         # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found:
@@ -221,13 +212,13 @@ def run_solver_on_instance_and_process_results(
     return cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path
 
 
-def running_solvers(performance_data_csv_path: str, rerun: bool):
+def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     """Run solvers on all instances.
 
     If rerun is True, rerun for instances with existing performance data.
     """
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    performance_measure = sgh.settings.get_general_performance_measure()
+    perf_measure = sgh.settings.get_general_performance_measure()
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 
     if rerun is False:
@@ -274,7 +265,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool):
 
             # Handle timeouts
             penalised_str = ""
-            if (performance_measure == PerformanceMeasure.RUNTIME
+            if (perf_measure == PerformanceMeasure.RUNTIME
                and (status == "TIMEOUT" or status == "UNKNOWN")):
                 penalised_str = " (penalised)"
 
@@ -288,7 +279,8 @@ def running_solvers(performance_data_csv_path: str, rerun: bool):
                 continue  # Skip to the next job
 
             # Update performance CSV
-            if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+            if perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
+               perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
                 # TODO: Handle the multi-objective case for quality
                 performance_data_csv.set_value(instance_path, solver_path, quality[0])
                 print(f"Running Result: Status: {status}, Quality{penalised_str}: "
@@ -327,7 +319,8 @@ def handle_timeouts(runtime: float, status: str,
     return runtime_penalised, status
 
 
-def verify(instance_path, raw_result_path, solver_path, status):
+def verify(instance_path: str, raw_result_path: str, solver_path: str, status: str)\
+        -> str:
     """Run a solution verifier on the solution and update the status if needed."""
     verifier = sgh.settings.get_general_solution_verifier()
 
@@ -453,7 +446,7 @@ def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
     cpu_time = float(-1)
     wc_time = float(-1)
 
-    infile = open(runsolver_values_path, "r+")
+    infile = Path(runsolver_values_path).open("r+")
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
     while True:
@@ -489,7 +482,7 @@ def sparkle_sat_parser(raw_result_path: str, runtime: float) -> str:
     return status
 
 
-def remove_faulty_solver(solver_path, instance_path) -> None:
+def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     """Remove a faulty solver from Sparkle.
 
     Input: Path to solver, path to instance it failed on
@@ -537,7 +530,7 @@ def sat_get_result_status(raw_result_path: str) -> str:
     # timed out
     status = "UNKNOWN"
 
-    infile = open(raw_result_path, "r+")
+    infile = Path(raw_result_path).open("r+")
     fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
 
     while True:
@@ -561,13 +554,13 @@ def sat_get_result_status(raw_result_path: str) -> str:
     return status
 
 
-def sat_get_verify_string(tmp_verify_result_path):
+def sat_get_verify_string(tmp_verify_result_path: str) -> str:
     """Return the status of the SAT verifier.
 
     Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
     """
     ret = "UNKNOWN"
-    fin = open(tmp_verify_result_path, "r+")
+    fin = Path(tmp_verify_result_path).open("r+")
     fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fin.readline()
@@ -598,7 +591,7 @@ def sat_get_verify_string(tmp_verify_result_path):
     return ret
 
 
-def sat_judge_correctness_raw_result(instance_path, raw_result_path):
+def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -> str:
     """Run a SAT verifier to determine correctness of a result."""
     sat_verifier_path = sgh.sat_verifier_path
     tmp_verify_result_path = (
@@ -620,7 +613,7 @@ def sat_judge_correctness_raw_result(instance_path, raw_result_path):
     return ret
 
 
-def update_performance_data_id():
+def update_performance_data_id() -> None:
     """Update the performance data ID."""
     # Get current pd_id
     pd_id = get_performance_data_id()
@@ -631,7 +624,7 @@ def update_performance_data_id():
     # Write new pd_id
     pd_id_path = sgh.performance_data_id_path
 
-    with open(pd_id_path, "w") as pd_id_file:
+    with Path(pd_id_path).open("w") as pd_id_file:
         pd_id_file.write(str(pd_id))
 
     return
@@ -643,7 +636,7 @@ def get_performance_data_id() -> int:
     pd_id_path = sgh.performance_data_id_path
 
     try:
-        with open(pd_id_path, "r") as pd_id_file:
+        with Path(pd_id_path).open("r") as pd_id_file:
             pd_id = int(pd_id_file.readline())
     except FileNotFoundError:
         pd_id = 0

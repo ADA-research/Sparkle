@@ -9,3 +9,11 @@ kill_started_jobs_slurm(){
   scancel $jobids 
 }
 
+detect_slurm(){
+  if [ -x "$(command -v sinfo)" ];
+  then
+    echo "slurm"
+  else
+    echo "local"
+  fi
+}

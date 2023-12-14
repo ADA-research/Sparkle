@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """Definitions of constants broadly used in Sparkle."""
 
-import os
 import fcntl
 from pathlib import Path
 from pathlib import PurePath
+from enum import Enum
+from sparkle import about
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
-def get_seed():
+def get_seed() -> int:
     """Return a seed."""
     return 1
 
 
-sparkle_version = "0.3"
+latest_scenario = None
+
+sparkle_version = str(about.about_info["version"])
 
 sparkle_maximum_int = 2147483647
 sparkle_missing_value = -(sparkle_maximum_int - 1)
@@ -28,6 +31,14 @@ sparkle_smac_settings_path = "Settings/sparkle_smac_settings.txt"
 sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 
 sparkle_global_output_dir = Path("Output")
+
+
+class ReportType(str, Enum):
+    """enum for separating different types of reports."""
+    ALGORITHM_SELECTION = "algorithm_selection"
+    ALGORITHM_CONFIGURATION = "algorithm_configuration"
+    PARALLEL_PORTFOLIO = "parallel_portfolio"
+
 
 # Log that keeps track of which commands were executed and where output details can be
 # found
@@ -44,25 +55,35 @@ sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"
 
 sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
 
-sparkle_portfolio_selector_dir = "Sparkle_Portfolio_Selector/"
+snapshot_dir = Path("Snapshots/")
+sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector/")
 
-sparkle_portfolio_selector_name = "sparkle_portfolio_selector" + sparkle_special_string
+sparkle_algorithm_selector_name = f"sparkle_portfolio_selector{sparkle_special_string}"
 
-sparkle_portfolio_selector_path = (
-    sparkle_portfolio_selector_dir + sparkle_portfolio_selector_name)
+sparkle_algorithm_selector_path = (
+    sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name)
+
+output_dir = Path("Output/")
+instance_dir = Path("Instances/")
+solver_dir = Path("Solvers/")
+test_data_dir = Path("Test_Data/")
+extractor_dir = Path("Extractors/")
+feature_data_dir = Path("Feature_Data/")
+performance_data_dir = Path("Performance_Data")
 
 sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio/")
 sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio/")
 
-sparkle_marginal_contribution_perfect_path = Path(
-    sparkle_portfolio_selector_dir + "margi_contr_perfect.csv")
+sparkle_parallel_portfolio_path = (
+    sparkle_parallel_portfolio_dir / sparkle_parallel_portfolio_name)
 
-sparkle_marginal_contribution_actual_path = Path(
-    sparkle_portfolio_selector_dir + "margi_contr_actual.csv")
+sparkle_marginal_contribution_perfect_path = (
+    sparkle_algorithm_selector_dir / "margi_contr_perfect.csv")
+
+sparkle_marginal_contribution_actual_path = (
+    sparkle_algorithm_selector_dir / "margi_contr_actual.csv")
 
 sparkle_last_test_file_name = "last_test_configured_default.txt"
-
-sparkle_last_configuration_file_name = "last_configuration.txt"
 
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
 
@@ -71,6 +92,7 @@ sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
 autofolio_path = "Components/AutoFolio-master/scripts/autofolio"
 
 smac_dir = "Components/smac-v2.10.03-master-778/"
+smac_results_dir = smac_dir + "results/"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 
@@ -79,7 +101,6 @@ sparkle_run_generic_wrapper = "sparkle_run_generic_wrapper.py"
 sparkle_run_configured_wrapper = "sparkle_run_configured_wrapper.sh"
 
 sparkle_smac_wrapper = "sparkle_smac_wrapper.py"
-
 
 ablation_dir = "Components/ablationAnalysis-0.9.4/"
 
@@ -90,7 +111,6 @@ performance_data_id_path = "Performance_Data/sparkle_performance_data.id"
 pap_performance_data_tmp_path = Path("Performance_Data/Tmp_PaP/")
 pap_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/")
 run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")
-
 
 reference_list_dir = Path("Reference_Lists/")
 instance_list_postfix = "_instance_list.txt"
@@ -104,6 +124,10 @@ solver_list_path = str(reference_list_dir) + "/sparkle_solver_list.txt"
 instance_list_file = Path("sparkle" + instance_list_postfix)
 instance_list_path = Path(reference_list_dir / instance_list_file)
 
+working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
+                feature_data_dir, performance_data_dir, reference_list_dir,
+                sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
+                test_data_dir]
 
 solver_list = []
 solver_nickname_mapping = {}
@@ -112,8 +136,8 @@ extractor_nickname_mapping = {}
 extractor_feature_vector_size_mapping = {}
 instance_list = []
 
-if os.path.exists(extractor_nickname_list_path):
-    fo = open(extractor_nickname_list_path, "r+")
+if Path(extractor_nickname_list_path).exists():
+    fo = Path(extractor_nickname_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -124,8 +148,8 @@ if os.path.exists(extractor_nickname_list_path):
         extractor_nickname_mapping[mylist[0]] = mylist[1]
     fo.close()
 
-if os.path.exists(extractor_feature_vector_size_list_path):
-    fo = open(extractor_feature_vector_size_list_path, "r+")
+if Path(extractor_feature_vector_size_list_path).exists():
+    fo = Path(extractor_feature_vector_size_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline().strip()
@@ -135,8 +159,8 @@ if os.path.exists(extractor_feature_vector_size_list_path):
         extractor_feature_vector_size_mapping[mylist[0]] = int(mylist[1])
     fo.close()
 
-if os.path.exists(extractor_list_path):
-    fo = open(extractor_list_path, "r+")
+if Path(extractor_list_path).exists():
+    fo = Path(extractor_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -146,8 +170,8 @@ if os.path.exists(extractor_list_path):
         extractor_list.append(myline)
     fo.close()
 
-if os.path.exists(solver_nickname_list_path):
-    fo = open(solver_nickname_list_path, "r+")
+if Path(solver_nickname_list_path).exists():
+    fo = Path(solver_nickname_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -158,8 +182,8 @@ if os.path.exists(solver_nickname_list_path):
         solver_nickname_mapping[mylist[0]] = mylist[1]
     fo.close()
 
-if os.path.exists(solver_list_path):
-    fo = open(solver_list_path, "r+")
+if Path(solver_list_path).exists():
+    fo = Path(solver_list_path).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()
@@ -170,8 +194,8 @@ if os.path.exists(solver_list_path):
         solver_list.append(mylist[0])
     fo.close()
 
-if os.path.exists(str(instance_list_path)):
-    fo = open(str(instance_list_path), "r+")
+if Path(str(instance_list_path)).exists():
+    fo = Path(str(instance_list_path)).open("r+")
     fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
     while True:
         myline = fo.readline()

@@ -49,12 +49,13 @@ exclude =
     Performance_Data/,
     __pycache__,
     .pytest_cache,
-    Records/,
+    Snapshots/,
     Reference_Lists/,
     scratch/,
     Solvers/,
     Sparkle_Portfolio_Selector/,
     Tmp/,
+    tests/test_files,
     build/,
     dist/
 

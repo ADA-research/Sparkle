@@ -5,14 +5,14 @@
 import os
 
 import runrunner.local
-from sparkle_help import sparkle_global_help as sgh
-from sparkle_help import sparkle_basic_help as sbh
-from sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from sparkle_help import sparkle_job_help as sjh
-from sparkle_help import sparkle_run_solvers_help as srs
-from sparkle_help import sparkle_slurm_help as ssh
-from sparkle_help import sparkle_logging as sl
-from sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_basic_help as sbh
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help import sparkle_run_solvers_help as srs
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_logging as sl
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
@@ -20,7 +20,8 @@ from runrunner.base import Runner
 
 
 def generate_running_solvers_sbatch_shell_script(total_job_num: int,
-                                                 num_job_in_parallel: int, total_job_list
+                                                 num_job_in_parallel: int,
+                                                 total_job_list: list[tuple[str, str]],
                                                  ) -> (str, str, str):
     """Generate a Slurm shell script to run the solvers."""
     sbatch_script_name = ("running_solvers_sbatch_shell_script_"
@@ -60,13 +61,13 @@ def running_solvers_parallel(
         performance_data_csv_path: str,
         num_job_in_parallel: int,
         rerun: bool = False,
-        run_on: Runner = Runner.SLURM):
+        run_on: Runner = Runner.SLURM) -> str:
     """Run the solvers in parallel.
 
     Parameters
     ----------
     performance_data_csv_path: str
-        The path the the performance data file
+        The path to the performance data file
     num_job_in_parallel: int
         The maximum number of jobs to run in parallel
     rerun: bool
@@ -112,8 +113,6 @@ def running_solvers_parallel(
     sl.add_output(std_err_path,
                   "Error output of Slurm batch script to run solvers in parallel")
 
-    batch = SlurmBatch(sbatch_script_path)
-
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:
@@ -125,14 +124,14 @@ def running_solvers_parallel(
         # Execute the sbatch script via slurm
         command_line = f"sbatch {sbatch_script_path}"
         output_list = os.popen(command_line).readlines()
-
+        run = ""
         if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
             run = output_list[0].strip().split()[-1]
             # Add job to active job CSV
             sjh.write_active_job(run, CommandName.RUN_SOLVERS)
-        else:
-            run = ""
     else:
+        batch = SlurmBatch(sbatch_script_path)
+
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM_RR:
             run_on = Runner.SLURM
@@ -141,8 +140,8 @@ def running_solvers_parallel(
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name="run_solvers",
-            base_dir="Tmp",
+            name=CommandName.RUN_SOLVERS,
+            base_dir=sgh.sparkle_tmp_path,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
 
