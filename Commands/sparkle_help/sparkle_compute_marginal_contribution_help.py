@@ -9,6 +9,7 @@ import sys
 import csv
 from pathlib import Path
 from typing import Callable
+from statistics import mean
 
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -63,9 +64,9 @@ def write_marginal_contribution_csv(path: Path,
 
 
 def compute_perfect_selector_marginal_contribution(
-        aggregation_function: Callable[[list[float]], float],
-        capvalue_list: list[float],
-        minimise: bool,
+        aggregation_function: Callable[[list[float]], float] = mean,
+        capvalue_list: list[float] = None,
+        minimise: bool = min,
         performance_data_csv_path: Path = sgh.performance_data_csv_path,
         flag_recompute: bool = False) -> list[tuple[str, float]]:
     """Return the marginal contributions of solvers for the VBS.
@@ -311,9 +312,9 @@ def compute_actual_performance_for_instance(
 
 
 def compute_actual_selector_marginal_contribution(
-        aggregation_function: Callable[[list[float]], float],
-        capvalue_list: list[float],
-        minimise: bool,
+        aggregation_function: Callable[[list[float]], float] = mean,
+        capvalue_list: list[float] = None,
+        minimise: bool = True,
         performance_data_csv_path: str = sgh.performance_data_csv_path,
         feature_data_csv_path: str = sgh.feature_data_csv_path,
         flag_recompute: bool = False) -> list[tuple[str, float]]:

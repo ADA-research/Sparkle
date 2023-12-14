@@ -406,7 +406,10 @@ class Settings:
         if self.__general_cap_value_set == SettingState.NOT_SET:
             self.set_general_cap_value()
 
-        return self.__settings["general"]["cap_value"]
+        if "cap_value" in self.__settings["general"]:
+            return self.__settings["general"]["cap_value"]
+        else:
+            return None
 
     def set_general_penalty_multiplier(
             self: Settings, value: int = DEFAULT_general_penalty_multiplier,
