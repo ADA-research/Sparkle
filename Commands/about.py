@@ -16,9 +16,10 @@ __authors__ = [
     "Holger H. Hoos",
     "Chuan Luo",
     "Richard Middelkoop",
-    "Jeroen Rook"]
+    "Jeroen Rook",
+    "Thijs Snelleman"]
 
-__contact__ = "k.van.der.blom@liacs.leidenuniv.nl"
+__contact__ = "snelleman@aim.rwth-aachen.de"
 
 
 def parser_function() -> argparse.ArgumentParser:
