@@ -170,8 +170,8 @@ if __name__ == "__main__":
 
         # Compute and print marginal contributions of the perfect and actual portfolio
         # selectors
-        scmch.compute_marginal_contribution(perfect=True,
-                                            actual=True,
+        scmch.compute_marginal_contribution(flag_compute_perfect=True,
+                                            flag_compute_actual=True,
                                             flag_recompute=flag_recompute_marg_cont)
 
         status_info.delete()

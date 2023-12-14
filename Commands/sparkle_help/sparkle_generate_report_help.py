@@ -14,6 +14,7 @@ from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_tex_help as stex
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 
 
 def underscore_for_latex(string: str) -> str:
@@ -326,12 +327,18 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
+    minimise = True
+    performance_measure = sgh.settings.get_general_performance_measure()
+    capvalue = sgh.settings.get_general_cap_value()
+
+    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
+        minimise = False
 
     for instance in performance_data_csv.list_rows():
-        used_time_for_this_instance, flag_successfully_solving = (
-            scmch.compute_actual_used_time_for_instance(
+        used_time_for_this_instance, flag_successfully_solving = \
+            scmch.compute_actual_performance_for_instance(
                 actual_portfolio_selector_path, instance, sgh.feature_data_csv_path,
-                performance_data_csv))
+                performance_data_csv, minimise, performance_measure, capvalue)
 
         if flag_successfully_solving:
             mydict[instance] = used_time_for_this_instance
