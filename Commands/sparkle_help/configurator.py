@@ -119,7 +119,7 @@ class Configurator:
         options += f"#SBATCH --error=tmp/{self.sbatch_filename}.err\n"
         options += "###\n"
         options += "###\n"
-        options += f"#SBATCH --array=0-{total_jobs}%{parallel_jobs}\n"
+        options += f"#SBATCH --array=0-{total_jobs-1}%{parallel_jobs}\n"
         options += "###\n"
 
         sbatch_options_list = ssh.get_slurm_options_list()
