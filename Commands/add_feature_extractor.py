@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Sparkle command to add a feature extractor to the Sparkle platform."""
 
-import os
 import sys
+import subprocess
+import glob
 import argparse
 from pathlib import Path
 from Commands.sparkle_help import sparkle_basic_help
@@ -100,18 +101,13 @@ if __name__ == "__main__":
     if not Path(extractor_directory).exists():
         Path(extractor_directory).mkdir()
     else:
-        print(
-            "Feature extractor "
-            + sfh.get_last_level_directory_name(extractor_directory)
-            + " already exists!"
-        )
-        print(
-            "Do not add feature extractor "
-            + sfh.get_last_level_directory_name(extractor_directory)
-        )
-        sys.exit()
+        ex_dir_name = sfh.get_last_level_directory_name(extractor_directory)
+        print(f"Feature extractor {ex_dir_name} already exists!")
+        print(f"Do not add feature extractor {ex_dir_name}")
+        sys.exit(-1)
 
-    os.system("cp -r " + extractor_source + "/* " + extractor_directory)
+    copy_cmd = ["cp", "-r"] + glob.glob(extractor_source + "/*") + [extractor_directory]
+    subprocess.run(copy_cmd)
 
     sgh.extractor_list.append(extractor_directory)
     sfh.add_new_extractor_into_file(extractor_directory)
@@ -143,7 +139,7 @@ if __name__ == "__main__":
             f"{Path(extractor_directory) / sgh.sparkle_run_default_wrapper} "
             f"{extractor_directory}/ {instance_path} {result_path}"
         )
-        os.system(command_line)
+        subprocess.run(command_line)
     else:
         instance_path = Path(extractor_directory) / "sparkle_test_instance.cnf"
         if not Path(instance_path).is_file():
@@ -157,19 +153,11 @@ if __name__ == "__main__":
             + sparkle_basic_help.get_time_pid_random_string()
             + ".rawres"
         )
-        command_line = (
-            extractor_directory
-            + "/"
-            + sgh.sparkle_run_default_wrapper
-            + " "
-            + extractor_directory
-            + "/"
-            + " "
-            + str(instance_path)
-            + " "
-            + result_path
-        )
-        os.system(command_line)
+        command_line = [extractor_directory + "/" + sgh.sparkle_run_default_wrapper,
+                        extractor_directory + "/",
+                        str(instance_path),
+                        result_path]
+        subprocess.run(command_line)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
 
@@ -185,28 +173,22 @@ if __name__ == "__main__":
         extractor_directory, len(list_columns)
     )
 
-    command_line = "rm -f " + result_path
-    os.system(command_line)
+    command_line = ["rm", "-f", result_path]
+    subprocess.run(command_line)
 
-    print(
-        "Adding feature extractor "
-        + sfh.get_last_level_directory_name(extractor_directory)
-        + " done!"
-    )
+    print("Adding feature extractor "
+          f"{sfh.get_last_level_directory_name(extractor_directory)} done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
-        os.system(command_line)
-        print(
-            "Removing Sparkle portfolio selector "
-            + sgh.sparkle_algorithm_selector_path
-            + " done!"
-        )
+        command_line = ["rm", "-f", sgh.sparkle_algorithm_selector_path]
+        subprocess.run(command_line)
+        print("Removing Sparkle portfolio selector "
+              f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
-        command_line = "rm -f " + sgh.sparkle_report_path
-        os.system(command_line)
-        print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
+        command_line = ["rm", "-f", sgh.sparkle_report_path]
+        subprocess.run(command_line)
+        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     if nickname_str is not None:
         sgh.extractor_nickname_mapping[nickname_str] = extractor_directory
@@ -217,16 +199,10 @@ if __name__ == "__main__":
         if not args.parallel:
             print("Start computing features ...")
             scf.computing_features(Path(sgh.feature_data_csv_path), False)
-            print(
-                "Feature data file "
-                + sgh.feature_data_csv_path
-                + " has been updated!"
-            )
+            print(f"Feature data file {sgh.feature_data_csv_path} has been updated!")
             print("Computing features done!")
         else:
-            scf.computing_features_parallel(
-                Path(sgh.feature_data_csv_path), False
-            )
+            scf.computing_features_parallel(Path(sgh.feature_data_csv_path), False)
             print("Computing features in parallel ...")
 
     # Write used settings to file
