@@ -249,6 +249,8 @@ if __name__ == "__main__":
     else:
         print("Running configuration finished!")
 
+    configurator.configuration_callback(dependency_jobid_list=dependency_jobid_list,
+                                        run_on=run_on)
     status_info.delete()
     # Write used settings to file
     sgh.settings.write_used_settings()

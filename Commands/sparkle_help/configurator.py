@@ -5,12 +5,14 @@
 from __future__ import annotations
 from pathlib import Path
 import sys
+import subprocess
 
 from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_parallel_help as sjph
 
 import runrunner as rrr
 from runrunner import Runner
@@ -100,6 +102,46 @@ class Configurator:
                 run_on = Runner.SLURM_RR
 
             return jobid
+
+    def configuration_callback(self: Configurator,
+                               dependency_jobid_list: list[str],
+                               run_on: Runner = Runner.SLURM) -> str:
+        """Callback to be run once configurator is done.
+
+        Returns:
+            str: Job id of the callback
+        """
+        jobid = ""
+        cmd = "rm -rf"
+        dir_list = self.scenario._clean_up_scenario_dirs()
+        cmd += " " + " ".join(dir_list)
+
+        if run_on == Runner.SLURM:
+            dependency = "--dependency="
+            dependency_list_str = sjph.get_dependency_list_str(dependency_jobid_list)
+            if dependency_list_str.strip() != "":
+                dependency += dependency_list_str
+            cmd = f"srun -n1 -N1 {dependency} {cmd}"
+            command_line = cmd.split(" ")
+            subprocess.run(args=command_line)
+        else:
+            # Remove once Runrunner is satisfactory
+            if run_on == Runner.SLURM_RR:
+                run_on = Runner.SLURM
+
+            run = rrr.add_to_queue(
+                runner=run_on,
+                cmd=cmd,
+                name="configuration_callback",
+                dependency=dependency_jobid_list)
+
+            if run_on == Runner.SLURM:
+                jobid = run.run_id
+                run_on = Runner.SLURM_RR
+            elif run_on == Runner.LOCAL:
+                run.wait()
+
+        return jobid
 
     def _get_sbatch_options(self: Configurator) -> str:
         """Get sbatch options.
