@@ -45,7 +45,7 @@ dependencies:
     - py==1.10.0
     - pycodestyle==2.9.1
     - pyflakes==2.5.0
-    - pynisher==0.6.4
+    - pynisher==1.0.0
     - pyparsing==2.4.7
     - pyrfr==0.8.2
     - pytest==7.3.1
