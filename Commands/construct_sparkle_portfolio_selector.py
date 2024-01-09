@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to construct a portfolio selector."""
 
-import os
+import subprocess
 import sys
 import argparse
 from pathlib import Path
@@ -83,9 +83,9 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
 
 def delete_log_files() -> None:
     """Remove the log files."""
-    os.system("rm -f " + sgh.sparkle_log_path)
-    os.system("rm -f " + sgh.sparkle_err_path)
-
+    rm_cmd = ["rm", "-f"]
+    subprocess.run(rm_cmd + [sgh.sparkle_log_path])
+    subprocess.run(rm_cmd + [sgh.sparkle_err_path])
     return
 
 

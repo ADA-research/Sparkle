@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to remove a solver from the Sparkle platform."""
 
-import os
+import subprocess
 import sys
 import argparse
 from pathlib import Path
@@ -48,16 +48,12 @@ if __name__ == "__main__":
         solver_path = sparkle_global_help.solver_nickname_mapping[args.nickname]
     if not Path(solver_path).exists():
         print(f'Solver path "{solver_path}" does not exist!')
-        sys.exit()
+        sys.exit(-1)
 
     if solver_path[-1] == "/":
         solver_path = solver_path[:-1]
 
-    print(
-        "Starting removing solver "
-        + sfh.get_last_level_directory_name(solver_path)
-        + " ..."
-    )
+    print(f"Start removing solver {sfh.get_last_level_directory_name(solver_path)} ...")
 
     solver_list = sparkle_global_help.solver_list
     if bool(solver_list):
@@ -80,39 +76,22 @@ if __name__ == "__main__":
                 performance_data_csv.delete_column(column_name)
         performance_data_csv.update_csv()
 
-    command_line = "rm -rf " + solver_path
-    os.system(command_line)
+    rm_cmd = ["rm", "-rf"]
+    subprocess.run(rm_cmd + [solver_path])
 
     solver_name = sfh.get_last_level_directory_name(solver_path)
-    smac_solver_path = (
-        sparkle_global_help.smac_dir
-        + "/"
-        + "example_scenarios/"
-        + solver_name
-        + "_*/"
-    )
+    smac_solver_path = f"{sparkle_global_help.smac_dir}example_scenarios/{solver_name}_*"
+
     if Path(smac_solver_path).exists():
-        command_line = "rm -rf " + smac_solver_path
-        os.system(command_line)
+        subprocess.run(rm_cmd + [smac_solver_path])
 
     if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
-        command_line = "rm -f " + sparkle_global_help.sparkle_algorithm_selector_path
-        os.system(command_line)
-        print(
-            "Removing Sparkle portfolio selector "
-            + sparkle_global_help.sparkle_algorithm_selector_path
-            + " done!"
-        )
+        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_algorithm_selector_path])
+        print("Removing Sparkle portfolio selector "
+              f"{sparkle_global_help.sparkle_algorithm_selector_path} done!")
 
     if Path(sparkle_global_help.sparkle_report_path).exists():
-        command_line = "rm -f " + sparkle_global_help.sparkle_report_path
-        os.system(command_line)
-        print(
-            "Removing Sparkle report "
-            + sparkle_global_help.sparkle_report_path
-            + " done!"
-        )
+        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_report_path])
+        print(f"Removing Sparkle report {sparkle_global_help.sparkle_report_path} done!")
 
-    print(
-        "Removing solver " + sfh.get_last_level_directory_name(solver_path) + " done!"
-    )
+    print(f"Removing solver {sfh.get_last_level_directory_name(solver_path)} done!")

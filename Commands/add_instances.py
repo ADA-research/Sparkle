@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Sparkle command to add an instance set to the Sparkle platform."""
 
-import os
 import sys
+import subprocess
 import argparse
 from pathlib import Path
 
@@ -116,8 +116,8 @@ if __name__ == "__main__":
             for related_file_name in instance_related_files:
                 source_file_path = Path(instances_source) / related_file_name
                 target_file_path = instances_directory / related_file_name
-                cmd = f"cp {source_file_path} {target_file_path}"
-                os.system(cmd)
+                cmd = ["cp", source_file_path, target_file_path]
+                subprocess.run(cmd)
                 intended_instance_line += str(target_file_path) + " "
 
             intended_instance_line = intended_instance_line.strip()
@@ -164,8 +164,9 @@ if __name__ == "__main__":
 
                 if list_source_all_directory[i][-1] == "/":
                     list_source_all_directory[i] = list_source_all_directory[i][:-1]
-                os.system(f"cp {list_source_all_directory[i]}/{intended_filename} "
-                          f"{instances_directory}")
+                copy_cmd = ["cp", f"{list_source_all_directory[i]}/{intended_filename}",
+                            instances_directory]
+                subprocess.run(copy_cmd)
                 print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
                       " has been added!")
 
@@ -176,14 +177,14 @@ if __name__ == "__main__":
           f"{instances_directory.name} done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
-        os.system(command_line)
+        command_line = ["rm", "-f", sgh.sparkle_algorithm_selector_path]
+        subprocess.run(command_line)
         print("Removing Sparkle portfolio selector "
               f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
-        command_line = "rm -f " + sgh.sparkle_report_path
-        os.system(command_line)
+        command_line = ["rm", "-f", sgh.sparkle_report_path]
+        subprocess.run(command_line)
         print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
 
     if args.run_extractor_now:

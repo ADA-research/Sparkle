@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to remove a feature extractor from the Sparkle platform."""
 
-import os
+import subprocess
 import sys
 import argparse
 from pathlib import Path
@@ -50,16 +50,13 @@ if __name__ == "__main__":
         extractor_path = sparkle_global_help.extractor_nickname_mapping[extractor_path]
     if not Path(extractor_path).exists():
         print(f'Feature extractor path "{extractor_path}" does not exist!')
-        sys.exit()
+        sys.exit(-1)
 
     if extractor_path[-1] == "/":
         extractor_path = extractor_path[:-1]
 
-    print(
-        "Starting removing feature extractor "
-        + sfh.get_last_level_directory_name(extractor_path)
-        + " ..."
-    )
+    print("Starting removing feature extractor "
+          f"{sfh.get_last_level_directory_name(extractor_path)} ...")
 
     extractor_list = sparkle_global_help.extractor_list
     if bool(extractor_list):
@@ -81,6 +78,7 @@ if __name__ == "__main__":
                 break
         sfh.write_extractor_nickname_mapping()
 
+    rm_cmd = ["rm", "-rf"]
     if Path(sparkle_global_help.feature_data_csv_path).exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
             sparkle_global_help.feature_data_csv_path
@@ -92,30 +90,16 @@ if __name__ == "__main__":
             if extractor_path == tmp_extractor_path:
                 feature_data_csv.delete_column(column_name)
         feature_data_csv.update_csv()
-
-        command_line = "rm -rf " + extractor_path
-        os.system(command_line)
+        subprocess.run(rm_cmd + [extractor_path])
 
     if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
-        command_line = "rm -f " + sparkle_global_help.sparkle_algorithm_selector_path
-        os.system(command_line)
-        print(
-            "Removing Sparkle portfolio selector "
-            + sparkle_global_help.sparkle_algorithm_selector_path
-            + " done!"
-        )
+        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_algorithm_selector_path])
+        print("Removing Sparkle portfolio selector "
+              f"{sparkle_global_help.sparkle_algorithm_selector_path} done!")
 
     if Path(sparkle_global_help.sparkle_report_path).exists():
-        command_line = "rm -f " + sparkle_global_help.sparkle_report_path
-        os.system(command_line)
-        print(
-            "Removing Sparkle report "
-            + sparkle_global_help.sparkle_report_path
-            + " done!"
-        )
+        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_report_path])
+        print(f"Removing Sparkle report {sparkle_global_help.sparkle_report_path} done!")
 
-    print(
-        "Removing feature extractor "
-        + sfh.get_last_level_directory_name(extractor_path)
-        + " done!"
-    )
+    print("Removing feature extractor "
+          f"{sfh.get_last_level_directory_name(extractor_path)} done!")
