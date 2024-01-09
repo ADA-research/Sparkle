@@ -15,7 +15,7 @@ dependencies:
     - certifi==2021.5.30
     - click==8.0.1
     - cloudpickle==1.6.0
-    - ConfigSpace==0.4.19
+    - ConfigSpace==0.6.1
     - Cython==0.29.24
     - dask==2021.7.0
     - distributed==2021.7.0
