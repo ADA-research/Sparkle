@@ -1,0 +1,3 @@
+[submodule "Components/AutoFolio"]
+	path = Components/AutoFolio
+	url = https://github.com/hadarshavit/AutoFolio.git
