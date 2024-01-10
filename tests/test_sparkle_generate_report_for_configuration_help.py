@@ -1168,40 +1168,26 @@ def test_generate_report_for_configuration_prep_exists_not(mocker: MockFixture) 
     """
     report_directory = "report/directory"
 
-    template_latex_directory_path = (
-        "Components/Sparkle-latex-generator-for-configuration/")
-
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
-    mock_system = mocker.patch("os.system")
+    mock_path = mocker.patch("pathlib.Path.mkdir")
+    mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_exists.assert_called_once()
-
-    mkdir_command = f"mkdir -p {report_directory}"
-    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
-    mock_system.assert_has_calls([
-        mocker.call(mkdir_command),
-        mocker.call(cp_command)
-    ])
+    mock_path.assert_called_once()
+    mock_shutil.assert_called_once()
 
 
 def test_generate_report_for_configuration_prep_exists(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_prep copies files to report directory."""
     report_directory = "report/directory"
 
-    template_latex_directory_path = (
-        "Components/Sparkle-latex-generator-for-configuration/")
-
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
-    mock_system = mocker.patch("os.system")
+    mock_path = mocker.patch("pathlib.Path.mkdir")
+    mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_exists.assert_called_once()
-
-    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
-    mock_system.assert_called_once_with(cp_command)
+    mock_path.assert_called_once()
+    mock_shutil.assert_called_once()
 
 
 def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:

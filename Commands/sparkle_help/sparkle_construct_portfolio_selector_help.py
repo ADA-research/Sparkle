@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for portfolio selector construction."""
 
-import os
+import subprocess
 import sys
 from pathlib import Path, PurePath
 
@@ -204,33 +204,32 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     err_file = selector_path.parent.name + "_autofolio.err"
     log_path_str = str(Path(sl.caller_log_dir / log_file))
     err_path_str = str(Path(sl.caller_log_dir / err_file))
-    command_line = (f"{python_executable} {sgh.autofolio_path} --performance_csv "
-                    f"{performance_data_csv_path} --feature_csv {feature_data_csv_path} "
-                    f"{objective_function} --runtime_cutoff {cutoff_time_str} --tune "
-                    f"--save {str(selector_path)} 1>> {log_path_str} 2>> "
-                    f"{err_path_str}")
-
+    cmd_list = [python_executable, sgh.autofolio_path, "--performance_csv",
+                performance_data_csv_path, "--feature_csv", feature_data_csv_path,
+                objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
+                "--save", str(selector_path)]
     # Write command line to log
-    print("Running command below:\n", command_line, file=open(log_path_str, "a+"))
+    print("Running command below:\n", " ".join(cmd_list), file=open(log_path_str, "a+"))
     sl.add_output(log_path_str, "Command line used to construct portfolio through "
                   "AutoFolio and associated output")
     sl.add_output(err_path_str,
                   "Error output from constructing portfolio through AutoFolio")
 
-    os.system(command_line)
-    # Remove autofolio output from root Sparkle directory
-    os.system("rm -f runhistory.json")
+    process = subprocess.run(cmd_list,
+                             stdout=Path(log_path_str).open("w+"),
+                             stderr=Path(err_path_str).open("w+"))
+    sfh.rmfiles("runhistory.json")
 
     if bool_exists_missing_value:
-        os.system(r"rm -f " + impute_feature_data_csv_path)
+        sfh.rmfiles(impute_feature_data_csv_path)
 
     # Check if the selector was constructed successfully
-    if not selector_path.is_file():
+    if process.returncode != 0 or not selector_path.is_file():
         print("Sparkle portfolio selector is not successfully constructed!")
         print("There might be some errors!")
         print("Standard output log:", log_path_str)
         print("Error output log:", err_path_str)
-        sys.exit()
+        sys.exit(-1)
 
     # Update data IDs associated with this selector
     write_selector_pd_id(selector_path)

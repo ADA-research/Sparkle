@@ -7,6 +7,7 @@ import sys
 import fcntl
 from pathlib import Path
 from pathlib import PurePath
+import shutil
 from enum import Enum
 
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -88,8 +89,10 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     smac_file_instance_path_target = (
         smac_solver_dir + instance_set_target_name + file_postfix)
 
-    command_line = f"cp {smac_file_instance_path_ori} {smac_file_instance_path_target}"
-    os.system(command_line)
+    if not Path(smac_solver_dir).exists():
+        Path(smac_solver_dir).mkdir(parents=True)
+
+    shutil.copy(smac_file_instance_path_ori, smac_file_instance_path_target)
 
     log_str = "List of instances to be used for configuration"
     sl.add_output(smac_file_instance_path_target, log_str)
@@ -203,7 +206,7 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     Returns:
         String containing the scenario directory inside SMAC
     """
-    smac_scenario_dir = f"{sgh.smac_dir}/scenarios"
+    smac_scenario_dir = f"{sgh.smac_dir}scenarios"
     smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
 
     return smac_solver_dir
@@ -291,38 +294,28 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
     for i in range(1, num_of_smac_run + 1):
-        solver_directory = f"Solvers/{solver_name}/*"
+        solver_directory = f"Solvers/{solver_name}/"
 
         # Train default
         execdir = "validate_train_default/"
-
         # Create directories, -p makes sure any missing parents are also created
-        cmd = f"mkdir -p {smac_solver_dir}{execdir}"
-        os.system(cmd)
+        Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
         # Copy solver to execution directory
-        cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
-        os.system(cmd)
+        sfh.copytree(solver_directory, smac_solver_dir + execdir)
 
         # Test default
         if instance_set_test_name is not None:
             execdir = f"validate_{instance_set_test_name}_test_default/"
-
             # Create directories, -p makes sure any missing parents are also created
-            cmd = f"mkdir -p {smac_solver_dir}{execdir}"
-            os.system(cmd)
+            Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory
-            cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
-            os.system(cmd)
-
+            sfh.copytree(solver_directory, smac_solver_dir + execdir)
             # Test configured
             execdir = f"validate_{instance_set_test_name}_test_configured/"
-
             # Create directories, -p makes sure any missing parents are also created
-            cmd = f"mkdir -p {smac_solver_dir}{execdir}"
-            os.system(cmd)
+            Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory
-            cmd = f"cp -r {solver_directory} {smac_solver_dir}{execdir}"
-            os.system(cmd)
+            sfh.copytree(solver_directory, smac_solver_dir + execdir)
 
 
 def create_smac_configure_sbatch_script(solver_name: str,

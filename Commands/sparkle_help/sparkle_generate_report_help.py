@@ -125,14 +125,14 @@ def get_num_instance_classes() -> str:
     for instance_path in instance_list:
         instance_class = sfh.get_current_directory_name(instance_path)
 
-        if not (instance_class in list_instance_class):
+        if instance_class not in list_instance_class:
             list_instance_class.append(instance_class)
 
     str_value = str(len(list_instance_class))
 
     if int(str_value) < 1:
         print("ERROR: No instance sets found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str_value
 
@@ -151,7 +151,7 @@ def get_instance_class_list() -> str:
     for instance_path in instance_list:
         instance_class = sfh.get_current_directory_name(instance_path)
 
-        if not (instance_class in list_instance_class):
+        if instance_class not in list_instance_class:
             list_instance_class.append(instance_class)
             dict_number_of_instances_in_instance_class[instance_class] = 1
         else:
@@ -171,9 +171,7 @@ def get_feature_computation_cutoff_time() -> str:
     Returns:
         The feature computation cutoff time as str.
     """
-    str_value = str(sgh.settings.get_general_extractor_cutoff_time())
-
-    return str_value
+    return str(sgh.settings.get_general_extractor_cutoff_time())
 
 
 def get_performance_computation_cutoff_time() -> str:
@@ -182,9 +180,7 @@ def get_performance_computation_cutoff_time() -> str:
     Returns:
         The performance computation cutoff time as str.
     """
-    str_value = str(sgh.settings.get_general_target_cutoff_time())
-
-    return str_value
+    return str(sgh.settings.get_general_target_cutoff_time())
 
 
 def get_solver_perfect_ranking_list() -> str:

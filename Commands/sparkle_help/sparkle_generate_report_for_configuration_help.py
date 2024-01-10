@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -971,12 +970,11 @@ def generate_report_for_configuration_prep(configuration_reports_directory: str)
         configuration_reports_directory: Directory for the configuration reports
     """
     print("Generating report for configuration ...")
-
-    template_latex_directory_path = (
-        "Components/Sparkle-latex-generator-for-configuration/")
-    if not Path(configuration_reports_directory).exists():
-        os.system("mkdir -p " + configuration_reports_directory)
-    os.system(f"cp -r {template_latex_directory_path} {configuration_reports_directory}")
+    full_conf_reports_dir = Path(configuration_reports_directory
+                                 + "/Sparkle-latex-generator-for-configuration")
+    full_conf_reports_dir.mkdir(parents=True, exist_ok=True)
+    template_latex_path = Path("Components/Sparkle-latex-generator-for-configuration")
+    sfh.copytree(template_latex_path, full_conf_reports_dir)
 
 
 def generate_report_for_configuration_train(solver_name: str,
@@ -1037,15 +1035,7 @@ def generate_report_for_configuration_common(configuration_reports_directory: st
 
     # Read in the report template from file
     latex_template_filepath = Path(latex_directory_path / latex_template_filename)
-    report_content = ""
-    fin = Path(latex_template_filepath).open("r")
-
-    while True:
-        myline = fin.readline()
-        if not myline:
-            break
-        report_content += myline
-    fin.close()
+    report_content = Path(latex_template_filepath).open("r").read()
 
     # Replace variables in the report template with their value
     for variable_key, str_value in dict_variable_to_value.items():
@@ -1054,8 +1044,6 @@ def generate_report_for_configuration_common(configuration_reports_directory: st
                 variable_key != "figure-configured-vs-default-train"):
             str_value = str_value.replace("_", r"\textunderscore ")
         report_content = report_content.replace(variable, str_value)
-
-    # print(report_content)
 
     # Write the completed report to a tex file
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
