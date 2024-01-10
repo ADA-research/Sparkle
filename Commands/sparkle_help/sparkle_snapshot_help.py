@@ -42,7 +42,7 @@ def save_current_sparkle_platform() -> None:
                       f"{snapshot_log_file_path}")
 
     print(f"Snapshot file {snapshot_filename} saved successfully!")
-    os.system("rm -f " + snapshot_log_file_path)
+    sfh.rmfiles(snapshot_log_file_path)
 
 
 def remove_current_sparkle_platform() -> None:
@@ -83,7 +83,7 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
               f"{snapshot_log_file_path}")
     os.system(r"cp -r " + my_tmp_directory + "/* " + "./")
     sfh.rmtree(Path(my_tmp_directory))
-    os.system(r"rm -f " + snapshot_log_file_path)
+    sfh.rmfiles(snapshot_log_file_path)
 
 
 def load_snapshot(snapshot_file_path: str) -> None:

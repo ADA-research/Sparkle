@@ -4,6 +4,7 @@
 
 import os
 import pathlib
+import subprocess
 import sys
 import fcntl
 from pathlib import Path
@@ -31,30 +32,33 @@ from runrunner.base import Runner
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
                             cutoff_time_each_extractor_run: float) -> list[str]:
     """Return the feature vector for an instance as a list."""
-    runsolver_path = sgh.runsolver_path
-
-    cutoff_time_each_run_option = f"--cpu-limit {str(cutoff_time_each_extractor_run)}"
     err_path = result_path.replace(".rawres", ".err")
     runsolver_watch_data_path = result_path.replace(".rawres", ".log")
-    runsolver_watch_data_path_option = f"-w {runsolver_watch_data_path}"
     runsolver_value_data_path = result_path.replace(".rawres", ".val")
-    runsolver_value_data_path_option = f"-v {runsolver_value_data_path}"
 
-    command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
-                    f"{runsolver_watch_data_path_option} "
-                    f"{runsolver_value_data_path_option} {extractor_path}/"
-                    f"{sgh.sparkle_run_default_wrapper} {extractor_path}/ "
-                    f"{instance_path} {result_path} 2> {err_path}")
+    cmd_list_runsolver = [sgh.runsolver_path,
+                          "--cpu-limit", str(cutoff_time_each_extractor_run),
+                          "-w", runsolver_watch_data_path,  # Set log path
+                          "-v", runsolver_value_data_path]  # Set information path
+    cmd_list_extractor = [f"{extractor_path}/{sgh.sparkle_run_default_wrapper}",
+                          f"{extractor_path}/", instance_path, result_path]
+    runsolver = subprocess.run(cmd_list_runsolver, capture_output=True)
+    extractor = subprocess.run(cmd_list_extractor, capture_output=True)
 
-    try:
-        os.system(command_line)
+    if runsolver.returncode < 0 or extractor.returncode < 0:
+        print("Possible issue with runsolver or extractor.")
+
+    if Path(runsolver_value_data_path).exists():
         with Path(runsolver_value_data_path).open() as file:
             if "TIMEOUT=true" in file.read():
                 print(f"****** WARNING: Feature vector computing on instance "
                       f"{instance_path} timed out! ******")
-    except Exception:
-        if not Path(result_path).exists():
-            sfh.create_new_empty_file(result_path)
+
+    if not Path(result_path).exists():
+        print("Result file does not exist.")
+        sys.exit(-1)
+        # Why are we doing this?
+        # sfh.create_new_empty_file(result_path)
 
     try:
         sfdcsv.SparkleFeatureDataCSV(result_path)
@@ -74,15 +78,8 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
         del list_feature_vector[0]
         fin.close()
 
-    command_line = f"rm -f {result_path}"
-    os.system(command_line)
-    command_line = f"rm -f {err_path}"
-    os.system(command_line)
-    command_line = f"rm -f {runsolver_watch_data_path}"
-    os.system(command_line)
-    command_line = f"rm -f {runsolver_value_data_path}"
-    os.system(command_line)
-
+    sfh.rmfiles([result_path, err_path,
+                runsolver_watch_data_path, runsolver_value_data_path])
     return list_feature_vector
 
 
@@ -150,7 +147,6 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
         srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
                                                        custom_cutoff=cutoff_time))
     flag_solved = False
-
     if status == "SUCCESS" or status == "SAT" or status == "UNSAT":
         flag_solved = True
 
@@ -167,13 +163,11 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
     else:
         if flag_solved:
             print("instance solved by solver " + solver_path)
-            os.system(f"cat {raw_result_path}")
         else:
             print(f"solver {solver_path} failed to solve the instance with status "
                   f"{status}")
 
-    os.system(r"rm -f " + raw_result_path)
-
+    sfh.rmfiles(raw_result_path)
     return flag_solved
 
 
@@ -198,7 +192,7 @@ def call_sparkle_portfolio_selector_solve_instance(
 
     print("Start running Sparkle portfolio selector on solving instance "
           f"{instance_files_str} ...")
-    python_executable = sgh.python_executable
+
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
 
@@ -223,9 +217,10 @@ def call_sparkle_portfolio_selector_solve_instance(
             extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
         print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)} computing "
               f"features of instance {instance_files_str} done!")
+
     print("Sparkle computing features of instance " + instance_files_str + " done!")
 
-    command_line = (f"{python_executable} {sgh.autofolio_path} --load "
+    command_line = (f"{sgh.python_executable} {sgh.autofolio_path} --load "
                     f'{sgh.sparkle_algorithm_selector_path} --feature_vec "')
     for i in range(0, len(list_feature_vector)):
         command_line = command_line + str(list_feature_vector[i])
@@ -236,19 +231,22 @@ def call_sparkle_portfolio_selector_solve_instance(
     predict_schedule_result_path = ("Tmp/predict_schedule_"
                                     f"{sparkle_basic_help.get_time_pid_random_string()}"
                                     ".predres")
-    command_line += f'" 1> {predict_schedule_result_path} 2> {sgh.sparkle_err_path}'
     print("Sparkle portfolio selector predicting ...")
-    os.system(command_line)
+    process = subprocess.run(command_line.split(" "),
+                             stdout=Path(predict_schedule_result_path).open("w+"),
+                             stderr=Path(sgh.sparkle_err_path).open("w+"))
+
+    if process.returncode != 0:
+        print(f"Error getting predict schedule! See {sgh.sparkle_err_path} for output.")
+        sys.exit(process.returncode)
     print("Predicting done!")
 
     print_predict_schedule(predict_schedule_result_path)
     list_predict_schedule = get_list_predict_schedule_from_file(
         predict_schedule_result_path)
+    sfh.rmfiles([predict_schedule_result_path, sgh.sparkle_err_path])
 
-    os.system("rm -f " + predict_schedule_result_path)
-    os.system("rm -f " + sgh.sparkle_err_path)
-
-    for i in range(0, len(list_predict_schedule)):
+    for i in range(len(list_predict_schedule)):
         solver_path = list_predict_schedule[i][0]
         if i + 1 < len(list_predict_schedule):
             cutoff_time = list_predict_schedule[i][1]
@@ -346,10 +344,7 @@ def call_sparkle_portfolio_selector_solve_directory(
     # Write used scenario to file
     sgh.latest_scenario.write_scenario_ini()
 
-    if not Path("Test_Cases/").exists():
-        os.system("mkdir Test_Cases/")
-    os.system("mkdir -p " + test_case_directory_path)
-    os.system("mkdir -p " + test_case_directory_path + "Tmp/")
+    Path(test_case_directory_path + "Tmp/").mkdir(parents=True)
 
     test_performance_data_csv_name = "sparkle_performance_data.csv"
     test_performance_data_csv_path = (

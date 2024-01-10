@@ -6,8 +6,10 @@ import os
 import sys
 import re
 import shutil
+import subprocess
 from pathlib import Path
 from pathlib import PurePath
+from Commands.sparkle_help import sparkle_file_help as sfh
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_instances_help as sih
@@ -63,23 +65,24 @@ def prepare_ablation_scenario(solver_name: str, instance_train_name: str,
     copy_candidates = ["conf/", "lib/", "ablationAnalysis", "ablationAnalysis.jar",
                        "ablationValidation", "LICENSE.txt", "README.txt"]
     for candidate in copy_candidates:
-        recursive = "-r" if candidate[-1] == "/" else ""
         candidate_path = str(PurePath(sgh.ablation_dir, candidate))
-        cmd = f"cp {recursive} {candidate_path} {ablation_scenario_dir}"
-        os.system(cmd)
+        if candidate[-1] == "/":
+            sfh.copytree(candidate_path, ablation_scenario_dir)
+        else:
+            shutil.copy(candidate_path, ablation_scenario_dir)
 
     # Copy solver
-    solver_directory = r"Solvers/" + solver_name + r"/*"
-    cmd = f"cp -r {solver_directory} {ablation_scenario_solver_dir}"
-    os.system(cmd)
+    solver_directory = "Solvers/" + solver_name
+    sfh.copytree(solver_directory, ablation_scenario_solver_dir)
 
     return ablation_scenario_dir
 
 
 def print_ablation_help() -> None:
     """Print help information for ablation analysis."""
-    call = f"./{sgh.ablation_dir}/ablationAnalysis -h"
-    print(os.system(call))
+    process = subprocess.run([f"./{sgh.ablation_dir}/ablationAnalysis", "-h"],
+                             capture_output=True)
+    print(process.stdout)
 
 
 def get_slurm_params(solver_name: str, instance_train_name: str, instance_test_name: str,

@@ -134,16 +134,13 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
 
     # Removes statusinfo files
     for solver_instance in solver_instance_list:
-        commandline = (f"rm -rf {sgh.pap_sbatch_tmp_path}/"
-                       f"{solver_instance}*")
-        os.system(commandline)
+        sfh.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}")
 
     # Validate no known errors occurred in the sbatch
     check_sbatch_for_errors(sbatch_script_path)
 
     # Removes the generated sbatch files
-    commandline = f"rm -rf {sbatch_script_path}*"
-    os.system(commandline)
+    sfh.rmtree(sbatch_script_path)
 
     # Removes the directories generated for the solver instances
     for temp_solver in temp_solvers:
@@ -174,8 +171,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                 to_be_moved.append(file)
 
     for file in to_be_deleted:
-        commandline = f"rm -rf {tmp_dir}{file}"
-        os.system(commandline)
+        sfh.rmtree(f"{tmp_dir}{file}")
 
     for file in to_be_moved:
         if ".val" in file:
@@ -187,9 +183,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             except shutil.Error:
                 print(f"the {str(sgh.pap_performance_data_tmp_path)} directory already "
                       "contains a file with the same name, it will be skipped")
-
-            commandline = f"rm -rf {path_from}"
-            os.system(commandline)
+            sfh.rmtree(path_from)
 
 
 def find_finished_time_finished_solver(solver_instance_list: list[str],
@@ -695,10 +689,10 @@ def remove_result_files(instances: list[str]) -> None:
     """
     for instance in instances:
         instance = Path(instance).name
-        cmd_line = f"rm -f {str(sgh.pap_performance_data_tmp_path)}/*_{instance}_*.*"
-        os.system(cmd_line)
-        cmd_line = f"rm -f {str(sgh.sparkle_tmp_path)}*_{instance}_*.*"
-        os.system(cmd_line)
+        pap_files = [f for f in os.listdir(sgh.pap_performance_data_tmp_path)
+                     if f"_{instance}_" in f]
+        tmp_files = [f for f in os.listdir(sgh.sparkle_tmp_path) if f"_{instance}_" in f]
+        sfh.rmfiles(pap_files + tmp_files)
 
 
 def run_parallel_portfolio(instances: list[str],

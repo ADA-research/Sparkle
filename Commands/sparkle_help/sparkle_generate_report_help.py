@@ -821,6 +821,6 @@ def generate_comparison_plot(points: list,
     epstopdf = which("epstopdf") or epsbackup
     os.system(f"{epstopdf} '{output_eps_file}'")
 
-    os.system(f"rm -f '{output_gnuplot_script}'")
+    sfh.rmfiles(output_gnuplot_script)
 
     os.chdir(pwd)
