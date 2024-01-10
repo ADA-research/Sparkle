@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for instance (set) management."""
 
-import os
 import sys
 import shutil
 from pathlib import Path
@@ -71,9 +70,7 @@ def _copy_instance_list_to_reference(instances_source: Path) -> None:
     instance_list_path = Path(instances_source / Path(__sparkle_instance_list_file))
     target_path = Path(sgh.reference_list_dir
                        / Path(instances_source.name + sgh.instance_list_postfix))
-    command_line = "cp " + str(instance_list_path) + " " + str(target_path)
-    os.system(command_line)
-
+    shutil.copy(instance_list_path, target_path)
     return
 
 
@@ -123,7 +120,7 @@ def remove_reference_instance_list(instance_set_name: str) -> None:
     instance_list_path = Path(sgh.reference_list_dir
                               / Path(instance_set_name + sgh.instance_list_postfix))
 
-    sfh.rmfile(instance_list_path)
+    sfh.rmfiles(instance_list_path)
 
     return
 
@@ -176,7 +173,7 @@ def copy_instances_to_smac(list_instance_path: list[Path], instance_dir_prefix: 
         file_suffix = "_test.txt"
     else:
         print('Invalid function call of "copy_instances_to_smac"; aborting execution')
-        sys.exit()
+        sys.exit(-1)
 
     # Concatenating a path with a partial filename to create the full name
     smac_instance_file = (smac_instance_dir_prefix.parent
@@ -199,9 +196,9 @@ def copy_instances_to_smac(list_instance_path: list[Path], instance_dir_prefix: 
         target_instance_dir = target_instance_path.parent
 
         if not Path(target_instance_dir).exists():
-            os.system(f"mkdir -p {target_instance_dir}")
-        command_line = f"cp {ori_instance_path} {target_instance_path}"
-        os.system(command_line)
+            target_instance_dir.mkdir(parents=True)
+
+        shutil.copy(ori_instance_path, target_instance_path)
 
         # Only do this when no instance_list file exists for this instance set
         if not check_existence_of_reference_instance_list(instance_set_name):

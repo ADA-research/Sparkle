@@ -636,16 +636,25 @@ def rmtree(directory: Path) -> None:
     Args:
       directory: Path object representing the directory.
     """
-    if directory.is_dir():
-        for path in directory.iterdir():
-            if path.is_dir():
-                rmtree(path)
-            else:
-                rmfile(path)
-        rmdir(directory)
-    else:
-        rmfile(directory)
+    if isinstance(directory, str):
+        directory = Path(directory)
 
+    if directory.is_dir():
+        shutil.rmtree(directory)
+    else:
+        rmfiles(directory)
+    return
+
+
+def copytree(source: Path, target: Path) -> None:
+    """Recursively copy the contents of a source to target.
+
+    Args:
+        source: The source directory which contents are to be copied.
+        target: The target path where they will be placed.
+                If directory does not exist, will be created.
+    """
+    shutil.copytree(source, target, dirs_exist_ok=True)
     return
 
 
@@ -661,13 +670,19 @@ def rmdir(dir_name: Path) -> None:
         pass
 
 
-def rmfile(file_name: Path) -> None:
-    """Remove a file.
+def rmfiles(files: list[Path]) -> None:
+    """Remove one or more files.
 
     Args:
-      file_name: Path object representing the file.
+      files: List of path object representing the file.
     """
-    file_name.unlink(missing_ok=True)
+    if not isinstance(files, list):
+        files = [files]
+
+    for file in files:
+        if isinstance(file, str):
+            file = Path(file)
+        file.unlink(missing_ok=True)
 
 
 def check_file_is_executable(file_name: Path) -> None:

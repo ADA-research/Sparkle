@@ -3,7 +3,6 @@
 
 import sys
 import subprocess
-import glob
 import argparse
 from pathlib import Path
 from Commands.sparkle_help import sparkle_basic_help
@@ -106,8 +105,7 @@ if __name__ == "__main__":
         print(f"Do not add feature extractor {ex_dir_name}")
         sys.exit(-1)
 
-    copy_cmd = ["cp", "-r"] + glob.glob(extractor_source + "/*") + [extractor_directory]
-    subprocess.run(copy_cmd)
+    sfh.copytree(Path(extractor_source), extractor_directory)
 
     sgh.extractor_list.append(extractor_directory)
     sfh.add_new_extractor_into_file(extractor_directory)
@@ -134,12 +132,11 @@ if __name__ == "__main__":
             + sparkle_basic_help.get_time_pid_random_string()
             + ".rawres"
         )
-
-        command_line = (
+        cmd = (
             f"{Path(extractor_directory) / sgh.sparkle_run_default_wrapper} "
             f"{extractor_directory}/ {instance_path} {result_path}"
         )
-        subprocess.run(command_line)
+        subprocess.run(cmd.split(" "))
     else:
         instance_path = Path(extractor_directory) / "sparkle_test_instance.cnf"
         if not Path(instance_path).is_file():
@@ -172,22 +169,18 @@ if __name__ == "__main__":
     sfh.add_new_extractor_feature_vector_size_into_file(
         extractor_directory, len(list_columns)
     )
-
-    command_line = ["rm", "-f", result_path]
-    subprocess.run(command_line)
+    sfh.rmfiles(Path(result_path))
 
     print("Adding feature extractor "
           f"{sfh.get_last_level_directory_name(extractor_directory)} done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
-        command_line = ["rm", "-f", sgh.sparkle_algorithm_selector_path]
-        subprocess.run(command_line)
+        sfh.rmfiles(Path(sgh.sparkle_algorithm_selector_path))
         print("Removing Sparkle portfolio selector "
               f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
-        command_line = ["rm", "-f", sgh.sparkle_report_path]
-        subprocess.run(command_line)
+        sfh.rmfiles(Path(sgh.sparkle_report_path))
         print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     if nickname_str is not None:

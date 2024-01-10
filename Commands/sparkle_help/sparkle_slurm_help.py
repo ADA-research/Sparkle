@@ -265,8 +265,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
                   f"Error output of Slurm batch script for {job}")
 
     # Remove possible old output
-    sfh.rmfile(Path(std_out))
-    sfh.rmfile(Path(std_err))
+    sfh.rmfiles([std_out, std_err])
 
     return sbatch_options_list
 
@@ -398,7 +397,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
 
     if not result:
         print(f"Slurm config Error: {msg}")
-        sys.exit()
+        sys.exit(-1)
 
     # Create target call
     target_call_str = ("./smac-validate --use-scenario-outdir true --num-run 1 "
@@ -406,7 +405,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
 
     # Remove possible old results
     for result_output_file in job_output_list:
-        sfh.rmfile(Path(result_output_file))
+        sfh.rmfiles(result_output_file)
 
     # Generate script
     generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,

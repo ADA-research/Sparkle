@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to remove a solver from the Sparkle platform."""
 
-import subprocess
 import sys
 import argparse
 from pathlib import Path
@@ -76,22 +75,21 @@ if __name__ == "__main__":
                 performance_data_csv.delete_column(column_name)
         performance_data_csv.update_csv()
 
-    rm_cmd = ["rm", "-rf"]
-    subprocess.run(rm_cmd + [solver_path])
+    sfh.rmtree(solver_path)
 
     solver_name = sfh.get_last_level_directory_name(solver_path)
     smac_solver_path = f"{sparkle_global_help.smac_dir}example_scenarios/{solver_name}_*"
 
     if Path(smac_solver_path).exists():
-        subprocess.run(rm_cmd + [smac_solver_path])
+        sfh.rmtree(smac_solver_path)
 
     if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
-        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_algorithm_selector_path])
+        sfh.rmtree(sparkle_global_help.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{sparkle_global_help.sparkle_algorithm_selector_path} done!")
 
     if Path(sparkle_global_help.sparkle_report_path).exists():
-        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_report_path])
+        sfh.rmtree(sparkle_global_help.sparkle_report_path)
         print(f"Removing Sparkle report {sparkle_global_help.sparkle_report_path} done!")
 
     print(f"Removing solver {sfh.get_last_level_directory_name(solver_path)} done!")

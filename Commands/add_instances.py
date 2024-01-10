@@ -177,14 +177,12 @@ if __name__ == "__main__":
           f"{instances_directory.name} done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
-        command_line = ["rm", "-f", sgh.sparkle_algorithm_selector_path]
-        subprocess.run(command_line)
+        sfh.rmfiles(sgh.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
-        command_line = ["rm", "-f", sgh.sparkle_report_path]
-        subprocess.run(command_line)
+        sfh.rmfiles(sgh.sparkle_report_path)
         print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
 
     if args.run_extractor_now:

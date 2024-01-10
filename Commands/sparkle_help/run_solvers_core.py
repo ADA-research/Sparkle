@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Run a solver on an instance, only for internal calls from Sparkle."""
 
-import os
+import subprocess
 import time
 import fcntl
 import argparse
@@ -54,7 +54,8 @@ if __name__ == "__main__":
             f"{sgh.sparkle_tmp_path}{sfh.get_last_level_directory_name(solver_path)}_"
             f"seed_{args.seed}_{sfh.get_last_level_directory_name(instance_path)}")
         command_line = f"cp -a -r {str(solver_path)} {str(new_solver_directory_path)}"
-        os.system(command_line)
+        cmd = ["cp", "-a", "-r", solver_path, new_solver_directory_path]
+        subprocess.run(cmd)
         solver_path = new_solver_directory_path
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
@@ -117,5 +118,4 @@ if __name__ == "__main__":
     fout.close()
 
     # TODO: Make removal conditional on a success status (SUCCESS, SAT or UNSAT)
-    # command_line = r'rm -f ' + raw_result_path
-    # os.system(command_line)
+    # sfh.rmfiles(raw_result_path)

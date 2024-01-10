@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to run solvers."""
 import os
+import subprocess
 import sys
 import fcntl
 from pathlib import Path
@@ -97,9 +98,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         # Copy to execution directory
         exec_path = str(raw_result_path).replace(".rawres", "_exec_dir/")
         Path(exec_path).mkdir(parents=True)
-        cmd_copy_solver = f"cp -r {str(solver_path)}/* {exec_path}"
-        os.system(cmd_copy_solver)
-
+        sfh.copytree(solver_path, exec_path)
         # Change to execution directory
         cmd_cd = f"cd {exec_path}"
 
@@ -154,7 +153,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
             # Check .rawres_solver output
             check_solver_output_for_errors(Path(raw_result_solver_path))
 
-        sfh.rmfile(Path(runsolver_watch_data_path))
+        sfh.rmfiles(runsolver_watch_data_path)
 
     # Check for known errors/issues
     check_solver_output_for_errors(raw_result_path)
@@ -518,9 +517,7 @@ def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> st
               f"{sfh.get_last_level_directory_name(instance_path)}!")
 
     # TODO: Make removal conditional on a success status (SAT or UNSAT)
-    # command_line = r'rm -f ' + raw_result_path
-    # os.system(command_line)
-
+    # sfh.rmfiles(raw_result_path)
     return status
 
 
@@ -599,17 +596,15 @@ def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -
         f"{sfh.get_last_level_directory_name(raw_result_path)}_"
         f"{sbh.get_time_pid_random_string()}.vryres")
     # TODO: Log output file
-    command_line = (f"{sat_verifier_path} {instance_path} {raw_result_path} > "
-                    f"{tmp_verify_result_path}")
     print("Run SAT verifier")
-    os.system(command_line)
+    subprocess.run([sat_verifier_path, instance_path, raw_result_path],
+                   stdout=Path(tmp_verify_result_path).open())
     print("SAT verifier done")
 
     ret = sat_get_verify_string(tmp_verify_result_path)
 
     # TODO: Log output file removal
-    command_line = "rm -f " + tmp_verify_result_path
-    os.system(command_line)
+    sfh.rmfiles(tmp_verify_result_path)
     return ret
 
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to remove a feature extractor from the Sparkle platform."""
 
-import subprocess
 import sys
 import argparse
 from pathlib import Path
@@ -78,7 +77,6 @@ if __name__ == "__main__":
                 break
         sfh.write_extractor_nickname_mapping()
 
-    rm_cmd = ["rm", "-rf"]
     if Path(sparkle_global_help.feature_data_csv_path).exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
             sparkle_global_help.feature_data_csv_path
@@ -90,15 +88,15 @@ if __name__ == "__main__":
             if extractor_path == tmp_extractor_path:
                 feature_data_csv.delete_column(column_name)
         feature_data_csv.update_csv()
-        subprocess.run(rm_cmd + [extractor_path])
+        sfh.rmtree(extractor_path)
 
     if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
-        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_algorithm_selector_path])
+        sfh.rmtree(sparkle_global_help.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{sparkle_global_help.sparkle_algorithm_selector_path} done!")
 
     if Path(sparkle_global_help.sparkle_report_path).exists():
-        subprocess.run(rm_cmd + [sparkle_global_help.sparkle_report_path])
+        sfh.rmtree(sparkle_global_help.sparkle_report_path)
         print(f"Removing Sparkle report {sparkle_global_help.sparkle_report_path} done!")
 
     print("Removing feature extractor "
