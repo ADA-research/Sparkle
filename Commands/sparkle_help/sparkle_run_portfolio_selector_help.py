@@ -42,6 +42,7 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
                           "-v", runsolver_value_data_path]  # Set information path
     cmd_list_extractor = [f"{extractor_path}/{sgh.sparkle_run_default_wrapper}",
                           f"{extractor_path}/", instance_path, result_path]
+
     runsolver = subprocess.run(cmd_list_runsolver, capture_output=True)
     extractor = subprocess.run(cmd_list_extractor, capture_output=True)
 
@@ -232,11 +233,17 @@ def call_sparkle_portfolio_selector_solve_instance(
                                     f"{sparkle_basic_help.get_time_pid_random_string()}"
                                     ".predres")
     print("Sparkle portfolio selector predicting ...")
-    process = subprocess.run(command_line.split(" "),
+    cmd_list = [sgh.python_executable, sgh.autofolio_path, "--load",
+                sgh.sparkle_algorithm_selector_path, "--feature_vec",
+                " ".join(map(str, list_feature_vector))]
+    
+    process = subprocess.run(cmd_list,
                              stdout=Path(predict_schedule_result_path).open("w+"),
                              stderr=Path(sgh.sparkle_err_path).open("w+"))
-
+    
     if process.returncode != 0:
+        # [TS 11-01-24] TODO: Known error with Autofolio, could be fixed by upgrading
+        # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"
         print(f"Error getting predict schedule! See {sgh.sparkle_err_path} for output.")
         sys.exit(process.returncode)
     print("Predicting done!")
@@ -344,7 +351,7 @@ def call_sparkle_portfolio_selector_solve_directory(
     # Write used scenario to file
     sgh.latest_scenario.write_scenario_ini()
 
-    Path(test_case_directory_path + "Tmp/").mkdir(parents=True)
+    Path(test_case_directory_path + "Tmp/").mkdir(parents=True, exist_ok=True)
 
     test_performance_data_csv_name = "sparkle_performance_data.csv"
     test_performance_data_csv_path = (
