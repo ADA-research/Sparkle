@@ -48,8 +48,7 @@ runsolver_binary = relative_path + "runsolver"
 solver_binary = relative_path + "PbO-CCSAT"
 
 tmp_directory = relative_path + "tmp/"
-if not Path(tmp_directory).exists():
-    os.system("mkdir -p " + tmp_directory)
+Path(tmp_directory).mkdir(parents=True, exist_ok=True)
 
 instance_name = get_last_level_directory_name(instance)
 solver_name = get_last_level_directory_name(solver_binary)
@@ -82,7 +81,7 @@ if run_time > cutoff_time:
     run_time = cutoff_time
 
 # Cleanup
-os.system("rm -f " + runsolver_watch_data_path)
+Path(runsolver_watch_data_path).unlink(missing_ok=True)
 # TODO: Any problem specific cleanup
 
 # Process run status

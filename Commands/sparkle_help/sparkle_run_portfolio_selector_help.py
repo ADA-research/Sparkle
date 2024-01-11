@@ -391,10 +391,10 @@ def call_sparkle_portfolio_selector_solve_directory(
         test_performance_data_csv_path, total_job_list, j)
 
     if run_on == Runner.SLURM:
-        os.system("chmod a+x " + sbatch_shell_script_path)
-        command_line = "sbatch " + sbatch_shell_script_path
-
-        output_list = os.popen(command_line).readlines()
+        os.chmod(sbatch_shell_script_path, mode=777)
+        process = subprocess.run(["sbatch", sbatch_shell_script_path],
+                                 capture_output=True)
+        output_list = process.stdout.splitlines()
 
         if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
             jobid = output_list[0].strip().split()[-1]

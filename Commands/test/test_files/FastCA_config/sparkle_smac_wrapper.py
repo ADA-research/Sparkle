@@ -38,7 +38,7 @@ def _is_a_number(input_str: str) -> bool:
     try:
         # eval insecure, so use ast.literal_eval instead
         input_val = ast.literal_eval(input_str)
-        if (type(input_val) == float) or (type(input_val) == int):
+        if isinstance(input_val, float) or isinstance(input_val, int):
             return True
         else:
             return False
@@ -92,8 +92,7 @@ runsolver_binary = relative_path + "runsolver"
 solver_binary = relative_path + "FastCA"
 
 tmp_directory = relative_path + "tmp/"
-if not Path(tmp_directory).exists():
-    os.system("mkdir -p " + tmp_directory)
+Path(tmp_directory).mkdir(parents=True, exist_ok=True)
 
 instance_model_name = get_last_level_directory_name(inst_model)
 instance_constr_name = get_last_level_directory_name(inst_constr)
@@ -120,7 +119,7 @@ run_time = end_time - start_time
 if run_time > cutoff_time:
     run_time = cutoff_time
 
-os.system("rm -f " + runsolver_watch_data_path)
+Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
 status, quality = parse_output(output_list)
 

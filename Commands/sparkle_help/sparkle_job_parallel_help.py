@@ -82,7 +82,8 @@ def running_job_parallel(job_script: str,
                                 f"{sbh.get_time_pid_random_string()}.sh")
     generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script,
                                      dependency_jobid_list)
-    os.system("chmod a+x " + sbatch_shell_script_path)
+    # os.system("chmod a+x " + sbatch_shell_script_path)
+    os.chmod(sbatch_shell_script_path, mode=777)
     command_line = "sbatch " + sbatch_shell_script_path
     output_list = os.popen(command_line).readlines()
 

@@ -52,5 +52,4 @@ if __name__ == "__main__":
     epsbackup = pathlib.Path(join(dirname(__file__), "..", "epstopdf.pl")).resolve()
     epstopdf = which("epstopdf") or epsbackup
     os.system(f"{epstopdf} '{output_eps_file}'")
-
-    os.system(f"rm -f '{output_gnuplot_script}'")
+    pathlib.Path(output_gnuplot_script).unlink(missing_ok=True)

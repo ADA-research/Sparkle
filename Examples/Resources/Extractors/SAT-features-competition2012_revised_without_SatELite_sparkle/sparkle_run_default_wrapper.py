@@ -5,8 +5,7 @@ import os
 import sys
 import random
 import time
-import pandas as pd
-import numpy as np
+from pathlib import Path
 
 global sparkle_special_string
 sparkle_special_string = r'__@@SPARKLE@@__'
@@ -21,10 +20,13 @@ def get_time_pid_random_string():
 	return my_time_pid_random_str
 
 def get_last_level_directory_name(filepath):
-	if filepath[-1] == r'/': filepath = filepath[0:-1]
+	if filepath[-1] == r'/':
+		filepath = filepath[0:-1]
 	right_index = filepath.rfind(r'/')
-	if right_index<0: pass
-	else: filepath = filepath[right_index+1:]
+	if right_index < 0:
+		pass
+	else:
+		filepath = filepath[right_index+1:]
 	return filepath
 
 def deal_raw_result_file(relative_path, cnf_instance_file_name, raw_result_file_name, result_feature_file_name):
@@ -39,10 +41,13 @@ def deal_raw_result_file(relative_path, cnf_instance_file_name, raw_result_file_
 	while True:
 		myline = fin.readline()
 		myline = myline.strip()
-		if not myline: break
+		if not myline:
+			break
 		mylist = myline.split()
-		if len(mylist) == 0: continue
-		elif mylist[0] == r'c': continue
+		if len(mylist) == 0:
+			continue
+		elif mylist[0] == r'c':
+			continue
 		else: 
 			#fout.write(',' + myline + '\n')
 			mylist_comma = myline.split(r',')
@@ -84,10 +89,5 @@ os.system(command_line)
 
 deal_raw_result_file(relative_path, cnf_instance_file_name, raw_result_file_name, result_feature_file_name)
 
-command_line = r'rm -f ' + tmp_output
-os.system(command_line)
-
-command_line = r'rm -f ' + raw_result_file_name
-os.system(command_line)
-
-
+Path(tmp_output).unlink(missing_ok=True)
+Path(raw_result_file_name).unlink(missing_ok=True)

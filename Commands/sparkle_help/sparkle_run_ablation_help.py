@@ -160,7 +160,8 @@ def generate_callback_slurm_script(solver_name: str, instance_train_name: str,
         rollback = "../" * (len(scenario_dir.split("/")) + 1)
         fh.write(f"cp -r log/ {rollback}{log_path}\n")
         fh.close()
-    os.system(f"chmod 755 {sgh.ablation_dir + callback_script_path}")
+
+    os.chmod(sgh.ablation_dir + callback_script_path, mode=755)
 
     srun_options_str = "-N1 -n1 -c1"
     target_call_str = "./" + callback_script_name
@@ -222,7 +223,7 @@ def generate_validation_callback_slurm_script(solver_name: str, instance_train_n
         rollback = "../" * (len(sgh.ablation_dir.split("/")) + 1)
         fh.write(f"cp -r log/ {rollback}{log_path}\n")
         fh.close()
-    os.system(f"chmod 755 {sgh.ablation_dir + callback_script_path}")
+    os.chmod(sgh.ablation_dir + callback_script_path, mode=755)
 
     srun_options_str = "-N1 -n1 -c1"
     target_call_str = "./" + callback_script_name

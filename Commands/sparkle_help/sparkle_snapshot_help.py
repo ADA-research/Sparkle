@@ -117,9 +117,8 @@ def remove_snapshot(snapshot_file_path: str) -> None:
     """
     if not Path(snapshot_file_path).exists():
         print(f"Snapshot file {snapshot_file_path} does not exist!")
-        sys.exit()
+        sys.exit(-1)
 
     print(f"Removing snapshot file {snapshot_file_path} ...")
-    command_line = f"rm -rf {snapshot_file_path}"
-    os.system(command_line)
+    sfh.rmtree(snapshot_file_path)
     print(f"Snapshot file {snapshot_file_path} removed!")
