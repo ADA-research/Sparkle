@@ -70,65 +70,40 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
                                     is_configured: bool = False) -> Path:
     """Run the solver on the given instance, with a given command line call."""
     if custom_cutoff is None:
-        cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    else:
-        cutoff_time_str = str(custom_cutoff)
-
-    # Prepare runsolver call
-    runsolver_path = sgh.runsolver_path
-    runsolver_option = "--timestamp --use-pty"
-    cutoff_time_each_run_option = f"--cpu-limit {cutoff_time_str}"
-    runsolver_values_log = f"-v {str(runsolver_values_path)}"
-    runsolver_watch_data_path = str(runsolver_values_path).replace("val", "log")
-    runsolver_watch_data_path_option = f"-w {runsolver_watch_data_path}"
-    raw_result_path_option = f"-o {str(raw_result_path)}"
+        custom_cutoff = sgh.settings.get_general_target_cutoff_time()
 
     # For configured solvers change the directory to accommodate sparkle_smac_wrapper
     original_path = Path.cwd()
+    exec_path = original_path
 
+    rs_prefix = ""
     if is_configured:
-        # Change paths to accommodate configured execution directory
-        runsolver_path = f"../../{sgh.runsolver_path}"
-        runsolver_values_log = f"-v ../../{str(runsolver_values_path)}"
-        runsolver_values_path = "../../" / runsolver_values_path
-        runsolver_watch_data_path = str(runsolver_values_path).replace("val", "log")
-        runsolver_watch_data_path_option = f"-w {runsolver_watch_data_path}"
-        raw_result_path_option = f"-o ../../{str(raw_result_path)}"
-
-        # Copy to execution directory
+        # Update paths to match configured solver dirs
+        rs_prefix = "../../"
         exec_path = str(raw_result_path).replace(".rawres", "_exec_dir/")
+        # Copy files
         Path(exec_path).mkdir(parents=True)
         sfh.copytree(solver_path, exec_path)
-        # Change to execution directory
-        cmd_cd = f"cd {exec_path}"
+        # Executable is now in "current dir"
+        solver_path = "."
 
-        # Return to original directory
-        cmd_cd_back = f"cd {original_path}"
+    # Prepare runsolver call
+    runsolver_path = rs_prefix + sgh.runsolver_path
+    runsolver_values_log = f"{rs_prefix}{runsolver_values_path}"
+    runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
+    raw_result_path_option = f"{rs_prefix}{raw_result_path}"
 
-        # Finalise command
-        command_line_run_solver = (
-            f"{cmd_cd} ; {runsolver_path} {runsolver_option} "
-            f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
-            f"{runsolver_values_log} {raw_result_path_option} ./{cmd_solver_call} ; "
-            f"{cmd_cd_back}")
-    else:
-        # Finalise command without extra is_configured steps
-        command_line_run_solver = (
-            f"{runsolver_path} {runsolver_option} "
-            f"{cutoff_time_each_run_option} {runsolver_watch_data_path_option} "
-            f"{runsolver_values_log} {raw_result_path_option} {str(solver_path)}/"
-            f"{cmd_solver_call}")
+    cmd = [runsolver_path, "--timestamp", "--use-pty",
+           "--cpu-limit", str(custom_cutoff),
+           "-w", runsolver_watch_data_path,
+           "-v", runsolver_values_log,
+           "-o", raw_result_path_option]
+    cmd += [x for x in (str(solver_path) + "/" + cmd_solver_call).split(" ") if x != ""]
 
-    # Execute command
-    try:
-        os.system(command_line_run_solver)
-    except Exception:
+    process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
+    if process.returncode != 0:
         print("WARNING: Solver execution seems to have failed!")
-        print(f"The used command was: {command_line_run_solver}")
-
-        # TODO: Why create an empty file if the command fails?
-        if not raw_result_path.exists():
-            sfh.create_new_empty_file(str(raw_result_path))
+        print(f"The used command was: {cmd}")
     else:
         # Clean up on success
         if is_configured:

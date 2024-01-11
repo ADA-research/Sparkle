@@ -3,6 +3,7 @@
 """Helper functions for parallel job execution."""
 
 import os
+from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_basic_help as sbh
@@ -83,7 +84,7 @@ def running_job_parallel(job_script: str,
     generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script,
                                      dependency_jobid_list)
     # os.system("chmod a+x " + sbatch_shell_script_path)
-    os.chmod(sbatch_shell_script_path, mode=777)
+    Path(sbatch_shell_script_path).chmod(mode=777)
     command_line = "sbatch " + sbatch_shell_script_path
     output_list = os.popen(command_line).readlines()
 

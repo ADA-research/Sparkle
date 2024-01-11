@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a portfolio selector."""
 
-import os
 import pathlib
 import subprocess
 import sys
@@ -236,11 +235,11 @@ def call_sparkle_portfolio_selector_solve_instance(
     cmd_list = [sgh.python_executable, sgh.autofolio_path, "--load",
                 sgh.sparkle_algorithm_selector_path, "--feature_vec",
                 " ".join(map(str, list_feature_vector))]
-    
+
     process = subprocess.run(cmd_list,
                              stdout=Path(predict_schedule_result_path).open("w+"),
                              stderr=Path(sgh.sparkle_err_path).open("w+"))
-    
+
     if process.returncode != 0:
         # [TS 11-01-24] TODO: Known error with Autofolio, could be fixed by upgrading
         # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"
@@ -391,7 +390,7 @@ def call_sparkle_portfolio_selector_solve_directory(
         test_performance_data_csv_path, total_job_list, j)
 
     if run_on == Runner.SLURM:
-        os.chmod(sbatch_shell_script_path, mode=777)
+        Path(sbatch_shell_script_path).chmod(mode=777)
         process = subprocess.run(["sbatch", sbatch_shell_script_path],
                                  capture_output=True)
         output_list = process.stdout.splitlines()
