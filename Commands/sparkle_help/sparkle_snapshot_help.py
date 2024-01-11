@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+import zipfile
 
 from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -79,9 +80,9 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
     if not Path(sgh.sparkle_tmp_path).exists():
         Path(sgh.sparkle_tmp_path).mkdir()
 
-    os.system(f"unzip -o {my_snapshot_filename} -d {my_tmp_directory} >> "
-              f"{snapshot_log_file_path}")
-    os.system(r"cp -r " + my_tmp_directory + "/* " + "./")
+    with zipfile.ZipFile(my_snapshot_filename, "r") as zip_ref:
+        zip_ref.extractall(my_tmp_directory)
+    sfh.copytree(my_tmp_directory, "./")
     sfh.rmtree(Path(my_tmp_directory))
     sfh.rmfiles(snapshot_log_file_path)
 
