@@ -2,7 +2,8 @@
 # -*- coding: UTF-8 -*-
 """Automatically generate a gnuplot script for algorithm configuration."""
 
-import os
+# import os
+import subprocess
 from os.path import dirname, join
 import sys
 from shutil import which
@@ -64,12 +65,14 @@ if __name__ == "__main__":
                "with points pt 2 ps 2\n")
     fout.close()
 
-    cmd = f"gnuplot '{output_gnuplot_script}'"
-    os.system(cmd)
+    # cmd = f"gnuplot '{output_gnuplot_script}'"
+    subprocess.run(["gnuplot", output_gnuplot_script])
+    # os.system(cmd)
 
     # Some systems are missing epstopdf so a copy is included
     epsbackup = pathlib.Path(join(dirname(__file__), "..", "epstopdf.pl")).resolve()
     epstopdf = which("epstopdf") or epsbackup
-    os.system(f"{epstopdf} '{output_eps_file}'")
+    # os.system(f"{epstopdf} '{output_eps_file}'")
+    subprocess.run([epstopdf, output_eps_file])
 
     pathlib.Path(output_gnuplot_script).unlink(missing_ok=True)

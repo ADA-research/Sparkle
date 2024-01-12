@@ -152,7 +152,6 @@ def get_results() -> dict[str, list[str, str]]:
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(solutions_dir)
-
     if len(results) == 0:
         print("ERROR: No result files found for parallel portfolio! Stopping execution.")
         print(solutions_dir)
@@ -177,7 +176,6 @@ def get_results() -> dict[str, list[str, str]]:
                     results_dict[instance][1] = result_lines[2]
             else:
                 results_dict[instance] = [result_lines[1], result_lines[2]]
-
     return results_dict
 
 
@@ -399,14 +397,10 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     penalised_time_str = str(sgh.settings.get_penalised_time())
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
-    # gnuplot_command = (
-    #    f"cd {latex_directory_path}; python auto_gen_plot.py {data_filename} "
-    #    f"{penalised_time_str} 'SBS ({sgrh.underscore_for_latex(sbs_solver)})' "
-    #    f"Parallel-Portfolio {figure_filename} {performance_metric_str}")
-    gnuplot_cmd_list = ["python auto_gen_plot.py", data_filename, penalised_time_str,
+    gnuplot_cmd_list = ["python", "auto_gen_plot.py", data_filename, penalised_time_str,
                         "SBS", sgrh.underscore_for_latex(sbs_solver),
                         "Parallel-Portfolio", figure_filename, performance_metric_str]
-    # os.system(gnuplot_command)
+
     subprocess.run(gnuplot_cmd_list, cwd=latex_directory_path)
 
     str_value = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"

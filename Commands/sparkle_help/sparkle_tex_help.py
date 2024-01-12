@@ -4,7 +4,7 @@
 
 from shutil import which
 from pathlib import Path
-import os
+import subprocess
 
 
 def check_tex_commands_exist(latex_directory_path: Path) -> None:
@@ -17,21 +17,35 @@ def check_tex_commands_exist(latex_directory_path: Path) -> None:
 
 
 def compile_pdf(latex_directory_path: Path, latex_report_filename: Path) -> Path:
-    """Compile the given latex files to a PDF."""
-    pdflatex_command = (f"cd {latex_directory_path}; pdflatex -interaction=nonstopmode "
-                        f"{latex_report_filename}.tex 1> /dev/null 2>&1")
-    bibtex_command = f"cd {latex_directory_path}; bibtex {latex_report_filename}.aux"
+    """Compile the given latex files to a PDF.
 
-    os.system(pdflatex_command)
-    os.system(pdflatex_command)
+    Args:
+        latex_directory_path: Path to the directory where the report will be generated.
+        latex_report_filename: Name of the output files.
 
-    os.system(bibtex_command)
-    os.system(bibtex_command)
+    Returns:
+        Path to the newly generated report in PDF format.
+    """
+    pdf_process = subprocess.run(["pdflatex", "-interaction=nonstopmode",
+                                 f"{latex_report_filename}.tex"],
+                                 cwd=latex_directory_path, capture_output=True)
 
-    os.system(pdflatex_command)
-    os.system(pdflatex_command)
+    if pdf_process.returncode != 0:
+        print("ERROR whilst generating with PDFLatex command:"
+              f"{pdf_process.stdout} {pdf_process.stderr}")
 
-    report_path = Path(latex_directory_path / latex_report_filename)
-    report_path = report_path.with_suffix(".pdf")
+    bibtex_process = subprocess.run(["bibtex", f"{latex_report_filename}.aux"],
+                                    cwd=latex_directory_path, capture_output=True)
 
+    if bibtex_process.returncode != 0:
+        print("ERROR whilst generating with Bibtex command:"
+              f"{bibtex_process.stdout} {bibtex_process.stderr}")
+
+    # We have to re-run the same pdf command to take in the updates bib files from bibtex
+    # But Bibtex cannot function without .aux file produced by pdflatex. Hence run twice.
+    pdf_process = subprocess.run(["pdflatex", "-interaction=nonstopmode",
+                                 f"{latex_report_filename}.tex"],
+                                 cwd=latex_directory_path, capture_output=True)
+
+    report_path = Path(latex_directory_path / latex_report_filename).with_suffix(".pdf")
     return report_path

@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from shutil import which
 from pathlib import Path
+import subprocess
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -811,16 +812,23 @@ def generate_comparison_plot(points: list,
         fout.write("set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n")
         fout.write(f"plot '{output_data_file}' ls 1\n")
         fout.close()
+    # TODO: Have the subprocess run in the cwd instead of using os.chdir
+    subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
+                                     capture_output=True)
 
-    # Make figure
-    cmd = f"gnuplot \'{output_gnuplot_script}\'"
-    os.system(cmd)
+    if subprocess_plot.returncode != 0:
+        print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:"
+              f"{subprocess_plot.stderr}")
 
     # Some systems are missing epstopdf so a copy is included
     epsbackup = Path(os.path.abspath(pwd)) / "Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
-    os.system(f"{epstopdf} '{output_eps_file}'")
+    subprocess_epstopdf = subprocess.run([epstopdf, output_eps_file],
+                                         capture_output=True)
+
+    if subprocess_epstopdf.returncode != 0:
+        print(f"(Eps To PDF) Error whilst converting Eps to PDF {output_eps_file}"
+              f"{subprocess_epstopdf.stderr}")
 
     sfh.rmfiles(output_gnuplot_script)
-
     os.chdir(pwd)

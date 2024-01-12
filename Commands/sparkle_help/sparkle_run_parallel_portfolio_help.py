@@ -197,13 +197,9 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
     Returns:
         A formatted string that represents the finishing time of a solver.
     """
-    # If there is a solver that ended but did not make a result file this means that it
-    # was manually cancelled or it gave an error the template will ensure that all
-    # solver on that instance will be cancelled.
     time_in_format_str = "-1:00"
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(solutions_dir)
-    solutions_dir = str(sgh.pap_performance_data_tmp_path)
 
     for result in results:
         if "_" in finished_job_array_nr:
@@ -609,7 +605,7 @@ def handle_waiting_and_removal_process(
             if len(finished_solver_files) > 1:
                 print(f"ERROR: {str(len(finished_solver_files))} result files found for"
                       f" {solver_instance} while there should be only one!")
-                sys.exit()
+                sys.exit(-1)
 
             for finished_solver_file in finished_solver_files:
                 file_path = finished_solver_file
@@ -729,7 +725,6 @@ def run_parallel_portfolio(instances: list[str],
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
         job_id = ""
-
         # NOTE: Once runrunner works satisfactorily this should be refactored
         if run_on == Runner.SLURM:
             job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
@@ -762,6 +757,7 @@ def run_parallel_portfolio(instances: list[str],
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))
+
             now = datetime.datetime.now()
             current_time = now.strftime("%H:%M:%S")
 
@@ -804,6 +800,7 @@ def run_parallel_portfolio(instances: list[str],
                 sjh.sleep(n_seconds)
         else:
             run.wait()
+
         finished_instances_dict = {}
 
         for instance in instances:

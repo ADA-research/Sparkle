@@ -490,8 +490,7 @@ def submit_sbatch_script(sbatch_script_name: str,
       String job identifier or empty string if the job was not submitted
       successfully. Defaults to the SMAC directory.
     """
-    command_chmod = ["chmod", "a+x", sbatch_script_name]
-    subprocess.run(command_chmod, cwd=execution_dir)
+    Path(sbatch_script_name).chmod(mode=777)
 
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
     command_bugfix = ["unset", "SLURM_CPU_BIND"]

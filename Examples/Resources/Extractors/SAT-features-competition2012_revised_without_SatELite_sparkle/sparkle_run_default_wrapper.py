@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import os
+import subprocess
 import sys
 import random
 import time
@@ -82,8 +83,10 @@ raw_result_file_name = relative_path + r'' + executable_name + r'_' + get_last_l
 
 tmp_output = r'TMP/' + raw_result_file_name
 
-command_line = relative_path + r'/' + executable_name + r' ' + cnf_instance_file_name + ' ' + tmp_output + r' > ' + raw_result_file_name
-os.system(command_line)
+#command_line = relative_path + r'/' + executable_name + r' ' + cnf_instance_file_name + ' ' + tmp_output + r' > ' + raw_result_file_name
+command_line = [relative_path + '/' + executable_name, cnf_instance_file_name, tmp_output, '>', raw_result_file_name]
+subprocess.run(command_line)
+# os.system(command_line)
 
 #print raw_result_file_name
 

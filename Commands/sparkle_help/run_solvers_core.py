@@ -20,6 +20,8 @@ from Commands.Structures.status_info import SolverRunStatusInfo
 
 
 if __name__ == "__main__":
+    import sys
+    sys.exit(-1)
     # Initialise settings
     global settings
     settings_dir = Path("Settings")
@@ -63,9 +65,10 @@ if __name__ == "__main__":
     key_str = (f"{sfh.get_last_level_directory_name(solver_path)}_"
                f"{sfh.get_last_level_directory_name(instance_path)}_"
                f"{sbh.get_time_pid_random_string()}")
-    raw_result_path = r"Tmp/" + key_str + r".rawres"
-    processed_result_path = r"Performance_Data/Tmp/" + key_str + r".result"
-
+    # raw_result_path = r"Tmp/" + key_str + r".rawres"
+    raw_result_path = f"Tmp/{key_str}.rawres"
+    # processed_result_path = r"Performance_Data/Tmp/" + key_str + r".result"
+    processed_result_path = f"{sgh.pap_performance_data_tmp_path}/{key_str}.result"
     start_time = time.time()
     # create statusinfo file
     status_info = SolverRunStatusInfo()
@@ -111,6 +114,15 @@ if __name__ == "__main__":
         print(f"*** ERROR: Unknown performance measure detected: {performance_measure}")
 
     fout = Path(processed_result_path).open("w+")
+    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+    fout.write(instance_path + "\n")
+    fout.write(solver_path + "\n")
+    fout.write(obj_str + "\n")
+    fout.close()
+
+    # pap_result_path = r"Performance_Data/Tmp_PaP/" + key_str + r".result"
+    pap_result_path = f"Performance_Data/Tmp_PaP/{key_str}.result"
+    fout = Path(pap_result_path).open("w+")
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
     fout.write(instance_path + "\n")
     fout.write(solver_path + "\n")
