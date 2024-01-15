@@ -55,10 +55,10 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
                       f"{instance_path} timed out! ******")
 
     if not Path(result_path).exists():
-        print("Result file does not exist.")
-        sys.exit(-1)
+        print(f"Result file {result_path} does not exist.")
+        # sys.exit(-1)
         # Why are we doing this?
-        # sfh.create_new_empty_file(result_path)
+        sfh.create_new_empty_file(result_path)
 
     try:
         sfdcsv.SparkleFeatureDataCSV(result_path)
