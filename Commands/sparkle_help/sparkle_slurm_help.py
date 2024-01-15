@@ -477,7 +477,7 @@ def generate_sbatch_script_for_feature_computation(
 
 def submit_sbatch_script(sbatch_script_name: str,
                          command_name: CommandName,
-                         execution_dir: str | None = None) -> str:
+                         execution_dir: Path | None = None) -> str:
     """Submit a Slurm batch script.
 
     Args:
@@ -490,7 +490,10 @@ def submit_sbatch_script(sbatch_script_name: str,
       String job identifier or empty string if the job was not submitted
       successfully. Defaults to the SMAC directory.
     """
-    Path(sbatch_script_name).chmod(mode=777)
+    if execution_dir is not None:
+        (execution_dir / sbatch_script_name).chmod(mode=777)
+    else:
+        Path(sbatch_script_name).chmod(mode=777)
 
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
     command_bugfix = ["unset", "SLURM_CPU_BIND"]
