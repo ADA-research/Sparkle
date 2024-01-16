@@ -46,7 +46,6 @@ if __name__ == "__main__":
                    f"set output '{output_eps_file}'\n"
                    f"plot '{data_portfolio_selector_sparkle_vs_vbs_filename}'\n")
 
-    # cmd = f"gnuplot '{output_gnuplot_script}'"
     gnuplot_process = subprocess.run(["gnuplot", output_gnuplot_script],
                                      capture_output=True)
     if gnuplot_process.returncode != 0:
@@ -56,7 +55,6 @@ if __name__ == "__main__":
     # Some systems are missing epstopdf so a copy is included
     epsbackup = pathlib.Path(join(dirname(__file__), "..", "epstopdf.pl")).resolve()
     epstopdf = which("epstopdf") or epsbackup
-    # os.system(f"{epstopdf} '{output_eps_file}'")
     epstopdf_subprocess = subprocess([epstopdf, output_eps_file],
                                      capture_output=True)
     if epstopdf_subprocess.returncode != 0:

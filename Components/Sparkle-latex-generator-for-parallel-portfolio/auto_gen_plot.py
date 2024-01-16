@@ -64,12 +64,7 @@ if __name__ == "__main__":
         outfile.write(f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
                       "points pt 2 ps 2\n")
 
-    # cmd = f"gnuplot '{output_gnuplot_script}'"
-    # os.system(cmd)
     subprocess.run(["gnuplot", output_gnuplot_script])
-
-    # cmd = f"epstopdf '{output_eps_file}'"
-    # os.system(cmd)
     subprocess.run(["epstopdf", output_eps_file])
 
     Path(output_gnuplot_script).unlink(missing_ok=True)
