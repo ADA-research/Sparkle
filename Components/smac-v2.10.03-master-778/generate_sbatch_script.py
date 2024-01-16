@@ -113,7 +113,7 @@ if __name__ == r'__main__':
 	if len(sys.argv) != 6:
 		print(r'c Command error!')
 		print(r'c Usage: ' + sys.argv[0] + r' <scenario_file> <result_directory> <num_of_smac_run> <num_job_in_parallel> <smac_execdir>')
-		sys.exit()
+		sys.exit(-1)
 	
 	scenario_file = sys.argv[1]
 	res_directory_path = sys.argv[2]

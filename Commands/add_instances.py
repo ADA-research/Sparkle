@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     if not Path(instances_source).exists():
         print(f'Instance set path "{instances_source}" does not exist!')
-        sys.exit()
+        sys.exit(-1)
 
     nickname_str = args.nickname
 

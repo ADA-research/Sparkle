@@ -288,8 +288,8 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
     elif train_or_test == r"test":
         file_suffix = r"_test.txt"
     else:
-        print('Invalid function call of "copy_instances_to_ablation"; stoping execution')
-        sys.exit()
+        print("Invalid function call of copy_instances_to_ablation; stopping execution")
+        sys.exit(-1)
 
     if instances_directory[-1] != "/":
         instances_directory += "/"

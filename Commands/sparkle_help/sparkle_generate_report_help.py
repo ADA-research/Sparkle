@@ -61,7 +61,7 @@ def get_num_solvers() -> str:
 
     if int(str_value) < 1:
         print("ERROR: No solvers found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str_value
 
@@ -93,7 +93,7 @@ def get_num_feature_extractors() -> str:
 
     if int(str_value) < 1:
         print("ERROR: No feature extractors found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str_value
 
@@ -361,9 +361,9 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
     instances = (dict_sbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
     if (len(dict_sbs_penalty_time_on_each_instance) != len(instances)):
-        print("""ERROR: Number of penalty times for the single best solver
-          does not match the number of instances""")
-        sys.exit()
+        print("ERROR: Number of penalty times for the single best solver does not match "
+              "the number of instances")
+        sys.exit(-1)
     points = []
     for instance in instances:
         point = [dict_sbs_penalty_time_on_each_instance[instance],
@@ -416,9 +416,9 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
     instances = (dict_vbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
     if (len(dict_vbs_penalty_time_on_each_instance) != len(instances)):
-        print("""ERROR: Number of penalty times for the virtual best solver
-          does not match the number of instances""")
-        sys.exit()
+        print("ERROR: Number of penalty times for the virtual best solver does not"
+              "match the number of instances")
+        sys.exit(-1)
     points = []
     for instance in instances:
         point = [dict_vbs_penalty_time_on_each_instance[instance],
@@ -742,7 +742,7 @@ def generate_comparison_plot(points: list,
     if penalty_time is not None:
         if (penalty_time < max_point_value):
             print("ERROR: Penalty time too small for the given performance data.")
-            sys.exit()
+            sys.exit(-1)
         max_point_value = penalty_time
 
     if limit == "absolute":

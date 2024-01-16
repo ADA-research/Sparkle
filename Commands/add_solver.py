@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     if not Path(solver_source).exists():
         print(f'Solver path "{solver_source}" does not exist!')
-        sys.exit()
+        sys.exit(-1)
 
     deterministic = args.deterministic
     nickname_str = args.nickname

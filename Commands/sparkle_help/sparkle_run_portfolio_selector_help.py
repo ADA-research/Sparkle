@@ -201,7 +201,7 @@ def call_sparkle_portfolio_selector_solve_instance(
 
     if len(sgh.extractor_list) == 0:
         print("ERROR: No feature extractor added to Sparkle.")
-        sys.exit()
+        sys.exit(-1)
 
     cutoff_time_each_extractor_run = (
         sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
@@ -219,14 +219,6 @@ def call_sparkle_portfolio_selector_solve_instance(
               f"features of instance {instance_files_str} done!")
 
     print("Sparkle computing features of instance " + instance_files_str + " done!")
-
-    command_line = (f"{sgh.python_executable} {sgh.autofolio_path} --load "
-                    f'{sgh.sparkle_algorithm_selector_path} --feature_vec "')
-    for i in range(0, len(list_feature_vector)):
-        command_line = command_line + str(list_feature_vector[i])
-
-        if i < (len(list_feature_vector) - 1):
-            command_line = command_line + " "
 
     predict_schedule_result_path = ("Tmp/predict_schedule_"
                                     f"{sparkle_basic_help.get_time_pid_random_string()}"
@@ -439,4 +431,4 @@ def check_selector_status(solver_name: str) -> None:
     if not selector.exists() or not selector.is_file():
         print("ERROR: The portfolio selector could not be found. Please make sure to "
               "first construct a portfolio selector.")
-        sys.exit()
+        sys.exit(-1)

@@ -283,7 +283,7 @@ def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
     if (len(dict_instance_to_par_default) != len(instances)):
         print("""ERROR: Number of instances does not match
          the number of performance values for the default configuration.""")
-        sys.exit()
+        sys.exit(-1)
     points = []
     for instance in instances:
         point = [dict_instance_to_par_default[instance],
@@ -547,7 +547,7 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
         if len(line) != 5:
             print("""ERROR: something has changed with the representation
                    of ablation tables""")
-            sys.exit()
+            sys.exit(-1)
         if i == 0:
             line = [f"\\textbf{{{word}}}" for word in line]
 
@@ -911,7 +911,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
               'combination. Make sure the "configure_solver" and '
               '"validate_configured_vs_default" commands were correctly executed. '
               f"\nDetected errors:\n{err_str}")
-        sys.exit()
+        sys.exit(-1)
 
     return
 
@@ -941,7 +941,7 @@ def get_most_recent_test_run(solver_name: str) -> tuple[str, str, bool, bool]:
               "specify which instance sets you want a report for with this solver. "
               'Alternatively, make sure the "test_configured_solver_and_default_solver" '
               "command was executed for this solver.")
-        sys.exit()
+        sys.exit(-1)
 
     while True:
         myline = fin.readline()

@@ -87,7 +87,7 @@ if __name__ == "__main__":
     extractor_source = args.extractor_path
     if not Path(extractor_source).exists():
         print(f'Feature extractor path "{extractor_source}" does not exist!')
-        sys.exit()
+        sys.exit(-1)
 
     nickname_str = args.nickname
 

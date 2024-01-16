@@ -33,7 +33,7 @@ def get_num_solvers(parallel_portfolio_path: Path) -> str:
 
     if num_solvers < 1:
         print("ERROR: No solvers found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str(num_solvers)
 

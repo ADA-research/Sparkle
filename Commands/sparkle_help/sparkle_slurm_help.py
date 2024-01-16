@@ -494,7 +494,8 @@ def submit_sbatch_script(sbatch_script_name: str,
     subprocess.run(["chmod", "a+x", sbatch_script_name], cwd=execution_dir)
 
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
-    subprocess.run(["unset", "SLURM_CPU_BIND"], cwd=execution_dir, shell=True)  # noqa: S602
+    subprocess.run(["unset", "SLURM_CPU_BIND"],
+                   cwd=execution_dir, shell=True)  # noqa: S602
 
     command = ["sbatch", sbatch_script_name]
     output = subprocess.run(command, cwd=execution_dir, capture_output=True, text=True)

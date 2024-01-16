@@ -38,7 +38,7 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
         # TODO: Add instructions for the user that might fix the issue?
         print('ERROR: Failed to get valid solver call command from wrapper at "'
               f'{solver_wrapper_path}" stopping execution!')
-        sys.exit()
+        sys.exit(-1)
 
     return cmd_solver_call
 
@@ -51,7 +51,7 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
     if not Path(solver_wrapper_path).is_file():
         print(f'ERROR: Wrapper named "{solver_wrapper_path}" not found, stopping '
               "execution!")
-        sys.exit()
+        sys.exit(-1)
 
     # Get the solver call command from the wrapper
     cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path,
@@ -321,7 +321,7 @@ def process_results(raw_result_path: str, solver_wrapper_path: str,
         # TODO: Add instructions for the user that might fix the issue?
         print(f'ERROR: Failed to get output from wrapper at "{solver_wrapper_path}" '
               "stopping execution!")
-        sys.exit()
+        sys.exit(-1)
 
     # Check if Sparkle should use it's own parser
     first_line = result_lines[0]
@@ -341,7 +341,7 @@ def process_results(raw_result_path: str, solver_wrapper_path: str,
             print("If your problem domain is not in the list, please parse the output in"
                   " the wrapper.")
             print("Stopping execution!")
-            sys.exit()
+            sys.exit(-1)
     else:
         # Read output
         quality = []
@@ -403,7 +403,7 @@ def get_status_from_wrapper(result: str) -> str:
     else:
         print(f'ERROR: Invalid status "{result}" given, possible statuses are: '
               f"{status_list}\nStopping execution!")
-        sys.exit()
+        sys.exit(-1)
 
     return status
 

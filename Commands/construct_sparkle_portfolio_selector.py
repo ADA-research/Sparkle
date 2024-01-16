@@ -142,7 +142,7 @@ if __name__ == "__main__":
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
 
-        sys.exit()
+        sys.exit(-1)
 
     delete_log_files()  # Make sure no old log files remain
     success = scps.construct_sparkle_portfolio_selector(
