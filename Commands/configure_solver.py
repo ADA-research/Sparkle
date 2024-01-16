@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
             print("Given training set path is not an existing directory")
-            sys.exit()
+            sys.exit(-1)
 
         data_dict = {}
         feature_data_df = feature_data_csv.dataframe
@@ -180,7 +180,7 @@ if __name__ == "__main__":
                 if row.empty:
                     print("No feature data exists for the given training set, please "
                           "run add_feature_extractor.py, then compute_features.py")
-                    sys.exit()
+                    sys.exit(-1)
 
                 new_label = (f"../../../instances/{instance_set_train.name}/"
                              + os.path.split(label)[1])
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         if feature_data_df.isnull().values.any():
             print("You have unfinished feature computation jobs, please run "
                   "compute_features.py")
-            sys.exit()
+            sys.exit(-1)
 
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)

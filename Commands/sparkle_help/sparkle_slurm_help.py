@@ -491,7 +491,7 @@ def submit_sbatch_script(sbatch_script_name: str,
       successfully. Defaults to the SMAC directory.
     """
     if execution_dir is not None:
-        (execution_dir / sbatch_script_name).chmod(mode=777)
+        (Path(execution_dir) / sbatch_script_name).chmod(mode=777)
     else:
         Path(sbatch_script_name).chmod(mode=777)
 
