@@ -42,10 +42,7 @@ output=$(Commands/configure_solver.py --validate --ablation --solver $solver_pat
 
 validationcallbackfile=Tmp/delayed_validation_PbO-CCSAT-Generic_PTN_script.sh
 ablationcallbackfile=Tmp/delayed_ablation_PbO-CCSAT-Generic_PTN_script.sh
-if ! [[ $slurm_available =~ "${slurm_true}" ]];
-then
-    echo "[success] ($slurm_available) configure_solver_validation test succeeded"
-elif [ ! -f "$validationcallbackfile" ]; then
+if [ ! -f "$validationcallbackfile" ]; then
     echo "[failure] ($slurm_available) $validationcallbackfile does not exist for configure_solver_validation."
     if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
@@ -63,7 +60,7 @@ elif [[ $output =~ "${output_true}" ]]; then
     if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
 		scancel $jobid
-	fi	
+	fi
 else              
 	echo "[failure] ($slurm_available) configure_solver_validation test failed with output:"
 	echo $output
