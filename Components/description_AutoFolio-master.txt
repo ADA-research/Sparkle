@@ -3,4 +3,4 @@ Version: 2020 Mar 12, commit 60a38a485e832b4e9bd2d06cbe7e1aecc994bb32
 Authors: Lindauer, Hoos, Hutter, Schaub
 Paper: Lindauer et al 2015 - AutoFolio: An Automatically Configured Algorithm Selector
 License: 2-Clause BSD
-License location: AutoFolio-master/doc/license.rst or AutoFolio-master/LICENSE
+License location: AutoFolio/doc/license.rst or AutoFolio/LICENSE
