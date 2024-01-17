@@ -233,7 +233,6 @@ def call_sparkle_portfolio_selector_solve_instance(
                              stderr=Path(sgh.sparkle_err_path).open("w+"))
 
     if process.returncode != 0:
-        # [TS 11-01-24] TODO: Known error with Autofolio, could be fixed by upgrading
         # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"
         print(f"Error getting predict schedule! See {sgh.sparkle_err_path} for output.")
         sys.exit(process.returncode)
