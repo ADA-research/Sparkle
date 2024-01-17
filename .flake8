@@ -28,7 +28,7 @@ ignore = D300  # Conflicts with docstring-quotes rule
          S404  # Just a warning about the usage of subprocess
          S603  # Flags only false positives as of now
 exclude =
-    Components/AutoFolio-master/,
+    Components/AutoFolio/,
     Components/ablationAnalysis-0.9.4/,
     Components/runsolver/,
     Components/smac-v2.10.03-master-778/,
