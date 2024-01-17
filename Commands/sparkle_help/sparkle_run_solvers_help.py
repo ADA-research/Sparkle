@@ -573,7 +573,7 @@ def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -
     # TODO: Log output file
     print("Run SAT verifier")
     subprocess.run([sat_verifier_path, instance_path, raw_result_path],
-                   stdout=Path(tmp_verify_result_path).open())
+                   stdout=Path(tmp_verify_result_path).open("w+"))
     print("SAT verifier done")
 
     ret = sat_get_verify_string(tmp_verify_result_path)
