@@ -229,6 +229,8 @@ if __name__ == "__main__":
 
     dependency_jobid_list = [configure_jobid]
 
+    callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
+
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = ssh.run_validation_callback(
@@ -249,8 +251,6 @@ if __name__ == "__main__":
     else:
         print("Running configuration finished!")
 
-    configurator.configuration_callback(dependency_jobid_list=dependency_jobid_list,
-                                        run_on=run_on)
     status_info.delete()
     # Write used settings to file
     sgh.settings.write_used_settings()
