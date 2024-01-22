@@ -18,10 +18,8 @@ pipelines:
               - git submodule update --init --recursive
               - git status
               - git submodule
-              - pip freeze
-              - ls Components/AutoFolio
               - conda info
-              - conda env create -f environment-dev.yml 
+              - conda env create -f environment.yml 
               - conda activate sparkle
               - pip freeze
               - pytest -v tests/* --junitxml=test-reports/report.xml
