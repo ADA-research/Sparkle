@@ -5,6 +5,7 @@ import os
 import time
 import random
 import sys
+from argparse import Namespace
 from pathlib import Path
 
 
@@ -18,7 +19,7 @@ def get_time_pid_random_string():
     return my_time_pid_random_str
 
 
-args = __import__(sys.argv[1])
+args = eval(sys.argv[1])
 
 # instance = sys.argv[1]
 specifics = args.specifics
@@ -50,11 +51,9 @@ for k in args.__dict__:
     if args.__dict__[k] is not None:
         command += r' ' + str(k) + " " + str(args.__dict__[k])
 
-# start_time = time.time() # Will be managed by Sparkle internally
 output_list = os.popen(command).readlines()
-# end_time = time.time() # Will be managed by Sparkle internally
 
-os.system(r'rm -f ' + runsolver_watch_data_path)
+Path(runsolver_watch_data_path).unlink()
 
 status = r'CRASHED'
 for line in output_list:
@@ -75,6 +74,7 @@ if specifics == 'rawres':
 
 #print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', 0, 0, ' + str(seed))
 
-outdir = {"status", status}
+outdir = {"status": status,
+          "raw_output": output_list}
 print(str(outdir))
 

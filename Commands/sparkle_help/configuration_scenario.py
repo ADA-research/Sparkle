@@ -111,8 +111,7 @@ class ConfigurationScenario:
                               / f"{self.name}_scenario.txt")
         self.scenario_file_name = scenario_file_path.name
         with scenario_file_path.open("w") as file:
-            # file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
-            file.write(f"algo = {sgh.smac_dir}smac_target_algorithm.py\n")
+            file.write(f"algo = ../../../smac_target_algorithm.py\n")
             file.write(f"execdir = {inner_directory}/\n")
             file.write(f"deterministic = {self.solver.is_deterministic()}\n")
             file.write(f"run_obj = {run_objective}\n")

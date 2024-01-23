@@ -118,10 +118,11 @@ if __name__ == "__main__":
     solver = subprocess.run([Path.cwd() / sgh.sparkle_smac_wrapper, str(args)],
                             capture_output=True)
     run_time = min(time.time() - start_t, args.cutoff_time)
-    print(solver)
+    
     if solver.returncode != 0:
         print(solver.stderr)
         sys.exit(solver.returncode)
     
-    outdir = ast.literal_eval(solver.stdout)
-    print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, 0, {args.seed}")
+    outdir = ast.literal_eval(solver.stdout.decode())
+    #print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, 0, {args.seed}")
+    print(outdir)

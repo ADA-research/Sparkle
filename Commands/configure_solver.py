@@ -192,7 +192,7 @@ if __name__ == "__main__":
         if feature_data_df.isnull().values.any():
             print("You have unfinished feature computation jobs, please run "
                   "compute_features.py")
-            sys.exit()
+            sys.exit(-1)
 
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
@@ -229,7 +229,7 @@ if __name__ == "__main__":
 
     dependency_jobid_list = [configure_jobid]
 
-    callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
+    #callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
 
     # Set validation to wait until configuration is done
     if validate:
