@@ -12,6 +12,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.solver import Solver
 from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 
 
 class ConfigurationScenario:
@@ -167,3 +168,18 @@ class ConfigurationScenario:
                                       / f"{self.instance_directory.name}_features.csv")
         self.feature_data.to_csv(self.directory
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
+
+    def _clean_up_scenario_dirs(self: ConfigurationScenario) -> list[str]:
+        """Yield directories to clean up after configuration scenario is done.
+
+        Returns:
+            list[str]: Full paths to directories that can be removed
+        """
+        # Wait for jobs to be done
+        result = []
+        smac_solver_dir = scsh.get_smac_solver_dir(self.solver.name,
+                                                   self.instance_directory.name)
+        for index in range(self.number_of_runs):
+            dir = smac_solver_dir + str(index + 1)
+            result.append(dir)
+        return result
