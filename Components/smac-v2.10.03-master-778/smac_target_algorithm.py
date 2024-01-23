@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-
 import sys
+import ast
 import argparse
+import time
 import subprocess
+from pathlib import Path
+
 from Commands.sparkle_help import sparkle_global_help as sgh
+
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments given by SMAC."""
@@ -109,6 +113,15 @@ if __name__ == "__main__":
     args.cutoff_time = float(sys.argv[3])
     args.run_length = int(sys.argv[4])
     args.seed = int(sys.argv[5])
+
+    start_t = time.time()
+    solver = subprocess.run([Path.cwd() / sgh.sparkle_smac_wrapper, str(args)],
+                            capture_output=True)
+    run_time = min(time.time() - start_t, args.cutoff_time)
+    print(solver)
+    if solver.returncode != 0:
+        print(solver.stderr)
+        sys.exit(solver.returncode)
     
-    print(sgh.sparkle_smac_wrapper)
-    #sys.exit(-1)
+    outdir = ast.literal_eval(solver.stdout)
+    print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, 0, {args.seed}")

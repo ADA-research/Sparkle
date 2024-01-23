@@ -18,21 +18,15 @@ def get_time_pid_random_string():
     return my_time_pid_random_str
 
 
-def get_last_level_directory_name(filepath):
-    if filepath[-1] == r'/': filepath = filepath[0:-1]
-    right_index = filepath.rfind(r'/')
-    if right_index<0: pass
-    else: filepath = filepath[right_index+1:]
-    return filepath
+args = __import__(sys.argv[1])
 
+# instance = sys.argv[1]
+specifics = args.specifics
+cutoff_time = args.cutoff_time
+# run_length = int(sys.argv[4])
+seed = args.seed
 
-instance = sys.argv[1]
-specifics = sys.argv[2]
-cutoff_time = int(float(sys.argv[3]) + 1)
-run_length = int(sys.argv[4])
-seed = int(sys.argv[5])
-
-params = sys.argv[6:]
+# params = sys.argv[6:]
 
 relative_path = r'./'
 runsolver_binary = relative_path + r'runsolver'
@@ -42,36 +36,25 @@ tmp_directory = relative_path + r'tmp/'
 if not os.path.exists(tmp_directory):
     os.system(r'mkdir -p ' + tmp_directory)
 
-inputlog = Path(tmp_directory + "inputlog.txt")
-with inputlog.open("w+") as f:
-    instr = " ".join(sys.argv)
-    f.write(instr)
-
-instance_name = get_last_level_directory_name(instance)
-solver_name = get_last_level_directory_name(solver_binary)
+instance_name = Path(args.instance).name
+solver_name = Path(solver_binary).name
 runsolver_watch_data_path = tmp_directory + solver_name + r'_' + instance_name + r'_' + get_time_pid_random_string() + r'.log'
 
-command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + instance + r' -seed ' + str(seed)
+command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + args.instance + r' -seed ' + str(args.seed)
+del args.instance
+del args.cutoff_time
+del args.seed
+del args.specifics
+del args.run_length
+for k in args.__dict__:
+    if args.__dict__[k] is not None:
+        command += r' ' + str(k) + " " + str(args.__dict__[k])
 
-len_argv = len(sys.argv)
-i = 6
-while i<len_argv:
-    command += r' ' + sys.argv[i]
-    i += 1
-    command += r' ' + sys.argv[i]
-    i += 1
-
-#print(command)
-
-start_time = time.time()
+# start_time = time.time() # Will be managed by Sparkle internally
 output_list = os.popen(command).readlines()
-end_time = time.time()
-run_time = end_time - start_time
-if run_time > cutoff_time: run_time = cutoff_time
+# end_time = time.time() # Will be managed by Sparkle internally
 
 os.system(r'rm -f ' + runsolver_watch_data_path)
-
-#print output_list
 
 status = r'CRASHED'
 for line in output_list:
@@ -83,11 +66,15 @@ for line in output_list:
         status = r'TIMEOUT'
         break
 
-print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', 0, 0, ' + str(seed))
-
 if specifics == 'rawres':
     raw_result_path = Path(runsolver_watch_data_path.replace('.log', '.rawres'))
 
     with raw_result_path.open('w') as outfile:
         for line in output_list:
             outfile.write(line)
+
+#print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', 0, 0, ' + str(seed))
+
+outdir = {"status", status}
+print(str(outdir))
+
