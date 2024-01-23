@@ -42,6 +42,11 @@ tmp_directory = relative_path + r'tmp/'
 if not os.path.exists(tmp_directory):
     os.system(r'mkdir -p ' + tmp_directory)
 
+inputlog = Path(tmp_directory + "inputlog.txt")
+with inputlog.open("w+") as f:
+    instr = " ".join(sys.argv)
+    f.write(instr)
+
 instance_name = get_last_level_directory_name(instance)
 solver_name = get_last_level_directory_name(solver_binary)
 runsolver_watch_data_path = tmp_directory + solver_name + r'_' + instance_name + r'_' + get_time_pid_random_string() + r'.log'
