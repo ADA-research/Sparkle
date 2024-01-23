@@ -229,6 +229,8 @@ if __name__ == "__main__":
 
     dependency_jobid_list = [configure_jobid]
 
+    callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
+
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = ssh.run_validation_callback(

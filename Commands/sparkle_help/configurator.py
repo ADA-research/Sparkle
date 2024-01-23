@@ -101,6 +101,45 @@ class Configurator:
 
             return jobid
 
+    def configuration_callback(self: Configurator,
+                               dependency_jobid: str,
+                               run_on: Runner = Runner.SLURM) -> str:
+        """Callback to be run once configurator is done.
+
+        Returns:
+            str: Job id of the callback
+        """
+        jobid = ""
+        cmd = "rm -rf"
+        dir_list = self.scenario._clean_up_scenario_dirs()
+        cmd += " " + " ".join(dir_list)
+        if run_on == Runner.SLURM:
+            ssh.generate_generic_callback_slurm_script("configuration_callback",
+                                                       self.scenario.solver,
+                                                       self.scenario.instance_file_path,
+                                                       None,
+                                                       dependency_jobid,
+                                                       cmd,
+                                                       CommandName.CONFIGURE_SOLVER)
+        else:
+            # Remove once Runrunner is satisfactory
+            if run_on == Runner.SLURM_RR:
+                run_on = Runner.SLURM
+
+            run = rrr.add_to_queue(
+                runner=run_on,
+                cmd=cmd,
+                name="configuration_callback",
+                dependency=dependency_jobid)
+
+            if run_on == Runner.SLURM:
+                jobid = run.run_id
+                run_on = Runner.SLURM_RR
+            elif run_on == Runner.LOCAL:
+                run.wait()
+
+        return jobid
+
     def _get_sbatch_options(self: Configurator) -> str:
         """Get sbatch options.
 
