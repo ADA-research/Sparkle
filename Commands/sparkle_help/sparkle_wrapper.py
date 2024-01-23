@@ -46,10 +46,21 @@ class Wrapper:
         """Runs the wrapped executable."""
         # Should we do this with runrunner?
         start_time = time.time()
-        p = subprocess.run([self.executable] + self.args,
+        p = subprocess.run([self.executable] + self.args,  # Correct?
                            stdout=self.raw_output,
                            stderr=self.err_output)
         print(p)
         run_time = time.time() - start_time
 
         return run_time
+
+
+class SmacWrapper(Wrapper):
+    """Sparkle Smac Wrapper.
+
+    A specific implementation to configure an executable with SMAC.
+    """
+
+    def __init__(self: SmacWrapper, executable_path: Path) -> None:
+        """Docstring."""
+        return
