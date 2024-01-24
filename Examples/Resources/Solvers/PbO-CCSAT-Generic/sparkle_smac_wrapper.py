@@ -5,7 +5,7 @@ import os
 import time
 import random
 import sys
-from argparse import Namespace
+import ast
 import subprocess
 from pathlib import Path
 
@@ -19,48 +19,47 @@ def get_time_pid_random_string():
     my_time_pid_random_str = my_time_str + '_' + my_pid_str + '_' + my_random_str
     return my_time_pid_random_str
 
+# Convert the argument of the target_algorithm script to dictionary
+args = ast.literal_eval(sys.argv[1])
 
-args = eval(sys.argv[1])
+# Extract and delete data that needs specific formatting
+instance = args["instance"]
+specifics = args["specifics"]
+cutoff_time = int(args["cutoff_time"])+1
+# run_length = args["run_length"]
+seed = args["seed"]
 
-# Extract and delete data
-instance = args.instance
-specifics = args.specifics
-cutoff_time = args.cutoff_time
-# run_length = int(sys.argv[4])
-seed = args.seed
+del args["instance"]
+del args["cutoff_time"]
+del args["seed"]
+del args["specifics"]
+del args["run_length"]
 
-del args.instance
-del args.cutoff_time
-del args.seed
-del args.specifics
-del args.run_length
+runsolver_binary = "./runsolver"
+solver_binary = "./PbO-CCSAT"
 
-relative_path = r'./'
-runsolver_binary = relative_path + r'runsolver'
-solver_binary = relative_path + r'PbO-CCSAT'
-
-tmp_directory = relative_path + r'tmp/'
-if not os.path.exists(tmp_directory):
-    os.system(r'mkdir -p ' + tmp_directory)
+tmp_directory = Path("tmp/")
+tmp_directory.mkdir(exist_ok=True)
+#if not os.path.exists(tmp_directory):
+#    os.system(r'mkdir -p ' + tmp_directory)
 
 instance_name = Path(instance).name
 solver_name = Path(solver_binary).name
-runsolver_watch_data_path = tmp_directory + solver_name + r'_' + instance_name + r'_' + get_time_pid_random_string() + r'.log'
+runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_" + get_time_pid_random_string() + ".log")
 
-command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + str(solver_binary) + r' -inst ' + str(instance) + r' -seed ' + str(seed)
+runsolver_call = [runsolver_binary,
+                  "-w", str(runsolver_watch_data_path),
+                  "--cpu-limit", str(cutoff_time),
+                  solver_binary,
+                  "-inst", instance,
+                  "-seed", str(seed)]
 
-for k in args.__dict__:
-    if args.__dict__[k] is not None:
-        command += r' ' + str(k) + " " + str(args.__dict__[k])
+params = []
+for key in args:
+    if args[key] is not None:
+        params.extend(["-" + str(key), str(args[key])])
 
-#output_list = os.popen(command).readlines()
-
-solver_call = subprocess.run(executable=runsolver_binary,
-                             args=["-w", runsolver_watch_data_path,
-                                   "--cpu-limit", str(cutoff_time),
-                                   solver_binary,
-                                   "-inst", instance,
-                                   "-seed", str(seed)],
+solver_call = subprocess.run(runsolver_call + params,
                              capture_output=True)
 
 output_list = solver_call.stdout.decode().splitlines()
@@ -79,15 +78,12 @@ for line in output_list:
 
 if specifics == 'rawres':
     raw_result_path = Path(runsolver_watch_data_path.replace('.log', '.rawres'))
-
     with raw_result_path.open('w') as outfile:
         for line in output_list:
             outfile.write(line)
 
-#print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', 0, 0, ' + str(seed))
-
 outdir = {"status": status,
-          "solver_call": command,
+          "solver_call": runsolver_call + params,
           "raw_output": output_list}
-print(str(outdir))
 
+print(outdir)

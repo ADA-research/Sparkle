@@ -85,27 +85,7 @@ def parser_function() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     # Incoming call from SMAC:
-    # Argsv
-    # 0: ../../../smac_target_algorithm.py 
-    # 1: ../../../../../Instances/PTN/Ptn-7824-b11.cnf
-    # 2: 0
-    # 3: 60.0
-    # 4: 2147483647
-    # 5: 738507
-    # 6: 
-    #   -init_solution '1'
-    #   -p_swt '0.3'
-    #   -perform_aspiration '1' 
-    #   -perform_clause_weight '1' 
-    #   -perform_double_cc '1'
-    #   -perform_first_div '0'
-    #   -perform_pac '0'
-    #   -q_swt '0.0' 
-    #   -sel_clause_div '1'
-    #   -sel_clause_weight_scheme '1'
-    #   -sel_var_break_tie_greedy '2'
-    #   -sel_var_div '3'
-    #   -threshold_swt '300'
+    # Args 1-5 contain arguments for Run Solver, the rest are parameters for the solver
     parser = parser_function()
     args = parser.parse_args(sys.argv[6:])
     args.instance = sys.argv[1]
@@ -115,7 +95,7 @@ if __name__ == "__main__":
     args.seed = int(sys.argv[5])
 
     start_t = time.time()
-    solver = subprocess.run([Path.cwd() / sgh.sparkle_smac_wrapper, str(args)],
+    solver = subprocess.run([Path.cwd() / sgh.sparkle_smac_wrapper, str(args.__dict__)],
                             capture_output=True)
     run_time = min(time.time() - start_t, args.cutoff_time)
     
@@ -124,6 +104,6 @@ if __name__ == "__main__":
         sys.exit(solver.returncode)
     
     outdir = ast.literal_eval(solver.stdout.decode())
-    #print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, 0, {args.seed}")
+    print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, 0, {args.seed}")
     #print(r'Result for SMAC: ' + str(outdir["status"]) + r', ' + str(run_time) + r', 0, 0, ' + str(args.seed))
-    print(outdir)
+    #print(outdir)
