@@ -6,6 +6,7 @@ import time
 import random
 import sys
 from argparse import Namespace
+import subprocess
 from pathlib import Path
 
 
@@ -21,13 +22,18 @@ def get_time_pid_random_string():
 
 args = eval(sys.argv[1])
 
-# instance = sys.argv[1]
+# Extract and delete data
+instance = args.instance
 specifics = args.specifics
 cutoff_time = args.cutoff_time
 # run_length = int(sys.argv[4])
 seed = args.seed
 
-# params = sys.argv[6:]
+del args.instance
+del args.cutoff_time
+del args.seed
+del args.specifics
+del args.run_length
 
 relative_path = r'./'
 runsolver_binary = relative_path + r'runsolver'
@@ -37,23 +43,29 @@ tmp_directory = relative_path + r'tmp/'
 if not os.path.exists(tmp_directory):
     os.system(r'mkdir -p ' + tmp_directory)
 
-instance_name = Path(args.instance).name
+instance_name = Path(instance).name
 solver_name = Path(solver_binary).name
 runsolver_watch_data_path = tmp_directory + solver_name + r'_' + instance_name + r'_' + get_time_pid_random_string() + r'.log'
 
-command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + args.instance + r' -seed ' + str(args.seed)
-del args.instance
-del args.cutoff_time
-del args.seed
-del args.specifics
-del args.run_length
+command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + str(solver_binary) + r' -inst ' + str(instance) + r' -seed ' + str(seed)
+
 for k in args.__dict__:
     if args.__dict__[k] is not None:
         command += r' ' + str(k) + " " + str(args.__dict__[k])
 
-output_list = os.popen(command).readlines()
+#output_list = os.popen(command).readlines()
 
-Path(runsolver_watch_data_path).unlink()
+solver_call = subprocess.run(executable=runsolver_binary,
+                             args=["-w", runsolver_watch_data_path,
+                                   "--cpu-limit", str(cutoff_time),
+                                   solver_binary,
+                                   "-inst", instance,
+                                   "-seed", str(seed)],
+                             capture_output=True)
+
+output_list = solver_call.stdout.decode().splitlines()
+
+Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
 status = r'CRASHED'
 for line in output_list:
@@ -75,6 +87,7 @@ if specifics == 'rawres':
 #print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', 0, 0, ' + str(seed))
 
 outdir = {"status": status,
+          "solver_call": command,
           "raw_output": output_list}
 print(str(outdir))
 

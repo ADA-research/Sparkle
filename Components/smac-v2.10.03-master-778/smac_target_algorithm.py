@@ -125,5 +125,5 @@ if __name__ == "__main__":
     
     outdir = ast.literal_eval(solver.stdout.decode())
     #print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, 0, {args.seed}")
-    print(r'Result for SMAC: ' + str(outdir["status"]) + r', ' + str(run_time) + r', 0, 0, ' + str(args.seed))
-    #print(outdir)
+    #print(r'Result for SMAC: ' + str(outdir["status"]) + r', ' + str(run_time) + r', 0, 0, ' + str(args.seed))
+    print(outdir)
