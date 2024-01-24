@@ -157,8 +157,18 @@ if __name__ == "__main__":
     run_on = args.run_on
     if args.configurator is not None:
         configurator_path = args.configurator
+        configurator_target = [x for x in os.listdir(configurator_path)
+                               if x.endswith("_target_algorithm.py")]
+        if len(configurator_target) != 1:
+            print("Configurator Error: "
+                  f"Could not determine target script for {configurator_path}\n"
+                  "Please check target script file '*_target_algorithm.py'")
+            sys.exit(-1)
+        configurator_target = configurator_target[0]
     else:
-        configurator_path = Path("Components", "smac-v2.10.03-master-778")
+        # SMAC is the default configurator
+        configurator_path = Path(sgh.smac_dir)
+        configurator_target = sgh.smac_target_algorithm
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.CONFIGURE_SOLVER])
@@ -169,7 +179,7 @@ if __name__ == "__main__":
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
             print("Given training set path is not an existing directory")
-            sys.exit()
+            sys.exit(-1)
 
         data_dict = {}
         feature_data_df = feature_data_csv.dataframe
@@ -210,7 +220,8 @@ if __name__ == "__main__":
 
     number_of_runs = sgh.settings.get_config_number_of_runs()
     config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
-                                            use_features, feature_data_df)
+                                            use_features, configurator_target,
+                                            feature_data_df)
     configurator = Configurator(configurator_path)
 
     configurator.create_sbatch_script(config_scenario)
@@ -229,7 +240,7 @@ if __name__ == "__main__":
 
     dependency_jobid_list = [configure_jobid]
 
-    #callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
+    callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
 
     # Set validation to wait until configuration is done
     if validate:
