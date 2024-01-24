@@ -7,6 +7,7 @@ import time
 import random
 import sys
 import ast
+import subprocess
 from pathlib import Path
 
 
@@ -76,28 +77,35 @@ def parse_output(output_list: list[str]) -> (str, float):
     return status, solution_quality
 
 
-instance = sys.argv[1]
+# Convert the argument of the target_algorithm script to dictionary
+args = ast.literal_eval(sys.argv[1])
+
+# Extract and delete data that needs specific formatting
+instance = args["instance"]
+specifics = args["specifics"]
+cutoff_time = int(args["cutoff_time"]) + 1
+# run_length = args["run_length"]
+seed = args["seed"]
+
+del args["instance"]
+del args["cutoff_time"]
+del args["seed"]
+del args["specifics"]
+del args["run_length"]
+
 inst_list = instance.split()
 inst_model = inst_list[0]
 inst_constr = inst_list[1]
-specifics = sys.argv[2]
-cutoff_time = int(float(sys.argv[3]) + 1)
-run_length = int(sys.argv[4])
-seed = int(sys.argv[5])
 
-params = sys.argv[6:]
+runsolver_binary = "./runsolver"
+solver_binary = "./FastCA"
 
-relative_path = "./"
-runsolver_binary = relative_path + "runsolver"
-solver_binary = relative_path + "FastCA"
+tmp_directory = Path("tmp/")
+tmp_directory.mkdir(exist_ok=True)
 
-tmp_directory = relative_path + "tmp/"
-if not Path(tmp_directory).exists():
-    os.system("mkdir -p " + tmp_directory)
-
-instance_model_name = get_last_level_directory_name(inst_model)
-instance_constr_name = get_last_level_directory_name(inst_constr)
-solver_name = get_last_level_directory_name(solver_binary)
+instance_model_name = Path(inst_model).name
+instance_constr_name = Path(inst_constr).name
+solver_name = Path(solver_binary).name
 runsolver_watch_data_path = (f"{tmp_directory}{solver_name}_{instance_model_name}_"
                              f"{get_time_pid_random_string()}.log")
 
@@ -105,23 +113,30 @@ command = (f"{runsolver_binary} -w {runsolver_watch_data_path} --cpu-limit "
            f"{str(cutoff_time)} {solver_binary} {inst_model} {inst_constr} "
            f"{str(cutoff_time)}")
 
-i = 6  # Start with first argument after 'seed'
-while i < len(sys.argv):
-    # Skip the parameter name for positional parameters
-    i += 1
-    command += " " + sys.argv[i]
-    i += 1
+runsolver_call = [runsolver_binary,
+                  "-w", str(runsolver_watch_data_path),
+                  "--cpu-limit", str(cutoff_time),
+                  solver_binary,
+                  "-inst", inst_model, inst_constr,
+                  str(cutoff_time)]
 
-# TODO: Replace with runtime from runsolver
-start_time = time.time()
-output_list = os.popen(command).readlines()
-end_time = time.time()
-run_time = end_time - start_time
-if run_time > cutoff_time:
-    run_time = cutoff_time
+params = []
+for key in args:
+    if args[key] is not None:
+        params.extend(["-" + str(key), str(args[key])])
 
-os.system("rm -f " + runsolver_watch_data_path)
+solver_call = subprocess.run(runsolver_call + params,
+                             capture_output=True)
+
+output_list = solver_call.stdout.decode().splitlines()
+
+Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
 status, quality = parse_output(output_list)
 
-print(f"Result for SMAC: {status}, {str(run_time)}, 0, {str(quality)}, {str(seed)}")
+outdir = {"status": status,
+          "quality": 0,
+          "solver_call": runsolver_call + params,
+          "raw_output": output_list}
+
+print(outdir)

@@ -6,6 +6,9 @@ import os
 import time
 import random
 import sys
+import ast
+import subprocess
+from pathlib import Path
 
 def get_time_pid_random_string():
 	my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
@@ -16,59 +19,61 @@ def get_time_pid_random_string():
 	my_time_pid_random_str = my_time_str + '_' + my_pid_str + '_' + my_random_str
 	return my_time_pid_random_str
 
-def get_last_level_directory_name(filepath):
-	if filepath[-1] == r'/': filepath = filepath[0:-1]
-	right_index = filepath.rfind(r'/')
-	if right_index<0: pass
-	else: filepath = filepath[right_index+1:]
-	return filepath
+# Convert the argument of the target_algorithm script to dictionary
+args = ast.literal_eval(sys.argv[1])
 
-instance = sys.argv[1]
-specifics = sys.argv[2]
-cutoff_time = int(float(sys.argv[3]) + 1)
-run_length = int(sys.argv[4])
-seed = int(sys.argv[5])
+# Extract and delete data that needs specific formatting
+instance = args["instance"]
+specifics = args["specifics"]
+cutoff_time = int(args["cutoff_time"])+1
+# run_length = args["run_length"]
+seed = args["seed"]
 
-params = sys.argv[6:]
+del args["instance"]
+del args["cutoff_time"]
+del args["seed"]
+del args["specifics"]
+del args["run_length"]
 
-relative_path = r'./'
-runsolver_binary = relative_path + r'runsolver'
-solver_binary = relative_path + r'VRP_SISRs'
+runsolver_binary = "./runsolver"
+solver_binary = "./VRP_SISRs"
 
-tmp_directory = relative_path + r'tmp/'
-if not os.path.exists(tmp_directory):
-	os.system(r'mkdir -p ' + tmp_directory)
+tmp_directory = Path("tmp/")
+tmp_directory.mkdir(exist_ok=True)
 
-instance_name = get_last_level_directory_name(instance)
-solver_name = get_last_level_directory_name(solver_binary)
-runsolver_watch_data_path = tmp_directory + solver_name + r'_' + instance_name + r'_' + get_time_pid_random_string() + r'.log'
+instance_name = Path(instance).name
+solver_name = Path(solver_binary).name
+runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_" + get_time_pid_random_string() + ".log")
 
-command = runsolver_binary + r' -w ' + runsolver_watch_data_path + r' --cpu-limit ' + str(cutoff_time) + r' ' + solver_binary + r' -inst ' + instance + r' -seed ' + str(seed)
-#r: raw string, arguments get passed to algorithm only from solver_binary onwards!
-len_argv = len(sys.argv)
-i = 6
-while i<len_argv:
-	command += r' ' + sys.argv[i]
-	i += 1
-	command += r' ' + sys.argv[i]
-	i += 1
+runsolver_call = [runsolver_binary,
+                  "-w", str(runsolver_watch_data_path),
+                  "--cpu-limit", str(cutoff_time),
+                  solver_binary,
+                  "-inst", instance,
+                  "-seed", str(seed)]
 
-#print(command)
+params = []
+for key in args:
+    if args[key] is not None:
+        params.extend(["-" + str(key), str(args[key])])
 
-start_time = time.time()
-output_list = os.popen(command).readlines()
-end_time = time.time()
-run_time = end_time - start_time
-if run_time > cutoff_time: run_time = cutoff_time
+solver_call = subprocess.run(runsolver_call + params,
+                             capture_output=True)
 
-os.system(r'rm -f ' + runsolver_watch_data_path)
+output_list = solver_call.stdout.decode().splitlines()
 
-#print output_list
+
+Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
 quality=1000000000000
-status = r'SUCCESS'#always ok, code checks per iteration whether cutoff time is exceeded
+status = r'SUCCESS'  # Always ok, code checks per iteration whether cutoff time is exceeded
 
 for line in output_list:
 	quality = line.strip()
 
-print(r'Result for SMAC: ' + status + r', ' + str(run_time) + r', 0,'+str(quality) +r', '+ str(seed))
+outdir = {"status": status,
+		  "quality": quality,
+          "solver_call": runsolver_call + params,
+          "raw_output": output_list}
+
+print(outdir)

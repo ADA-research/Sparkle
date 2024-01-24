@@ -81,6 +81,7 @@ if specifics == 'rawres':
             outfile.write(line)
 
 outdir = {"status": status,
+          "quality": 0,
           "solver_call": runsolver_call + params,
           "raw_output": output_list}
 
