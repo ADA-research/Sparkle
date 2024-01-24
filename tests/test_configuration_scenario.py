@@ -11,6 +11,7 @@ from pathlib import Path
 
 from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help.solver import Solver
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 class TestConfigurationScenario(TestCase):
@@ -33,7 +34,9 @@ class TestConfigurationScenario(TestCase):
 
         self.scenario = ConfigurationScenario(self.solver,
                                               self.instance_directory,
-                                              self.run_number, False)
+                                              self.run_number,
+                                              False,
+                                              sgh.smac_target_algorithm)
 
     def tearDown(self: TestConfigurationScenario) -> None:
         """Cleanup executed after each test."""
@@ -109,7 +112,7 @@ class TestConfigurationScenario(TestCase):
         mock_abs.side_effect = [Path("tests/test_files/test_configurator")]
         mock_deterministic.return_value = "0"
 
-        self.scenario.create_scenario(self.parent_directory)
+        self.scenario.create_scenario(self.parent_directory, )
 
         scenario_file_path = self.scenario.directory / self.scenario.scenario_file_name
         reference_scenario_file = Path("tests", "test_files", "reference_files",

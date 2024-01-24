@@ -40,8 +40,6 @@ solver_binary = "./PbO-CCSAT"
 
 tmp_directory = Path("tmp/")
 tmp_directory.mkdir(exist_ok=True)
-#if not os.path.exists(tmp_directory):
-#    os.system(r'mkdir -p ' + tmp_directory)
 
 instance_name = Path(instance).name
 solver_name = Path(solver_binary).name
