@@ -158,7 +158,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
     scenario_file_name = (
         f"{instance_set_val_name}_{inst_type}_{config_type}_scenario.txt")
-    smac_file_scenario = smac_solver_dir + scenario_file_name
+    smac_file_scenario = Path(smac_solver_dir) / scenario_file_name
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
@@ -175,23 +175,22 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
                           f"{instance_set_val_name}_{inst_type}.txt")
     smac_test_instance_file = smac_instance_file
 
-    fout = Path(smac_file_scenario).open("w+")
-    fout.write("algo = ./" + sgh.sparkle_smac_wrapper + "\n")
-    fout.write(f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n")
-    fout.write("deterministic = " + get_solver_deterministic(solver_name) + "\n")
-    fout.write("run_obj = " + smac_run_obj + "\n")
-    fout.write("wallclock-limit = " + str(smac_whole_time_budget) + "\n")
-    fout.write("cutoffTime = " + str(smac_each_run_cutoff_time) + "\n")
-    fout.write("cutoff_length = " + smac_each_run_cutoff_length + "\n")
-    fout.write("paramfile = " + smac_paramfile + "\n")
-    fout.write("outdir = " + smac_outdir + "\n")
-    fout.write("instance_file = " + smac_instance_file + "\n")
-    fout.write("test_instance_file = " + smac_test_instance_file + "\n")
-    fout.close()
+    with smac_file_scenario.open("w+") as fout:
+        fout.write("algo = ./" + sgh.sparkle_smac_wrapper + "\n"
+                   f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n"
+                   f"deterministic = {get_solver_deterministic(solver_name)}\n"
+                   f"run_obj = {smac_run_obj}\n"
+                   f"wallclock-limit = {smac_whole_time_budget}\n"
+                   f"cutoffTime = {smac_each_run_cutoff_time}\n"
+                   f"cutoff_length = {smac_each_run_cutoff_length}\n"
+                   f"paramfile = {smac_paramfile}\n"
+                   f"outdir = {smac_outdir}\n"
+                   f"instance_file = {smac_instance_file}\n"
+                   f"test_instance_file = {smac_test_instance_file}\n")
 
     log_str = (f"SMAC Scenario file for the validation of the {config_type} solver "
                f"{solver_name} on the {inst_type}ing set")
-    sl.add_output(smac_file_scenario, log_str)
+    sl.add_output(str(smac_file_scenario), log_str)
 
     return scenario_file_name
 
@@ -206,10 +205,10 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     Returns:
         String containing the scenario directory inside SMAC
     """
-    smac_scenario_dir = f"{sgh.smac_dir}scenarios"
-    smac_solver_dir = f"{smac_scenario_dir}/{solver_name}_{instance_set_name}/"
+    smac_scenario_dir = Path(sgh.smac_dir) / "scenarios"
+    smac_solver_dir = smac_scenario_dir / f"{solver_name}_{instance_set_name}/"
 
-    return smac_solver_dir
+    return str(smac_solver_dir)
 
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
@@ -293,25 +292,24 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
-    for i in range(1, num_of_smac_run + 1):
+    for _ in range(1, num_of_smac_run + 1):
         solver_directory = f"Solvers/{solver_name}/"
 
         # Train default
-        execdir = "validate_train_default/"
+        execdir = "/validate_train_default/"
         # Create directories, -p makes sure any missing parents are also created
         Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
         # Copy solver to execution directory
         sfh.copytree(solver_directory, smac_solver_dir + execdir)
-
         # Test default
         if instance_set_test_name is not None:
-            execdir = f"validate_{instance_set_test_name}_test_default/"
+            execdir = f"/validate_{instance_set_test_name}_test_default/"
             # Create directories, -p makes sure any missing parents are also created
             Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory
             sfh.copytree(solver_directory, smac_solver_dir + execdir)
             # Test configured
-            execdir = f"validate_{instance_set_test_name}_test_configured/"
+            execdir = f"/validate_{instance_set_test_name}_test_configured/"
             # Create directories, -p makes sure any missing parents are also created
             Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory

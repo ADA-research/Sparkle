@@ -55,9 +55,9 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
                       f"{instance_path} timed out! ******")
 
     if not Path(result_path).exists():
-        print(f"Result file {result_path} does not exist.")
-        # sys.exit(-1)
-        # Why are we doing this?
+        # TODO: This protocol seems to make no sense. Why create an empty file?
+        # Needs to be fixed
+        print(f"WARNING: Result file {result_path} does not exist.")
         sfh.create_new_empty_file(result_path)
 
     try:
@@ -193,10 +193,9 @@ def call_sparkle_portfolio_selector_solve_instance(
     print("Start running Sparkle portfolio selector on solving instance "
           f"{instance_files_str} ...")
 
-    if not Path("Tmp/").exists():
-        Path("Tmp/").mkdir()
+    Path("Tmp/").mkdir(exist_ok=True)
 
-    print("Sparkle computing features of instance " + instance_files_str + " ...")
+    print(f"Sparkle computing features of instance {instance_files_str} ...")
     list_feature_vector = []
 
     if len(sgh.extractor_list) == 0:

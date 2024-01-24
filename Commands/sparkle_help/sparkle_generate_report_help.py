@@ -517,108 +517,45 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
-        test_case_directory: Path to the test case directory. Defaults to None.
+        test_case_directory: Path to the test case directory.
 
     Returns:
         A dict matching str variables in the LaTeX template with their value str.
     """
-    mydict = {}
+    latex_dict = {}
 
-    variable = "customCommands"
-    str_value = get_custom_commands()
-    mydict[variable] = str_value
-
-    variable = "sparkle"
-    str_value = get_sparkle()
-    mydict[variable] = str_value
-
-    variable = "numSolvers"
-    str_value = get_num_solvers()
-    mydict[variable] = str_value
-
-    variable = "solverList"
-    str_value = get_solver_list()
-    mydict[variable] = str_value
-
-    variable = "numFeatureExtractors"
-    str_value = get_num_feature_extractors()
-    mydict[variable] = str_value
-
-    variable = r"featureExtractorList"
-    str_value = get_feature_extractor_list()
-    mydict[variable] = str_value
-
-    variable = r"numInstanceClasses"
-    str_value = get_num_instance_classes()
-    mydict[variable] = str_value
-
-    variable = r"instanceClassList"
-    str_value = get_instance_class_list()
-    mydict[variable] = str_value
-
-    variable = r"featureComputationCutoffTime"
-    str_value = get_feature_computation_cutoff_time()
-    mydict[variable] = str_value
-
-    variable = r"performanceComputationCutoffTime"
-    str_value = get_performance_computation_cutoff_time()
-    mydict[variable] = str_value
-
-    variable = r"solverPerfectRankingList"
-    str_value = get_solver_perfect_ranking_list()
-    mydict[variable] = str_value
-
-    variable = r"solverActualRankingList"
-    str_value = get_solver_actual_ranking_list()
-    mydict[variable] = str_value
-
-    variable = r"PARRankingList"
-    str_value = get_par_ranking_list()
-    mydict[variable] = str_value
-
-    variable = r"VBSPAR"
-    str_value = get_vbs_par()
-    mydict[variable] = str_value
-
-    variable = r"actualPAR"
-    str_value = get_actual_par()
-    mydict[variable] = str_value
-
-    variable = r"penalty"
-    str_value = str(sgh.settings.get_general_penalty_multiplier())
-    mydict[variable] = str_value
-
-    variable = r"figure-portfolio-selector-sparkle-vs-sbs"
-    str_value = get_figure_portfolio_selector_sparkle_vs_sbs()
-    mydict[variable] = str_value
-
-    variable = r"figure-portfolio-selector-sparkle-vs-vbs"
-    str_value = get_figure_portfolio_selector_sparkle_vs_vbs()
-    mydict[variable] = str_value
-
-    variable = r"testBool"
-    str_value = r"\testfalse"
-    mydict[variable] = str_value
+    latex_dict["customCommands"] = get_custom_commands()
+    latex_dict["sparkle"] = get_sparkle()
+    latex_dict["numSolvers"] = get_num_solvers()
+    latex_dict["solverList"] = get_solver_list()
+    latex_dict["numFeatureExtractors"] = get_num_feature_extractors()
+    latex_dict["featureExtractorList"] = get_feature_extractor_list()
+    latex_dict["numInstanceClasses"] = get_num_instance_classes()
+    latex_dict["instanceClassList"] = get_instance_class_list()
+    latex_dict["featureComputationCutoffTime"] = get_feature_computation_cutoff_time()
+    latex_dict["performanceComputationCutoffTime"] =\
+        get_performance_computation_cutoff_time()
+    latex_dict["solverPerfectRankingList"] = get_solver_perfect_ranking_list()
+    latex_dict["solverActualRankingList"] = get_solver_actual_ranking_list()
+    latex_dict["PARRankingList"] = get_par_ranking_list()
+    latex_dict["VBSPAR"] = get_vbs_par()
+    latex_dict["actualPAR"] = get_actual_par()
+    latex_dict["penalty"] = str(sgh.settings.get_general_penalty_multiplier())
+    latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
+        get_figure_portfolio_selector_sparkle_vs_sbs()
+    latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
+        get_figure_portfolio_selector_sparkle_vs_vbs()
+    latex_dict["testBool"] = r"\testfalse"
 
     # Train and test
     if test_case_directory is not None:
-        variable = r"testInstanceClass"
-        str_value = get_test_instance_class(test_case_directory)
-        mydict[variable] = str_value
+        latex_dict["testInstanceClass"] = get_test_instance_class(test_case_directory)
+        latex_dict["numInstanceInTestInstanceClass"] =\
+            get_num_instance_in_test_instance_class(test_case_directory)
+        latex_dict["testActualPAR"] = get_test_actual_par(test_case_directory)
+        latex_dict["testBool"] = r"\testtrue"
 
-        variable = r"numInstanceInTestInstanceClass"
-        str_value = get_num_instance_in_test_instance_class(test_case_directory)
-        mydict[variable] = str_value
-
-        variable = "testActualPAR"
-        str_value = get_test_actual_par(test_case_directory)
-        mydict[variable] = str_value
-
-        variable = r"testBool"
-        str_value = r"\testtrue"
-        mydict[variable] = str_value
-
-    return mydict
+    return latex_dict
 
 
 def generate_report(test_case_directory: str = None) -> None:
@@ -633,8 +570,8 @@ def generate_report(test_case_directory: str = None) -> None:
             print("ERROR: The given directory", test_case_directory, "does not exist!")
             sys.exit(-1)
 
-        if test_case_directory[-1] != r"/":
-            test_case_directory += r"/"
+        if test_case_directory[-1] != "/":
+            test_case_directory += "/"
 
         latex_report_filename = Path("Sparkle_Report_for_Test")
         dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
@@ -644,30 +581,21 @@ def generate_report(test_case_directory: str = None) -> None:
         dict_variable_to_value = get_dict_variable_to_value()
 
     latex_directory_path = Path("Components/Sparkle-latex-generator/")
-    latex_template_filename = "template-Sparkle.tex"
 
-    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
-    report_content = ""
-    fin = Path(latex_template_filepath).open("r")
-    while True:
-        myline = fin.readline()
-        if not myline:
-            break
-        report_content += myline
-    fin.close()
+    latex_template_filepath = latex_directory_path / "template-Sparkle.tex"
+    report_content = Path(latex_template_filepath).open("r").read()
 
     for variable_key, str_value in dict_variable_to_value.items():
         variable = r"@@" + variable_key + r"@@"
-        if (variable_key != r"figure-portfolio-selector-sparkle-vs-sbs"
-           and variable_key != r"figure-portfolio-selector-sparkle-vs-vbs"):
-            str_value = str_value.replace(r"_", r"\textunderscore ")
+        if (variable_key != "figure-portfolio-selector-sparkle-vs-sbs"
+           and variable_key != "figure-portfolio-selector-sparkle-vs-vbs"):
+            str_value = str_value.replace("_", r"\textunderscore ")
         report_content = report_content.replace(variable, str_value)
 
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-    fout = Path(latex_report_filepath).open("w+")
-    fout.write(report_content)
-    fout.close()
+
+    Path(latex_report_filepath).open("w+").write(report_content)
 
     stex.check_tex_commands_exist(latex_directory_path)
 
@@ -689,7 +617,7 @@ def generate_comparison_plot(points: list,
                              penalty_time: float = None,
                              replace_zeros: bool = True,
                              magnitude_lines: int = sgh.sparkle_maximum_int,
-                             cwd: str = None) -> None:
+                             output_dir: Path = None) -> None:
     """Create comparison plots between two different solvers/portfolios.
 
     Args:
@@ -701,7 +629,7 @@ def generate_comparison_plot(points: list,
         title: Display title in the image (default: None)
         scale: [linear, log] (default: linear)
         limit: The method to compute the axis limits in the figure
-        [absolute, relative, magnitude] (default: relative)
+            [absolute, relative, magnitude] (default: relative)
             absolute: Uses the limit_min/max values as absolute values
             relative: Decreases/increases relatively to the min/max values found in the
             points. E.g., min/limit_min and max*limit_max
@@ -715,12 +643,13 @@ def generate_comparison_plot(points: list,
         replace_zeros: Replaces zeros valued performances to a very small value to make
         plotting on log-scale possible
         magnitude_lines: Draw magnitude lines (only supported for log scale)
-        cwd: directory path to place the figure and its intermediate files in (default:
-        current working directory)
+        output_dir: directory path to place the figure and its intermediate files in
+            (default: current working directory)
     """
-    pwd = Path.cwd()
-    if cwd is not None:
-        os.chdir(cwd)
+    if output_dir is None:
+        output_dir = Path()
+    elif type(output_dir) is str:
+        output_dir = Path(output_dir)
 
     points = np.array(points)
     if replace_zeros:
@@ -765,30 +694,29 @@ def generate_comparison_plot(points: list,
     output_eps_file = f"{figure_filename}.eps"
 
     # Create data file
-    with Path(output_data_file).open("w") as fout:
+    with (output_dir / output_data_file).open("w") as fout:
         for point in points:
             fout.write(" ".join([str(c) for c in point]) + "\n")
         fout.close()
 
     # Generate plot script
-    with Path(output_gnuplot_script).open("w") as fout:
-        fout.write(f"set xlabel '{xlabel}'\n")
-        fout.write(f"set ylabel '{ylabel}'\n")
-        fout.write(f"set title '{title}'\n")
-        fout.write("unset key\n")
-        fout.write(f"set xrange [{min_value}:{max_value}]\n")
-        fout.write(f"set yrange [{min_value}:{max_value}]\n")
+    with (output_dir / output_gnuplot_script).open("w") as fout:
+        fout.write(f"set xlabel '{xlabel}'\n"
+                   f"set ylabel '{ylabel}'\n"
+                   f"set title '{title}'\n"
+                   "unset key\n"
+                   f"set xrange [{min_value}:{max_value}]\n"
+                   f"set yrange [{min_value}:{max_value}]\n")
         if scale == "log":
-            fout.write("set logscale x\n")
-            fout.write("set logscale y\n")
-        fout.write("set grid lc rgb '#CCCCCC' lw 2\n")
-        fout.write("set size square\n")
-        fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value}"
+            fout.write("set logscale x\n"
+                       "set logscale y\n")
+        fout.write("set grid lc rgb '#CCCCCC' lw 2\n"
+                   "set size square\n"
+                   f"set arrow from {min_value},{min_value} to {max_value},{max_value}"
                    " nohead lc rgb '#AAAAAA'\n")
         # TODO magnitude lines for linear scale
         if magnitude_lines > 0 and scale == "log":
-            for order in range(magnitude_lines):
-                order += 1
+            for order in range(1, magnitude_lines + 1):
                 min_shift = min_value * 10 ** order
                 max_shift = 10**(np.log10(max_value) - order)
                 if min_shift >= max_value:  # Outside plot
@@ -797,38 +725,38 @@ def generate_comparison_plot(points: list,
                     break
 
                 fout.write(f"set arrow from {min_value},{min_shift} to {max_shift},"
-                           f"{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n")
-                fout.write(f"set arrow from {min_shift},{min_value} to {max_value},"
+                           f"{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n"
+                           f"set arrow from {min_shift},{min_value} to {max_value},"
                            f"{max_shift} nohead lc rgb '#CCCCCC' dashtype '-'\n")
 
         if penalty_time is not None:
             fout.write(f"set arrow from {min_value},{penalty_time} to {max_value},"
-                       f"{penalty_time} nohead lc rgb '#AAAAAA'\n")
-            fout.write(f"set arrow from {penalty_time},{min_value} to {penalty_time},"
+                       f"{penalty_time} nohead lc rgb '#AAAAAA'\n"
+                       f"set arrow from {penalty_time},{min_value} to {penalty_time},"
                        f"{max_value} nohead lc rgb '#AAAAAA'\n")
 
-        fout.write('set terminal postscript eps color solid linewidth "Helvetica" 20\n')
-        fout.write(f"set output '{output_eps_file}\n")
-        fout.write("set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n")
-        fout.write(f"plot '{output_data_file}' ls 1\n")
-        fout.close()
-    # TODO: Have the subprocess run in the cwd instead of using os.chdir
+        fout.write('set terminal postscript eps color solid linewidth "Helvetica" 20\n'
+                   f"set output '{output_eps_file}\n"
+                   "set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n"
+                   f"plot '{output_data_file}' ls 1\n")
+
     subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
-                                     capture_output=True)
+                                     capture_output=True,
+                                     cwd=output_dir)
 
     if subprocess_plot.returncode != 0:
-        print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:"
-              f"{subprocess_plot.stderr}")
+        print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:\n"
+              f"{subprocess_plot.stderr.decode()}\n")
 
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(os.path.abspath(pwd)) / "Components/epstopdf.pl"
+    epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
     subprocess_epstopdf = subprocess.run([epstopdf, output_eps_file],
-                                         capture_output=True)
+                                         capture_output=True,
+                                         cwd=output_dir)
 
     if subprocess_epstopdf.returncode != 0:
         print(f"(Eps To PDF) Error whilst converting Eps to PDF {output_eps_file}"
-              f"{subprocess_epstopdf.stderr}")
+              f"{subprocess_epstopdf.stderr.decode()}")
 
     sfh.rmfiles(output_gnuplot_script)
-    os.chdir(pwd)

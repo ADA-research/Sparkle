@@ -246,7 +246,7 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
     Returns:
         A string describing whether features are used
     """
-    scenario_file = (f"{get_smac_solver_dir(solver_name, instance_set_train_name)}"
+    scenario_file = (f"{get_smac_solver_dir(solver_name, instance_set_train_name)}/"
                      f"{solver_name}_{instance_set_train_name}_scenario.txt")
     features_bool = r"\featuresfalse"
 
@@ -322,7 +322,7 @@ def get_figure_configure_vs_default(configured_results_dir: str,
 
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "cwd": latex_directory_path,
+                   "output_dir": latex_directory_path,
                    "scale": "linear",
                    "limit_min": 1.5,
                    "limit_max": 1.5,

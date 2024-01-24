@@ -64,8 +64,8 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str) -> None:
         job_nr = line[line.rfind(";") + 2:]
     else:
         # TODO: Not sure what the intend of checking job numbers in this function was.
-        # TODO: Writing a warning as job_nr for now, since this is a logging function,
-        # TODO: this issue should be of no harm to the functionality.
+        #       Writing a warning as job_nr for now, since this is a logging function,
+        #       this issue should be of no harm to the functionality.
         job_nr = "WARNING: No job_nr found in function add_log_statement_to_file"
 
     current_time = now.strftime("%H:%M:%S")
@@ -190,6 +190,9 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
                                        finished_job_array_nr: str) -> str:
     """Return the time at which a solver finished.
 
+    If there is a solver that ended but did not make a result file this means that it
+    was manually cancelled or it gave an error the template will ensure that all
+    solver on that instance will be cancelled.
     Args:
         solver_instance_list: List of solver instances.
         finished_job_array_nr: The Slurm array number of the finished job.
@@ -685,9 +688,10 @@ def remove_result_files(instances: list[str]) -> None:
     """
     for instance in instances:
         instance = Path(instance).name
-        pap_files = [f for f in os.listdir(sgh.pap_performance_data_tmp_path)
+        pap_files = [f for f in sgh.pap_performance_data_tmp_path.iterdir()
                      if f"_{instance}_" in f]
-        tmp_files = [f for f in os.listdir(sgh.sparkle_tmp_path) if f"_{instance}_" in f]
+        tmp_files = [f for f in Path(sgh.sparkle_tmp_path).iterdir()
+                     if f"_{instance}_" in f]
         sfh.rmfiles(pap_files + tmp_files)
 
 
