@@ -86,12 +86,14 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
     smac_file_instance_path_ori = (f"{sgh.smac_dir}scenarios/instances/"
                                    f"{instance_set_target_name}{file_postfix}")
+
     smac_file_instance_path_target = (
         smac_solver_dir + instance_set_target_name + file_postfix)
 
     if not Path(smac_solver_dir).exists():
         Path(smac_solver_dir).mkdir(parents=True)
-
+    print(smac_file_instance_path_ori, "\n", smac_file_instance_path_target)
+    print()
     shutil.copy(smac_file_instance_path_ori, smac_file_instance_path_target)
 
     log_str = "List of instances to be used for configuration"
@@ -206,9 +208,9 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
         String containing the scenario directory inside SMAC
     """
     smac_scenario_dir = Path(sgh.smac_dir) / "scenarios"
-    smac_solver_dir = smac_scenario_dir / f"{solver_name}_{instance_set_name}/"
+    smac_solver_dir = smac_scenario_dir / f"{solver_name}_{instance_set_name}"
 
-    return str(smac_solver_dir)
+    return str(smac_solver_dir) + "/"
 
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
