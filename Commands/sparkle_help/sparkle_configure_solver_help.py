@@ -173,7 +173,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     smac_test_instance_file = smac_instance_file
 
     fout = Path(smac_file_scenario).open("w+")
-    fout.write(f"algo = ../../../{sgh.sparkle_solver_configurator_wrapper}\n"
+    fout.write(f"algo = ../../../{sgh.smac_target_algorithm}\n"
                f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n"
                f"deterministic = {get_solver_deterministic(solver_name)}\n"
                f"run_obj = {smac_run_obj}\n"

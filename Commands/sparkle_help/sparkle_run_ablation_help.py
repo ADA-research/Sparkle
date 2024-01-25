@@ -249,7 +249,7 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
     ablation_racing = sgh.settings.get_ablation_racing_flag()
 
     with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
-        fout.write(f"algo = ../../../{sgh.sparkle_solver_configurator_wrapper}.py\n"
+        fout.write(f"algo = ../../../{sgh.smac_target_algorithm}.py\n"
                    "execdir = ./solver/\n"
                    "experimentDir = ./\n")
 

@@ -222,8 +222,9 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     run_length = "2147483647"  # Arbitrary, not used in the SMAC wrapper
     seed_str = str(sgh.get_seed())
-    cmd_solver_call = (f"{sgh.sparkle_smac_wrapper} {instance_path_str} {specifics} "
-                       f"{cutoff_time_str} {run_length} {seed_str} {config_str}")
+    cmd_solver_call = (f"../../../{sgh.sparkle_solver_configurator_wrapper} "
+                       f"{instance_path_str} {specifics} {cutoff_time_str} {run_length} "
+                       f"{seed_str} {config_str}")
 
     # Prepare paths
     solver_path = Path(f"Solvers/{solver_name}")

@@ -101,9 +101,10 @@ if __name__ == "__main__":
         print("ERROR: Invalid number of solver variations given "
               f"({str(solver_variations)}), "
               "a postive integer must be used. Stopping execution.")
-        sys.exit(0)
+        sys.exit(-1)
 
-    configurator_wrapper_path = Path(solver_source, sgh.sparkle_solver_configurator_wrapper)
+    configurator_wrapper_path = Path(solver_source,
+                                     sgh.sparkle_solver_configurator_wrapper)
     if configurator_wrapper_path.is_file():
         sfh.check_file_is_executable(configurator_wrapper_path)
     else:
