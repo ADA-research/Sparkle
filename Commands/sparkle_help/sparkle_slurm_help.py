@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import os
+import stat
 import fcntl
 import shlex
 import subprocess
@@ -182,9 +183,9 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 
     # specify the options of sbatch in the top of this sbatch script
-    fout.write("#!/bin/bash\n")
-    fout.write("###\n")
-    fout.write("###\n")
+    fout.write("#!/bin/bash\n"
+               "###\n"
+               "###\n")
 
     for i in sbatch_options_list:
         fout.write("#SBATCH " + str(i) + "\n")
@@ -477,7 +478,7 @@ def generate_sbatch_script_for_feature_computation(
 
 def submit_sbatch_script(sbatch_script_name: str,
                          command_name: CommandName,
-                         execution_dir: Path | None = None) -> str:
+                         execution_dir: Path = Path()) -> str:
     """Submit a Slurm batch script.
 
     Args:
@@ -491,7 +492,10 @@ def submit_sbatch_script(sbatch_script_name: str,
       successfully. Defaults to the SMAC directory.
     """
     # Update permissions to executable, but leave all others untouched
-    subprocess.run(["chmod", "a+x", sbatch_script_name], cwd=execution_dir)
+    if execution_dir is str:
+        execution_dir = Path(execution_dir)
+    sbatch_path = execution_dir / sbatch_script_name
+    sbatch_path.chmod(sbatch_path.stat().st_mode | stat.S_IEXEC)
 
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
     subprocess.run(["unset", "SLURM_CPU_BIND"],

@@ -41,11 +41,13 @@ def compile_pdf(latex_directory_path: Path, latex_report_filename: Path) -> Path
         print("ERROR whilst generating with Bibtex command:"
               f"{bibtex_process.stdout} {bibtex_process.stderr}")
 
+    # TODO: Fix compilation for references
+    # (~\ref[] yields [?] in pdf, re-running command fixes it)
     # We have to re-run the same pdf command to take in the updates bib files from bibtex
     # But Bibtex cannot function without .aux file produced by pdflatex. Hence run twice.
-    pdf_process = subprocess.run(["pdflatex", "-interaction=nonstopmode",
-                                 f"{latex_report_filename}.tex"],
-                                 cwd=latex_directory_path, capture_output=True)
+    # pdf_process = subprocess.run(["pdflatex", "-interaction=nonstopmode",
+    #                             f"{latex_report_filename}.tex"],
+    #                             cwd=latex_directory_path, capture_output=True)
 
     report_path = Path(latex_directory_path / latex_report_filename).with_suffix(".pdf")
     return report_path

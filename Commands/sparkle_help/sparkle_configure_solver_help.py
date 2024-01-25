@@ -83,21 +83,20 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     """
     file_postfix = f"_{instance_type}.txt"
 
-    smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
+    smac_solver_dir = get_smac_solver_path(solver_name, instance_set_train_name)
     smac_file_instance_path_ori = (f"{sgh.smac_dir}scenarios/instances/"
                                    f"{instance_set_target_name}{file_postfix}")
 
-    smac_file_instance_path_target = (
-        smac_solver_dir + instance_set_target_name + file_postfix)
+    smac_file_instance_path_target = \
+        smac_solver_dir / (instance_set_target_name + file_postfix)
 
-    if not Path(smac_solver_dir).exists():
-        Path(smac_solver_dir).mkdir(parents=True)
-    print(smac_file_instance_path_ori, "\n", smac_file_instance_path_target)
-    print()
+    if not smac_solver_dir.exists():
+        smac_solver_dir.mkdir(parents=True)
+
     shutil.copy(smac_file_instance_path_ori, smac_file_instance_path_target)
 
     log_str = "List of instances to be used for configuration"
-    sl.add_output(smac_file_instance_path_target, log_str)
+    sl.add_output(str(smac_file_instance_path_target) + "/", log_str)
 
 
 def get_solver_deterministic(solver_name: str) -> str:
@@ -157,16 +156,16 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     else:
         config_type = "configured"
 
-    smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
+    smac_solver_path = get_smac_solver_path(solver_name, instance_set_train_name)
     scenario_file_name = (
         f"{instance_set_val_name}_{inst_type}_{config_type}_scenario.txt")
-    smac_file_scenario = Path(smac_solver_dir) / scenario_file_name
+    smac_file_scenario = smac_solver_path / scenario_file_name
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
     smac_paramfile = (f"scenarios/{solver_name}_{instance_set_train_name}/"
-                      f"{get_pcs_file_from_solver_directory(Path(smac_solver_dir))}")
+                      f"{get_pcs_file_from_solver_directory(smac_solver_path)}")
     if instance_type == InstanceType.TRAIN:
         smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{inst_type}_{config_type}/")
@@ -197,7 +196,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     return scenario_file_name
 
 
-def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
+def get_smac_solver_path(solver_name: str, instance_set_name: str) -> Path:
     """Return the directory of a solver under the SMAC directory.
 
     Args:
@@ -207,10 +206,10 @@ def get_smac_solver_dir(solver_name: str, instance_set_name: str) -> str:
     Returns:
         String containing the scenario directory inside SMAC
     """
-    smac_scenario_dir = Path(sgh.smac_dir) / "scenarios"
-    smac_solver_dir = smac_scenario_dir / f"{solver_name}_{instance_set_name}"
+    smac_scenario_path = Path(sgh.smac_dir) / "scenarios"
+    smac_solver_path = smac_scenario_path / f"{solver_name}_{instance_set_name}"
 
-    return str(smac_solver_dir) + "/"
+    return smac_solver_path
 
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
@@ -245,18 +244,16 @@ def remove_validation_directories_execution_or_output(solver_name: str,
         instance_set_test_name: Name of instance set for testing
         exec_or_out: Postfix describing if execution or output directory is used
     """
-    solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name) + exec_or_out
+    solver_path = get_smac_solver_path(solver_name, instance_set_train_name) \
+        / exec_or_out
 
-    train_default_dir = Path(solver_dir + "_train_default/")
+    train_default_dir = solver_path / "_train_default/"
     sfh.rmtree(train_default_dir)
 
     if instance_set_test_name is not None:
-        test_default_dir = Path(
-            solver_dir + "_" + instance_set_test_name + "_test_default/")
+        test_default_dir = solver_path / f"_{instance_set_test_name}_test_default/"
         sfh.rmtree(test_default_dir)
-
-        test_configured_dir = Path(
-            solver_dir + "_" + instance_set_test_name + "_test_configured/")
+        test_configured_dir = solver_path / f"_{instance_set_test_name}_test_configured/"
         sfh.rmtree(test_configured_dir)
 
 
@@ -291,31 +288,33 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     remove_validation_directories(solver_name, instance_set_train_name,
                                   instance_set_test_name)
 
-    smac_solver_dir = get_smac_solver_dir(solver_name, instance_set_train_name)
+    smac_solver_path = get_smac_solver_path(solver_name, instance_set_train_name)
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
     for _ in range(1, num_of_smac_run + 1):
         solver_directory = f"Solvers/{solver_name}/"
 
         # Train default
-        execdir = "/validate_train_default/"
+        exec_path = smac_solver_path / "validate_train_default"
         # Create directories, -p makes sure any missing parents are also created
-        Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
+        exec_path.mkdir(parents=True, exist_ok=True)
         # Copy solver to execution directory
-        sfh.copytree(solver_directory, smac_solver_dir + execdir)
+        sfh.copytree(solver_directory, exec_path)
         # Test default
         if instance_set_test_name is not None:
-            execdir = f"/validate_{instance_set_test_name}_test_default/"
+            exec_path = smac_solver_path \
+                / f"validate_{instance_set_test_name}_test_default"
             # Create directories, -p makes sure any missing parents are also created
-            Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
+            exec_path.mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory
-            sfh.copytree(solver_directory, smac_solver_dir + execdir)
+            sfh.copytree(solver_directory, exec_path)
             # Test configured
-            execdir = f"/validate_{instance_set_test_name}_test_configured/"
+            exec_path = smac_solver_path \
+                / f"validate_{instance_set_test_name}_test_configured"
             # Create directories, -p makes sure any missing parents are also created
-            Path(smac_solver_dir + execdir).mkdir(parents=True, exist_ok=True)
+            exec_path.mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory
-            sfh.copytree(solver_directory, smac_solver_dir + execdir)
+            sfh.copytree(solver_directory, exec_path)
 
 
 def create_smac_configure_sbatch_script(solver_name: str,

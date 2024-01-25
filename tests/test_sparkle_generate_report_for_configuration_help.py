@@ -258,10 +258,10 @@ def test_get_features_bool_false(mocker: MockFixture) -> None:
     """
     solver_name = "test-solver"
     instance_set = "train-instance"
-    solver_dir = "smac-solver-dir/"
+    solver_dir = Path("smac-solver-dir/")
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_dir",
+                            "get_smac_solver_path",
                             return_value=solver_dir)
     file_content_mock = ""
     mock_open = mocker.patch("pathlib.Path.open",
@@ -279,12 +279,12 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_dir = "smac-solver-dir/"
+    solver_dir = Path("smac-solver-dir/")
     solver_name = "test-solver"
     instance_set = "train-instance"
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_dir",
+                            "get_smac_solver_path",
                             return_value=solver_dir)
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
