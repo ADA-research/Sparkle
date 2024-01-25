@@ -147,7 +147,6 @@ class Configurator:
             String containing the sbatch options.
         """
         total_jobs = self.scenario.number_of_runs
-
         maximal_parallel_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
         parallel_jobs = max(maximal_parallel_jobs, total_jobs)
 
@@ -162,7 +161,8 @@ class Configurator:
                   "###\n"
 
         sbatch_options_list = ssh.get_slurm_options_list()
-        options.extend([f"#SBATCH {option}\n" for option in sbatch_options_list])
+        for option in sbatch_options_list:
+            options += f"#SBATCH {option}\n"
         return options
 
     def _get_run_parameter_list(self: Configurator) -> str:
