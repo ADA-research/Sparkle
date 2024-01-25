@@ -173,17 +173,17 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     smac_test_instance_file = smac_instance_file
 
     fout = Path(smac_file_scenario).open("w+")
-    fout.write("algo = ./" + sgh.sparkle_smac_wrapper + "\n")
-    fout.write(f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n")
-    fout.write("deterministic = " + get_solver_deterministic(solver_name) + "\n")
-    fout.write("run_obj = " + smac_run_obj + "\n")
-    fout.write("wallclock-limit = " + str(smac_whole_time_budget) + "\n")
-    fout.write("cutoffTime = " + str(smac_each_run_cutoff_time) + "\n")
-    fout.write("cutoff_length = " + smac_each_run_cutoff_length + "\n")
-    fout.write("paramfile = " + smac_paramfile + "\n")
-    fout.write("outdir = " + smac_outdir + "\n")
-    fout.write("instance_file = " + smac_instance_file + "\n")
-    fout.write("test_instance_file = " + smac_test_instance_file + "\n")
+    fout.write(f"algo = ../../../{sgh.sparkle_solver_configurator_wrapper}\n"
+               f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n"
+               f"deterministic = {get_solver_deterministic(solver_name)}\n"
+               f"run_obj = {smac_run_obj}\n"
+               f"wallclock-limit = {smac_whole_time_budget}\n"
+               f"cutoffTime = {smac_each_run_cutoff_time}\n"
+               f"cutoff_length = {smac_each_run_cutoff_length}\n"
+               f"paramfile = {smac_paramfile}\n"
+               f"outdir = {smac_outdir}\n"
+               f"instance_file = {smac_instance_file}\n"
+               f"test_instance_file = {smac_test_instance_file}\n")
     fout.close()
 
     log_str = (f"SMAC Scenario file for the validation of the {config_type} solver "

@@ -677,11 +677,10 @@ def check_file_is_executable(file_name: Path) -> None:
       file_name: Path object representing the file.
     """
     if not os.access(file_name, os.X_OK):
-        print(
-            f"Error: The smac wrapper file {sgh.sparkle_smac_wrapper} is not "
-            "executable.\nAdd execution permissions to the file to run the configurator."
-        )
-        sys.exit()
+        print("Error: The configurator wrapper file "
+              f"{sgh.sparkle_solver_configurator_wrapper} is not executable.\n"
+              "Add execution permissions to the file to run the configurator.")
+        sys.exit(-1)
 
 
 def create_temporary_directories() -> None:

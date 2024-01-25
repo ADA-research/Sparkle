@@ -103,12 +103,12 @@ if __name__ == "__main__":
               "a postive integer must be used. Stopping execution.")
         sys.exit(0)
 
-    smac_wrapper_path = Path(solver_source, sgh.sparkle_smac_wrapper)
-    if smac_wrapper_path.is_file():
-        sfh.check_file_is_executable(smac_wrapper_path)
+    configurator_wrapper_path = Path(solver_source, sgh.sparkle_solver_configurator_wrapper)
+    if configurator_wrapper_path.is_file():
+        sfh.check_file_is_executable(configurator_wrapper_path)
     else:
-        print("WARNING: The solver does not have a SMAC wrapper. "
-              "Therefore it cannot be configured using SMAC.")
+        print("WARNING: The solver does not have a configurator wrapper. "
+              "Therefore it cannot be automatically be configured.")
 
     # Start add solver
     last_level_directory = ""

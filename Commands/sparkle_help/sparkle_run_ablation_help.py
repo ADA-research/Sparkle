@@ -249,31 +249,30 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
     ablation_racing = sgh.settings.get_ablation_racing_flag()
 
     with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
-        fout.write("algo = ./sparkle_smac_wrapper.py\n")
-        fout.write("execdir = ./solver/\n")
-        fout.write("experimentDir = ./\n")
+        fout.write(f"algo = ../../../{sgh.sparkle_solver_configurator_wrapper}.py\n"
+                   "execdir = ./solver/\n"
+                   "experimentDir = ./\n")
 
         # USER SETTINGS
-        fout.write(f"deterministic = {scsh.get_solver_deterministic(solver_name)}\n")
-        fout.write("run_obj = " + smac_run_obj + "\n")
+        fout.write(f"deterministic = {scsh.get_solver_deterministic(solver_name)}\n"
+                   f"run_obj = {smac_run_obj}\n")
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
-        fout.write(f"overall_obj = {objective_str}\n")
-        fout.write("cutoffTime = " + str(smac_each_run_cutoff_time) + "\n")
-        fout.write("cutoff_length = " + str(smac_each_run_cutoff_length) + "\n")
-        fout.write(f"cli-cores = {concurrent_clis}\n")
-        fout.write(f"useRacing = {ablation_racing}\n")
+        fout.write(f"overall_obj = {objective_str}\n"
+                   f"cutoffTime = {smac_each_run_cutoff_time}\n"
+                   f"cutoff_length = {smac_each_run_cutoff_length}\n"
+                   f"cli-cores = {concurrent_clis}\n"
+                   f"useRacing = {ablation_racing}\n")
 
         fout.write("seed = 1234\n")
         # Get PCS file name from solver directory
         solver_directory = Path("Solvers/", solver_name)
         pcs_file_name = scsh.get_pcs_file_from_solver_directory(solver_directory)
         pcs_file_path = "./solver/" + str(pcs_file_name)
-        fout.write("paramfile = " + pcs_file_path + "\n")
-        fout.write("instance_file = instances_train.txt\n")
-        fout.write("test_instance_file = instances_test.txt\n")
-        fout.write("sourceConfiguration=DEFAULT\n")
-        fout.write(f'targetConfiguration="{optimised_configuration_params}"')
-        fout.close()
+        fout.write(f"paramfile = {pcs_file_path}\n"
+                   "instance_file = instances_train.txt\n"
+                   "test_instance_file = instances_test.txt\n"
+                   "sourceConfiguration=DEFAULT\n"
+                   f'targetConfiguration="{optimised_configuration_params}"')
     return
 
 
