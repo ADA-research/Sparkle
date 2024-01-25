@@ -184,7 +184,7 @@ class Configurator:
         scenario_file = Path(self.scenario.directory.parent.name,
                              self.scenario.directory.name,
                              self.scenario.scenario_file_name)
-        for seed in range(1, num_job_total+1):
+        for seed in range(1, num_job_total + 1):
             result_path = Path(result_directory,
                                f"{self.sbatch_filename}_seed_{seed}_smac.txt")
             smac_execdir_i = Path("scenarios", self.scenario.name, str(seed))

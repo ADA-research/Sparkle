@@ -95,7 +95,8 @@ if __name__ == "__main__":
     args.seed = int(sys.argv[5])
 
     start_t = time.time()
-    solver = subprocess.run([Path.cwd() / sgh.sparkle_smac_wrapper, str(args.__dict__)],
+    solver = subprocess.run([Path.cwd() / sgh.sparkle_solver_configurator_wrapper,
+                             str(args.__dict__)],
                             capture_output=True)
     run_time = min(time.time() - start_t, args.cutoff_time)
     

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Sparkle SMAC wrapper for the FastCA algorithm."""
+"""Sparkle Configurator wrapper for the FastCA algorithm."""
 
 import os
 import time
@@ -20,18 +20,6 @@ def get_time_pid_random_string() -> str:
     my_random_str = str(my_random)
     my_time_pid_random_str = my_time_str + "_" + my_pid_str + "_" + my_random_str
     return my_time_pid_random_str
-
-
-def get_last_level_directory_name(filepath: str) -> str:
-    """Return the final path component for a given string; similar to Path.name."""
-    if filepath[-1] == "/":
-        filepath = filepath[0:-1]
-    right_index = filepath.rfind("/")
-    if right_index < 0:
-        pass
-    else:
-        filepath = filepath[right_index + 1:]
-    return filepath
 
 
 def _is_a_number(input_str: str) -> bool:

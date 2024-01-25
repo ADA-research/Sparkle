@@ -16,7 +16,7 @@ args = ast.literal_eval(sys.argv[1])
 # Extract and delete data that needs specific formatting
 instance = args["instance"]
 specifics = args["specifics"]
-cutoff_time = int(args["cutoff_time"])+1
+cutoff_time = int(args["cutoff_time"]) + 1
 run_length = args["run_length"]
 seed = args["seed"]
 
@@ -36,7 +36,8 @@ tmp_directory.mkdir(exist_ok=True)
 instance_name = Path(instance).name
 solver_name = Path(solver_binary).name
 # Create a unique name for your runsolver log file, for example:
-runsolver_watch_data_path = tmp_directory / f"{solver_name}_{instance_name}_{random.randint()}.log"
+runsolver_watch_data_path = tmp_directory \
+    / f"{solver_name}_{instance_name}_{random.randint()}.log"
 
 # Process parameters
 # TODO: Make sure parameters are processed correctly for your solver
