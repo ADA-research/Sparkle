@@ -364,7 +364,7 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     latex_directory = reports_dir + "Sparkle-latex-generator-for-configuration/"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "cwd": latex_directory,
+                   "output_dir": latex_directory,
                    "scale": "linear",
                    "limit_min": 1.5,
                    "limit_max": 1.5,
@@ -412,7 +412,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     latex_directory = reports_dir + "Sparkle-latex-generator-for-configuration/"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "cwd": latex_directory,
+                   "output_dir": latex_directory,
                    "scale": "log",
                    "limit_min": 0.25,
                    "limit_max": 0.25,
