@@ -678,7 +678,7 @@ def check_file_is_executable(file_name: Path) -> None:
     """
     if not os.access(file_name, os.X_OK):
         print("Error: The configurator wrapper file "
-              f"{sgh.sparkle_solver_configurator_wrapper} is not executable.\n"
+              f"{file_name} is not executable.\n"
               "Add execution permissions to the file to run the configurator.")
         sys.exit(-1)
 
