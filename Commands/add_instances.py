@@ -2,9 +2,9 @@
 """Sparkle command to add an instance set to the Sparkle platform."""
 
 import sys
-import subprocess
 import argparse
 from pathlib import Path
+import shutil
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -116,8 +116,7 @@ if __name__ == "__main__":
             for related_file_name in instance_related_files:
                 source_file_path = Path(instances_source) / related_file_name
                 target_file_path = instances_directory / related_file_name
-                cmd = ["cp", source_file_path, target_file_path]
-                subprocess.run(cmd)
+                shutil.copy(source_file_path, target_file_path)
                 intended_instance_line += str(target_file_path) + " "
 
             intended_instance_line = intended_instance_line.strip()
@@ -164,9 +163,8 @@ if __name__ == "__main__":
 
                 if list_source_all_directory[i][-1] == "/":
                     list_source_all_directory[i] = list_source_all_directory[i][:-1]
-                copy_cmd = ["cp", f"{list_source_all_directory[i]}/{intended_filename}",
-                            instances_directory]
-                subprocess.run(copy_cmd)
+                shutil.copy(f"{list_source_all_directory[i]}/{intended_filename}",
+                            instances_directory)
                 print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
                       " has been added!")
 

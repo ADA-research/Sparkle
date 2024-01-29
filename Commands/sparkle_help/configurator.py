@@ -112,7 +112,8 @@ class Configurator:
         jobid = ""
         cmd = "rm -rf"
         dir_list = self.scenario._clean_up_scenario_dirs()
-        cmd += " " + " ".join(dir_list)
+        for dir in dir_list:
+            cmd += " " + str(dir)
         if run_on == Runner.SLURM:
             ssh.generate_generic_callback_slurm_script("configuration_callback",
                                                        self.scenario.solver,

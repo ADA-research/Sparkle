@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to add a solver to the Sparkle platform."""
 
-import subprocess
-import glob
 import sys
 import argparse
 from pathlib import Path
@@ -123,8 +121,7 @@ if __name__ == "__main__":
         print(f"Do not add solver {last_level_directory}")
         sys.exit(-1)
 
-    copy_cmd = ["cp", "-r"] + glob.glob(f"{solver_source}/*") + [solver_directory]
-    subprocess.run(copy_cmd)
+    sfh.copytree(solver_source, solver_directory)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path

@@ -132,14 +132,14 @@ if __name__ == "__main__":
             + sparkle_basic_help.get_time_pid_random_string()
             + ".rawres"
         )
-        cmd = (
-            f"{Path(extractor_directory) / sgh.sparkle_run_default_wrapper} "
-            f"{extractor_directory}/ {instance_path} {result_path}"
-        )
-        subprocess.run(cmd.split(" "))
+        command_line = [Path(extractor_directory) / sgh.sparkle_run_default_wrapper,
+                        f"{extractor_directory}/",
+                        instance_path,
+                        result_path]
+        subprocess.run(command_line)
     else:
         instance_path = Path(extractor_directory) / "sparkle_test_instance.cnf"
-        if not Path(instance_path).is_file():
+        if not instance_path.is_file():
             instance_path = Path(extractor_directory) / "sparkle_test_instance.txt"
         result_path = (
             "Tmp/"
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             + ".rawres"
         )
         command_line = [extractor_directory + "/" + sgh.sparkle_run_default_wrapper,
-                        extractor_directory + "/",
+                        f"{extractor_directory}/",
                         str(instance_path),
                         result_path]
         subprocess.run(command_line)

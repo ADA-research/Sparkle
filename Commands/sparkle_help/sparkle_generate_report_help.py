@@ -391,7 +391,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             cwd=latex_directory_path)
+                             output_dir=latex_directory_path)
     str_value = (
         "\\includegraphics[width=0.6\\textwidth]"
         f"{figure_portfolio_selector_sparkle_vs_sbs_filename}"
@@ -439,7 +439,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             cwd=latex_directory_path)
+                             output_dir=latex_directory_path)
 
     str_value = (
         "\\includegraphics[width=0.6\\textwidth]"
@@ -648,7 +648,7 @@ def generate_comparison_plot(points: list,
     """
     if output_dir is None:
         output_dir = Path()
-    elif type(output_dir) is str:
+    elif isinstance(output_dir, str):
         output_dir = Path(output_dir)
 
     points = np.array(points)

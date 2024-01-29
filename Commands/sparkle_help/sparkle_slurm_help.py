@@ -492,7 +492,7 @@ def submit_sbatch_script(sbatch_script_name: str,
       successfully. Defaults to the SMAC directory.
     """
     # Update permissions to executable, but leave all others untouched
-    if execution_dir is str:
+    if execution_dir is not Path:
         execution_dir = Path(execution_dir)
     sbatch_path = execution_dir / sbatch_script_name
     sbatch_path.chmod(sbatch_path.stat().st_mode | stat.S_IEXEC)

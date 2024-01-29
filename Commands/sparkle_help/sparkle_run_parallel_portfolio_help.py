@@ -689,9 +689,9 @@ def remove_result_files(instances: list[str]) -> None:
     for instance in instances:
         instance = Path(instance).name
         pap_files = [f for f in sgh.pap_performance_data_tmp_path.iterdir()
-                     if f"_{instance}_" in f]
+                     if f"_{instance}_" in str(f)]
         tmp_files = [f for f in Path(sgh.sparkle_tmp_path).iterdir()
-                     if f"_{instance}_" in f]
+                     if f"_{instance}_" in str(f)]
         sfh.rmfiles(pap_files + tmp_files)
 
 

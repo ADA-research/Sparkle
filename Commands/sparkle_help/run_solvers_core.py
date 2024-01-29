@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Run a solver on an instance, only for internal calls from Sparkle."""
 
-import subprocess
 import time
 import fcntl
 import argparse
@@ -53,9 +52,8 @@ if __name__ == "__main__":
         new_solver_directory_path = (
             f"{sgh.sparkle_tmp_path}{sfh.get_last_level_directory_name(solver_path)}_"
             f"seed_{args.seed}_{sfh.get_last_level_directory_name(instance_path)}")
-        command_line = f"cp -a -r {str(solver_path)} {str(new_solver_directory_path)}"
-        cmd = ["cp", "-a", "-r", solver_path, new_solver_directory_path]
-        subprocess.run(cmd)
+        subtarget = new_solver_directory_path / solver_path.name
+        sfh.copytree(solver_path, subtarget)
         solver_path = new_solver_directory_path
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
@@ -63,9 +61,7 @@ if __name__ == "__main__":
     key_str = (f"{sfh.get_last_level_directory_name(solver_path)}_"
                f"{sfh.get_last_level_directory_name(instance_path)}_"
                f"{sbh.get_time_pid_random_string()}")
-    # raw_result_path = r"Tmp/" + key_str + r".rawres"
     raw_result_path = f"Tmp/{key_str}.rawres"
-    # processed_result_path = r"Performance_Data/Tmp/" + key_str + r".result"
     processed_result_path = f"{sgh.pap_performance_data_tmp_path}/{key_str}.result"
     start_time = time.time()
     # create statusinfo file
@@ -111,21 +107,18 @@ if __name__ == "__main__":
     else:
         print(f"*** ERROR: Unknown performance measure detected: {performance_measure}")
 
-    fout = Path(processed_result_path).open("w+")
-    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-    fout.write(instance_path + "\n")
-    fout.write(solver_path + "\n")
-    fout.write(obj_str + "\n")
-    fout.close()
+    with Path(processed_result_path).open("w+") as fout:
+        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+        fout.write(f"{instance_path}\n"
+                   f"{solver_path}\n"
+                   f"{obj_str}\n")
 
-    # pap_result_path = r"Performance_Data/Tmp_PaP/" + key_str + r".result"
     pap_result_path = f"Performance_Data/Tmp_PaP/{key_str}.result"
-    fout = Path(pap_result_path).open("w+")
-    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-    fout.write(instance_path + "\n")
-    fout.write(solver_path + "\n")
-    fout.write(obj_str + "\n")
-    fout.close()
+    with Path(pap_result_path).open("w+") as fout:
+        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+        fout.write(f"{instance_path}\n"
+                   f"{solver_path}\n"
+                   f"{obj_str}\n")
 
     # TODO: Make removal conditional on a success status (SUCCESS, SAT or UNSAT)
     # sfh.rmfiles(raw_result_path)
