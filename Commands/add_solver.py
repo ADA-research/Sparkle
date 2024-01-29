@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to add a solver to the Sparkle platform."""
 
-import os
 import sys
 import argparse
 from pathlib import Path
@@ -90,7 +89,7 @@ if __name__ == "__main__":
 
     if not Path(solver_source).exists():
         print(f'Solver path "{solver_source}" does not exist!')
-        sys.exit()
+        sys.exit(-1)
 
     deterministic = args.deterministic
     nickname_str = args.nickname
@@ -120,9 +119,9 @@ if __name__ == "__main__":
     else:
         print(f"Solver {last_level_directory} already exists!")
         print(f"Do not add solver {last_level_directory}")
-        sys.exit()
+        sys.exit(-1)
 
-    os.system(f"cp -r {solver_source}/* {solver_directory}")
+    sfh.copytree(solver_source, solver_directory)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
@@ -140,15 +139,13 @@ if __name__ == "__main__":
           "done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
-        os.system(command_line)
+        sfh.rmfiles(sgh.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
-        command_line = "rm -f " + sgh.sparkle_report_path
-        os.system(command_line)
-        print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
+        sfh.rmfiles(sgh.sparkle_report_path)
+        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     if nickname_str is not None:
         sgh.solver_nickname_mapping[nickname_str] = solver_directory
@@ -159,11 +156,8 @@ if __name__ == "__main__":
         if not my_flag_parallel:
             print("Start running solvers ...")
             srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
-            print(
-                "Performance data file "
-                + sgh.performance_data_csv_path
-                + " has been updated!"
-            )
+            print(f"Performance data file {sgh.performance_data_csv_path}"
+                  " has been updated!")
             print("Running solvers done!")
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()

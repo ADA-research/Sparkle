@@ -64,8 +64,8 @@ def add_log_statement_to_file(log_file: str, line: str, jobtime: str) -> None:
         job_nr = line[line.rfind(";") + 2:]
     else:
         # TODO: Not sure what the intend of checking job numbers in this function was.
-        # TODO: Writing a warning as job_nr for now, since this is a logging function,
-        # TODO: this issue should be of no harm to the functionality.
+        #       Writing a warning as job_nr for now, since this is a logging function,
+        #       this issue should be of no harm to the functionality.
         job_nr = "WARNING: No job_nr found in function add_log_statement_to_file"
 
     current_time = now.strftime("%H:%M:%S")
@@ -134,16 +134,13 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
 
     # Removes statusinfo files
     for solver_instance in solver_instance_list:
-        commandline = (f"rm -rf {sgh.pap_sbatch_tmp_path}/"
-                       f"{solver_instance}*")
-        os.system(commandline)
+        sfh.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}")
 
     # Validate no known errors occurred in the sbatch
     check_sbatch_for_errors(sbatch_script_path)
 
     # Removes the generated sbatch files
-    commandline = f"rm -rf {sbatch_script_path}*"
-    os.system(commandline)
+    sfh.rmtree(sbatch_script_path)
 
     # Removes the directories generated for the solver instances
     for temp_solver in temp_solvers:
@@ -174,8 +171,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                 to_be_moved.append(file)
 
     for file in to_be_deleted:
-        commandline = f"rm -rf {tmp_dir}{file}"
-        os.system(commandline)
+        sfh.rmtree(f"{tmp_dir}{file}")
 
     for file in to_be_moved:
         if ".val" in file:
@@ -187,15 +183,16 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             except shutil.Error:
                 print(f"the {str(sgh.pap_performance_data_tmp_path)} directory already "
                       "contains a file with the same name, it will be skipped")
-
-            commandline = f"rm -rf {path_from}"
-            os.system(commandline)
+            sfh.rmtree(path_from)
 
 
 def find_finished_time_finished_solver(solver_instance_list: list[str],
                                        finished_job_array_nr: str) -> str:
     """Return the time at which a solver finished.
 
+    If there is a solver that ended but did not make a result file this means that it
+    was manually cancelled or it gave an error the template will ensure that all
+    solver on that instance will be cancelled.
     Args:
         solver_instance_list: List of solver instances.
         finished_job_array_nr: The Slurm array number of the finished job.
@@ -203,13 +200,9 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
     Returns:
         A formatted string that represents the finishing time of a solver.
     """
-    # If there is a solver that ended but did not make a result file this means that it
-    # was manually cancelled or it gave an error the template will ensure that all
-    # solver on that instance will be cancelled.
     time_in_format_str = "-1:00"
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(solutions_dir)
-    solutions_dir = str(sgh.pap_performance_data_tmp_path)
 
     for result in results:
         if "_" in finished_job_array_nr:
@@ -615,7 +608,7 @@ def handle_waiting_and_removal_process(
             if len(finished_solver_files) > 1:
                 print(f"ERROR: {str(len(finished_solver_files))} result files found for"
                       f" {solver_instance} while there should be only one!")
-                sys.exit()
+                sys.exit(-1)
 
             for finished_solver_file in finished_solver_files:
                 file_path = finished_solver_file
@@ -695,10 +688,11 @@ def remove_result_files(instances: list[str]) -> None:
     """
     for instance in instances:
         instance = Path(instance).name
-        cmd_line = f"rm -f {str(sgh.pap_performance_data_tmp_path)}/*_{instance}_*.*"
-        os.system(cmd_line)
-        cmd_line = f"rm -f {str(sgh.sparkle_tmp_path)}*_{instance}_*.*"
-        os.system(cmd_line)
+        pap_files = [f for f in sgh.pap_performance_data_tmp_path.iterdir()
+                     if f"_{instance}_" in str(f)]
+        tmp_files = [f for f in Path(sgh.sparkle_tmp_path).iterdir()
+                     if f"_{instance}_" in str(f)]
+        sfh.rmfiles(pap_files + tmp_files)
 
 
 def run_parallel_portfolio(instances: list[str],
@@ -735,7 +729,6 @@ def run_parallel_portfolio(instances: list[str],
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
         job_id = ""
-
         # NOTE: Once runrunner works satisfactorily this should be refactored
         if run_on == Runner.SLURM:
             job_id = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
@@ -768,6 +761,7 @@ def run_parallel_portfolio(instances: list[str],
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))
+
             now = datetime.datetime.now()
             current_time = now.strftime("%H:%M:%S")
 
@@ -810,6 +804,7 @@ def run_parallel_portfolio(instances: list[str],
                 sjh.sleep(n_seconds)
         else:
             run.wait()
+
         finished_instances_dict = {}
 
         for instance in instances:

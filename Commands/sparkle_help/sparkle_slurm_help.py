@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import os
+import stat
 import fcntl
 import shlex
 import subprocess
@@ -182,9 +183,9 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
 
     # specify the options of sbatch in the top of this sbatch script
-    fout.write("#!/bin/bash\n")
-    fout.write("###\n")
-    fout.write("###\n")
+    fout.write("#!/bin/bash\n"
+               "###\n"
+               "###\n")
 
     for i in sbatch_options_list:
         fout.write("#SBATCH " + str(i) + "\n")
@@ -265,8 +266,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
                   f"Error output of Slurm batch script for {job}")
 
     # Remove possible old output
-    sfh.rmfile(Path(std_out))
-    sfh.rmfile(Path(std_err))
+    sfh.rmfiles([std_out, std_err])
 
     return sbatch_options_list
 
@@ -398,7 +398,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
 
     if not result:
         print(f"Slurm config Error: {msg}")
-        sys.exit()
+        sys.exit(-1)
 
     # Create target call
     target_call_str = ("./smac-validate --use-scenario-outdir true --num-run 1 "
@@ -406,7 +406,7 @@ def generate_sbatch_script_for_validation(solver_name: str,
 
     # Remove possible old results
     for result_output_file in job_output_list:
-        sfh.rmfile(Path(result_output_file))
+        sfh.rmfiles(result_output_file)
 
     # Generate script
     generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,
@@ -478,7 +478,7 @@ def generate_sbatch_script_for_feature_computation(
 
 def submit_sbatch_script(sbatch_script_name: str,
                          command_name: CommandName,
-                         execution_dir: str | None = None) -> str:
+                         execution_dir: Path = Path()) -> str:
     """Submit a Slurm batch script.
 
     Args:
@@ -491,12 +491,15 @@ def submit_sbatch_script(sbatch_script_name: str,
       String job identifier or empty string if the job was not submitted
       successfully. Defaults to the SMAC directory.
     """
-    command_chmod = ["chmod", "a+x", sbatch_script_name]
-    subprocess.run(command_chmod, cwd=execution_dir)
+    # Update permissions to executable, but leave all others untouched
+    if execution_dir is not Path:
+        execution_dir = Path(execution_dir)
+    sbatch_path = execution_dir / sbatch_script_name
+    sbatch_path.chmod(sbatch_path.stat().st_mode | stat.S_IEXEC)
 
     # unset fix https://bugs.schedmd.com/show_bug.cgi?id=14298
-    command_bugfix = ["unset", "SLURM_CPU_BIND"]
-    subprocess.run(command_bugfix, cwd=execution_dir, shell=True)  # noqa: S602
+    subprocess.run(["unset", "SLURM_CPU_BIND"],
+                   cwd=execution_dir, shell=True)  # noqa: S602
 
     command = ["sbatch", sbatch_script_name]
     output = subprocess.run(command, cwd=execution_dir, capture_output=True, text=True)

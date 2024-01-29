@@ -18,10 +18,13 @@ def get_time_pid_random_string():
 	return my_time_pid_random_str
 
 def get_last_level_directory_name(filepath):
-	if filepath[-1] == r'/': filepath = filepath[0:-1]
+	if filepath[-1] == r'/':
+		filepath = filepath[0:-1]
 	right_index = filepath.rfind(r'/')
-	if right_index<0: pass
-	else: filepath = filepath[right_index+1:]
+	if right_index < 0:
+		pass
+	else:
+		filepath = filepath[right_index+1:]
 	return filepath
 
 instance = sys.argv[1]
@@ -37,8 +40,7 @@ runsolver_binary = relative_path + r'runsolver'
 solver_binary = relative_path + r'VRP_SISRs'
 
 tmp_directory = relative_path + r'tmp/'
-if not os.path.exists(tmp_directory):
-	os.system(r'mkdir -p ' + tmp_directory)
+Path(tmp_directory).mkdir(parents=True, exist_ok=True)
 
 instance_name = get_last_level_directory_name(instance)
 solver_name = get_last_level_directory_name(solver_binary)
@@ -60,11 +62,10 @@ start_time = time.time()
 output_list = os.popen(command).readlines()
 end_time = time.time()
 run_time = end_time - start_time
-if run_time > cutoff_time: run_time = cutoff_time
+if run_time > cutoff_time:
+	run_time = cutoff_time
 
-os.system(r'rm -f ' + runsolver_watch_data_path)
-
-#print output_list
+Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
 quality=1000000000000
 status = r'SUCCESS'#always ok, code checks per iteration whether cutoff time is exceeded

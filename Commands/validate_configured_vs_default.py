@@ -212,12 +212,11 @@ if __name__ == "__main__":
         f"{solver.name}_{sgh.sparkle_last_test_file_name}"
     )
 
-    fout = Path(last_test_file_path).open("w+")
-    fout.write(f"solver {solver}\n")
-    fout.write(f"train {instance_set_train}\n")
-    if instance_set_test is not None:
-        fout.write(f"test {instance_set_test}\n")
-    fout.close()
+    with Path(last_test_file_path).open("w+") as fout:
+        fout.write(f"solver {solver}\n"
+                   f"train {instance_set_train}\n")
+        if instance_set_test is not None:
+            fout.write(f"test {instance_set_test}\n")
 
     # Update latest scenario
     sgh.latest_scenario.set_config_solver(Path(solver))

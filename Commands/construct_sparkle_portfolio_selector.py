@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Sparkle command to construct a portfolio selector."""
 
-import os
 import sys
 import argparse
 from pathlib import Path
 
 from Commands.Structures.status_info import ConstructPortfolioSelectorStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
@@ -83,9 +83,7 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
 
 def delete_log_files() -> None:
     """Remove the log files."""
-    os.system("rm -f " + sgh.sparkle_log_path)
-    os.system("rm -f " + sgh.sparkle_err_path)
-
+    sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path])
     return
 
 
@@ -94,7 +92,6 @@ def print_log_paths() -> None:
     print("Consider investigating the log files:")
     print(f"stdout: {sgh.sparkle_log_path}")
     print(f"stderr: {sgh.sparkle_err_path}")
-
     return
 
 
@@ -145,7 +142,7 @@ if __name__ == "__main__":
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
 
-        sys.exit()
+        sys.exit(-1)
 
     delete_log_files()  # Make sure no old log files remain
     success = scps.construct_sparkle_portfolio_selector(

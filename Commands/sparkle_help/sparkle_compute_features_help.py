@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for feature data computation."""
 
-import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -130,7 +130,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                   f"{sfh.get_last_level_directory_name(instance_path)} ...")
 
             try:
-                os.system(command_line)
+                subprocess.run(command_line.split(" "))
                 with Path(runsolver_value_data_path).open() as file:
                     if "TIMEOUT=true" in file.read():
                         print(f"****** WARNING: Feature vector computation on instance "

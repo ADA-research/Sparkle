@@ -168,7 +168,7 @@ class ConfigurationScenario:
         self.feature_data.to_csv(self.directory
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
 
-    def _clean_up_scenario_dirs(self: ConfigurationScenario) -> list[str]:
+    def _clean_up_scenario_dirs(self: ConfigurationScenario) -> list[Path]:
         """Yield directories to clean up after configuration scenario is done.
 
         Returns:
@@ -176,9 +176,9 @@ class ConfigurationScenario:
         """
         # Wait for jobs to be done
         result = []
-        smac_solver_dir = scsh.get_smac_solver_dir(self.solver.name,
-                                                   self.instance_directory.name)
+        smac_solver_path = scsh.get_smac_solver_path(self.solver.name,
+                                                     self.instance_directory.name)
         for index in range(self.number_of_runs):
-            dir = smac_solver_dir + str(index + 1)
+            dir = smac_solver_path / str(index + 1)
             result.append(dir)
         return result

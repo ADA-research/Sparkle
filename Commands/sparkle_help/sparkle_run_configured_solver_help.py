@@ -196,7 +196,7 @@ def get_latest_configured_solver_and_configuration() -> (str, str):
     if solver_name is None or instance_set_name is None:
         # Print error and stop execution
         print("ERROR: No configured solver found! Stopping execution.")
-        sys.exit()
+        sys.exit(-1)
 
     # Get optimised configuration
     config_str = scsh.get_optimised_configuration_params(solver_name, instance_set_name)

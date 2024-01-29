@@ -3,15 +3,20 @@
 
 import os
 import sys
+from pathlib import Path
 sys.path.append('../../../../Commands')
 from sparkle_help import sparkle_slurm_help
 
+
 def get_last_level_directory_name(filepath):
 	filepath = get_file_directory(filepath)
-	if filepath[-1] == r'/': filepath = filepath[0:-1]
+	if filepath[-1] == r'/':
+		filepath = filepath[0:-1]
 	right_index = filepath.rfind(r'/')
-	if right_index<0: pass
-	else: filepath = filepath[right_index+1:]
+	if right_index < 0:
+		pass
+	else:
+		filepath = filepath[right_index+1:]
 	return filepath
 	
 
@@ -23,8 +28,10 @@ def get_file_directory(filepath):
 			filedir = filepath
 		return filedir
 	right_index = filepath.rfind(r'/')
-	if right_index<0: filedir = r'./'
-	else: filedir = filepath[:right_index+1]
+	if right_index < 0:
+		filedir = r'./'
+	else:
+		filedir = filepath[:right_index+1]
 	return filedir
 
 def get_file_name(filepath):
@@ -32,16 +39,20 @@ def get_file_name(filepath):
 		return r''
 	right_index = filepath.rfind(r'/')
 	filename = filepath
-	if right_index<0: pass
-	else: filename = filepath[right_index+1:]
+	if right_index < 0:
+		pass
+	else:
+		filename = filepath[right_index+1:]
 	return filename
 
 def get_file_least_extension(filepath):
 	filename = get_file_name(filepath)
 	file_extension = r''
 	right_index = filename.rfind(r'.')
-	if right_index<0: pass
-	else: file_extension = filename[right_index+1:]
+	if right_index < 0:
+		pass
+	else:
+		file_extension = filename[right_index+1:]
 	return file_extension
 
 
@@ -87,10 +98,8 @@ def generate_sbatch_script(sbatch_script_path, executable_wrapper_name, cnf_dire
 	
 	if res_directory_path[-1] != r'/':
 		res_directory_path += r'/'
-	
-	if not os.path.exists(res_directory_path):
-		os.system(r'mkdir -p ' + res_directory_path)
-	
+	Path(res_directory_path).mkdir(parents=True, exist_ok=True)
+
 	fout = open(sbatch_script_path, 'w+')
 	fout.write(r'#!/bin/bash' + '\n')
 	fout.write(r'###' + '\n')
@@ -114,8 +123,7 @@ def generate_sbatch_script(sbatch_script_path, executable_wrapper_name, cnf_dire
 		instance_directory = get_file_directory(instance_path)
 		result_name = executable_wrapper_name + r'_' + instance_name + r'_' + str(seed) + r'.res'
 		result_directory = instance_directory.replace(cnf_directory_path, res_directory_path, 1)
-		if not os.path.exists(result_directory):
-			os.system(r'mkdir -p ' + result_directory)
+		Path(result_directory).mkdir(parents=True, exist_ok=True)
 		result_path = result_directory + result_name
 		fout.write('\'%s %s %s %s\' \\' % (result_path, executable_wrapper_path, './', instance_path) + '\n')
 		
@@ -151,7 +159,4 @@ if __name__ == r'__main__':
 	else:
 		sbatch_script_path = executable_wrapper_name + r'_' + get_last_level_directory_name(cnf_directory_path) + r'_test_exp_sbatch.sh'
 	generate_sbatch_script(sbatch_script_path, executable_wrapper_name, cnf_directory_path, res_directory_path, list_all_cnf_files, cutoff_time_each_run, num_job_in_parallel)
-	os.system(r'chmod a+x ' + sbatch_script_path)
-	
-	
-
+	os.chmod(sbatch_script_path, mode=777)
