@@ -12,8 +12,6 @@ seed_str = r'1'
 para_str = r''
 para_list = sys.argv[3:]
 
-# command_line = relative_path+'/'+executable_name + r' -inst ' + cnf_instance_file + r' -seed ' + seed_str + r' ' + " ".join(para_list)
 command_line = [relative_path + '/' + executable_name, '-inst', cnf_instance_file, '-seed', seed_str] + para_list
 
-# os.system(command_line)
 subprocess.run(command_line)
