@@ -84,7 +84,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
     # For configured solvers change the directory to accommodate sparkle_smac_wrapper
     original_path = Path.cwd()
-    
+
     if is_configured:
         # Change paths to accommodate configured execution directory
         runsolver_path = f"../../{sgh.runsolver_path}"

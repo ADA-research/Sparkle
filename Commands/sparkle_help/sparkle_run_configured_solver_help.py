@@ -221,7 +221,7 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     solver_params = {"instance": instance_path_str,
                      "specifics": "rawres",
                      "cutoff_time_str": sgh.settings.get_general_target_cutoff_time(),
-                     "run_length": "2147483647", # Arbitrary, not used in the SMAC wrapper
+                     "run_length": "2147483647",  # Arbitrary, not used by SMAC wrapper
                      "seed": sgh.get_seed()}
     config_list = config_str.split(" ")
     for i in range(len(config_list)):
@@ -279,13 +279,10 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
             sys.exit(0)
 
     # Output results to user, including path to rawres_solver (e.g. SAT solution)
-    output_msg = (f"Execution on instance {instance_name} completed with status {status}"
-                  f" in {runtime} seconds.")
+    print(f"Execution on instance {instance_name} completed with status {status}"
+          f" in {runtime} seconds.")
 
     if status == "SUCCESS":
-        output_msg += (" Solver output of the results can be found at: "
-                       f"{str(rawres_solver)}")
-
-    print(output_msg)
+        print(f"Solver output of the results can be found at: {str(rawres_solver)}")
 
     return
