@@ -86,7 +86,7 @@ if __name__ == "__main__":
             "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
             " for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)"
         )
-        sys.exit()
+        sys.exit(-1)
 
     # Directory
     if Path(instance_path).is_dir():

@@ -27,7 +27,7 @@ def _is_a_number(input_str: str) -> bool:
     try:
         # eval insecure, so use ast.literal_eval instead
         input_val = ast.literal_eval(input_str)
-        if (type(input_val) == float) or (type(input_val) == int):
+        if isinstance(input_val, float) or isinstance(input_val, int):
             return True
         else:
             return False

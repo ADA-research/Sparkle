@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-import os
+import subprocess
 import sys
 import csv
 from pathlib import Path
@@ -158,40 +158,32 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
         Path("Tmp/").mkdir()
     feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
 
-    predit_schedule_file = ("predict_schedule_"
-                            f"{sparkle_basic_help.get_time_pid_random_string()}.predres")
+    pred_sched_file = ("predict_schedule_"
+                       f"{sparkle_basic_help.get_time_pid_random_string()}.predres")
     log_file = "predict_schedule_autofolio.out"
     err_file = "predict_schedule_autofolio.err"
-    predict_schedule_result_path_str = (
-        str(Path(sl.caller_log_dir / predit_schedule_file)))
-    log_path = Path(sl.caller_log_dir / log_file)
-    err_path_str = str(Path(sl.caller_log_dir / err_file))
+    predict_schedule_result_file = str(sl.caller_log_dir) + "/" + pred_sched_file
+    log_path = sl.caller_log_dir / log_file
+    err_path_str = str(sl.caller_log_dir) + "/" + err_file
 
-    command_line = (f"{python_executable} {sgh.autofolio_path} --load "
-                    f'{actual_portfolio_selector_path} --feature_vec "'
-                    f'{feature_vector_string}" 1> {predict_schedule_result_path_str}'
-                    f" 2> {err_path_str}")
+    cmd = [python_executable, sgh.autofolio_path, "--load",
+           actual_portfolio_selector_path, "--feature_vec", feature_vector_string]
 
     with log_path.open("a+") as log_file:
         print("Running command below to get predicted schedule from autofolio:\n",
-              command_line, file=log_file)
+              cmd, file=log_file)
 
-    os.system(command_line)
-
+    process = subprocess.run(cmd,
+                             stdout=Path(predict_schedule_result_file).open("w+"),
+                             stderr=Path(err_path_str).open("w+"))
     list_predict_schedule = (
-        srps.get_list_predict_schedule_from_file(predict_schedule_result_path_str))
-
-    # If there is error output log temporary files for analsysis, otherwise remove them
-    with Path(err_path_str).open() as file_content:
-        lines = file_content.read().splitlines()
-    if len(lines) > 1 or lines[0] != "INFO:AutoFolio:Predict on Test":
+        srps.get_list_predict_schedule_from_file(predict_schedule_result_file))
+    if process.returncode != 0:
         sl.add_output(str(log_path), "Predicted portfolio schedule command line call")
-        sl.add_output(predict_schedule_result_path_str, "Predicted portfolio schedule")
+        sl.add_output(predict_schedule_result_file, "Predicted portfolio schedule")
         sl.add_output(err_path_str, "Predicted portfolio schedule error output")
     else:
-        os.system("rm -f " + predict_schedule_result_path_str)
-        os.system("rm -f " + err_path_str)
-        os.system("rm -f " + str(log_path))
+        sfh.rmfiles([predict_schedule_result_file, err_path_str, log_path])
 
     return list_predict_schedule
 
@@ -421,7 +413,7 @@ def compute_actual_selector_marginal_contribution(
 
         print(f"Actual performance for portfolio selector excluding solver "
               f"{solver_name} is {str(tmp_asp)}")
-        os.system("rm -f " + tmp_performance_data_csv_path)
+        sfh.rmfiles(tmp_performance_data_csv_path)
         sl.add_output(tmp_performance_data_csv_path,
                       "[removed] Temporary performance data")
         print("Computing done!")

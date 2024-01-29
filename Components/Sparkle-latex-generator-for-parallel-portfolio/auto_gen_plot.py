@@ -2,7 +2,8 @@
 # -*- coding: UTF-8 -*-
 """Automatically generate a gnuplot script for parallel algorithm portfolios."""
 
-import os
+# import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -63,10 +64,7 @@ if __name__ == "__main__":
         outfile.write(f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
                       "points pt 2 ps 2\n")
 
-    cmd = f"gnuplot '{output_gnuplot_script}'"
-    os.system(cmd)
+    subprocess.run(["gnuplot", output_gnuplot_script])
+    subprocess.run(["epstopdf", output_eps_file])
 
-    cmd = f"epstopdf '{output_eps_file}'"
-    os.system(cmd)
-
-    os.system(f"rm -f '{output_gnuplot_script}'")
+    Path(output_gnuplot_script).unlink(missing_ok=True)

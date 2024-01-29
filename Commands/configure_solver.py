@@ -190,7 +190,7 @@ if __name__ == "__main__":
                 if row.empty:
                     print("No feature data exists for the given training set, please "
                           "run add_feature_extractor.py, then compute_features.py")
-                    sys.exit()
+                    sys.exit(-1)
 
                 new_label = (f"../../../instances/{instance_set_train.name}/"
                              + os.path.split(label)[1])

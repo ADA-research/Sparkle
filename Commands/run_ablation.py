@@ -2,7 +2,6 @@
 """Sparkle command to execute ablation analysis."""
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
@@ -173,12 +172,11 @@ if __name__ == "__main__":
     ablation_scenario_dir = sah.get_ablation_scenario_directory(
         solver_name, instance_set_train_name, instance_set_test_name
     )
-    if sah.check_for_ablation(
-        solver_name, instance_set_train_name, instance_set_test_name
-    ):
-        print("Warning: found existing ablation scenario for this combination. This "
-              "will be removed.")
-        os.system(f"rm -rf {sgh.ablation_dir}{ablation_scenario_dir}")
+    if sah.check_for_ablation(solver_name, instance_set_train_name,
+                              instance_set_test_name):
+        print("Warning: found existing ablation scenario for this combination. "
+              "This will be removed.")
+        sfh.rmtree(sgh.ablation_dir + ablation_scenario_dir)
 
     # Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(
@@ -200,7 +198,6 @@ if __name__ == "__main__":
         solver_name, instance_set_train_name, instance_set_test_name
     )
     print("Submit ablation run")
-    # Submit ablation run
     if args.run_on == Runner.SLURM:
         ids = sah.submit_ablation_sparkle(
             solver_name=solver_name,

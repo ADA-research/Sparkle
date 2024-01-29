@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to remove an instance set from the Sparkle platform."""
 
-import os
 import sys
 import argparse
 from pathlib import Path
@@ -66,9 +65,7 @@ if __name__ == "__main__":
         sgh.performance_data_csv_path
     )
 
-    for i in range(0, len(list_instances)):
-        intended_instance = list_instances[i]
-
+    for intended_instance in list_instances:
         # Remove instance records
         sgh.instance_list.remove(intended_instance)
         sfh.remove_line_from_file(intended_instance, sgh.instance_list_path)
@@ -77,71 +74,47 @@ if __name__ == "__main__":
 
         # Delete instance file(s)
         for instance_file in intended_instance.split():
-            print("Removing instance file", instance_file)
-            instance_path = Path(instance_file)
-            sfh.rmfile(instance_path)
+            print(f"Removing instance file {instance_file}")
+            sfh.rmfiles(Path(instance_file))
 
-        print("Instance " + intended_instance + " has been removed!")
+        print(f"Instance {intended_instance} has been removed!")
 
     sfh.rmdir(Path(instances_path))
 
     # Remove instance reference list (for multi-file instances)
     instance_set_name = Path(instances_path).name
     sih.remove_reference_instance_list(instance_set_name)
-
+    smac_instance_dir = sgh.smac_dir + "/example_scenarios/instances/"
     # Remove instance set from SMAC directories
-    smac_train_instances_path = (
-        sgh.smac_dir
-        + "/"
-        + "example_scenarios/"
-        + "instances/"
-        + sfh.get_last_level_directory_name(instances_path)
-    )
-    file_smac_train_instances = (
-        sgh.smac_dir
-        + "/"
-        + "example_scenarios/"
-        + "instances/"
-        + sfh.get_last_level_directory_name(instances_path)
-        + "_train.txt"
-    )
-    os.system("rm -rf " + smac_train_instances_path)
-    os.system("rm -f " + file_smac_train_instances)
+    smac_train_instances_path = sgh.smac_dir + "/example_scenarios/instances/" +\
+        sfh.get_last_level_directory_name(instances_path)
 
-    smac_test_instances_path = (
-        sgh.smac_dir
-        + "/"
-        + "example_scenarios/"
-        + "instances_test/"
-        + sfh.get_last_level_directory_name(instances_path)
-    )
-    file_smac_test_instances = (
-        sgh.smac_dir
-        + "/"
-        + "example_scenarios/"
-        + "instances_test/"
-        + sfh.get_last_level_directory_name(instances_path)
-        + "_test.txt"
-    )
-    os.system("rm -rf " + smac_test_instances_path)
-    os.system("rm -f " + file_smac_test_instances)
+    smace_instance_test_dir = sgh.smac_dir + "/example_scenarios/instances_test/"
+    file_smac_train_instances = smace_instance_test_dir +\
+        sfh.get_last_level_directory_name(instances_path) + "_train.txt"
+
+    sfh.rmtree(smac_train_instances_path)
+    sfh.rmtree(file_smac_train_instances)
+
+    smac_test_instances_path = smace_instance_test_dir +\
+        sfh.get_last_level_directory_name(instances_path)
+    file_smac_test_instances = smace_instance_test_dir +\
+        sfh.get_last_level_directory_name(instances_path) + "_test.txt"
+
+    sfh.rmtree(smac_test_instances_path)
+    sfh.rmtree(file_smac_test_instances)
 
     sfh.write_instance_list()
     feature_data_csv.update_csv()
     performance_data_csv.update_csv()
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
-        os.system(command_line)
-        print(
-            "Removing Sparkle portfolio selector "
-            + sgh.sparkle_algorithm_selector_path
-            + " done!"
-        )
+        sfh.rmtree(sgh.sparkle_algorithm_selector_path)
+        print("Removing Sparkle portfolio selector "
+              f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
-        command_line = "rm -f " + sgh.sparkle_report_path
-        os.system(command_line)
-        print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
+        sfh.rmtree(sgh.sparkle_report_path)
+        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
-    print("Removing instances in directory " + instances_path + " done!")
+    print(f"Removing instances in directory {instances_path} done!")

@@ -39,7 +39,7 @@ class Solver:
         if file_count != 1:
             print("None or multiple .pcs files found. Solver "
                   "is not valid for configuration.")
-            sys.exit()
+            sys.exit(-1)
 
         return self.directory / file_name
 

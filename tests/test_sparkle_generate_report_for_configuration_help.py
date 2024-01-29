@@ -258,10 +258,10 @@ def test_get_features_bool_false(mocker: MockFixture) -> None:
     """
     solver_name = "test-solver"
     instance_set = "train-instance"
-    solver_dir = "smac-solver-dir/"
+    solver_dir = Path("smac-solver-dir/")
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_dir",
+                            "get_smac_solver_path",
                             return_value=solver_dir)
     file_content_mock = ""
     mock_open = mocker.patch("pathlib.Path.open",
@@ -279,12 +279,12 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_dir = "smac-solver-dir/"
+    solver_dir = Path("smac-solver-dir/")
     solver_name = "test-solver"
     instance_set = "train-instance"
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_dir",
+                            "get_smac_solver_path",
                             return_value=solver_dir)
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
@@ -364,7 +364,7 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     latex_directory = reports_dir + "Sparkle-latex-generator-for-configuration/"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "cwd": latex_directory,
+                   "output_dir": latex_directory,
                    "scale": "linear",
                    "limit_min": 1.5,
                    "limit_max": 1.5,
@@ -412,7 +412,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     latex_directory = reports_dir + "Sparkle-latex-generator-for-configuration/"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "cwd": latex_directory,
+                   "output_dir": latex_directory,
                    "scale": "log",
                    "limit_min": 0.25,
                    "limit_max": 0.25,
@@ -1168,40 +1168,26 @@ def test_generate_report_for_configuration_prep_exists_not(mocker: MockFixture) 
     """
     report_directory = "report/directory"
 
-    template_latex_directory_path = (
-        "Components/Sparkle-latex-generator-for-configuration/")
-
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
-    mock_system = mocker.patch("os.system")
+    mock_path = mocker.patch("pathlib.Path.mkdir")
+    mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_exists.assert_called_once()
-
-    mkdir_command = f"mkdir -p {report_directory}"
-    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
-    mock_system.assert_has_calls([
-        mocker.call(mkdir_command),
-        mocker.call(cp_command)
-    ])
+    mock_path.assert_called_once()
+    mock_shutil.assert_called_once()
 
 
 def test_generate_report_for_configuration_prep_exists(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_prep copies files to report directory."""
     report_directory = "report/directory"
 
-    template_latex_directory_path = (
-        "Components/Sparkle-latex-generator-for-configuration/")
-
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
-    mock_system = mocker.patch("os.system")
+    mock_path = mocker.patch("pathlib.Path.mkdir")
+    mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_exists.assert_called_once()
-
-    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
-    mock_system.assert_called_once_with(cp_command)
+    mock_path.assert_called_once()
+    mock_shutil.assert_called_once()
 
 
 def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:

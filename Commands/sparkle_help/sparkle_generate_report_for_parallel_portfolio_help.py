@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio report generation."""
 
-import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -33,7 +33,7 @@ def get_num_solvers(parallel_portfolio_path: Path) -> str:
 
     if num_solvers < 1:
         print("ERROR: No solvers found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str(num_solvers)
 
@@ -97,7 +97,7 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
     for instance_path in instance_list:
         instance_set = sfh.get_current_directory_name(instance_path)
 
-        if not (instance_set in list_instance_sets):
+        if instance_set not in list_instance_sets:
             list_instance_sets.append(instance_set)
 
     n_sets = len(list_instance_sets)
@@ -128,7 +128,7 @@ def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
     for instance_path in instance_list:
         instance_set = sfh.get_current_directory_name(instance_path)
 
-        if not (instance_set in list_instance_sets):
+        if instance_set not in list_instance_sets:
             list_instance_sets.append(instance_set)
             dict_n_instances_in_sets[instance_set] = 1
         else:
@@ -152,7 +152,6 @@ def get_results() -> dict[str, list[str, str]]:
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_result_filename(solutions_dir)
-
     if len(results) == 0:
         print("ERROR: No result files found for parallel portfolio! Stopping execution.")
         print(solutions_dir)
@@ -177,7 +176,6 @@ def get_results() -> dict[str, list[str, str]]:
                     results_dict[instance][1] = result_lines[2]
             else:
                 results_dict[instance] = [result_lines[1], result_lines[2]]
-
     return results_dict
 
 
@@ -399,12 +397,11 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     penalised_time_str = str(sgh.settings.get_penalised_time())
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
-    gnuplot_command = (
-        f"cd {latex_directory_path}; python auto_gen_plot.py {data_filename} "
-        f"{penalised_time_str} 'SBS ({sgrh.underscore_for_latex(sbs_solver)})' "
-        f"Parallel-Portfolio {figure_filename} {performance_metric_str}")
+    gnuplot_cmd_list = ["python", "auto_gen_plot.py", data_filename, penalised_time_str,
+                        "SBS", sgrh.underscore_for_latex(sbs_solver),
+                        "Parallel-Portfolio", figure_filename, performance_metric_str]
 
-    os.system(gnuplot_command)
+    subprocess.run(gnuplot_cmd_list, cwd=latex_directory_path)
 
     str_value = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 

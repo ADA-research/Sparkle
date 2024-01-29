@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Merge new performance/feature data into CSVs, only for internal calls from Sparkle."""
 
-import os
 import fcntl
 from pathlib import Path
 
@@ -67,7 +66,7 @@ def performance_data_csv_merge() -> None:
             performance_data_csv.set_value(instance_path, solver_path, runtime)
             fin.close()
             performance_data_csv.update_csv()
-            os.system("rm -f " + result_path)
+            sfh.rmfiles(result_path)
         except Exception:
             print(f"ERROR: Could not remove file: {result_path}")
     for i in range(0, len(wrong_solver_list)):
