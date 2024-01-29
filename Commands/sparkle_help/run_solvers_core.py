@@ -20,8 +20,6 @@ from Commands.Structures.status_info import SolverRunStatusInfo
 
 
 if __name__ == "__main__":
-    import sys
-    sys.exit(-1)
     # Initialise settings
     global settings
     settings_dir = Path("Settings")
