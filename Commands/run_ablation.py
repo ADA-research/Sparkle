@@ -198,7 +198,6 @@ if __name__ == "__main__":
         solver_name, instance_set_train_name, instance_set_test_name
     )
     print("Submit ablation run")
-    # Submit ablation run
     if args.run_on == Runner.SLURM:
         ids = sah.submit_ablation_sparkle(
             solver_name=solver_name,

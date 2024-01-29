@@ -29,11 +29,10 @@ dependencies:
     # For AutoFolio
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario
     - xgboost
-    - scikit-learn
+    - scikit-learn==1.3.2
     - ConfigSpace
     - smac
     - scipy
     - pynisher 
-    - scikit-learn
     # To build documentation
     - -r Documentation/requirements.txt
