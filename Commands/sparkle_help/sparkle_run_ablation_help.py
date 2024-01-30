@@ -110,10 +110,10 @@ def generate_slurm_script(solver_name: str, instance_train_name: str,
     srun_options_str = f"-N1 -n1 -c{concurrent_clis}"
     target_call_str = ("../../ablationAnalysis --optionFile "
                        "ablation_config.txt")
-
+    job_params_list = []
     ssh.generate_sbatch_script_generic(f"{sgh.ablation_dir}{sbatch_script_path}",
-                                       sbatch_options_list, srun_options_str,
-                                       target_call_str, job_params_list=[])
+                                       sbatch_options_list, job_params_list,
+                                       srun_options_str, target_call_str)
 
     return sbatch_script_name
 
@@ -168,10 +168,10 @@ def generate_validation_slurm_script(solver_name: str, instance_train_name: str,
     target_call_str = ("../../ablationValidation --optionFile ablation_config.txt "
                        "--ablationLogFile "
                        "ablationPath.txt")
-
+    job_params_list = []
     ssh.generate_sbatch_script_generic(f"{sgh.ablation_dir}{sbatch_script_path}",
-                                       sbatch_options_list, srun_options_str,
-                                       target_call_str, job_params_list=[])
+                                       sbatch_options_list, job_params_list,
+                                       srun_options_str, target_call_str)
 
     return sbatch_script_name
 
@@ -204,10 +204,10 @@ def generate_validation_callback_slurm_script(solver_name: str, instance_train_n
 
     srun_options_str = "-N1 -n1 -c1"
     target_call_str = "./" + callback_script_name
-
+    job_params_list = []
     ssh.generate_sbatch_script_generic(f"{sgh.ablation_dir}{sbatch_script_path}",
-                                       sbatch_options_list, srun_options_str,
-                                       target_call_str, job_params_list=[])
+                                       sbatch_options_list, job_params_list,
+                                       srun_options_str, target_call_str)
 
     return sbatch_script_name
 
