@@ -67,7 +67,7 @@ def prepare_ablation_scenario(solver_name: str, instance_train_name: str,
     for candidate in copy_candidates:
         candidate_path = str(PurePath(sgh.ablation_dir, candidate))
         if candidate[-1] == "/":
-            sfh.copytree(candidate_path, ablation_scenario_dir)
+            sfh.copytree(candidate_path, ablation_scenario_dir + "/" + candidate)
         else:
             shutil.copy(candidate_path, ablation_scenario_dir)
 
