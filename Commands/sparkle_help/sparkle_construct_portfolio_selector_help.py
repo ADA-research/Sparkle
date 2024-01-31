@@ -4,6 +4,7 @@
 
 import subprocess
 import sys
+import shutil
 from pathlib import Path, PurePath
 
 
@@ -154,7 +155,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
 
     # Remove contents of- and the selector path to ensure everything is (re)computed
     # for the new selector when required
-    sfh.rmtree(selector_path.parent)
+    shutil.rmtree(selector_path.parent, ignore_errors=True)
 
     # (Re)create the path to the selector
     selector_path.parent.mkdir(parents=True, exist_ok=True)

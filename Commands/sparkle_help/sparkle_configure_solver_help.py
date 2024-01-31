@@ -10,7 +10,6 @@ from pathlib import PurePath
 import shutil
 from enum import Enum
 
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
@@ -237,17 +236,17 @@ def remove_validation_directories_execution_or_output(solver_name: str,
         instance_set_test_name: Name of instance set for testing
         exec_or_out: Postfix describing if execution or output directory is used
     """
-    solver_path = get_smac_solver_path(solver_name, instance_set_train_name) \
-        / exec_or_out
-
-    train_default_dir = solver_path / "_train_default/"
-    sfh.rmtree(train_default_dir)
+    solver_path = get_smac_solver_path(solver_name, instance_set_train_name)
+    train_default_dir = solver_path / (exec_or_out + "_train_default/")
+    shutil.rmtree(train_default_dir, ignore_errors=True)
 
     if instance_set_test_name is not None:
-        test_default_dir = solver_path / f"_{instance_set_test_name}_test_default/"
-        sfh.rmtree(test_default_dir)
-        test_configured_dir = solver_path / f"_{instance_set_test_name}_test_configured/"
-        sfh.rmtree(test_configured_dir)
+        test_default_dir = solver_path / \
+            f"{exec_or_out}_{instance_set_test_name}_test_default/"
+        shutil.rmtree(test_default_dir, ignore_errors=True)
+        test_configured_dir = solver_path / \
+            f"{exec_or_out}_{instance_set_test_name}_test_configured/"
+        shutil.rmtree(test_configured_dir, ignore_errors=True)
 
 
 def remove_validation_directories(solver_name: str, instance_set_train_name: str,
@@ -289,25 +288,19 @@ def prepare_smac_execution_directories_validation(solver_name: str,
 
         # Train default
         exec_path = smac_solver_path / "validate_train_default"
-        # Create directories, -p makes sure any missing parents are also created
-        exec_path.mkdir(parents=True, exist_ok=True)
         # Copy solver to execution directory
-        sfh.copytree(solver_directory, exec_path)
+        shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
         # Test default
         if instance_set_test_name is not None:
             exec_path = smac_solver_path \
                 / f"validate_{instance_set_test_name}_test_default"
-            # Create directories, -p makes sure any missing parents are also created
-            exec_path.mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory
-            sfh.copytree(solver_directory, exec_path)
+            shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
             # Test configured
             exec_path = smac_solver_path \
                 / f"validate_{instance_set_test_name}_test_configured"
-            # Create directories, -p makes sure any missing parents are also created
-            exec_path.mkdir(parents=True, exist_ok=True)
             # Copy solver to execution directory
-            sfh.copytree(solver_directory, exec_path)
+            shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
 
 
 def create_smac_configure_sbatch_script(solver_name: str,

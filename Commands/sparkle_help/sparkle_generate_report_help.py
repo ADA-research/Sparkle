@@ -124,7 +124,7 @@ def get_num_instance_classes() -> str:
     instance_list = sgh.instance_list
 
     for instance_path in instance_list:
-        instance_class = sfh.get_current_directory_name(instance_path)
+        instance_class = Path(instance_path).parent.name
 
         if instance_class not in list_instance_class:
             list_instance_class.append(instance_class)
@@ -150,7 +150,7 @@ def get_instance_class_list() -> str:
     instance_list = sgh.instance_list
 
     for instance_path in instance_list:
-        instance_class = sfh.get_current_directory_name(instance_path)
+        instance_class = Path(instance_path).parent.name
 
         if instance_class not in list_instance_class:
             list_instance_class.append(instance_class)

@@ -3,6 +3,7 @@
 
 import sys
 import argparse
+import shutil
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -121,8 +122,7 @@ if __name__ == "__main__":
         print(f"Solver {last_level_directory} already exists!")
         print(f"Do not add solver {last_level_directory}")
         sys.exit(-1)
-
-    sfh.copytree(solver_source, solver_directory)
+    shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path

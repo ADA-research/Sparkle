@@ -8,7 +8,6 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
-from Commands.sparkle_help import sparkle_file_help as sfh
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_instances_help as sih
@@ -55,15 +54,11 @@ def prepare_ablation_scenario(solver_name: str, instance_train_name: str,
     ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
                                                             instance_train_name,
                                                             instance_test_name)
+
     ablation_scenario_solver_dir = Path(ablation_scenario_dir, "solver/")
-
-    Path(ablation_scenario_dir).mkdir(parents=True, exist_ok=True)
-    ablation_scenario_solver_dir.mkdir(parents=True, exist_ok=True)
-
     # Copy solver
     solver_directory = "Solvers/" + solver_name
-    sfh.copytree(solver_directory, ablation_scenario_solver_dir)
-
+    shutil.copytree(solver_directory, ablation_scenario_solver_dir, dirs_exist_ok=True)
     return ablation_scenario_dir
 
 

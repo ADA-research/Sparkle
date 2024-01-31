@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to inform about Sparkle's system status."""
 
+from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -22,10 +23,8 @@ def print_solver_list(verbose: bool = False) -> None:
           + (":" if verbose else ""))
 
     if verbose:
-        i = 1
-        for solver in solver_list:
-            print(f"[{str(i)}]: Solver: {sfh.get_last_level_directory_name(solver)}")
-            i += 1
+        for i, solver in enumerate(solver_list):
+            print(f"[{i + 1}]: Solver: {sfh.get_last_level_directory_name(solver)}")
 
     print("")
     return
@@ -66,7 +65,7 @@ def print_instance_list(verbose: bool = False) -> None:
     if verbose:
         i = 1
         for instance in instance_list:
-            instance_dir = sfh.get_directory(instance).split("Instances/")[1][:-1]
+            instance_dir = Path(instance).parent
             print(f"[{str(i)}]: [{instance_dir}] Instance: ",
                   f"{sfh.get_last_level_directory_name(instance)}")
             i += 1

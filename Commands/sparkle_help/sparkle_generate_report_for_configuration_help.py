@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import sys
+import shutil
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
@@ -36,7 +37,8 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
     # For single-file instances just count the number of instance files
     else:
         instance_dir = f"{sgh.smac_dir}/scenarios/instances/{instance_set_name}/"
-        list_instance = sfh.get_list_all_filename(instance_dir)
+        list_instance = []
+        sfh.get_list_all_filename_recursive(instance_dir, list_instance)
 
         # If there is only an instance file and not the actual instances in the
         # directory, count number of lines in instance file
@@ -879,9 +881,8 @@ def generate_report_for_configuration_prep(configuration_reports_directory: str)
     print("Generating report for configuration ...")
     full_conf_reports_dir = Path(configuration_reports_directory
                                  + "/Sparkle-latex-generator-for-configuration")
-    full_conf_reports_dir.mkdir(parents=True, exist_ok=True)
     template_latex_path = Path("Components/Sparkle-latex-generator-for-configuration")
-    sfh.copytree(template_latex_path, full_conf_reports_dir)
+    shutil.copytree(template_latex_path, full_conf_reports_dir, dirs_exist_ok=True)
 
 
 def generate_report_for_configuration_train(solver_name: str,

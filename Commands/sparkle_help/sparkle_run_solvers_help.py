@@ -4,6 +4,7 @@
 import os
 import subprocess
 import sys
+import shutil
 import fcntl
 from pathlib import Path
 
@@ -82,8 +83,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         rs_prefix = "../../"
         exec_path = str(raw_result_path).replace(".rawres", "_exec_dir/")
         # Copy files
-        Path(exec_path).mkdir(parents=True)
-        sfh.copytree(solver_path, exec_path)
+        shutil.copytree(solver_path, exec_path, dirs_exist_ok=True)
         # Executable is now in "current dir"
         solver_path = "."
 
@@ -124,7 +124,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
                 raw_result_solver_src_path.rename(Path(raw_result_solver_path))
             # Remove execution directory (should contain nothing of interest on succes
             # after moving the .rawres file)
-            sfh.rmtree(Path(exec_path))
+            shutil.rmtree(Path(exec_path))
             # Check .rawres_solver output
             check_solver_output_for_errors(Path(raw_result_solver_path))
 
@@ -472,7 +472,7 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     sgh.solver_list.remove(solver_path)
     sgh.solver_nickname_mapping.pop(solver_path)
     sfh.write_solver_list()
-    sfh.write_solver_nickname_mapping()
+    sfh.write_data_to_file(sgh.solver_nickname_list_path, sgh.solver_nickname_mapping)
 
     print(f"Solver {sfh.get_last_level_directory_name(solver_path)} is a wrong solver")
     print(f"Solver {sfh.get_last_level_directory_name(solver_path)} running on "

@@ -48,7 +48,7 @@ if __name__ == "__main__":
         # Failure from run solver or solver wrapper
         print(run_solver.stderr)
         sys.exit(run_solver.returncode)
-    
     outdir = ast.literal_eval(run_solver.stdout.decode())
+    Path(runsolver_watch_data_path).unlink(missing_ok=True)
     # Return values to SMAC
     print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, {outdir['quality']}, {args['seed']}")

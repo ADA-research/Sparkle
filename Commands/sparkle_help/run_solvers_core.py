@@ -53,7 +53,7 @@ if __name__ == "__main__":
             f"{sgh.sparkle_tmp_path}{sfh.get_last_level_directory_name(solver_path)}_"
             f"seed_{args.seed}_{sfh.get_last_level_directory_name(instance_path)}")
         subtarget = new_solver_directory_path / solver_path.name
-        sfh.copytree(solver_path, subtarget)
+        shutil.copytree(solver_path, subtarget, dirs_exist_ok=True)
         solver_path = new_solver_directory_path
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)

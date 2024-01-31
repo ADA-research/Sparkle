@@ -23,7 +23,7 @@ del args["run_length"]
 
 solver_name = "PbO-CCSAT"
 solver_cmd = ["./" + solver_name,
-              "-inst", instance,
+              "-inst", str(instance),
               "-seed", str(seed)]
 
 # Construct call from args dictionary

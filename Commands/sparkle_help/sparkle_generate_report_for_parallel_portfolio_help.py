@@ -95,7 +95,7 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
     list_instance_sets = []
 
     for instance_path in instance_list:
-        instance_set = sfh.get_current_directory_name(instance_path)
+        instance_set = Path(instance_path).parent.name
 
         if instance_set not in list_instance_sets:
             list_instance_sets.append(instance_set)
@@ -126,7 +126,7 @@ def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
     dict_n_instances_in_sets = {}
 
     for instance_path in instance_list:
-        instance_set = sfh.get_current_directory_name(instance_path)
+        instance_set = Path(instance_path).parent.name
 
         if instance_set not in list_instance_sets:
             list_instance_sets.append(instance_set)
@@ -151,7 +151,7 @@ def get_results() -> dict[str, list[str, str]]:
         contains the solver name followed by the performance (both as string).
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
-    results = sfh.get_list_all_result_filename(solutions_dir)
+    results = sfh.get_list_all_extensions(solutions_dir, "result")
     if len(results) == 0:
         print("ERROR: No result files found for parallel portfolio! Stopping execution.")
         print(solutions_dir)

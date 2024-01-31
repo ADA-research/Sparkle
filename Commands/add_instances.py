@@ -131,9 +131,13 @@ if __name__ == "__main__":
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()
     else:
-        list_source_all_filename = sfh.get_list_all_filename(instances_source)
-        list_source_all_directory = sfh.get_list_all_directory(instances_source)
-        list_target_all_filename = sfh.get_list_all_filename(str(instances_directory))
+        list_source_all_filename = []
+        sfh.get_list_all_filename_recursive(instances_source, list_source_all_filename)
+        list_source_all_directory = []
+        sfh.get_list_all_directory_recursive(instances_source, list_source_all_directory)
+        list_target_all_filename = []
+        sfh.get_list_all_filename_recursive(str(instances_directory),
+                                            list_target_all_filename)
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
@@ -143,8 +147,7 @@ if __name__ == "__main__":
 
         print(f"Number of instances to be added: {str(num_inst)}")
 
-        for i in range(0, len(list_source_all_filename)):
-            intended_filename = list_source_all_filename[i]
+        for i, intended_filename in enumerate(list_source_all_filename):
             print("")
             print(f"Adding {intended_filename} ... "
                   f"({str(i + 1)} out of {str(num_inst)})")
@@ -161,8 +164,6 @@ if __name__ == "__main__":
                 feature_data_csv.add_row(intended_filename_path)
                 performance_data_csv.add_row(intended_filename_path)
 
-                if list_source_all_directory[i][-1] == "/":
-                    list_source_all_directory[i] = list_source_all_directory[i][:-1]
                 shutil.copy(f"{list_source_all_directory[i]}/{intended_filename}",
                             instances_directory)
                 print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"

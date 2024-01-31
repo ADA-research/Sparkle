@@ -209,7 +209,6 @@ if __name__ == "__main__":
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
     sah.clean_ablation_scenarios(solver_path.name, instance_set_train.name)
-
     solver = Solver(solver_path)
 
     status_info = ConfigureSolverStatusInfo()
@@ -224,7 +223,6 @@ if __name__ == "__main__":
                                             use_features, configurator_target,
                                             feature_data_df)
     configurator = Configurator(configurator_path)
-
     configurator.create_sbatch_script(config_scenario)
     configure_jobid = configurator.configure(run_on=run_on)
 

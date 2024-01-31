@@ -60,7 +60,8 @@ def get_instance_list_from_path(path: Path) -> list[str]:
         list_all_filename = _get_list_instance(str(path))
     # Single file instances
     else:
-        list_all_filename = sfh.get_list_all_cnf_filename(str(path))
+        list_all_filename = []
+        sfh.get_list_all_cnf_filename_recursive(str(path), list_all_filename)
 
     return list_all_filename
 

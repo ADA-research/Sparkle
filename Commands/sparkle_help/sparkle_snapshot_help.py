@@ -68,8 +68,8 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
 
     with zipfile.ZipFile(my_snapshot_filename, "r") as zip_ref:
         zip_ref.extractall(my_tmp_directory)
-    sfh.copytree(my_tmp_directory, "./")
-    sfh.rmtree(Path(my_tmp_directory))
+    shutil.copytree(my_tmp_directory, "./", dirs_exist_ok=True)
+    shutil.rmtree(Path(my_tmp_directory))
 
 
 def load_snapshot(snapshot_file_path: str) -> None:
@@ -106,5 +106,5 @@ def remove_snapshot(snapshot_file_path: str) -> None:
         sys.exit(-1)
 
     print(f"Removing snapshot file {snapshot_file_path} ...")
-    sfh.rmtree(snapshot_file_path)
+    shutil.rmtree(snapshot_file_path)
     print(f"Snapshot file {snapshot_file_path} removed!")

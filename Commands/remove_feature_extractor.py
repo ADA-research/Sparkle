@@ -3,10 +3,11 @@
 
 import sys
 import argparse
+import shutil
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_command_help as sch
@@ -46,7 +47,7 @@ if __name__ == "__main__":
                              sch.CommandName.REMOVE_FEATURE_EXTRACTOR])
 
     if args.nickname:
-        extractor_path = sparkle_global_help.extractor_nickname_mapping[extractor_path]
+        extractor_path = sgh.extractor_nickname_mapping[extractor_path]
     if not Path(extractor_path).exists():
         print(f'Feature extractor path "{extractor_path}" does not exist!')
         sys.exit(-1)
@@ -57,29 +58,31 @@ if __name__ == "__main__":
     print("Starting removing feature extractor "
           f"{sfh.get_last_level_directory_name(extractor_path)} ...")
 
-    extractor_list = sparkle_global_help.extractor_list
+    extractor_list = sgh.extractor_list
     if bool(extractor_list):
         extractor_list.remove(extractor_path)
-        sfh.write_extractor_list()
+        sfh.write_data_to_file(sgh.extractor_list_path, sgh.extractor_list)
 
     extractor_feature_vector_size_mapping = (
-        sparkle_global_help.extractor_feature_vector_size_mapping
+        sgh.extractor_feature_vector_size_mapping
     )
     if bool(extractor_feature_vector_size_mapping):
         output = extractor_feature_vector_size_mapping.pop(extractor_path)
-        sfh.write_extractor_feature_vector_size_mapping()
+        sfh.write_data_to_file(sgh.extractor_feature_vector_size_list_path,
+                               sgh.extractor_feature_vector_size_mapping)
 
-    extractor_nickname_mapping = sparkle_global_help.extractor_nickname_mapping
+    extractor_nickname_mapping = sgh.extractor_nickname_mapping
     if bool(extractor_nickname_mapping):
         for key in extractor_nickname_mapping:
             if extractor_nickname_mapping[key] == extractor_path:
                 output = extractor_nickname_mapping.pop(key)
                 break
-        sfh.write_extractor_nickname_mapping()
+        sfh.write_data_to_file(sgh.extractor_nickname_list_path,
+                               sgh.extractor_nickname_mapping)
 
-    if Path(sparkle_global_help.feature_data_csv_path).exists():
+    if Path(sgh.feature_data_csv_path).exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
-            sparkle_global_help.feature_data_csv_path
+            sgh.feature_data_csv_path
         )
         for column_name in feature_data_csv.list_columns():
             tmp_extractor_path = feature_data_csv.get_extractor_path_from_feature(
@@ -88,16 +91,16 @@ if __name__ == "__main__":
             if extractor_path == tmp_extractor_path:
                 feature_data_csv.delete_column(column_name)
         feature_data_csv.update_csv()
-        sfh.rmtree(extractor_path)
+        shutil.rmtree(extractor_path)
 
-    if Path(sparkle_global_help.sparkle_algorithm_selector_path).exists():
-        sfh.rmtree(sparkle_global_help.sparkle_algorithm_selector_path)
+    if Path(sgh.sparkle_algorithm_selector_path).exists():
+        shutil.rmtree(sgh.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{sparkle_global_help.sparkle_algorithm_selector_path} done!")
+              f"{sgh.sparkle_algorithm_selector_path} done!")
 
-    if Path(sparkle_global_help.sparkle_report_path).exists():
-        sfh.rmtree(sparkle_global_help.sparkle_report_path)
-        print(f"Removing Sparkle report {sparkle_global_help.sparkle_report_path} done!")
+    if Path(sgh.sparkle_report_path).exists():
+        shutil.rmtree(sgh.sparkle_report_path)
+        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     print("Removing feature extractor "
           f"{sfh.get_last_level_directory_name(extractor_path)} done!")
