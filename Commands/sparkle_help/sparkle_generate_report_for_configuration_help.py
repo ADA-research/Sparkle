@@ -684,9 +684,9 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     if ablation_validation_name is None:
         ablation_validation_name = instance_set_train_name
     common_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
-                                              ablation_validation_name)
-    common_dict["ablationPath"] = get_ablation_table(solver_name, instance_set_train_name,
-                                               ablation_validation_name)
+                                                    ablation_validation_name)
+    common_dict["ablationPath"] = get_ablation_table(
+        solver_name, instance_set_train_name, ablation_validation_name)
     common_dict["featuresBool"] = get_features_bool(solver_name, instance_set_train_name)
 
     return common_dict

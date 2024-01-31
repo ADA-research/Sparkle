@@ -3,84 +3,11 @@
 
 import sys
 import ast
-import argparse
 import time
 import subprocess
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
-
-
-def parser_function() -> argparse.ArgumentParser:
-    """Define the command line arguments given by SMAC."""
-    parser = argparse.ArgumentParser(
-        description="SMAC input from commandline.")
-    parser.add_argument(
-        "-init_solution",
-        type=int,
-        help="Initial solution?"
-    )
-    parser.add_argument(
-        "-p_swt",
-        type=float,
-        help="p_swt?"
-    )
-    parser.add_argument(
-        "-perform_aspiration",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-perform_clause_weight",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-perform_double_cc",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-perform_first_div",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-perform_pac",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-q_swt",
-        type=float,
-        help="?"
-    )
-    parser.add_argument(
-        "-sel_clause_div",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-sel_clause_weight_scheme",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-sel_var_break_tie_greedy",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-sel_var_div",
-        type=int,
-        help="?"
-    )
-    parser.add_argument(
-        "-threshold_swt",
-        type=int,
-        help="?"
-    )
-    return parser
 
 
 if __name__ == "__main__":
