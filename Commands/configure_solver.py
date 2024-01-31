@@ -22,6 +22,7 @@ from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help.configurator import Configurator
 from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help.solver import Solver
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from runrunner.base import Runner
 
@@ -244,14 +245,16 @@ if __name__ == "__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = ssh.run_validation_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
+        validate_jobid = ssh.run_callback(
+            solver, instance_set_train, instance_set_test, configure_jobid,
+            command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
         dependency_jobid_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = ssh.run_ablation_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
+        ablation_jobid = ssh.run_callback(
+            solver, instance_set_train, instance_set_test, configure_jobid,
+            command=CommandName.RUN_ABLATION, run_on=run_on
         )
         dependency_jobid_list.append(ablation_jobid)
 

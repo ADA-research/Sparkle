@@ -15,14 +15,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_instances_help as sih
-
 from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help import sparkle_job_help as sjh
-from Commands.sparkle_help.sparkle_command_help import CommandName
-
-from sparkle.slurm_parsing import SlurmBatch
-from runrunner.base import Runner
-import runrunner as rrr
 
 
 class InstanceType(Enum):
@@ -349,94 +342,6 @@ def create_smac_configure_sbatch_script(solver_name: str,
     return sbatch_script_path
 
 
-def run_smac_configure(solver_name: str,
-                       instance_set_name: str,
-                       run_on: Runner = Runner.LOCAL) -> str:
-    """Runs the smac configuration for a solver and instance set.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set
-
-    Returns:
-        str: The Slurm Job ID string, if relevant
-    """
-    sbatch_script_path = create_smac_configure_sbatch_script(
-        solver_name, instance_set_name
-    )
-    configure_jobid = ""
-    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
-    # runrunner works properly everything under 'if' should be removed leaving only the
-    # 'else', and the SLURM_RR replaced by just SLURM.
-    if run_on == Runner.SLURM:
-        configure_jobid = submit_smac_configure_sbatch_script(
-            sbatch_script_path
-        )
-    else:
-        # Remove once Runner is running properly
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        batch = SlurmBatch(Path(f"{sgh.smac_dir}{sbatch_script_path}"))
-
-        result_part = Path(f"{solver_name}_{instance_set_name}")
-        result_dir = sgh.smac_results_dir / result_part
-
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=batch.cmd,
-            name="smac_configure",
-            base_dir=result_dir,
-            sbatch_options=batch.sbatch_options)
-
-        # Remove once Runner is running properly
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-        if run_on == Runner.SLURM_RR:
-            configure_jobid = run.run_id
-
-    return configure_jobid
-
-
-def execute_smac_configure_local(solver_name: str,
-                                 instance_set_name: str,
-                                 run_on: Runner = Runner.LOCAL) -> rrr.LocalRun:
-    """Adds a process to the local queue for algorithm configuration with SMAC.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set
-
-    Returns:
-        The LocalRun Object
-    """
-    # Remove once Runner is running properly
-    if run_on == Runner.SLURM_RR:
-        run_on = Runner.SLURM
-    sbatch_script_path = create_smac_configure_sbatch_script(
-        solver_name, instance_set_name
-    )
-
-    batch = SlurmBatch(Path(f"{sgh.smac_dir}{sbatch_script_path}"))
-
-    result_part = Path(f"{solver_name}_{instance_set_name}")
-    result_dir = sgh.smac_results_dir / result_part
-
-    run = rrr.add_to_queue(
-        runner=run_on,
-        cmd=batch.cmd,
-        name="smac_configure",
-        base_dir=result_dir,
-        sbatch_options=batch.sbatch_options)
-
-    # Remove once Runner is running properly
-    if run_on == Runner.SLURM:
-        run_on = Runner.SLURM_RR
-
-    return run
-
-
 def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file: Path,
                                          result_directory: Path, num_job_total: int,
                                          num_job_in_parallel: int,
@@ -471,15 +376,15 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
     Path(sgh.smac_dir, "tmp").mkdir(parents=True, exist_ok=True)
 
     fout = Path(f"{sgh.smac_dir}{sbatch_script_path}").open("w+")
-    fout.write("#!/bin/bash\n")
-    fout.write("###\n")
-    fout.write(f"#SBATCH --job-name={sbatch_script_path}\n")
-    fout.write(f"#SBATCH --output=tmp/{sbatch_script_path}.txt\n")
-    fout.write(f"#SBATCH --error=tmp/{sbatch_script_path}.err\n")
-    fout.write("###\n")
-    fout.write("###\n")
-    fout.write(f"#SBATCH --array=0-{num_job_total}%{num_job_in_parallel}\n")
-    fout.write("###\n")
+    fout.write("#!/bin/bash\n"
+               "###\n"
+               f"#SBATCH --job-name={sbatch_script_path}\n"
+               f"#SBATCH --output=tmp/{sbatch_script_path}.txt\n"
+               f"#SBATCH --error=tmp/{sbatch_script_path}.err\n"
+               "###\n"
+               "###\n"
+               f"#SBATCH --array=0-{num_job_total}%{num_job_in_parallel}\n"
+               "###\n")
     # Options from the slurm/sbatch settings file
     for i in sbatch_options_list:
         fout.write(f"#SBATCH {i}\n")
@@ -509,31 +414,6 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
     cmd = f"{cmd_srun_prefix} {cmd_smac_prefix} " + "${params[$SLURM_ARRAY_TASK_ID]}"
     fout.write(cmd + "\n")
     fout.close()
-
-
-def submit_smac_configure_sbatch_script(smac_configure_sbatch_script_name: str) -> str:
-    """Submit a Slurm batch script for algorithm configuration with SMAC.
-
-    Args:
-        smac_configure_sbatch_script_name: Name of the script to execute
-
-    Returns:
-        String containing the slurm job ID
-    """
-    ori_path = Path.cwd()
-    command_line = (f"cd {sgh.smac_dir} ; sbatch {smac_configure_sbatch_script_name} ; "
-                    f"cd {ori_path}")
-
-    output_list = os.popen(command_line).readlines()
-
-    if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-        jobid = output_list[0].strip().split()[-1]
-        # Add job to active job CSV
-        sjh.write_active_job(jobid, CommandName.CONFIGURE_SOLVER)
-    else:
-        jobid = ""
-
-    return jobid
 
 
 def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:

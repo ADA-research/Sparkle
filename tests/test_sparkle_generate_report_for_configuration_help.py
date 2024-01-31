@@ -82,15 +82,6 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     assert par == 7.5
 
 
-def test_get_instance_name_from_path() -> None:
-    """Test get_instance_name_from_path returns the last part of the given path."""
-    path_string = "parent/directory/instance-name"
-
-    name = sgr.get_instance_name_from_path(path_string)
-
-    assert name == "instance-name"
-
-
 def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
     """Test construct_list_instance_and_performance creates list from file content."""
     file_content_mock = ('"Problem Instance","Seed",'

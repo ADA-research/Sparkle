@@ -76,36 +76,6 @@ def get_par_performance(results_file: str, cutoff: int) -> float:
     return mean_par
 
 
-def get_instance_name_from_path(path: str) -> str:
-    """Return the name of an instance from the path.
-
-    Args:
-        path: Path to the instance (as string)
-
-    Returns:
-        A string containing the instance name
-    """
-    instance_path = Path(path)
-    instance_name = instance_path.name
-    # TODO: Check what this was supposed to do, or whehter it can be deleted:
-    # if results_dir[-1] != '/':
-    # 	results_dir += '/'
-    # instance_path = path.replace(results_dir, '')
-    # pos_right_slash = instance_path.rfind('/')
-    # instance_path_1 = instance_path[:pos_right_slash+1]
-    # instance_path_2 = instance_path[pos_right_slash+1:]
-    #
-    # key_str_wrapper = 'wrapper'
-    # pos_wrapper = instance_path_2.find(key_str_wrapper)
-    # instance_path_2 = instance_path_2[pos_wrapper+1:]
-    # pos_underscore_first = instance_path_2.find('_')
-    # instance_path_2 = instance_path_2[pos_underscore_first+1:]
-    # pos_underscore_last = instance_path_2.rfind('_')
-    # instance_path_2 = instance_path_2[:pos_underscore_last]
-    # instance_path = instance_path_1 + instance_path_2
-    return instance_name
-
-
 # Retrieve instances and corresponding performance values from smac validation objective
 # matrix
 def construct_list_instance_and_performance(result_file: str,
@@ -168,7 +138,7 @@ def get_dict_instance_to_performance(results_file: str, cutoff: int) -> dict[str
     dict_instance_to_performance = {}
 
     for item in list_instance_and_performance:
-        instance = get_instance_name_from_path(item[0])
+        instance = Path(item[0]).name
         performance_value = item[1]
         dict_instance_to_performance[instance] = performance_value
 
@@ -650,67 +620,34 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
         A dictionary containing the variables and values
     """
     common_dict = {}
-
-    variable = "performanceMeasure"
-    str_value = get_performance_measure()
-    common_dict[variable] = str_value
-
-    variable = "runtimeBool"
-    str_value = get_runtime_bool()
-    common_dict[variable] = str_value
-
-    variable = "customCommands"
-    str_value = sgrh.get_custom_commands()
-    common_dict[variable] = str_value
-
-    variable = "sparkle"
-    str_value = sgrh.get_sparkle()
-    common_dict[variable] = str_value
-
-    variable = "solver"
-    str_value = solver_name
-    common_dict[variable] = str_value
-
-    variable = "instanceSetTrain"
-    str_value = instance_set_train_name
-    common_dict[variable] = str_value
-
-    variable = "sparkleVersion"
-    str_value = sgh.sparkle_version
-    common_dict[variable] = str_value
-
-    variable = "numInstanceInTrainingInstanceSet"
-    str_value = get_num_instance_in_instance_set_smac_dir(instance_set_train_name)
-    common_dict[variable] = str_value
+    common_dict["performanceMeasure"] = get_performance_measure()
+    common_dict["runtimeBool"] = get_runtime_bool()
+    common_dict["customCommands"] = sgrh.get_custom_commands()
+    common_dict["sparkle"] = sgrh.get_sparkle()
+    common_dict["solver"] = solver_name
+    common_dict["instanceSetTrain"] = instance_set_train_name
+    common_dict["sparkleVersion"] = sgh.sparkle_version
+    common_dict["numInstanceInTrainingInstanceSet"] = \
+        get_num_instance_in_instance_set_smac_dir(instance_set_train_name)
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
-     smac_each_run_cutoff_length, num_of_smac_run_str, num_of_smac_run_in_parallel_str
-     ) = scsh.get_smac_settings()
+     _, num_of_smac_run_str, _) = scsh.get_smac_settings()
 
-    variable = "numSmacRuns"
-    common_dict[variable] = str(num_of_smac_run_str)
+    common_dict["numSmacRuns"] = str(num_of_smac_run_str)
+    common_dict["smacObjective"] = str(smac_run_obj)
+    common_dict["smacWholeTimeBudget"] = str(smac_whole_time_budget)
+    common_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
 
-    variable = "smacObjective"
-    common_dict[variable] = str(smac_run_obj)
-
-    variable = "smacWholeTimeBudget"
-    common_dict[variable] = str(smac_whole_time_budget)
-
-    variable = "smacEachRunCutoffTime"
-    common_dict[variable] = str(smac_each_run_cutoff_time)
-
-    (optimised_configuration_str, optimised_configuration_performance_par,
+    (optimised_configuration_str, _,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
 
-    variable = "optimisedConfiguration"
-    common_dict[variable] = str(optimised_configuration_str)
+    common_dict["optimisedConfiguration"] = str(optimised_configuration_str)
 
     smac_solver_dir = (
         f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
 
-    variable = "optimisedConfigurationTrainingPerformancePAR"
-    (optimised_configuration_str, optimised_configuration_performance_par,
+    (optimised_configuration_str, _,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
     configured_results_train_file = "validationObjectiveMatrix-traj-run-" + str(
@@ -720,49 +657,37 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
                                     f"{configured_results_train_file}")
     str_value = get_par_performance(configured_results_train_dir,
                                     smac_each_run_cutoff_time)
-    common_dict[variable] = str(str_value)
+    common_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
 
-    variable = "defaultConfigurationTrainingPerformancePAR"
     default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_train_dir = (
         smac_solver_dir + "outdir_train_default/" + default_results_train_file)
     str_value = get_par_performance(default_results_train_dir,
                                     smac_each_run_cutoff_time)
-    common_dict[variable] = str(str_value)
+    common_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
 
-    variable = "figure-configured-vs-default-train"
     str_value = get_figure_configured_vs_default_on_train_instance_set(
         solver_name, instance_set_train_name, configuration_reports_directory,
         float(smac_each_run_cutoff_time))
-    common_dict[variable] = str_value
+    common_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = (
         get_timeouts_train(solver_name, instance_set_train_name,
                            float(smac_each_run_cutoff_time)))
 
-    variable = "timeoutsTrainDefault"
-    common_dict[variable] = str(default_timeouts_train)
+    common_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
+    common_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
+    common_dict["timeoutsTrainOverlap"] = str(overlapping_timeouts_train)
 
-    variable = "timeoutsTrainConfigured"
-    common_dict[variable] = str(configured_timeouts_train)
-
-    variable = "timeoutsTrainOverlap"
-    common_dict[variable] = str(overlapping_timeouts_train)
-
-    variable = "ablationBool"
-    ablation_validation_name = (instance_set_test_name
-                                if instance_set_test_name is not None
-                                else instance_set_train_name)
-    common_dict[variable] = get_ablation_bool(solver_name, instance_set_train_name,
+    ablation_validation_name = instance_set_test_name
+    if ablation_validation_name is None:
+        ablation_validation_name = instance_set_train_name
+    common_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
                                               ablation_validation_name)
-
-    variable = "ablationPath"
-    common_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,
+    common_dict["ablationPath"] = get_ablation_table(solver_name, instance_set_train_name,
                                                ablation_validation_name)
-
-    variable = "featuresBool"
-    common_dict[variable] = get_features_bool(solver_name, instance_set_train_name)
+    common_dict["featuresBool"] = get_features_bool(solver_name, instance_set_train_name)
 
     return common_dict
 
@@ -789,58 +714,43 @@ def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: s
     str_value = get_num_instance_in_instance_set_smac_dir(instance_set_test_name)
     test_dict[variable] = str_value
 
-    (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
-     smac_each_run_cutoff_length, num_of_smac_run_str,
-     num_of_smac_run_in_parallel_str) = scsh.get_smac_settings()
+    (_, _, smac_each_run_cutoff_time, _, _, _) = scsh.get_smac_settings()
 
     smac_solver_dir = (
         f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set_train_name}/")
 
-    variable = "optimisedConfigurationTestingPerformancePAR"
     configured_results_test_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     configured_results_test_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
                                    f"_test_configured/{configured_results_test_file}")
     str_value = get_par_performance(configured_results_test_dir,
                                     smac_each_run_cutoff_time)
-    test_dict[variable] = str(str_value)
+    test_dict["optimisedConfigurationTestingPerformancePAR"] = str(str_value)
 
-    variable = "defaultConfigurationTestingPerformancePAR"
     default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_test_dir = (f"{smac_solver_dir}outdir_{instance_set_test_name}"
                                 f"_test_default/{default_results_test_file}")
     str_value = get_par_performance(default_results_test_dir,
                                     smac_each_run_cutoff_time)
-    test_dict[variable] = str(str_value)
+    test_dict["defaultConfigurationTestingPerformancePAR"] = str(str_value)
 
-    variable = "figure-configured-vs-default-test"
     str_value = get_figure_configured_vs_default_on_test_instance_set(
         solver_name, instance_set_train_name, instance_set_test_name,
         float(smac_each_run_cutoff_time))
-    test_dict[variable] = str_value
+    test_dict["figure-configured-vs-default-test"] = str_value
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = (
         get_timeouts_test(solver_name, instance_set_train_name, instance_set_test_name,
                           float(smac_each_run_cutoff_time)))
 
-    variable = "timeoutsTestDefault"
-    test_dict[variable] = str(default_timeouts_test)
-
-    variable = "timeoutsTestConfigured"
-    test_dict[variable] = str(configured_timeouts_test)
-
-    variable = "timeoutsTestOverlap"
-    test_dict[variable] = str(overlapping_timeouts_test)
-
-    variable = "ablationBool"
-    test_dict[variable] = get_ablation_bool(solver_name, instance_set_train_name,
-                                            instance_set_test_name)
-
-    variable = "ablationPath"
-    test_dict[variable] = get_ablation_table(solver_name, instance_set_train_name,
-                                             instance_set_test_name)
-
+    test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
+    test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
+    test_dict["timeoutsTestOverlap"] = str(overlapping_timeouts_test)
+    test_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
+                                                  instance_set_test_name)
+    test_dict["ablationPath"] = get_ablation_table(solver_name, instance_set_train_name,
+                                                   instance_set_test_name)
     return test_dict
 
 
