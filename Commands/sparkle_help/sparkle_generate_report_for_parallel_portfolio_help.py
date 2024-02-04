@@ -159,8 +159,7 @@ def get_results() -> dict[str, list[str, str]]:
 
     results_dict = dict()
 
-    for result in results:
-        result_path = Path(solutions_dir / result)
+    for result_path in results:
 
         with Path(result_path).open("r") as result_file:
             lines = result_file.readlines()

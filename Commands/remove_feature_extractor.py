@@ -56,19 +56,19 @@ if __name__ == "__main__":
         extractor_path = extractor_path[:-1]
 
     print("Starting removing feature extractor "
-          f"{sfh.get_last_level_directory_name(extractor_path)} ...")
+          f"{Path(extractor_path).name} ...")
 
     extractor_list = sgh.extractor_list
     if bool(extractor_list):
         extractor_list.remove(extractor_path)
-        sfh.write_data_to_file(sgh.extractor_list_path, sgh.extractor_list)
+        sfh.write_data_to_file(Path(sgh.extractor_list_path), sgh.extractor_list)
 
     extractor_feature_vector_size_mapping = (
         sgh.extractor_feature_vector_size_mapping
     )
     if bool(extractor_feature_vector_size_mapping):
         output = extractor_feature_vector_size_mapping.pop(extractor_path)
-        sfh.write_data_to_file(sgh.extractor_feature_vector_size_list_path,
+        sfh.write_data_to_file(Path(sgh.extractor_feature_vector_size_list_path),
                                sgh.extractor_feature_vector_size_mapping)
 
     extractor_nickname_mapping = sgh.extractor_nickname_mapping
@@ -103,4 +103,4 @@ if __name__ == "__main__":
         print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     print("Removing feature extractor "
-          f"{sfh.get_last_level_directory_name(extractor_path)} done!")
+          f"{Path(extractor_path).name} done!")

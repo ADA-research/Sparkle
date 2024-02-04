@@ -134,13 +134,13 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
 
     # Removes statusinfo files
     for solver_instance in solver_instance_list:
-        shutil.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}")
+        shutil.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}", ignore_errors=True)
 
     # Validate no known errors occurred in the sbatch
     check_sbatch_for_errors(sbatch_script_path)
 
     # Removes the generated sbatch files
-    shutil.rmtree(sbatch_script_path)
+    sbatch_script_path.unlink()
 
     # Removes the directories generated for the solver instances
     for temp_solver in temp_solvers:
@@ -171,7 +171,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                 to_be_moved.append(file)
 
     for file in to_be_deleted:
-        shutil.rmtree(f"{tmp_dir}{file}")
+        Path(f"{tmp_dir}{file}").unlink(missing_ok=True)
 
     for file in to_be_moved:
         if ".val" in file:
@@ -183,7 +183,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             except shutil.Error:
                 print(f"the {str(sgh.pap_performance_data_tmp_path)} directory already "
                       "contains a file with the same name, it will be skipped")
-            shutil.rmtree(path_from)
+            Path(path_from).unlink(missing_ok=True)
 
 
 def find_finished_time_finished_solver(solver_instance_list: list[str],

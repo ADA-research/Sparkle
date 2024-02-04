@@ -39,7 +39,7 @@ def get_last_level_directory_name(filepath: str) -> str:
     Returns:
       String representation of the last path component.
     """
-    if not Path(filepath).is_dir():
+    if Path(filepath).is_file():
         return Path(filepath).parent.name
     return Path(filepath).name
 
@@ -116,38 +116,6 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
     return portfolio_solver_list
 
 
-def get_list_all_cnf_filename_recursive(path: str,
-                                        list_all_cnf_filename: list[str]) -> None:
-    """Extend a given list of filenames with all files found under a path.
-
-    This includes all files found in subdirectories of the given path.
-
-    NOTE: Possibly to be merged with get_list_all_filename() since the CNF extension is
-    not considered anymore.
-
-    Args:
-      path: Target path.
-      list_all_cnf_filename: List of filenames (may be empty).
-    """
-    if Path(path).is_file():
-        # TODO: Possibly add extension check back when we get this information from the
-        # user
-        # file_extension = get_file_least_extension(path)
-        # if file_extension == scch.file_extension:
-        filename = get_file_name(path)
-        list_all_cnf_filename.append(filename)
-        return
-    elif Path(path).is_dir():
-        if path[-1] != "/":
-            this_path = path + "/"
-        else:
-            this_path = path
-        list_all_items = os.listdir(this_path)
-        for item in list_all_items:
-            get_list_all_cnf_filename_recursive(this_path + item, list_all_cnf_filename)
-    return
-
-
 def get_list_all_filename_recursive(path: str, list_all_filename: list[str]) -> None:
     """Extend a given list of filenames with all files found under a path.
 
@@ -210,6 +178,8 @@ def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
     Returns:
       List of result files.
     """
+    if not suffix.startswith("."):
+        suffix = "." + suffix
     if not filepath.exists():
         return []
     return [str(x) for x in Path.iterdir(filepath) if x.suffix == suffix]
@@ -399,7 +369,7 @@ def write_data_to_file(target_file: Path, object: list | dict) -> None:
     """
     with target_file.open("w+") as fout:
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-        if isinstance(object, dir):
+        if isinstance(object, dict):
             for key in object:
                 fout.write(f"{key} {object[key]}\n")
         elif isinstance(object, list):
