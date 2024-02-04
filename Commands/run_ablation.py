@@ -183,7 +183,6 @@ if __name__ == "__main__":
     ablation_scenario_dir = sah.prepare_ablation_scenario(
         solver_name, instance_set_train_name, instance_set_test_name
     )
-    print(f"Scenario dir: {ablation_scenario_dir}")
 
     # Instances
     sah.create_instance_file(instance_set_train, ablation_scenario_dir, "train")

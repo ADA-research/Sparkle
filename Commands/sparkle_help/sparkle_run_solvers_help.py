@@ -135,8 +135,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
     if is_configured:
         return raw_result_solver_path
-    else:
-        return raw_result_path
+    return raw_result_path
 
 
 def check_solver_output_for_errors(raw_result_path: Path) -> None:

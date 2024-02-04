@@ -261,8 +261,7 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
 
     if instances_directory[-1] != "/":
         instances_directory += "/"
-    print(f"create_instance_file ({instances_directory}, {ablation_scenario_dir}, "
-          f"{train_or_test})")
+
     list_all_path = sih.get_list_all_path(instances_directory)
     file_instance_path = ablation_scenario_dir + "instances" + file_suffix
 
