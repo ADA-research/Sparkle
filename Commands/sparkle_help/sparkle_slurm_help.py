@@ -185,39 +185,30 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
     fout.write("#!/bin/bash\n"
                "###\n"
                "###\n")
-
     for i in sbatch_options_list:
-        fout.write("#SBATCH " + str(i) + "\n")
-
+        fout.write(f"#SBATCH {i}\n")
     fout.write("###\n")
+
+    # specify the executing command
+    command_line = "srun " + srun_options_str + " " + target_call_str
 
     # specify the array of parameters for each command
     if len(job_params_list) > 0:
         fout.write("params=( \\" + "\n")
-
-        for i in range(0, len(job_params_list)):
-            fout.write(f"'{job_params_list[i]}' \\\n")
-
+        for job in job_params_list:
+            fout.write(f"'{job}' \\\n")
         fout.write(")" + "\n")
+        command_line += " " + "${params[$SLURM_ARRAY_TASK_ID]}"
 
     # if there is a list of output file paths, write the output parameter
     if job_output_list is not None:
         fout.write("output=( \\" + "\n")
 
-        for i in range(0, len(job_output_list)):
-            fout.write(f"'{job_output_list[i]}' \\\n")
+        for job in job_output_list:
+            fout.write(f"'{job}' \\\n")
 
         fout.write(")" + "\n")
-
-    # specify the prefix of the executing command
-    command_prefix = "srun " + srun_options_str + " " + target_call_str
-    # specify the complete command
-    command_line = command_prefix
-    if len(job_params_list) > 0:
-        command_line += " " + "${params[$SLURM_ARRAY_TASK_ID]}"
-
-    # add output file paths to the command if given
-    if job_output_list is not None:
+        # add output file paths to the command
         command_line += " > ${output[$SLURM_ARRAY_TASK_ID]}"
 
     # write the complete command in this sbatch script
@@ -245,7 +236,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
     else:
         tmp_dir = "Tmp/"
 
-    sbatch_script_name = sfh.get_file_name(str(sbatch_script_path))
+    sbatch_script_name = Path(sbatch_script_path).name
 
     # Set sbatch options
     max_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
@@ -454,9 +445,9 @@ def generate_sbatch_script_for_feature_computation(
     # Create job list
     job_params_list = []
 
-    for i in range(0, num_jobs):
-        instance_path = list_jobs[i][0]
-        extractor_path = list_jobs[i][1]
+    for job in list_jobs:
+        instance_path = job[0]
+        extractor_path = job[1]
         job_params = (f"--instance {instance_path} --extractor {extractor_path} "
                       f"--feature-csv {feature_data_csv_path}")
         job_params_list.append(job_params)

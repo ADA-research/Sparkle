@@ -105,11 +105,9 @@ if __name__ == "__main__":
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sgh.performance_data_csv_path)
 
-        num_inst = len(list_instance)
-        print(f"Number of instances to be added: {str(num_inst)}")
+        print(f"Number of instances to be added: {len(list_instance)}")
 
-        for i in range(0, num_inst):
-            instance_line = list_instance[i]
+        for instance_line in list_instance:
             instance_related_files = instance_line.strip().split()
             intended_instance_line = ""
 
@@ -131,13 +129,11 @@ if __name__ == "__main__":
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()
     else:
-        list_source_all_filename = []
-        sfh.get_list_all_filename_recursive(instances_source, list_source_all_filename)
+        print(instances_source)
+        list_source_all_filename = sfh.get_list_all_filename_recursive(instances_source)
         list_source_all_directory = []
         sfh.get_list_all_directory_recursive(instances_source, list_source_all_directory)
-        list_target_all_filename = []
-        sfh.get_list_all_filename_recursive(str(instances_directory),
-                                            list_target_all_filename)
+        target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
@@ -149,25 +145,20 @@ if __name__ == "__main__":
 
         for i, intended_filename in enumerate(list_source_all_filename):
             print("")
-            print(f"Adding {intended_filename} ... "
+            print(f"Adding {intended_filename.name} ... "
                   f"({str(i + 1)} out of {str(num_inst)})")
 
-            if intended_filename in list_target_all_filename:
-                print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
-                      f" already exists in Directory {instances_directory}")
-                print("Ignore adding file "
-                      f"{sfh.get_last_level_directory_name(intended_filename)}")
+            if intended_filename in target_all_filename:
+                print(f"Instance {intended_filename.name} already exists in Directory "
+                      f"{instances_directory}")
+                print(f"Ignore adding file {intended_filename.name}")
             else:
-                intended_filename_path = f"{instances_directory}/{intended_filename}"
-                sgh.instance_list.append(intended_filename_path)
-                sfh.add_new_instance_into_file(intended_filename_path)
-                feature_data_csv.add_row(intended_filename_path)
-                performance_data_csv.add_row(intended_filename_path)
-
-                shutil.copy(f"{list_source_all_directory[i]}/{intended_filename}",
-                            instances_directory)
-                print(f"Instance {sfh.get_last_level_directory_name(intended_filename)}"
-                      " has been added!")
+                sgh.instance_list.append(intended_filename)
+                sfh.add_new_instance_into_file(str(intended_filename))
+                feature_data_csv.add_row(intended_filename)
+                performance_data_csv.add_row(intended_filename)
+                shutil.copy(intended_filename, instances_directory)
+                print(f"Instance {intended_filename.name} has been added!")
 
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()

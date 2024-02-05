@@ -98,15 +98,13 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
 
     if verbose:
         current_job_num = 1
-        for i in range(0, len(list_feature_computation_job)):
-            instance_path = list_feature_computation_job[i][0]
-            extractor_list = list_feature_computation_job[i][1]
-            len_extractor_list = len(extractor_list)
-            for j in range(0, len_extractor_list):
-                extractor_path = extractor_list[j]
-                print(f"[{str(current_job_num)}]: Extractor: "
-                      f"{sfh.get_last_level_directory_name(extractor_path)}, Instance: "
-                      f"{sfh.get_last_level_directory_name(instance_path)}")
+        for job in list_feature_computation_job:
+            instance_path = job[0]
+            extractor_list = job[1]
+            for extractor_path in extractor_list:
+                print(f"[{current_job_num}]: Extractor: "
+                      f"{Path(extractor_path).name}, Instance: "
+                      f"{Path(instance_path).name}")
                 current_job_num += 1
 
     print("")
@@ -138,15 +136,13 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
 
     if verbose:
         current_job_num = 1
-        for i in range(0, len(list_performance_computation_job)):
-            instance_path = list_performance_computation_job[i][0]
-            solver_list = list_performance_computation_job[i][1]
-            len_solver_list = len(solver_list)
-            for j in range(0, len_solver_list):
-                solver_path = solver_list[j]
-                print(f"[{str(current_job_num)}]: Solver: "
-                      f"{sfh.get_last_level_directory_name(solver_path)}, Instance: "
-                      f"{sfh.get_last_level_directory_name(instance_path)}")
+        for job in list_performance_computation_job:
+            instance_path = job[0]
+            solver_list = job[1]
+            for solver_path in solver_list:
+                print(f"[{current_job_num}]: Solver: "
+                      f"{Path(solver_path).name}, Instance: "
+                      f"{Path(instance_path).name}")
                 current_job_num += 1
 
     print("")

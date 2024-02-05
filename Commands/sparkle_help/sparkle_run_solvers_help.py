@@ -215,20 +215,17 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     else:
         update_performance_data_id()
 
-    for i in range(0, len(list_performance_computation_job)):
-        instance_path = list_performance_computation_job[i][0]
-        solver_list = list_performance_computation_job[i][1]
-        len_solver_list = len(solver_list)
-        for j in range(0, len_solver_list):
-            solver_path = solver_list[j]
-
+    for job in list_performance_computation_job:
+        instance_path = job[0]
+        solver_list = job[1]
+        for solver_path in solver_list:
             print("")
             # TODO: Fix printing of multi-file instance 'path' (only one file name is
             # printed)
-            print(f"Solver {sfh.get_last_level_directory_name(solver_path)} running on "
-                  f"instance {sfh.get_last_level_directory_name(instance_path)} ...")
+            print(f"Solver {Path(solver_path).name} running on "
+                  f"instance {Path(instance_path).name} ...")
 
-            cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = (
+            _, _, cpu_time_penalised, quality, status, raw_result_path = (
                 run_solver_on_instance_and_process_results(solver_path, instance_path))
 
             if status == "CRASHED":

@@ -57,10 +57,7 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
             solver_variations = int(solver_path[solver_path.rfind(" ") + 1:])
             solver_path = solver_path[:solver_path.rfind(" ")]
 
-        solver_name = sfh.get_file_name(solver_path)
-
-        if solver_name == "":
-            solver_name = sfh.get_last_level_directory_name(solver_path)
+        solver_name = Path(solver_path).name
 
         x = solver_name.rfind("_")
 
@@ -198,7 +195,7 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
         unsolved_instances = 0
 
         for instances in results_on_instances:
-            solver_name = sfh.get_file_name(results_on_instances[instances][0])
+            solver_name = Path(results_on_instances[instances][0]).name
             cutoff_time = str(sgh.settings.get_penalised_time())
 
             if results_on_instances[instances][1] != cutoff_time:

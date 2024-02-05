@@ -89,7 +89,7 @@ class CCAGInstanceFeature:
             return num_constraint, average_constraint_length
 
         sum_constraint_length = 0
-        for i in range(0, num_constraint):
+        for i in range(num_constraint):
             temp_constraint_length = int(lines[2*i+1].strip())
             sum_constraint_length += temp_constraint_length
         

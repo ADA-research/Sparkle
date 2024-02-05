@@ -460,11 +460,10 @@ def print_rank_list(rank_list: list, mode: str) -> None:
     print("******")
     print("Solver ranking list via marginal contribution (Margi_Contr) with regards to "
           f"{mode}")
-    for i in range(0, len(rank_list)):
-        solver = rank_list[i][0]
-        marginal_contribution = rank_list[i][1]
-        print(f"#{str(i+1)}: {sfh.get_last_level_directory_name(solver)}\t Margi_Contr: "
-              f"{str(marginal_contribution)}")
+    for i, rank in enumerate(rank_list):
+        solver = rank[0]
+        marginal_contribution = rank[1]
+        print(f"#{i+1}: {Path(solver).name}\t Margi_Contr: {marginal_contribution}")
     print("******")
 
 

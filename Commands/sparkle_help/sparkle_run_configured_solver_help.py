@@ -41,7 +41,6 @@ def call_configured_solver(instance_path_list: list[Path],
 
         # Create an instance list keeping in mind possible multi-file instances
         instances_list = []
-
         for filename_str in list_all_filename:
             instances_list.append([instance_directory_path / name
                                   for name in filename_str.split()])

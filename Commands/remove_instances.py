@@ -57,8 +57,7 @@ if __name__ == "__main__":
         instances_path = instances_path[:-1]
 
     print(f"Start removing all instances in directory {instances_path} ...")
-    list_all_filename = []
-    sfh.get_list_all_filename_recursive(instances_path, list_all_filename)
+    list_all_filename = sfh.get_list_all_filename_recursive(instances_path)
     list_instances = sfh.get_instance_list_from_reference(instances_path)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
@@ -81,7 +80,7 @@ if __name__ == "__main__":
         print(f"Instance {intended_instance} has been removed!")
 
     if Path(instances_path).exists() and Path(instances_path).is_dir():
-        Path(instances_path).rmdir()
+        shutil.rmtree(instances_path)
     else:
         print(f"Warning: Path {instances_path} did not exist. Continuing")
 

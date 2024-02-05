@@ -7,7 +7,6 @@ from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_basic_help as sbh
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
@@ -42,7 +41,7 @@ def generate_job_sbatch_shell_script(sbatch_script_path: str, job_script: str,
       job_script: Actual job script.
       dependency_jobid_list: List of job IDs.
     """
-    sbatch_script_name = sfh.get_file_name(sbatch_script_path)
+    sbatch_script_name = Path(sbatch_script_path).name
     job_name = "--job-name=" + sbatch_script_name
     output = "--output=" + sbatch_script_path + ".txt"
     error = "--error=" + sbatch_script_path + ".err"

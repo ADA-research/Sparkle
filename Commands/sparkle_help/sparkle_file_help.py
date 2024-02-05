@@ -44,18 +44,6 @@ def get_last_level_directory_name(filepath: str) -> str:
     return Path(filepath).name
 
 
-def get_file_name(filepath: str) -> str:
-    """Return the name of the file.
-
-    Args:
-      filepath: Path to file.
-
-    Returns:
-      The actual file name.
-    """
-    return Path(filepath).name
-
-
 def get_instance_list_from_reference(instances_path: Path) -> list[str]:
     """Return a list of instances read from a file.
 
@@ -66,22 +54,10 @@ def get_instance_list_from_reference(instances_path: Path) -> list[str]:
     Returns:
       List of instances file paths.
     """
-    instance_list = []
-    instances_path_str = str(instances_path)
-
     # Read instances from reference file
-    instance_list_file_path = sgh.instance_list_path
-
-    with instance_list_file_path.open("r") as infile:
-        lines = infile.readlines()
-
-        for line in lines:
-            words = line.strip().split()
-
-            if len(words) <= 0:
-                continue
-            elif line.strip().startswith(instances_path_str):
-                instance_list.append(line.strip())
+    with sgh.instance_list_path.open("r") as infile:
+        instance_list = [x.strip() for x in infile.readlines()
+                         if x.startswith(str(instances_path))]
 
     return instance_list
 
@@ -116,30 +92,18 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
     return portfolio_solver_list
 
 
-def get_list_all_filename_recursive(path: str, list_all_filename: list[str]) -> None:
+def get_list_all_filename_recursive(path: Path) -> list[Path]:
     """Extend a given list of filenames with all files found under a path.
 
     This includes all files found in subdirectories of the given path.
-
-    NOTE: Possibly to be merged with get_list_all_cnf_filename() since the CNF extension
-    is not considered anymore.
 
     Args:
       path: Target path.
       list_all_filename: List of filenames (may be empty).
     """
-    if Path(path).is_file():
-        filename = get_file_name(path)
-        list_all_filename.append(filename)
-        return
-    elif Path(path).is_dir():
-        if path[-1] != "/":
-            this_path = path + "/"
-        else:
-            this_path = path
-        list_all_items = os.listdir(this_path)
-        for item in list_all_items:
-            get_list_all_filename_recursive(this_path + item, list_all_filename)
+    if isinstance(path, str):
+        path = Path(path)
+    return [p for p in Path(path).rglob("*") if p.is_file()]
 
 
 def get_list_all_directory_recursive(path: str, list_all_directory: list[str]) -> None:
@@ -199,10 +163,10 @@ def get_list_all_jobinfo_filename(filepath: str) -> list[str]:
         return jobinfo_list
 
     list_all_items = os.listdir(filepath)
-    for i in range(0, len(list_all_items)):
-        file_extension = Path(list_all_items[i]).suffix
+    for item in list_all_items:
+        file_extension = Path(item).suffix
         if file_extension == "jobinfo":
-            jobinfo_list.append(list_all_items[i])
+            jobinfo_list.append(item)
     return jobinfo_list
 
 
@@ -220,10 +184,9 @@ def get_list_all_statusinfo_filename(filepath: str) -> list[str]:
         return statusinfo_list
 
     list_all_items = os.listdir(filepath)
-    for i in range(0, len(list_all_items)):
-        file_extension = Path(list_all_items[i]).suffix
-        if file_extension == "statusinfo":
-            statusinfo_list.append(list_all_items[i])
+    for item in list_all_items:
+        if Path(item).suffix == "statusinfo":
+            statusinfo_list.append(item)
     return statusinfo_list
 
 
@@ -233,10 +196,9 @@ def add_new_instance_into_file(filepath: str) -> None:
     Args:
       filepath: Path to the instance.
     """
-    fo = Path(str(sgh.instance_list_path)).open("a+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(filepath + "\n")
-    fo.close()
+    with sgh.instance_list_path.open("a+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        fo.write(filepath + "\n")
 
 
 def add_new_solver_into_file(filepath: str, deterministic: int = 0,
@@ -249,10 +211,9 @@ def add_new_solver_into_file(filepath: str, deterministic: int = 0,
         Default is 0.
       solver_variations: Number of different solver variations. Default is 1.
     """
-    fo = Path(sgh.solver_list_path).open("a+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(f"{filepath} {str(deterministic)} {str(solver_variations)}\n")
-    fo.close()
+    with Path(sgh.solver_list_path).open("a+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        fo.write(f"{filepath} {str(deterministic)} {str(solver_variations)}\n")
 
 
 def add_new_solver_nickname_into_file(nickname: str, filepath: str) -> None:
@@ -262,10 +223,9 @@ def add_new_solver_nickname_into_file(nickname: str, filepath: str) -> None:
       nickname: Nickname for the solver.
       filepath: Path to the file.
     """
-    fo = Path(sgh.solver_nickname_list_path).open("a+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(nickname + r" " + filepath + "\n")
-    fo.close()
+    with Path(sgh.solver_nickname_list_path).open("a+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        fo.write(nickname + r" " + filepath + "\n")
 
 
 def add_new_extractor_into_file(filepath: str) -> None:
@@ -274,10 +234,9 @@ def add_new_extractor_into_file(filepath: str) -> None:
     Args:
       filepath: Path to the target file.
     """
-    fo = Path(sgh.extractor_list_path).open("a+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(filepath + "\n")
-    fo.close()
+    with Path(sgh.extractor_list_path).open("a+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        fo.write(filepath + "\n")
 
 
 def add_new_extractor_feature_vector_size_into_file(filepath: str,
@@ -288,10 +247,9 @@ def add_new_extractor_feature_vector_size_into_file(filepath: str,
       filepath: Path to the target file.
       feature_vector_size: Feature vector size.
     """
-    fo = Path(sgh.extractor_feature_vector_size_list_path).open("a+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(filepath + r" " + str(feature_vector_size) + "\n")
-    fo.close()
+    with Path(sgh.extractor_feature_vector_size_list_path).open("a+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        fo.write(filepath + r" " + str(feature_vector_size) + "\n")
 
 
 def add_new_extractor_nickname_into_file(nickname: str, filepath: str) -> None:
@@ -301,19 +259,17 @@ def add_new_extractor_nickname_into_file(nickname: str, filepath: str) -> None:
       nickname: Nickname for the extractor.
       filepath: Path to the target file.
     """
-    fo = Path(sgh.extractor_nickname_list_path).open("a+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.write(nickname + r" " + filepath + "\n")
-    fo.close()
+    with Path(sgh.extractor_nickname_list_path).open("a+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        fo.write(nickname + r" " + filepath + "\n")
 
 
 def write_solver_list() -> None:
     """Write the solver list to the default solver list file."""
-    fout = Path(sgh.solver_list_path).open("w+")
-    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-    for i in range(0, len(sgh.solver_list)):
-        fout.write(sgh.solver_list[i] + "\n")
-    fout.close()
+    with Path(sgh.solver_list_path).open("w+") as fout:
+        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+        for solver in sgh.solver_list:
+            fout.write(solver + "\n")
 
 
 def remove_line_from_file(line_start: str, filepath: Path) -> None:
@@ -464,8 +420,9 @@ def check_file_is_executable(file_name: Path) -> None:
 
 def create_temporary_directories() -> None:
     """Create directories for temporary files."""
-    if not Path("Tmp/").exists():
-        Path("Tmp/").mkdir()
+    tmp_path = Path("Tmp/")
+    if not tmp_path.exists():
+        tmp_path.mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
 
     Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)

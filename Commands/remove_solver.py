@@ -80,7 +80,7 @@ if __name__ == "__main__":
     shutil.rmtree(solver_path)
 
     solver_name = sfh.get_last_level_directory_name(solver_path)
-    smac_solver_path = f"{sgh.smac_dir}example_scenarios/{solver_name}_*"
+    smac_solver_path = f"{sgh.smac_dir}scenarios/{solver_name}_*"
 
     if Path(smac_solver_path).exists():
         shutil.rmtree(smac_solver_path)

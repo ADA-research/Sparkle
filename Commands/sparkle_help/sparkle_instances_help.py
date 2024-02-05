@@ -60,9 +60,9 @@ def get_instance_list_from_path(path: Path) -> list[str]:
         list_all_filename = _get_list_instance(str(path))
     # Single file instances
     else:
-        list_all_filename = []
-        sfh.get_list_all_filename_recursive(str(path), list_all_filename)
-        list_all_filename = [x for x in list_all_filename if Path(x).suffix == ".cnf"]
+        list_all_filename = sfh.get_list_all_filename_recursive(path)
+        list_all_filename = [x.name for x in list_all_filename
+                             if Path(x).suffix == ".cnf"]
 
     return list_all_filename
 
@@ -110,11 +110,7 @@ def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
     """
     instance_list_path = Path(sgh.reference_list_dir
                               / Path(instance_set_name + sgh.instance_list_postfix))
-
-    if instance_list_path.is_file():
-        return True
-    else:
-        return False
+    return instance_list_path.is_file()
 
 
 def remove_reference_instance_list(instance_set_name: str) -> None:

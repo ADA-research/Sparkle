@@ -283,7 +283,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     smac_solver_path = get_smac_solver_path(solver_name, instance_set_train_name)
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
-    for _ in range(1, num_of_smac_run + 1):
+    for _ in range(num_of_smac_run):
         solver_directory = f"Solvers/{solver_name}/"
 
         # Train default
@@ -314,7 +314,7 @@ def create_smac_configure_sbatch_script(solver_name: str,
     Returns:
         Path to the sbatch script
     """
-    execdir = Path(".", "example_scenarios", f"{solver_name}_{instance_set_name}")
+    execdir = Path(".", "scenarios", f"{solver_name}_{instance_set_name}")
     smac_file_scenario_name = Path(f"{solver_name}_{instance_set_name}_scenario.txt")
     _, _, _, _, num_of_smac_run, num_of_smac_run_in_parallel = get_smac_settings()
 
@@ -389,8 +389,7 @@ def generate_configuration_sbatch_script(sbatch_script_path: Path, scenario_file
         f"{sgh.smac_dir}{result_directory}/{sbatch_script_path}_seed_N_smac.txt",
         f"Configuration log for SMAC run 1 < N <= {num_job_total}")
 
-    for i in range(0, num_job_total):
-        seed = i + 1
+    for seed in range(1, num_job_total + 1):
         result_path = f"{result_directory}/{sbatch_script_path}_seed_{seed}_smac.txt"
         smac_execdir_i = smac_execdir / str(seed)
         sl.add_output(sgh.smac_dir + result_path,

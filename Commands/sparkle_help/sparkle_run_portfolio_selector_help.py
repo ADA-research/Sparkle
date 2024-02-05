@@ -242,12 +242,9 @@ def call_sparkle_portfolio_selector_solve_instance(
         predict_schedule_result_path)
     sfh.rmfiles([predict_schedule_result_path, sgh.sparkle_err_path])
 
-    for i in range(len(list_predict_schedule)):
-        solver_path = list_predict_schedule[i][0]
-        if i + 1 < len(list_predict_schedule):
-            cutoff_time = list_predict_schedule[i][1]
-        else:
-            cutoff_time = list_predict_schedule[i][1]
+    for pred in list_predict_schedule:
+        solver_path = pred[0]
+        cutoff_time = pred[1]
         print(f"Calling solver {sfh.get_last_level_directory_name(solver_path)} with "
               f"time budget {str(cutoff_time)} for solving ...")
         sys.stdout.flush()
@@ -278,10 +275,10 @@ def generate_running_sparkle_portfolio_selector_sbatch_shell_script(
         list_jobs: list of instances to run on.
         num_job_total: The amount of jobs to be handled by this script.
     """
-    job_name = sfh.get_file_name(sbatch_shell_script_path)
+    sbatch_fn = Path(sbatch_shell_script_path).name
+    job_name = sbatch_fn
     std_out_path = test_case_directory_path + "Tmp/" + job_name + ".txt"
     std_err_path = test_case_directory_path + "Tmp/" + job_name + ".err"
-    sbatch_fn = sfh.get_file_name(sbatch_shell_script_path)
     sbatch_options = ssh.get_sbatch_options_list(sbatch_fn,
                                                  num_job_total,
                                                  job_name,
@@ -354,15 +351,8 @@ def call_sparkle_portfolio_selector_solve_directory(
     list_all_filename = sih.get_instance_list_from_path(Path(instance_directory_path))
 
     for filename in list_all_filename:
-        paths = []
-
-        for name in filename.split():
-            path = instance_directory_path + name
-            paths.append(path)
-
-        filepath = " ".join(paths)
-        test_performance_data_csv.add_row(filepath)
-        total_job_list.append([filepath])
+        test_performance_data_csv.add_row(str(filename))
+        total_job_list.append([str(filename)])
 
     solver_name = "Sparkle_Portfolio_Selector"
     check_selector_status(solver_name)

@@ -29,25 +29,26 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
         A string containing the number of instances
     """
     str_value = ""
-
+    import os
+    print(os.listdir(f"{sgh.smac_dir}scenarios/instances/"))
     # For multi-file instances count based on the reference list
     if sih.check_existence_of_reference_instance_list(instance_set_name):
         instance_count = sih.count_instances_in_reference_list(instance_set_name)
         str_value = str(instance_count)
     # For single-file instances just count the number of instance files
     else:
-        instance_dir = f"{sgh.smac_dir}/scenarios/instances/{instance_set_name}/"
-        list_instance = []
-        sfh.get_list_all_filename_recursive(instance_dir, list_instance)
+        instance_dir = f"{sgh.smac_dir}scenarios/instances/{instance_set_name}/"
+        list_instance = [x.name for x in
+                         sfh.get_list_all_filename_recursive(instance_dir)]
 
         # If there is only an instance file and not the actual instances in the
         # directory, count number of lines in instance file
         if f"{instance_set_name}_train.txt" in list_instance:
-            str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}"
-                                                "_train.txt").open("r")))
+            str_value = str(len(Path(f"{instance_dir}/{instance_set_name}_train.txt")
+                                .open("r").readlines()))
         elif f"{instance_set_name}_test.txt" in list_instance:
-            str_value = str(sum(1 for _ in Path(f"{instance_dir}/{instance_set_name}"
-                                                "_test.txt").open("r")))
+            str_value = str(len(Path(f"{instance_dir}/{instance_set_name}_test.txt")
+                                .open("r").readlines()))
         else:
             str_value = str(len(list_instance))
 

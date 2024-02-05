@@ -76,7 +76,7 @@ def get_solver_list() -> str:
     solver_list = sgh.solver_list
 
     for solver_path in solver_list:
-        solver_name = sfh.get_file_name(solver_path)
+        solver_name = Path(solver_path).name
         str_value += r"\item \textbf{" + solver_name + r"}\n"
 
     return str_value
@@ -108,8 +108,7 @@ def get_feature_extractor_list() -> str:
     extractor_list = sgh.extractor_list
 
     for extractor_path in extractor_list:
-        extractor_name = sfh.get_file_name(extractor_path)
-        str_value += r"\item \textbf{" + extractor_name + r"}\n"
+        str_value += r"\item \textbf{" + Path(extractor_path).name + r"}\n"
 
     return str_value
 
@@ -195,12 +194,10 @@ def get_solver_perfect_ranking_list() -> str:
     rank_list = scmch.compute_perfect_selector_marginal_contribution()
     str_value = ""
 
-    for i in range(0, len(rank_list)):
-        solver = rank_list[i][0]
-        solver = sfh.get_file_name(solver)
-        marginal_contribution = str(rank_list[i][1])
+    for rank in rank_list:
+        solver = Path(rank[0]).name
         str_value += (r"\item \textbf{" + solver + r"}, marginal contribution: "
-                      + f"{marginal_contribution}\n")
+                      + f"{rank[1]}\n")
     return str_value
 
 
@@ -215,12 +212,10 @@ def get_solver_actual_ranking_list() -> str:
     rank_list = scmch.compute_actual_selector_marginal_contribution()
     str_value = ""
 
-    for i in range(0, len(rank_list)):
-        solver = rank_list[i][0]
-        solver = sfh.get_file_name(solver)
-        marginal_contribution = str(rank_list[i][1])
+    for rank in rank_list:
+        solver = Path(rank[0]).name
         str_value += (r"\item \textbf{" + solver + r"}, marginal contribution: "
-                      + f"{marginal_contribution}\n")
+                      + f"{rank[1]}\n")
     return str_value
 
 
@@ -238,7 +233,7 @@ def get_par_ranking_list() -> str:
         performance_data_csv.get_solver_penalty_time_ranking_list())
 
     for solver, this_penalty_time in solver_penalty_time_ranking_list:
-        solver = sfh.get_file_name(solver)
+        solver = Path(solver).name
         penalty = sgh.settings.get_general_penalty_multiplier()
         str_value += (rf"\item \textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n")
 
@@ -378,8 +373,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
-    sbs_solver = solver_penalty_time_ranking_list[0][0]
-    sbs_solver = sfh.get_file_name(sbs_solver)
+    sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
     penalty = sgh.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
