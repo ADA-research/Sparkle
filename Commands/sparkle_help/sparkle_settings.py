@@ -379,17 +379,18 @@ class Settings:
 
     def set_general_sparkle_objectives(
             self: Settings,
-            value: SparkleObjective = DEFAULT_general_sparkle_objective,
+            value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective],
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the sparkle objective."""
         section = "general"
         name = "objective"
-
         if value is not None and self.__check_setting_state(
                 self.__general_sparkle_objective_set, origin, name):
+            if isinstance(value, list):
+                value = ",".join([obj.name for obj in value])
             self.__init_section(section)
             self.__general_sparkle_objective_set = origin
-            self.__settings[section][name] = ",".join(obj.name for obj in value)
+            self.__settings[section][name] = value
 
         return
 
