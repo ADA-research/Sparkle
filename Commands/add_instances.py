@@ -129,10 +129,7 @@ if __name__ == "__main__":
         feature_data_csv.update_csv()
         performance_data_csv.update_csv()
     else:
-        print(instances_source)
         list_source_all_filename = sfh.get_list_all_filename_recursive(instances_source)
-        list_source_all_directory = []
-        sfh.get_list_all_directory_recursive(instances_source, list_source_all_directory)
         target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)

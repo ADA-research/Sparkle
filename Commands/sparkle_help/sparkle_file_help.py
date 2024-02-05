@@ -80,13 +80,8 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
 
     with portfolio_solvers_file_path.open("r") as infile:
         lines = infile.readlines()
-
         for line in lines:
-            words = line.strip().split()
-
-            if len(words) <= 0:
-                continue
-            elif line.strip().startswith(solvers_path_str):
+            if line.strip().startswith(solvers_path_str):
                 portfolio_solver_list.append(line.strip())
 
     return portfolio_solver_list
@@ -106,33 +101,6 @@ def get_list_all_filename_recursive(path: Path) -> list[Path]:
     return [p for p in Path(path).rglob("*") if p.is_file()]
 
 
-def get_list_all_directory_recursive(path: str, list_all_directory: list[str]) -> None:
-    """Extend a given list of directories with all directories found under a path.
-
-    This includes all directories found in subdirectories of the given path.
-
-    NOTE: Possibly to be merged with get_list_all_cnf_filename() since the CNF extension
-    is not considered anymore.
-
-    Args:
-      path: Target path.
-      list_all_directory: List of directories.
-    """
-    if Path(path).is_file():
-        directory = Path(path).parent
-        list_all_directory.append(directory)
-        return
-    elif Path(path).is_dir():
-        if path[-1] != "/":
-            this_path = path + "/"
-        else:
-            this_path = path
-        list_all_items = os.listdir(this_path)
-        for item in list_all_items:
-            get_list_all_directory_recursive(this_path + item, list_all_directory)
-    return
-
-
 def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
     """Return a list of files with a certain suffix in a given path.
 
@@ -147,27 +115,6 @@ def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
     if not filepath.exists():
         return []
     return [str(x) for x in Path.iterdir(filepath) if x.suffix == suffix]
-
-
-def get_list_all_jobinfo_filename(filepath: str) -> list[str]:
-    """Return a list of jobinfo files in a given path.
-
-    Args:
-      filepath: Target path.
-
-    Returns:
-      List of jobinfo files.
-    """
-    jobinfo_list = []
-    if not Path(filepath).exists():
-        return jobinfo_list
-
-    list_all_items = os.listdir(filepath)
-    for item in list_all_items:
-        file_extension = Path(item).suffix
-        if file_extension == "jobinfo":
-            jobinfo_list.append(item)
-    return jobinfo_list
 
 
 def get_list_all_statusinfo_filename(filepath: str) -> list[str]:
@@ -299,13 +246,9 @@ def remove_from_solver_list(filepath: str) -> None:
     Args:
       filepath: Path to the solver file.
     """
-    newlines = []
-
     # Store lines that do not contain filepath
-    with Path(sgh.solver_list_path).open("r") as infile:
-        for line in infile:
-            if filepath not in line:
-                newlines.append(line)
+    newlines = [line for line in Path(sgh.solver_list_path).open("r").readlines()
+                if filepath not in line]
 
     # Overwrite the file with stored lines
     with Path(sgh.solver_list_path).open("w") as outfile:
