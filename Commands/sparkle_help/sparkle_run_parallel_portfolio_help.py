@@ -511,7 +511,8 @@ def generate_sbatch_job_list(
     new_num_jobs = num_jobs
     solver_instance_list = list()
     tmp_solver_instances = list()
-    performance_measure = sgh.settings.get_general_performance_measure()
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
 
     # Adds all the jobs of instances and their portfolio to the parameter list
     for instance_path in instance_path_list:
@@ -756,8 +757,8 @@ def run_parallel_portfolio(instances: list[str],
                 run_on = Runner.SLURM
         # NOTE: the IF statement below is Slurm only as well?
         # As running runtime based performance may be less relevant
-        if (run_on == Runner.SLURM and sgh.settings.get_general_performance_measure()
-                == PerformanceMeasure.RUNTIME):
+        perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+        if (run_on == Runner.SLURM and perf_m == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))

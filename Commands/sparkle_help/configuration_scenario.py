@@ -151,7 +151,8 @@ class ConfigurationScenario:
             The run objective from global settings.
         """
         # Get run_obj from general settings
-        run_objective = sgh.settings.get_general_performance_measure()
+        run_objective =\
+            sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
 
         # Convert to SMAC format
         if run_objective == PerformanceMeasure.RUNTIME:

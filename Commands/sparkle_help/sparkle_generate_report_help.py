@@ -320,7 +320,8 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
     minimise = True
-    performance_measure = sgh.settings.get_general_performance_measure()
+    performance_measure = \
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     capvalue = sgh.settings.get_general_cap_value()
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:

@@ -151,7 +151,8 @@ if __name__ == "__main__":
 
     # Reporting for algorithm selection
     if selection or test_case_directory is not None:
-        performance_measure = sgh.settings.get_general_performance_measure()
+        performance_measure =\
+            sgh.settings.get_general_sparkle_objective()[0].PerformanceMeasure
         if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
            performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
             print("ERROR: The generate_report command is not yet implemented for the"

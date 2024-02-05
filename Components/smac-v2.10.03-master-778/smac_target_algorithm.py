@@ -50,5 +50,12 @@ if __name__ == "__main__":
         sys.exit(run_solver.returncode)
     outdir = ast.literal_eval(run_solver.stdout.decode())
     Path(runsolver_watch_data_path).unlink(missing_ok=True)
-    # Return values to SMAC
-    print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, {outdir['quality']}, {args['seed']}")
+    # 5. Return values to SMAC
+    # We need to check how the "quality" in the output directory must be formatted
+    quality = outdir["quality"]
+    if isinstance(quality, dict):
+        #SMAC2 does not support multi-objective so always opt for the first objective
+        objective = sgh.settings.get_general_sparkle_objectives()[0]
+        quality = quality[objective.metric]
+        
+    print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, {quality}, {args['seed']}")

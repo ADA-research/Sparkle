@@ -191,7 +191,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     If rerun is True, rerun for instances with existing performance data.
     """
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    perf_measure = sgh.settings.get_general_performance_measure()
+    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 
     if rerun is False:

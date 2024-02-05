@@ -171,7 +171,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
 
     cutoff_time_str = str(cutoff_time)
     python_executable = sgh.python_executable
-    perf_measure = sgh.settings.get_general_performance_measure()
+    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     if perf_measure == PerformanceMeasure.RUNTIME:
         objective_function = "--objective runtime"
     elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\

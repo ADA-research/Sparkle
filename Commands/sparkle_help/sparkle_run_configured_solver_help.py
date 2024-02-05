@@ -102,9 +102,8 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
     sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
-
-    job_params_common = ("--performance-measure "
-                         f"{sgh.settings.get_general_performance_measure().name}")
+    perf_name = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
+    job_params_common = f"--performance-measure {perf_name}"
     job_params_list = [f"--instance {instance} {job_params_common}"
                        for instance in instance_list]
 

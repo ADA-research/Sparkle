@@ -30,6 +30,8 @@ def parser_function() -> argparse.ArgumentParser:
     else:
         latest = sgh.latest_scenario.get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
     parser.add_argument(
         "--instance-paths",
         metavar="PATH",
@@ -62,9 +64,10 @@ def parser_function() -> argparse.ArgumentParser:
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
         help="The performance measure, e.g., RUNTIME (for decision algorithms) or "
-             "QUALITY_ABSOLUTE (for optimisation algorithms)"
-             f" (default: {sgh.settings.DEFAULT_general_performance_measure.name})"
-             f" (current value: {sgh.settings.get_general_performance_measure().name})")
+             "QUALITY_ABSOLUTE (for optimisation algorithms) (default: "
+             f"{sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure.name})"
+             " (current value: "
+             f"{performance_measure})")
     parser.add_argument(
         "--cutoff-time",
         type=int,

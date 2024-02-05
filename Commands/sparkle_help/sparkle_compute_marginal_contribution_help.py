@@ -211,7 +211,7 @@ def compute_actual_selector_performance(
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     penalty_factor = sgh.settings.get_general_penalty_multiplier()
     performances = []
-    perf_measure = sgh.settings.get_general_performance_measure()
+    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     capvalue = None
     for index, instance in enumerate(performance_data_csv.list_rows()):
         if capvalue_list is not None:
@@ -482,7 +482,8 @@ def compute_marginal_contribution(
     """
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
-    performance_measure = sgh.settings.get_general_performance_measure()
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     aggregation_function = sgh.settings.get_general_metric_aggregation_function()
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         capvalue_list = sgh.settings.get_general_cap_value()

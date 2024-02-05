@@ -47,7 +47,8 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
                                         return_value=3)
     mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
                                       "get_list_all_filename_recursive",
-                                      return_value=[Path("instance-1"), Path("instance-2")])
+                                      return_value=[Path("instance-1"),
+                                                    Path("instance-2")])
     instance_set_name = "test-instance"
 
     number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
