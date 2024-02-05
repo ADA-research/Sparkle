@@ -24,14 +24,14 @@ if __name__ == "__main__":
     settings_dir = Path("Settings")
     file_path_latest = PurePath(settings_dir / "latest.ini")
     sgh.settings = sparkle_settings.Settings(file_path_latest)
-
+    perf_measure = sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance", required=False, type=str, nargs="+",
                         help="path to instance to run on")
     parser.add_argument("--solver", required=True, type=str, help="path to solver")
     parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
-                        default=sgh.settings.DEFAULT_general_performance_measure,
+                        default=perf_measure,
                         help="the performance measure, e.g. runtime")
     parser.add_argument("--run-status-path", type=Path,
                         choices=[sgh.run_solvers_sbatch_tmp_path,

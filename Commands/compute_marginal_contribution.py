@@ -38,7 +38,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
+        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
         action=ac.SetByUser,
         help="the performance measure, e.g. runtime",
     )
