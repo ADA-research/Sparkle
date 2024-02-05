@@ -45,12 +45,18 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_count_instances = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
+    mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
+                                      "get_list_all_filename_recursive",
+                                      return_value=[Path("instance-1"), Path("instance-2")])
     instance_set_name = "test-instance"
 
     number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
+
+    instance_directory = f"{sgh.smac_dir}scenarios/instances/{instance_set_name}/"
+    mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
 

@@ -29,8 +29,6 @@ def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
         A string containing the number of instances
     """
     str_value = ""
-    import os
-    print(os.listdir(f"{sgh.smac_dir}scenarios/instances/"))
     # For multi-file instances count based on the reference list
     if sih.check_existence_of_reference_instance_list(instance_set_name):
         instance_count = sih.count_instances_in_reference_list(instance_set_name)
