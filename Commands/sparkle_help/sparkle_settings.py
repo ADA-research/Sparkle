@@ -403,8 +403,8 @@ class Settings:
 
     def get_performance_metric_for_report(self: Settings) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""
-        objectives = self.get_general_sparkle_objective()
-        if len(objectives) == 0:
+        objectives = self.get_general_sparkle_objectives()
+        if len(objectives) == 1:
             return objectives[0].metric
         return ""
 

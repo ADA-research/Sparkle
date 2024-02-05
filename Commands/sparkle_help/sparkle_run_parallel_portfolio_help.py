@@ -640,7 +640,7 @@ def handle_waiting_and_removal_process(
 
                             nr_of_lines_raw_content = len(raw_content)
 
-                            for lines in range(0, nr_of_lines_raw_content):
+                            for lines in range(nr_of_lines_raw_content):
                                 if "\ts " in raw_content[
                                         nr_of_lines_raw_content - lines - 1]:
                                     results_line = raw_content[

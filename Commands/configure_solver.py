@@ -117,8 +117,8 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.settings_file is not None:
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
