@@ -158,8 +158,8 @@ if __name__ == "__main__":
     run_on = args.run_on
     if args.configurator is not None:
         configurator_path = args.configurator
-        configurator_target = [x for x in os.listdir(configurator_path)
-                               if x.endswith("_target_algorithm.py")]
+        configurator_target = [file for file in os.listdir(configurator_path)
+                               if file.endswith("_target_algorithm.py")]
         if len(configurator_target) != 1:
             print("Configurator Error: "
                   f"Could not determine target script for {configurator_path}\n"
