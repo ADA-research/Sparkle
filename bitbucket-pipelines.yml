@@ -16,6 +16,9 @@ pipelines:
               - condacache
             script:
               - git submodule update --init --recursive
+              - git status
+              - git submodule
+              - ll Components/AutoFolio
               - conda info
               - conda env create -f environment.yml 
               - conda activate sparkle
