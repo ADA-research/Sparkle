@@ -18,6 +18,7 @@ pipelines:
               - git submodule update --init --recursive
               - git status
               - git submodule
+              - pip freeze
               - ls Components/AutoFolio
               - conda info
               - conda env create -f environment.yml 
