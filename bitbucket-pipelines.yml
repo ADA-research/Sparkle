@@ -21,7 +21,7 @@ pipelines:
               - pip freeze
               - ls Components/AutoFolio
               - conda info
-              - conda env create -f environment.yml 
+              - conda env create -f environment-dev.yml 
               - conda activate sparkle
               - pip freeze
               - pytest -v tests/* --junitxml=test-reports/report.xml
