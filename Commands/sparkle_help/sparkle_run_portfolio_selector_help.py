@@ -98,9 +98,14 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
     """Return the predicted algorithm schedule as a list."""
     list_predict_schedule = []
     prefix_string = "Selected Schedule [(algorithm, budget)]: "
-    fin = Path(predict_schedule_result_path).open("r+")
-    fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-    predict_schedule = fin.readline().strip()
+    predict_schedule = ""
+    with Path(predict_schedule_result_path).open("r+") as fin:
+        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+        predict_schedule_lines = fin.readlines()
+        for line in predict_schedule_lines:
+            if line.strip().startswith(prefix_string):
+                predict_schedule = line.strip()
+                break
     if predict_schedule == "":
         print("ERROR: Failed to get schedule from algorithm portfolio. Stopping "
               "execution!\n"
@@ -111,7 +116,6 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
     predict_schedule_string = predict_schedule[len(prefix_string):]
     # eval insecure, so use ast.literal_eval instead
     list_predict_schedule = ast.literal_eval(predict_schedule_string)
-    fin.close()
 
     return list_predict_schedule
 
