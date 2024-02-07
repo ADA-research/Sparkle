@@ -10,12 +10,12 @@ dependencies:
   - pip:
     - --editable .  # self install !
     - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
-    - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario@9ce38dd43dc6e2834cb8ef44cd837514e950a9c5
+    - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario@c785d4ae524dd0f4624d4092eea62a05ee2830d4
     - attrs==21.4.0
     - certifi==2021.5.30
     - click==8.0.1
     - cloudpickle==1.6.0
-    - ConfigSpace==0.4.19
+    - ConfigSpace==0.7.1
     - Cython==0.29.24
     - dask==2021.7.0
     - distributed==2021.7.0
@@ -30,33 +30,33 @@ dependencies:
     - fsspec==2021.7.0
     - HeapDict==1.0.1
     - iniconfig==1.1.1
-    - joblib==1.0.1
+    - joblib==1.3.1
     - lazy-import==0.2.2
     - liac-arff==2.5.0
     - locket==0.2.1
     - mccabe==0.7.0
     - msgpack==1.0.2
-    - numpy==1.21.1
+    - numpy==1.23.3
     - packaging==21.0
-    - pandas==1.3.0
+    - pandas==2.1.0
     - partd==1.2.0
     - pluggy==0.13.1
     - psutil==5.8.0
     - py==1.10.0
     - pycodestyle==2.9.1
     - pyflakes==2.5.0
-    - pynisher==0.6.4
+    - pynisher==1.0.0
     - pyparsing==2.4.7
-    - pyrfr==0.8.2
+    - pyrfr==0.9.0
     - pytest==7.3.1
     - pytest-mock==3.10.0
     - python-dateutil==2.8.2
     - pytz==2021.1
     - PyYAML==5.4.1
-    - scikit-learn==0.24.2
-    - scipy==1.6.3
+    - scikit-learn==1.3.2
+    - scipy==1.12.0
     - six==1.16.0
-    - smac==0.13.1
+    - smac==2.0.0
     - sortedcontainers==2.4.0
     - tblib==1.7.0
     - threadpoolctl==2.2.0
