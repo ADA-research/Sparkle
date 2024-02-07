@@ -101,7 +101,7 @@ sparkle_run_generic_wrapper = "sparkle_run_generic_wrapper.py"
 sparkle_run_configured_wrapper = "sparkle_run_configured_wrapper.sh"
 
 smac_target_algorithm = "smac_target_algorithm.py"
-sparkle_solver_configurator_wrapper = "sparkle_solver_configurator_wrapper.py"
+sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 
 ablation_dir = "Components/ablationAnalysis-0.9.4/"
 

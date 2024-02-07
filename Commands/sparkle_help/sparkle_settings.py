@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 
 class PerformanceMeasure(Enum):
     """Possible performance measures."""
-
+    ERR = -1
     RUNTIME = 0
     QUALITY_ABSOLUTE = 1
     QUALITY = 1
@@ -33,6 +33,8 @@ class PerformanceMeasure(Enum):
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
         elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
+        else:
+            performance_measure = PerformanceMeasure.ERR
 
         return performance_measure
 
@@ -55,6 +57,9 @@ class SparkleObjective():
             performance_measure, metric = performance_setting.split(":")
         self.PerformanceMeasure = PerformanceMeasure.from_str(performance_measure)
         self.metric = metric
+
+        if self.PerformanceMeasure == PerformanceMeasure.ERR:
+            print(f"WARNING: Performance measure {performance_measure} not found!")
         return
 
     @staticmethod

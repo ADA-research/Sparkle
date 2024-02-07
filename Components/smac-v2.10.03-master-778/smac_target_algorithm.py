@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_run_solvers_help as srsh
 
 
 if __name__ == "__main__":
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     runsolver_call = [runsolver_binary,
                       "-w", str(runsolver_watch_data_path),
                       "--cpu-limit", str(cutoff_time),
-                      str(Path.cwd() / sgh.sparkle_solver_configurator_wrapper),
+                      str(Path.cwd() / sgh.sparkle_solver_wrapper),
                       str(args)]
 
     # 3. Call Runsolver with the solver configurator wrapper and its arguments
@@ -46,16 +47,26 @@ if __name__ == "__main__":
     # Solver output can be found in the regular subprocess.stdout
     if run_solver.returncode != 0:
         # Failure from run solver or solver wrapper
-        print(run_solver.stderr)
-        sys.exit(run_solver.returncode)
-    outdir = ast.literal_eval(run_solver.stdout.decode())
+        print("WARNING: Subprocess for Solver Wrapper crashed with code "
+              f"{run_solver.returncode}:\n {run_solver.stderr}")
+        print(f"Result for SMAC: CRASHED, {run_time}, 0, 0, {args['seed']}")
+        sys.exit()
+        
+    outdict = ast.literal_eval(run_solver.stdout.decode())
+
+    # Overwrite the CPU runtime with runsolver log value
+    # TODO: Runsolver also registers WALL time, add as a settings option in Sparkle
+    runtime, wtime =  srsh.get_runtime_from_runsolver(runsolver_watch_data_path)
     Path(runsolver_watch_data_path).unlink(missing_ok=True)
+
     # 5. Return values to SMAC
     # We need to check how the "quality" in the output directory must be formatted
-    quality = outdir["quality"]
-    if isinstance(quality, dict):
-        #SMAC2 does not support multi-objective so always opt for the first objective
-        objective = sgh.settings.get_general_sparkle_objectives()[0]
-        quality = quality[objective.metric]
+    quality = '\0'
+    if "quality" in outdict.keys():
+        quality = outdict["quality"]
+        if isinstance(quality, dict):
+            #SMAC2 does not support multi-objective so always opt for the first objective
+            objective = sgh.settings.get_general_sparkle_objectives()[0]
+            quality = quality[objective.metric]
         
-    print(f"Result for SMAC: {outdir['status']}, {run_time}, 0, {quality}, {args['seed']}")
+    print(f"Result for SMAC: {outdict['status']}, {run_time}, 0, {quality}, {args['seed']}")

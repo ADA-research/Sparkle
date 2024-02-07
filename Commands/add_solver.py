@@ -104,7 +104,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     configurator_wrapper_path = Path(solver_source,
-                                     sgh.sparkle_solver_configurator_wrapper)
+                                     sgh.sparkle_solver_wrapper)
     if configurator_wrapper_path.is_file():
         sfh.check_file_is_executable(configurator_wrapper_path)
     else:

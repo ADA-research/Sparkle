@@ -226,7 +226,7 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
         if i + 1 >= len(config_list):
             break
         solver_params[config_list[i]] = config_list[i + 1]
-    cmd_solver_call = f"{sgh.sparkle_solver_configurator_wrapper} {solver_params}"
+    cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
     # Prepare paths
     solver_path = Path(f"Solvers/{solver_name}")
     instance_name = "_".join([path.name for path in instance_path_list])
