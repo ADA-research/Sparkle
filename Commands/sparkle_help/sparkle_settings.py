@@ -61,7 +61,7 @@ class SparkleObjective():
     def from_multi_str(performance_setting: str) -> list[SparkleObjective]:
         """Create one or more Objectives from the settings string."""
         objectives_str = performance_setting.split(",")
-        return [SparkleObjective(objective) for objective in objectives_str]
+        return [SparkleObjective(objective.strip()) for objective in objectives_str]
 
 
 class SolutionVerifier(Enum):
