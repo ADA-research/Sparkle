@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio construction."""
 
+import shutil
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -48,7 +49,7 @@ def construct_sparkle_parallel_portfolio(sparkle_parallel_portfolio_path: Path,
     """
     if sparkle_parallel_portfolio_path.is_dir():
         if overwrite:
-            sfh.rmtree(sparkle_parallel_portfolio_path)
+            shutil.rmtree(sparkle_parallel_portfolio_path)
         else:
             print("directory already exists")
             print('use "--overwrite" or give the portfolio a different name')

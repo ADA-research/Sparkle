@@ -99,18 +99,17 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         update_feature_data_id()
 
     current_job_num = 1
-    print(f"Total number of jobs to run: {str(total_job_num)}")
+    print(f"Total number of jobs to run: {total_job_num}")
 
-    for i in range(0, len(list_feature_computation_job)):
-        instance_path = list_feature_computation_job[i][0]
-        extractor_list = list_feature_computation_job[i][1]
-        len_extractor_list = len(extractor_list)
+    for feature_job in list_feature_computation_job:
+        instance_path = Path(feature_job[0])
+        extractor_list = feature_job[1]
 
-        for j in range(0, len_extractor_list):
-            extractor_path = extractor_list[j]
+        for extractor_str in extractor_list:
+            extractor_path = Path(extractor_str)
             basic_part = (f"{sgh.sparkle_tmp_path}/"
-                          f"{sfh.get_last_level_directory_name(extractor_path)}_"
-                          f"{sfh.get_last_level_directory_name(instance_path)}_"
+                          f"{extractor_path.name}_"
+                          f"{instance_path.name}_"
                           f"{sparkle_basic_help.get_time_pid_random_string()}")
             result_path = f"{basic_part}.rawres"
             err_path = f"{basic_part}.err"
@@ -125,12 +124,11 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                             f"{sgh.sparkle_run_default_wrapper} {extractor_path}/ "
                             f"{instance_path} {result_path} 2> {err_path}")
 
-            print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)}"
-                  " computing feature vector of instance "
-                  f"{sfh.get_last_level_directory_name(instance_path)} ...")
+            print(f"Extractor {extractor_path.name} computing feature vector of instance"
+                  f" {instance_path.name} ...")
 
             try:
-                subprocess.run(command_line.split(" "))
+                runsolver = subprocess.run(command_line.split(" "), capture_output=True)
                 with Path(runsolver_value_data_path).open() as file:
                     if "TIMEOUT=true" in file.read():
                         print(f"****** WARNING: Feature vector computation on instance "
@@ -146,6 +144,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                       f"{instance_path} failed! ******")
                 print("****** WARNING: The feature vector of this instance consists of "
                       "missing values ******")
+                print(f"****** Run solver Output:\n{runsolver.stderr}")
                 Path(result_path).unlink(missing_ok=True)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
                     feature_data_csv, Path(instance_path), Path(extractor_path),

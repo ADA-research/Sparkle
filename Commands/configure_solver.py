@@ -22,6 +22,7 @@ from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help.configurator import Configurator
 from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help.solver import Solver
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from runrunner.base import Runner
 
@@ -116,8 +117,8 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.settings_file is not None:
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
@@ -157,8 +158,18 @@ if __name__ == "__main__":
     run_on = args.run_on
     if args.configurator is not None:
         configurator_path = args.configurator
+        configurator_target = [file for file in os.listdir(configurator_path)
+                               if file.endswith("_target_algorithm.py")]
+        if len(configurator_target) != 1:
+            print("Configurator Error: "
+                  f"Could not determine target script for {configurator_path}\n"
+                  "Please check target script file '*_target_algorithm.py'")
+            sys.exit(-1)
+        configurator_target = configurator_target[0]
     else:
-        configurator_path = Path("Components", "smac-v2.10.03-master-778")
+        # SMAC is the default configurator
+        configurator_path = Path(sgh.smac_dir)
+        configurator_target = sgh.smac_target_algorithm
 
     sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                              sch.CommandName.CONFIGURE_SOLVER])
@@ -198,7 +209,6 @@ if __name__ == "__main__":
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
     sah.clean_ablation_scenarios(solver_path.name, instance_set_train.name)
-
     solver = Solver(solver_path)
 
     status_info = ConfigureSolverStatusInfo()
@@ -210,9 +220,9 @@ if __name__ == "__main__":
 
     number_of_runs = sgh.settings.get_config_number_of_runs()
     config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
-                                            use_features, feature_data_df)
+                                            use_features, configurator_target,
+                                            feature_data_df)
     configurator = Configurator(configurator_path)
-
     configurator.create_sbatch_script(config_scenario)
     configure_jobid = configurator.configure(run_on=run_on)
 
@@ -233,14 +243,16 @@ if __name__ == "__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = ssh.run_validation_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
+        validate_jobid = ssh.run_callback(
+            solver, instance_set_train, instance_set_test, configure_jobid,
+            command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
         dependency_jobid_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = ssh.run_ablation_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid, run_on=run_on
+        ablation_jobid = ssh.run_callback(
+            solver, instance_set_train, instance_set_test, configure_jobid,
+            command=CommandName.RUN_ABLATION, run_on=run_on
         )
         dependency_jobid_list.append(ablation_jobid)
 

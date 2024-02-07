@@ -24,15 +24,12 @@ def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> N
     mock_count_instances = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
-                                      "get_list_all_filename")
     instance_set_name = "test-instance"
 
     number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_called_once_with(instance_set_name)
-    mock_list_filename.assert_not_called()
     assert number == "3"
 
 
@@ -49,8 +46,9 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
                                         "count_instances_in_reference_list",
                                         return_value=3)
     mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
-                                      "get_list_all_filename",
-                                      return_value=["instance-1", "instance-2"])
+                                      "get_list_all_filename_recursive",
+                                      return_value=[Path("instance-1"),
+                                                    Path("instance-2")])
     instance_set_name = "test-instance"
 
     number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
@@ -58,7 +56,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
 
-    instance_directory = f"{sgh.smac_dir}/scenarios/instances/test-instance/"
+    instance_directory = f"{sgh.smac_dir}scenarios/instances/{instance_set_name}/"
     mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
@@ -80,15 +78,6 @@ def test_get_par_performance(mocker: MockFixture) -> None:
 
     mock_construct_list.assert_called_once_with(results_file, cutoff)
     assert par == 7.5
-
-
-def test_get_instance_name_from_path() -> None:
-    """Test get_instance_name_from_path returns the last part of the given path."""
-    path_string = "parent/directory/instance-name"
-
-    name = sgr.get_instance_name_from_path(path_string)
-
-    assert name == "instance-name"
 
 
 def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
@@ -1167,26 +1156,19 @@ def test_generate_report_for_configuration_prep_exists_not(mocker: MockFixture) 
     Also test that the function then copies the latex templates to the report directory.
     """
     report_directory = "report/directory"
-
-    mock_path = mocker.patch("pathlib.Path.mkdir")
     mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_path.assert_called_once()
     mock_shutil.assert_called_once()
 
 
 def test_generate_report_for_configuration_prep_exists(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_prep copies files to report directory."""
     report_directory = "report/directory"
-
-    mock_path = mocker.patch("pathlib.Path.mkdir")
     mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
-
-    mock_path.assert_called_once()
     mock_shutil.assert_called_once()
 
 

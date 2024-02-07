@@ -47,7 +47,7 @@ def deal_raw_result_file(relative_path, cnf_instance_file_name, raw_result_file_
 		else: 
 			#fout.write(',' + myline + '\n')
 			mylist_comma = myline.split(r',')
-			for i in range(0, len(mylist_comma)):
+			for i in range(len(mylist_comma)):
 				fout.write(r','+mylist_comma[i] + sparkle_special_string + extractor_directory_last_level)
 				#fout.write(r','+mylist_comma[i]+r'_'+current_last_level_directory_name)
 			fout.write('\n')

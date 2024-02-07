@@ -2,6 +2,7 @@
 """Sparkle command to add a feature extractor to the Sparkle platform."""
 
 import sys
+import shutil
 import subprocess
 import argparse
 from pathlib import Path
@@ -105,7 +106,7 @@ if __name__ == "__main__":
         print(f"Do not add feature extractor {ex_dir_name}")
         sys.exit(-1)
 
-    sfh.copytree(Path(extractor_source), extractor_directory)
+    shutil.copytree(Path(extractor_source), extractor_directory, dirs_exist_ok=True)
 
     sgh.extractor_list.append(extractor_directory)
     sfh.add_new_extractor_into_file(extractor_directory)

@@ -28,7 +28,6 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
         """Return a list of feature computations to re-do per instance and solver."""
         list_recompute_feature_computation_job = []
         list_row_name = self.list_rows()
-
         for row_name in list_row_name:
             list_item = [row_name, self.extractor_list]
             list_recompute_feature_computation_job.append(list_item)
@@ -45,7 +44,6 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
         """
         list_remaining_feature_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
-
         for row_name in self.list_rows():
             current_extractor_list = []
 
@@ -118,11 +116,11 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
         len_list_columns_second_sfdcsv = len(list_columns_second_sfdcsv)
         len_list_rows_second_sfdcsv = len(list_rows_second_sfdcsv)
 
-        for i in range(0, len_list_rows_second_sfdcsv):
+        for i in range(len_list_rows_second_sfdcsv):
             row_name_second_sfdcsv = str(second_sfdcsv.get_row_name(i))
             bool_in_rows = self.get_bool_in_rows(row_name_second_sfdcsv)
 
-            for j in range(0, len_list_columns_second_sfdcsv):
+            for j in range(len_list_columns_second_sfdcsv):
                 column_name_second_sfdcsv = second_sfdcsv.get_column_name(j)
                 bool_in_columns = self.get_bool_in_columns(column_name_second_sfdcsv)
                 value = second_sfdcsv.get_value_index(i, j)

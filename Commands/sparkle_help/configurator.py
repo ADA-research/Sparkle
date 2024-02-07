@@ -148,24 +148,22 @@ class Configurator:
             String containing the sbatch options.
         """
         total_jobs = self.scenario.number_of_runs
-
         maximal_parallel_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
         parallel_jobs = max(maximal_parallel_jobs, total_jobs)
 
-        options = "#!/bin/bash\n"
-        options += "###\n"
-        options += f"#SBATCH --job-name={self.sbatch_filename}\n"
-        options += f"#SBATCH --output=tmp/{self.sbatch_filename}.txt\n"
-        options += f"#SBATCH --error=tmp/{self.sbatch_filename}.err\n"
-        options += "###\n"
-        options += "###\n"
-        options += f"#SBATCH --array=0-{total_jobs-1}%{parallel_jobs}\n"
-        options += "###\n"
+        options = "#!/bin/bash\n"\
+                  "###\n"\
+                  f"#SBATCH --job-name={self.sbatch_filename}\n"\
+                  f"#SBATCH --output=tmp/{self.sbatch_filename}.txt\n"\
+                  f"#SBATCH --error=tmp/{self.sbatch_filename}.err\n"\
+                  "###\n"\
+                  "###\n"\
+                  f"#SBATCH --array=0-{total_jobs-1}%{parallel_jobs}\n"\
+                  "###\n"
 
         sbatch_options_list = ssh.get_slurm_options_list()
         for option in sbatch_options_list:
             options += f"#SBATCH {option}\n"
-
         return options
 
     def _get_run_parameter_list(self: Configurator) -> str:
@@ -183,12 +181,11 @@ class Configurator:
 
         params = "params=( \\\n"
 
-        # Use scneario_file_name and two parent directories of it
-        scenario_file = Path(self.scenario.directory.parts[-2],
-                             self.scenario.directory.parts[-1],
+        # Use scenario_file_name and two parent directories of it
+        scenario_file = Path(self.scenario.directory.parent.name,
+                             self.scenario.directory.name,
                              self.scenario.scenario_file_name)
-        for i in range(0, num_job_total):
-            seed = i + 1
+        for seed in range(1, num_job_total + 1):
             result_path = Path(result_directory,
                                f"{self.sbatch_filename}_seed_{seed}_smac.txt")
             smac_execdir_i = Path("scenarios", self.scenario.name, str(seed))

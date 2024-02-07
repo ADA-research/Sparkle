@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 sys.path.append('../../Commands')
-from sparkle_help import sparkle_slurm_help
+from Commands.sparkle_help import sparkle_slurm_help as ssh
 
 
 def get_last_level_directory_name(filepath):
@@ -61,7 +61,7 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 	num_job_total = num_of_smac_run
 
 	path_modifier = '../../'
-	sbatch_options_list = sparkle_slurm_help.get_slurm_sbatch_user_options_list(path_modifier)
+	sbatch_options_list = ssh.get_slurm_sbatch_user_options_list(path_modifier)
 	
 	if num_job_in_parallel>num_job_total:
 		num_job_in_parallel = num_job_total
@@ -89,8 +89,8 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 
 	fout.write('params=( \\' + '\n')
 	
-	for i in range(0, num_job_total):
-		seed = i+1
+	for seed in range(1, num_job_total + 1):
+		#seed = i+1
 		result_path = result_directory + sbatch_script_path + r'_seed_' + str(seed) + r'_smac.txt'
 		smac_execdir_i = smac_execdir + r'/' + str(seed)
 		fout.write('\'%s %d %s %s\' \\' % (scenario_file, seed, result_path, smac_execdir_i) + '\n')
@@ -99,7 +99,7 @@ def generate_sbatch_script(sbatch_script_path, scenario_file, result_directory, 
 
 	#cmd_srun_prefix = r'srun -N1 -n1 --exclusive '
 	cmd_srun_prefix = r'srun -N1 -n1 '
-	cmd_srun_prefix += sparkle_slurm_help.get_slurm_srun_user_options_str(path_modifier)
+	cmd_srun_prefix += ssh.get_slurm_srun_user_options_str(path_modifier)
 	cmd_smac_prefix = r'./each_smac_run_core.sh '
 
 	cmd = cmd_srun_prefix + r' ' + cmd_smac_prefix + r' ' + r'${params[$SLURM_ARRAY_TASK_ID]}'

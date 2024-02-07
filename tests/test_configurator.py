@@ -10,6 +10,7 @@ from pathlib import Path
 from Commands.sparkle_help.solver import Solver
 from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help.configurator import Configurator
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 class TestConfigurator():
@@ -71,7 +72,7 @@ def scenario_fixture(solver_fixture: MockerFixture) -> ConfigurationScenario:
     number_of_runs = 2
     use_features = False
     return ConfigurationScenario(solver_fixture, instance_set_train, number_of_runs,
-                                 use_features)
+                                 use_features, sgh.smac_target_algorithm)
 
 
 @pytest.fixture

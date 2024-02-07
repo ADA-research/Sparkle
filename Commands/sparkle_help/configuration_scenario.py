@@ -18,8 +18,8 @@ from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
     def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
-                 number_of_runs: int, use_features: bool,
-                 feature_data_df: pd.DataFrame = None,) -> None:
+                 number_of_runs: int, use_features: bool, configurator_target: str,
+                 feature_data_df: pd.DataFrame = None) -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -27,6 +27,8 @@ class ConfigurationScenario:
             instance_directory: Original directory of instances.
             number_of_runs: Number of runs used for configuration.
             use_features: Boolean indicating if features should be used.
+            configurator_target: The target Python script to be called.
+                This script standardises Configurator I/O for solver wrappers.
             feature_data_df: If features are used, this contains the feature data.
                 Defaults to None.
         """
@@ -38,6 +40,7 @@ class ConfigurationScenario:
         self.instance_directory = instance_directory
         self.number_of_runs = number_of_runs
         self.use_features = use_features
+        self.configurator_target = configurator_target
         self.feature_data = feature_data_df
         self.name = f"{self.solver.name}_{self.instance_directory.name}"
 
@@ -111,17 +114,17 @@ class ConfigurationScenario:
                               / f"{self.name}_scenario.txt")
         self.scenario_file_name = scenario_file_path.name
         with scenario_file_path.open("w") as file:
-            file.write(f"algo = ./{sgh.sparkle_smac_wrapper}\n")
-            file.write(f"execdir = {inner_directory}/\n")
-            file.write(f"deterministic = {self.solver.is_deterministic()}\n")
-            file.write(f"run_obj = {run_objective}\n")
-            file.write(f"wallclock-limit = {time_budget}\n")
-            file.write(f"cutoffTime = {cutoff_time}\n")
-            file.write(f"cutoff_length = {cutoff_length}\n")
-            file.write(f"paramfile = {solver_param_file_path}\n")
-            file.write(f"outdir = {config_output_directory}\n")
-            file.write(f"instance_file = {self.instance_file_path}\n")
-            file.write(f"test_instance_file = {self.instance_file_path}\n")
+            file.write(f"algo = ../../../{self.configurator_target}\n"
+                       f"execdir = {inner_directory}/\n"
+                       f"deterministic = {self.solver.is_deterministic()}\n"
+                       f"run_obj = {run_objective}\n"
+                       f"wallclock-limit = {time_budget}\n"
+                       f"cutoffTime = {cutoff_time}\n"
+                       f"cutoff_length = {cutoff_length}\n"
+                       f"paramfile = {solver_param_file_path}\n"
+                       f"outdir = {config_output_directory}\n"
+                       f"instance_file = {self.instance_file_path}\n"
+                       f"test_instance_file = {self.instance_file_path}\n")
             if self.use_features:
                 file.write(f"feature_file = {self.feature_file_path}\n")
             file.write("validation = true" + "\n")
@@ -148,7 +151,8 @@ class ConfigurationScenario:
             The run objective from global settings.
         """
         # Get run_obj from general settings
-        run_objective = sgh.settings.get_general_performance_measure()
+        run_objective =\
+            sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
 
         # Convert to SMAC format
         if run_objective == PerformanceMeasure.RUNTIME:

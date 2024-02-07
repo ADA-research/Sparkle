@@ -134,13 +134,13 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
 
     # Removes statusinfo files
     for solver_instance in solver_instance_list:
-        sfh.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}")
+        shutil.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}", ignore_errors=True)
 
     # Validate no known errors occurred in the sbatch
     check_sbatch_for_errors(sbatch_script_path)
 
     # Removes the generated sbatch files
-    sfh.rmtree(sbatch_script_path)
+    sbatch_script_path.unlink()
 
     # Removes the directories generated for the solver instances
     for temp_solver in temp_solvers:
@@ -171,7 +171,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                 to_be_moved.append(file)
 
     for file in to_be_deleted:
-        sfh.rmtree(f"{tmp_dir}{file}")
+        Path(f"{tmp_dir}{file}").unlink(missing_ok=True)
 
     for file in to_be_moved:
         if ".val" in file:
@@ -183,7 +183,7 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
             except shutil.Error:
                 print(f"the {str(sgh.pap_performance_data_tmp_path)} directory already "
                       "contains a file with the same name, it will be skipped")
-            sfh.rmtree(path_from)
+            Path(path_from).unlink(missing_ok=True)
 
 
 def find_finished_time_finished_solver(solver_instance_list: list[str],
@@ -202,7 +202,7 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
     """
     time_in_format_str = "-1:00"
     solutions_dir = sgh.pap_performance_data_tmp_path
-    results = sfh.get_list_all_result_filename(solutions_dir)
+    results = sfh.get_list_all_extensions(solutions_dir, "result")
 
     for result in results:
         if "_" in finished_job_array_nr:
@@ -511,7 +511,8 @@ def generate_sbatch_job_list(
     new_num_jobs = num_jobs
     solver_instance_list = list()
     tmp_solver_instances = list()
-    performance_measure = sgh.settings.get_general_performance_measure()
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
 
     # Adds all the jobs of instances and their portfolio to the parameter list
     for instance_path in instance_path_list:
@@ -639,7 +640,7 @@ def handle_waiting_and_removal_process(
 
                             nr_of_lines_raw_content = len(raw_content)
 
-                            for lines in range(0, nr_of_lines_raw_content):
+                            for lines in range(nr_of_lines_raw_content):
                                 if "\ts " in raw_content[
                                         nr_of_lines_raw_content - lines - 1]:
                                     results_line = raw_content[
@@ -756,8 +757,8 @@ def run_parallel_portfolio(instances: list[str],
                 run_on = Runner.SLURM
         # NOTE: the IF statement below is Slurm only as well?
         # As running runtime based performance may be less relevant
-        if (run_on == Runner.SLURM and sgh.settings.get_general_performance_measure()
-                == PerformanceMeasure.RUNTIME):
+        perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+        if (run_on == Runner.SLURM and perf_m == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))

@@ -20,6 +20,7 @@ from runrunner.base import Runner
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
+    perf_measure = sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     parser.add_argument(
         "instance_path",
         type=Path,
@@ -34,8 +35,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        help=("the performance measure, e.g. runtime"
-              f" (default: {sgh.settings.DEFAULT_general_performance_measure.name})"))
+        help=f"the performance measure, e.g. runtime (default: {perf_measure.name})")
     parser.add_argument(
         "--parallel",
         action="store_true",

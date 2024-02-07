@@ -42,9 +42,9 @@ def generate_running_solvers_sbatch_shell_script(total_job_num: int,
     for job in total_job_list:
         instance_path = job[0]
         solver_path = job[1]
-        performance_measure = sgh.settings.get_general_performance_measure()
+        perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         job_params_list.append(f"--instance {instance_path} --solver {solver_path}"
-                               f" --performance-measure {performance_measure.name}")
+                               f" --performance-measure {perf_m.name}")
 
     srun_options_str = "-N1 -n1"
     srun_options_str = srun_options_str + " " + ssh.get_slurm_srun_user_options_str()

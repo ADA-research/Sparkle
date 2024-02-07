@@ -41,7 +41,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
+        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
         action=ac.SetByUser,
         help="the performance measure, e.g. runtime",
     )
@@ -80,7 +80,7 @@ if __name__ == "__main__":
             PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
         )
 
-    if sgh.settings.get_general_performance_measure()\
+    if sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
             == PerformanceMeasure.QUALITY_ABSOLUTE:
         print(
             "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"

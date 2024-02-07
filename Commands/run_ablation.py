@@ -3,6 +3,7 @@
 
 import argparse
 import sys
+import shutil
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -50,7 +51,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
+        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
         action=ac.SetByUser,
         help="The performance measure, e.g. runtime",
     )
@@ -176,13 +177,12 @@ if __name__ == "__main__":
                               instance_set_test_name):
         print("Warning: found existing ablation scenario for this combination. "
               "This will be removed.")
-        sfh.rmtree(sgh.ablation_dir + ablation_scenario_dir)
+        shutil.rmtree(sgh.ablation_dir + ablation_scenario_dir)
 
     # Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(
         solver_name, instance_set_train_name, instance_set_test_name
     )
-    print(f"Scenario dir: {ablation_scenario_dir}")
 
     # Instances
     sah.create_instance_file(instance_set_train, ablation_scenario_dir, "train")

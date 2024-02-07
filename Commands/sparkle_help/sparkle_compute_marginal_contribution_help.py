@@ -211,7 +211,7 @@ def compute_actual_selector_performance(
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
     penalty_factor = sgh.settings.get_general_penalty_multiplier()
     performances = []
-    perf_measure = sgh.settings.get_general_performance_measure()
+    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     capvalue = None
     for index, instance in enumerate(performance_data_csv.list_rows()):
         if capvalue_list is not None:
@@ -460,11 +460,10 @@ def print_rank_list(rank_list: list, mode: str) -> None:
     print("******")
     print("Solver ranking list via marginal contribution (Margi_Contr) with regards to "
           f"{mode}")
-    for i in range(0, len(rank_list)):
-        solver = rank_list[i][0]
-        marginal_contribution = rank_list[i][1]
-        print(f"#{str(i+1)}: {sfh.get_last_level_directory_name(solver)}\t Margi_Contr: "
-              f"{str(marginal_contribution)}")
+    for i, rank in enumerate(rank_list):
+        solver = rank[0]
+        marginal_contribution = rank[1]
+        print(f"#{i+1}: {Path(solver).name}\t Margi_Contr: {marginal_contribution}")
     print("******")
 
 
@@ -483,7 +482,8 @@ def compute_marginal_contribution(
     """
     performance_data_csv = (
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
-    performance_measure = sgh.settings.get_general_performance_measure()
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     aggregation_function = sgh.settings.get_general_metric_aggregation_function()
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         capvalue_list = sgh.settings.get_general_cap_value()

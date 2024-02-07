@@ -41,7 +41,6 @@ def call_configured_solver(instance_path_list: list[Path],
 
         # Create an instance list keeping in mind possible multi-file instances
         instances_list = []
-
         for filename_str in list_all_filename:
             instances_list.append([instance_directory_path / name
                                   for name in filename_str.split()])
@@ -103,9 +102,8 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
     sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
-
-    job_params_common = ("--performance-measure "
-                         f"{sgh.settings.get_general_performance_measure().name}")
+    perf_name = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
+    job_params_common = f"--performance-measure {perf_name}"
     job_params_list = [f"--instance {instance} {job_params_common}"
                        for instance in instance_list]
 
@@ -218,13 +216,17 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
     # write a '.rawres' file with raw solver output in the tmp/ subdirectory of the
     # execution directory:
-    specifics = "rawres"
-    cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    run_length = "2147483647"  # Arbitrary, not used in the SMAC wrapper
-    seed_str = str(sgh.get_seed())
-    cmd_solver_call = (f"{sgh.sparkle_smac_wrapper} {instance_path_str} {specifics} "
-                       f"{cutoff_time_str} {run_length} {seed_str} {config_str}")
-
+    solver_params = {"instance": instance_path_str,
+                     "specifics": "rawres",
+                     "cutoff_time_str": sgh.settings.get_general_target_cutoff_time(),
+                     "run_length": "2147483647",  # Arbitrary, not used by SMAC wrapper
+                     "seed": sgh.get_seed()}
+    config_list = config_str.split(" ")
+    for i in range(len(config_list)):
+        if i + 1 >= len(config_list):
+            break
+        solver_params[config_list[i]] = config_list[i + 1]
+    cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
     # Prepare paths
     solver_path = Path(f"Solvers/{solver_name}")
     instance_name = "_".join([path.name for path in instance_path_list])
@@ -275,13 +277,10 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
             sys.exit(0)
 
     # Output results to user, including path to rawres_solver (e.g. SAT solution)
-    output_msg = (f"Execution on instance {instance_name} completed with status {status}"
-                  f" in {runtime} seconds.")
+    print(f"Execution on instance {instance_name} completed with status {status}"
+          f" in {runtime} seconds.")
 
     if status == "SUCCESS":
-        output_msg += (" Solver output of the results can be found at: "
-                       f"{str(rawres_solver)}")
-
-    print(output_msg)
+        print(f"Solver output of the results can be found at: {str(rawres_solver)}")
 
     return

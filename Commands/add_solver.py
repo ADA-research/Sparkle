@@ -3,6 +3,7 @@
 
 import sys
 import argparse
+import shutil
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -100,14 +101,15 @@ if __name__ == "__main__":
         print("ERROR: Invalid number of solver variations given "
               f"({str(solver_variations)}), "
               "a postive integer must be used. Stopping execution.")
-        sys.exit(0)
+        sys.exit(-1)
 
-    smac_wrapper_path = Path(solver_source, sgh.sparkle_smac_wrapper)
-    if smac_wrapper_path.is_file():
-        sfh.check_file_is_executable(smac_wrapper_path)
+    configurator_wrapper_path = Path(solver_source,
+                                     sgh.sparkle_solver_wrapper)
+    if configurator_wrapper_path.is_file():
+        sfh.check_file_is_executable(configurator_wrapper_path)
     else:
-        print("WARNING: The solver does not have a SMAC wrapper. "
-              "Therefore it cannot be configured using SMAC.")
+        print("WARNING: The solver does not have a configurator wrapper. "
+              "Therefore it cannot be automatically be configured.")
 
     # Start add solver
     last_level_directory = ""
@@ -120,8 +122,7 @@ if __name__ == "__main__":
         print(f"Solver {last_level_directory} already exists!")
         print(f"Do not add solver {last_level_directory}")
         sys.exit(-1)
-
-    sfh.copytree(solver_source, solver_directory)
+    shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path

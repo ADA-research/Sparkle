@@ -15,6 +15,8 @@ dependencies:
     # For Sparkle
     - numpy
     - pandas
+    # Upcoming pandas requirement (Pandas 3.0), remove once 3.0 has arrived
+    - pyarrow
     # Testing
     - pytest
     - pytest-mock==3.10.0

@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 
 class PerformanceMeasure(Enum):
     """Possible performance measures."""
-
+    ERR = -1
     RUNTIME = 0
     QUALITY_ABSOLUTE = 1
     QUALITY = 1
@@ -33,8 +33,40 @@ class PerformanceMeasure(Enum):
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
         elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
             performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
+        else:
+            performance_measure = PerformanceMeasure.ERR
 
         return performance_measure
+
+
+class SparkleObjective():
+    """Objective for Sparkle specified by user.
+
+    Specified in settings.ini's [general] performance_measure.
+    Contains the type of Performance Measure, and the type of metric.
+    """
+
+    def __init__(self: SparkleObjective, performance_setting: str) -> None:
+        """Create sparkle objective from string of format TYPE:METRIC."""
+        self.name = performance_setting
+        if ":" not in performance_setting:
+            print(f"WARNING: Objective {performance_setting} not fully specified."
+                  "Continuing with default values.")
+            performance_measure, metric = performance_setting, ""
+        else:
+            performance_measure, metric = performance_setting.split(":")
+        self.PerformanceMeasure = PerformanceMeasure.from_str(performance_measure)
+        self.metric = metric
+
+        if self.PerformanceMeasure == PerformanceMeasure.ERR:
+            print(f"WARNING: Performance measure {performance_measure} not found!")
+        return
+
+    @staticmethod
+    def from_multi_str(performance_setting: str) -> list[SparkleObjective]:
+        """Create one or more Objectives from the settings string."""
+        objectives_str = performance_setting.split(",")
+        return [SparkleObjective(objective.strip()) for objective in objectives_str]
 
 
 class SolutionVerifier(Enum):
@@ -90,7 +122,7 @@ class Settings:
     DEFAULT_settings_path = PurePath(__settings_dir / __settings_file)
 
     # Constant default values
-    DEFAULT_general_performance_measure = PerformanceMeasure.RUNTIME
+    DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
@@ -115,7 +147,7 @@ class Settings:
         self.__settings = configparser.ConfigParser()
 
         # Setting flags
-        self.__general_performance_measure_set = SettingState.NOT_SET
+        self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_cap_value_set = SettingState.NOT_SET
@@ -157,12 +189,12 @@ class Settings:
         # successfully
         if file_settings.sections() != []:
             section = "general"
-            option_names = ("performance_measure", "smac_run_obj")
+            option_names = ("objective", "smac_run_obj")
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = PerformanceMeasure.from_str(
+                    value = SparkleObjective.from_multi_str(
                         file_settings.get(section, option))
-                    self.set_general_performance_measure(value, state)
+                    self.set_general_sparkle_objectives(value, state)
                     file_settings.remove_option(section, option)
 
             # Comma so python understands it's a tuple...
@@ -350,41 +382,37 @@ class Settings:
 
     # General settings ###
 
-    def set_general_performance_measure(
+    def set_general_sparkle_objectives(
             self: Settings,
-            value: PerformanceMeasure = DEFAULT_general_performance_measure,
+            value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective],
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the performance measure."""
+        """Set the sparkle objective."""
         section = "general"
-        name = "performance_measure"
-
+        name = "objective"
         if value is not None and self.__check_setting_state(
-                self.__general_performance_measure_set, origin, name):
+                self.__general_sparkle_objective_set, origin, name):
+            if isinstance(value, list):
+                value = ",".join([obj.name for obj in value])
             self.__init_section(section)
-            self.__general_performance_measure_set = origin
-            self.__settings[section][name] = value.name
+            self.__general_sparkle_objective_set = origin
+            self.__settings[section][name] = value
 
         return
 
-    def get_general_performance_measure(self: Settings) -> PerformanceMeasure:
+    def get_general_sparkle_objectives(self: Settings) -> list[SparkleObjective]:
         """Return the performance measure."""
-        if self.__general_performance_measure_set == SettingState.NOT_SET:
-            self.set_general_performance_measure()
+        if self.__general_sparkle_objective_set == SettingState.NOT_SET:
+            self.set_general_sparkle_objectives()
 
-        return PerformanceMeasure.from_str(
-            self.__settings["general"]["performance_measure"])
+        return SparkleObjective.from_multi_str(
+            self.__settings["general"]["objective"])
 
     def get_performance_metric_for_report(self: Settings) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""
-        performance_measure = self.get_general_performance_measure()
-
-        if performance_measure is PerformanceMeasure.RUNTIME:
-            penalty_multiplier_str = str(self.get_general_penalty_multiplier())
-            performance_measure_str = f"PAR{penalty_multiplier_str}"
-        else:
-            performance_measure_str = performance_measure.name
-
-        return performance_measure_str
+        objectives = self.get_general_sparkle_objectives()
+        if len(objectives) == 1:
+            return objectives[0].metric
+        return ""
 
     def set_general_cap_value(
             self: Settings, value: float = None,

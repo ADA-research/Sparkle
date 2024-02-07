@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import os
 import stat
 import fcntl
 import shlex
@@ -186,39 +185,30 @@ def generate_sbatch_script_generic(sbatch_script_path: str,
     fout.write("#!/bin/bash\n"
                "###\n"
                "###\n")
-
     for i in sbatch_options_list:
-        fout.write("#SBATCH " + str(i) + "\n")
-
+        fout.write(f"#SBATCH {i}\n")
     fout.write("###\n")
+
+    # specify the executing command
+    command_line = "srun " + srun_options_str + " " + target_call_str
 
     # specify the array of parameters for each command
     if len(job_params_list) > 0:
         fout.write("params=( \\" + "\n")
-
-        for i in range(0, len(job_params_list)):
-            fout.write(f"'{job_params_list[i]}' \\\n")
-
+        for job in job_params_list:
+            fout.write(f"'{job}' \\\n")
         fout.write(")" + "\n")
+        command_line += " " + "${params[$SLURM_ARRAY_TASK_ID]}"
 
     # if there is a list of output file paths, write the output parameter
     if job_output_list is not None:
         fout.write("output=( \\" + "\n")
 
-        for i in range(0, len(job_output_list)):
-            fout.write(f"'{job_output_list[i]}' \\\n")
+        for job in job_output_list:
+            fout.write(f"'{job}' \\\n")
 
         fout.write(")" + "\n")
-
-    # specify the prefix of the executing command
-    command_prefix = "srun " + srun_options_str + " " + target_call_str
-    # specify the complete command
-    command_line = command_prefix
-    if len(job_params_list) > 0:
-        command_line += " " + "${params[$SLURM_ARRAY_TASK_ID]}"
-
-    # add output file paths to the command if given
-    if job_output_list is not None:
+        # add output file paths to the command
         command_line += " > ${output[$SLURM_ARRAY_TASK_ID]}"
 
     # write the complete command in this sbatch script
@@ -246,7 +236,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
     else:
         tmp_dir = "Tmp/"
 
-    sbatch_script_name = sfh.get_file_name(str(sbatch_script_path))
+    sbatch_script_name = Path(sbatch_script_path).name
 
     # Set sbatch options
     max_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
@@ -455,9 +445,9 @@ def generate_sbatch_script_for_feature_computation(
     # Create job list
     job_params_list = []
 
-    for i in range(0, num_jobs):
-        instance_path = list_jobs[i][0]
-        extractor_path = list_jobs[i][1]
+    for job in list_jobs:
+        instance_path = job[0]
+        extractor_path = job[1]
         job_params = (f"--instance {instance_path} --extractor {extractor_path} "
                       f"--feature-csv {feature_data_csv_path}")
         job_params_list.append(job_params)
@@ -516,27 +506,36 @@ def submit_sbatch_script(sbatch_script_name: str,
     return job_id
 
 
-def run_validation_callback(solver: Path,
-                            instance_set_train: Path,
-                            instance_set_test: Path,
-                            dependency: str,
-                            run_on: Runner = Runner.SLURM) -> str:
-    """Generate a callback Slurm batch script for validation and run it.
+def run_callback(solver: Path,
+                 instance_set_train: Path,
+                 instance_set_test: Path,
+                 dependency: str,
+                 command: CommandName,
+                 run_on: Runner = Runner.SLURM) -> str:
+    """Generate a command callback Slurm batch script for validation and run it.
 
     Args:
       solver: Path (object) to solver.
       instance_set_train: Path (object) to instances used for training.
       instance_set_test: Path (object) to instances used for testing.
       dependency: String of job dependencies.
+      command: The command to run. Currently supported: Validation and Ablation.
       run_on: Whether the job is executed on Slurm or locally.
 
     Returns:
       String job identifier.
     """
+    cmd_file, cmd_str = None, None
+    if command == CommandName.RUN_ABLATION:
+        cmd_file = "run_ablation.py"
+        cmd_str = "ablation"
+    elif command == CommandName.VALIDATE_CONFIGURED_VS_DEFAULT:
+        cmd_file = "validate_configured_vs_default.py"
+        cmd_str = "validation"
     command_line = "echo $(pwd) $(date)\n"
     command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
-    command_line += ("./Commands/validate_configured_vs_default.py "
-                     "--settings-file Settings/latest.ini")
+    command_line += f"./Commands/{cmd_file} "
+    command_line += "--settings-file Settings/latest.ini"
     command_line += f" --solver {solver.name}"
     command_line += f" --instance-set-train {instance_set_train}"
     command_line += f" --run-on {run_on}"
@@ -550,80 +549,16 @@ def run_validation_callback(solver: Path,
     # 'else', and the SLURM_RR replaced by just SLURM.
     if run_on == Runner.SLURM:
         jobid = generate_generic_callback_slurm_script(
-            "validation", solver, instance_set_train, instance_set_test,
-            dependency, command_line, CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
+            cmd_str, solver, instance_set_train, instance_set_test,
+            dependency, command_line, command)
     else:
-        result = create_callback_options_list("validation",
+        result = create_callback_options_list(cmd_str,
                                               solver,
                                               instance_set_train,
                                               instance_set_test)
         run = rrr.add_to_queue(runner=run_on,
                                cmd=command_line,
-                               name="validation",
-                               dependencies=dependency,
-                               base_dir=sgh.sparkle_tmp_path,
-                               sbatch_options=result)
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        if run_on == Runner.SLURM:
-            jobid = run.run_id
-        else:
-            print("Waiting for the local calculations to finish.")
-            run.wait()
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-    return jobid
-
-
-def run_ablation_callback(solver: Path,
-                          instance_set_train: Path,
-                          instance_set_test: Path,
-                          dependency: str,
-                          run_on: Runner = Runner.SLURM) -> str:
-    """Generate a callback script for ablation and execute it.
-
-    Args:
-      solver: Path (object) to solver.
-      instance_set_train: Path (object) to instances used for training.
-      instance_set_test: Path (object) to instances used for testing.
-      dependency: String of job dependencies.
-      run_on: Whether the job is executed on Slurm or Locally.
-
-    Returns:
-      String job identifier.
-    """
-    command_line = "echo $(pwd) $(date)\n"
-    command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
-    command_line += "./Commands/run_ablation.py --settings-file Settings/latest.ini"
-    command_line += f" --solver {solver.name}"
-    command_line += f" --instance-set-train {instance_set_train}"
-    command_line += f" --run-on {run_on}"
-
-    if instance_set_test is not None:
-        command_line += f" --instance-set-test {instance_set_test}"
-    jobid = ""
-
-    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
-    # runrunner works properly everything under 'if' should be removed leaving only the
-    # 'else', and the SLURM_RR replaced by just SLURM.
-    if run_on == Runner.SLURM:
-        jobid = generate_generic_callback_slurm_script(
-            "ablation", solver, instance_set_train, instance_set_test,
-            dependency, command_line, CommandName.RUN_ABLATION)
-    else:
-        result = create_callback_options_list("ablation",
-                                              solver,
-                                              instance_set_train,
-                                              instance_set_test)
-        run = rrr.add_to_queue(runner=run_on,
-                               cmd=command_line,
-                               name="ablation",
+                               name=cmd_str,
                                dependencies=dependency,
                                base_dir=sgh.sparkle_tmp_path,
                                sbatch_options=result)
@@ -708,36 +643,31 @@ def generate_generic_callback_slurm_script(name: str,
     Returns:
       String job identifier.
     """
-    result = create_callback_options_list(name,
-                                          solver,
-                                          instance_set_train,
-                                          instance_set_test)
-    delayed_job_file_path, sbatch_options_list = result[0], result[1]
+    delayed_job_file_path, sbatch_options_list = \
+        create_callback_options_list(name, solver, instance_set_train, instance_set_test)
     sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(get_slurm_sbatch_user_options_list())
 
     # Only overwrite task specific arguments
-    sbatch_options_list.append(f"--dependency=afterany:{dependency}")
-    sbatch_options_list.append("--nodes=1")
-    sbatch_options_list.append("--ntasks=1")
-    sbatch_options_list.append("-c1")
+    sbatch_options_list.extend([f"--dependency=afterany:{dependency}",
+                                "--nodes=1", "--ntasks=1", "-c1"])
+    delayed_job_file_path = Path(delayed_job_file_path)
+    with delayed_job_file_path.open("w") as fout:
+        fout.write("#!/bin/bash\n"
+                   "###\n"
+                   "###\n")
 
-    fout = Path(delayed_job_file_path).open("w")
-    fout.write("#!/bin/bash\n")  # Use bash to execute this script
-    fout.write("###\n")
-    fout.write("###\n")
+        for sbatch_option in sbatch_options_list:
+            fout.write(f"#SBATCH {sbatch_option}\n")
 
-    for sbatch_option in sbatch_options_list:
-        fout.write(f"#SBATCH {sbatch_option}\n")
-
-    fout.write("###\n")
-    fout.write(f"{command_line}\n")
-    fout.close()
-
-    os.popen(f"chmod 755 {delayed_job_file_path}")
-
-    output_list = os.popen(f"sbatch ./{delayed_job_file_path}").readlines()
+        fout.write("###\n"
+                   f"{command_line}\n")
+    st = delayed_job_file_path.stat().st_mode
+    delayed_job_file_path.chmod(mode=st | stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+    sbatch_p = subprocess.run(["sbatch", f"./{delayed_job_file_path}"],
+                              capture_output=True)
+    output_list = sbatch_p.stdout.decode().splitlines()
 
     jobid = ""
     if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:

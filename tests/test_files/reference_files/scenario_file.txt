@@ -1,4 +1,4 @@
-algo = ./sparkle_smac_wrapper.py
+algo = ../../../smac_target_algorithm.py
 execdir = scenarios/Test-Solver_Test-Instance-Set/
 deterministic = 0
 run_obj = RUNTIME

@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions to inform about Sparkle's system status."""
 
+from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -22,10 +23,8 @@ def print_solver_list(verbose: bool = False) -> None:
           + (":" if verbose else ""))
 
     if verbose:
-        i = 1
-        for solver in solver_list:
-            print(f"[{str(i)}]: Solver: {sfh.get_last_level_directory_name(solver)}")
-            i += 1
+        for i, solver in enumerate(solver_list):
+            print(f"[{i + 1}]: Solver: {sfh.get_last_level_directory_name(solver)}")
 
     print("")
     return
@@ -66,7 +65,7 @@ def print_instance_list(verbose: bool = False) -> None:
     if verbose:
         i = 1
         for instance in instance_list:
-            instance_dir = sfh.get_directory(instance).split("Instances/")[1][:-1]
+            instance_dir = Path(instance).parent
             print(f"[{str(i)}]: [{instance_dir}] Instance: ",
                   f"{sfh.get_last_level_directory_name(instance)}")
             i += 1
@@ -99,15 +98,13 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
 
     if verbose:
         current_job_num = 1
-        for i in range(0, len(list_feature_computation_job)):
-            instance_path = list_feature_computation_job[i][0]
-            extractor_list = list_feature_computation_job[i][1]
-            len_extractor_list = len(extractor_list)
-            for j in range(0, len_extractor_list):
-                extractor_path = extractor_list[j]
-                print(f"[{str(current_job_num)}]: Extractor: "
-                      f"{sfh.get_last_level_directory_name(extractor_path)}, Instance: "
-                      f"{sfh.get_last_level_directory_name(instance_path)}")
+        for job in list_feature_computation_job:
+            instance_path = job[0]
+            extractor_list = job[1]
+            for extractor_path in extractor_list:
+                print(f"[{current_job_num}]: Extractor: "
+                      f"{Path(extractor_path).name}, Instance: "
+                      f"{Path(instance_path).name}")
                 current_job_num += 1
 
     print("")
@@ -139,15 +136,13 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
 
     if verbose:
         current_job_num = 1
-        for i in range(0, len(list_performance_computation_job)):
-            instance_path = list_performance_computation_job[i][0]
-            solver_list = list_performance_computation_job[i][1]
-            len_solver_list = len(solver_list)
-            for j in range(0, len_solver_list):
-                solver_path = solver_list[j]
-                print(f"[{str(current_job_num)}]: Solver: "
-                      f"{sfh.get_last_level_directory_name(solver_path)}, Instance: "
-                      f"{sfh.get_last_level_directory_name(instance_path)}")
+        for job in list_performance_computation_job:
+            instance_path = job[0]
+            solver_list = job[1]
+            for solver_path in solver_list:
+                print(f"[{current_job_num}]: Solver: "
+                      f"{Path(solver_path).name}, Instance: "
+                      f"{Path(instance_path).name}")
                 current_job_num += 1
 
     print("")
