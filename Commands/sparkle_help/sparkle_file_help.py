@@ -137,157 +137,45 @@ def get_list_all_statusinfo_filename(filepath: str) -> list[str]:
     return statusinfo_list
 
 
-def add_item_to_platform(item: any,
-                         file_target: Path,
-                         target: list | dict = None,
-                         key: str = None) -> None:
-    """Add an item to a list or dictionary of the platform that must saved to disk.
+def add_remove_platform_item(item: any,
+                             file_target: Path,
+                             target: list | dict = None,
+                             key: str = None,
+                             remove: bool = False) -> None:
+    """Add an item to or remove from a list or dictionary
+       of the platform that must saved to disk.
 
     Args:
         item: The item to be added to the data structure.
         target: Either a list or dictionary to add the item to.
         file_target: Path to the file where we want to keep the disk storage.
         key: Optional string, in case we use a dictionary.
+        remove: If true, remove the item from platform.
+                If the target is a dict, the key is used to remove the entry.
     """
+    # ast.literal_eval can't deal with Path objects
+    if isinstance(item, Path):
+        item = str(item)
+    if isinstance(file_target, str):
+        file_target = Path(file_target)
     # Determine object if not present
     if target is None:
         target = sgh.file_storage_data_mapping[file_target]
-    # Add item to object
+    # Add/Remove item to/from object
     if isinstance(target, dict):
-        target[key] = item
+        if remove:
+            del target[key]
+        else:
+            target[key] = item
     else:
-        target.append(item)
+        if remove:
+            target.remove(item)
+        else:
+            target.append(item)
     # (Over)Write data structure to path
     with file_target.open("w") as fout:
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
         fout.write(str(target))
-
-def add_new_solver_into_file(filepath: str, deterministic: int = 0,
-                             solver_variations: int = 1) -> None:
-    """Add a solver to an existing file listing solvers and their details.
-
-    Args:
-      filepath: Path to the file with solver (details).
-      deterministic: 1 for deterministic solvers and 0 for stochastic solvers.
-        Default is 0.
-      solver_variations: Number of different solver variations. Default is 1.
-    """
-    with Path(sgh.solver_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(f"{filepath} {str(deterministic)} {str(solver_variations)}\n")
-
-
-def add_new_solver_nickname_into_file(nickname: str, filepath: str) -> None:
-    """Add a new solver nickname to a given file.
-
-    Args:
-      nickname: Nickname for the solver.
-      filepath: Path to the file.
-    """
-    with Path(sgh.solver_nickname_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(nickname + r" " + filepath + "\n")
-
-
-def add_new_extractor_into_file(filepath: str) -> None:
-    """Add a new feature extractor to a given file.
-
-    Args:
-      filepath: Path to the target file.
-    """
-    with Path(sgh.extractor_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(filepath + "\n")
-
-
-def add_new_extractor_feature_vector_size_into_file(filepath: str,
-                                                    feature_vector_size: int) -> None:
-    """Add a new feature vector size to a given file.
-
-    Args:
-      filepath: Path to the target file.
-      feature_vector_size: Feature vector size.
-    """
-    with Path(sgh.extractor_feature_vector_size_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(filepath + r" " + str(feature_vector_size) + "\n")
-
-
-def add_new_extractor_nickname_into_file(nickname: str, filepath: str) -> None:
-    """Add a new feature extractor nickname to a given file.
-
-    Args:
-      nickname: Nickname for the extractor.
-      filepath: Path to the target file.
-    """
-    with Path(sgh.extractor_nickname_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(nickname + r" " + filepath + "\n")
-
-
-def write_solver_list() -> None:
-    """Write the solver list to the default solver list file."""
-    with Path(sgh.solver_list_path).open("w+") as fout:
-        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-        for solver in sgh.solver_list:
-            fout.write(solver + "\n")
-
-
-def remove_line_from_file(line_start: str, filepath: Path) -> None:
-    """Remove all lines starting with a given string from a given file.
-
-    Args:
-      line_start: The prefix string.
-      filepath: A Path object representing the file.
-    """
-    newlines = []
-
-    # Store lines that do not start with the input line
-    with filepath.open("r") as infile:
-        for current_line in infile:
-            if not current_line.startswith(line_start):
-                newlines.append(current_line)
-
-    # Overwrite the file with stored lines
-    with filepath.open("w") as outfile:
-        for current_line in newlines:
-            outfile.write(current_line)
-
-
-def remove_from_solver_list(filepath: str) -> None:
-    """Remove a solver from the list and the solver file.
-
-    Args:
-      filepath: Path to the solver file.
-    """
-    # Store lines that do not contain filepath
-    newlines = [line for line in Path(sgh.solver_list_path).open("r").readlines()
-                if filepath not in line]
-
-    # Overwrite the file with stored lines
-    with Path(sgh.solver_list_path).open("w") as outfile:
-        for line in newlines:
-            outfile.write(line)
-
-    # Remove solver from list
-    sgh.solver_list.remove(filepath)
-
-
-def write_data_to_file(target_file: Path, object: list | dict) -> None:
-    """Write an object to a file.
-
-    target_file: Path object describing file to write the data to.
-    object: Either list or dict, to write to the file. In case of dict, the key is also
-            written to the file.
-    """
-    with target_file.open("w+") as fout:
-        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-        if isinstance(object, dict):
-            for key in object:
-                fout.write(f"{key} {object[key]}\n")
-        elif isinstance(object, list):
-            for item in object:
-                fout.write(f"{item}\n")
 
 
 def write_string_to_file(file: Path, string: str,
@@ -387,7 +275,6 @@ def create_temporary_directories() -> None:
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
-
     return
 
 
@@ -407,7 +294,6 @@ def remove_temporary_files() -> None:
 
     shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
                   ignore_errors=True)
-
     return
 
 

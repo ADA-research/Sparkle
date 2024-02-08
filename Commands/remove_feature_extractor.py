@@ -58,27 +58,26 @@ if __name__ == "__main__":
     print("Starting removing feature extractor "
           f"{Path(extractor_path).name} ...")
 
-    extractor_list = sgh.extractor_list
-    if bool(extractor_list):
-        extractor_list.remove(extractor_path)
-        sfh.write_data_to_file(Path(sgh.extractor_list_path), sgh.extractor_list)
+    if bool(sgh.extractor_list):
+        sfh.add_remove_platform_item(extractor_path,
+                                     sgh.extractor_list_path, remove=True)
+        
+        #sfh.write_data_to_file(Path(sgh.extractor_list_path), sgh.extractor_list)
 
-    extractor_feature_vector_size_mapping = (
-        sgh.extractor_feature_vector_size_mapping
-    )
-    if bool(extractor_feature_vector_size_mapping):
-        output = extractor_feature_vector_size_mapping.pop(extractor_path)
-        sfh.write_data_to_file(Path(sgh.extractor_feature_vector_size_list_path),
-                               sgh.extractor_feature_vector_size_mapping)
-
-    extractor_nickname_mapping = sgh.extractor_nickname_mapping
-    if bool(extractor_nickname_mapping):
-        for key in extractor_nickname_mapping:
-            if extractor_nickname_mapping[key] == extractor_path:
-                output = extractor_nickname_mapping.pop(key)
+    if bool(sgh.extractor_feature_vector_size_mapping):
+        sfh.add_remove_platform_item(None,
+                                     sgh.extractor_feature_vector_size_list_path,
+                                     key=extractor_path,
+                                     remove=False)
+    
+    if bool(sgh.extractor_nickname_mapping):
+        for key in sgh.extractor_nickname_mapping:
+            if sgh.extractor_nickname_mapping[key] == extractor_path:
+                sfh.add_remove_platform_item(None,
+                                             sgh.extractor_nickname_list_path,
+                                             key=key,
+                                             remove=False)
                 break
-        sfh.write_data_to_file(sgh.extractor_nickname_list_path,
-                               sgh.extractor_nickname_mapping)
 
     if Path(sgh.feature_data_csv_path).exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(

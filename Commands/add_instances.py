@@ -118,7 +118,7 @@ if __name__ == "__main__":
                 intended_instance_line += str(target_file_path) + " "
 
             intended_instance_line = intended_instance_line.strip()
-            sfh.add_item_to_platform(intended_instance_line, sgh.instance_list_path)
+            sfh.add_remove_platform_item(intended_instance_line, sgh.instance_list_path)
             feature_data_csv.add_row(intended_instance_line)
             performance_data_csv.add_row(intended_instance_line)
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
                       f"{instances_directory}")
                 print(f"Ignore adding file {intended_filename.name}")
             else:
-                sfh.add_item_to_platform(intended_filename, sgh.instance_list_path)
+                sfh.add_remove_platform_item(intended_filename, sgh.instance_list_path)
                 feature_data_csv.add_row(intended_filename)
                 performance_data_csv.add_row(intended_filename)
                 shutil.copy(intended_filename, instances_directory)

@@ -67,8 +67,8 @@ if __name__ == "__main__":
 
     for intended_instance in list_instances:
         # Remove instance records
-        sgh.instance_list.remove(intended_instance)
-        sfh.remove_line_from_file(intended_instance, sgh.instance_list_path)
+        sfh.add_remove_platform_item(intended_instance,
+                                     sgh.instance_list_path, remove=True)
         feature_data_csv.delete_row(intended_instance)
         performance_data_csv.delete_row(intended_instance)
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     shutil.rmtree(Path(smac_test_instances_path), ignore_errors=True)
     Path(file_smac_test_instances).unlink(missing_ok=True)
 
-    sfh.write_data_to_file(sgh.instance_list_path, sgh.instance_list)
+    #sfh.write_data_to_file(sgh.instance_list_path, sgh.instance_list)
     feature_data_csv.update_csv()
     performance_data_csv.update_csv()
 

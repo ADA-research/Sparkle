@@ -131,61 +131,22 @@ working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
                 test_data_dir]
 
-solver_list = []
-solver_nickname_mapping = {}
-extractor_list = []
-extractor_nickname_mapping = {}
-extractor_feature_vector_size_mapping = {}
-instance_list = []
+file_storage_data_mapping = {Path(solver_list_path): [],
+                             Path(solver_nickname_list_path): {},
+                             Path(extractor_list_path): [],
+                             Path(extractor_nickname_list_path): {},
+                             Path(extractor_feature_vector_size_list_path): {},
+                             instance_list_path: []}
 
-file_storage_data_mapping = {Path(solver_list_path): solver_list,
-                             Path(solver_nickname_list_path): solver_nickname_mapping,
-                             Path(extractor_list_path): extractor_list,
-                             Path(extractor_nickname_list_path): extractor_nickname_mapping,
-                             Path(extractor_feature_vector_size_list_path): extractor_feature_vector_size_mapping,
-                             instance_list_path: instance_list}
+for data_path in file_storage_data_mapping.keys():
+    if data_path.exists():
+        with data_path.open("r+") as fo:
+            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)    
+            file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
-if Path(solver_list_path).exists():
-    with Path(solver_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        solver_list = ast.literal_eval(fo.read())
-        #lines = [line.strip() for line in fo.readlines()]
-        #solver_list.extend(lines)
-
-if Path(solver_nickname_list_path).exists():
-    with Path(solver_nickname_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        solver_nickname_mapping = ast.literal_eval(fo.read())
-        #lines = [line.strip().split() for line in fo.readlines()]
-        #for nickname, solver in lines:
-        #    solver_nickname_mapping[nickname] = solver
-
-if Path(extractor_list_path).exists():
-    with Path(extractor_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        extractor_list = ast.literal_eval(fo.readlines())
-        #lines = [line.strip() for line in fo.readlines()]
-        #extractor_list.extend(lines)
-
-if Path(extractor_nickname_list_path).exists():
-    with Path(extractor_nickname_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        extractor_nickname_mapping = ast.literal_eval(fo.read())
-        #lines = [line.strip().split() for line in fo.readlines()]
-        #for nickname, extractor in lines:
-        #    extractor_nickname_mapping[nickname] = extractor
-
-if Path(extractor_feature_vector_size_list_path).exists():
-    with Path(extractor_feature_vector_size_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        extractor_feature_vector_size_mapping = ast.literal_eval(fo.read())
-        #lines = [line.strip().split() for line in fo.readlines()]
-        #for extractor, vector_size in lines:
-        #    extractor_feature_vector_size_mapping[extractor] = int(vector_size)
-
-if instance_list_path.exists():
-    with instance_list_path.open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        instance_list = ast.literal_eval(fo.read())
-        #lines = [line.strip() for line in fo.readlines()]
-        #instance_list.extend(lines)
+solver_list = file_storage_data_mapping[Path(solver_list_path)]
+solver_nickname_mapping = file_storage_data_mapping[Path(solver_nickname_list_path)]
+extractor_list = file_storage_data_mapping[Path(extractor_list_path)]
+extractor_nickname_mapping = file_storage_data_mapping[Path(extractor_nickname_list_path)]
+extractor_feature_vector_size_mapping = file_storage_data_mapping[Path(extractor_feature_vector_size_list_path)]
+instance_list = file_storage_data_mapping[instance_list_path]

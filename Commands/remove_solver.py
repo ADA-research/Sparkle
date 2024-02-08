@@ -55,9 +55,9 @@ if __name__ == "__main__":
 
     print(f"Start removing solver {sfh.get_last_level_directory_name(solver_path)} ...")
 
-    solver_list = sgh.solver_list
-    if bool(solver_list):
-        sfh.remove_from_solver_list(solver_path)
+    if bool(sgh.solver_list):
+        sfh.add_remove_platform_item(solver_path,
+                                     sgh.solver_list_path)
 
     solver_nickname_mapping = sgh.solver_nickname_mapping
     if bool(solver_nickname_mapping):

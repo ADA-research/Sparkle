@@ -455,10 +455,13 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
 
     # TODO: Fix solver removal from performanc data CSV file
     # performance_data_csv.delete_column(solver_path)
-    sgh.solver_list.remove(solver_path)
-    sgh.solver_nickname_mapping.pop(solver_path)
-    sfh.write_solver_list()
-    sfh.write_data_to_file(sgh.solver_nickname_list_path, sgh.solver_nickname_mapping)
+    sfh.add_remove_platform_item(solver_path,
+                                 sgh.solver_list_path,
+                                 remove=True)
+    sfh.add_remove_platform_item(None,
+                                 sgh.solver_nickname_list_path,
+                                 key=solver_path,
+                                 remove=True)
 
     print(f"Solver {sfh.get_last_level_directory_name(solver_path)} is a wrong solver")
     print(f"Solver {sfh.get_last_level_directory_name(solver_path)} running on "
@@ -563,6 +566,6 @@ def update_performance_data_id() -> None:
 def get_performance_data_id() -> int:
     """Return the current performance data ID."""
     pd_id = 0
-    if Path(sgh.performance_data_id_path).exist():
+    if Path(sgh.performance_data_id_path).exists():
         pd_id = int(Path(sgh.performance_data_id_path).open("r").readline())
     return pd_id

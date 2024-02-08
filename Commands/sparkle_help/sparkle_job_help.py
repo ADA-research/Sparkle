@@ -34,7 +34,7 @@ def get_num_of_total_job_from_list(list_jobs: list) -> int:
     """
     num = 0
     for job in list_jobs:
-        num += len(job[1])
+        num += len(job)
     return num
 
 
