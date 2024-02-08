@@ -353,7 +353,8 @@ def wait_for_finished_solver(
     # TODO: Fix weird situation. This starts as dict, later becomes a list...
     current_solver_list = remaining_job_dict
     finished_solver_list = list()
-
+    # TODO: This while loop is rather lengthy and chaotic. This should be refactored.
+    # Especially the output string handling of the subprocess should be more structured.
     while not done:
         # Ask the cluster for a list of all jobs which are currently running
         result = subprocess.run(["squeue", "--array", "--jobs", job_id,
@@ -725,7 +726,8 @@ def run_parallel_portfolio(instances: list[str],
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
     sfh.create_new_empty_file(file_path_output1)
-
+    # TODO: This try/except structure is absolutely massive.
+    # This entire method should be refactored after everything works with RunRunner
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
@@ -779,7 +781,8 @@ def run_parallel_portfolio(instances: list[str],
             done = False
             wait_cutoff_time = False
             n_seconds = 4
-
+            # TODO: This piece of code is quite identical to the loop in
+            # wait_for_finished solver. Perhaps it can be merged.
             while not done:
                 # Ask the cluster for a list of all jobs which are currently running
                 result = subprocess.run(["squeue", "--array",

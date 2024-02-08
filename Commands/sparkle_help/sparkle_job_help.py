@@ -138,12 +138,10 @@ def wait_for_job(job_id: str) -> None:
     Args:
       job_id: String job identifier.
     """
-    done = check_job_is_done(job_id)
     n_seconds = 10
 
-    while not done:
+    while not check_job_is_done(job_id):
         sleep(n_seconds)
-        done = check_job_is_done(job_id)
 
     print("Job with ID", job_id, "done!", flush=True)
 
@@ -154,9 +152,8 @@ def wait_for_all_jobs() -> None:
     n_seconds = 10
     print("Waiting for", remaining_jobs, "jobs...", flush=True)
 
-    while remaining_jobs > 0:
+    while cleanup_active_jobs() > 0:
         sleep(n_seconds)
-        remaining_jobs = cleanup_active_jobs()
 
     print("All jobs done!")
 

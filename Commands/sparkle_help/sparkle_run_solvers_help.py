@@ -413,29 +413,19 @@ def get_runtime_from_wrapper(result: str) -> float:
 
 def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
     """Return the CPU and wallclock time reported by runsolver."""
-    cpu_time = float(-1)
-    wc_time = float(-1)
+    cpu_time = -1.0
+    wc_time = -1.0
 
-    infile = Path(runsolver_values_path).open("r+")
-    fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-
-    while True:
-        line = infile.readline().strip()
-        if not line:
-            break
-        words = line.split("=")
-        # Read wallclock time from a line of the form 'WCTIME=0.110449'
-        if len(words) == 2 and words[0] == "WCTIME":
-            wc_time = float(words[1])
-        # Read CPU time from a line of the form 'CPUTIME=0.110449'
-        elif len(words) == 2 and words[0] == "CPUTIME":
-            cpu_time = float(words[1])
-            # Order is fixed, CPU is the last thing we want to read, so break from the
-            # loop
-            break
-
-    infile.close()
-
+    with Path(runsolver_values_path).open("r+") as infile:
+        fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip().split("=") for line in infile.readlines() if "=" in line]
+        for keyword, value in lines:
+            if keyword == "WCTIME":
+                wc_time = float(value)
+            elif keyword == "CPUTIME":
+                cpu_time = float(value)
+                # Order is fixed, CPU is the last thing we want to read, so break
+                break
     return cpu_time, wc_time
 
 
