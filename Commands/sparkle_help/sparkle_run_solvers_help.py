@@ -550,15 +550,10 @@ def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -
 
 def update_performance_data_id() -> None:
     """Update the performance data ID."""
-    # Get current pd_id
-    pd_id = get_performance_data_id()
-
-    # Increment pd_id
-    pd_id = pd_id + 1
-
+    # Get next pd_id
+    pd_id = get_performance_data_id() + 1
     # Write new pd_id
     pd_id_path = sgh.performance_data_id_path
-
     with Path(pd_id_path).open("w") as pd_id_file:
         pd_id_file.write(str(pd_id))
 
@@ -567,13 +562,7 @@ def update_performance_data_id() -> None:
 
 def get_performance_data_id() -> int:
     """Return the current performance data ID."""
-    pd_id = -1
-    pd_id_path = sgh.performance_data_id_path
-
-    try:
-        with Path(pd_id_path).open("r") as pd_id_file:
-            pd_id = int(pd_id_file.readline())
-    except FileNotFoundError:
-        pd_id = 0
-
+    pd_id = 0
+    if Path(sgh.performance_data_id_path).exist():
+        pd_id = int(Path(sgh.performance_data_id_path).open("r").readline())
     return pd_id
