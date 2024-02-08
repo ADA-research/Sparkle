@@ -488,26 +488,20 @@ def sat_get_result_status(raw_result_path: str) -> str:
     # timed out
     status = "UNKNOWN"
 
-    infile = Path(raw_result_path).open("r+")
-    fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-
-    while True:
-        line = infile.readline().strip()
-        if not line:
-            break
-        words = line.split()
-        if len(words) == 3 and words[1] == "s":
-            if words[2] == "SATISFIABLE":
-                status = "SAT"
-            elif words[2] == "UNSATISFIABLE":
-                status = "UNSAT"
-            else:
-                # Something is wrong or the solver timed out
-                print(f'Warning: Unknown SAT result "{words[2]}"')
-                status = "UNKNOWN"
-            break
-
-    infile.close()
+    with Path(raw_result_path).open("r+") as infile:
+        fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip().split() for line in infile.readlines()]
+        for words in lines:
+            if len(words) == 3 and words[1] == "s":
+                if words[2] == "SATISFIABLE":
+                    status = "SAT"
+                elif words[2] == "UNSATISFIABLE":
+                    status = "UNSAT"
+                else:
+                    # Something is wrong or the solver timed out
+                    print(f'Warning: Unknown SAT result "{words[2]}"')
+                    status = "UNKNOWN"
+                break
 
     return status
 
@@ -517,36 +511,21 @@ def sat_get_verify_string(tmp_verify_result_path: str) -> str:
 
     Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
     """
-    ret = "UNKNOWN"
-    fin = Path(tmp_verify_result_path).open("r+")
-    fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fin.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        if myline == "Solution verified.":
-            myline2 = fin.readline()
-            myline2 = fin.readline().strip()
-            if myline2 == "11":
-                ret = "SAT"
-                break
-        elif myline == "Solver reported unsatisfiable. I guess it must be right!":
-            myline2 = fin.readline()
-            myline2 = fin.readline().strip()
-            if myline2 == "10":
-                ret = "UNSAT"
-                break
-        elif myline == "Wrong solution.":
-            myline2 = fin.readline()
-            myline2 = fin.readline().strip()
-            if myline2 == "0":
-                ret = "WRONG"
-                break
-        else:
-            continue
-    fin.close()
-    return ret
+    lines = []
+    with Path(tmp_verify_result_path).open("r+") as fin:
+        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip() for line in fin.readlines()]
+    for index, line in enumerate(lines):
+        if line == "Solution verified.":
+            if lines[index + 2] == "11":
+                return "SAT"
+        elif line == "Solver reported unsatisfiable. I guess it must be right!":
+            if lines[index + 2] == "10":
+                return "UNSAT"
+        elif line == "Wrong solution.":
+            if lines[index + 2] == "0":
+                return "WRONG"
+    return "UNKNOWN"
 
 
 def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -> str:
