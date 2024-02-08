@@ -37,18 +37,10 @@ def get_slurm_options_list(path_modifier: str = None) -> list[str]:
         path_modifier = ""
 
     slurm_options_list = []
-
-    sparkle_slurm_settings_path = str(path_modifier) + sgh.sparkle_slurm_settings_path
-
-    settings_file = Path(sparkle_slurm_settings_path).open("r")
-    while True:
-        current_line = settings_file.readline()
-        if not current_line:
-            break
-        if current_line[0] == "-":
-            current_line = current_line.strip()
-            slurm_options_list.append(current_line)
-    settings_file.close()
+    sparkle_slurm_settings_path = Path(path_modifier) / sgh.sparkle_slurm_settings_path
+    with Path(sparkle_slurm_settings_path).open("r") as settings_file:
+        slurm_options_list.extend([line.strip() for line in settings_file.readlines()
+                                   if line.startswith("-")])
 
     return slurm_options_list
 
