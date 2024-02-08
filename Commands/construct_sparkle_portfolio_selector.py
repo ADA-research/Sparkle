@@ -12,7 +12,7 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
-from Commands.sparkle_help import sparkle_job_help
+from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
@@ -55,25 +55,17 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
                                performance_data_csv_path: str) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-    list_feature_computation_job = (
+    feature_computation_jobs =\
         feature_data_csv.get_list_remaining_feature_computation_job()
-    )
-    total_job_num = sparkle_job_help.get_num_of_total_job_from_list(
-        list_feature_computation_job
-    )
+    total_job_num = sjh.get_num_of_total_job_from_list(feature_computation_jobs)
 
     if total_job_num > 0:
         return True
 
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-        performance_data_csv_path
-    )
-    list_performance_computation_job = (
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_computation_jobs =\
         performance_data_csv.get_list_remaining_performance_computation_job()
-    )
-    total_job_num = sparkle_job_help.get_num_of_total_job_from_list(
-        list_performance_computation_job
-    )
+    total_job_num = sjh.get_num_of_total_job_from_list(performance_computation_jobs)
 
     if total_job_num > 0:
         return True
