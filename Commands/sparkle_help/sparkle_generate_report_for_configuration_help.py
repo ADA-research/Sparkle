@@ -81,7 +81,7 @@ def get_par_performance(results_file: str, cutoff: int) -> float:
 # matrix
 def construct_list_instance_and_performance(result_file: str,
                                             cutoff: int) -> list[list[str | float]]:
-    """Return a list of [instance, performance] pairs.
+    """Extracts a list of [instance, performance] pairs from a result file.
 
     Args:
         results_file: Name of the result file
@@ -90,36 +90,33 @@ def construct_list_instance_and_performance(result_file: str,
     Returns:
         A list containing the performance for each instance
     """
+    #print("DOING THIS ONE")
+    #print(Path(result_file).open("r").read())
+    #input()
     list_instance_and_performance = []
 
-    fin = Path(result_file).open("r")
-    fin.readline()  # Skip column titles
+    csv_lines = Path(result_file).open("r").readlines()
+    csv_lines = csv_lines[1:]# Skip column titles
 
-    while True:
-        myline = fin.readline()
-
-        if not myline.strip():
-            break
-
-        mylist = myline.split(",")
-        instance_path = mylist[0].strip('"')
-        instance = instance_path.split("/")[-1]
-        performance = float(mylist[2].replace('"', ""))
+    for csv_line in csv_lines:
+        values = csv_line.strip().split(",")
+        instance = Path(values[0]).name
+        performance = float(values[2].strip('"'))
 
         # If the objective is runtime, compute the PAR score; otherwise don't modify
         # the value
         smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
         if smac_run_obj == "RUNTIME":
+            # TODO: Verifiy/explain why this is Incorrect/Correct flow
             # Minimum runtime. Is lower than this not accurate?
             if performance < 0.01001:
                 performance = 0.01001
-            elif performance >= float(cutoff):
+            elif performance >= cutoff:
                 penalty = sgh.settings.get_general_penalty_multiplier()
                 performance = float(cutoff) * penalty
 
         list_instance_and_performance.append([instance, performance])
-
     return list_instance_and_performance
 
 
