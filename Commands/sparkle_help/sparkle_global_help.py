@@ -138,70 +138,40 @@ extractor_feature_vector_size_mapping = {}
 instance_list = []
 
 if Path(extractor_nickname_list_path).exists():
-    fo = Path(extractor_nickname_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        mylist = myline.split()
-        extractor_nickname_mapping[mylist[0]] = mylist[1]
-    fo.close()
+    with Path(extractor_nickname_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip().split() for line in fo.readlines()]
+        for nickname, extractor in lines:
+            extractor_nickname_mapping[nickname] = extractor
 
 if Path(extractor_feature_vector_size_list_path).exists():
-    fo = Path(extractor_feature_vector_size_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline().strip()
-        if not myline:
-            break
-        mylist = myline.split()
-        extractor_feature_vector_size_mapping[mylist[0]] = int(mylist[1])
-    fo.close()
+    with Path(extractor_feature_vector_size_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip().split() for line in fo.readlines()]
+        for extractor, vector_size in lines:
+            extractor_feature_vector_size_mapping[extractor] = int(vector_size)
 
 if Path(extractor_list_path).exists():
-    fo = Path(extractor_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        extractor_list.append(myline)
-    fo.close()
+    with Path(extractor_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip() for line in fo.readlines()]
+        extractor_list.extend(lines)
 
 if Path(solver_nickname_list_path).exists():
-    fo = Path(solver_nickname_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        mylist = myline.split()
-        solver_nickname_mapping[mylist[0]] = mylist[1]
-    fo.close()
+    with Path(solver_nickname_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip().split() for line in fo.readlines()]
+        for nickname, solver in lines:
+            solver_nickname_mapping[nickname] = solver
 
 if Path(solver_list_path).exists():
-    fo = Path(solver_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        if not myline:
-            break
-        myline = myline.strip()
-        mylist = myline.split()
-        solver_list.append(mylist[0])
-    fo.close()
+    with Path(solver_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip() for line in fo.readlines()]
+        solver_list.extend(lines)
 
 if Path(str(instance_list_path)).exists():
-    fo = Path(str(instance_list_path)).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        instance_list.append(myline)
-    fo.close()
+    with Path(str(instance_list_path)).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip() for line in fo.readlines()]
+        instance_list.extend(lines)

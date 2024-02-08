@@ -93,7 +93,7 @@ def construct_list_instance_and_performance(result_file: str,
     list_instance_and_performance = []
 
     csv_lines = Path(result_file).open("r").readlines()
-    csv_lines = csv_lines[1:]# Skip column titles
+    csv_lines = csv_lines[1:]  # Skip column titles
 
     for csv_line in csv_lines:
         values = csv_line.strip().split(",")
