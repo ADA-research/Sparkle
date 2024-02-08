@@ -54,15 +54,24 @@ class Solver:
         solver_list_path = sgh.solver_list_path
 
         with Path(solver_list_path).open("r+") as fin:
-            while True:
-                myline = fin.readline()
-                if not myline:
-                    break
-                myline = myline.strip()
-                mylist = myline.split()
-
-                if (mylist[0] == target_solver_path):
-                    deterministic = mylist[1]
+            for line in fin.readlines():
+                solver_line = line.strip().split()
+                if (solver_line[0] == target_solver_path):
+                    deterministic = solver_line[1]
                     break
 
         return deterministic
+
+    @staticmethod
+    def get_solver_by_name(name: str) -> Solver:
+        """Attempt to resolve the solver object by name.
+
+        Args:
+            name: The name of the solver
+
+        Returns:
+            A Solver object if found, None otherwise
+        """
+        if (sgh.solver_dir / name).exists():
+            return Solver(sgh.solver_dir / name)
+        return None
