@@ -238,7 +238,7 @@ def get_sbatch_options_list(sbatch_script_path: Path,
     output = f"--output={std_out}"
     error = f"--error={std_err}"
     array = ""
-    if max_jobs - (num_jobs - 1) > 1:
+    if max_jobs - (num_jobs - 1) > 1:  # Arrays of size 1 are not allowed in Slurm
         array = f"--array=0-{str(num_jobs - 1)}%{str(max_jobs)}"
     sbatch_options_list = [job_name, output, error, array]
 
