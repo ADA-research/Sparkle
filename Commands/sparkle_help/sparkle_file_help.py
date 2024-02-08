@@ -137,16 +137,30 @@ def get_list_all_statusinfo_filename(filepath: str) -> list[str]:
     return statusinfo_list
 
 
-def add_new_instance_into_file(filepath: str) -> None:
-    """Add an instance to a given instance file.
+def add_item_to_platform(item: any,
+                         file_target: Path,
+                         target: list | dict = None,
+                         key: str = None) -> None:
+    """Add an item to a list or dictionary of the platform that must saved to disk.
 
     Args:
-      filepath: Path to the instance.
+        item: The item to be added to the data structure.
+        target: Either a list or dictionary to add the item to.
+        file_target: Path to the file where we want to keep the disk storage.
+        key: Optional string, in case we use a dictionary.
     """
-    with sgh.instance_list_path.open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(filepath + "\n")
-
+    # Determine object if not present
+    if target is None:
+        target = sgh.file_storage_data_mapping[file_target]
+    # Add item to object
+    if isinstance(target, dict):
+        target[key] = item
+    else:
+        target.append(item)
+    # (Over)Write data structure to path
+    with file_target.open("w") as fout:
+        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+        fout.write(str(target))
 
 def add_new_solver_into_file(filepath: str, deterministic: int = 0,
                              solver_variations: int = 1) -> None:

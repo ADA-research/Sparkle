@@ -2,6 +2,7 @@
 """Definitions of constants broadly used in Sparkle."""
 
 import fcntl
+import ast
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
@@ -137,41 +138,54 @@ extractor_nickname_mapping = {}
 extractor_feature_vector_size_mapping = {}
 instance_list = []
 
-if Path(extractor_nickname_list_path).exists():
-    with Path(extractor_nickname_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip().split() for line in fo.readlines()]
-        for nickname, extractor in lines:
-            extractor_nickname_mapping[nickname] = extractor
-
-if Path(extractor_feature_vector_size_list_path).exists():
-    with Path(extractor_feature_vector_size_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip().split() for line in fo.readlines()]
-        for extractor, vector_size in lines:
-            extractor_feature_vector_size_mapping[extractor] = int(vector_size)
-
-if Path(extractor_list_path).exists():
-    with Path(extractor_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip() for line in fo.readlines()]
-        extractor_list.extend(lines)
-
-if Path(solver_nickname_list_path).exists():
-    with Path(solver_nickname_list_path).open("r+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip().split() for line in fo.readlines()]
-        for nickname, solver in lines:
-            solver_nickname_mapping[nickname] = solver
+file_storage_data_mapping = {Path(solver_list_path): solver_list,
+                             Path(solver_nickname_list_path): solver_nickname_mapping,
+                             Path(extractor_list_path): extractor_list,
+                             Path(extractor_nickname_list_path): extractor_nickname_mapping,
+                             Path(extractor_feature_vector_size_list_path): extractor_feature_vector_size_mapping,
+                             instance_list_path: instance_list}
 
 if Path(solver_list_path).exists():
     with Path(solver_list_path).open("r+") as fo:
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip() for line in fo.readlines()]
-        solver_list.extend(lines)
+        solver_list = ast.literal_eval(fo.read())
+        #lines = [line.strip() for line in fo.readlines()]
+        #solver_list.extend(lines)
 
-if Path(str(instance_list_path)).exists():
-    with Path(str(instance_list_path)).open("r+") as fo:
+if Path(solver_nickname_list_path).exists():
+    with Path(solver_nickname_list_path).open("r+") as fo:
         fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip() for line in fo.readlines()]
-        instance_list.extend(lines)
+        solver_nickname_mapping = ast.literal_eval(fo.read())
+        #lines = [line.strip().split() for line in fo.readlines()]
+        #for nickname, solver in lines:
+        #    solver_nickname_mapping[nickname] = solver
+
+if Path(extractor_list_path).exists():
+    with Path(extractor_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        extractor_list = ast.literal_eval(fo.readlines())
+        #lines = [line.strip() for line in fo.readlines()]
+        #extractor_list.extend(lines)
+
+if Path(extractor_nickname_list_path).exists():
+    with Path(extractor_nickname_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        extractor_nickname_mapping = ast.literal_eval(fo.read())
+        #lines = [line.strip().split() for line in fo.readlines()]
+        #for nickname, extractor in lines:
+        #    extractor_nickname_mapping[nickname] = extractor
+
+if Path(extractor_feature_vector_size_list_path).exists():
+    with Path(extractor_feature_vector_size_list_path).open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        extractor_feature_vector_size_mapping = ast.literal_eval(fo.read())
+        #lines = [line.strip().split() for line in fo.readlines()]
+        #for extractor, vector_size in lines:
+        #    extractor_feature_vector_size_mapping[extractor] = int(vector_size)
+
+if instance_list_path.exists():
+    with instance_list_path.open("r+") as fo:
+        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+        instance_list = ast.literal_eval(fo.read())
+        #lines = [line.strip() for line in fo.readlines()]
+        #instance_list.extend(lines)
