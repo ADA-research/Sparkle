@@ -90,9 +90,6 @@ def construct_list_instance_and_performance(result_file: str,
     Returns:
         A list containing the performance for each instance
     """
-    #print("DOING THIS ONE")
-    #print(Path(result_file).open("r").read())
-    #input()
     list_instance_and_performance = []
 
     csv_lines = Path(result_file).open("r").readlines()
@@ -100,7 +97,7 @@ def construct_list_instance_and_performance(result_file: str,
 
     for csv_line in csv_lines:
         values = csv_line.strip().split(",")
-        instance = Path(values[0]).name
+        instance = Path(values[0].strip('"')).name
         performance = float(values[2].strip('"'))
 
         # If the objective is runtime, compute the PAR score; otherwise don't modify
