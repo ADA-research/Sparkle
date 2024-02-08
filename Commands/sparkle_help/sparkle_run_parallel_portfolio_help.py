@@ -468,6 +468,7 @@ def generate_parallel_portfolio_sbatch_script(parameters: list[str],
     job = "run_parallel_portfolio"
     sbatch_options_list = ssh.get_sbatch_options_list(sbatch_script_path, num_jobs, job,
                                                       smac=False)
+
     sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
@@ -519,7 +520,8 @@ def generate_sbatch_job_list(
     for instance_path in instance_path_list:
         for solver in solver_list:
             if " " in solver:
-                solver_path, seed = solver.strip().split()
+                splitted_solver = solver.strip().split()
+                solver_path, seed = splitted_solver[0], splitted_solver[1]
                 solver_name = Path(solver_path).name
                 tmp_solver_instances.append(f"{solver_name}_seed_")
                 new_num_jobs = new_num_jobs + int(seed) - 1

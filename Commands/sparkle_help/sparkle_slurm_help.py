@@ -237,7 +237,9 @@ def get_sbatch_options_list(sbatch_script_path: Path,
     job_name = f"--job-name={sbatch_script_name}"
     output = f"--output={std_out}"
     error = f"--error={std_err}"
-    array = f"--array=0-{str(num_jobs - 1)}%{str(max_jobs)}"
+    array = ""
+    if max_jobs - (num_jobs - 1) > 1:
+        array = f"--array=0-{str(num_jobs - 1)}%{str(max_jobs)}"
     sbatch_options_list = [job_name, output, error, array]
 
     # Log script and output paths
