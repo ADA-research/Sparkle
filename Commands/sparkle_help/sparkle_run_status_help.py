@@ -52,16 +52,16 @@ def print_running_solver_jobs() -> None:
     command = CommandName.RUN_SOLVERS
     command_jobs_ids = get_running_jobs_for_command(command)
     tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
-    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
               f"with job IDs {command_jobs_ids}")
-        if len(list_all_statusinfo_filename) > 0:
+        if len(statusinfo_files) > 0:
             print("Running solver jobs:")
-            for statusinfo_filename in list_all_statusinfo_filename:
+            for statusinfo_filename in statusinfo_files:
                 statusinfo_filepath = Path(
                     tmp_directory
-                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                    + Path(statusinfo_filename).name)
                 status_info = SolverRunStatusInfo.from_file(statusinfo_filepath)
                 print(f"Start Time: {status_info.get_start_time()}")
                 print(f"Solver: {status_info.get_solver()}")
@@ -76,13 +76,13 @@ def print_running_configuration_jobs() -> None:
     command = CommandName.CONFIGURE_SOLVER
     command_jobs_ids = get_running_jobs_for_command(command)
     tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.CONFIGURE_SOLVER}/"
-    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
               f"with job IDs {command_jobs_ids}")
-        if len(list_all_statusinfo_filename) > 0:
+        if len(statusinfo_files) > 0:
             print("Running configuration jobs:")
-            for statusinfo_filename in list_all_statusinfo_filename:
+            for statusinfo_filename in statusinfo_files:
                 statusinfo_filepath = Path(
                     tmp_directory
                     + sfh.get_last_level_directory_name(statusinfo_filename))
@@ -102,13 +102,13 @@ def print_running_parallel_portfolio_construction_jobs() -> None:
     command_jobs_ids = get_running_jobs_for_command(command)
     tmp_directory = (f"{sgh.sparkle_tmp_path}/"
                      f"{StatusInfoType.CONSTRUCT_PARALLEL_PORTFOLIO}/")
-    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
               f"with job IDs {command_jobs_ids}")
-        if len(list_all_statusinfo_filename) > 0:
+        if len(statusinfo_files) > 0:
             print("Running parallel portfolio construction jobs:")
-            for statusinfo_filename in list_all_statusinfo_filename:
+            for statusinfo_filename in statusinfo_files:
                 statusinfo_filepath = Path(
                     tmp_directory
                     + sfh.get_last_level_directory_name(statusinfo_filename))
@@ -128,13 +128,13 @@ def print_running_portfolio_selector_construction_jobs() -> None:
     command_jobs_ids = get_running_jobs_for_command(command)
     tmp_directory = (f"{sgh.sparkle_tmp_path}/"
                      f"{StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR}/")
-    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
+    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
               f"with job IDs {command_jobs_ids}")
-        if len(list_all_statusinfo_filename) > 0:
+        if len(statusinfo_files) > 0:
             print("Running portfolio selector construction jobs:")
-            for statusinfo_filename in list_all_statusinfo_filename:
+            for statusinfo_filename in statusinfo_files:
                 statusinfo_filepath = Path(
                     tmp_directory
                     + sfh.get_last_level_directory_name(statusinfo_filename))
@@ -155,10 +155,10 @@ def print_running_generate_report_jobs() -> None:
     """Print a list of currently active generate report jobs."""
     tmp_directory = (f"{sgh.sparkle_tmp_path}/"
                      f"{StatusInfoType.GENERATE_REPORT}/")
-    list_all_statusinfo_filename = sfh.get_list_all_statusinfo_filename(tmp_directory)
-    if len(list_all_statusinfo_filename) > 0:
+    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
+    if len(statusinfo_files) > 0:
         print("Running generate report jobs:")
-        for statusinfo_filename in list_all_statusinfo_filename:
+        for statusinfo_filename in statusinfo_files:
             statusinfo_filepath = Path(
                 tmp_directory
                 + sfh.get_last_level_directory_name(statusinfo_filename))

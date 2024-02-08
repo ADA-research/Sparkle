@@ -76,13 +76,9 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
     solvers_path_str = "Solvers/"
 
     # Read the included solvers (or solver instances) from file
-    portfolio_solvers_file_path = Path(portfolio_path / "solvers.txt")
-
-    with portfolio_solvers_file_path.open("r") as infile:
-        lines = infile.readlines()
-        for line in lines:
-            if line.strip().startswith(solvers_path_str):
-                portfolio_solver_list.append(line.strip())
+    with (portfolio_path / "solvers.txt").open("r") as infile:
+        portfolio_solver_list = [line.strip() for line in infile.readlines()
+                                 if line.strip().startswith(solvers_path_str)]
 
     return portfolio_solver_list
 
@@ -117,33 +113,12 @@ def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
     return [str(x) for x in Path.iterdir(filepath) if x.suffix == suffix]
 
 
-def get_list_all_statusinfo_filename(filepath: str) -> list[str]:
-    """Return a list of statusinfo files in a given path.
-
-    Args:
-      filepath: Target path.
-
-    Returns:
-      List of statusinfo files.
-    """
-    statusinfo_list = []
-    if not Path(filepath).exists():
-        return statusinfo_list
-
-    list_all_items = os.listdir(filepath)
-    for item in list_all_items:
-        if Path(item).suffix == "statusinfo":
-            statusinfo_list.append(item)
-    return statusinfo_list
-
-
 def add_remove_platform_item(item: any,
                              file_target: Path,
                              target: list | dict = None,
                              key: str = None,
                              remove: bool = False) -> None:
-    """Add an item to or remove from a list or dictionary
-       of the platform that must saved to disk.
+    """Add/remove item from a list or dictionary of the platform that must saved to disk.
 
     Args:
         item: The item to be added to the data structure.
@@ -203,6 +178,9 @@ def write_string_to_file(file: Path, string: str,
     Path(file).parent.mkdir(parents=True, exist_ok=True)
 
     for i in range(maxtry):
+        # TODO: This is a strange make-shift construct of handling file locks.
+        # Especially the part of randomizing the sleep seconds. This code must be
+        # refactored to work with standard Python methods/libraries.
         try:
             with Path(file).open("a" if append else "w") as fout:
                 fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -215,24 +193,6 @@ def write_string_to_file(file: Path, string: str,
                 time.sleep(random.randint(1, 5) / 5)
             else:
                 raise e
-
-
-def append_string_to_file(file: Path, string: str, maxtry: int = 5) -> None:
-    """Append 'string' to the file 'file'.
-
-    Use a lock and creates the parents path
-    if needed. Try a maximum of 'maxtry' to acquire the lock.
-    Raise an OSError exception if it fail to acquire the lock maxtry times.
-
-    Args:
-      file: Path object of the target file.
-      string: String we want to write to 'file'.
-      maxtry: The maximum number of trials. A trial is considered as failed if
-        locking 'file' failed. The default is 5.
-    """
-    write_string_to_file(file, string, append=True, maxtry=maxtry)
-
-    return
 
 
 def rmfiles(files: list[Path]) -> None:
@@ -257,8 +217,7 @@ def check_file_is_executable(file_name: Path) -> None:
       file_name: Path object representing the file.
     """
     if not os.access(file_name, os.X_OK):
-        print("Error: The configurator wrapper file "
-              f"{file_name} is not executable.\n"
+        print(f"Error: The configurator wrapper file {file_name} is not executable.\n"
               "Add execution permissions to the file to run the configurator.")
         sys.exit(-1)
 
@@ -318,9 +277,9 @@ def initialise_sparkle(argv: list[str]) -> None:
     sl.log_command(argv)
 
     create_temporary_directories()
-
     for working_dir in sgh.working_dirs:
         working_dir.mkdir(exist_ok=True)
+
     Path(f"{sgh.ablation_dir}scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)

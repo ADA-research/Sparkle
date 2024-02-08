@@ -113,7 +113,6 @@ if __name__ == "__main__":
 
     log_str = (f"{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, "
                f"{result_string_str}")
-
-    sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
+    sfh.write_string_to_file(sgh.sparkle_system_log_path, log_str, append=True)
     tmp_fdcsv.save_csv(result_path)
     sfh.rmfiles([task_run_status_path, err_path, runsolver_watch_data_path])

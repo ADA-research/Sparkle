@@ -61,15 +61,13 @@ if __name__ == "__main__":
     if bool(sgh.extractor_list):
         sfh.add_remove_platform_item(extractor_path,
                                      sgh.extractor_list_path, remove=True)
-        
-        #sfh.write_data_to_file(Path(sgh.extractor_list_path), sgh.extractor_list)
 
     if bool(sgh.extractor_feature_vector_size_mapping):
         sfh.add_remove_platform_item(None,
                                      sgh.extractor_feature_vector_size_list_path,
                                      key=extractor_path,
                                      remove=False)
-    
+
     if bool(sgh.extractor_nickname_mapping):
         for key in sgh.extractor_nickname_mapping:
             if sgh.extractor_nickname_mapping[key] == extractor_path:

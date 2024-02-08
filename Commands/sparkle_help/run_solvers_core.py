@@ -92,8 +92,7 @@ if __name__ == "__main__":
 
     log_str = (f"{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, "
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
-
-    sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
+    sfh.write_string_to_file(sgh.sparkle_system_log_path, log_str, append=True)
     status_info.delete()
 
     if run_status_path != sgh.pap_sbatch_tmp_path:

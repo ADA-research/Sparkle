@@ -107,7 +107,6 @@ if __name__ == "__main__":
     shutil.rmtree(Path(smac_test_instances_path), ignore_errors=True)
     Path(file_smac_test_instances).unlink(missing_ok=True)
 
-    #sfh.write_data_to_file(sgh.instance_list_path, sgh.instance_list)
     feature_data_csv.update_csv()
     performance_data_csv.update_csv()
 

@@ -165,7 +165,7 @@ if __name__ == "__main__":
     feature_data_csv.update_csv()
     sfh.add_remove_platform_item(len(list_columns),
                                  sgh.extractor_feature_vector_size_list_path,
-                                 key = extractor_directory)
+                                 key=extractor_directory)
 
     sfh.rmfiles(Path(result_path))
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
     if nickname_str is not None:
         sfh.add_remove_platform_item(extractor_directory,
-                                     sgh.extractor_nickname_list_path, key = nickname_str)
+                                     sgh.extractor_nickname_list_path, key=nickname_str)
 
     if args.run_extractor_now:
         if not args.parallel:

@@ -141,12 +141,14 @@ file_storage_data_mapping = {Path(solver_list_path): [],
 for data_path in file_storage_data_mapping.keys():
     if data_path.exists():
         with data_path.open("r+") as fo:
-            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)    
+            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
 solver_list = file_storage_data_mapping[Path(solver_list_path)]
 solver_nickname_mapping = file_storage_data_mapping[Path(solver_nickname_list_path)]
 extractor_list = file_storage_data_mapping[Path(extractor_list_path)]
-extractor_nickname_mapping = file_storage_data_mapping[Path(extractor_nickname_list_path)]
-extractor_feature_vector_size_mapping = file_storage_data_mapping[Path(extractor_feature_vector_size_list_path)]
+extractor_nickname_mapping =\
+    file_storage_data_mapping[Path(extractor_nickname_list_path)]
+extractor_feature_vector_size_mapping =\
+    file_storage_data_mapping[Path(extractor_feature_vector_size_list_path)]
 instance_list = file_storage_data_mapping[instance_list_path]
