@@ -103,21 +103,16 @@ def check_sbatch_for_errors(sbatch_script_path: Path) -> None:
     Args:
         sbatch_script_path: Path to the sbatch script.
     """
-    error_lines = [ \
-        # ERROR: [...] not found [...]
-        "ERROR: "]
-
     sbatch_script_path.with_suffix(".txt")
 
     # Find lines containing an error
     with sbatch_script_path.open("r") as infile:
-        for current_line in infile:
-            for error in error_lines:
-                if error in current_line:
-                    print(f"ERROR detected in {sbatch_script_path}\n"
-                          f"involving {current_line}\n"
-                          "Stopping execution!")
-                    sys.exit(-1)
+        error_lines = [line for line in infile.read() if "ERROR: " in line]
+        if any(error_lines):
+            print(f"ERROR detected in {sbatch_script_path.name} in lines:\n"
+                  f"{error_lines}\n"
+                  "Stopping execution!")
+            sys.exit(-1)
 
 
 def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
