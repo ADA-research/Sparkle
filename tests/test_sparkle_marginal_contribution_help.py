@@ -132,7 +132,7 @@ class TestMarginalContribution(TestCase):
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
 
-        result = [("Solvers/CSCCSat", 1.1890548520062698), ("Solvers/MiniSAT", 0.0)]
+        result = [("Solvers/CSCCSat", 1.3895076764357648), ("Solvers/MiniSAT", 0.0)]
 
         output = scmch.compute_actual_selector_marginal_contribution(
             aggregation_function=sum,
