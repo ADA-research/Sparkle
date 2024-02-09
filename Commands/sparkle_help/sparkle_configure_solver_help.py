@@ -494,10 +494,8 @@ def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) 
     # Create dictionary
     config_dict = {}
     for i in range(0, len(optimised_configuration_list), 2):
-        #print(i)
         # Remove dashes and spaces from parameter names, and remove quotes and
         # spaces from parameter values before adding them to the dict
-        
         config_dict[optimised_configuration_list[i].strip(" -")] = (
             optimised_configuration_list[i + 1].strip(" '"))
 

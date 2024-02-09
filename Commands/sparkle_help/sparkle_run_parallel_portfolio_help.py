@@ -812,9 +812,8 @@ def run_parallel_portfolio(instances: list[str],
             run.wait()
 
         finished_instances_dict = {}
-
         for instance in instances:
-            instance = sfh.get_last_level_directory_name(instance)
+            instance = Path(instance).name #Or maybe .parent.name for instance set?
             finished_instances_dict[instance] = ["UNSOLVED", 0]
 
         tmp_res_files = glob.glob(f"{str(sgh.pap_performance_data_tmp_path)}/*.result")
