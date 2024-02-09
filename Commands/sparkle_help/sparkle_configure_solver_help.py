@@ -494,8 +494,10 @@ def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) 
     # Create dictionary
     config_dict = {}
     for i in range(0, len(optimised_configuration_list), 2):
+        #print(i)
         # Remove dashes and spaces from parameter names, and remove quotes and
         # spaces from parameter values before adding them to the dict
+        
         config_dict[optimised_configuration_list[i].strip(" -")] = (
             optimised_configuration_list[i + 1].strip(" '"))
 
@@ -620,7 +622,6 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"
     list_file_result_name = os.listdir(conf_results_dir)
     line_key_prefix = "Estimated mean quality of final incumbent config"
-
     # Compare results of each run on the training set to find the best configuration
     # among them
     for file_result_name in list_file_result_name:
@@ -674,6 +675,5 @@ def get_optimised_configuration(solver_name: str,
     check_optimised_configuration_params(optimised_configuration_str)
     check_optimised_configuration_performance(optimised_configuration_performance)
     check_optimised_configuration_seed(optimised_configuration_seed)
-
     return (optimised_configuration_str, optimised_configuration_performance,
             optimised_configuration_seed)
