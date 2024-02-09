@@ -631,6 +631,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
             # Format the lines of log, but only take the lines with relevant prefix
             lines = fin.readlines()
             for index, line in enumerate(lines):
+                print(line)
                 if line.startswith(line_key_prefix):
                     smac_output_line = line.strip().split()
                     # The call is printed two lines below the output

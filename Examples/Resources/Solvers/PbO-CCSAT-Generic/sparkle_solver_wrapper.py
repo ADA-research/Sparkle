@@ -59,7 +59,6 @@ if specifics == 'rawres':
 
 outdir = {"status": status,
           "quality": 0,
-          "solver_call": solver_cmd + params,
-          "raw_output": output_str}
+          "solver_call": solver_cmd + params}
 
 print(outdir)

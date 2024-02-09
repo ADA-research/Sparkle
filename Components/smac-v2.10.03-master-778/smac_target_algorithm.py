@@ -51,12 +51,14 @@ if __name__ == "__main__":
               f"{run_solver.returncode}:\n {run_solver.stderr}")
         print(f"Result for SMAC: CRASHED, {run_time}, 0, 0, {args['seed']}")
         sys.exit()
-        
+
     outdict = ast.literal_eval(run_solver.stdout.decode())
 
     # Overwrite the CPU runtime with runsolver log value
     # TODO: Runsolver also registers WALL time, add as a settings option in Sparkle
-    runtime, wtime =  srsh.get_runtime_from_runsolver(runsolver_watch_data_path)
+    runsolver_runtime, run_wtime = srsh.get_runtime_from_runsolver(runsolver_watch_data_path)
+    if runsolver_runtime != -1.0:  # Valid value found
+        runtime = runsolver_runtime
     Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
     # 5. Return values to SMAC

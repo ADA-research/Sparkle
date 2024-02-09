@@ -77,13 +77,11 @@ for line in output_list:
         status = "TIMEOUT"
         break
 
-# Output results in the format SMAC requires
+# Output results in the format target_algorithm requires
 outdir = {"status": status,
           "quality": 0,
           "solver_call": runsolver_call + params,
           "raw_output": output_list}
-
-print(outdir)
 
 # Write raw solver output to file for Sparkle when calling run_configured_solver.py
 if specifics == "rawres":
@@ -92,3 +90,5 @@ if specifics == "rawres":
     with raw_result_path.open("w") as outfile:
         for line in output_list:
             outfile.write(line)
+
+print(outdir)

@@ -51,14 +51,11 @@ class Solver:
         """
         deterministic = ""
         target_solver_path = "Solvers/" + self.name
-        solver_list_path = sgh.solver_list_path
-
-        with Path(solver_list_path).open("r+") as fin:
-            for line in fin.readlines():
-                solver_line = line.strip().split()
-                if (solver_line[0] == target_solver_path):
-                    deterministic = solver_line[1]
-                    break
+        for solver in sgh.solver_list:
+            solver_line = solver.strip().split()
+            if (solver_line[0] == target_solver_path):
+                deterministic = solver_line[1]
+                break
 
         return deterministic
 
