@@ -169,7 +169,7 @@ def run_solver_on_instance_and_process_results(
                        f"{sfh.get_last_level_directory_name(instance_path)}_"
                        f"{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
-    solver_wrapper_path = solver_path + "/" + sgh.sparkle_run_default_wrapper
+    solver_wrapper_path = solver_path / sgh.sparkle_run_default_wrapper
 
     # Run
     run_solver_on_instance(solver_path, solver_wrapper_path, instance_path,

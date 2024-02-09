@@ -515,8 +515,7 @@ def generate_sbatch_job_list(
     for instance_path in instance_path_list:
         for solver in solver_list:
             if " " in solver:
-                splitted_solver = solver.strip().split()
-                solver_path, seed = splitted_solver[0], splitted_solver[1]
+                solver_path, _, seed = solver.strip().split()
                 solver_name = Path(solver_path).name
                 tmp_solver_instances.append(f"{solver_name}_seed_")
                 new_num_jobs = new_num_jobs + int(seed) - 1
@@ -540,7 +539,6 @@ def generate_sbatch_job_list(
                 parameters.append(commandline)
 
     temp_solvers = list(dict.fromkeys(tmp_solver_instances))
-
     return (parameters, new_num_jobs, solver_instance_list, temp_solvers)
 
 
@@ -808,7 +806,7 @@ def run_parallel_portfolio(instances: list[str],
 
         finished_instances_dict = {}
         for instance in instances:
-            instance = Path(instance).name #Or maybe .parent.name for instance set?
+            instance = Path(instance).name
             finished_instances_dict[instance] = ["UNSOLVED", 0]
 
         tmp_res_files = glob.glob(f"{str(sgh.pap_performance_data_tmp_path)}/*.result")
