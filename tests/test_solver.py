@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import shutil
 
-from unittest import TestCase, mock
+from unittest import TestCase
 from pathlib import Path
 from Commands.sparkle_help.solver import Solver
 from unittest.mock import patch
@@ -54,16 +54,16 @@ class TestSolver(TestCase):
         with self.assertRaises(SystemExit):
             solver.get_pcs_file()
 
-    @patch('Commands.sparkle_help.sparkle_global_help.solver_list', ["Solvers/test_solver 0 1"])
+    @patch("Commands.sparkle_help.sparkle_global_help.solver_list",
+           ["Solvers/test_solver 0 1"])
     def test_is_deterministic_false(self: TestSolver) -> None:
         """Test if is_deterministic() correctly returns False."""
         solver = Solver(self.solver_path)
         self.assertEqual(solver.is_deterministic(), "0")
-    
-    @patch('Commands.sparkle_help.sparkle_global_help.solver_list', ["Solvers/test_solver 1 1"])
+
+    @patch("Commands.sparkle_help.sparkle_global_help.solver_list",
+           ["Solvers/test_solver 1 1"])
     def test_is_deterministic_true(self: TestSolver) -> None:
         """Test if is_deterministic() correctly returns True."""
-        
-       # with mock.patch("sgh.solver_list", return_value=["Solvers/test_solver 1 1"]):
         solver = Solver(self.solver_path)
         self.assertEqual(solver.is_deterministic(), "1")
