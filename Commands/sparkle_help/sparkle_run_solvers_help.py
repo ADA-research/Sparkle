@@ -169,7 +169,7 @@ def run_solver_on_instance_and_process_results(
                        f"{sfh.get_last_level_directory_name(instance_path)}_"
                        f"{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
-    solver_wrapper_path = solver_path / sgh.sparkle_run_default_wrapper
+    solver_wrapper_path = Path(solver_path) / sgh.sparkle_run_default_wrapper
 
     # Run
     run_solver_on_instance(solver_path, solver_wrapper_path, instance_path,
@@ -245,7 +245,6 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             if status == "WRONG":
                 remove_faulty_solver(solver_path, instance_path)
                 current_job_num += 1
-
                 continue  # Skip to the next job
 
             # Update performance CSV
@@ -266,7 +265,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             current_job_num += 1
 
     performance_data_csv.update_csv()
-    print("Performance data file " + performance_data_csv_path + " has been updated!")
+    print(f"Performance data file {performance_data_csv_path} has been updated!")
 
     return
 
