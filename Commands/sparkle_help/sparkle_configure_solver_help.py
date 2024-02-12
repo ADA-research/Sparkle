@@ -4,7 +4,6 @@
 
 import os
 import sys
-import fcntl
 from pathlib import Path
 from pathlib import PurePath
 import shutil
@@ -13,8 +12,8 @@ from enum import Enum
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
-from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help.solver import Solver
 
 
 class InstanceType(Enum):
@@ -91,36 +90,6 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     sl.add_output(str(smac_file_instance_path_target) + "/", log_str)
 
 
-def get_solver_deterministic(solver_name: str) -> str:
-    """Return a string indicating whether a given solver is deterministic or not.
-
-    Args:
-        solver_name: Name of the solver to check
-
-    Returns:
-        A string containing 0 or 1 indicating whether solver is deterministic
-    """
-    deterministic = ""
-    target_solver_path = "Solvers/" + solver_name
-    solver_list_path = sgh.solver_list_path
-
-    fin = Path(solver_list_path).open("r+")
-    fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-
-    while True:
-        myline = fin.readline()
-        if not myline:
-            break
-        myline = myline.strip()
-        mylist = myline.split()
-
-        if (mylist[0] == target_solver_path):
-            deterministic = mylist[1]
-            break
-
-    return deterministic
-
-
 def create_file_scenario_validate(solver_name: str, instance_set_train_name: str,
                                   instance_set_val_name: str,
                                   instance_type: InstanceType, default: bool) -> str:
@@ -167,11 +136,11 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     smac_instance_file = (f"scenarios/instances/{instance_set_train_name}/"
                           f"{instance_set_val_name}_{inst_type}.txt")
     smac_test_instance_file = smac_instance_file
-
+    solver = Solver.get_solver_by_name(solver_name)
     with smac_file_scenario.open("w+") as fout:
         fout.write(f"algo = ../../../{sgh.smac_target_algorithm}\n"
                    f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n"
-                   f"deterministic = {get_solver_deterministic(solver_name)}\n"
+                   f"deterministic = {solver.is_deterministic()}\n"
                    f"run_obj = {smac_run_obj}\n"
                    f"wallclock-limit = {smac_whole_time_budget}\n"
                    f"cutoffTime = {smac_each_run_cutoff_time}\n"
@@ -635,7 +604,7 @@ def get_optimised_configuration_params(solver_name: str, instance_set_name: str)
 
 def get_optimised_configuration_from_file(solver_name: str, instance_set_name: str
                                           ) -> tuple[str, str, str]:
-    """Read the optimised configuration, its performance, and seed from file.
+    """Read the optimised configuration, its performance, and seed from SMAC file.
 
     Args:
         solver_name: Name of the solver
@@ -650,56 +619,38 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
 
     conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"
     list_file_result_name = os.listdir(conf_results_dir)
-    key_str_1 = "Estimated mean quality of final incumbent config"
-
+    line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
     # among them
     for file_result_name in list_file_result_name:
         file_result_path = conf_results_dir + file_result_name
-        fin = Path(file_result_path).open("r+")
+        smac_output_line = ""
+        target_call = ""
+        extra_info_statement = ""
+        with Path(file_result_path).open("r+") as fin:
+            # Format the lines of log, but only take the lines with relevant prefix
+            lines = fin.readlines()
+            for index, line in enumerate(lines):
+                if line.startswith(line_key_prefix):
+                    smac_output_line = line.strip().split()
+                    # The call is printed two lines below the output
+                    target_call = lines[index + 2].strip()
+                    # Format the target_call to only contain the actuall call
+                    target_call =\
+                        target_call[target_call.find(sgh.smac_target_algorithm):]
+                    extra_info_statement = lines[index + 3].strip()
 
-        myline = fin.readline()
-        while myline:
-            myline = myline.strip()
-
-            if myline.find(key_str_1) == 0:
-                mylist = myline.split()
-                # Skip 14 words leading up to the performance value
-                this_configuration_performance = float(mylist[14][:-1])
-
-                if (optimised_configuration_performance < 0
-                   or this_configuration_performance
-                   < optimised_configuration_performance):
-                    optimised_configuration_performance = this_configuration_performance
-
-                    # Skip the line before the line with the optimised configuration
-                    myline_2 = fin.readline()
-                    myline_2 = fin.readline()
-                    # If this is a single file instance:
-                    if not sih.check_existence_of_reference_instance_list(
-                            instance_set_name):
-                        mylist_2 = myline_2.strip().split()
-                        # Skip 8 words before the configured parameters
-                        start_index = 8
-                    # Otherwise, for multi-file instances:
-                    else:
-                        # Skip everything before the last double quote "
-                        mylist_2 = myline_2.strip().split('"')
-                        last_idx = len(mylist_2) - 1
-                        mylist_2 = mylist_2[last_idx].strip().split()
-                        # Then skip another 4 words before the configured parameters
-                        start_index = 4
-                    end_index = len(mylist_2)
-                    optimised_configuration_str = ""
-                    for i in range(start_index, end_index):
-                        optimised_configuration_str += " " + mylist_2[i]
-
-                    # Get seed used to call smac
-                    myline_3 = fin.readline()
-                    mylist_3 = myline_3.strip().split()
-                    optimised_configuration_seed = mylist_3[4]
-            myline = fin.readline()
-        fin.close()
+        # The 15th item contains the performance as float, but has trailing char
+        this_configuration_performance = float(smac_output_line[14][:-1])
+        # We look for the data with the highest performance
+        if (optimised_configuration_performance < 0
+                or this_configuration_performance < optimised_configuration_performance):
+            optimised_configuration_performance = this_configuration_performance
+            # Extract the configured parameters
+            first_idx_config_param = target_call.find(" -")
+            optimised_configuration_str = target_call[first_idx_config_param:]
+            # Extract the seed
+            optimised_configuration_seed = extra_info_statement.split()[4]
 
     return (optimised_configuration_str, optimised_configuration_performance,
             optimised_configuration_seed)
@@ -722,6 +673,5 @@ def get_optimised_configuration(solver_name: str,
     check_optimised_configuration_params(optimised_configuration_str)
     check_optimised_configuration_performance(optimised_configuration_performance)
     check_optimised_configuration_seed(optimised_configuration_seed)
-
     return (optimised_configuration_str, optimised_configuration_performance,
             optimised_configuration_seed)

@@ -120,27 +120,6 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
     return list_predict_schedule
 
 
-def print_solution(raw_result_path: str) -> None:
-    """Print the solution from a raw result."""
-    fin = Path(raw_result_path).open("r+")
-    fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-
-    while True:
-        myline = fin.readline().strip()
-
-        if not myline:
-            break
-        mylist = myline.split()
-
-        if mylist[1] == r"s" or mylist[1] == r"v":
-            string_output = " ".join(mylist[1:])
-            print(string_output)
-
-    fin.close()
-
-    return
-
-
 def call_solver_solve_instance_within_cutoff(solver_path: str,
                                              instance_path: str,
                                              cutoff_time: int,

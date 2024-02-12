@@ -107,9 +107,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     shutil.copytree(Path(extractor_source), extractor_directory, dirs_exist_ok=True)
-
-    sgh.extractor_list.append(extractor_directory)
-    sfh.add_new_extractor_into_file(extractor_directory)
+    sfh.add_remove_platform_item(extractor_directory, sgh.extractor_list_path)
 
     # pre-run the feature extractor on a testing instance, to obtain the feature names
     if _check_existence_of_test_instance_list_file(extractor_directory):
@@ -165,11 +163,10 @@ if __name__ == "__main__":
         feature_data_csv.add_column(column_name)
 
     feature_data_csv.update_csv()
+    sfh.add_remove_platform_item(len(list_columns),
+                                 sgh.extractor_feature_vector_size_list_path,
+                                 key=extractor_directory)
 
-    sgh.extractor_feature_vector_size_mapping[extractor_directory] = len(list_columns)
-    sfh.add_new_extractor_feature_vector_size_into_file(
-        extractor_directory, len(list_columns)
-    )
     sfh.rmfiles(Path(result_path))
 
     print("Adding feature extractor "
@@ -185,9 +182,8 @@ if __name__ == "__main__":
         print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     if nickname_str is not None:
-        sgh.extractor_nickname_mapping[nickname_str] = extractor_directory
-        sfh.add_new_extractor_nickname_into_file(nickname_str, extractor_directory)
-        pass
+        sfh.add_remove_platform_item(extractor_directory,
+                                     sgh.extractor_nickname_list_path, key=nickname_str)
 
     if args.run_extractor_now:
         if not args.parallel:

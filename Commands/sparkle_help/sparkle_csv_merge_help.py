@@ -70,11 +70,13 @@ def performance_data_csv_merge() -> None:
     for wrong_solver_path in wrong_solver_list:
         performance_data_csv.delete_column(wrong_solver_path)
         performance_data_csv.update_csv()
-        sgh.solver_list.remove(wrong_solver_path)
-        sgh.solver_nickname_mapping.pop(wrong_solver_path)
-        sfh.write_solver_list()
-        sfh.write_data_to_file(sgh.solver_nickname_list_path,
-                               sgh.solver_nickname_mapping)
+        sfh.add_remove_platform_item(wrong_solver_path,
+                                     sgh.solver_list_path,
+                                     remove=True)
+        sfh.add_remove_platform_item(None,
+                                     sgh.solver_nickname_list_path,
+                                     key=wrong_solver_path,
+                                     remove=True)
 
     return
 

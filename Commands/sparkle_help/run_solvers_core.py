@@ -45,16 +45,16 @@ if __name__ == "__main__":
     # Process command line arguments
     # Turn multiple instance files into a space separated string
     instance_path = " ".join(args.instance)
-    solver_path = args.solver
+    solver_path = Path(args.solver)
     if args.seed is not None:
         # Creating a new directory for the solver to facilitate running several
         # solver_instances in parallel.
-        new_solver_directory_path = (
+        new_solver_directory_path = Path(
             f"{sgh.sparkle_tmp_path}{sfh.get_last_level_directory_name(solver_path)}_"
-            f"seed_{args.seed}_{sfh.get_last_level_directory_name(instance_path)}")
+            f"seed_{args.seed}_{Path(instance_path).parent.name}")
         subtarget = new_solver_directory_path / solver_path.name
         shutil.copytree(solver_path, subtarget, dirs_exist_ok=True)
-        solver_path = new_solver_directory_path
+        solver_path = subtarget
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     run_status_path = args.run_status_path
@@ -73,7 +73,6 @@ if __name__ == "__main__":
                                 f" second(s)")
     print("Writing run status to file")
     status_info.save()
-
     cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = (
         srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
                                                        args.seed))
@@ -92,8 +91,7 @@ if __name__ == "__main__":
 
     log_str = (f"{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, "
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
-
-    sfh.append_string_to_file(sgh.sparkle_system_log_path, log_str)
+    sfh.write_string_to_file(sgh.sparkle_system_log_path, log_str, append=True)
     status_info.delete()
 
     if run_status_path != sgh.pap_sbatch_tmp_path:

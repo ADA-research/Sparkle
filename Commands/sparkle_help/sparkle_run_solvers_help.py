@@ -169,7 +169,7 @@ def run_solver_on_instance_and_process_results(
                        f"{sfh.get_last_level_directory_name(instance_path)}_"
                        f"{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
-    solver_wrapper_path = solver_path + "/" + sgh.sparkle_run_default_wrapper
+    solver_wrapper_path = Path(solver_path) / sgh.sparkle_run_default_wrapper
 
     # Run
     run_solver_on_instance(solver_path, solver_wrapper_path, instance_path,
@@ -245,7 +245,6 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             if status == "WRONG":
                 remove_faulty_solver(solver_path, instance_path)
                 current_job_num += 1
-
                 continue  # Skip to the next job
 
             # Update performance CSV
@@ -266,7 +265,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             current_job_num += 1
 
     performance_data_csv.update_csv()
-    print("Performance data file " + performance_data_csv_path + " has been updated!")
+    print(f"Performance data file {performance_data_csv_path} has been updated!")
 
     return
 
@@ -413,29 +412,20 @@ def get_runtime_from_wrapper(result: str) -> float:
 
 def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
     """Return the CPU and wallclock time reported by runsolver."""
-    cpu_time = float(-1)
-    wc_time = float(-1)
+    cpu_time = -1.0
+    wc_time = -1.0
 
-    infile = Path(runsolver_values_path).open("r+")
-    fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-
-    while True:
-        line = infile.readline().strip()
-        if not line:
-            break
-        words = line.split("=")
-        # Read wallclock time from a line of the form 'WCTIME=0.110449'
-        if len(words) == 2 and words[0] == "WCTIME":
-            wc_time = float(words[1])
-        # Read CPU time from a line of the form 'CPUTIME=0.110449'
-        elif len(words) == 2 and words[0] == "CPUTIME":
-            cpu_time = float(words[1])
-            # Order is fixed, CPU is the last thing we want to read, so break from the
-            # loop
-            break
-
-    infile.close()
-
+    with Path(runsolver_values_path).open("r+") as infile:
+        fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip().split("=") for line in infile.readlines()
+                 if len(line.split("=")) == 2]
+        for keyword, value in lines:
+            if keyword == "WCTIME":
+                wc_time = float(value)
+            elif keyword == "CPUTIME":
+                cpu_time = float(value)
+                # Order is fixed, CPU is the last thing we want to read, so break
+                break
     return cpu_time, wc_time
 
 
@@ -465,10 +455,13 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
 
     # TODO: Fix solver removal from performanc data CSV file
     # performance_data_csv.delete_column(solver_path)
-    sgh.solver_list.remove(solver_path)
-    sgh.solver_nickname_mapping.pop(solver_path)
-    sfh.write_solver_list()
-    sfh.write_data_to_file(sgh.solver_nickname_list_path, sgh.solver_nickname_mapping)
+    sfh.add_remove_platform_item(solver_path,
+                                 sgh.solver_list_path,
+                                 remove=True)
+    sfh.add_remove_platform_item(None,
+                                 sgh.solver_nickname_list_path,
+                                 key=solver_path,
+                                 remove=True)
 
     print(f"Solver {sfh.get_last_level_directory_name(solver_path)} is a wrong solver")
     print(f"Solver {sfh.get_last_level_directory_name(solver_path)} running on "
@@ -498,26 +491,20 @@ def sat_get_result_status(raw_result_path: str) -> str:
     # timed out
     status = "UNKNOWN"
 
-    infile = Path(raw_result_path).open("r+")
-    fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-
-    while True:
-        line = infile.readline().strip()
-        if not line:
-            break
-        words = line.split()
-        if len(words) == 3 and words[1] == "s":
-            if words[2] == "SATISFIABLE":
-                status = "SAT"
-            elif words[2] == "UNSATISFIABLE":
-                status = "UNSAT"
-            else:
-                # Something is wrong or the solver timed out
-                print(f'Warning: Unknown SAT result "{words[2]}"')
-                status = "UNKNOWN"
-            break
-
-    infile.close()
+    with Path(raw_result_path).open("r+") as infile:
+        fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip().split() for line in infile.readlines()]
+        for words in lines:
+            if len(words) == 3 and words[1] == "s":
+                if words[2] == "SATISFIABLE":
+                    status = "SAT"
+                elif words[2] == "UNSATISFIABLE":
+                    status = "UNSAT"
+                else:
+                    # Something is wrong or the solver timed out
+                    print(f'Warning: Unknown SAT result "{words[2]}"')
+                    status = "UNKNOWN"
+                break
 
     return status
 
@@ -527,36 +514,21 @@ def sat_get_verify_string(tmp_verify_result_path: str) -> str:
 
     Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
     """
-    ret = "UNKNOWN"
-    fin = Path(tmp_verify_result_path).open("r+")
-    fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fin.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        if myline == "Solution verified.":
-            myline2 = fin.readline()
-            myline2 = fin.readline().strip()
-            if myline2 == "11":
-                ret = "SAT"
-                break
-        elif myline == "Solver reported unsatisfiable. I guess it must be right!":
-            myline2 = fin.readline()
-            myline2 = fin.readline().strip()
-            if myline2 == "10":
-                ret = "UNSAT"
-                break
-        elif myline == "Wrong solution.":
-            myline2 = fin.readline()
-            myline2 = fin.readline().strip()
-            if myline2 == "0":
-                ret = "WRONG"
-                break
-        else:
-            continue
-    fin.close()
-    return ret
+    lines = []
+    with Path(tmp_verify_result_path).open("r+") as fin:
+        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+        lines = [line.strip() for line in fin.readlines()]
+    for index, line in enumerate(lines):
+        if line == "Solution verified.":
+            if lines[index + 2] == "11":
+                return "SAT"
+        elif line == "Solver reported unsatisfiable. I guess it must be right!":
+            if lines[index + 2] == "10":
+                return "UNSAT"
+        elif line == "Wrong solution.":
+            if lines[index + 2] == "0":
+                return "WRONG"
+    return "UNKNOWN"
 
 
 def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -> str:
@@ -581,15 +553,10 @@ def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -
 
 def update_performance_data_id() -> None:
     """Update the performance data ID."""
-    # Get current pd_id
-    pd_id = get_performance_data_id()
-
-    # Increment pd_id
-    pd_id = pd_id + 1
-
+    # Get next pd_id
+    pd_id = get_performance_data_id() + 1
     # Write new pd_id
     pd_id_path = sgh.performance_data_id_path
-
     with Path(pd_id_path).open("w") as pd_id_file:
         pd_id_file.write(str(pd_id))
 
@@ -598,13 +565,7 @@ def update_performance_data_id() -> None:
 
 def get_performance_data_id() -> int:
     """Return the current performance data ID."""
-    pd_id = -1
-    pd_id_path = sgh.performance_data_id_path
-
-    try:
-        with Path(pd_id_path).open("r") as pd_id_file:
-            pd_id = int(pd_id_file.readline())
-    except FileNotFoundError:
-        pd_id = 0
-
+    pd_id = 0
+    if Path(sgh.performance_data_id_path).exists():
+        pd_id = int(Path(sgh.performance_data_id_path).open("r").readline())
     return pd_id

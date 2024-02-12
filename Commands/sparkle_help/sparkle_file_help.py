@@ -76,13 +76,9 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
     solvers_path_str = "Solvers/"
 
     # Read the included solvers (or solver instances) from file
-    portfolio_solvers_file_path = Path(portfolio_path / "solvers.txt")
-
-    with portfolio_solvers_file_path.open("r") as infile:
-        lines = infile.readlines()
-        for line in lines:
-            if line.strip().startswith(solvers_path_str):
-                portfolio_solver_list.append(line.strip())
+    with (portfolio_path / "solvers.txt").open("r") as infile:
+        portfolio_solver_list = [line.strip() for line in infile.readlines()
+                                 if line.strip().startswith(solvers_path_str)]
 
     return portfolio_solver_list
 
@@ -117,163 +113,44 @@ def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
     return [str(x) for x in Path.iterdir(filepath) if x.suffix == suffix]
 
 
-def get_list_all_statusinfo_filename(filepath: str) -> list[str]:
-    """Return a list of statusinfo files in a given path.
+def add_remove_platform_item(item: any,
+                             file_target: Path,
+                             target: list | dict = None,
+                             key: str = None,
+                             remove: bool = False) -> None:
+    """Add/remove item from a list or dictionary of the platform that must saved to disk.
 
     Args:
-      filepath: Target path.
-
-    Returns:
-      List of statusinfo files.
+        item: The item to be added to the data structure.
+        target: Either a list or dictionary to add the item to.
+        file_target: Path to the file where we want to keep the disk storage.
+        key: Optional string, in case we use a dictionary.
+        remove: If true, remove the item from platform.
+                If the target is a dict, the key is used to remove the entry.
     """
-    statusinfo_list = []
-    if not Path(filepath).exists():
-        return statusinfo_list
-
-    list_all_items = os.listdir(filepath)
-    for item in list_all_items:
-        if Path(item).suffix == "statusinfo":
-            statusinfo_list.append(item)
-    return statusinfo_list
-
-
-def add_new_instance_into_file(filepath: str) -> None:
-    """Add an instance to a given instance file.
-
-    Args:
-      filepath: Path to the instance.
-    """
-    with sgh.instance_list_path.open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(filepath + "\n")
-
-
-def add_new_solver_into_file(filepath: str, deterministic: int = 0,
-                             solver_variations: int = 1) -> None:
-    """Add a solver to an existing file listing solvers and their details.
-
-    Args:
-      filepath: Path to the file with solver (details).
-      deterministic: 1 for deterministic solvers and 0 for stochastic solvers.
-        Default is 0.
-      solver_variations: Number of different solver variations. Default is 1.
-    """
-    with Path(sgh.solver_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(f"{filepath} {str(deterministic)} {str(solver_variations)}\n")
-
-
-def add_new_solver_nickname_into_file(nickname: str, filepath: str) -> None:
-    """Add a new solver nickname to a given file.
-
-    Args:
-      nickname: Nickname for the solver.
-      filepath: Path to the file.
-    """
-    with Path(sgh.solver_nickname_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(nickname + r" " + filepath + "\n")
-
-
-def add_new_extractor_into_file(filepath: str) -> None:
-    """Add a new feature extractor to a given file.
-
-    Args:
-      filepath: Path to the target file.
-    """
-    with Path(sgh.extractor_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(filepath + "\n")
-
-
-def add_new_extractor_feature_vector_size_into_file(filepath: str,
-                                                    feature_vector_size: int) -> None:
-    """Add a new feature vector size to a given file.
-
-    Args:
-      filepath: Path to the target file.
-      feature_vector_size: Feature vector size.
-    """
-    with Path(sgh.extractor_feature_vector_size_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(filepath + r" " + str(feature_vector_size) + "\n")
-
-
-def add_new_extractor_nickname_into_file(nickname: str, filepath: str) -> None:
-    """Add a new feature extractor nickname to a given file.
-
-    Args:
-      nickname: Nickname for the extractor.
-      filepath: Path to the target file.
-    """
-    with Path(sgh.extractor_nickname_list_path).open("a+") as fo:
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        fo.write(nickname + r" " + filepath + "\n")
-
-
-def write_solver_list() -> None:
-    """Write the solver list to the default solver list file."""
-    with Path(sgh.solver_list_path).open("w+") as fout:
+    # ast.literal_eval can't deal with Path objects
+    if isinstance(item, Path):
+        item = str(item)
+    if isinstance(file_target, str):
+        file_target = Path(file_target)
+    # Determine object if not present
+    if target is None:
+        target = sgh.file_storage_data_mapping[file_target]
+    # Add/Remove item to/from object
+    if isinstance(target, dict):
+        if remove:
+            del target[key]
+        else:
+            target[key] = item
+    else:
+        if remove:
+            target.remove(item)
+        else:
+            target.append(item)
+    # (Over)Write data structure to path
+    with file_target.open("w") as fout:
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-        for solver in sgh.solver_list:
-            fout.write(solver + "\n")
-
-
-def remove_line_from_file(line_start: str, filepath: Path) -> None:
-    """Remove all lines starting with a given string from a given file.
-
-    Args:
-      line_start: The prefix string.
-      filepath: A Path object representing the file.
-    """
-    newlines = []
-
-    # Store lines that do not start with the input line
-    with filepath.open("r") as infile:
-        for current_line in infile:
-            if not current_line.startswith(line_start):
-                newlines.append(current_line)
-
-    # Overwrite the file with stored lines
-    with filepath.open("w") as outfile:
-        for current_line in newlines:
-            outfile.write(current_line)
-
-
-def remove_from_solver_list(filepath: str) -> None:
-    """Remove a solver from the list and the solver file.
-
-    Args:
-      filepath: Path to the solver file.
-    """
-    # Store lines that do not contain filepath
-    newlines = [line for line in Path(sgh.solver_list_path).open("r").readlines()
-                if filepath not in line]
-
-    # Overwrite the file with stored lines
-    with Path(sgh.solver_list_path).open("w") as outfile:
-        for line in newlines:
-            outfile.write(line)
-
-    # Remove solver from list
-    sgh.solver_list.remove(filepath)
-
-
-def write_data_to_file(target_file: Path, object: list | dict) -> None:
-    """Write an object to a file.
-
-    target_file: Path object describing file to write the data to.
-    object: Either list or dict, to write to the file. In case of dict, the key is also
-            written to the file.
-    """
-    with target_file.open("w+") as fout:
-        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-        if isinstance(object, dict):
-            for key in object:
-                fout.write(f"{key} {object[key]}\n")
-        elif isinstance(object, list):
-            for item in object:
-                fout.write(f"{item}\n")
+        fout.write(str(target))
 
 
 def write_string_to_file(file: Path, string: str,
@@ -301,6 +178,9 @@ def write_string_to_file(file: Path, string: str,
     Path(file).parent.mkdir(parents=True, exist_ok=True)
 
     for i in range(maxtry):
+        # TODO: This is a strange make-shift construct of handling file locks.
+        # Especially the part of randomizing the sleep seconds. This code must be
+        # refactored to work with standard Python methods/libraries.
         try:
             with Path(file).open("a" if append else "w") as fout:
                 fcntl.flock(fout.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -313,24 +193,6 @@ def write_string_to_file(file: Path, string: str,
                 time.sleep(random.randint(1, 5) / 5)
             else:
                 raise e
-
-
-def append_string_to_file(file: Path, string: str, maxtry: int = 5) -> None:
-    """Append 'string' to the file 'file'.
-
-    Use a lock and creates the parents path
-    if needed. Try a maximum of 'maxtry' to acquire the lock.
-    Raise an OSError exception if it fail to acquire the lock maxtry times.
-
-    Args:
-      file: Path object of the target file.
-      string: String we want to write to 'file'.
-      maxtry: The maximum number of trials. A trial is considered as failed if
-        locking 'file' failed. The default is 5.
-    """
-    write_string_to_file(file, string, append=True, maxtry=maxtry)
-
-    return
 
 
 def rmfiles(files: list[Path]) -> None:
@@ -355,8 +217,7 @@ def check_file_is_executable(file_name: Path) -> None:
       file_name: Path object representing the file.
     """
     if not os.access(file_name, os.X_OK):
-        print("Error: The configurator wrapper file "
-              f"{file_name} is not executable.\n"
+        print(f"Error: The configurator wrapper file {file_name} is not executable.\n"
               "Add execution permissions to the file to run the configurator.")
         sys.exit(-1)
 
@@ -373,7 +234,6 @@ def create_temporary_directories() -> None:
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
-
     return
 
 
@@ -393,7 +253,6 @@ def remove_temporary_files() -> None:
 
     shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
                   ignore_errors=True)
-
     return
 
 
@@ -418,9 +277,9 @@ def initialise_sparkle(argv: list[str]) -> None:
     sl.log_command(argv)
 
     create_temporary_directories()
-
     for working_dir in sgh.working_dirs:
         working_dir.mkdir(exist_ok=True)
+
     Path(f"{sgh.ablation_dir}scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)

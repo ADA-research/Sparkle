@@ -14,6 +14,7 @@ from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help.solver import Solver
 
 from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
@@ -225,9 +226,9 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
         fout.write(f"algo = ../../../../../{sgh.smac_dir}{sgh.smac_target_algorithm}\n"
                    "execdir = ./solver/\n"
                    "experimentDir = ./\n")
-
+        solver = Solver.get_solver_by_name(solver_name)
         # USER SETTINGS
-        fout.write(f"deterministic = {scsh.get_solver_deterministic(solver_name)}\n"
+        fout.write(f"deterministic = {solver.is_deterministic()}\n"
                    f"run_obj = {smac_run_obj}\n")
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         fout.write(f"overall_obj = {objective_str}\n"

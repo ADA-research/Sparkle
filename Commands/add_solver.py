@@ -129,9 +129,8 @@ if __name__ == "__main__":
     )
     performance_data_csv.add_column(solver_directory)
     performance_data_csv.update_csv()
-
-    sgh.solver_list.append(solver_directory)
-    sfh.add_new_solver_into_file(solver_directory, deterministic, solver_variations)
+    sfh.add_remove_platform_item(
+        f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)
 
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
         print("One pcs file detected, this is a configurable solver.")
@@ -149,9 +148,8 @@ if __name__ == "__main__":
         print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     if nickname_str is not None:
-        sgh.solver_nickname_mapping[nickname_str] = solver_directory
-        sfh.add_new_solver_nickname_into_file(nickname_str, solver_directory)
-        pass
+        sfh.add_remove_platform_item(solver_directory,
+                                     sgh.solver_nickname_list_path, key=nickname_str)
 
     if args.run_solver_now:
         if not my_flag_parallel:

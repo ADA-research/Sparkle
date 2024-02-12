@@ -96,7 +96,7 @@ def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
     list = sgr.construct_list_instance_and_performance(result_file, cutoff)
 
     assert list == (
-        [["instance-1.cnf", 0.01001], ["instance-2.cnf", 1.0], ["instance-3.cnf", 100]]
+        [["instance-1.cnf", 0.01001], ["instance-2.cnf", 1.0], ["instance-3.cnf", 100.0]]
     )
 
 

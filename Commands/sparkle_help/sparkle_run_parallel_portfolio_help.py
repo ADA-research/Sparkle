@@ -103,21 +103,16 @@ def check_sbatch_for_errors(sbatch_script_path: Path) -> None:
     Args:
         sbatch_script_path: Path to the sbatch script.
     """
-    error_lines = [ \
-        # ERROR: [...] not found [...]
-        "ERROR: "]
-
     sbatch_script_path.with_suffix(".txt")
 
     # Find lines containing an error
     with sbatch_script_path.open("r") as infile:
-        for current_line in infile:
-            for error in error_lines:
-                if error in current_line:
-                    print(f"ERROR detected in {sbatch_script_path}\n"
-                          f"involving {current_line}\n"
-                          "Stopping execution!")
-                    sys.exit(-1)
+        error_lines = [line for line in infile.read() if "ERROR: " in line]
+        if any(error_lines):
+            print(f"ERROR detected in {sbatch_script_path.name} in lines:\n"
+                  f"{error_lines}\n"
+                  "Stopping execution!")
+            sys.exit(-1)
 
 
 def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
@@ -353,7 +348,8 @@ def wait_for_finished_solver(
     # TODO: Fix weird situation. This starts as dict, later becomes a list...
     current_solver_list = remaining_job_dict
     finished_solver_list = list()
-
+    # TODO: This while loop is rather lengthy and chaotic. This should be refactored.
+    # Especially the output string handling of the subprocess should be more structured.
     while not done:
         # Ask the cluster for a list of all jobs which are currently running
         result = subprocess.run(["squeue", "--array", "--jobs", job_id,
@@ -467,6 +463,7 @@ def generate_parallel_portfolio_sbatch_script(parameters: list[str],
     job = "run_parallel_portfolio"
     sbatch_options_list = ssh.get_sbatch_options_list(sbatch_script_path, num_jobs, job,
                                                       smac=False)
+
     sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
     # Get user options second to overrule defaults
     sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
@@ -518,7 +515,7 @@ def generate_sbatch_job_list(
     for instance_path in instance_path_list:
         for solver in solver_list:
             if " " in solver:
-                solver_path, seed = solver.strip().split()
+                solver_path, _, seed = solver.strip().split()
                 solver_name = Path(solver_path).name
                 tmp_solver_instances.append(f"{solver_name}_seed_")
                 new_num_jobs = new_num_jobs + int(seed) - 1
@@ -542,7 +539,6 @@ def generate_sbatch_job_list(
                 parameters.append(commandline)
 
     temp_solvers = list(dict.fromkeys(tmp_solver_instances))
-
     return (parameters, new_num_jobs, solver_instance_list, temp_solvers)
 
 
@@ -725,7 +721,8 @@ def run_parallel_portfolio(instances: list[str],
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
     sfh.create_new_empty_file(file_path_output1)
-
+    # TODO: This try/except structure is absolutely massive.
+    # This entire method should be refactored after everything works with RunRunner
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
@@ -779,7 +776,8 @@ def run_parallel_portfolio(instances: list[str],
             done = False
             wait_cutoff_time = False
             n_seconds = 4
-
+            # TODO: This piece of code is quite identical to the loop in
+            # wait_for_finished solver. Perhaps it can be merged.
             while not done:
                 # Ask the cluster for a list of all jobs which are currently running
                 result = subprocess.run(["squeue", "--array",
@@ -807,9 +805,8 @@ def run_parallel_portfolio(instances: list[str],
             run.wait()
 
         finished_instances_dict = {}
-
         for instance in instances:
-            instance = sfh.get_last_level_directory_name(instance)
+            instance = Path(instance).name
             finished_instances_dict[instance] = ["UNSOLVED", 0]
 
         tmp_res_files = glob.glob(f"{str(sgh.pap_performance_data_tmp_path)}/*.result")
