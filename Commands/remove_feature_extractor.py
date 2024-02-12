@@ -58,17 +58,17 @@ if __name__ == "__main__":
     print("Starting removing feature extractor "
           f"{Path(extractor_path).name} ...")
 
-    if bool(sgh.extractor_list):
+    if len(sgh.extractor_list) > 0:
         sfh.add_remove_platform_item(extractor_path,
                                      sgh.extractor_list_path, remove=True)
 
-    if bool(sgh.extractor_feature_vector_size_mapping):
+    if len(sgh.extractor_feature_vector_size_mapping) > 0:
         sfh.add_remove_platform_item(None,
                                      sgh.extractor_feature_vector_size_list_path,
                                      key=extractor_path,
                                      remove=False)
 
-    if bool(sgh.extractor_nickname_mapping):
+    if len(sgh.extractor_nickname_mapping) > 0:
         for key in sgh.extractor_nickname_mapping:
             if sgh.extractor_nickname_mapping[key] == extractor_path:
                 sfh.add_remove_platform_item(None,
