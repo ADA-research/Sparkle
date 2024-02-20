@@ -187,7 +187,6 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
 
     return list_predict_schedule
 
-
 def compute_actual_selector_performance(
         actual_portfolio_selector_path: str,
         performance_data_csv_path: str,
@@ -219,7 +218,7 @@ def compute_actual_selector_performance(
         performance_instance, flag_success = compute_actual_performance_for_instance(
             actual_portfolio_selector_path, instance, feature_data_csv_path,
             performance_data_csv, minimise, perf_measure, capvalue)
-
+        
         if not flag_success and capvalue is not None:
             performance_instance = capvalue * penalty_factor
 
@@ -276,7 +275,7 @@ def compute_actual_performance_for_instance(
                 if sum(performance_list) <= cutoff_time:
                     flag_successfully_solving = True
                 break
-            # 3. Else, we sett the failed solver to the cutoff time
+            # 3. Else, we set the failed solver to the cutoff time
             performance_list[-1] = scheduled_cutoff_time_this_run
 
             # 4. If we have exceeded cutoff_time, we are done
