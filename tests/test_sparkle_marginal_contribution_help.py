@@ -104,8 +104,6 @@ class TestMarginalContribution(TestCase):
     def test_compute_actual_selector_performance(self: TestCase, patch_performance_for_instance) -> None:
         """Test for method compute_actual_selector_performance."""
         # Does not work on bitbucket.
-        # TODO: Fix with mocker commands to fake method output. Ticket on jira.
-        #return
         pth = "Commands/test/test_files/Sparkle_Portfolio_Selector/"\
               "sparkle_portfolio_selector__@@SPARKLE@@__"
         perf_path = "Commands/test/test_files/Performance_Data/"\
@@ -116,11 +114,11 @@ class TestMarginalContribution(TestCase):
         result = 526.805294
 
         patch_performance_for_instance.side_effect = [(61.0, False), (28.1747, True),
-                                              (61.0, False), (9.98625, True), 
-                                              (0.107158, True), (61.0, False),
-                                              (0.537186, True), (61.0, False), 
-                                              (61.0, False), (61.0, False),
-                                              (61.0, False), (61.0, False)]
+                                                      (61.0, False), (9.98625, True), 
+                                                      (0.107158, True), (61.0, False),
+                                                      (0.537186, True), (61.0, False), 
+                                                      (61.0, False), (61.0, False),
+                                                      (61.0, False), (61.0, False)]
 
         output = scmch.compute_actual_selector_performance(pth,
                                                            perf_path,
