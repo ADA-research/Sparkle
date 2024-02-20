@@ -187,6 +187,7 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
 
     return list_predict_schedule
 
+
 def compute_actual_selector_performance(
         actual_portfolio_selector_path: str,
         performance_data_csv_path: str,
@@ -218,7 +219,7 @@ def compute_actual_selector_performance(
         performance_instance, flag_success = compute_actual_performance_for_instance(
             actual_portfolio_selector_path, instance, feature_data_csv_path,
             performance_data_csv, minimise, perf_measure, capvalue)
-        
+
         if not flag_success and capvalue is not None:
             performance_instance = capvalue * penalty_factor
 
