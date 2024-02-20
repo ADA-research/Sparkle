@@ -152,8 +152,8 @@ def get_results() -> dict[str, list[str, str]]:
     results_dict = dict()
 
     if len(results) == 0:
-        print("WARNING: No result files found for parallel portfolio in:")
-        print(solutions_dir)
+        print(f"WARNING: No result files found for parallel portfolio in:"
+              f" {solutions_dir}")
 
     for result_path in results:
 
