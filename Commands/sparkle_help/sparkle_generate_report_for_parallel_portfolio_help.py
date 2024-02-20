@@ -149,12 +149,11 @@ def get_results() -> dict[str, list[str, str]]:
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
     results = sfh.get_list_all_extensions(solutions_dir, "result")
-    if len(results) == 0:
-        print("ERROR: No result files found for parallel portfolio! Stopping execution.")
-        print(solutions_dir)
-        sys.exit(-1)
-
     results_dict = dict()
+
+    if len(results) == 0:
+        print("WARNING: No result files found for parallel portfolio in:")
+        print(solutions_dir)
 
     for result_path in results:
 
