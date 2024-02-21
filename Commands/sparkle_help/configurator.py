@@ -39,14 +39,14 @@ class Configurator:
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
         self.multiobjective = True
-        if configurator_path == Path("sparkle/Components/smac-v2.10.03-master-778/smac"):
+        if configurator_path == sgh.smac_dir:
             self.multiobjective = False
 
-        performance_measures = sgh.settings.get_general_sparkle_objectives()
-        if len(performance_measures) > 1 and not self.multiobjective:
+        objectives = sgh.settings.get_general_sparkle_objectives()
+        if len(objectives) > 1 and not self.multiobjective:
             print("Warning: Multiple objectives specified but current configurator "
-                  f"{self.configurator_path} only supports single objective.\n"
-                  "-> Default to first indicated objective.")
+                  f"{self.configurator_path.name} only supports single objective. "
+                  f"-> Defaulted to first specified objective: {objectives[0].name}")
 
     def create_sbatch_script(self: Configurator,
                              scenario: ConfigurationScenario) -> None:
