@@ -132,8 +132,8 @@ if __name__ == "__main__":
         )  # Do first, so other command line options can override settings from the file
         args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
         sgh.settings.set_general_target_cutoff_time(

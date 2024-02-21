@@ -155,8 +155,8 @@ if __name__ == "__main__":
                                                      SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE)
 
     # Write settings to file before starting, since they are used in callback scripts
     sgh.settings.write_used_settings()
