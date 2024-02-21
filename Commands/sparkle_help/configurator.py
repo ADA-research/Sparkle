@@ -46,7 +46,7 @@ class Configurator:
         if len(objectives) > 1 and not self.multiobjective:
             print("Warning: Multiple objectives specified but current configurator "
                   f"{self.configurator_path.name} only supports single objective. "
-                  f"-> Defaulted to first specified objective: {objectives[0].name}")
+                  f"Defaulted to first specified objective: {objectives[0].name}")
 
     def create_sbatch_script(self: Configurator,
                              scenario: ConfigurationScenario) -> None:
