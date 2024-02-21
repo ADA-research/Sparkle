@@ -76,8 +76,8 @@ if __name__ == "__main__":
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
         )
 
     if sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
