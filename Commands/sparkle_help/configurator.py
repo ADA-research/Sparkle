@@ -38,6 +38,16 @@ class Configurator:
         self.sbatch_filename = ""
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
+        self.multiobjective = True
+        if configurator_path == sgh.smac_dir:
+            self.multiobjective = False
+
+        objectives = sgh.settings.get_general_sparkle_objectives()
+        if len(objectives) > 1 and not self.multiobjective:
+            print("Warning: Multiple objectives specified but current configurator "
+                  f"{self.configurator_path.name} only supports single objective. "
+                  f"Defaulted to first specified objective: {objectives[0].name}")
+
     def create_sbatch_script(self: Configurator,
                              scenario: ConfigurationScenario) -> None:
         """Create sbatch script.
