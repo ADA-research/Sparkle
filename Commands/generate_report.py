@@ -125,9 +125,8 @@ if __name__ == "__main__":
             args.settings_file, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
-        )
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
     if not selection and test_case_directory is None and solver is None:

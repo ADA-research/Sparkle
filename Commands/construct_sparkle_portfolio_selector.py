@@ -111,8 +111,8 @@ if __name__ == "__main__":
                              sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR])
 
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
         )
 
     print("Start constructing Sparkle portfolio selector ...")
