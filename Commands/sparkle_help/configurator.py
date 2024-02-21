@@ -61,11 +61,12 @@ class Configurator:
         with (self.configurator_path / self.sbatch_filename).open("w+") as sbatch_script:
             sbatch_script.write(file_content)
 
-    def configure(self: Configurator, run_on: Runner = Runner.SLURM) -> int:
+    def configure(self: Configurator,
+                  run_on: Runner = Runner.SLURM) -> int | rrr.slurm.SlurmJob:
         """Submit sbatch script.
 
         Returns:
-            ID of the submitted job.
+            ID of the submitted job. In case of running on RunRunner Slurm, a SlurmJob.
         """
         if run_on == Runner.SLURM:
             return ssh.submit_sbatch_script(self.sbatch_filename,
@@ -91,7 +92,7 @@ class Configurator:
                 srun_options=batch.srun_options)
 
             if run_on == Runner.SLURM:
-                jobid = run.run_id
+                jobid = run
             elif run_on == Runner.LOCAL:
                 run.wait()
 
@@ -131,7 +132,7 @@ class Configurator:
                 runner=run_on,
                 cmd=cmd,
                 name="configuration_callback",
-                dependency=dependency_jobid)
+                dependencies=dependency_jobid)
 
             if run_on == Runner.SLURM:
                 jobid = run.run_id

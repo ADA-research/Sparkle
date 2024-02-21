@@ -503,7 +503,7 @@ def run_callback(solver: Path,
                  instance_set_test: Path,
                  dependency: str,
                  command: CommandName,
-                 run_on: Runner = Runner.SLURM) -> str:
+                 run_on: Runner = Runner.SLURM) -> str | rrr.slurm.SlurmJob:
     """Generate a command callback Slurm batch script for validation and run it.
 
     Args:
@@ -515,7 +515,7 @@ def run_callback(solver: Path,
       run_on: Whether the job is executed on Slurm or locally.
 
     Returns:
-      String job identifier.
+      String job identifier or SlurmJob if running with RunRunner
     """
     cmd_file, cmd_str = None, None
     if command == CommandName.RUN_ABLATION:
@@ -534,13 +534,13 @@ def run_callback(solver: Path,
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
-    jobid = ""
+    job = ""
 
     # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
     # runrunner works properly everything under 'if' should be removed leaving only the
     # 'else', and the SLURM_RR replaced by just SLURM.
     if run_on == Runner.SLURM:
-        jobid = generate_generic_callback_slurm_script(
+        job = generate_generic_callback_slurm_script(
             cmd_str, solver, instance_set_train, instance_set_test,
             dependency, command_line, command)
     else:
@@ -560,7 +560,7 @@ def run_callback(solver: Path,
             run_on = Runner.SLURM
 
         if run_on == Runner.SLURM:
-            jobid = run.run_id
+            job = run
         else:
             print("Waiting for the local calculations to finish.")
             run.wait()
@@ -569,7 +569,7 @@ def run_callback(solver: Path,
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
 
-    return jobid
+    return job
 
 
 def create_callback_options_list(name: str,

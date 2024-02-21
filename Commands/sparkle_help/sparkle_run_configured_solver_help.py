@@ -119,8 +119,9 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
     return sbatch_script_path
 
 
-def call_configured_solver_parallel(instances_list: list[list[Path]],
-                                    run_on: Runner = Runner.SLURM) -> str:
+def call_configured_solver_parallel(
+        instances_list: list[list[Path]], run_on: Runner = Runner.SLURM)\
+        -> str | rrr.slurm.SlurmJob:
     """Run the latest configured solver in parallel on all given instances.
 
     Args:
@@ -128,7 +129,7 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
         run_on: Whether the command is run with Slurm or not.
 
     Returns:
-        str: The Slurm job id str, or empty string if local run
+        str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
     """
     # Create an instance list[str] keeping in mind possible multi-file instances
     instance_list = []
@@ -144,11 +145,11 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
     # Run batch script
     cmd_name = CommandName.RUN_CONFIGURED_SOLVER
     exec_dir = "./"
-    jobid_str = ""
+    job = ""
     if run_on == Runner.SLURM:
-        jobid_str = ssh.submit_sbatch_script(sbatch_script_name=str(sbatch_script_path),
-                                             command_name=cmd_name,
-                                             execution_dir=exec_dir)
+        job = ssh.submit_sbatch_script(sbatch_script_name=str(sbatch_script_path),
+                                       command_name=cmd_name,
+                                       execution_dir=exec_dir)
         print("Submitted sbatch script for configured solver, "
               "output and results will be written to: "
               f"{sbatch_script_path}.txt")
@@ -171,12 +172,13 @@ def call_configured_solver_parallel(instances_list: list[list[Path]],
             run.wait()
         else:
             print(f"Configured solver added to {run_on} queue.")
+            job = run
 
         # Remove the below if block once runrunner works satisfactorily
         if run_on == Runner.SLURM:
             run_on = Runner.SLURM_RR
 
-    return jobid_str
+    return job
 
 
 def get_latest_configured_solver_and_configuration() -> (str, str):

@@ -195,7 +195,7 @@ if __name__ == "__main__":
             srun_options=batch.srun_options)
 
         if run_on == Runner.SLURM:
-            print(f"Running validation in parallel. Waiting for local job with id: "
+            print(f"Running validation in parallel. Waiting for Slurm job with id: "
                   f"{run.run_id}")
         else:
             run.wait()
