@@ -238,7 +238,6 @@ if __name__ == "__main__":
         sgh.latest_scenario.set_config_instance_set_test()
 
     dependency_jobid_list = [configure_jobid]
-
     callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
 
     # Set validation to wait until configuration is done

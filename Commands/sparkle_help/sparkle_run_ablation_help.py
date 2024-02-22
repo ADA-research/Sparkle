@@ -413,7 +413,7 @@ def submit_ablation_runrunner(solver_name: str,
                               instance_set_train_name: str,
                               instance_set_test_name: str,
                               ablation_scenario_dir: str,
-                              run_on: Runner = Runner.SLURM) -> list[str]:
+                              run_on: Runner = Runner.SLURM) -> list[rrr.slurm.SlurmJob]:
     """Sends an ablation to the RunRunner queue.
 
     Args:
@@ -425,7 +425,7 @@ def submit_ablation_runrunner(solver_name: str,
         run_on: Determines to which RunRunner queue the job is added
 
     Returns:
-        A (potential empty) list of Slurm job id strings. Empty when running locally.
+        A (potential empty) list of SlurmJobs. Empty when running locally.
     """
     # This script sumbits 4 jobs: Normal, normal callback, validation, validation cb
     # The callback is nothing but a copy script from Albation/scenario/DIR/log to
@@ -451,7 +451,7 @@ def submit_ablation_runrunner(solver_name: str,
     if run_on == Runner.LOCAL:
         run.wait()
     else:
-        dependency.append(run.run_id)
+        dependency.append(run)
 
     # 2. Submit intermediate actions (copy path from log)
     sbatch_script_path = generate_callback_slurm_script(
@@ -463,7 +463,7 @@ def submit_ablation_runrunner(solver_name: str,
         cmd=batch.cmd,
         name=CommandName.RUN_ABLATION,
         path=ablation_scenario_dir,
-        dependency=dependency,
+        dependencies=dependency,
         sbatch_options=batch.sbatch_options,
         srun_options=batch.srun_options)
 
@@ -471,7 +471,7 @@ def submit_ablation_runrunner(solver_name: str,
     if run_on == Runner.LOCAL:
         run.wait()
     else:
-        dependency.append(run.run_id)
+        dependency.append(run)
 
     # 3. Submit ablation validation run when nessesary, repeat process for the test set
     if instance_set_test is not None:
@@ -492,7 +492,7 @@ def submit_ablation_runrunner(solver_name: str,
         if run_on == Runner.LOCAL:
             run.wait()
         else:
-            dependency.append(run.run_id)
+            dependency.append(run)
         # Submit intermediate actions (copy validation table from log)
         sbatch_script_path = generate_callback_slurm_script(
             solver_name,
@@ -513,7 +513,7 @@ def submit_ablation_runrunner(solver_name: str,
         if run_on == Runner.LOCAL:
             run.wait()
         else:
-            dependency.append(run.run_id)
+            dependency.append(run)
     # Remove the below if block once runrunner works satisfactorily
     if run_on == Runner.SLURM_RR:
         run_on = Runner.SLURM
