@@ -219,9 +219,15 @@ if __name__ == "__main__":
     status_info.save()
 
     number_of_runs = sgh.settings.get_config_number_of_runs()
+    time_budget = sgh.settings.get_config_budget_per_run()
+    cutoff_time = sgh.settings.get_general_target_cutoff_time()
+    cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+    run_objective =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
-                                            use_features, configurator_target,
-                                            feature_data_df)
+                                            time_budget, cutoff_time, cutoff_length,
+                                            run_objective, use_features,
+                                            configurator_target, feature_data_df)
     configurator = Configurator(configurator_path)
     configurator.create_sbatch_script(config_scenario)
     configure_jobid = configurator.configure(run_on=run_on)
