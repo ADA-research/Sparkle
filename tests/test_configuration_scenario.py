@@ -36,7 +36,7 @@ class TestConfigurationScenario(TestCase):
         self.cutoff_time = sgh.settings.get_general_target_cutoff_time()
         self.cutoff_length = sgh.settings.get_smac_target_cutoff_length()
         self.run_objective =\
-            sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+            sgh.settings.get_general_sparkle_objectives()[0]
 
         self.scenario = ConfigurationScenario(self.solver,
                                               self.instance_directory,
