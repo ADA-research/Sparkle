@@ -78,7 +78,8 @@ def scenario_fixture(solver_fixture: MockerFixture) -> ConfigurationScenario:
     use_features = False
     return ConfigurationScenario(solver_fixture, instance_set_train, number_of_runs,
                                  time_budget, cutoff_time, cutoff_length,
-                                 sparkle_objective, use_features, sgh.smac_target_algorithm)
+                                 sparkle_objective, use_features,
+                                 sgh.smac_target_algorithm)
 
 
 @pytest.fixture
