@@ -154,7 +154,7 @@ class ReportingScenario:
 
         # Print error if unable to read the scenario file
         else:
-            print(f"ERROR: Failed to read latest scenario from {str(file_path)} The "
+            print(f"WARNING: Failed to read latest scenario from {str(file_path)} The "
                   "file may have been empty, or is in another format than INI. Default "
                   "values will be used.")
 
