@@ -111,7 +111,7 @@ class ConfigurationScenario:
         """Create a file with the configuration scenario."""
         inner_directory = Path("scenarios", self.name)
 
-        run_objective = self._get_performance_measure()
+        performance_measure = self._get_performance_measure()
         solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
 
@@ -122,7 +122,7 @@ class ConfigurationScenario:
             file.write(f"algo = ../../../{self.configurator_target}\n"
                        f"execdir = {inner_directory}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
-                       f"run_obj = {run_objective}\n"
+                       f"run_obj = {performance_measure}\n"
                        f"wallclock-limit = {self.time_budget}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
@@ -150,23 +150,23 @@ class ConfigurationScenario:
                            f"{original_instance_path.name}\n")
 
     def _get_performance_measure(self: ConfigurationScenario) -> str:
-        """Return the run objective.
+        """Retrieve the performance measure of the SparkleObjective.
 
         Returns:
             Performance measure of the sparkle objective
         """
         # Convert to SMAC format
-        run_objective = self.sparkle_objective.PerformanceMeasure
+        run_performance_measure = self.sparkle_objective.PerformanceMeasure
 
-        if run_objective == PerformanceMeasure.RUNTIME:
-            run_objective = run_objective.name
-        elif run_objective == PerformanceMeasure.QUALITY_ABSOLUTE:
-            run_objective = "QUALITY"
+        if run_performance_measure == PerformanceMeasure.RUNTIME:
+            run_performance_measure = run_performance_measure.name
+        elif run_performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+            run_performance_measure = "QUALITY"
         else:
-            print("Warning: Unknown performance measure", run_objective,
+            print("Warning: Unknown performance measure", run_performance_measure,
                   "! This is a bug in Sparkle.")
 
-        return run_objective
+        return run_performance_measure
 
     def _create_feature_file(self: ConfigurationScenario) -> None:
         """Create CSV file from feature data."""
