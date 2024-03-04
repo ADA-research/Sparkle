@@ -183,12 +183,12 @@ class Configurator:
         Returns:
             String containing the run parameters.
         """
-        num_job_total = self.scenario.number_of_runs
+        total_jobs = self.scenario.number_of_runs
         result_directory = Path("results", self.scenario.name)
 
         sl.add_output(
             f"{sgh.smac_dir}{result_directory}/{self.sbatch_filename}_seed_N_smac.txt",
-            f"Configuration log for SMAC run 1 < N <= {num_job_total}")
+            f"Configuration log for SMAC run 1 < N <= {total_jobs}")
 
         params = "params=( \\\n"
 
@@ -196,7 +196,7 @@ class Configurator:
         scenario_file = Path(self.scenario.directory.parent.name,
                              self.scenario.directory.name,
                              self.scenario.scenario_file_name)
-        for seed in range(1, num_job_total + 1):
+        for seed in range(1, total_jobs + 1):
             result_path = Path(result_directory,
                                f"{self.sbatch_filename}_seed_{seed}_smac.txt")
             smac_execdir_i = Path("scenarios", self.scenario.name, str(seed))
