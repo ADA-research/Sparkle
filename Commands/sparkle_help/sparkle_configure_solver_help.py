@@ -644,11 +644,12 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
         if len(smac_output_line) == 0:
             print("Error: Configurator output file has unexpected format")
             # Find matching error file
-            error_file = [file for file in sgh.smac_tmp_dir.iterdir()
-                          if file.name.startswith(f"{solver_name}_{instance_set_name}")
-                          and file.suffix == ".err"][0]
+            error_files = [file for file in sgh.smac_tmp_dir.iterdir()
+                           if file.name.startswith(f"{solver_name}_{instance_set_name}")
+                           and file.suffix == ".err"]
             # Output content of error file
-            if error_file.exists():
+            if error_files and error_files[0].exists():
+                error_file = error_files[0]
                 with error_file.open("r") as file:
                     file_content = file.read()
                     print(f"Error log {error_file}:")
