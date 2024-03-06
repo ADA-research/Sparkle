@@ -617,13 +617,13 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
 
-    conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"
+    conf_results_dir = sgh.smac_results_dir / f"{solver_name}_{instance_set_name}/"
     list_file_result_name = os.listdir(conf_results_dir)
     line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
     # among them
     for file_result_name in list_file_result_name:
-        file_result_path = conf_results_dir + file_result_name
+        file_result_path = conf_results_dir / file_result_name
         smac_output_line = ""
         target_call = ""
         extra_info_statement = ""
@@ -639,24 +639,23 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     target_call =\
                         target_call[target_call.find(sgh.smac_target_algorithm):]
                     extra_info_statement = lines[index + 3].strip()
+        # TODO: General implementation of smac_output verfication
         # Check whether the smac_output is empty
         if len(smac_output_line) == 0:
             print("Error: SMAC Configuration file is empty")
             # Find matching error file
-            tmp_files = os.listdir(sgh.smac_tmp_dir)
-            matching_files = [file for file in tmp_files if file.startswith(solver_name)
-                              and file.endswith(".err")]
+            error_file = [file for file in sgh.smac_tmp_dir.iterdir()
+                          if file.name.startswith(f"{solver_name}_{instance_set_name}")
+                          and file.suffix == ".err"][0]
             # Output content of error file
-            for relative_path in matching_files:
-                path = f"{sgh.smac_tmp_dir}{relative_path}"
-                with Path(path).open("r") as file:
+            if error_file.exists():
+                with error_file.open("r") as file:
                     file_content = file.read()
-                    print(f"{path}:")
+                    print(f"Error log {error_file}:")
                     print(file_content)
-            sys.exit(-1)
-        else:
-            # The 15th item contains the performance as float, but has trailing char
-            this_configuration_performance = float(smac_output_line[14][:-1])
+                sys.exit(-1)
+        # The 15th item contains the performance as float, but has trailing char
+        this_configuration_performance = float(smac_output_line[14][:-1])
         # We look for the data with the highest performance
         if (optimised_configuration_performance < 0
                 or this_configuration_performance < optimised_configuration_performance):
