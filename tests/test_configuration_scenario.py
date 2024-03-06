@@ -32,9 +32,19 @@ class TestConfigurationScenario(TestCase):
                                             "/scenarios/instances/Test-Instance-Set")
         self.instance_file_directory.mkdir(parents=True, exist_ok=True)
 
+        self.time_budget = sgh.settings.get_config_budget_per_run()
+        self.cutoff_time = sgh.settings.get_general_target_cutoff_time()
+        self.cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+        self.sparkle_objective =\
+            sgh.settings.get_general_sparkle_objectives()[0]
+
         self.scenario = ConfigurationScenario(self.solver,
                                               self.instance_directory,
                                               self.run_number,
+                                              self.time_budget,
+                                              self.cutoff_time,
+                                              self.cutoff_length,
+                                              self.sparkle_objective,
                                               False,
                                               sgh.smac_target_algorithm)
 
