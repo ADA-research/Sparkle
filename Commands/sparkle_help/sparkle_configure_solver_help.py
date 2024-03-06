@@ -617,13 +617,13 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
 
-    conf_results_dir = f"{sgh.smac_results_dir}{solver_name}_{instance_set_name}/"
+    conf_results_dir = sgh.smac_results_dir / f"{solver_name}_{instance_set_name}/"
     list_file_result_name = os.listdir(conf_results_dir)
     line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
     # among them
     for file_result_name in list_file_result_name:
-        file_result_path = conf_results_dir + file_result_name
+        file_result_path = conf_results_dir / file_result_name
         smac_output_line = ""
         target_call = ""
         extra_info_statement = ""
@@ -639,7 +639,22 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     target_call =\
                         target_call[target_call.find(sgh.smac_target_algorithm):]
                     extra_info_statement = lines[index + 3].strip()
-
+        # TODO: General implementation of configurator output verification
+        # Check whether the smac_output is empty
+        if len(smac_output_line) == 0:
+            print("Error: Configurator output file has unexpected format")
+            # Find matching error file
+            error_files = [file for file in sgh.smac_tmp_dir.iterdir()
+                           if file.name.startswith(f"{solver_name}_{instance_set_name}")
+                           and file.suffix == ".err"]
+            # Output content of error file
+            if error_files and error_files[0].exists():
+                error_file = error_files[0]
+                with error_file.open("r") as file:
+                    file_content = file.read()
+                    print(f"Error log {error_file}:")
+                    print(file_content)
+                sys.exit(-1)
         # The 15th item contains the performance as float, but has trailing char
         this_configuration_performance = float(smac_output_line[14][:-1])
         # We look for the data with the highest performance
