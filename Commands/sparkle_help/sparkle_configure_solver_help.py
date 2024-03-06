@@ -639,10 +639,10 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     target_call =\
                         target_call[target_call.find(sgh.smac_target_algorithm):]
                     extra_info_statement = lines[index + 3].strip()
-        # TODO: General implementation of smac_output verfication
+        # TODO: General implementation of configurator output verification
         # Check whether the smac_output is empty
         if len(smac_output_line) == 0:
-            print("Error: SMAC Configuration file is empty")
+            print("Error: Configurator output file has unexpected format")
             # Find matching error file
             error_file = [file for file in sgh.smac_tmp_dir.iterdir()
                           if file.name.startswith(f"{solver_name}_{instance_set_name}")
