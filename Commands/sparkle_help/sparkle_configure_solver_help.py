@@ -639,9 +639,24 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     target_call =\
                         target_call[target_call.find(sgh.smac_target_algorithm):]
                     extra_info_statement = lines[index + 3].strip()
-
-        # The 15th item contains the performance as float, but has trailing char
-        this_configuration_performance = float(smac_output_line[14][:-1])
+        # Check whether the smac_output is empty
+        if len(smac_output_line) == 0:
+            print("Error: SMAC Configuration file is empty")
+            # Find matching error file
+            tmp_files = os.listdir(sgh.smac_tmp_dir)
+            matching_files = [file for file in tmp_files if file.startswith(solver_name)
+                              and file.endswith(".err")]
+            # Output content of error file
+            for relative_path in matching_files:
+                path = f"{sgh.smac_tmp_dir}{relative_path}"
+                with Path(path).open("r") as file:
+                    file_content = file.read()
+                    print(f"{path}:")
+                    print(file_content)
+            sys.exit(-1)
+        else:
+            # The 15th item contains the performance as float, but has trailing char
+            this_configuration_performance = float(smac_output_line[14][:-1])
         # We look for the data with the highest performance
         if (optimised_configuration_performance < 0
                 or this_configuration_performance < optimised_configuration_performance):
