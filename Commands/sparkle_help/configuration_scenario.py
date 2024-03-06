@@ -8,37 +8,45 @@ from pathlib import Path
 
 import pandas as pd
 
-from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, SparkleObjective
 from Commands.sparkle_help.solver import Solver
-from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 
 
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
     def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
-                 number_of_runs: int, use_features: bool, configurator_target: str,
+                 number_of_runs: int, time_budget: int, cutoff_time: int,
+                 cutoff_length: int, sparkle_objective: SparkleObjective,
+                 use_features: bool, configurator_target: str,
                  feature_data_df: pd.DataFrame = None) -> None:
         """Initialize scenario paths and names.
 
         Args:
             solver: Solver that should be configured.
             instance_directory: Original directory of instances.
-            number_of_runs: Number of runs used for configuration.
+            number_of_runs: The number of configurator runs to perform \
+                for configuring the solver.
+            time_budget: The time budget allocated for each configuration run.
+            cutoff_time: The maximum time allowed for each individual run during \
+                configuration.
+            cutoff_length: The maximum number of iterations allowed for each \
+                individual run during configuration.
+            sparkle_objective: SparkleObjective used for each run of the configuration.
             use_features: Boolean indicating if features should be used.
             configurator_target: The target Python script to be called.
                 This script standardises Configurator I/O for solver wrappers.
             feature_data_df: If features are used, this contains the feature data.
                 Defaults to None.
         """
-        global settings
-        sgh.settings = sparkle_settings.Settings()
-
         self.solver = solver
         self.parent_directory = Path()
         self.instance_directory = instance_directory
         self.number_of_runs = number_of_runs
+        self.time_budget = time_budget
+        self.cutoff_time = cutoff_time
+        self.cutoff_length = cutoff_length
+        self.sparkle_objective = sparkle_objective
         self.use_features = use_features
         self.configurator_target = configurator_target
         self.feature_data = feature_data_df
@@ -103,10 +111,7 @@ class ConfigurationScenario:
         """Create a file with the configuration scenario."""
         inner_directory = Path("scenarios", self.name)
 
-        run_objective = self._get_run_objective()
-        time_budget = sgh.settings.get_config_budget_per_run()
-        cutoff_time = sgh.settings.get_general_target_cutoff_time()
-        cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+        performance_measure = self._get_performance_measure()
         solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
 
@@ -117,10 +122,10 @@ class ConfigurationScenario:
             file.write(f"algo = ../../../{self.configurator_target}\n"
                        f"execdir = {inner_directory}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
-                       f"run_obj = {run_objective}\n"
-                       f"wallclock-limit = {time_budget}\n"
-                       f"cutoffTime = {cutoff_time}\n"
-                       f"cutoff_length = {cutoff_length}\n"
+                       f"run_obj = {performance_measure}\n"
+                       f"wallclock-limit = {self.time_budget}\n"
+                       f"cutoffTime = {self.cutoff_time}\n"
+                       f"cutoff_length = {self.cutoff_length}\n"
                        f"paramfile = {solver_param_file_path}\n"
                        f"outdir = {config_output_directory}\n"
                        f"instance_file = {self.instance_file_path}\n"
@@ -144,26 +149,24 @@ class ConfigurationScenario:
                            f"{original_instance_path.parts[-2]}/"
                            f"{original_instance_path.name}\n")
 
-    def _get_run_objective(self: ConfigurationScenario) -> str:
-        """Return the SMAC run objective.
+    def _get_performance_measure(self: ConfigurationScenario) -> str:
+        """Retrieve the performance measure of the SparkleObjective.
 
         Returns:
-            The run objective from global settings.
+            Performance measure of the sparkle objective
         """
-        # Get run_obj from general settings
-        run_objective =\
-            sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-
         # Convert to SMAC format
-        if run_objective == PerformanceMeasure.RUNTIME:
-            run_objective = run_objective.name
-        elif run_objective == PerformanceMeasure.QUALITY_ABSOLUTE:
-            run_objective = "QUALITY"
+        run_performance_measure = self.sparkle_objective.PerformanceMeasure
+
+        if run_performance_measure == PerformanceMeasure.RUNTIME:
+            run_performance_measure = run_performance_measure.name
+        elif run_performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
+            run_performance_measure = "QUALITY"
         else:
-            print("Warning: Unknown performance measure", run_objective,
+            print("Warning: Unknown performance measure", run_performance_measure,
                   "! This is a bug in Sparkle.")
 
-        return run_objective
+        return run_performance_measure
 
     def _create_feature_file(self: ConfigurationScenario) -> None:
         """Create CSV file from feature data."""
