@@ -118,7 +118,7 @@ def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str
         if "=" in arg:
             splitted = arg.split("=")
             kwargs[splitted[0]] = splitted[1]
-        elif i < len(args) and "-" not in args[i + 1]:
+        elif i < len(args) - 1 and "-" not in args[i + 1]:
             kwargs[arg] = args[i + 1]
 
     if not ("--partition" in kwargs.keys() or "-p" in kwargs.keys()):
