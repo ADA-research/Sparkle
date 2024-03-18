@@ -750,8 +750,8 @@ def run_parallel_portfolio(instances: list[str],
             elif run_on == Runner.LOCAL:
                 run.wait()
             # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM_RR:
-                run_on = Runner.SLURM
+            if run_on == Runner.SLURM:
+                run_on = Runner.SLURM_RR
         # NOTE: the IF statement below is Slurm only as well?
         # As running runtime based performance may be less relevant
         perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
