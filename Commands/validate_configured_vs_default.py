@@ -184,7 +184,7 @@ if __name__ == "__main__":
         for i in range(n_jobs):
             cmd.append(batch.cmd + " " + batch.cmd_params[i])
             # The second half of the params contain the destination files for bash output
-            dest.append(batch.cmd_params[i+n_jobs])
+            dest.append(batch.cmd_params[i + n_jobs])
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
