@@ -743,7 +743,7 @@ def run_parallel_portfolio(instances: list[str],
                 cmd=cmd_list,
                 name=command_name,
                 path=execution_dir,
-                base_dir="Tmp",
+                base_dir=sgh.sparkle_tmp_path,
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
             # Remove SLURM_RR once runrunner works satisfactorily
