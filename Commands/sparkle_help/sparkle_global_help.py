@@ -94,7 +94,7 @@ autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
 smac_dir = "Components/smac-v2.10.03-master-778/"
 smac_results_dir = Path(smac_dir) / "results"
-smac_results_dir = Path(smac_dir) / "tmp"
+smac_tmp_dir = Path(smac_dir) / "tmp"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 
