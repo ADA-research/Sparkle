@@ -180,19 +180,23 @@ if __name__ == "__main__":
         batch = SlurmBatch(sbatch_script_path)
         n_jobs = int(len(batch.cmd_params) / 2)
         cmd = []
+        dest = []
+        print(sbatch_script_path)
+        print()
+        #print("\nCMD params:")
         for i in range(n_jobs):
-            # TODO:
-            # The second half of the params contain the destination files for bash output
-            # This should be given to runrunner as pipe dest
             cmd.append(batch.cmd + " " + batch.cmd_params[i])
-
+            # The second half of the params contain the destination files for bash output
+            dest.append(batch.cmd_params[i+n_jobs])
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
             name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
             path=configurator_path,
+            base_dir=sgh.sparkle_tmp_path,
             sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options)
+            srun_options=batch.srun_options,
+            output_path=dest)
 
         if run_on == Runner.SLURM:
             print(f"Running validation in parallel. Waiting for Slurm job with id: "
