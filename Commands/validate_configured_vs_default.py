@@ -181,9 +181,6 @@ if __name__ == "__main__":
         n_jobs = int(len(batch.cmd_params) / 2)
         cmd = []
         dest = []
-        print(sbatch_script_path)
-        print()
-        #print("\nCMD params:")
         for i in range(n_jobs):
             cmd.append(batch.cmd + " " + batch.cmd_params[i])
             # The second half of the params contain the destination files for bash output
