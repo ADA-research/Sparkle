@@ -4,4 +4,4 @@ Sphinx
 sphinxcontrib-jsmath
 sphinxcontrib-autoprogram
 pandas # Also in environment.yml but needed for readthedocs
-runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
+RunRunner

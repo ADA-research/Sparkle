@@ -10,11 +10,11 @@ dependencies:
   - latexmk
   - pip
   - pip:
-    - --editable .  # self install !
-    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
     # For Sparkle
+    - --editable .  # self install !
     - numpy
     - pandas
+    - RunRunner==0.1.0
     # Upcoming pandas requirement (Pandas 3.0), remove once 3.0 has arrived
     - pyarrow
     # Testing
