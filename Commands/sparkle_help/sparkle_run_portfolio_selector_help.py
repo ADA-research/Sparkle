@@ -343,54 +343,32 @@ def call_sparkle_portfolio_selector_solve_directory(
 
     test_performance_data_csv.update_csv()
 
-    i = 0
-    j = len(total_job_list)
-    sbatch_shell_script_path = (
+    n_jobs = len(total_job_list)
+    """sbatch_shell_script_path = (
         f"{test_case_directory_path}Tmp/running_sparkle_portfolio_selector_sbatch_shell_"
-        f"script_{str(i)}_{str(j)}_{sparkle_basic_help.get_time_pid_random_string()}.sh")
+        f"script_0_{n_jobs}_{sparkle_basic_help.get_time_pid_random_string()}.sh")
     generate_running_sparkle_portfolio_selector_sbatch_shell_script(
         sbatch_shell_script_path, test_case_directory_path,
-        test_performance_data_csv_path, total_job_list, j)
+        test_performance_data_csv_path, total_job_list, n_jobs)
+    """
+
+    target_call = "python Commands/sparkle_help/run_sparkle_portfolio_core.py" +\
+                  f" --performance-data-csv {test_performance_data_csv_path}"
+    cmd_list = [f"{target_call} --instance {job_instance[0]}" for job_instance in total_job_list]
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
+        base_dir=f"{test_case_directory_path}/Tmp",
+        parallel_jobs=n_jobs,
+        sbatch_options=ssh.get_slurm_sbatch_user_options_list(),
+        srun_options=["-N1", "-n1", "--exclusive"])
 
     if run_on == Runner.SLURM:
-        Path(sbatch_shell_script_path).chmod(mode=777)
-        process = subprocess.run(["sbatch", sbatch_shell_script_path],
-                                 capture_output=True)
-        output_list = process.stdout.splitlines()
-
-        if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-            jobid = output_list[0].strip().split()[-1]
-            # Add job to active job CSV
-            sjh.write_active_job(jobid, CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR)
-        else:
-            jobid = ""
+        # Add the run to the list of active job.
+        sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
     else:
-        batch = SlurmBatch(sbatch_shell_script_path)
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd_list,
-            name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
-            base_dir=f"{test_case_directory_path}/Tmp",
-            sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options)
-
-        if run_on == Runner.SLURM:
-            # Add the run to the list of active job.
-            sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
-        else:
-            run.wait()
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-    return
+        run.wait()
 
 
 def check_selector_status(solver_name: str) -> None:
