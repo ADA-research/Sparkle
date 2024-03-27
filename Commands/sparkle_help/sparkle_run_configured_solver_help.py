@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a configured solver."""
+from __future__ import annotations
 
 import sys
 from pathlib import Path
@@ -14,7 +15,6 @@ from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_instances_help as sih
 
-from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
 from runrunner.base import Runner
 
@@ -121,7 +121,7 @@ def generate_sbatch_script_for_configured_solver(num_jobs: int,
 
 def call_configured_solver_parallel(
         instances_list: list[list[Path]], run_on: Runner = Runner.SLURM)\
-        -> str | rrr.slurm.SlurmJob:
+        -> rrr.SlurmRun | rrr.LocalRun:
     """Run the latest configured solver in parallel on all given instances.
 
     Args:
@@ -132,53 +132,41 @@ def call_configured_solver_parallel(
         str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
     """
     # Create an instance list[str] keeping in mind possible multi-file instances
-    instance_list = []
+    for index, value in enumerate(instances_list):
+        # Flatten the second dimension
+        if isinstance(value, list):
+            instances_list[index] = " ".join([str(path) for path in value])
 
-    for instance_path_list in instances_list:
-        instance_list.append(" ".join([str(path) for path in instance_path_list]))
+    num_jobs = len(instances_list)
 
-    # Prepare batch script
-    num_jobs = len(instance_list)
-    sbatch_script_path = generate_sbatch_script_for_configured_solver(
-        num_jobs, instance_list)
+    perf_name = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
+    cmd_list = [f"{sgh.python_executable} "\
+                f"Commands/sparkle_help/run_configured_solver_core.py "\
+                f"--instance {instance}"
+                f"--performance-measure {perf_name}" for instance in instances_list]
 
-    # Run batch script
-    cmd_name = CommandName.RUN_CONFIGURED_SOLVER
-    exec_dir = "./"
-    job = ""
-    if run_on == Runner.SLURM:
-        job = ssh.submit_sbatch_script(sbatch_script_name=str(sbatch_script_path),
-                                       command_name=cmd_name,
-                                       execution_dir=exec_dir)
-        print("Submitted sbatch script for configured solver, "
-              "output and results will be written to: "
-              f"{sbatch_script_path}.txt")
+    sbatch_options = ssh.get_slurm_sbatch_default_options_list()
+    # Get user options second to overrule defaults
+    sbatch_options.extend(ssh.get_slurm_sbatch_user_options_list())
+    srun_options = ["--nodes=1", "--ntasks=1"]
+    srun_options.extend(ssh.get_slurm_srun_user_options_list())
+
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.RUN_CONFIGURED_SOLVER,
+        parallel_jobs=num_jobs,
+        base_dir=sgh.sparkle_tmp_path,
+        path="./",
+        sbatch_options=sbatch_options,
+        srun_options=srun_options)
+
+    if run_on == Runner.LOCAL:
+        run.wait()
     else:
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
+        print(f"Configured solver added to {run_on} queue.")
 
-        batch = SlurmBatch(sbatch_script_path)
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd_list,
-            name=cmd_name,
-            base_dir=exec_dir,
-            sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options)
-
-        if run_on == Runner.LOCAL:
-            run.wait()
-        else:
-            print(f"Configured solver added to {run_on} queue.")
-            job = run
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-    return job
+    return run
 
 
 def get_latest_configured_solver_and_configuration() -> (str, str):
