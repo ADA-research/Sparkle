@@ -348,7 +348,6 @@ def generate_sbatch_script_for_validation(solver_name: str,
         job_params_list.extend([test_default, test_configured])
         job_output_list.extend([test_default_out, test_configured_out])
 
-
     # Adjust maximum number of cores to be the maximum of the instances we validate on
     instance_sizes = []
     # Get instance set sizes
@@ -532,14 +531,14 @@ def run_callback(solver: Path,
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
-    run = rrr.add_to_queue( runner=run_on,
-                            cmd=command_line,
-                            name=cmd_str,
-                            dependencies=dependency,
-                            base_dir=sgh.sparkle_tmp_path,
-                            srun_options=["-N1", "-n1"],
-                            sbatch_options=get_slurm_sbatch_user_options_list())
-       
+    run = rrr.add_to_queue(runner=run_on,
+                           cmd=command_line,
+                           name=cmd_str,
+                           dependencies=dependency,
+                           base_dir=sgh.sparkle_tmp_path,
+                           srun_options=["-N1", "-n1"],
+                           sbatch_options=get_slurm_sbatch_user_options_list())
+
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
         run.wait()
@@ -549,7 +548,7 @@ def run_callback(solver: Path,
 def create_callback_options_list(name: str,
                                  solver: Path,
                                  instance_set_train: Path,
-                                 instance_set_test: Path) -> (str, list[str]):
+                                 instance_set_test: Path) -> tuple[str, list[str]]:
     """Create the options for the callback script.
 
     Args:

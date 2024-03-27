@@ -167,14 +167,14 @@ if __name__ == "__main__":
     scenario_file_name = scsh.create_file_scenario_validate(
         solver.name, instance_set_train.name, instance_set_train.name,
         scsh.InstanceType.TRAIN, default=True)
-        
+
     batch = SlurmBatch(sbatch_script_path)
     n_jobs = int(len(batch.cmd_params) / 2)
     parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), n_jobs)
     cmd = [f"{batch.cmd} {batch.cmd_params[i]}" for i in range(n_jobs)]
     dest = batch.cmd_params[n_jobs:]  # destination files for bash output
 
-     # Adjust maximum number of cores to be the maximum of the instances we validate on
+    # Adjust maximum number of cores to be the maximum of the instances we validate on
     instance_sizes = []
     # Get instance set sizes
     for instance_set_name, inst_type in [(instance_set_train.name, "train"),
@@ -194,7 +194,7 @@ if __name__ == "__main__":
         max_instance_count = (max(*instance_sizes) if len(instance_sizes) > 1
                               else instance_sizes[0])
         n_cpus = min(n_cpus, max_instance_count)
-    
+
     # Extend sbatch options
     sbatch_options_list = [f"--cpus-per-task={n_cpus}"]
     sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
@@ -218,10 +218,9 @@ if __name__ == "__main__":
 
     if run_on == Runner.SLURM:
         print(f"Running validation in parallel. Waiting for Slurm job with id: "
-                f"{run.run_id}")
+              f"{run.run_id}")
     else:
         run.wait()
-    print("Running validation done!")
 
     # Write most recent run to file
     last_test_file_path = Path(

@@ -100,8 +100,8 @@ def call_configured_solver_parallel(
     num_jobs = len(instances_list)
 
     perf_name = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
-    cmd_list = [f"{sgh.python_executable} "\
-                f"Commands/sparkle_help/run_configured_solver_core.py "\
+    cmd_list = [f"{sgh.python_executable} "
+                f"Commands/sparkle_help/run_configured_solver_core.py "
                 f"--instance {instance}"
                 f"--performance-measure {perf_name}" for instance in instances_list]
 
@@ -129,7 +129,7 @@ def call_configured_solver_parallel(
     return run
 
 
-def get_latest_configured_solver_and_configuration() -> (str, str):
+def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
     """Return the name and parameter string of the latest configured solver.
 
     Returns:
