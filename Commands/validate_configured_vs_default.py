@@ -218,7 +218,7 @@ if __name__ == "__main__":
                 instance_sizes.append(instance_count)
 
     # Maximum number of cpus we can use
-    n_cpus = min(instance_sizes)
+    n_cpus = min(sgh.settings.get_slurm_clis_per_node(), max(instance_sizes))
 
     # Extend sbatch options
     sbatch_options_list = [f"--cpus-per-task={n_cpus}"]
