@@ -11,7 +11,6 @@ from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_job_help as sjh
-from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_job_help
 from Commands.sparkle_help.sparkle_command_help import CommandName
@@ -220,7 +219,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
         ssh.generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
                                                            total_job_list))
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
-    batch = SlurmBatch(sbatch_script_path) # TODO: Refactor this to hand info directly to runrunner
+    batch = SlurmBatch(sbatch_script_path)  # TODO: Refactor this without SlurmBatch
     cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
 
     run = rrr.add_to_queue(

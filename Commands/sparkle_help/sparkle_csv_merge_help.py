@@ -18,7 +18,7 @@ def feature_data_csv_merge() -> None:
             sgh.feature_data_csv_path)
         tmp_feature_data_csv_directory = sgh.feature_data_dir / "Tmp"
         csv_list = sfh.get_list_all_extensions(tmp_feature_data_csv_directory, "csv")
-    except Exception as ex:
+    except Exception:
         return
     for csv_name in csv_list:
         tmp_feature_data_csv = sfdcsv.SparkleFeatureDataCSV(str(csv_name))

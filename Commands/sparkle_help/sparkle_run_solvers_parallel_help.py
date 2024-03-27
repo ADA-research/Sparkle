@@ -2,9 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel execution of solvers."""
 
-import os
-
-import runrunner.local
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv

@@ -106,15 +106,11 @@ def run_solvers_on_instances(
         rerun=recompute,
         run_on=run_on)]
 
-    # Remove the below if block once runrunner works satisfactorily
-    if run_on == Runner.SLURM_RR:
-        run_on = Runner.SLURM
-
     # If there are no jobs return
     if all(run is None for run in runs):
         print("Running solvers done!")
-
         return
+
     sbatch_user_options = ssh.get_slurm_sbatch_user_options_list()
 
     # Update performance data csv after the last job is done
@@ -143,21 +139,15 @@ def run_solvers_on_instances(
             base_dir=sgh.sparkle_tmp_path,
             sbatch_options=sbatch_user_options))
 
-    # Remove the below if block once runrunner works satisfactorily
-    if run_on == Runner.SLURM:
-        run_on = Runner.SLURM_RR
-
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
         for run in runs:
             if run is not None:
                 run.wait()
         print("Running solvers done!")
-    elif run_on == Runner.SLURM_RR:
+    elif run_on == Runner.SLURM:
         print("Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-                f'{",".join(r.run_id for r in runs if r is not None)}')
-
-    return
+              f'{",".join(r.run_id for r in runs if r is not None)}')
 
 
 def construct_selector_and_report(dependency_jobid_list: list[str] = []) -> str:
