@@ -276,7 +276,7 @@ def get_feature_data_id() -> int:
         An int containing the current feature data ID.
     """
     fd_id_path = Path(sgh.feature_data_id_path)
-    if not fd_id_path.exist():
+    if not fd_id_path.exists():
         return 0
     
     return Path(fd_id_path).open("r").readline()
