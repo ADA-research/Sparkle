@@ -95,12 +95,14 @@ class Configurator:
             rrr.SlurmRun | rrr.LocalRun: Run object of the callback
         """
         dir_list = self.scenario._clean_up_scenario_dirs()
-        cmd = "rm -rf " + " ".join(dir_list)
+        cmd = "rm -rf " + " ".join([str(p) for p in dir_list])
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
+            base_dir=sgh.sparkle_tmp_path,
             name="configuration_callback",
-            dependencies=dependency_job)
+            dependencies=dependency_job,
+            sbatch_options=ssh.get_slurm_options_list())
 
         if run_on == Runner.LOCAL:
             run.wait()
