@@ -33,7 +33,7 @@ def performance_data_csv_merge() -> None:
     try:
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sgh.performance_data_csv_path)
-        tmp_performance_data_result_directory = Path("Performance_Data/Tmp/")
+        tmp_performance_data_result_directory = sgh.performance_data_dir / "Tmp"
         result_list = sfh.get_list_all_extensions(
             tmp_performance_data_result_directory, "result")
     except Exception:
