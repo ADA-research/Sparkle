@@ -21,7 +21,6 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
-from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
 from runrunner.base import Runner
 
@@ -443,49 +442,6 @@ def wait_for_finished_solver(
     return finished_solver_list, pending_job_with_new_cutoff, started
 
 
-def generate_parallel_portfolio_sbatch_script(parameters: list[str],
-                                              num_jobs: int) -> Path:
-    """Generate an sbatch script for the PAP (parallel algorithm portfolio).
-
-    Args:
-        parameters: List of str parameters for the Slurm batch job.
-        num_jobs: Number of jobs.
-
-    Returns:
-        Path to the generated sbatch script.
-    """
-    # Set script name and path
-    sbatch_script_name = (f"parallel_portfolio_sbatch_shell_script_{str(num_jobs)}_"
-                          f"{sbh.get_time_pid_random_string()}.sh")
-    sbatch_script_path = Path(f"{sgh.sparkle_tmp_path}{sbatch_script_name}")
-
-    # Set sbatch options
-    job = "run_parallel_portfolio"
-    sbatch_options_list = ssh.get_sbatch_options_list(sbatch_script_path, num_jobs, job,
-                                                      smac=False)
-
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
-    # Get user options second to overrule defaults
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
-
-    # Create job list
-    job_params_list = parameters
-
-    # Set srun options
-    srun_options_str = f"--nodes=1 --ntasks=1 {ssh.get_slurm_srun_user_options_str()}"
-
-    # Create target call
-    target_call_str = ("Commands/sparkle_help/run_solvers_core.py --run-status-path "
-                       f"{str(sgh.pap_sbatch_tmp_path)}")
-
-    # Generate script
-    ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,
-                                       job_params_list, srun_options_str,
-                                       target_call_str)
-
-    return sbatch_script_path
-
-
 def generate_sbatch_job_list(
         solver_list: list[str],
         instance_path_list: list[str],
@@ -713,30 +669,34 @@ def run_parallel_portfolio(instances: list[str],
     # Makes SBATCH scripts for all individual solvers in a list
     parameters, num_jobs, solver_instance_list, temp_solvers = generate_sbatch_job_list(
         solver_list, instances, num_jobs)
-    # Generates a SBATCH script which uses the created parameters
-    sbatch_script_path = generate_parallel_portfolio_sbatch_script(parameters, num_jobs)
 
     # Run the script and cancel the remaining solvers if a solver finishes before the
     # end of the cutoff_time
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
     sfh.create_new_empty_file(file_path_output1)
+    srun_options = ["--nodes=1", "--ntasks=1"] + ssh.get_slurm_srun_user_options_list()
+    parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
+    sbatch_options_list = ssh.get_slurm_sbatch_default_options_list() +\
+        ssh.get_slurm_sbatch_user_options_list()
+    # Create cmd list
+    base_cmd_str = ("Commands/sparkle_help/run_solvers_core.py --run-status-path "
+                    f"{str(sgh.pap_sbatch_tmp_path)}")
+    cmd_list = [f"{base_cmd_str} {params}" for params in parameters]
+    
     # TODO: This try/except structure is absolutely massive.
     # This entire method should be refactored after everything works with RunRunner
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
-        execution_dir = "./"
-        batch = SlurmBatch(sbatch_script_path)
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name=command_name,
-            path=execution_dir,
+            name=CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO,
+            parallel_jobs=parallel_jobs,
+            path="./",
             base_dir=sgh.sparkle_tmp_path,
-            sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options)
+            sbatch_options=sbatch_options_list,
+            srun_options=srun_options)
         if run_on == Runner.LOCAL:
             run.wait()
         
@@ -747,7 +707,7 @@ def run_parallel_portfolio(instances: list[str],
         perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if (run_on == Runner.SLURM and perf_m == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, run.run_id,
-                                               solver_instance_list, sbatch_script_path,
+                                               solver_instance_list, run.script_filepath,
                                                num_jobs / len(instances))
 
             now = datetime.datetime.now()
@@ -760,7 +720,7 @@ def run_parallel_portfolio(instances: list[str],
             # After all jobs have finished remove/extract the files in temp only needed
             # for the running of the portfolios.
             remove_temp_files_unfinished_solvers(solver_instance_list,
-                                                 sbatch_script_path,
+                                                 run.script_filepath,
                                                  temp_solvers)
         elif run_on == Runner.SLURM:
             done = False
