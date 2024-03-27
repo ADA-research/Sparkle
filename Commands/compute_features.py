@@ -7,13 +7,13 @@ from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_compute_features_help as scf
-from Commands.sparkle_help import sparkle_job_parallel_help as sjph
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.sparkle_help import sparkle_slurm_help as ssh
 
 from runrunner.base import Runner
 import runrunner as rrr
@@ -73,7 +73,8 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
         cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
         name="sprkl_csv_merge",
         dependencies=runs[-1],
-        base_dir=sgh.sparkle_tmp_path))
+        base_dir=sgh.sparkle_tmp_path,
+        sbatch_options=ssh.get_slurm_sbatch_user_options_list()))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")

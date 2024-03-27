@@ -222,6 +222,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
     batch = SlurmBatch(sbatch_script_path) # TODO: Refactor this to hand info directly to runrunner
     cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
