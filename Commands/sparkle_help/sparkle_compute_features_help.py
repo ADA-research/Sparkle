@@ -220,35 +220,17 @@ def computing_features_parallel(feature_data_csv_path: Path,
         ssh.generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
                                                            total_job_list))
     sbatch_script_path = sbatch_script_dir + sbatch_script_name
-    if run_on == Runner.SLURM:
-        # Execute the sbatch script via slurm
-        execution_dir = "./"
-        run = ssh.submit_sbatch_script(sbatch_script_path, CommandName.COMPUTE_FEATURES,
-                                       execution_dir)
+    batch = SlurmBatch(sbatch_script_path) # TODO: Refactor this to hand info directly to runrunner
+    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.COMPUTE_FEATURES,
+        base_dir=sgh.sparkle_tmp_path,
+        sbatch_options=batch.sbatch_options,
+        srun_options=batch.srun_options)
 
-        # Log output paths
-        sl.add_output(sbatch_script_path,
-                      "Slurm batch script to compute features in parallel")
-    else:
-        batch = SlurmBatch(sbatch_script_path)
-        # Execute the batch locally
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd_list,
-            name=CommandName.COMPUTE_FEATURES,
-            base_dir=sgh.sparkle_tmp_path,
-            sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options)
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-    if run_on == Runner.SLURM_RR:  # Change to SLURM once runrunner works satisfactorily
+    if run_on == Runner.SLURM:  # Change to SLURM once runrunner works satisfactorily
         # Add the run to the list of active job.
         sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
 

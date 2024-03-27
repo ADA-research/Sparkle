@@ -60,61 +60,27 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             On which computer or cluster environment to run the solvers.
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
     """
-    if run_on == Runner.SLURM:
-        print("Running on Slurm")
-        compute_features_parallel_jobid = scf.computing_features_parallel(
-            Path(sgh.feature_data_csv_path), recompute
-        )
+    runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
+                                            recompute, run_on=run_on)]
+    # If there are no jobs return
+    if all(run is None for run in runs):
+        print("Running solvers done!")
+        return
 
-        dependency_jobid_list = []
+    # Update performance data csv after the last job is done
+    runs.append(rrr.add_to_queue(
+        runner=run_on,
+        cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
+        name="sprkl_csv_merge",
+        dependencies=runs[-1],
+        base_dir=sgh.sparkle_tmp_path))
 
-        if compute_features_parallel_jobid:
-            dependency_jobid_list.append(compute_features_parallel_jobid)
-
-        # Update feature data csv after the last job is done
-        job_script = "Commands/sparkle_help/sparkle_csv_merge_help.py"
-        compute_features_parallel_jobid = sjph.running_job_parallel(
-            job_script, dependency_jobid_list, CommandName.COMPUTE_FEATURES
-        )
-        dependency_jobid_list.append(compute_features_parallel_jobid)
-
-        job_id_str = ",".join(dependency_jobid_list)
-        print(f"Computing features in parallel. Waiting for Slurm job(s) with id(s): "
-              f"{job_id_str}")
-    else:
-        print("Running Locally")
-        runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
-                                                recompute, run_on=run_on)]
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        # If there are no jobs return
-        if all(run is None for run in runs):
-            print("Running solvers done!")
-
-            return
-
-        # Update performance data csv after the last job is done
-        runs.append(rrr.add_to_queue(
-            runner=run_on,
-            cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-            name="sprkl_csv_merge",
-            dependencies=runs[-1],
-            base_dir=sgh.sparkle_tmp_path))
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-        if run_on == Runner.LOCAL:
-            print("Waiting for the local calculations to finish.")
-            for run in runs:
-                if run is not None:
-                    run.wait()
-            print("Computing Features in parallel done!")
-
-    return
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        for run in runs:
+            if run is not None:
+                run.wait()
+        print("Computing Features in parallel done!")
 
 
 if __name__ == "__main__":
