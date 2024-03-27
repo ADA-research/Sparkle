@@ -229,8 +229,7 @@ if __name__ == "__main__":
                                             sparkle_objective, use_features,
                                             configurator_target, feature_data_df)
     configurator = Configurator(configurator_path)
-    configurator.create_sbatch_script(config_scenario)
-    configure_jobid = configurator.configure(run_on=run_on)
+    configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
     sgh.latest_scenario.set_config_solver(solver.directory)
@@ -243,26 +242,26 @@ if __name__ == "__main__":
         # Set to default to overwrite possible old path
         sgh.latest_scenario.set_config_instance_set_test()
 
-    dependency_jobid_list = [configure_jobid]
-    callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
+    dependency_job_list = [configure_job]
+    callback_job = configurator.configuration_callback(configure_job, run_on=run_on)
 
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = ssh.run_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid,
+            solver, instance_set_train, instance_set_test, configure_job,
             command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
-        dependency_jobid_list.append(validate_jobid)
+        dependency_job_list.append(validate_jobid)
 
     if ablation:
         ablation_jobid = ssh.run_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid,
+            solver, instance_set_train, instance_set_test, configure_job,
             command=CommandName.RUN_ABLATION, run_on=run_on
         )
-        dependency_jobid_list.append(ablation_jobid)
+        dependency_job_list.append(ablation_jobid)
 
     if run_on == Runner.SLURM:
-        job_id_str = ",".join(dependency_jobid_list)
+        job_id_str = ",".join([run.run_id for run in dependency_job_list])
         print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
     else:
