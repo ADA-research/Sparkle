@@ -348,8 +348,6 @@ def generate_sbatch_script_for_validation(solver_name: str,
         job_params_list.extend([test_default, test_configured])
         job_output_list.extend([test_default_out, test_configured_out])
 
-    # Number of cores available on a CPU of this cluster
-    n_cpus = sgh.settings.get_slurm_clis_per_node()
 
     # Adjust maximum number of cores to be the maximum of the instances we validate on
     instance_sizes = []
@@ -362,6 +360,9 @@ def generate_sbatch_script_for_validation(solver_name: str,
             if Path(smac_instance_file).is_file():
                 instance_count = sum(1 for _ in open(smac_instance_file, "r"))
                 instance_sizes.append(instance_count)
+
+    # Number of cores available on a CPU of this cluster
+    n_cpus = sgh.settings.get_slurm_clis_per_node()
 
     # Adjust cpus when nessacery
     if len(instance_sizes) > 0:
@@ -505,9 +506,9 @@ def submit_sbatch_script(sbatch_script_name: str,
 def run_callback(solver: Path,
                  instance_set_train: Path,
                  instance_set_test: Path,
-                 dependency: str,
+                 dependency: rrr.SlurmRun | rrr.LocalRun,
                  command: CommandName,
-                 run_on: Runner = Runner.SLURM) -> str | rrr.slurm.SlurmJob:
+                 run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Generate a command callback Slurm batch script for validation and run it.
 
     Args:
@@ -519,61 +520,30 @@ def run_callback(solver: Path,
       run_on: Whether the job is executed on Slurm or locally.
 
     Returns:
-      String job identifier or SlurmJob if running with RunRunner
+      RunRunner Run object regarding the callback
     """
-    cmd_file, cmd_str = None, None
+    cmd_file, cmd_str = "validate_configured_vs_default.py", command.value
     if command == CommandName.RUN_ABLATION:
         cmd_file = "run_ablation.py"
-        cmd_str = "ablation"
-    elif command == CommandName.VALIDATE_CONFIGURED_VS_DEFAULT:
-        cmd_file = "validate_configured_vs_default.py"
-        cmd_str = "validation"
-    command_line = "echo $(pwd) $(date)\n"
-    command_line += "srun -N1 -n1 " if run_on == Runner.SLURM else ""
-    command_line += f"./Commands/{cmd_file} "
-    command_line += "--settings-file Settings/latest.ini"
-    command_line += f" --solver {solver.name}"
-    command_line += f" --instance-set-train {instance_set_train}"
-    command_line += f" --run-on {run_on}"
+
+    command_line = f"./Commands/{cmd_file} --settings-file Settings/latest.ini "\
+                   f"--solver {solver.name} --instance-set-train {instance_set_train}"\
+                   f" --run-on {run_on}"
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
-    job = ""
-
-    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
-    # runrunner works properly everything under 'if' should be removed leaving only the
-    # 'else', and the SLURM_RR replaced by just SLURM.
-    if run_on == Runner.SLURM:
-        job = generate_generic_callback_slurm_script(
-            cmd_str, solver, instance_set_train, instance_set_test,
-            dependency, command_line, command)
-    else:
-        result = create_callback_options_list(cmd_str,
-                                              solver,
-                                              instance_set_train,
-                                              instance_set_test)
-        run = rrr.add_to_queue(runner=run_on,
-                               cmd=command_line,
-                               name=cmd_str,
-                               dependencies=dependency,
-                               base_dir=sgh.sparkle_tmp_path,
-                               sbatch_options=result)
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        if run_on == Runner.SLURM:
-            job = run
-        else:
-            print("Waiting for the local calculations to finish.")
-            run.wait()
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-    return job
+    run = rrr.add_to_queue( runner=run_on,
+                            cmd=command_line,
+                            name=cmd_str,
+                            dependencies=dependency,
+                            base_dir=sgh.sparkle_tmp_path,
+                            srun_options=["-N1", "-n1"],
+                            sbatch_options=get_slurm_sbatch_user_options_list())
+       
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        run.wait()
+    return run
 
 
 def create_callback_options_list(name: str,

@@ -163,48 +163,65 @@ if __name__ == "__main__":
         solver.name, instance_set_train.name, instance_set_test_name
     )
     sbatch_script_path = configurator_path / sbatch_script_name
+    scenario_dir = "scenarios/" + solver.name + "_" + instance_set_train.name
+    scenario_file_name = scsh.create_file_scenario_validate(
+        solver.name, instance_set_train.name, instance_set_train.name,
+        scsh.InstanceType.TRAIN, default=True)
+        
+    batch = SlurmBatch(sbatch_script_path)
+    n_jobs = int(len(batch.cmd_params) / 2)
+    parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), n_jobs)
+    cmd = [f"{batch.cmd} {batch.cmd_params[i]}" for i in range(n_jobs)]
+    dest = batch.cmd_params[n_jobs:]  # destination files for bash output
+
+     # Adjust maximum number of cores to be the maximum of the instances we validate on
+    instance_sizes = []
+    # Get instance set sizes
+    for instance_set_name, inst_type in [(instance_set_train.name, "train"),
+                                         (instance_set_test_name, "test")]:
+        if instance_set_name is not None:
+            smac_instance_file = (f"{sgh.smac_dir}{scenario_dir}/{instance_set_name}_"
+                                  f"{inst_type}.txt")
+            if Path(smac_instance_file).is_file():
+                instance_count = sum(1 for _ in open(smac_instance_file, "r"))
+                instance_sizes.append(instance_count)
+
+    # Number of cores available on a CPU of this cluster
+    n_cpus = sgh.settings.get_slurm_clis_per_node()
+
+    # Adjust cpus when nessacery
+    if len(instance_sizes) > 0:
+        max_instance_count = (max(*instance_sizes) if len(instance_sizes) > 1
+                              else instance_sizes[0])
+        n_cpus = min(n_cpus, max_instance_count)
+    
+    # Extend sbatch options
+    sbatch_options_list = [f"--cpus-per-task={n_cpus}"]
+    sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
+    # Get user options second to overrule defaults
+    sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
+
+    # Set srun options
+    srun_options = ["--nodes=1", "--ntasks=1", f"--cpus-per-task={n_cpus}"]
+    srun_options.extend(ssh.get_slurm_srun_user_options_list())
+
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd,
+        name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
+        path=configurator_path,
+        base_dir=sgh.sparkle_tmp_path,
+        parallel_jobs=parallel_jobs,
+        sbatch_options=sbatch_options_list,
+        srun_options=srun_options,
+        output_path=dest)
 
     if run_on == Runner.SLURM:
-        validate_jobid = ssh.submit_sbatch_script(
-            sbatch_script_name,
-            CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-            configurator_path,
-        )
-
         print(f"Running validation in parallel. Waiting for Slurm job with id: "
-              f"{validate_jobid}")
+                f"{run.run_id}")
     else:
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-        batch = SlurmBatch(sbatch_script_path)
-        n_jobs = int(len(batch.cmd_params) / 2)
-        cmd = []
-        dest = []
-        for i in range(n_jobs):
-            cmd.append(batch.cmd + " " + batch.cmd_params[i])
-            # The second half of the params contain the destination files for bash output
-            dest.append(batch.cmd_params[i + n_jobs])
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd,
-            name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-            path=configurator_path,
-            base_dir=sgh.sparkle_tmp_path,
-            sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options,
-            output_path=dest)
-
-        if run_on == Runner.SLURM:
-            print(f"Running validation in parallel. Waiting for Slurm job with id: "
-                  f"{run.run_id}")
-        else:
-            run.wait()
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-        print("Running validation done!")
+        run.wait()
+    print("Running validation done!")
 
     # Write most recent run to file
     last_test_file_path = Path(
