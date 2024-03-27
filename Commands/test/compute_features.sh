@@ -8,7 +8,6 @@
 #SBATCH --job-name=test/compute_features.sh
 #SBATCH --output=Tmp/compute_features.sh.txt
 #SBATCH --error=Tmp/compute_features.sh.err
-#SBATCH --partition=graceADA
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
 #SBATCH --ntasks=1

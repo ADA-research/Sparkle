@@ -112,7 +112,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     else:
         inst_type = "test"
 
-    if default is True:
+    if default:
         config_type = "default"
     else:
         config_type = "configured"
