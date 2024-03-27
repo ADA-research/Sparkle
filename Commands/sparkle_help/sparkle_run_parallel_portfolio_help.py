@@ -726,39 +726,27 @@ def run_parallel_portfolio(instances: list[str],
     try:
         command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         execution_dir = "./"
-        job = ""
-        # NOTE: Once runrunner works satisfactorily this should be refactored
-        if run_on == Runner.SLURM:
-            job = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
-                                           execution_dir)
-        else:
-            # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM_RR:
-                run_on = Runner.SLURM
-            batch = SlurmBatch(sbatch_script_path)
-            cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        batch = SlurmBatch(sbatch_script_path)
+        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
 
-            run = rrr.add_to_queue(
-                runner=run_on,
-                cmd=cmd_list,
-                name=command_name,
-                path=execution_dir,
-                base_dir=sgh.sparkle_tmp_path,
-                sbatch_options=batch.sbatch_options,
-                srun_options=batch.srun_options)
-            # Remove SLURM_RR once runrunner works satisfactorily
-            if run_on == Runner.SLURM or run_on == Runner.SLURM_RR:
-                job = run
-            elif run_on == Runner.LOCAL:
-                run.wait()
-            # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM:
-                run_on = Runner.SLURM_RR
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name=command_name,
+            path=execution_dir,
+            base_dir=sgh.sparkle_tmp_path,
+            sbatch_options=batch.sbatch_options,
+            srun_options=batch.srun_options)
+        if run_on == Runner.LOCAL:
+            run.wait()
+        
         # NOTE: the IF statement below is Slurm only as well?
         # As running runtime based performance may be less relevant for Local
+        # NOTE: Why does this command have its own waiting process? If we need to handle
+        # Something after the job is done, we can just create a callback script to that
         perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if (run_on == Runner.SLURM and perf_m == PerformanceMeasure.RUNTIME):
-            handle_waiting_and_removal_process(instances, file_path_output1, job,
+            handle_waiting_and_removal_process(instances, file_path_output1, run.run_id,
                                                solver_instance_list, sbatch_script_path,
                                                num_jobs / len(instances))
 
@@ -783,7 +771,7 @@ def run_parallel_portfolio(instances: list[str],
             while not done:
                 # Ask the cluster for a list of all jobs which are currently running
                 result = subprocess.run(["squeue", "--array",
-                                         "--jobs", job,
+                                         "--jobs", run.run_id,
                                          "--format",
                                          "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
                                         capture_output=True, text=True)
