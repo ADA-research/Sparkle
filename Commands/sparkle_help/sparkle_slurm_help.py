@@ -257,66 +257,6 @@ def get_sbatch_options_list(sbatch_script_path: Path,
     return sbatch_options_list
 
 
-def generate_sbatch_script_for_feature_computation(
-        n_jobs: int,
-        feature_data_csv_path: str,
-        list_jobs: list[str]) -> tuple[str, str]:
-    """Generate a Slurm batch script for feature computation.
-
-    Args:
-      n_jobs: The number of jobs.
-      feature_data_csv_path: Path to the feature data in CSV format.
-      list_jobs: List of job IDs.
-
-    Returns:
-      A 2-tuple: Name of the generated Slurm batch script file and the full path
-      to this file.
-    """
-    # Set script name and path
-    sbatch_script_name = (f"computing_features_sbatch_shell_script_{str(n_jobs)}_"
-                          f"{sbh.get_time_pid_random_string()}.sh")
-    sbatch_script_dir = sgh.sparkle_tmp_path
-    sbatch_script_path = sbatch_script_dir + sbatch_script_name
-
-    # Set sbatch options
-    max_jobs = sgh.settings.get_slurm_number_of_runs_in_parallel()
-    num_jobs = n_jobs
-    if num_jobs < max_jobs:
-        max_jobs = num_jobs
-    job_name = "--job-name=" + sbatch_script_name
-    output = "--output=" + sbatch_script_path + ".txt"
-    error = "--error=" + sbatch_script_path + ".err"
-    array = "--array=0-" + str(num_jobs - 1) + "%" + str(max_jobs)
-
-    sbatch_options_list = [job_name, output, error, array]
-    sbatch_options_list.extend(get_slurm_sbatch_default_options_list())
-    # Get user options second to overrule defaults
-    sbatch_options_list.extend(get_slurm_sbatch_user_options_list())
-
-    # Create job list
-    job_params_list = []
-
-    for job in list_jobs:
-        instance_path = job[0]
-        extractor_path = job[1]
-        job_params = (f"--instance {instance_path} --extractor {extractor_path} "
-                      f"--feature-csv {feature_data_csv_path}")
-        job_params_list.append(job_params)
-
-    # Set srun options
-    srun_options_str = "-N1 -n1"
-    srun_options_str = srun_options_str + " " + get_slurm_srun_user_options_str()
-
-    # Create target call
-    target_call_str = "Commands/sparkle_help/compute_features_core.py"
-
-    # Generate script
-    generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,
-                                   job_params_list, srun_options_str, target_call_str)
-
-    return sbatch_script_name, sbatch_script_dir
-
-
 def submit_sbatch_script(sbatch_script_name: str,
                          command_name: CommandName,
                          execution_dir: Path = Path()) -> str:

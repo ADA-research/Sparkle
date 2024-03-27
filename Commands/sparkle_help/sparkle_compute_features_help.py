@@ -15,8 +15,6 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_job_help
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
-from sparkle.slurm_parsing import SlurmBatch
-
 import runrunner as rrr
 from runrunner.base import Runner
 
@@ -191,7 +189,6 @@ def computing_features_parallel(feature_data_csv_path: Path,
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     list_feature_computation_job = get_feature_computation_job_list(
         feature_data_csv, recompute)
-
     n_jobs = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
 
@@ -205,8 +202,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
         update_feature_data_id()
 
     print("The number of total running jobs: " + str(n_jobs))
-    total_job_list = (
-        sparkle_job_help.expand_total_job_from_list(list_feature_computation_job))
+    total_job_list = sjh.expand_total_job_from_list(list_feature_computation_job)
 
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
@@ -214,21 +210,21 @@ def computing_features_parallel(feature_data_csv_path: Path,
         print("Running the solvers through Slurm")
 
     # Generate the sbatch script
-    n_jobs = len(total_job_list)
-    sbatch_script_name, sbatch_script_dir = (
-        ssh.generate_sbatch_script_for_feature_computation(n_jobs, feature_data_csv_path,
-                                                           total_job_list))
-    sbatch_script_path = sbatch_script_dir + sbatch_script_name
-    batch = SlurmBatch(sbatch_script_path)  # TODO: Refactor this without SlurmBatch
-    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-
+    parallel_jobs = min(n_jobs, sgh.settings.get_slurm_number_of_runs_in_parallel())
+    cmd_list = [f"Commands/sparkle_help/compute_features_core.py --instance {inst_path} "
+                f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
+                for inst_path, ex_path in total_job_list]
+    sbatch_options = ssh.get_slurm_sbatch_default_options_list() +\
+        ssh.get_slurm_sbatch_user_options_list()
+    srun_options = ["-N1", "-n1"] + ssh.get_slurm_srun_user_options_list()
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.COMPUTE_FEATURES,
+        parallel_jobs=parallel_jobs,
         base_dir=sgh.sparkle_tmp_path,
-        sbatch_options=batch.sbatch_options,
-        srun_options=batch.srun_options)
+        sbatch_options=sbatch_options,
+        srun_options=srun_options)
 
     if run_on == Runner.SLURM:  # Change to SLURM once runrunner works satisfactorily
         # Add the run to the list of active job.
