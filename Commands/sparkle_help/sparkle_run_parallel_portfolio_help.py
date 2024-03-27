@@ -737,11 +737,13 @@ def run_parallel_portfolio(instances: list[str],
                 run_on = Runner.SLURM
             batch = SlurmBatch(sbatch_script_path)
             cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+
             run = rrr.add_to_queue(
                 runner=run_on,
                 cmd=cmd_list,
                 name=command_name,
                 path=execution_dir,
+                base_dir=sgh.sparkle_tmp_path,
                 sbatch_options=batch.sbatch_options,
                 srun_options=batch.srun_options)
             # Remove SLURM_RR once runrunner works satisfactorily
@@ -750,10 +752,10 @@ def run_parallel_portfolio(instances: list[str],
             elif run_on == Runner.LOCAL:
                 run.wait()
             # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM_RR:
-                run_on = Runner.SLURM
+            if run_on == Runner.SLURM:
+                run_on = Runner.SLURM_RR
         # NOTE: the IF statement below is Slurm only as well?
-        # As running runtime based performance may be less relevant
+        # As running runtime based performance may be less relevant for Local
         perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if (run_on == Runner.SLURM and perf_m == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, job,
