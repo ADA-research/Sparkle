@@ -118,38 +118,18 @@ def running_solvers_parallel(
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
 
-    # NOTE: Remove everything under the if once Slurm through runrunner works
-    # satisfactorily. Keep everything in the else.
+    batch = SlurmBatch(sbatch_script_path)
+
+    cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.RUN_SOLVERS,
+        base_dir=sgh.sparkle_tmp_path,
+        sbatch_options=batch.sbatch_options,
+        srun_options=batch.srun_options)
+
     if run_on == Runner.SLURM:
-        # Execute the sbatch script via slurm
-        command_line = f"sbatch {sbatch_script_path}"
-        output_list = os.popen(command_line).readlines()
-        run = ""
-        if len(output_list) > 0 and len(output_list[0].strip().split()) > 0:
-            run = output_list[0].strip().split()[-1]
-            # Add job to active job CSV
-            sjh.write_active_job(run, CommandName.RUN_SOLVERS)
-    else:
-        batch = SlurmBatch(sbatch_script_path)
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd_list,
-            name=CommandName.RUN_SOLVERS,
-            base_dir=sgh.sparkle_tmp_path,
-            sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options)
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-    if run_on == Runner.SLURM_RR:  # Change to SLURM once runrunner works satisfactorily
         # Add the run to the list of active job.
         sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
 

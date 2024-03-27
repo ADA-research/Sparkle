@@ -41,25 +41,21 @@ def performance_data_csv_merge() -> None:
 
     wrong_solver_list = []
 
-    for result_name in result_list:
-        result_path = str(tmp_performance_data_result_directory) + result_name
-
+    for result_path in result_list:
         try:
-            fin = Path(result_path).open("r+")
-            fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-            instance_path = fin.readline().strip()
-            if not instance_path:
-                continue
-            solver_path = fin.readline().strip()
-            if not solver_path:
-                continue
-            runtime_str = fin.readline().strip()
-            if not runtime_str:
-                continue
-            runtime = float(runtime_str)
-
-            performance_data_csv.set_value(instance_path, solver_path, runtime)
-            fin.close()
+            with Path(result_path).open("r+") as fin:
+                fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+                instance_path = fin.readline().strip()
+                if not instance_path:
+                    continue
+                solver_path = fin.readline().strip()
+                if not solver_path:
+                    continue
+                runtime_str = fin.readline().strip()
+                if not runtime_str:
+                    continue
+                runtime = float(runtime_str)
+                performance_data_csv.set_value(instance_path, solver_path, runtime)
             performance_data_csv.update_csv()
             sfh.rmfiles(result_path)
         except Exception:
