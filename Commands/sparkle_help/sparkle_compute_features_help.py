@@ -262,16 +262,10 @@ def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureData
 
 def update_feature_data_id() -> None:
     """Updates the feature data ID by incrementing the current feature data ID by 1."""
-    # Get current fd_id
-    fd_id = get_feature_data_id()
-
-    # Increment fd_id
-    fd_id = fd_id + 1
-
-    # Write new fd_id
-    fd_id_path = sgh.feature_data_id_path
-
-    with Path(fd_id_path).open("w") as fd_id_file:
+    # Get the incremented fd_id
+    fd_id = get_feature_data_id() + 1
+    # Write it
+    with Path(sgh.feature_data_id_path).open("w") as fd_id_file:
         fd_id_file.write(str(fd_id))
 
 
@@ -281,12 +275,8 @@ def get_feature_data_id() -> int:
     Returns:
         An int containing the current feature data ID.
     """
-    fd_id_path = sgh.feature_data_id_path
-
-    try:
-        with Path(fd_id_path).open("r") as fd_id_file:
-            fd_id = int(fd_id_file.readline())
-    except FileNotFoundError:
-        fd_id = 0
-
-    return fd_id
+    fd_id_path = Path(sgh.feature_data_id_path)
+    if not fd_id_path.exist():
+        return 0
+    
+    return Path(fd_id_path).open("r").readline()

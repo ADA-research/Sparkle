@@ -408,13 +408,13 @@ def submit_ablation_sparkle(solver_name: str,
     return dependency_jobid_list
 
 
-def submit_ablation_runrunner(solver_name: str,
-                              instance_set_test: str,
-                              instance_set_train_name: str,
-                              instance_set_test_name: str,
-                              ablation_scenario_dir: str,
-                              run_on: Runner = Runner.SLURM) -> list[rrr.slurm.SlurmJob]:
-    """Sends an ablation to the RunRunner queue.
+def submit_ablation(solver_name: str,
+                    instance_set_test: str,
+                    instance_set_train_name: str,
+                    instance_set_test_name: str,
+                    ablation_scenario_dir: str,
+                    run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun]:
+    """Submit an ablation job
 
     Args:
         solver_name:
@@ -432,8 +432,7 @@ def submit_ablation_runrunner(solver_name: str,
     # the Log/Ablation/.. folder. This should be avoidable.
     # 1. submit the ablation to the runrunner queue
     # Remove the below if block once runrunner works satisfactorily
-    if run_on == Runner.SLURM_RR:
-        run_on = Runner.SLURM
+   
     sbatch_script_path = generate_slurm_script(
         solver_name, instance_set_train_name, instance_set_test_name
     )
@@ -442,16 +441,17 @@ def submit_ablation_runrunner(solver_name: str,
         runner=run_on,
         cmd=batch.cmd,
         name=CommandName.RUN_ABLATION,
+        base_dir=sgh.sparkle_tmp_path,
         path=ablation_scenario_dir,
         sbatch_options=batch.sbatch_options,
         srun_options=batch.srun_options)
 
     print(f"Created {batch.file}")
-    dependency = []
+    dependencies = []
     if run_on == Runner.LOCAL:
         run.wait()
     else:
-        dependency.append(run)
+        dependencies.append(run)
 
     # 2. Submit intermediate actions (copy path from log)
     sbatch_script_path = generate_callback_slurm_script(
@@ -461,9 +461,10 @@ def submit_ablation_runrunner(solver_name: str,
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=batch.cmd,
-        name=CommandName.RUN_ABLATION,
+        name="ablation_callback",
         path=ablation_scenario_dir,
-        dependencies=dependency,
+        base_dir=sgh.sparkle_tmp_path,
+        dependencies=dependencies,
         sbatch_options=batch.sbatch_options,
         srun_options=batch.srun_options)
 
@@ -471,7 +472,7 @@ def submit_ablation_runrunner(solver_name: str,
     if run_on == Runner.LOCAL:
         run.wait()
     else:
-        dependency.append(run)
+        dependencies.append(run)
 
     # 3. Submit ablation validation run when nessesary, repeat process for the test set
     if instance_set_test is not None:
@@ -486,13 +487,14 @@ def submit_ablation_runrunner(solver_name: str,
             cmd=batch.cmd,
             name=CommandName.RUN_ABLATION,
             path=ablation_scenario_dir,
+            base_dir=sgh.sparkle_tmp_path,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
         print(f"Created {batch.file}")
         if run_on == Runner.LOCAL:
             run.wait()
         else:
-            dependency.append(run)
+            dependencies.append(run)
         # Submit intermediate actions (copy validation table from log)
         sbatch_script_path = generate_callback_slurm_script(
             solver_name,
@@ -504,8 +506,10 @@ def submit_ablation_runrunner(solver_name: str,
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=batch.cmd,
-            name=CommandName.RUN_ABLATION,
+            name="ablation_callback",
             path=ablation_scenario_dir,
+            base_dir=sgh.sparkle_tmp_path,
+            dependencies=dependencies,
             sbatch_options=batch.sbatch_options,
             srun_options=batch.srun_options)
 
@@ -513,8 +517,8 @@ def submit_ablation_runrunner(solver_name: str,
         if run_on == Runner.LOCAL:
             run.wait()
         else:
-            dependency.append(run)
+            dependencies.append(run)
     # Remove the below if block once runrunner works satisfactorily
     if run_on == Runner.SLURM_RR:
         run_on = Runner.SLURM
-    return dependency
+    return dependencies

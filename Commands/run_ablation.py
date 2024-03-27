@@ -198,28 +198,17 @@ if __name__ == "__main__":
         solver_name, instance_set_train_name, instance_set_test_name
     )
     print("Submit ablation run")
-    if args.run_on == Runner.SLURM:
-        ids = sah.submit_ablation_sparkle(
-            solver_name=solver_name,
-            instance_set_test=instance_set_test,
-            instance_set_train_name=instance_set_train_name,
-            instance_set_test_name=instance_set_test_name,
-            ablation_scenario_dir=ablation_scenario_dir)
-        job_id_str = ",".join(ids)
-        print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
-              f"{job_id_str}")
-    else:
-        ids = sah.submit_ablation_runrunner(
-            solver_name=solver_name,
-            instance_set_test=instance_set_test,
-            instance_set_train_name=instance_set_train_name,
-            instance_set_test_name=instance_set_test_name,
-            ablation_scenario_dir=ablation_scenario_dir,
-            run_on=run_on)
+    runs = sah.submit_ablation(
+        solver_name=solver_name,
+        instance_set_test=instance_set_test,
+        instance_set_train_name=instance_set_train_name,
+        instance_set_test_name=instance_set_test_name,
+        ablation_scenario_dir=ablation_scenario_dir,
+        run_on=run_on)
 
-        if run_on == Runner.LOCAL:
-            print("Ablation analysis finished!")
-        else:
-            job_id_str = ",".join(ids)
-            print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
-                  f"{job_id_str}")
+    if run_on == Runner.LOCAL:
+        print("Ablation analysis finished!")
+    else:
+        job_id_str = ",".join([run.run_id for run in runs])
+        print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
+                f"{job_id_str}")

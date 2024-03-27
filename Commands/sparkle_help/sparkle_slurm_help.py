@@ -8,12 +8,9 @@ import stat
 import fcntl
 import shlex
 import subprocess
-import sys
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_basic_help as sbh
-from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help.sparkle_command_help import CommandName
