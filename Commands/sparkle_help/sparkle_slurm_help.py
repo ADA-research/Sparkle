@@ -10,6 +10,7 @@ from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 
+
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:
     """Return a list with the Slurm options given in the Slurm settings file.
 
@@ -86,5 +87,3 @@ def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str
                           f"not be satisfied for {partition}, only got {memory}MB"
 
     return True, "Check successful"
-
-

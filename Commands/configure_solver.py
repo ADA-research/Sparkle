@@ -133,11 +133,11 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
 
 
 def run_after(solver: Path,
-                 instance_set_train: Path,
-                 instance_set_test: Path,
-                 dependency: rrr.SlurmRun | rrr.LocalRun,
-                 command: CommandName,
-                 run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+              instance_set_train: Path,
+              instance_set_test: Path,
+              dependency: rrr.SlurmRun | rrr.LocalRun,
+              command: CommandName,
+              run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Add a command to run after configuration to RunRunner queue.
 
     Args:
