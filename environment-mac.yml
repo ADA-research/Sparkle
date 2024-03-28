@@ -10,6 +10,7 @@ dependencies:
   - pip
   - pip:
     # For Sparkle
+    - --editable .  # self install !
     - swig==3.0.6 #Changed from 3.0 to 3.0.6
     - numpy
     - pandas
