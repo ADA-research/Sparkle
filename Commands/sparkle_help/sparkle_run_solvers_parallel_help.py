@@ -62,7 +62,7 @@ def running_solvers_parallel(
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
-    
+
     srun_options = ["-N1", "-n1"] + ssh.get_slurm_srun_user_options_list()
     sbatch_options = ssh.get_slurm_sbatch_default_options_list() +\
         ssh.get_slurm_sbatch_user_options_list()

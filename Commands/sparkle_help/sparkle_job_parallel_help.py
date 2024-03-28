@@ -11,6 +11,9 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 
 def get_dependency_list_str(dependency_jobid_list: list[str]) -> str:
     """Return a list of dependencies as a single string of Slurm dependencies.
@@ -67,7 +70,8 @@ def generate_job_sbatch_shell_script(sbatch_script_path: str, job_script: str,
 
 def running_job_parallel(job_script: str,
                          dependency_jobid_list: list[str],
-                         command_name: CommandName) -> str:
+                         command_name: CommandName,
+                         run_on: Runner.SLURM) -> str:
     """Queues a Slurm job with given dependencies. Returns a Slurm job ID as string.
 
     Args:
@@ -78,6 +82,7 @@ def running_job_parallel(job_script: str,
     Returns:
       The job ID of the queued job or an empty string if no job was queued.
     """
+    rrr.add_to_queue
     sbatch_shell_script_path = (f"{sgh.sparkle_tmp_path}running_job_parallel_"
                                 f"{sbh.get_time_pid_random_string()}.sh")
     generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script,

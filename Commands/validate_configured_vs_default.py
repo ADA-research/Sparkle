@@ -183,12 +183,13 @@ if __name__ == "__main__":
         scenario_fn_tconf = scsh.create_file_scenario_validate(
             solver.name, instance_set_train.name, instance_set_test_name,
             scsh.InstanceType.TEST, default=False)
-        exec_dir_conf = scenario_dir / f"validate_{instance_set_test_name}_test_configured/"
+        dir_name = f"validate_{instance_set_test_name}_test_configured/"
+        exec_dir_conf = scenario_dir / dir_name
 
         # Write configuration to file to be used by smac-validate
         config_file_path = scenario_dir / "configuration_for_validation.txt"
         # open the file of sbatch script
-        with (Path(sgh.smac_dir) / config_file_path).open("w+") as fout:    
+        with (Path(sgh.smac_dir) / config_file_path).open("w+") as fout:
             fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
             optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
                 solver.name, instance_set_train.name)
@@ -235,7 +236,8 @@ if __name__ == "__main__":
         sys.exit(-1)
     # Clear out possible existing destination files
     sfh.rmfiles(dest)
-    parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), len(cmd_list))
+    parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(),
+                        len(cmd_list))
 
     run = rrr.add_to_queue(
         runner=run_on,

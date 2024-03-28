@@ -13,7 +13,6 @@ from pathlib import Path
 from pathlib import PurePath
 
 from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as slog
 from Commands.sparkle_help import sparkle_job_help as sjh
@@ -683,7 +682,7 @@ def run_parallel_portfolio(instances: list[str],
     base_cmd_str = ("Commands/sparkle_help/run_solvers_core.py --run-status-path "
                     f"{str(sgh.pap_sbatch_tmp_path)}")
     cmd_list = [f"{base_cmd_str} {params}" for params in parameters]
-    
+
     # TODO: This try/except structure is absolutely massive.
     # This entire method should be refactored after everything works with RunRunner
     try:
@@ -699,7 +698,7 @@ def run_parallel_portfolio(instances: list[str],
             srun_options=srun_options)
         if run_on == Runner.LOCAL:
             run.wait()
-        
+
         # NOTE: the IF statement below is Slurm only as well?
         # As running runtime based performance may be less relevant for Local
         # NOTE: Why does this command have its own waiting process? If we need to handle

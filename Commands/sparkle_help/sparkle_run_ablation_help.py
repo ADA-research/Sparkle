@@ -217,7 +217,7 @@ def submit_ablation(solver_name: str,
                     instance_set_test_name: str,
                     ablation_scenario_dir: str,
                     run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun]:
-    """Submit an ablation job
+    """Submit an ablation job.
 
     Args:
         solver_name:
@@ -261,7 +261,7 @@ def submit_ablation(solver_name: str,
     ablation_path = "ablationPath.txt"
     log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / run.name
     log_path.mkdir(parents=True, exist_ok=True)
-    
+
     cmd_list = [f"cp {log_source} {ablation_path}", f"cp -r log/ {log_path.absolute()}"]
     srun_options_cb = ["-N1", "-n1", "-c1"]
     run = rrr.add_to_queue(
@@ -300,9 +300,11 @@ def submit_ablation(solver_name: str,
 
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
-        log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / (run.name + "_validation")
+        val_dir = run.name + "_validation"
+        log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / val_dir
         log_path.mkdir(parents=True, exist_ok=True)
-        cmd_list = [f"cp {log_source} {ablation_path}", f"cp -r log/ {log_path.absolute()}"]
+        cmd_list = [f"cp {log_source} {ablation_path}",
+                    f"cp -r log/ {log_path.absolute()}"]
 
         run = rrr.add_to_queue(
             runner=run_on,
