@@ -17,7 +17,7 @@ def running_solvers_parallel(
         performance_data_csv_path: str,
         num_job_in_parallel: int,
         rerun: bool = False,
-        run_on: Runner = Runner.SLURM) -> str:
+        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Run the solvers in parallel.
 
     Parameters
@@ -35,9 +35,9 @@ def running_solvers_parallel(
 
     Returns
     -------
-    run: runrunner.local.QueuedRun or runrunner.slurm.SlurmRun or None
+    run: runrunner.LocalRun or runrunner.SlurmRun
         If the run is local return a QueuedRun object with the information concerning
-        the run. If the run is executed on Slurm, return the ID of the run.
+        the run.
     """
     # Open the performance data csv file
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
