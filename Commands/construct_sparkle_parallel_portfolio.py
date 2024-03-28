@@ -12,8 +12,8 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.Structures.reporting_scenario import ReportingScenario
+from Commands.Structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
 
 

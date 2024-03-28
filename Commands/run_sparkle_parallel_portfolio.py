@@ -10,7 +10,7 @@ from pathlib import Path
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.Structures.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure

@@ -14,13 +14,13 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.Structures.reporting_scenario import ReportingScenario
+from Commands.Structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_command_help as sch
-from Commands.sparkle_help.configurator import Configurator
-from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
+from Commands.Structures.configurator import Configurator
+from Commands.Structures.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
