@@ -21,6 +21,7 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 import runrunner as rrr
 from runrunner.base import Runner
 
+
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser(

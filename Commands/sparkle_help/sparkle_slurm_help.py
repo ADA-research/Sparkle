@@ -169,4 +169,3 @@ def run_callback(solver: Path,
         print("Waiting for the local calculations to finish.")
         run.wait()
     return run
-
