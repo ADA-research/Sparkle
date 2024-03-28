@@ -9,7 +9,7 @@ dependencies:
   - pip
   - pip:
     - --editable .  # self install !
-    - RunRunner==0.1.0
+    - RunRunner==0.1.2
     - aslib-scenario @ git+https://github.com/mlindauer/ASlibScenario@c785d4ae524dd0f4624d4092eea62a05ee2830d4
     - attrs==21.4.0
     - certifi==2021.5.30
