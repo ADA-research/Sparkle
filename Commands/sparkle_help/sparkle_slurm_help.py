@@ -4,17 +4,12 @@
 
 from __future__ import annotations
 
-import stat
-import fcntl
 import shlex
 import subprocess
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_logging as sl
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 from runrunner.base import Runner
 import runrunner as rrr
@@ -75,25 +70,6 @@ def get_slurm_srun_user_options_list(path_modifier: str = None) -> list[str]:
       List of strings (the actual Slurm settings, e.g., ['--mem-per-cpu=3000']).
     """
     return get_slurm_options_list(path_modifier)
-
-
-def get_slurm_srun_user_options_str(path_modifier: str = None) -> str:
-    """Return a single string with the Slurm run option given by the user.
-
-    Args:
-      path_modifier: An optional prefix path for the sparkle Slurm settings.
-        Default is None which is interpreted as an empty prefix.
-
-    Returns:
-      A single string of Slurm options.
-    """
-    srun_options_list = get_slurm_srun_user_options_list(path_modifier)
-    srun_options_str = ""
-
-    for i in srun_options_list:
-        srun_options_str += i + " "
-
-    return srun_options_str
 
 
 def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str]:
