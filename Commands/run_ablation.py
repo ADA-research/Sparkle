@@ -199,11 +199,8 @@ if __name__ == "__main__":
     )
     print("Submit ablation run")
     runs = sah.submit_ablation(
-        solver_name=solver_name,
-        instance_set_test=instance_set_test,
-        instance_set_train_name=instance_set_train_name,
-        instance_set_test_name=instance_set_test_name,
         ablation_scenario_dir=ablation_scenario_dir,
+        instance_set_test=instance_set_test,
         run_on=run_on)
 
     if run_on == Runner.LOCAL:

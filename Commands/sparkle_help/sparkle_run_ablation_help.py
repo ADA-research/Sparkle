@@ -211,20 +211,14 @@ def get_ablation_table(solver_name: str, instance_train_name: str,
     return results
 
 
-def submit_ablation(solver_name: str,
-                    instance_set_test: str,
-                    instance_set_train_name: str,
-                    instance_set_test_name: str,
-                    ablation_scenario_dir: str,
+def submit_ablation(ablation_scenario_dir: str,
+                    instance_set_test: str = None,
                     run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun]:
     """Submit an ablation job.
 
     Args:
-        solver_name:
-        instance_set_test:
-        instance_set_train_name:
-        instance_set_test_name:
-        ablation_scenario_dir:
+        ablation_scenario_dir: The prepared dir where the ablation will be executed,
+        instance_set_test: The optional test set to run ablation on too.
         run_on: Determines to which RunRunner queue the job is added
 
     Returns:
@@ -232,9 +226,9 @@ def submit_ablation(solver_name: str,
     """
     # This script sumbits 4 jobs: Normal, normal callback, validation, validation cb
     # The callback is nothing but a copy script from Albation/scenario/DIR/log to
-    # the Log/Ablation/.. folder. This should be avoidable.
-    # 1. submit the ablation to the runrunner queue
+    # the Log/Ablation/.. folder.
 
+    # 1. submit the ablation to the runrunner queue
     clis = sgh.settings.get_slurm_clis_per_node()
     cmd = "../../ablationAnalysis --optionFile ablation_config.txt"
     srun_options = ["-N1", "-n1", f"-c{clis}"]
@@ -320,7 +314,5 @@ def submit_ablation(solver_name: str,
             run.wait()
         else:
             dependencies.append(run)
-    # Remove the below if block once runrunner works satisfactorily
-    if run_on == Runner.SLURM_RR:
-        run_on = Runner.SLURM
+
     return dependencies
