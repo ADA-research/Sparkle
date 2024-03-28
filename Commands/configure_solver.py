@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to configure a solver."""
+from __future__ import annotations
 
 import argparse
 import sys

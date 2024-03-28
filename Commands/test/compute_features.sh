@@ -39,7 +39,7 @@ else
 fi
 
 # Compute features parallel
-output_true="Computing features in parallel. Waiting for Slurm job(s) with id(s): "
+output_true="RunRunner Submitted a run to Slurm "
 if ! [[ $slurm_available =~ "${slurm_true}" ]];
 then
 	output_true="Computing Features in parallel done!"
@@ -50,7 +50,7 @@ output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_pat
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] ($slurm_available) compute_features --parallel test succeeded"
-    jobid=${output##* }
+    jobid=${output//[^0-9]/}
 
 	if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
