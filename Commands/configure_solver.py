@@ -21,7 +21,7 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.Structures.configurator import Configurator
 from Commands.Structures.configuration_scenario import ConfigurationScenario
-from Commands.sparkle_help.solver import Solver
+from Commands.Structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from runrunner.base import Runner

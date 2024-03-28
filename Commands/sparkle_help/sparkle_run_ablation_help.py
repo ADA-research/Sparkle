@@ -13,7 +13,7 @@ from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.sparkle_help.solver import Solver
+from Commands.Structures.solver import Solver
 
 import runrunner as rrr
 from runrunner.base import Runner

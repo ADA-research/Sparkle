@@ -12,7 +12,7 @@ from enum import Enum
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
-from Commands.sparkle_help.solver import Solver
+from Commands.Structures.solver import Solver
 
 
 class InstanceType(Enum):
