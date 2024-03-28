@@ -310,7 +310,7 @@ def call_sparkle_portfolio_selector_solve_directory(
 
     if run_on == Runner.SLURM:
         # Add the run to the list of active job.
-        sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
+        sjh.write_active_job(run.run_id, CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR)
     else:
         run.wait()
 

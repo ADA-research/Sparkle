@@ -12,8 +12,10 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.Structures.solver import Solver
+
 
 import runrunner as rrr
 from runrunner.base import Runner
@@ -249,6 +251,7 @@ def submit_ablation(ablation_scenario_dir: str,
         run.wait()
     else:
         dependencies.append(run)
+        sjh.write_active_job(run.run_id, CommandName.RUN_ABLATION)
 
     # 2. Submit intermediate actions (copy path from log)
     log_source = "log/ablation-run1234.txt"
@@ -261,7 +264,7 @@ def submit_ablation(ablation_scenario_dir: str,
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name="ablation_callback",
+        name=CommandName.ABLATION_CALLBACK,
         path=ablation_scenario_dir,
         base_dir=sgh.sparkle_tmp_path,
         dependencies=dependencies,
@@ -272,6 +275,7 @@ def submit_ablation(ablation_scenario_dir: str,
         run.wait()
     else:
         dependencies.append(run)
+        sjh.write_active_job(run.run_id, CommandName.ABLATION_CALLBACK)
 
     # 3. Submit ablation validation run when nessesary, repeat process for the test set
     if instance_set_test is not None:
@@ -291,6 +295,7 @@ def submit_ablation(ablation_scenario_dir: str,
             run.wait()
         else:
             dependencies.append(run)
+            sjh.write_active_job(run.run_id, CommandName.RUN_ABLATION)
 
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
@@ -314,5 +319,6 @@ def submit_ablation(ablation_scenario_dir: str,
             run.wait()
         else:
             dependencies.append(run)
+            sjh.write_active_job(run.run_id, CommandName.ABLATION_CALLBACK)
 
     return dependencies

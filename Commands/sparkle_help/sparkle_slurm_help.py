@@ -9,6 +9,7 @@ import subprocess
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from runrunner.base import Runner
@@ -134,7 +135,7 @@ def run_callback(solver: Path,
                  dependency: rrr.SlurmRun | rrr.LocalRun,
                  command: CommandName,
                  run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
-    """Generate a command callback Slurm batch script for validation and run it.
+    """Add a command callback to RunRunner queue for validation and run it.
 
     Args:
       solver: Path (object) to solver.
@@ -147,7 +148,7 @@ def run_callback(solver: Path,
     Returns:
       RunRunner Run object regarding the callback
     """
-    cmd_file, cmd_str = "validate_configured_vs_default.py", command.value
+    cmd_file = "validate_configured_vs_default.py"
     if command == CommandName.RUN_ABLATION:
         cmd_file = "run_ablation.py"
 
@@ -159,7 +160,7 @@ def run_callback(solver: Path,
 
     run = rrr.add_to_queue(runner=run_on,
                            cmd=command_line,
-                           name=cmd_str,
+                           name=command,
                            dependencies=dependency,
                            base_dir=sgh.sparkle_tmp_path,
                            srun_options=["-N1", "-n1"],
@@ -168,4 +169,6 @@ def run_callback(solver: Path,
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
         run.wait()
+    else:
+        sjh.write_active_job(run.run_id, command)
     return run

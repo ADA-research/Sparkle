@@ -9,6 +9,7 @@ import sys
 from Commands.Structures.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
 import runrunner as rrr
@@ -85,6 +86,8 @@ class Configurator:
             srun_options=["-N1", "-n1"])
         if run_on == Runner.LOCAL:
             run.wait()
+        else:
+            sjh.write_active_job(run.run_id, CommandName.CONFIGURE_SOLVER)
         return run
 
     def configuration_callback(self: Configurator,
@@ -102,11 +105,12 @@ class Configurator:
             runner=run_on,
             cmd=cmd,
             base_dir=sgh.sparkle_tmp_path,
-            name="configuration_callback",
+            name=CommandName.CONFIGURE_SOLVER_CALLBACK,
             dependencies=dependency_job,
             sbatch_options=ssh.get_slurm_options_list())
 
         if run_on == Runner.LOCAL:
             run.wait()
-
+        else:
+            sjh.write_active_job(run.run_id, CommandName.CONFIGURE_SOLVER_CALLBACK)
         return run

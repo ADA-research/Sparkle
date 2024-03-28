@@ -14,6 +14,7 @@ from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_instances_help as sih
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 import runrunner as rrr
 from runrunner.base import Runner
@@ -125,6 +126,7 @@ def call_configured_solver_parallel(
         run.wait()
     else:
         print(f"Configured solver added to {run_on} queue.")
+        sjh.write_active_job(run.run_id, CommandName.RUN_CONFIGURED_SOLVER)
 
     return run
 

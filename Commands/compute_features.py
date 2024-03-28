@@ -13,6 +13,8 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
 from runrunner.base import Runner
 import runrunner as rrr
@@ -70,7 +72,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
     runs.append(rrr.add_to_queue(
         runner=run_on,
         cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-        name="sprkl_csv_merge",
+        name=CommandName.SPARKLE_CSV_MERGE,
         dependencies=runs[-1],
         base_dir=sgh.sparkle_tmp_path,
         sbatch_options=ssh.get_slurm_sbatch_user_options_list()))
@@ -81,6 +83,9 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             if run is not None:
                 run.wait()
         print("Computing Features in parallel done!")
+    else:
+        sjh.write_active_job(runs[-1].run_id,
+                             CommandName.SPARKLE_CSV_MERGE)
 
 
 if __name__ == "__main__":
