@@ -109,7 +109,7 @@ def run_solvers_on_instances(
         print("Running solvers done!")
         return
 
-    sbatch_user_options = ssh.get_slurm_sbatch_user_options_list()
+    sbatch_user_options = ssh.get_slurm_options_list()
 
     # Update performance data csv after the last job is done
     runs.append(rrr.add_to_queue(

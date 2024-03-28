@@ -646,10 +646,9 @@ def run_parallel_portfolio(instances: list[str],
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
     sfh.create_new_empty_file(file_path_output1)
-    srun_options = ["--nodes=1", "--ntasks=1"] + ssh.get_slurm_srun_user_options_list()
+    srun_options = ["--nodes=1", "--ntasks=1"] + ssh.get_slurm_options_list()
     parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
-    sbatch_options_list = ssh.get_slurm_sbatch_default_options_list() +\
-        ssh.get_slurm_sbatch_user_options_list()
+    sbatch_options_list = ssh.get_slurm_options_list()
     # Create cmd list
     base_cmd_str = ("Commands/sparkle_help/run_solvers_core.py --run-status-path "
                     f"{str(sgh.pap_sbatch_tmp_path)}")

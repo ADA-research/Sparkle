@@ -175,9 +175,8 @@ if __name__ == "__main__":
                 rerun=False, run_on=run_on
             )]
 
-            sbatch_options = ssh.get_slurm_sbatch_default_options_list() +\
-                ssh.get_slurm_sbatch_user_options_list()
-            srun_options = ["-N1", "-n1"] + ssh.get_slurm_srun_user_options_list()
+            sbatch_options = ssh.get_slurm_options_list()
+            srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
             run_construct_portfolio_selector = rrr.add_to_queue(
                 cmd="Commands/construct_sparkle_portfolio_selector.py",
                 name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,

@@ -223,14 +223,11 @@ if __name__ == "__main__":
     n_cpus = min(sgh.settings.get_slurm_clis_per_node(), max(instance_sizes))
 
     # Extend sbatch options
-    sbatch_options_list = [f"--cpus-per-task={n_cpus}"]
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
-    # Get user options second to overrule defaults
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
+    sbatch_options_list = [f"--cpus-per-task={n_cpus}"] + ssh.get_slurm_options_list()
 
     # Set srun options
-    srun_options = ["--nodes=1", "--ntasks=1", f"--cpus-per-task={n_cpus}"]
-    srun_options.extend(ssh.get_slurm_srun_user_options_list())
+    srun_options = ["--nodes=1", "--ntasks=1", f"--cpus-per-task={n_cpus}"] +\
+        ssh.get_slurm_options_list()
     success, msg = ssh.check_slurm_option_compatibility(" ".join(srun_options))
     if not success:
         print(f"Slurm config Error: {msg}")

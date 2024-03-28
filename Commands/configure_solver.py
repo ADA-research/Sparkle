@@ -23,8 +23,10 @@ from Commands.Structures.configurator import Configurator
 from Commands.Structures.configuration_scenario import ConfigurationScenario
 from Commands.Structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 from runrunner.base import Runner
+import runrunner as rrr
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -128,6 +130,51 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.number_of_runs is not None:
         sgh.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
+
+
+def run_after(solver: Path,
+                 instance_set_train: Path,
+                 instance_set_test: Path,
+                 dependency: rrr.SlurmRun | rrr.LocalRun,
+                 command: CommandName,
+                 run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+    """Add a command to run after configuration to RunRunner queue.
+
+    Args:
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      dependency: String of job dependencies.
+      command: The command to run. Currently supported: Validation and Ablation.
+      run_on: Whether the job is executed on Slurm or locally.
+
+    Returns:
+      RunRunner Run object regarding the callback
+    """
+    cmd_file = "validate_configured_vs_default.py"
+    if command == CommandName.RUN_ABLATION:
+        cmd_file = "run_ablation.py"
+
+    command_line = f"./Commands/{cmd_file} --settings-file Settings/latest.ini "\
+                   f"--solver {solver.name} --instance-set-train {instance_set_train}"\
+                   f" --run-on {run_on}"
+    if instance_set_test is not None:
+        command_line += f" --instance-set-test {instance_set_test}"
+
+    run = rrr.add_to_queue(runner=run_on,
+                           cmd=command_line,
+                           name=command,
+                           dependencies=dependency,
+                           base_dir=sgh.sparkle_tmp_path,
+                           srun_options=["-N1", "-n1"],
+                           sbatch_options=ssh.get_slurm_options_list())
+
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        run.wait()
+    else:
+        sjh.write_active_job(run.run_id, command)
+    return run
 
 
 if __name__ == "__main__":
@@ -247,14 +294,14 @@ if __name__ == "__main__":
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = ssh.run_callback(
+        validate_jobid = run_after(
             solver, instance_set_train, instance_set_test, configure_job,
             command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
         dependency_job_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = ssh.run_callback(
+        ablation_jobid = run_after(
             solver, instance_set_train, instance_set_test, configure_job,
             command=CommandName.RUN_ABLATION, run_on=run_on
         )

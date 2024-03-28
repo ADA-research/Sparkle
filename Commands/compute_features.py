@@ -75,7 +75,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
         name=CommandName.SPARKLE_CSV_MERGE,
         dependencies=runs[-1],
         base_dir=sgh.sparkle_tmp_path,
-        sbatch_options=ssh.get_slurm_sbatch_user_options_list()))
+        sbatch_options=ssh.get_slurm_options_list()))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")

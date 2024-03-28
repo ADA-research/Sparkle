@@ -235,7 +235,7 @@ def submit_ablation(ablation_scenario_dir: str,
     cmd = "../../ablationAnalysis --optionFile ablation_config.txt"
     srun_options = ["-N1", "-n1", f"-c{clis}"]
     sbatch_options = [f"--cpus-per-task={clis}"] +\
-        ssh.get_slurm_sbatch_user_options_list()
+        ssh.get_slurm_options_list()
 
     run = rrr.add_to_queue(
         runner=run_on,

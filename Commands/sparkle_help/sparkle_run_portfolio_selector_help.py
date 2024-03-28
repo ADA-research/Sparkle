@@ -305,7 +305,7 @@ def call_sparkle_portfolio_selector_solve_directory(
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
         base_dir=f"{test_case_directory_path}/Tmp",
         parallel_jobs=n_jobs,
-        sbatch_options=ssh.get_slurm_sbatch_user_options_list(),
+        sbatch_options=ssh.get_slurm_options_list(),
         srun_options=["-N1", "-n1", "--exclusive"])
 
     if run_on == Runner.SLURM:

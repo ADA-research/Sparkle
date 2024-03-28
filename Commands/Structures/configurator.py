@@ -73,8 +73,7 @@ class Configurator:
 
         parallel_jobs = max(sgh.settings.get_slurm_number_of_runs_in_parallel(),
                             self.scenario.number_of_runs)
-        sbatch_options = ssh.get_slurm_sbatch_user_options_list() +\
-            ssh.get_slurm_sbatch_default_options_list()
+        sbatch_options = ssh.get_slurm_options_list()
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,

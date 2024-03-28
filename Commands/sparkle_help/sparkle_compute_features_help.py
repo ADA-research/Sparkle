@@ -214,9 +214,8 @@ def computing_features_parallel(feature_data_csv_path: Path,
     cmd_list = [f"Commands/sparkle_help/compute_features_core.py --instance {inst_path} "
                 f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
                 for inst_path, ex_path in total_job_list]
-    sbatch_options = ssh.get_slurm_sbatch_default_options_list() +\
-        ssh.get_slurm_sbatch_user_options_list()
-    srun_options = ["-N1", "-n1"] + ssh.get_slurm_srun_user_options_list()
+    sbatch_options = ssh.get_slurm_options_list()
+    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,

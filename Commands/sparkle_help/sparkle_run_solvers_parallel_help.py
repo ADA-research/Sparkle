@@ -64,9 +64,8 @@ def running_solvers_parallel(
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
 
-    srun_options = ["-N1", "-n1"] + ssh.get_slurm_srun_user_options_list()
-    sbatch_options = ssh.get_slurm_sbatch_default_options_list() +\
-        ssh.get_slurm_sbatch_user_options_list()
+    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
+    sbatch_options = ssh.get_slurm_options_list()
     cmd_base = "Commands/sparkle_help/run_solvers_core.py"
     perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     cmd_list = [f"{cmd_base} --instance {inst_p} --solver {solver_p} "
