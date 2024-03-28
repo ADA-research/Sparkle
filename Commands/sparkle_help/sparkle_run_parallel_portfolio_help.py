@@ -441,62 +441,6 @@ def wait_for_finished_solver(
     return finished_solver_list, pending_job_with_new_cutoff, started
 
 
-def generate_sbatch_job_list(
-        solver_list: list[str],
-        instance_path_list: list[str],
-        num_jobs: int) -> tuple[list[str], int, list[str], list[str]]:
-    """Generate a list of jobs to be executed in the sbatch script.
-
-    Args:
-        solver_list: List of solvers.
-        instance_path_list: List of instance paths.
-        num_jobs: Number of jobs.
-
-    Returns:
-        A list of parameters used in the sbatch script.
-        Number of new jobs.
-        A list of solver instances.
-        A list of temp solver instances.
-    """
-    # The function generates the parameters used in the SBATCH script of the portfolio
-    parameters = list()
-    new_num_jobs = num_jobs
-    solver_instance_list = list()
-    tmp_solver_instances = list()
-    performance_measure =\
-        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-
-    # Adds all the jobs of instances and their portfolio to the parameter list
-    for instance_path in instance_path_list:
-        for solver in solver_list:
-            if " " in solver:
-                solver_path, _, seed = solver.strip().split()
-                solver_name = Path(solver_path).name
-                tmp_solver_instances.append(f"{solver_name}_seed_")
-                new_num_jobs = new_num_jobs + int(seed) - 1
-
-                for instance in range(1, int(seed) + 1):
-                    commandline = (f"--instance {str(instance_path)} --solver "
-                                   f"{str(solver_path)} --performance-measure "
-                                   f"{performance_measure.name} --seed {str(instance)}")
-                    parameters.append(commandline)
-                    instance_name = Path(instance_path).name
-                    solver_instance_list.append(
-                        f"{solver_name}_seed_{str(instance)}_{instance_name}")
-            else:
-                solver_path = Path(solver)
-                solver_name = solver_path.name
-                instance_name = Path(instance_path).name
-                solver_instance_list.append(f"{solver_name}_{instance_name}")
-                commandline = (f"--instance {str(instance_path)} --solver "
-                               f"{str(solver_path)} --performance-measure "
-                               f"{performance_measure.name}")
-                parameters.append(commandline)
-
-    temp_solvers = list(dict.fromkeys(tmp_solver_instances))
-    return (parameters, new_num_jobs, solver_instance_list, temp_solvers)
-
-
 def handle_waiting_and_removal_process(
         instances: list[str],
         logging_file: str,
@@ -661,13 +605,41 @@ def run_parallel_portfolio(instances: list[str],
     """
     # Remove existing result files
     remove_result_files(instances)
-
     solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
-    num_jobs = len(solver_list) * len(instances)
 
-    # Makes SBATCH scripts for all individual solvers in a list
-    parameters, num_jobs, solver_instance_list, temp_solvers = generate_sbatch_job_list(
-        solver_list, instances, num_jobs)
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    parameters = []
+    num_jobs = len(solver_list) * len(instances)
+    temp_solvers = []
+    solver_instance_list = []
+    # Create a command for each instance-solver combination
+    for instance_path in instances:
+        instance_name = Path(instance_path).name
+        for solver_path in solver_list:
+            seeds = []
+            # If the solver has a seed range specified, create a call per seed
+            if " " in solver_path:
+                solver_path, _, seed_range = solver_path.strip().split()
+                seed_range = int(seed_range)
+                seeds = [seed_val for seed_val in range(1, seed_range + 1)]
+                solver_name = Path(solver_path).name
+                temp_solvers.append(f"{solver_name}_seed_")
+                num_jobs += (seed_range - 1)
+            else:
+                solver_path = Path(solver_path)
+
+            base_param = f"--instance {(instance_path)} --solver "\
+                         f"{str(solver_path)} --performance-measure "\
+                         f"{performance_measure.name}"
+            if len(seeds) > 0:
+                for seed_idx in seeds:
+                    parameters.append(f"{base_param} --seed {seed_idx}")
+                    solver_instance_list.append(
+                        f"{solver_name}_seed_{str(seed_idx)}_{instance_name}")
+            else:
+                parameters.append(base_param)
+                solver_instance_list.append(f"{solver_name}_{instance_name}")
 
     # Run the script and cancel the remaining solvers if a solver finishes before the
     # end of the cutoff_time
@@ -686,7 +658,6 @@ def run_parallel_portfolio(instances: list[str],
     # TODO: This try/except structure is absolutely massive.
     # This entire method should be refactored after everything works with RunRunner
     try:
-        command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
@@ -785,7 +756,8 @@ def run_parallel_portfolio(instances: list[str],
             else:
                 print(f"{str(instances)} was not solved in the given cutoff-time.")
     except Exception as except_msg:
-        print(f"Exception thrown during {command_name} call: {except_msg}")
+        print(f"Exception thrown during {CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO}: "
+              f"{except_msg}")
         return False
 
     return True
