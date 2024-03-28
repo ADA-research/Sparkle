@@ -9,7 +9,6 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsph
-from Commands.sparkle_help import sparkle_job_parallel_help as sjph
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
