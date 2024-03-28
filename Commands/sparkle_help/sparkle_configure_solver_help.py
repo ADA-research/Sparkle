@@ -74,10 +74,11 @@ def copy_file_instance(solver_name: str, instance_set_train_name: str,
     """
     file_postfix = f"_{instance_type}.txt"
 
-    smac_solver_dir = get_smac_solver_path(solver_name, instance_set_train_name)
     smac_file_instance_path_ori = (f"{sgh.smac_dir}scenarios/instances/"
                                    f"{instance_set_target_name}{file_postfix}")
 
+    # smac_solver_dir = smac_dir/scenarios/solver_name/instance_set_train_name
+    smac_solver_dir = get_smac_solver_path(solver_name, instance_set_train_name)
     smac_file_instance_path_target = \
         smac_solver_dir / (instance_set_target_name + file_postfix)
 

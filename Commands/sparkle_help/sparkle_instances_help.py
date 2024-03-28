@@ -160,9 +160,18 @@ def _copy_reference_instance_list_to_smac(smac_instance_file: Path,
 
 def copy_instances_to_smac(list_instance_path: list[Path], instance_dir_prefix: Path,
                            smac_instance_dir_prefix: Path, train_or_test: str) -> None:
-    """Copy problem instances to be used for configuration to the SMAC directory."""
+    """Copy problem instances to be used for configuration to the SMAC directory.
+
+    Args:
+        list_instance_path: List of paths to the instances to be copied
+        instance_dir_prefix: Path to the instances directory
+        smac_instance_dir_prefix: Path to the scenario instances in the configurator
+        train_or_test: Specifies if the instances are for training or testing
+    """
     instance_set_name = Path(instance_dir_prefix).name
 
+    # TODO: Check wheter this is necessary. Throughout the whole project the function
+    # isn't used for train data
     file_suffix = ""
     if train_or_test == "train":
         file_suffix = "_train.txt"

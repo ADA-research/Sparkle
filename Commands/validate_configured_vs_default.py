@@ -141,11 +141,12 @@ if __name__ == "__main__":
         # configuration)
         instances_directory_test = Path("Instances/", instance_set_test_name)
         list_path = sih.get_list_all_path(instances_directory_test)
-        inst_dir_prefix = instances_directory_test
         smac_inst_dir_prefix = Path(configurator_path, "scenarios/instances",
                                     instance_set_test_name)
+
+        # Copy files from instances_directory_test to smac_inst_dir_prefix
         sih.copy_instances_to_smac(
-            list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
+            list_path, instances_directory_test, smac_inst_dir_prefix, "test"
         )
 
         # Copy file listing test instances to smac solver directory
