@@ -94,11 +94,9 @@ def run_solvers_on_instances(
     """
     if recompute:
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path).clean_csv()
-
+    num_job_in_parallel = 1
     if parallel:
         num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
-    else:
-        num_job_in_parallel = 1
 
     runs = [srsph.running_solvers_parallel(
         performance_data_csv_path=sgh.performance_data_csv_path,
@@ -148,27 +146,6 @@ def run_solvers_on_instances(
     elif run_on == Runner.SLURM:
         print("Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
               f'{",".join(r.run_id for r in runs if r is not None)}')
-
-
-def construct_selector_and_report(dependency_jobid_list: list[str] = []) -> str:
-    """Queue jobs for portfolio construction and report generation.
-
-    Returns a Slurm job ID as str.
-    """
-    job_script = "Commands/construct_sparkle_portfolio_selector.py"
-    run_job_parallel_jobid = sjph.running_job_parallel(
-        job_script,
-        dependency_jobid_list,
-        CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
-
-    if run_job_parallel_jobid:
-        dependency_jobid_list.append(run_job_parallel_jobid)
-
-    job_script = "Commands/generate_report.py"
-    run_job_parallel_jobid = sjph.running_job_parallel(
-        job_script, dependency_jobid_list, CommandName.GENERATE_REPORT)
-
-    return run_job_parallel_jobid
 
 
 if __name__ == "__main__":

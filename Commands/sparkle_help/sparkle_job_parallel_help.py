@@ -82,7 +82,7 @@ def running_job_parallel(job_script: str,
     Returns:
       The job ID of the queued job or an empty string if no job was queued.
     """
-    rrr.add_to_queue
+    print("bippity!")
     sbatch_shell_script_path = (f"{sgh.sparkle_tmp_path}running_job_parallel_"
                                 f"{sbh.get_time_pid_random_string()}.sh")
     generate_job_sbatch_shell_script(sbatch_shell_script_path, job_script,
