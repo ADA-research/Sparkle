@@ -29,6 +29,7 @@ class TestConfigurator():
 
         mock_path.assert_called_once()
 
+
 @pytest.fixture
 def solver_fixture() -> Solver:
     """Solver fixture for tests."""
