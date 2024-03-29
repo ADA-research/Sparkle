@@ -5,6 +5,9 @@ import sys
 import argparse
 from pathlib import Path
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
@@ -17,9 +20,6 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_job_help as sjh
-
-import runrunner as rrr
-from runrunner.base import Runner
 
 import functools
 print = functools.partial(print, flush=True)

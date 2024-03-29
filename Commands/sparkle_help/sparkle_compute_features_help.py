@@ -6,6 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -14,9 +17,6 @@ from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_job_help
 from Commands.sparkle_help.sparkle_command_help import CommandName
-
-import runrunner as rrr
-from runrunner.base import Runner
 
 
 def generate_missing_value_csv_like_feature_data_csv(

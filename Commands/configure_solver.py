@@ -8,6 +8,9 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
+from runrunner.base import Runner
+import runrunner as rrr
+
 from Commands.Structures.status_info import ConfigureSolverStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
@@ -25,9 +28,6 @@ from Commands.Structures.configuration_scenario import ConfigurationScenario
 from Commands.Structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
-
-from runrunner.base import Runner
-import runrunner as rrr
 
 
 def parser_function() -> argparse.ArgumentParser:

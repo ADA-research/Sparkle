@@ -3,15 +3,15 @@
 """Helper functions for parallel execution of solvers."""
 from __future__ import annotations
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
-
-import runrunner as rrr
-from runrunner.base import Runner
 
 
 def running_solvers_parallel(

@@ -6,6 +6,7 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
+
 from sparkle import about
 
 

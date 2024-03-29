@@ -9,6 +9,9 @@ import fcntl
 from pathlib import Path
 import ast
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -21,9 +24,6 @@ from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
-
-import runrunner as rrr
-from runrunner.base import Runner
 
 
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,

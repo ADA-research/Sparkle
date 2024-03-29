@@ -6,6 +6,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_run_solvers_help as srsh
@@ -15,9 +18,6 @@ from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_job_help as sjh
-
-import runrunner as rrr
-from runrunner.base import Runner
 
 
 def call_configured_solver(instance_path_list: list[Path],

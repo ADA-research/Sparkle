@@ -8,6 +8,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
@@ -15,10 +18,6 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.Structures.solver import Solver
-
-
-import runrunner as rrr
-from runrunner.base import Runner
 
 
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,

@@ -6,6 +6,9 @@ import argparse
 import fcntl
 from pathlib import Path
 
+from runrunner.base import Runner
+import runrunner as rrr
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_instances_help as sih
@@ -21,9 +24,6 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_job_help as sjh
-
-from runrunner.base import Runner
-import runrunner as rrr
 
 
 def parser_function() -> argparse.ArgumentParser:

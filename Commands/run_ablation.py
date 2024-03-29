@@ -6,6 +6,8 @@ import sys
 import shutil
 from pathlib import Path
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -16,8 +18,6 @@ from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
 
 
 def parser_function() -> argparse.ArgumentParser:
