@@ -2,6 +2,16 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.7] - 2024/??
+
+### Added
+
+### Changed
+- All SBATCH scripts in sparkle are no longer internally generated but are now done by a sub-library called RunRunner
+
+### Fixed
+
+
 ## [0.6] - 2023/12/14
 
 ### Added
