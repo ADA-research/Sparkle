@@ -107,7 +107,7 @@ def call_configured_solver_parallel(
                 f"--performance-measure {perf_name}" for instance in instances_list]
 
     sbatch_options = ssh.get_slurm_options_list()
-    srun_options = ["--nodes=1", "--ntasks=1"]
+    srun_options = ["-N1", "-n1"]
     srun_options.extend(ssh.get_slurm_options_list())
 
     run = rrr.add_to_queue(

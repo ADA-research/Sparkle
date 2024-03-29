@@ -646,7 +646,7 @@ def run_parallel_portfolio(instances: list[str],
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
     sfh.create_new_empty_file(file_path_output1)
-    srun_options = ["--nodes=1", "--ntasks=1"] + ssh.get_slurm_options_list()
+    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
     parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
     sbatch_options_list = ssh.get_slurm_options_list()
     # Create cmd list

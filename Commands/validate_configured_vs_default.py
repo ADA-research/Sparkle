@@ -226,7 +226,7 @@ if __name__ == "__main__":
     sbatch_options_list = [f"--cpus-per-task={n_cpus}"] + ssh.get_slurm_options_list()
 
     # Set srun options
-    srun_options = ["--nodes=1", "--ntasks=1", f"--cpus-per-task={n_cpus}"] +\
+    srun_options = ["--N1", "--n1", f"--cpus-per-task={n_cpus}"] +\
         ssh.get_slurm_options_list()
     success, msg = ssh.check_slurm_option_compatibility(" ".join(srun_options))
     if not success:
