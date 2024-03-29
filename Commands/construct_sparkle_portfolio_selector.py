@@ -5,7 +5,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from Commands.Structures.status_info import ConstructPortfolioSelectorStatusInfo
+from Commands.structures.status_info import ConstructPortfolioSelectorStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -18,8 +18,8 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.Structures.reporting_scenario import ReportingScenario
-from Commands.Structures.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
 
 

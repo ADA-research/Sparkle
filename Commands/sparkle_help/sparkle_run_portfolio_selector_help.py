@@ -18,8 +18,8 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
-from Commands.Structures.reporting_scenario import ReportingScenario
-from Commands.Structures.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh

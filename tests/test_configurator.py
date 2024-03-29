@@ -7,9 +7,9 @@ from pytest_mock import MockerFixture
 
 from pathlib import Path
 
-from Commands.Structures.solver import Solver
-from Commands.Structures.configuration_scenario import ConfigurationScenario
-from Commands.Structures.configurator import Configurator
+from Commands.structures.solver import Solver
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.configurator import Configurator
 from Commands.sparkle_help import sparkle_global_help as sgh
 
 

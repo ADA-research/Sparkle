@@ -13,7 +13,7 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from Commands.Structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import ReportingScenario
 from sparkle_help import sparkle_command_help as sch
 
 

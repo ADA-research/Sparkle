@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_settings
-from Commands.Structures.status_info import SolverRunStatusInfo
+from Commands.structures.status_info import SolverRunStatusInfo
 
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.Structures.solver import Solver
+from Commands.structures.solver import Solver
 
 
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,

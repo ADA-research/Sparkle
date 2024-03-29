@@ -18,8 +18,8 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.Structures.reporting_scenario import ReportingScenario
-from Commands.Structures.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_file_help as sfh

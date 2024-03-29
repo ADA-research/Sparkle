@@ -11,21 +11,21 @@ from pandas import DataFrame
 from runrunner.base import Runner
 import runrunner as rrr
 
-from Commands.Structures.status_info import ConfigureSolverStatusInfo
+from Commands.structures.status_info import ConfigureSolverStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
-from Commands.Structures.reporting_scenario import ReportingScenario
-from Commands.Structures.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_command_help as sch
-from Commands.Structures.configurator import Configurator
-from Commands.Structures.configuration_scenario import ConfigurationScenario
-from Commands.Structures.solver import Solver
+from Commands.structures.configurator import Configurator
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
 
