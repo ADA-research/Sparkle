@@ -45,8 +45,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: Local, Slurm. Default: Slurm")
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
     )
 
     return parser

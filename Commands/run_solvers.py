@@ -58,8 +58,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation."))
     parser.add_argument(
         "--settings-file",
         type=Path,
