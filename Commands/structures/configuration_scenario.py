@@ -9,7 +9,7 @@ from pathlib import Path
 import pandas as pd
 
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, SparkleObjective
-from Commands.sparkle_help.solver import Solver
+from Commands.structures.solver import Solver
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 
 

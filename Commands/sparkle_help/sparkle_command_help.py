@@ -21,6 +21,7 @@ class CommandName(str, Enum):
     COMPUTE_FEATURES = "compute_features"
     COMPUTE_MARGINAL_CONTRIBUTION = "compute_marginal_contribution"
     CONFIGURE_SOLVER = "configure_solver"
+    CONFIGURE_SOLVER_CALLBACK = "configure_solver_callback"
     CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR = "construct_sparkle_portfolio_selector"
     GENERATE_REPORT = "generate_report"
     INITIALISE = "initialise"
@@ -29,6 +30,7 @@ class CommandName(str, Enum):
     REMOVE_INSTANCES = "remove_instances"
     REMOVE_SOLVER = "remove_solver"
     RUN_ABLATION = "run_ablation"
+    ABLATION_CALLBACK = "ablation_callback"
     RUN_SOLVERS = "run_solvers"
     RUN_SPARKLE_PORTFOLIO_SELECTOR = "run_sparkle_portfolio_selector"
     RUN_STATUS = "run_status"
@@ -39,6 +41,7 @@ class CommandName(str, Enum):
     RUN_CONFIGURED_SOLVER = "run_configured_solver"
     CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO = "construct_sparkle_parallel_portfolio"
     RUN_SPARKLE_PARALLEL_PORTFOLIO = "run_sparkle_parallel_portfolio"
+    SPARKLE_CSV_MERGE = "sparkle_csv_merge"
 
     @staticmethod
     def from_str(command_name: str) -> CommandName:

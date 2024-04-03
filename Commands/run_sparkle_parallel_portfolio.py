@@ -7,16 +7,16 @@ import os
 import argparse
 from pathlib import Path
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -79,8 +79,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation."))
     parser.add_argument(
         "--settings-file",
         type=Path,

@@ -14,7 +14,7 @@ re_srun_split = re.compile(r" (?!-)")
 
 
 class SlurmBatch:
-    """Simple class to parse a Slurm batch file and get the info.
+    """Class to parse a Slurm batch file and get structured information.
 
     Attributes
     ----------

@@ -3,7 +3,11 @@
 
 import sys
 import argparse
+import fcntl
 from pathlib import Path
+
+from runrunner.base import Runner
+import runrunner as rrr
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
@@ -14,14 +18,12 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from sparkle.slurm_parsing import SlurmBatch
-from runrunner.base import Runner
-import runrunner as rrr
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -77,8 +79,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm")
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
     )
     return parser
 
@@ -158,53 +160,101 @@ if __name__ == "__main__":
         solver.name, instance_set_train.name, instance_set_test_name
     )
 
-    # Generate and run sbatch script for validation runs
-    sbatch_script_name = ssh.generate_sbatch_script_for_validation(
-        solver.name, instance_set_train.name, instance_set_test_name
-    )
-    sbatch_script_path = configurator_path / sbatch_script_name
+    # Set up scenarios
+    # 1. Set up the validation scenario for the training set
+    cmd_base = "./smac-validate --use-scenario-outdir true --num-run 1 --cli-cores 8"
+    scenario_dir = Path("scenarios") / (solver.name + "_" + instance_set_train.name)
+    scenario_fn_train = scsh.create_file_scenario_validate(
+        solver.name, instance_set_train.name, instance_set_train.name,
+        scsh.InstanceType.TRAIN, default=True)
+    cmd_list = [f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_train} "
+                f"--execdir {scenario_dir / 'validate_train_default'} "
+                f"--configuration DEFAULT"]
+    dest = [Path("results") / (solver.name + "_validation_" + scenario_fn_train)]
+
+    # If given, also validate on the test set
+    if instance_set_test_name is not None:
+        # 2. Test default
+        scenario_fn_tdef = scsh.create_file_scenario_validate(
+            solver.name, instance_set_train.name, instance_set_test_name,
+            scsh.InstanceType.TEST, default=True)
+        exec_dir_def = scenario_dir / f"validate_{instance_set_test_name}_test_default/"
+
+        # 3. Test configured
+        scenario_fn_tconf = scsh.create_file_scenario_validate(
+            solver.name, instance_set_train.name, instance_set_test_name,
+            scsh.InstanceType.TEST, default=False)
+        dir_name = f"validate_{instance_set_test_name}_test_configured/"
+        exec_dir_conf = scenario_dir / dir_name
+
+        # Write configuration to file to be used by smac-validate
+        config_file_path = scenario_dir / "configuration_for_validation.txt"
+        # open the file of sbatch script
+        with (Path(sgh.smac_dir) / config_file_path).open("w+") as fout:
+            fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+            optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
+                solver.name, instance_set_train.name)
+            fout.write(optimised_configuration_str + "\n")
+
+        # Extend job list
+        cmd_list.extend([f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_tdef} "
+                         f"--execdir {exec_dir_def} "
+                         f"--configuration DEFAULT",
+                         f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_tconf}"
+                         f" --execdir {exec_dir_conf}"
+                         f" --configuration-list {config_file_path}"])
+
+        dest.extend([f"results/{solver.name}_validation_{scenario_fn_tdef}",
+                     f"results/{solver.name}_validation_{scenario_fn_tconf}"])
+
+    # Adjust maximum number of cores to be the maximum of the instances we validate on
+    instance_sizes = [sgh.settings.get_slurm_clis_per_node()]
+    # Get instance set sizes
+    for instance_set_name, inst_type in [(instance_set_train.name, "train"),
+                                         (instance_set_test_name, "test")]:
+        if instance_set_name is not None:
+            smac_instance_file = (f"{sgh.smac_dir}{scenario_dir}/{instance_set_name}_"
+                                  f"{inst_type}.txt")
+            if Path(smac_instance_file).is_file():
+                instance_count = sum(1 for _ in open(smac_instance_file, "r"))
+                instance_sizes.append(instance_count)
+
+    # Maximum number of cpus we can use
+    n_cpus = min(sgh.settings.get_slurm_clis_per_node(), max(instance_sizes))
+
+    # Extend sbatch options
+    sbatch_options_list = [f"--cpus-per-task={n_cpus}"] + ssh.get_slurm_options_list()
+
+    # Set srun options
+    srun_options = ["--N1", "--n1", f"--cpus-per-task={n_cpus}"] +\
+        ssh.get_slurm_options_list()
+    success, msg = ssh.check_slurm_option_compatibility(" ".join(srun_options))
+    if not success:
+        print(f"Slurm config Error: {msg}")
+        sys.exit(-1)
+    # Clear out possible existing destination files
+    sfh.rmfiles(dest)
+    parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(),
+                        len(cmd_list))
+
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
+        path=configurator_path,
+        base_dir=sgh.sparkle_tmp_path,
+        parallel_jobs=parallel_jobs,
+        sbatch_options=sbatch_options_list,
+        srun_options=srun_options,
+        output_path=dest)
 
     if run_on == Runner.SLURM:
-        validate_jobid = ssh.submit_sbatch_script(
-            sbatch_script_name,
-            CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-            configurator_path,
-        )
-
         print(f"Running validation in parallel. Waiting for Slurm job with id: "
-              f"{validate_jobid}")
+              f"{run.run_id}")
+        sjh.write_active_job(run.run_id,
+                             CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
     else:
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-        batch = SlurmBatch(sbatch_script_path)
-        n_jobs = int(len(batch.cmd_params) / 2)
-        cmd = []
-        dest = []
-        for i in range(n_jobs):
-            cmd.append(batch.cmd + " " + batch.cmd_params[i])
-            # The second half of the params contain the destination files for bash output
-            dest.append(batch.cmd_params[i + n_jobs])
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd,
-            name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-            path=configurator_path,
-            base_dir=sgh.sparkle_tmp_path,
-            sbatch_options=batch.sbatch_options,
-            srun_options=batch.srun_options,
-            output_path=dest)
-
-        if run_on == Runner.SLURM:
-            print(f"Running validation in parallel. Waiting for Slurm job with id: "
-                  f"{run.run_id}")
-        else:
-            run.wait()
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-        print("Running validation done!")
+        run.wait()
 
     # Write most recent run to file
     last_test_file_path = Path(

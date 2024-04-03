@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_settings
-from Commands.Structures.status_info import SolverRunStatusInfo
+from Commands.structures.status_info import SolverRunStatusInfo
 
 
 if __name__ == "__main__":
@@ -62,7 +62,6 @@ if __name__ == "__main__":
                f"{sfh.get_last_level_directory_name(instance_path)}_"
                f"{sbh.get_time_pid_random_string()}")
     raw_result_path = f"Tmp/{key_str}.rawres"
-    processed_result_path = f"{sgh.pap_performance_data_tmp_path}/{key_str}.result"
     start_time = time.time()
     # create statusinfo file
     status_info = SolverRunStatusInfo()
@@ -95,7 +94,7 @@ if __name__ == "__main__":
     status_info.delete()
 
     if run_status_path != sgh.pap_sbatch_tmp_path:
-        if solver_path.startswith(sgh.sparkle_tmp_path):
+        if sgh.sparkle_tmp_path in solver_path.parents:
             shutil.rmtree(solver_path)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
@@ -104,15 +103,15 @@ if __name__ == "__main__":
         obj_str = str(cpu_time_penalised)
     else:
         print(f"*** ERROR: Unknown performance measure detected: {performance_measure}")
-
+    processed_result_path = sgh.performance_data_dir / "Tmp" / f"{key_str}.result"
     with Path(processed_result_path).open("w+") as fout:
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
         fout.write(f"{instance_path}\n"
                    f"{solver_path}\n"
                    f"{obj_str}\n")
 
-    pap_result_path = f"Performance_Data/Tmp_PaP/{key_str}.result"
-    with Path(pap_result_path).open("w+") as fout:
+    pap_result_path = sgh.pap_performance_data_tmp_path / f"{key_str}.result"
+    with pap_result_path.open("w+") as fout:
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
         fout.write(f"{instance_path}\n"
                    f"{solver_path}\n"
