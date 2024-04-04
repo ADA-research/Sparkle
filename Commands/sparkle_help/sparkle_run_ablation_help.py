@@ -143,7 +143,6 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
     # TODO: Check whether this function also works for single-file instances and can be
     # used in all cases
     else:
-        print("bong")
         relative_instance_directory = relative_instance_directory + "/"
         sih.copy_reference_instance_list(Path(file_instance_path), instance_set_name,
                                          relative_instance_directory)
