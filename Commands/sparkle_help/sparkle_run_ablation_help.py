@@ -294,7 +294,7 @@ def submit_ablation(ablation_scenario_dir: str,
             run.wait()
         else:
             dependencies.append(run)
-            sjh.write_active_job(run.run_id, CommandName.RUN_ABLATION)
+            sjh.write_active_job(run.run_id, CommandName.RUN_ABLATION_VALIDATION)
 
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
