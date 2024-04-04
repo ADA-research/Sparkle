@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for ablation analysis."""
 
-import sys
 import re
 import shutil
 import subprocess
@@ -143,9 +142,8 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
     # TODO: Check whether this function also works for single-file instances and can be
     # used in all cases
     else:
-        relative_instance_directory = relative_instance_directory + "/"
         sih.copy_reference_instance_list(Path(file_instance_path), instance_set_name,
-                                         relative_instance_directory)
+                                         "")
     return
 
 
@@ -169,7 +167,7 @@ def get_ablation_table(solver_name: str, instance_train_name: str,
     """Run a solver on an instance, only for internal calls from Sparkle."""
     if not check_for_ablation(solver_name, instance_train_name, instance_test_name):
         # No ablation table exists for this solver-instance pair
-        return dict()
+        return []
     scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name,
                                                    instance_test_name, exec_path=False)
     table_file = Path(scenario_dir) / "ablationValidation.txt"
@@ -218,7 +216,7 @@ def submit_ablation(ablation_scenario_dir: str,
     sbatch_options = [f"--cpus-per-task={clis}"] +\
         ssh.get_slurm_options_list()
 
-    run = rrr.add_to_queue(
+    run_ablation = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd,
         name=CommandName.RUN_ABLATION,
@@ -229,77 +227,80 @@ def submit_ablation(ablation_scenario_dir: str,
 
     dependencies = []
     if run_on == Runner.LOCAL:
-        run.wait()
+        run_ablation.wait()
     else:
-        dependencies.append(run)
-        sjh.write_active_job(run.run_id, CommandName.RUN_ABLATION)
+        dependencies.append(run_ablation)
+        sjh.write_active_job(run_ablation.run_id, CommandName.RUN_ABLATION)
 
     # 2. Submit intermediate actions (copy path from log)
     log_source = "log/ablation-run1234.txt"
     ablation_path = "ablationPath.txt"
-    log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / run.name
+    log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / run_ablation.name
     log_path.mkdir(parents=True, exist_ok=True)
 
     cmd_list = [f"cp {log_source} {ablation_path}", f"cp -r log/ {log_path.absolute()}"]
     srun_options_cb = ["-N1", "-n1", "-c1"]
-    run = rrr.add_to_queue(
+    run_cb = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.ABLATION_CALLBACK,
         path=ablation_scenario_dir,
         base_dir=sgh.sparkle_tmp_path,
-        dependencies=dependencies,
+        dependencies=run_ablation,
         sbatch_options=sbatch_options,
         srun_options=srun_options_cb)
 
     if run_on == Runner.LOCAL:
-        run.wait()
+        run_cb.wait()
     else:
-        dependencies.append(run)
-        sjh.write_active_job(run.run_id, CommandName.ABLATION_CALLBACK)
+        dependencies.append(run_cb)
+        sjh.write_active_job(run_cb.run_id, CommandName.ABLATION_CALLBACK)
 
     # 3. Submit ablation validation run when nessesary, repeat process for the test set
     if instance_set_test is not None:
         cmd = "../../ablationValidation --optionFile ablation_config.txt "\
             "--ablationLogFile ablationPath.txt"
 
-        run = rrr.add_to_queue(
+        run_ablation_validation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
             name=CommandName.RUN_ABLATION_VALIDATION,
             path=ablation_scenario_dir,
             base_dir=sgh.sparkle_tmp_path,
+            dependencies=dependencies,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 
         if run_on == Runner.LOCAL:
-            run.wait()
+            run_ablation_validation.wait()
         else:
-            dependencies.append(run)
-            sjh.write_active_job(run.run_id, CommandName.RUN_ABLATION_VALIDATION)
+            dependencies.append(run_ablation_validation)
+            sjh.write_active_job(run_ablation_validation.run_id,
+                                 CommandName.RUN_ABLATION_VALIDATION)
 
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
-        val_dir = run.name + "_validation"
+        val_dir = run_ablation_validation.name + "_validation"
         log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / val_dir
         log_path.mkdir(parents=True, exist_ok=True)
         cmd_list = [f"cp {log_source} {ablation_path}",
                     f"cp -r log/ {log_path.absolute()}"]
 
-        run = rrr.add_to_queue(
+        run_v_cb = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd_list,
-            name="ablation_validation_callback",
+            name=CommandName.ABLATION_VALIDATION_CALLBACK,
             path=ablation_scenario_dir,
             base_dir=sgh.sparkle_tmp_path,
-            dependencies=dependencies,
+            dependencies=run_ablation_validation,
             sbatch_options=sbatch_options,
             srun_options=srun_options_cb)
 
         if run_on == Runner.LOCAL:
-            run.wait()
+            run_v_cb.wait()
         else:
-            dependencies.append(run)
-            sjh.write_active_job(run.run_id, CommandName.ABLATION_CALLBACK)
+            dependencies.append(run_v_cb)
+            sjh.write_active_job(run_v_cb.run_id,
+                                 CommandName.ABLATION_VALIDATION_CALLBACK)
 
     return dependencies

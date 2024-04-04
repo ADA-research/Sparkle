@@ -418,7 +418,7 @@ def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
         with Path(runsolver_values_path).open("r+") as infile:
             fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
             lines = [line.strip().split("=") for line in infile.readlines()
-                    if len(line.split("=")) == 2]
+                     if len(line.split("=")) == 2]
             for keyword, value in lines:
                 if keyword == "WCTIME":
                     wc_time = float(value)
