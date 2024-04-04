@@ -310,7 +310,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
     sbs_dict = {}
 
     for instance in instance_list:
-        instance_name = sfh.get_last_level_directory_name(instance)
+        instance_name = Path(instance).name
 
         if instance_name in results:
             if sbs_name in results[instance_name][0]:
@@ -333,23 +333,24 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     Returns:
         A dict of instance names and the penalised running time of the PaP.
     """
-    mydict = {}
+    instance_penalty_dict = {}
 
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     results = get_results()
+    default_penalty = float(sgh.settings.get_penalised_time())
 
     for instance in instance_list:
-        instance_name = sfh.get_last_level_directory_name(instance)
-
+        instance_name = Path(instance).name
+        
         if instance_name in results:
             if float(results[instance_name][1]) <= cutoff_time:
-                mydict[instance_name] = float(results[instance_name][1])
+                instance_penalty_dict[instance_name] = float(results[instance_name][1])
             else:
-                mydict[instance_name] = float(sgh.settings.get_penalised_time())
+                instance_penalty_dict[instance_name] = default_penalty
         else:
-            mydict[instance_name] = float(sgh.settings.get_penalised_time())
+            instance_penalty_dict[instance_name] = default_penalty
 
-    return mydict
+    return instance_penalty_dict
 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
@@ -391,7 +392,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
     gnuplot_cmd_list = ["python", "auto_gen_plot.py", data_filename, penalised_time_str,
-                        "SBS", sgrh.underscore_for_latex(sbs_solver),
+                        f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
                         "Parallel-Portfolio", figure_filename, performance_metric_str]
 
     subprocess.run(gnuplot_cmd_list, cwd=latex_directory_path)
@@ -579,7 +580,6 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]) -> None
             outfile.write(line)
 
     stex.check_tex_commands_exist(latex_directory_path)
-
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
     print(f"Report is placed at: {report_path}")
