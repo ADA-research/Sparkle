@@ -72,22 +72,24 @@ K. van der Blom, H. H. Hoos, C. Luo and J. G. Rook, **Sparkle: Toward Accessible
 
 
 ## Maintainers
-Koen van der Blom,
+Thijs Snelleman,
 Jeroen Rook,
 Holger H. Hoos,
-Malte Schwerin,
-Yingliu Lu,
-Tarek Junied,
-Marie Anastacio,
-Jakob Bossek,
-Thijs Snelleman
+Noah Peil,
+Brian Schiller
 
 ## Contributors
 Chuan Luo,
 Richard Middelkoop,
 Jérémie Gobeil,
 Sam Vermeulen,
-Marcel Baumann
+Marcel Baumann,
+Jakob Bossek,
+Tarek Junied,
+Yingliu Lu,
+Malte Schwerin,
+Marie Anastacio,
+Koen van der Blom
 
 ## Contact
 sparkle@aim.rwth-aachen.de
