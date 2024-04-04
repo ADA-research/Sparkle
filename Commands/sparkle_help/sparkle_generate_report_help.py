@@ -74,10 +74,9 @@ def get_solver_list() -> str:
     """
     str_value = ""
     solver_list = sgh.solver_list
-
     for solver_path in solver_list:
         solver_name = Path(solver_path).name
-        str_value += r"\item \textbf{" + solver_name + r"}\n"
+        str_value += f"\item \\textbf{{{solver_name}}}\n"
 
     return str_value
 
@@ -106,10 +105,8 @@ def get_feature_extractor_list() -> str:
     """
     str_value = ""
     extractor_list = sgh.extractor_list
-
     for extractor_path in extractor_list:
-        str_value += r"\item \textbf{" + Path(extractor_path).name + r"}\n"
-
+        str_value += f"\item \\textbf{{{Path(extractor_path).name}}}\n"
     return str_value
 
 
@@ -235,7 +232,7 @@ def get_par_ranking_list() -> str:
     for solver, this_penalty_time in solver_penalty_time_ranking_list:
         solver = Path(solver).name
         penalty = sgh.settings.get_general_penalty_multiplier()
-        str_value += (rf"\item \textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n")
+        str_value += (f"\item \\textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n")
 
     return str_value
 
@@ -389,7 +386,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              output_dir=latex_directory_path)
     str_value = (
         "\\includegraphics[width=0.6\\textwidth]"
-        f"{figure_portfolio_selector_sparkle_vs_sbs_filename}"
+        f"{{{figure_portfolio_selector_sparkle_vs_sbs_filename}}}"
     )
 
     return str_value
@@ -438,7 +435,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
 
     str_value = (
         "\\includegraphics[width=0.6\\textwidth]"
-        f"{figure_portfolio_selector_sparkle_vs_vbs_filename}"
+        f"{{{figure_portfolio_selector_sparkle_vs_vbs_filename}}}"
     )
 
     return str_value

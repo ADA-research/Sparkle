@@ -64,7 +64,7 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
         if str(x) != "-1":
             solver_name = solver_name[:x] + "\\" + solver_name[x:]
 
-        str_value += r"\item \textbf{" + f"{sgrh.underscore_for_latex(solver_name)}}}\n"
+        str_value += f"\item \textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"
 
         if solver_variations > 1:
             seed_number = ""
