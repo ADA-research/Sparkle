@@ -185,12 +185,12 @@ if __name__ == "__main__":
     )
 
     # Instances
-    sah.create_instance_file(instance_set_train, ablation_scenario_dir, "train")
+    sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=False)
     if instance_set_test_name is not None:
-        sah.create_instance_file(instance_set_test, ablation_scenario_dir, "test")
+        sah.create_instance_file(instance_set_test, ablation_scenario_dir, test=True)
     else:
         # TODO: check if needed
-        sah.create_instance_file(instance_set_train, ablation_scenario_dir, "test")
+        sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=True)
 
     print("Create config file")
     # Configurations

@@ -121,49 +121,32 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
 
 
 def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
-                         train_or_test: str) -> None:
+                         test: bool = False) -> None:
     """Create an instance file for ablation analysis."""
-    if train_or_test == "train":
-        file_suffix = "_train.txt"
-    elif train_or_test == "test":
+    file_suffix = "_train.txt"
+    if test:
         file_suffix = "_test.txt"
-    else:
-        print("Invalid function call of copy_instances_to_ablation; stopping execution")
-        sys.exit(-1)
 
-    if instances_directory[-1] != "/":
-        instances_directory += "/"
-
+    # We give the Ablation script directly the paths of the instances (no copying)
     list_all_path = sih.get_list_all_path(instances_directory)
     file_instance_path = ablation_scenario_dir + "instances" + file_suffix
-
-    # Relative path
-    pwd = Path.cwd()
-    full_ablation_scenario_dir = Path(pwd) / ablation_scenario_dir / "solver/"
-    full_instances_directory = Path(pwd) / instances_directory
-    relative_instance_directory = (Path(full_instances_directory)
-                                   / full_ablation_scenario_dir)
 
     instance_set_name = Path(instances_directory).name
 
     # If a reference list does not exist this is a single-file instance
     if not sih.check_existence_of_reference_instance_list(instance_set_name):
-        list_all_path = [str(instance)[len(instances_directory):]
-                         for instance in list_all_path]
-
         with Path(file_instance_path).open("w") as fh:
             for instance in list_all_path:
-                instance_path = f"{relative_instance_directory / instance}\n"
-                fh.write(instance_path)
+                fh.write(f"{instance.absolute()}\n")
     # Otherwise this is a multi-file instance, and instances need to be wrapped in quotes
     # with function below
     # TODO: Check whether this function also works for single-file instances and can be
     # used in all cases
     else:
+        print("bong")
         relative_instance_directory = relative_instance_directory + "/"
         sih.copy_reference_instance_list(Path(file_instance_path), instance_set_name,
                                          relative_instance_directory)
-
     return
 
 
