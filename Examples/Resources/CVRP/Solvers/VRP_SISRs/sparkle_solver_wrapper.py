@@ -35,54 +35,43 @@ del args["seed"]
 del args["specifics"]
 del args["run_length"]
 
-params = sys.argv[6:]
 
-runsolver_binary = "./runsolver"
-solver_binary = "./VRP_SISRs"
-
-tmp_directory = Path("tmp/")
-tmp_directory.mkdir(exist_ok=True)
-
-instance_name = Path(instance).name
-solver_name = Path(solver_binary).name
-runsolver_watch_data_path = tmp_directory / (solver_name + "_" + instance_name + "_" + get_time_pid_random_string() + ".log")
-
-runsolver_call = [runsolver_binary,
-                  "-w", str(runsolver_watch_data_path),
-                  "--cpu-limit", str(cutoff_time),
-                  solver_binary,
-                  "-inst", instance,
-                  "-seed", str(seed)]
-
+# Construct call from args dictionary
 params = []
 for key in args:
     if args[key] is not None:
         params.extend(["-" + str(key), str(args[key])])
 
+solver_binary = "VRP_SISRs"
+solver_cmd = ["./" + solver_binary,
+              "-inst", str(instance),
+              "-seed", str(seed)]
 
-solver_call = subprocess.run(runsolver_call + params,
+
+
+instance_name = Path(instance).name
+solver_name = Path(solver_binary).name
+
+solver_call = subprocess.run(solver_cmd + params,
                              capture_output=True)
 
 output_list = solver_call.stdout.decode().splitlines()
 
-Path(runsolver_watch_data_path).unlink(missing_ok=True)
-
 quality=1000000000000
 status = r'SUCCESS'#always ok, code checks per iteration whether cutoff time is exceeded
 
-for line in output_list:
-	quality = line.strip()
+if len(output_list) > 0:
+    quality = output_list[-1].strip()
 
-if specifics == 'rawres':
+"""if specifics == 'rawres':
 	raw_result_path = Path(runsolver_watch_data_path.replace('.log', '.rawres'))
 
 	with raw_result_path.open('w') as outfile:
 		for line in output_list:
-			outfile.write(line)
+			outfile.write(line)"""
 
 outdir = {"status": status,
 		  "quality": quality,
-          "solver_call": runsolver_call + params,
-          "raw_output": output_list}
+          "solver_call": solver_cmd + params}
 
 print(outdir)

@@ -103,7 +103,6 @@ class ConfigurationScenario:
         """Create directories for each configurator run and copy solver files to them."""
         for i in range(self.number_of_runs):
             run_path = self.directory / str(i + 1)
-
             shutil.copytree(self.solver.directory, run_path)
             (run_path / "tmp").mkdir()
 

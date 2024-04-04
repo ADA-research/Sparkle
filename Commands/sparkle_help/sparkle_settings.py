@@ -50,7 +50,7 @@ class SparkleObjective():
         """Create sparkle objective from string of format TYPE:METRIC."""
         self.name = performance_setting
         if ":" not in performance_setting:
-            print(f"WARNING: Objective {performance_setting} not fully specified."
+            print(f"WARNING: Objective {performance_setting} not fully specified. "
                   "Continuing with default values.")
             performance_measure, metric = performance_setting, ""
         else:
@@ -381,7 +381,6 @@ class Settings:
         return change_setting_ok
 
     # General settings ###
-
     def set_general_sparkle_objectives(
             self: Settings,
             value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective],
