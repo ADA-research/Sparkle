@@ -30,6 +30,7 @@ class CommandName(str, Enum):
     REMOVE_INSTANCES = "remove_instances"
     REMOVE_SOLVER = "remove_solver"
     RUN_ABLATION = "run_ablation"
+    RUN_ABLATION_VALIDATION = "run_ablation_validation"
     ABLATION_CALLBACK = "ablation_callback"
     RUN_SOLVERS = "run_solvers"
     RUN_SPARKLE_PORTFOLIO_SELECTOR = "run_sparkle_portfolio_selector"
