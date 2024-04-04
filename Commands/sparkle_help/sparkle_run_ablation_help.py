@@ -284,7 +284,7 @@ def submit_ablation(ablation_scenario_dir: str,
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
-            name=CommandName.RUN_ABLATION,
+            name=CommandName.RUN_ABLATION_VALIDATION,
             path=ablation_scenario_dir,
             base_dir=sgh.sparkle_tmp_path,
             sbatch_options=sbatch_options,
