@@ -151,7 +151,6 @@ if __name__ == "__main__":
                         f"{extractor_directory}/",
                         str(instance_path),
                         result_path]
-        print(command_line)
         subprocess.run(command_line)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
