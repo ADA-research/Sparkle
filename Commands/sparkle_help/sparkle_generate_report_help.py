@@ -76,7 +76,7 @@ def get_solver_list() -> str:
     solver_list = sgh.solver_list
     for solver_path in solver_list:
         solver_name = Path(solver_path).name
-        str_value += f"\item \\textbf{{{solver_name}}}\n"
+        str_value += f"\\item \\textbf{{{solver_name}}}\n"
 
     return str_value
 
@@ -106,7 +106,7 @@ def get_feature_extractor_list() -> str:
     str_value = ""
     extractor_list = sgh.extractor_list
     for extractor_path in extractor_list:
-        str_value += f"\item \\textbf{{{Path(extractor_path).name}}}\n"
+        str_value += f"\\item \\textbf{{{Path(extractor_path).name}}}\n"
     return str_value
 
 
@@ -232,7 +232,7 @@ def get_par_ranking_list() -> str:
     for solver, this_penalty_time in solver_penalty_time_ranking_list:
         solver = Path(solver).name
         penalty = sgh.settings.get_general_penalty_multiplier()
-        str_value += (f"\item \\textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n")
+        str_value += f"\\item \\textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n"
 
     return str_value
 

@@ -64,7 +64,7 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
         if str(x) != "-1":
             solver_name = solver_name[:x] + "\\" + solver_name[x:]
 
-        str_value += f"\item \textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"
+        str_value += f"\\item \textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"
 
         if solver_variations > 1:
             seed_number = ""
@@ -341,7 +341,6 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
 
     for instance in instance_list:
         instance_name = Path(instance).name
-        
         if instance_name in results:
             if float(results[instance_name][1]) <= cutoff_time:
                 instance_penalty_dict[instance_name] = float(results[instance_name][1])

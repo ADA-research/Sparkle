@@ -119,7 +119,7 @@ if __name__ == "__main__":
         )  # Do first, so other command line options can override settings from the file
 
     if ac.set_by_user(args, "performance_measure"):
-        set_str = ','.join([args.performance_measure + ':' + o.metric for o in 
+        set_str = ",".join([args.performance_measure + ":" + o.metric for o in
                             sgh.settings.get_general_sparkle_objectives()])
         sgh.settings.set_general_sparkle_objectives(
             set_str, SettingState.CMD_LINE
