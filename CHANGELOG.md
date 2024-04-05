@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.7] - 2024/??
+## [0.7] - 2024/04/05
 
 ### Added
 - SMAC target algorithm, a SMAC handler that takes in input from SMAC and structures it for the targeted solvers. Takes solver output and yields it to SMAC. Preparation for detaching from SMAC to allow for various optimizers in Sparkle.
