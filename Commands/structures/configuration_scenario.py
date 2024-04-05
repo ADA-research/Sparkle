@@ -25,12 +25,12 @@ class ConfigurationScenario:
         Args:
             solver: Solver that should be configured.
             instance_directory: Original directory of instances.
-            number_of_runs: The number of configurator runs to perform \
+            number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
             time_budget: The time budget allocated for each configuration run.
-            cutoff_time: The maximum time allowed for each individual run during \
+            cutoff_time: The maximum time allowed for each individual run during
                 configuration.
-            cutoff_length: The maximum number of iterations allowed for each \
+            cutoff_length: The maximum number of iterations allowed for each
                 individual run during configuration.
             sparkle_objective: SparkleObjective used for each run of the configuration.
             use_features: Boolean indicating if features should be used.
@@ -103,7 +103,6 @@ class ConfigurationScenario:
         """Create directories for each configurator run and copy solver files to them."""
         for i in range(self.number_of_runs):
             run_path = self.directory / str(i + 1)
-
             shutil.copytree(self.solver.directory, run_path)
             (run_path / "tmp").mkdir()
 

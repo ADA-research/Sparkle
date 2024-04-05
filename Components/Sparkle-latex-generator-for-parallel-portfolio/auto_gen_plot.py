@@ -5,7 +5,9 @@
 # import os
 import subprocess
 import sys
+from os.path import dirname, join
 from pathlib import Path
+from shutil import which
 
 if __name__ == "__main__":
     if len(sys.argv) != 7:
@@ -65,6 +67,8 @@ if __name__ == "__main__":
                       "points pt 2 ps 2\n")
 
     subprocess.run(["gnuplot", output_gnuplot_script])
-    subprocess.run(["epstopdf", output_eps_file])
+    epsbackup = Path(join(dirname(__file__), "..", "epstopdf.pl")).resolve()
+    epstopdf = which("epstopdf") or epsbackup
+    subprocess.run([epstopdf, output_eps_file])
 
     Path(output_gnuplot_script).unlink(missing_ok=True)

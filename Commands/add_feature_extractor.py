@@ -113,28 +113,25 @@ if __name__ == "__main__":
     # pre-run the feature extractor on a testing instance, to obtain the feature names
     if _check_existence_of_test_instance_list_file(extractor_directory):
         test_instance_list_file_name = "sparkle_test_instance_list.txt"
-        test_instance_list_file_path = (Path(extractor_directory)
+        extractor_path = Path(extractor_directory)
+        test_instance_list_file_path = (extractor_path
                                         / test_instance_list_file_name)
-        infile = Path(test_instance_list_file_path).open("r")
-        test_instance_files = infile.readline().strip().split()
-        instance_path = ""
-        for test_instance_file in test_instance_files:
-            instance_path += extractor_directory + "/" + test_instance_file + " "
-        instance_path = instance_path.strip()
-        infile.close()
+        with Path(test_instance_list_file_path).open("r") as infile:
+            model_file, constraint_file = infile.readline().strip().split()
 
         result_path = (
             "Tmp/"
-            + sfh.get_last_level_directory_name(extractor_directory)
+            + extractor_path.name
             + "_"
-            + sfh.get_last_level_directory_name(instance_path)
+            + Path(model_file).name
             + "_"
             + sparkle_basic_help.get_time_pid_random_string()
             + ".rawres"
         )
-        command_line = [Path(extractor_directory) / sgh.sparkle_run_default_wrapper,
+        command_line = [extractor_path / sgh.sparkle_run_default_wrapper,
                         f"{extractor_directory}/",
-                        instance_path,
+                        extractor_path / model_file,
+                        extractor_path / constraint_file,
                         result_path]
         subprocess.run(command_line)
     else:
