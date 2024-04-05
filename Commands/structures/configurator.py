@@ -6,14 +6,14 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 
+import runrunner as rrr
+from runrunner import Runner
+
 from Commands.structures.configuration_scenario import ConfigurationScenario
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
-
-import runrunner as rrr
-from runrunner import Runner
 
 
 class Configurator:
