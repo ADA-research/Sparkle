@@ -2,11 +2,12 @@
 # -*- coding: UTF-8 -*-
 
 import os
+import subprocess
 import sys
 import random
 import time
-import pandas as pd
-import numpy as np
+from pathlib import Path
+
 
 global sparkle_special_string
 sparkle_special_string = r'__@@SPARKLE@@__'
@@ -46,7 +47,7 @@ def deal_raw_result_file(relative_path, cnf_instance_file_name, raw_result_file_
 		else: 
 			#fout.write(',' + myline + '\n')
 			mylist_comma = myline.split(r',')
-			for i in range(0, len(mylist_comma)):
+			for i in range(len(mylist_comma)):
 				fout.write(r','+mylist_comma[i] + sparkle_special_string + extractor_directory_last_level)
 				#fout.write(r','+mylist_comma[i]+r'_'+current_last_level_directory_name)
 			fout.write('\n')
@@ -61,33 +62,20 @@ def deal_raw_result_file(relative_path, cnf_instance_file_name, raw_result_file_
 
 executable_name = r'features'
 
-'''
-if len(sys.argv) !=4:
-	print r'c Command error!'
-	print r'c Usage: ' + sys.argv[0] + r' <relative_path> <cnf_instance_file> <result_feature_file>'
-	sys.exit()
-'''
-
 relative_path = sys.argv[1]
 cnf_instance_file_name = sys.argv[2]
 result_feature_file_name = sys.argv[3]
-#tmp_output = sys.argv[4]
 
 raw_result_file_name = relative_path + r'' + executable_name + r'_' + get_last_level_directory_name(cnf_instance_file_name) + r'_' + get_time_pid_random_string() + r'.rawres'
 
 tmp_output = r'TMP/' + raw_result_file_name
 
-command_line = relative_path + r'/' + executable_name + r' ' + cnf_instance_file_name + ' ' + tmp_output + r' > ' + raw_result_file_name
-os.system(command_line)
-
-#print raw_result_file_name
+command_line = [relative_path + r'/' + executable_name,
+				cnf_instance_file_name,
+				tmp_output]
+subprocess.run(command_line, stdout=Path(raw_result_file_name).open("w+"))
 
 deal_raw_result_file(relative_path, cnf_instance_file_name, raw_result_file_name, result_feature_file_name)
 
-command_line = r'rm -f ' + tmp_output
-os.system(command_line)
-
-command_line = r'rm -f ' + raw_result_file_name
-os.system(command_line)
-
-
+Path(tmp_output).unlink(missing_ok=True)
+Path(raw_result_file_name).unlink(missing_ok=True)

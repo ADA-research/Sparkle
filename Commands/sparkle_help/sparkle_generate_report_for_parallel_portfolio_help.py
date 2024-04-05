@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio report generation."""
 
-import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -33,7 +33,7 @@ def get_num_solvers(parallel_portfolio_path: Path) -> str:
 
     if num_solvers < 1:
         print("ERROR: No solvers found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str(num_solvers)
 
@@ -57,17 +57,14 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
             solver_variations = int(solver_path[solver_path.rfind(" ") + 1:])
             solver_path = solver_path[:solver_path.rfind(" ")]
 
-        solver_name = sfh.get_file_name(solver_path)
-
-        if solver_name == "":
-            solver_name = sfh.get_last_level_directory_name(solver_path)
+        solver_name = Path(solver_path).name
 
         x = solver_name.rfind("_")
 
         if str(x) != "-1":
             solver_name = solver_name[:x] + "\\" + solver_name[x:]
 
-        str_value += r"\item \textbf{" + f"{sgrh.underscore_for_latex(solver_name)}}}\n"
+        str_value += f"\\item \textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"
 
         if solver_variations > 1:
             seed_number = ""
@@ -95,9 +92,9 @@ def get_num_instance_sets(instance_list: list[str]) -> str:
     list_instance_sets = []
 
     for instance_path in instance_list:
-        instance_set = sfh.get_current_directory_name(instance_path)
+        instance_set = Path(instance_path).parent.name
 
-        if not (instance_set in list_instance_sets):
+        if instance_set not in list_instance_sets:
             list_instance_sets.append(instance_set)
 
     n_sets = len(list_instance_sets)
@@ -126,9 +123,9 @@ def get_instance_set_list(instance_list: list[str]) -> tuple[str, int]:
     dict_n_instances_in_sets = {}
 
     for instance_path in instance_list:
-        instance_set = sfh.get_current_directory_name(instance_path)
+        instance_set = Path(instance_path).parent.name
 
-        if not (instance_set in list_instance_sets):
+        if instance_set not in list_instance_sets:
             list_instance_sets.append(instance_set)
             dict_n_instances_in_sets[instance_set] = 1
         else:
@@ -151,17 +148,14 @@ def get_results() -> dict[str, list[str, str]]:
         contains the solver name followed by the performance (both as string).
     """
     solutions_dir = sgh.pap_performance_data_tmp_path
-    results = sfh.get_list_all_result_filename(solutions_dir)
-
-    if len(results) == 0:
-        print("ERROR: No result files found for parallel portfolio! Stopping execution.")
-        print(solutions_dir)
-        sys.exit(-1)
-
+    results = sfh.get_list_all_extensions(solutions_dir, "result")
     results_dict = dict()
 
-    for result in results:
-        result_path = Path(solutions_dir / result)
+    if len(results) == 0:
+        print(f"WARNING: No result files found for parallel portfolio in:"
+              f" {solutions_dir}")
+
+    for result_path in results:
 
         with Path(result_path).open("r") as result_file:
             lines = result_file.readlines()
@@ -177,7 +171,6 @@ def get_results() -> dict[str, list[str, str]]:
                     results_dict[instance][1] = result_lines[2]
             else:
                 results_dict[instance] = [result_lines[1], result_lines[2]]
-
     return results_dict
 
 
@@ -194,14 +187,14 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
     """
     results_on_instances = get_results()
     str_value = ""
-
+    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     # Count the number of solved instances per solver, and the unsolved instances
-    if sgh.settings.get_general_performance_measure() == PerformanceMeasure.RUNTIME:
+    if perf_measure == PerformanceMeasure.RUNTIME:
         solver_dict = dict()
         unsolved_instances = 0
 
         for instances in results_on_instances:
-            solver_name = sfh.get_file_name(results_on_instances[instances][0])
+            solver_name = Path(results_on_instances[instances][0]).name
             cutoff_time = str(sgh.settings.get_penalised_time())
 
             if results_on_instances[instances][1] != cutoff_time:
@@ -213,12 +206,10 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
                     solver_dict[solver_name] = 1
             else:
                 unsolved_instances += 1
-    if (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION):
+    if perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         print("*** ERROR: Parallel Portfolio is not available currently for"
-              f" performance measure: {sgh.settings.get_general_performance_measure()}")
-    elif (sgh.settings.get_general_performance_measure()
-            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
+              f" performance measure: {perf_measure}")
+    elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         for instances in results_on_instances:
             str_value += (r"\item \textbf{" + sgrh.underscore_for_latex(instances)
                           + "}, was scored by: " + r"\textbf{"
@@ -319,7 +310,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
     sbs_dict = {}
 
     for instance in instance_list:
-        instance_name = sfh.get_last_level_directory_name(instance)
+        instance_name = Path(instance).name
 
         if instance_name in results:
             if sbs_name in results[instance_name][0]:
@@ -342,23 +333,23 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     Returns:
         A dict of instance names and the penalised running time of the PaP.
     """
-    mydict = {}
+    instance_penalty_dict = {}
 
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     results = get_results()
+    default_penalty = float(sgh.settings.get_penalised_time())
 
     for instance in instance_list:
-        instance_name = sfh.get_last_level_directory_name(instance)
-
+        instance_name = Path(instance).name
         if instance_name in results:
             if float(results[instance_name][1]) <= cutoff_time:
-                mydict[instance_name] = float(results[instance_name][1])
+                instance_penalty_dict[instance_name] = float(results[instance_name][1])
             else:
-                mydict[instance_name] = float(sgh.settings.get_penalised_time())
+                instance_penalty_dict[instance_name] = default_penalty
         else:
-            mydict[instance_name] = float(sgh.settings.get_penalised_time())
+            instance_penalty_dict[instance_name] = default_penalty
 
-    return mydict
+    return instance_penalty_dict
 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
@@ -399,12 +390,11 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     penalised_time_str = str(sgh.settings.get_penalised_time())
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
-    gnuplot_command = (
-        f"cd {latex_directory_path}; python auto_gen_plot.py {data_filename} "
-        f"{penalised_time_str} 'SBS ({sgrh.underscore_for_latex(sbs_solver)})' "
-        f"Parallel-Portfolio {figure_filename} {performance_metric_str}")
+    gnuplot_cmd_list = ["python", "auto_gen_plot.py", data_filename, penalised_time_str,
+                        f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
+                        "Parallel-Portfolio", figure_filename, performance_metric_str]
 
-    os.system(gnuplot_command)
+    subprocess.run(gnuplot_cmd_list, cwd=latex_directory_path)
 
     str_value = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
@@ -546,14 +536,12 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     variable = "decisionBool"
     str_value = r"\decisiontrue"
 
-    if (sgh.settings.get_general_performance_measure()
+    if (sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
             == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
         str_value = r"\decisionfalse"
     mydict[variable] = str_value
 
-    variable = "performanceMetric"
-    str_value = sgh.settings.get_performance_metric_for_report()
-    mydict[variable] = str_value
+    mydict["performanceMetric"] = sgh.settings.get_performance_metric_for_report()
 
     return mydict
 
@@ -591,7 +579,6 @@ def generate_report(parallel_portfolio_path: Path, instances: list[str]) -> None
             outfile.write(line)
 
     stex.check_tex_commands_exist(latex_directory_path)
-
     report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
 
     print(f"Report is placed at: {report_path}")

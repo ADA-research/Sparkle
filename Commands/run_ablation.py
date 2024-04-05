@@ -2,9 +2,11 @@
 """Sparkle command to execute ablation analysis."""
 
 import argparse
-import os
 import sys
+import shutil
 from pathlib import Path
+
+from runrunner.base import Runner
 
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
@@ -16,8 +18,6 @@ from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -51,7 +51,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
+        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
         action=ac.SetByUser,
         help="The performance measure, e.g. runtime",
     )
@@ -94,8 +94,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm")
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
     )
     parser.set_defaults(ablation_settings_help=False)
     return parser
@@ -132,8 +132,8 @@ if __name__ == "__main__":
         )  # Do first, so other command line options can override settings from the file
         args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
         sgh.settings.set_general_target_cutoff_time(
@@ -173,26 +173,24 @@ if __name__ == "__main__":
     ablation_scenario_dir = sah.get_ablation_scenario_directory(
         solver_name, instance_set_train_name, instance_set_test_name
     )
-    if sah.check_for_ablation(
-        solver_name, instance_set_train_name, instance_set_test_name
-    ):
-        print("Warning: found existing ablation scenario for this combination. This "
-              "will be removed.")
-        os.system(f"rm -rf {sgh.ablation_dir}{ablation_scenario_dir}")
+    if sah.check_for_ablation(solver_name, instance_set_train_name,
+                              instance_set_test_name):
+        print("Warning: found existing ablation scenario for this combination. "
+              "This will be removed.")
+        shutil.rmtree(sgh.ablation_dir + ablation_scenario_dir)
 
     # Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(
         solver_name, instance_set_train_name, instance_set_test_name
     )
-    print(f"Scenario dir: {ablation_scenario_dir}")
 
     # Instances
-    sah.create_instance_file(instance_set_train, ablation_scenario_dir, "train")
+    sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=False)
     if instance_set_test_name is not None:
-        sah.create_instance_file(instance_set_test, ablation_scenario_dir, "test")
+        sah.create_instance_file(instance_set_test, ablation_scenario_dir, test=True)
     else:
         # TODO: check if needed
-        sah.create_instance_file(instance_set_train, ablation_scenario_dir, "test")
+        sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=True)
 
     print("Create config file")
     # Configurations
@@ -200,29 +198,14 @@ if __name__ == "__main__":
         solver_name, instance_set_train_name, instance_set_test_name
     )
     print("Submit ablation run")
-    # Submit ablation run
-    if args.run_on == Runner.SLURM:
-        ids = sah.submit_ablation_sparkle(
-            solver_name=solver_name,
-            instance_set_test=instance_set_test,
-            instance_set_train_name=instance_set_train_name,
-            instance_set_test_name=instance_set_test_name,
-            ablation_scenario_dir=ablation_scenario_dir)
-        job_id_str = ",".join(ids)
+    runs = sah.submit_ablation(
+        ablation_scenario_dir=ablation_scenario_dir,
+        instance_set_test=instance_set_test,
+        run_on=run_on)
+
+    if run_on == Runner.LOCAL:
+        print("Ablation analysis finished!")
+    else:
+        job_id_str = ",".join([run.run_id for run in runs])
         print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
-    else:
-        ids = sah.submit_ablation_runrunner(
-            solver_name=solver_name,
-            instance_set_test=instance_set_test,
-            instance_set_train_name=instance_set_train_name,
-            instance_set_test_name=instance_set_test_name,
-            ablation_scenario_dir=ablation_scenario_dir,
-            run_on=run_on)
-
-        if run_on == Runner.LOCAL:
-            print("Ablation analysis finished!")
-        else:
-            job_id_str = ",".join(ids)
-            print(f"Ablation analysis running. Waiting for Slurm job(s) with id(s): "
-                  f"{job_id_str}")

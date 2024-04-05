@@ -27,7 +27,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         csv file. If rerun is False (default), get only the tuples that don't have a
         value in the table, else (True) get all the tuples.
         """
-        df = self.dataframe.stack(dropna=False)
+        df = self.dataframe.stack(future_stack=True)
 
         if not rerun:
             df = df[df.isnull()]
@@ -148,7 +148,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         """
         virtual_best = []
         capvalue = None
-        for instance_idx in range(0, len(self.list_rows())):
+        for instance_idx in range(len(self.list_rows())):
             instance = self.get_row_name(instance_idx)
             if capvalue_list is not None:
                 capvalue = capvalue_list[instance_idx]

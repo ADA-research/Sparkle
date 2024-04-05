@@ -24,15 +24,12 @@ def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> N
     mock_count_instances = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
-                                      "get_list_all_filename")
     instance_set_name = "test-instance"
 
     number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_called_once_with(instance_set_name)
-    mock_list_filename.assert_not_called()
     assert number == "3"
 
 
@@ -49,8 +46,9 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
                                         "count_instances_in_reference_list",
                                         return_value=3)
     mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
-                                      "get_list_all_filename",
-                                      return_value=["instance-1", "instance-2"])
+                                      "get_list_all_filename_recursive",
+                                      return_value=[Path("instance-1"),
+                                                    Path("instance-2")])
     instance_set_name = "test-instance"
 
     number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
@@ -58,7 +56,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
 
-    instance_directory = f"{sgh.smac_dir}/scenarios/instances/test-instance/"
+    instance_directory = f"{sgh.smac_dir}scenarios/instances/{instance_set_name}/"
     mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
@@ -82,15 +80,6 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     assert par == 7.5
 
 
-def test_get_instance_name_from_path() -> None:
-    """Test get_instance_name_from_path returns the last part of the given path."""
-    path_string = "parent/directory/instance-name"
-
-    name = sgr.get_instance_name_from_path(path_string)
-
-    assert name == "instance-name"
-
-
 def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
     """Test construct_list_instance_and_performance creates list from file content."""
     file_content_mock = ('"Problem Instance","Seed",'
@@ -107,7 +96,7 @@ def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
     list = sgr.construct_list_instance_and_performance(result_file, cutoff)
 
     assert list == (
-        [["instance-1.cnf", 0.01001], ["instance-2.cnf", 1.0], ["instance-3.cnf", 100]]
+        [["instance-1.cnf", 0.01001], ["instance-2.cnf", 1.0], ["instance-3.cnf", 100.0]]
     )
 
 
@@ -258,10 +247,10 @@ def test_get_features_bool_false(mocker: MockFixture) -> None:
     """
     solver_name = "test-solver"
     instance_set = "train-instance"
-    solver_dir = "smac-solver-dir/"
+    solver_dir = Path("smac-solver-dir/")
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_dir",
+                            "get_smac_solver_path",
                             return_value=solver_dir)
     file_content_mock = ""
     mock_open = mocker.patch("pathlib.Path.open",
@@ -279,12 +268,12 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_dir = "smac-solver-dir/"
+    solver_dir = Path("smac-solver-dir/")
     solver_name = "test-solver"
     instance_set = "train-instance"
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_dir",
+                            "get_smac_solver_path",
                             return_value=solver_dir)
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
@@ -364,7 +353,7 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     latex_directory = reports_dir + "Sparkle-latex-generator-for-configuration/"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "cwd": latex_directory,
+                   "output_dir": latex_directory,
                    "scale": "linear",
                    "limit_min": 1.5,
                    "limit_max": 1.5,
@@ -412,7 +401,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     latex_directory = reports_dir + "Sparkle-latex-generator-for-configuration/"
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "cwd": latex_directory,
+                   "output_dir": latex_directory,
                    "scale": "log",
                    "limit_min": 0.25,
                    "limit_max": 0.25,
@@ -1167,41 +1156,20 @@ def test_generate_report_for_configuration_prep_exists_not(mocker: MockFixture) 
     Also test that the function then copies the latex templates to the report directory.
     """
     report_directory = "report/directory"
-
-    template_latex_directory_path = (
-        "Components/Sparkle-latex-generator-for-configuration/")
-
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
-    mock_system = mocker.patch("os.system")
+    mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
 
-    mock_exists.assert_called_once()
-
-    mkdir_command = f"mkdir -p {report_directory}"
-    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
-    mock_system.assert_has_calls([
-        mocker.call(mkdir_command),
-        mocker.call(cp_command)
-    ])
+    mock_shutil.assert_called_once()
 
 
 def test_generate_report_for_configuration_prep_exists(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_prep copies files to report directory."""
     report_directory = "report/directory"
-
-    template_latex_directory_path = (
-        "Components/Sparkle-latex-generator-for-configuration/")
-
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
-    mock_system = mocker.patch("os.system")
+    mock_shutil = mocker.patch("shutil.copytree", return_value=report_directory)
 
     sgr.generate_report_for_configuration_prep(report_directory)
-
-    mock_exists.assert_called_once()
-
-    cp_command = f"cp -r {template_latex_directory_path} {report_directory}"
-    mock_system.assert_called_once_with(cp_command)
+    mock_shutil.assert_called_once()
 
 
 def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:

@@ -5,21 +5,22 @@ import sys
 import argparse
 from pathlib import Path
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import ReportingScenario
 from sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
+    perf_measure = sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     parser.add_argument(
         "instance_path",
         type=Path,
@@ -34,8 +35,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        help=("the performance measure, e.g. runtime"
-              f" (default: {sgh.settings.DEFAULT_general_performance_measure.name})"))
+        help=f"the performance measure, e.g. runtime (default: {perf_measure.name})")
     parser.add_argument(
         "--parallel",
         action="store_true",
@@ -43,8 +43,9 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
+    )
     return parser
 
 
@@ -71,8 +72,9 @@ if __name__ == "__main__":
         # Do first, so other command line options can override settings from the file
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
+        )
 
     # Initialise latest scenario
     sgh.latest_scenario = ReportingScenario()
@@ -81,9 +83,9 @@ if __name__ == "__main__":
     if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Call the configured solver
-        job_id_str = srcsh.call_configured_solver(args.instance_path,
-                                                  args.parallel,
-                                                  run_on=run_on)
+        run = srcsh.call_configured_solver(args.instance_path,
+                                           args.parallel,
+                                           run_on=run_on)
     else:
         print("ERROR: Faulty input instance or instance directory!")
         sys.exit(-1)
@@ -91,7 +93,7 @@ if __name__ == "__main__":
     # Print result
     if args.parallel and run_on == Runner.SLURM:
         print(f"Running configured solver in parallel. Waiting for Slurm "
-              f"job(s) with id(s): {job_id_str}")
+              f"job(s) with id(s): {run.run_id}")
     else:
         print("Running configured solver done!")
 

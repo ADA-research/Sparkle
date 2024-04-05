@@ -5,7 +5,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from Commands.Structures.status_info import GenerateReportStatusInfo
+from Commands.structures.status_info import GenerateReportStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
 from Commands.sparkle_help import \
@@ -16,8 +16,8 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import \
     sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
 from Commands.sparkle_help import sparkle_command_help as sch
@@ -77,7 +77,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
+        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
         action=ac.SetByUser,
         help="the performance measure, e.g. runtime",
     )
@@ -125,9 +125,8 @@ if __name__ == "__main__":
             args.settings_file, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
-        )
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
     if not selection and test_case_directory is None and solver is None:
@@ -151,7 +150,8 @@ if __name__ == "__main__":
 
     # Reporting for algorithm selection
     if selection or test_case_directory is not None:
-        performance_measure = sgh.settings.get_general_performance_measure()
+        performance_measure =\
+            sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
            performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
             print("ERROR: The generate_report command is not yet implemented for the"

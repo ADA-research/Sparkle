@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from shutil import which
 from pathlib import Path
+import subprocess
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -60,7 +61,7 @@ def get_num_solvers() -> str:
 
     if int(str_value) < 1:
         print("ERROR: No solvers found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str_value
 
@@ -73,10 +74,9 @@ def get_solver_list() -> str:
     """
     str_value = ""
     solver_list = sgh.solver_list
-
     for solver_path in solver_list:
-        solver_name = sfh.get_file_name(solver_path)
-        str_value += r"\item \textbf{" + solver_name + r"}\n"
+        solver_name = Path(solver_path).name
+        str_value += f"\\item \\textbf{{{solver_name}}}\n"
 
     return str_value
 
@@ -92,7 +92,7 @@ def get_num_feature_extractors() -> str:
 
     if int(str_value) < 1:
         print("ERROR: No feature extractors found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str_value
 
@@ -105,11 +105,8 @@ def get_feature_extractor_list() -> str:
     """
     str_value = ""
     extractor_list = sgh.extractor_list
-
     for extractor_path in extractor_list:
-        extractor_name = sfh.get_file_name(extractor_path)
-        str_value += r"\item \textbf{" + extractor_name + r"}\n"
-
+        str_value += f"\\item \\textbf{{{Path(extractor_path).name}}}\n"
     return str_value
 
 
@@ -123,16 +120,16 @@ def get_num_instance_classes() -> str:
     instance_list = sgh.instance_list
 
     for instance_path in instance_list:
-        instance_class = sfh.get_current_directory_name(instance_path)
+        instance_class = Path(instance_path).parent.name
 
-        if not (instance_class in list_instance_class):
+        if instance_class not in list_instance_class:
             list_instance_class.append(instance_class)
 
     str_value = str(len(list_instance_class))
 
     if int(str_value) < 1:
         print("ERROR: No instance sets found, report generation failed!")
-        sys.exit()
+        sys.exit(-1)
 
     return str_value
 
@@ -149,9 +146,9 @@ def get_instance_class_list() -> str:
     instance_list = sgh.instance_list
 
     for instance_path in instance_list:
-        instance_class = sfh.get_current_directory_name(instance_path)
+        instance_class = Path(instance_path).parent.name
 
-        if not (instance_class in list_instance_class):
+        if instance_class not in list_instance_class:
             list_instance_class.append(instance_class)
             dict_number_of_instances_in_instance_class[instance_class] = 1
         else:
@@ -171,9 +168,7 @@ def get_feature_computation_cutoff_time() -> str:
     Returns:
         The feature computation cutoff time as str.
     """
-    str_value = str(sgh.settings.get_general_extractor_cutoff_time())
-
-    return str_value
+    return str(sgh.settings.get_general_extractor_cutoff_time())
 
 
 def get_performance_computation_cutoff_time() -> str:
@@ -182,9 +177,7 @@ def get_performance_computation_cutoff_time() -> str:
     Returns:
         The performance computation cutoff time as str.
     """
-    str_value = str(sgh.settings.get_general_target_cutoff_time())
-
-    return str_value
+    return str(sgh.settings.get_general_target_cutoff_time())
 
 
 def get_solver_perfect_ranking_list() -> str:
@@ -198,12 +191,10 @@ def get_solver_perfect_ranking_list() -> str:
     rank_list = scmch.compute_perfect_selector_marginal_contribution()
     str_value = ""
 
-    for i in range(0, len(rank_list)):
-        solver = rank_list[i][0]
-        solver = sfh.get_file_name(solver)
-        marginal_contribution = str(rank_list[i][1])
+    for rank in rank_list:
+        solver = Path(rank[0]).name
         str_value += (r"\item \textbf{" + solver + r"}, marginal contribution: "
-                      + f"{marginal_contribution}\n")
+                      + f"{rank[1]}\n")
     return str_value
 
 
@@ -218,12 +209,10 @@ def get_solver_actual_ranking_list() -> str:
     rank_list = scmch.compute_actual_selector_marginal_contribution()
     str_value = ""
 
-    for i in range(0, len(rank_list)):
-        solver = rank_list[i][0]
-        solver = sfh.get_file_name(solver)
-        marginal_contribution = str(rank_list[i][1])
+    for rank in rank_list:
+        solver = Path(rank[0]).name
         str_value += (r"\item \textbf{" + solver + r"}, marginal contribution: "
-                      + f"{marginal_contribution}\n")
+                      + f"{rank[1]}\n")
     return str_value
 
 
@@ -241,9 +230,9 @@ def get_par_ranking_list() -> str:
         performance_data_csv.get_solver_penalty_time_ranking_list())
 
     for solver, this_penalty_time in solver_penalty_time_ranking_list:
-        solver = sfh.get_file_name(solver)
+        solver = Path(solver).name
         penalty = sgh.settings.get_general_penalty_multiplier()
-        str_value += (rf"\item \textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n")
+        str_value += f"\\item \\textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n"
 
     return str_value
 
@@ -328,7 +317,8 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
     minimise = True
-    performance_measure = sgh.settings.get_general_performance_measure()
+    performance_measure = \
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     capvalue = sgh.settings.get_general_cap_value()
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
@@ -364,9 +354,9 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
     instances = (dict_sbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
     if (len(dict_sbs_penalty_time_on_each_instance) != len(instances)):
-        print("""ERROR: Number of penalty times for the single best solver
-          does not match the number of instances""")
-        sys.exit()
+        print("ERROR: Number of penalty times for the single best solver does not match "
+              "the number of instances")
+        sys.exit(-1)
     points = []
     for instance in instances:
         point = [dict_sbs_penalty_time_on_each_instance[instance],
@@ -381,8 +371,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
-    sbs_solver = solver_penalty_time_ranking_list[0][0]
-    sbs_solver = sfh.get_file_name(sbs_solver)
+    sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
     penalty = sgh.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
@@ -394,10 +383,10 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             cwd=latex_directory_path)
+                             output_dir=latex_directory_path)
     str_value = (
         "\\includegraphics[width=0.6\\textwidth]"
-        f"{figure_portfolio_selector_sparkle_vs_sbs_filename}"
+        f"{{{figure_portfolio_selector_sparkle_vs_sbs_filename}}}"
     )
 
     return str_value
@@ -419,9 +408,9 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
     instances = (dict_vbs_penalty_time_on_each_instance.keys()
                  & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
     if (len(dict_vbs_penalty_time_on_each_instance) != len(instances)):
-        print("""ERROR: Number of penalty times for the virtual best solver
-          does not match the number of instances""")
-        sys.exit()
+        print("ERROR: Number of penalty times for the virtual best solver does not"
+              "match the number of instances")
+        sys.exit(-1)
     points = []
     for instance in instances:
         point = [dict_vbs_penalty_time_on_each_instance[instance],
@@ -442,11 +431,11 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             cwd=latex_directory_path)
+                             output_dir=latex_directory_path)
 
     str_value = (
         "\\includegraphics[width=0.6\\textwidth]"
-        f"{figure_portfolio_selector_sparkle_vs_vbs_filename}"
+        f"{{{figure_portfolio_selector_sparkle_vs_vbs_filename}}}"
     )
 
     return str_value
@@ -520,108 +509,45 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
-        test_case_directory: Path to the test case directory. Defaults to None.
+        test_case_directory: Path to the test case directory.
 
     Returns:
         A dict matching str variables in the LaTeX template with their value str.
     """
-    mydict = {}
+    latex_dict = {}
 
-    variable = "customCommands"
-    str_value = get_custom_commands()
-    mydict[variable] = str_value
-
-    variable = "sparkle"
-    str_value = get_sparkle()
-    mydict[variable] = str_value
-
-    variable = "numSolvers"
-    str_value = get_num_solvers()
-    mydict[variable] = str_value
-
-    variable = "solverList"
-    str_value = get_solver_list()
-    mydict[variable] = str_value
-
-    variable = "numFeatureExtractors"
-    str_value = get_num_feature_extractors()
-    mydict[variable] = str_value
-
-    variable = r"featureExtractorList"
-    str_value = get_feature_extractor_list()
-    mydict[variable] = str_value
-
-    variable = r"numInstanceClasses"
-    str_value = get_num_instance_classes()
-    mydict[variable] = str_value
-
-    variable = r"instanceClassList"
-    str_value = get_instance_class_list()
-    mydict[variable] = str_value
-
-    variable = r"featureComputationCutoffTime"
-    str_value = get_feature_computation_cutoff_time()
-    mydict[variable] = str_value
-
-    variable = r"performanceComputationCutoffTime"
-    str_value = get_performance_computation_cutoff_time()
-    mydict[variable] = str_value
-
-    variable = r"solverPerfectRankingList"
-    str_value = get_solver_perfect_ranking_list()
-    mydict[variable] = str_value
-
-    variable = r"solverActualRankingList"
-    str_value = get_solver_actual_ranking_list()
-    mydict[variable] = str_value
-
-    variable = r"PARRankingList"
-    str_value = get_par_ranking_list()
-    mydict[variable] = str_value
-
-    variable = r"VBSPAR"
-    str_value = get_vbs_par()
-    mydict[variable] = str_value
-
-    variable = r"actualPAR"
-    str_value = get_actual_par()
-    mydict[variable] = str_value
-
-    variable = r"penalty"
-    str_value = str(sgh.settings.get_general_penalty_multiplier())
-    mydict[variable] = str_value
-
-    variable = r"figure-portfolio-selector-sparkle-vs-sbs"
-    str_value = get_figure_portfolio_selector_sparkle_vs_sbs()
-    mydict[variable] = str_value
-
-    variable = r"figure-portfolio-selector-sparkle-vs-vbs"
-    str_value = get_figure_portfolio_selector_sparkle_vs_vbs()
-    mydict[variable] = str_value
-
-    variable = r"testBool"
-    str_value = r"\testfalse"
-    mydict[variable] = str_value
+    latex_dict["customCommands"] = get_custom_commands()
+    latex_dict["sparkle"] = get_sparkle()
+    latex_dict["numSolvers"] = get_num_solvers()
+    latex_dict["solverList"] = get_solver_list()
+    latex_dict["numFeatureExtractors"] = get_num_feature_extractors()
+    latex_dict["featureExtractorList"] = get_feature_extractor_list()
+    latex_dict["numInstanceClasses"] = get_num_instance_classes()
+    latex_dict["instanceClassList"] = get_instance_class_list()
+    latex_dict["featureComputationCutoffTime"] = get_feature_computation_cutoff_time()
+    latex_dict["performanceComputationCutoffTime"] =\
+        get_performance_computation_cutoff_time()
+    latex_dict["solverPerfectRankingList"] = get_solver_perfect_ranking_list()
+    latex_dict["solverActualRankingList"] = get_solver_actual_ranking_list()
+    latex_dict["PARRankingList"] = get_par_ranking_list()
+    latex_dict["VBSPAR"] = get_vbs_par()
+    latex_dict["actualPAR"] = get_actual_par()
+    latex_dict["penalty"] = str(sgh.settings.get_general_penalty_multiplier())
+    latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
+        get_figure_portfolio_selector_sparkle_vs_sbs()
+    latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
+        get_figure_portfolio_selector_sparkle_vs_vbs()
+    latex_dict["testBool"] = r"\testfalse"
 
     # Train and test
     if test_case_directory is not None:
-        variable = r"testInstanceClass"
-        str_value = get_test_instance_class(test_case_directory)
-        mydict[variable] = str_value
+        latex_dict["testInstanceClass"] = get_test_instance_class(test_case_directory)
+        latex_dict["numInstanceInTestInstanceClass"] =\
+            get_num_instance_in_test_instance_class(test_case_directory)
+        latex_dict["testActualPAR"] = get_test_actual_par(test_case_directory)
+        latex_dict["testBool"] = r"\testtrue"
 
-        variable = r"numInstanceInTestInstanceClass"
-        str_value = get_num_instance_in_test_instance_class(test_case_directory)
-        mydict[variable] = str_value
-
-        variable = "testActualPAR"
-        str_value = get_test_actual_par(test_case_directory)
-        mydict[variable] = str_value
-
-        variable = r"testBool"
-        str_value = r"\testtrue"
-        mydict[variable] = str_value
-
-    return mydict
+    return latex_dict
 
 
 def generate_report(test_case_directory: str = None) -> None:
@@ -636,8 +562,8 @@ def generate_report(test_case_directory: str = None) -> None:
             print("ERROR: The given directory", test_case_directory, "does not exist!")
             sys.exit(-1)
 
-        if test_case_directory[-1] != r"/":
-            test_case_directory += r"/"
+        if test_case_directory[-1] != "/":
+            test_case_directory += "/"
 
         latex_report_filename = Path("Sparkle_Report_for_Test")
         dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
@@ -647,30 +573,21 @@ def generate_report(test_case_directory: str = None) -> None:
         dict_variable_to_value = get_dict_variable_to_value()
 
     latex_directory_path = Path("Components/Sparkle-latex-generator/")
-    latex_template_filename = "template-Sparkle.tex"
 
-    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
-    report_content = ""
-    fin = Path(latex_template_filepath).open("r")
-    while True:
-        myline = fin.readline()
-        if not myline:
-            break
-        report_content += myline
-    fin.close()
+    latex_template_filepath = latex_directory_path / "template-Sparkle.tex"
+    report_content = Path(latex_template_filepath).open("r").read()
 
     for variable_key, str_value in dict_variable_to_value.items():
         variable = r"@@" + variable_key + r"@@"
-        if (variable_key != r"figure-portfolio-selector-sparkle-vs-sbs"
-           and variable_key != r"figure-portfolio-selector-sparkle-vs-vbs"):
-            str_value = str_value.replace(r"_", r"\textunderscore ")
+        if (variable_key != "figure-portfolio-selector-sparkle-vs-sbs"
+           and variable_key != "figure-portfolio-selector-sparkle-vs-vbs"):
+            str_value = str_value.replace("_", r"\textunderscore ")
         report_content = report_content.replace(variable, str_value)
 
     latex_report_filepath = Path(latex_directory_path / latex_report_filename)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-    fout = Path(latex_report_filepath).open("w+")
-    fout.write(report_content)
-    fout.close()
+
+    Path(latex_report_filepath).open("w+").write(report_content)
 
     stex.check_tex_commands_exist(latex_directory_path)
 
@@ -692,7 +609,7 @@ def generate_comparison_plot(points: list,
                              penalty_time: float = None,
                              replace_zeros: bool = True,
                              magnitude_lines: int = sgh.sparkle_maximum_int,
-                             cwd: str = None) -> None:
+                             output_dir: Path = None) -> None:
     """Create comparison plots between two different solvers/portfolios.
 
     Args:
@@ -704,7 +621,7 @@ def generate_comparison_plot(points: list,
         title: Display title in the image (default: None)
         scale: [linear, log] (default: linear)
         limit: The method to compute the axis limits in the figure
-        [absolute, relative, magnitude] (default: relative)
+            [absolute, relative, magnitude] (default: relative)
             absolute: Uses the limit_min/max values as absolute values
             relative: Decreases/increases relatively to the min/max values found in the
             points. E.g., min/limit_min and max*limit_max
@@ -718,12 +635,13 @@ def generate_comparison_plot(points: list,
         replace_zeros: Replaces zeros valued performances to a very small value to make
         plotting on log-scale possible
         magnitude_lines: Draw magnitude lines (only supported for log scale)
-        cwd: directory path to place the figure and its intermediate files in (default:
-        current working directory)
+        output_dir: directory path to place the figure and its intermediate files in
+            (default: current working directory)
     """
-    pwd = Path.cwd()
-    if cwd is not None:
-        os.chdir(cwd)
+    if output_dir is None:
+        output_dir = Path()
+    elif isinstance(output_dir, str):
+        output_dir = Path(output_dir)
 
     points = np.array(points)
     if replace_zeros:
@@ -745,7 +663,7 @@ def generate_comparison_plot(points: list,
     if penalty_time is not None:
         if (penalty_time < max_point_value):
             print("ERROR: Penalty time too small for the given performance data.")
-            sys.exit()
+            sys.exit(-1)
         max_point_value = penalty_time
 
     if limit == "absolute":
@@ -768,30 +686,29 @@ def generate_comparison_plot(points: list,
     output_eps_file = f"{figure_filename}.eps"
 
     # Create data file
-    with Path(output_data_file).open("w") as fout:
+    with (output_dir / output_data_file).open("w") as fout:
         for point in points:
             fout.write(" ".join([str(c) for c in point]) + "\n")
         fout.close()
 
     # Generate plot script
-    with Path(output_gnuplot_script).open("w") as fout:
-        fout.write(f"set xlabel '{xlabel}'\n")
-        fout.write(f"set ylabel '{ylabel}'\n")
-        fout.write(f"set title '{title}'\n")
-        fout.write("unset key\n")
-        fout.write(f"set xrange [{min_value}:{max_value}]\n")
-        fout.write(f"set yrange [{min_value}:{max_value}]\n")
+    with (output_dir / output_gnuplot_script).open("w") as fout:
+        fout.write(f"set xlabel '{xlabel}'\n"
+                   f"set ylabel '{ylabel}'\n"
+                   f"set title '{title}'\n"
+                   "unset key\n"
+                   f"set xrange [{min_value}:{max_value}]\n"
+                   f"set yrange [{min_value}:{max_value}]\n")
         if scale == "log":
-            fout.write("set logscale x\n")
-            fout.write("set logscale y\n")
-        fout.write("set grid lc rgb '#CCCCCC' lw 2\n")
-        fout.write("set size square\n")
-        fout.write(f"set arrow from {min_value},{min_value} to {max_value},{max_value}"
+            fout.write("set logscale x\n"
+                       "set logscale y\n")
+        fout.write("set grid lc rgb '#CCCCCC' lw 2\n"
+                   "set size square\n"
+                   f"set arrow from {min_value},{min_value} to {max_value},{max_value}"
                    " nohead lc rgb '#AAAAAA'\n")
         # TODO magnitude lines for linear scale
         if magnitude_lines > 0 and scale == "log":
-            for order in range(magnitude_lines):
-                order += 1
+            for order in range(1, magnitude_lines + 1):
                 min_shift = min_value * 10 ** order
                 max_shift = 10**(np.log10(max_value) - order)
                 if min_shift >= max_value:  # Outside plot
@@ -800,31 +717,38 @@ def generate_comparison_plot(points: list,
                     break
 
                 fout.write(f"set arrow from {min_value},{min_shift} to {max_shift},"
-                           f"{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n")
-                fout.write(f"set arrow from {min_shift},{min_value} to {max_value},"
+                           f"{max_value} nohead lc rgb '#CCCCCC' dashtype '-'\n"
+                           f"set arrow from {min_shift},{min_value} to {max_value},"
                            f"{max_shift} nohead lc rgb '#CCCCCC' dashtype '-'\n")
 
         if penalty_time is not None:
             fout.write(f"set arrow from {min_value},{penalty_time} to {max_value},"
-                       f"{penalty_time} nohead lc rgb '#AAAAAA'\n")
-            fout.write(f"set arrow from {penalty_time},{min_value} to {penalty_time},"
+                       f"{penalty_time} nohead lc rgb '#AAAAAA'\n"
+                       f"set arrow from {penalty_time},{min_value} to {penalty_time},"
                        f"{max_value} nohead lc rgb '#AAAAAA'\n")
 
-        fout.write('set terminal postscript eps color solid linewidth "Helvetica" 20\n')
-        fout.write(f"set output '{output_eps_file}\n")
-        fout.write("set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n")
-        fout.write(f"plot '{output_data_file}' ls 1\n")
-        fout.close()
+        fout.write('set terminal postscript eps color solid linewidth "Helvetica" 20\n'
+                   f"set output '{output_eps_file}\n"
+                   "set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n"
+                   f"plot '{output_data_file}' ls 1\n")
 
-    # Make figure
-    cmd = f"gnuplot \'{output_gnuplot_script}\'"
-    os.system(cmd)
+    subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
+                                     capture_output=True,
+                                     cwd=output_dir)
+
+    if subprocess_plot.returncode != 0:
+        print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:\n"
+              f"{subprocess_plot.stderr.decode()}\n")
 
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(os.path.abspath(pwd)) / "Components/epstopdf.pl"
+    epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
-    os.system(f"{epstopdf} '{output_eps_file}'")
+    subprocess_epstopdf = subprocess.run([epstopdf, output_eps_file],
+                                         capture_output=True,
+                                         cwd=output_dir)
 
-    os.system(f"rm -f '{output_gnuplot_script}'")
+    if subprocess_epstopdf.returncode != 0:
+        print(f"(Eps To PDF) Error whilst converting Eps to PDF {output_eps_file}"
+              f"{subprocess_epstopdf.stderr.decode()}")
 
-    os.chdir(pwd)
+    sfh.rmfiles(output_gnuplot_script)

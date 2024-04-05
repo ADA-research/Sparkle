@@ -3,8 +3,7 @@
 """Helper functions for adding solvers."""
 
 import os
-
-from Commands.sparkle_help import sparkle_file_help as sfh
+from pathlib import Path
 
 
 def get_solver_directory(solver_name: str) -> str:
@@ -34,7 +33,7 @@ def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
     pcs_count = 0
 
     for file_name in list_files:
-        file_extension = sfh.get_file_least_extension(file_name)
+        file_extension = Path(file_name).suffix
 
         if file_extension == "pcs":
             pcs_count += 1

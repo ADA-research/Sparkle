@@ -3,29 +3,24 @@
 from __future__ import annotations
 from unittest import TestCase
 from pathlib import Path
-import platform
 
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help.sparkle_settings import Settings
+from Commands.sparkle_help import sparkle_settings
 
+from unittest.mock import patch
+from unittest.mock import MagicMock
 
-def is_bitbucket() -> bool:
-    """Method to check if test is run on Docker (BitBucket) or not."""
-    # path = "/proc/self/cgroup"
-    # return (
-    #    Path("/.dockerenv").exists()
-    #    or Path(path).is_file() and any("docker" in line for line in open(path))
-    # )
-    return True
+global settings
+sgh.settings = sparkle_settings.Settings()
 
 
 class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
     def test_read_marginal_contribution_csv(self: TestCase) -> None:
         """Test for method read_marginal_contribution_csv."""
-        pth = Path("Test_Data/test_marginal_contribution.csv")
+        pth = Path("test_marginal_contribution.csv")
         if not pth.exists():
             Path.write_text(pth,
                             "Solvers/CSCCSat,2.068482775510204\nSolvers/MiniSAT,0.0")
@@ -38,7 +33,7 @@ class TestMarginalContribution(TestCase):
 
     def test_write_marginal_contribution_csv(self: TestCase) -> None:
         """Test for method write_marginal_contribution_csv."""
-        pth = Path("Test_Data/test_marginal_contribution.csv")
+        pth = Path("test_marginal_contribution.csv")
         object = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
         result = "Solvers/CSCCSat,2.068482775510204\nSolvers/MiniSAT,0.0\n"
 
@@ -57,17 +52,16 @@ class TestMarginalContribution(TestCase):
                    "test_construct_sparkle_portfolio_selector.csv")
 
         # Settings have no impact yet on the unit test, this needs to be reconfigured
-        tmp_settings = ""
+        """tmp_settings = ""
         source_settings = Path("tests/test_files/Settings/mc-settings.ini")
         with Path("Settings/sparkle_settings.ini").open("r+") as file_target:
             tmp_settings = file_target.read()
             file_target.truncate()
             with source_settings.open("r") as file_source:
                 source_settings = file_source.read()
-                file_target.write(source_settings)
+                file_target.write(source_settings)"""
 
         result = [("Solvers/CSCCSat", 1.7980089765503102), ("Solvers/MiniSAT", 0.0)]
-
         output = scmch.compute_perfect_selector_marginal_contribution(
             aggregation_function=sum,
             capvalue_list=None,
@@ -76,19 +70,19 @@ class TestMarginalContribution(TestCase):
             flag_recompute=True
         )
 
-        with Path("Settings/sparkle_settings.ini").open("w") as f:
+        """with Path("Settings/sparkle_settings.ini").open("w") as f:
             f.truncate()
-            f.write(tmp_settings)
+            f.write(tmp_settings)"""
 
         self.assertListEqual(output, result)
 
     def test_get_list_predict_schedule(self: TestCase) -> None:
         """Test for method get_list_predict_schedule."""
-        # Does not work yet on mac due to issues with Autofolio run
-        # Does not work yet with Bitbucket Pipelines because reading from files(?)
-        if platform.system() != "Linux" or is_bitbucket():
-            return
-        pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
+        # Does not work on bitbucket.
+        # TODO: Fix with mocker commands. There is a ticket for this.
+        return
+        pth = "Commands/test/test_files/Sparkle_Portfolio_Selector/"\
+              "sparkle_portfolio_selector__@@SPARKLE@@__"
         file = "Commands/test/test_files/Feature_Data/"\
                "test_construct_sparkle_portfolio_selector.csv"
         featurecsv = SparkleFeatureDataCSV(file)
@@ -99,26 +93,32 @@ class TestMarginalContribution(TestCase):
                         prefix + "Ptn-7824-b17.cnf", prefix + "bce7824.cnf",
                         prefix + "Ptn-7824-b01.cnf", prefix + "Ptn-7824-b11.cnf",
                         prefix + "Ptn-7824-b09.cnf", prefix + "Ptn-7824-b07.cnf"]
-        result = [("Solvers/CSCCSat", 3.0)]
+        result = [("Solvers/CSCCSat", 61.0)]
 
         for instance in instance_ids:
             output = scmch.get_list_predict_schedule(pth, featurecsv, instance)
             assert output == result
 
-    def test_compute_actual_selector_performance(self: TestCase) -> None:
+    @patch("Commands.sparkle_help.sparkle_compute_marginal_contribution_help."
+           "compute_actual_performance_for_instance")
+    def test_compute_actual_selector_performance(
+            self: TestCase, patch_perf_for_instance: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
-        # Does not work yet on mac due to issues with Autofolio run
-        # Does not work yet on Bitbucket due to issues with get_list..._from_file()
-        if platform.system() != "Linux" or is_bitbucket():
-            return
-        pth = "tests/data/sparkle_portfolio_selector__@@SPARKLE@@__"
+        pth = "Commands/test/test_files/Sparkle_Portfolio_Selector/"\
+              "sparkle_portfolio_selector__@@SPARKLE@@__"
         perf_path = "Commands/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
 
-        result = 30.644344
-        sgh.settings = Settings("Commands/test/test_files/sparkle_settings.ini")
+        result = 526.805294
+        patch_perf_for_instance.side_effect = [(61.0, False), (28.1747, True),
+                                               (61.0, False), (9.98625, True),
+                                               (0.107158, True), (61.0, False),
+                                               (0.537186, True), (61.0, False),
+                                               (61.0, False), (61.0, False),
+                                               (61.0, False), (61.0, False)]
+
         output = scmch.compute_actual_selector_performance(pth,
                                                            perf_path,
                                                            feature_csv_path,
@@ -136,8 +136,6 @@ class TestMarginalContribution(TestCase):
     def test_compute_actual_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
         # Test does not work on Mac
-        if platform.system() != "Linux":
-            return
         perf_path = "Commands/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\

@@ -9,8 +9,9 @@ from unittest.mock import patch
 from unittest.mock import Mock
 from pathlib import Path
 
-from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
-from Commands.sparkle_help.solver import Solver
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.solver import Solver
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 class TestConfigurationScenario(TestCase):
@@ -31,9 +32,21 @@ class TestConfigurationScenario(TestCase):
                                             "/scenarios/instances/Test-Instance-Set")
         self.instance_file_directory.mkdir(parents=True, exist_ok=True)
 
+        self.time_budget = sgh.settings.get_config_budget_per_run()
+        self.cutoff_time = sgh.settings.get_general_target_cutoff_time()
+        self.cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+        self.sparkle_objective =\
+            sgh.settings.get_general_sparkle_objectives()[0]
+
         self.scenario = ConfigurationScenario(self.solver,
                                               self.instance_directory,
-                                              self.run_number, False)
+                                              self.run_number,
+                                              self.time_budget,
+                                              self.cutoff_time,
+                                              self.cutoff_length,
+                                              self.sparkle_objective,
+                                              False,
+                                              sgh.smac_target_algorithm)
 
     def tearDown(self: TestConfigurationScenario) -> None:
         """Cleanup executed after each test."""
@@ -109,7 +122,7 @@ class TestConfigurationScenario(TestCase):
         mock_abs.side_effect = [Path("tests/test_files/test_configurator")]
         mock_deterministic.return_value = "0"
 
-        self.scenario.create_scenario(self.parent_directory)
+        self.scenario.create_scenario(self.parent_directory, )
 
         scenario_file_path = self.scenario.directory / self.scenario.scenario_file_name
         reference_scenario_file = Path("tests", "test_files", "reference_files",

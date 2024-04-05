@@ -5,6 +5,8 @@ import sys
 import argparse
 from pathlib import Path
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_run_portfolio_selector_help as srpsh
 from Commands.sparkle_help import sparkle_logging as sl
@@ -13,8 +15,6 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -29,8 +29,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation."))
     parser.add_argument(
         "--settings-file",
         type=Path,
@@ -41,7 +41,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
+        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
         action=ac.SetByUser,
         help="the performance measure, e.g. runtime",
     )
@@ -76,17 +76,17 @@ if __name__ == "__main__":
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
         )
 
-    if sgh.settings.get_general_performance_measure()\
+    if sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
             == PerformanceMeasure.QUALITY_ABSOLUTE:
         print(
             "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
             " for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)"
         )
-        sys.exit()
+        sys.exit(-1)
 
     # Directory
     if Path(instance_path).is_dir():

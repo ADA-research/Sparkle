@@ -15,10 +15,16 @@ pipelines:
               - pip
               - condacache
             script:
+              - git submodule update --init --recursive
+              - git status
+              - git submodule
               - conda info
               - conda env create -f environment.yml 
               - conda activate sparkle
+              - pip freeze
               - pytest -v tests/* --junitxml=test-reports/report.xml
+            artifacts:
+              - Output/**
         - step:
             name: Lint code
             script:

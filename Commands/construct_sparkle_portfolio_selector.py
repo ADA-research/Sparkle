@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 """Sparkle command to construct a portfolio selector."""
 
-import os
 import sys
 import argparse
 from pathlib import Path
 
-from Commands.Structures.status_info import ConstructPortfolioSelectorStatusInfo
+from Commands.structures.status_info import ConstructPortfolioSelectorStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
-from Commands.sparkle_help import sparkle_job_help
+from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
 
 
@@ -43,7 +43,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_performance_measure,
+        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
         action=ac.SetByUser,
         help="the performance measure, e.g. runtime",
     )
@@ -55,25 +55,17 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
                                performance_data_csv_path: str) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-    list_feature_computation_job = (
+    feature_computation_jobs =\
         feature_data_csv.get_list_remaining_feature_computation_job()
-    )
-    total_job_num = sparkle_job_help.get_num_of_total_job_from_list(
-        list_feature_computation_job
-    )
+    total_job_num = sjh.get_num_of_total_job_from_list(feature_computation_jobs)
 
     if total_job_num > 0:
         return True
 
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-        performance_data_csv_path
-    )
-    list_performance_computation_job = (
+    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_computation_jobs =\
         performance_data_csv.get_list_remaining_performance_computation_job()
-    )
-    total_job_num = sparkle_job_help.get_num_of_total_job_from_list(
-        list_performance_computation_job
-    )
+    total_job_num = sjh.get_num_of_total_job_from_list(performance_computation_jobs)
 
     if total_job_num > 0:
         return True
@@ -83,9 +75,7 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
 
 def delete_log_files() -> None:
     """Remove the log files."""
-    os.system("rm -f " + sgh.sparkle_log_path)
-    os.system("rm -f " + sgh.sparkle_err_path)
-
+    sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path])
     return
 
 
@@ -94,7 +84,6 @@ def print_log_paths() -> None:
     print("Consider investigating the log files:")
     print(f"stdout: {sgh.sparkle_log_path}")
     print(f"stderr: {sgh.sparkle_err_path}")
-
     return
 
 
@@ -122,8 +111,8 @@ if __name__ == "__main__":
                              sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR])
 
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
         )
 
     print("Start constructing Sparkle portfolio selector ...")
@@ -145,7 +134,7 @@ if __name__ == "__main__":
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
 
-        sys.exit()
+        sys.exit(-1)
 
     delete_log_files()  # Make sure no old log files remain
     success = scps.construct_sparkle_portfolio_selector(

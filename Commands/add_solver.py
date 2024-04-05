@@ -1,22 +1,26 @@
 #!/usr/bin/env python3
 """Sparkle command to add a solver to the Sparkle platform."""
 
-import os
 import sys
 import argparse
+import shutil
 from pathlib import Path
+
+import runrunner as rrr
+from runrunner.base import Runner
 
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsp
-from Commands.sparkle_help import sparkle_job_parallel_help
 from Commands.sparkle_help import sparkle_add_solver_help as sash
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -66,7 +70,12 @@ def parser_function() -> argparse.ArgumentParser:
         type=str,
         help="path to the solver"
     )
-
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
+    )
     return parser
 
 
@@ -90,25 +99,27 @@ if __name__ == "__main__":
 
     if not Path(solver_source).exists():
         print(f'Solver path "{solver_source}" does not exist!')
-        sys.exit()
+        sys.exit(-1)
 
     deterministic = args.deterministic
     nickname_str = args.nickname
     my_flag_parallel = args.parallel
     solver_variations = args.solver_variations
+    run_on = args.run_on
 
     if solver_variations < 1:
         print("ERROR: Invalid number of solver variations given "
               f"({str(solver_variations)}), "
               "a postive integer must be used. Stopping execution.")
-        sys.exit(0)
+        sys.exit(-1)
 
-    smac_wrapper_path = Path(solver_source, sgh.sparkle_smac_wrapper)
-    if smac_wrapper_path.is_file():
-        sfh.check_file_is_executable(smac_wrapper_path)
+    configurator_wrapper_path = Path(solver_source,
+                                     sgh.sparkle_solver_wrapper)
+    if configurator_wrapper_path.is_file():
+        sfh.check_file_is_executable(configurator_wrapper_path)
     else:
-        print("WARNING: The solver does not have a SMAC wrapper. "
-              "Therefore it cannot be configured using SMAC.")
+        print("WARNING: The solver does not have a configurator wrapper. "
+              "Therefore it cannot be automatically be configured.")
 
     # Start add solver
     last_level_directory = ""
@@ -120,18 +131,16 @@ if __name__ == "__main__":
     else:
         print(f"Solver {last_level_directory} already exists!")
         print(f"Do not add solver {last_level_directory}")
-        sys.exit()
-
-    os.system(f"cp -r {solver_source}/* {solver_directory}")
+        sys.exit(-1)
+    shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
     )
     performance_data_csv.add_column(solver_directory)
     performance_data_csv.update_csv()
-
-    sgh.solver_list.append(solver_directory)
-    sfh.add_new_solver_into_file(solver_directory, deterministic, solver_variations)
+    sfh.add_remove_platform_item(
+        f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)
 
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
         print("One pcs file detected, this is a configurable solver.")
@@ -140,53 +149,57 @@ if __name__ == "__main__":
           "done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
-        command_line = "rm -f " + sgh.sparkle_algorithm_selector_path
-        os.system(command_line)
+        sfh.rmfiles(sgh.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{sgh.sparkle_algorithm_selector_path} done!")
 
     if Path(sgh.sparkle_report_path).exists():
-        command_line = "rm -f " + sgh.sparkle_report_path
-        os.system(command_line)
-        print("Removing Sparkle report " + sgh.sparkle_report_path + " done!")
+        sfh.rmfiles(sgh.sparkle_report_path)
+        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     if nickname_str is not None:
-        sgh.solver_nickname_mapping[nickname_str] = solver_directory
-        sfh.add_new_solver_nickname_into_file(nickname_str, solver_directory)
-        pass
+        sfh.add_remove_platform_item(solver_directory,
+                                     sgh.solver_nickname_list_path, key=nickname_str)
 
     if args.run_solver_now:
         if not my_flag_parallel:
             print("Start running solvers ...")
             srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
-            print(
-                "Performance data file "
-                + sgh.performance_data_csv_path
-                + " has been updated!"
-            )
+            print(f"Performance data file {sgh.performance_data_csv_path}"
+                  " has been updated!")
             print("Running solvers done!")
         else:
             num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
-            run_solvers_parallel_jobid = srsp.running_solvers_parallel(
-                sgh.performance_data_csv_path, num_job_in_parallel, rerun=False
-            )
-            print("Running solvers in parallel ...")
-            dependency_jobid_list = []
-            if run_solvers_parallel_jobid:
-                dependency_jobid_list.append(run_solvers_parallel_jobid)
-            job_script = "Commands/construct_sparkle_portfolio_selector.py"
-            run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(
-                job_script,
-                dependency_jobid_list,
-                CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-            )
+            dependency_run_list = [srsp.running_solvers_parallel(
+                sgh.performance_data_csv_path, num_job_in_parallel,
+                rerun=False, run_on=run_on
+            )]
 
-            if run_job_parallel_jobid:
-                dependency_jobid_list.append(run_job_parallel_jobid)
-            job_script = "Commands/generate_report.py"
-            run_job_parallel_jobid = sparkle_job_parallel_help.running_job_parallel(
-                job_script, dependency_jobid_list, CommandName.GENERATE_REPORT
-            )
+            sbatch_options = ssh.get_slurm_options_list()
+            srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
+            run_construct_portfolio_selector = rrr.add_to_queue(
+                cmd="Commands/construct_sparkle_portfolio_selector.py",
+                name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+                dependencies=dependency_run_list,
+                base_dir=sgh.sparkle_tmp_path,
+                sbatch_options=sbatch_options,
+                srun_options=srun_options)
+            if run_on == Runner.SLURM:
+                sjh.write_active_job(run_construct_portfolio_selector.run_id,
+                                     CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
+
+            dependency_run_list.append(run_construct_portfolio_selector)
+
+            run_generate_report = rrr.add_to_queue(
+                cmd="Commands/generate_report.py",
+                name=CommandName.GENERATE_REPORT,
+                dependencies=dependency_run_list,
+                base_dir=sgh.sparkle_tmp_path,
+                sbatch_options=sbatch_options,
+                srun_options=srun_options)
+            if run_on == Runner.SLURM:
+                sjh.write_active_job(run_generate_report.run_id,
+                                     CommandName.GENERATE_REPORT)
 
     # Write used settings to file
     sgh.settings.write_used_settings()

@@ -7,9 +7,10 @@ from pytest_mock import MockerFixture
 
 from pathlib import Path
 
-from Commands.sparkle_help.solver import Solver
-from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
-from Commands.sparkle_help.configurator import Configurator
+from Commands.structures.solver import Solver
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.configurator import Configurator
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 class TestConfigurator():
@@ -28,34 +29,6 @@ class TestConfigurator():
 
         mock_path.assert_called_once()
 
-    def test_create_sbatch_script(self: TestConfigurator,
-                                  mocker: MockerFixture,
-                                  scenario_fixture: ConfigurationScenario,
-                                  configurator_path: Path) -> None:
-        """Test correct sbatch script creation."""
-        mocker.patch.object(Path, "mkdir")
-        mocker.patch.object(ConfigurationScenario, "create_scenario", return_value=None)
-        scenario_fixture.directory = Path("parent_dir", "scenarios",
-                                          scenario_fixture.name)
-        scenario_fixture.scenario_file_name = f"{scenario_fixture.name}_scenario.txt"
-
-        mock_config_scenario = mocker.patch.object(ConfigurationScenario,
-                                                   "create_scenario",
-                                                   return_value=False)
-
-        configurator = Configurator(configurator_path)
-
-        reference_file_path = Path("tests", "test_files", "reference_files", "sbatch.sh")
-        with reference_file_path.open("r") as file:
-            reference_file_content = file.read()
-
-        mocked_file = mocker.patch("pathlib.Path.open", mocker.mock_open())
-
-        configurator.create_sbatch_script(scenario_fixture)
-
-        mocked_file().write.assert_called_with(reference_file_content)
-        mock_config_scenario.assert_called_with(parent_directory=configurator_path)
-
 
 @pytest.fixture
 def solver_fixture() -> Solver:
@@ -69,9 +42,16 @@ def scenario_fixture(solver_fixture: MockerFixture) -> ConfigurationScenario:
     """Scenario fixture for tests."""
     instance_set_train = Path("Instances", "Test-Instance-Set")
     number_of_runs = 2
+    time_budget = sgh.settings.get_config_budget_per_run()
+    cutoff_time = sgh.settings.get_general_target_cutoff_time()
+    cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+    sparkle_objective =\
+        sgh.settings.get_general_sparkle_objectives()[0]
     use_features = False
     return ConfigurationScenario(solver_fixture, instance_set_train, number_of_runs,
-                                 use_features)
+                                 time_budget, cutoff_time, cutoff_length,
+                                 sparkle_objective, use_features,
+                                 sgh.smac_target_algorithm)
 
 
 @pytest.fixture

@@ -7,16 +7,16 @@ import os
 import argparse
 from pathlib import Path
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
+from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -30,6 +30,8 @@ def parser_function() -> argparse.ArgumentParser:
     else:
         latest = sgh.latest_scenario.get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
     parser.add_argument(
         "--instance-paths",
         metavar="PATH",
@@ -62,9 +64,10 @@ def parser_function() -> argparse.ArgumentParser:
         "--performance-measure",
         choices=PerformanceMeasure.__members__,
         help="The performance measure, e.g., RUNTIME (for decision algorithms) or "
-             "QUALITY_ABSOLUTE (for optimisation algorithms)"
-             f" (default: {sgh.settings.DEFAULT_general_performance_measure.name})"
-             f" (current value: {sgh.settings.get_general_performance_measure().name})")
+             "QUALITY_ABSOLUTE (for optimisation algorithms) (default: "
+             f"{sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure.name})"
+             " (current value: "
+             f"{performance_measure})")
     parser.add_argument(
         "--cutoff-time",
         type=int,
@@ -76,8 +79,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation."))
     parser.add_argument(
         "--settings-file",
         type=Path,
@@ -152,8 +155,8 @@ if __name__ == "__main__":
                                                      SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE)
 
     # Write settings to file before starting, since they are used in callback scripts
     sgh.settings.write_used_settings()

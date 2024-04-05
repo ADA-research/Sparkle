@@ -2,9 +2,11 @@
 """Definitions of constants broadly used in Sparkle."""
 
 import fcntl
+import ast
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
+
 from sparkle import about
 
 
@@ -89,10 +91,11 @@ sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
 
 runsolver_path = "Components/runsolver/src/runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
-autofolio_path = "Components/AutoFolio-master/scripts/autofolio"
+autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
 smac_dir = "Components/smac-v2.10.03-master-778/"
-smac_results_dir = smac_dir + "results/"
+smac_results_dir = Path(smac_dir) / "results"
+smac_tmp_dir = Path(smac_dir) / "tmp"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 
@@ -100,7 +103,8 @@ sparkle_run_generic_wrapper = "sparkle_run_generic_wrapper.py"
 
 sparkle_run_configured_wrapper = "sparkle_run_configured_wrapper.sh"
 
-sparkle_smac_wrapper = "sparkle_smac_wrapper.py"
+smac_target_algorithm = "smac_target_algorithm.py"
+sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 
 ablation_dir = "Components/ablationAnalysis-0.9.4/"
 
@@ -129,78 +133,24 @@ working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
                 test_data_dir]
 
-solver_list = []
-solver_nickname_mapping = {}
-extractor_list = []
-extractor_nickname_mapping = {}
-extractor_feature_vector_size_mapping = {}
-instance_list = []
+file_storage_data_mapping = {Path(solver_list_path): [],
+                             Path(solver_nickname_list_path): {},
+                             Path(extractor_list_path): [],
+                             Path(extractor_nickname_list_path): {},
+                             Path(extractor_feature_vector_size_list_path): {},
+                             instance_list_path: []}
 
-if Path(extractor_nickname_list_path).exists():
-    fo = Path(extractor_nickname_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        mylist = myline.split()
-        extractor_nickname_mapping[mylist[0]] = mylist[1]
-    fo.close()
+for data_path in file_storage_data_mapping.keys():
+    if data_path.exists():
+        with data_path.open("r+") as fo:
+            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+            file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
-if Path(extractor_feature_vector_size_list_path).exists():
-    fo = Path(extractor_feature_vector_size_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline().strip()
-        if not myline:
-            break
-        mylist = myline.split()
-        extractor_feature_vector_size_mapping[mylist[0]] = int(mylist[1])
-    fo.close()
-
-if Path(extractor_list_path).exists():
-    fo = Path(extractor_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        extractor_list.append(myline)
-    fo.close()
-
-if Path(solver_nickname_list_path).exists():
-    fo = Path(solver_nickname_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        mylist = myline.split()
-        solver_nickname_mapping[mylist[0]] = mylist[1]
-    fo.close()
-
-if Path(solver_list_path).exists():
-    fo = Path(solver_list_path).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        if not myline:
-            break
-        myline = myline.strip()
-        mylist = myline.split()
-        solver_list.append(mylist[0])
-    fo.close()
-
-if Path(str(instance_list_path)).exists():
-    fo = Path(str(instance_list_path)).open("r+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    while True:
-        myline = fo.readline()
-        myline = myline.strip()
-        if not myline:
-            break
-        instance_list.append(myline)
-    fo.close()
+solver_list = file_storage_data_mapping[Path(solver_list_path)]
+solver_nickname_mapping = file_storage_data_mapping[Path(solver_nickname_list_path)]
+extractor_list = file_storage_data_mapping[Path(extractor_list_path)]
+extractor_nickname_mapping =\
+    file_storage_data_mapping[Path(extractor_nickname_list_path)]
+extractor_feature_vector_size_mapping =\
+    file_storage_data_mapping[Path(extractor_feature_vector_size_list_path)]
+instance_list = file_storage_data_mapping[instance_list_path]

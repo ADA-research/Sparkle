@@ -5,11 +5,13 @@ import sys
 import argparse
 from pathlib import Path
 
+import runrunner as rrr
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from Commands.sparkle_help import sparkle_run_solvers_help as srsh
+from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsph
-from Commands.sparkle_help import sparkle_job_parallel_help as sjph
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
@@ -17,9 +19,7 @@ from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
-
-import runrunner as rrr
-from runrunner.base import Runner
+from Commands.sparkle_help import sparkle_job_help as sjh
 
 import functools
 print = functools.partial(print, flush=True)
@@ -58,8 +58,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation."))
     parser.add_argument(
         "--settings-file",
         type=Path,
@@ -94,123 +94,67 @@ def run_solvers_on_instances(
     """
     if recompute:
         spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path).clean_csv()
-
+    num_job_in_parallel = 1
     if parallel:
         num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
-    else:
-        num_job_in_parallel = 1
 
-    # NOTE: For the moment still run with Slurm through Sparkle's own systems, once
-    # runrunner works properly everything under 'if' should be removed leaving only the
-    # 'else', and the SLURM_RR replaced by just SLURM.
+    runs = [srsph.running_solvers_parallel(
+        performance_data_csv_path=sgh.performance_data_csv_path,
+        num_job_in_parallel=num_job_in_parallel,
+        rerun=recompute,
+        run_on=run_on)]
+
+    # If there are no jobs return
+    if all(run is None for run in runs):
+        print("Running solvers done!")
+        return
+
+    sbatch_user_options = ssh.get_slurm_options_list()
+
+    # Update performance data csv after the last job is done
+    runs.append(rrr.add_to_queue(
+        runner=run_on,
+        cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
+        name=CommandName.SPARKLE_CSV_MERGE,
+        dependencies=runs[-1],
+        base_dir=sgh.sparkle_tmp_path,
+        sbatch_options=sbatch_user_options))
     if run_on == Runner.SLURM:
-        if not parallel:
-            srsh.running_solvers(sgh.performance_data_csv_path, recompute)
+        sjh.write_active_job(runs[-1].run_id,
+                             CommandName.SPARKLE_CSV_MERGE)
 
-            if also_construct_selector_and_report:
-                construct_selector_and_report()
-        else:
-            run_solvers_parallel_jobid = srsph.running_solvers_parallel(
-                sgh.performance_data_csv_path, num_job_in_parallel, rerun=recompute,
-                run_on=run_on)
-
-            dependency_jobid_list = []
-
-            if run_solvers_parallel_jobid:
-                dependency_jobid_list.append(run_solvers_parallel_jobid)
-
-            # Update performance data csv after the last job is done
-            job_script = "Commands/sparkle_help/sparkle_csv_merge_help.py"
-            run_job_parallel_jobid = sjph.running_job_parallel(
-                job_script, dependency_jobid_list, CommandName.RUN_SOLVERS)
-            dependency_jobid_list.append(run_job_parallel_jobid)
-
-            # Only do selector construction and report generation if the flag is set
-            if also_construct_selector_and_report:
-                run_job_parallel_jobid = construct_selector_and_report(
-                    dependency_jobid_list)
-                dependency_jobid_list.append(run_job_parallel_jobid)
-
-            job_id_str = ",".join(dependency_jobid_list)
-            print(f"Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-                  f"{job_id_str}")
-    else:
-        # Run the solvers
-        runs = [srsph.running_solvers_parallel(
-            performance_data_csv_path=sgh.performance_data_csv_path,
-            num_job_in_parallel=num_job_in_parallel,
-            rerun=recompute,
-            run_on=run_on)]
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        # If there are no jobs return
-        if all(run is None for run in runs):
-            print("Running solvers done!")
-
-            return
-
-        # Update performance data csv after the last job is done
+    if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
             runner=run_on,
-            cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-            name="sprkl_csv_merge",
+            cmd="Commands/construct_sparkle_portfolio_selector.py",
+            name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
             dependencies=runs[-1],
-            base_dir=sgh.sparkle_tmp_path))
-
-        if also_construct_selector_and_report:
-            runs.append(rrr.add_to_queue(
-                runner=run_on,
-                cmd="Commands/construct_sparkle_portfolio_selector.py",
-                name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-                dependencies=runs[-1],
-                base_dir=sgh.sparkle_tmp_path))
-
-            runs.append(rrr.add_to_queue(
-                runner=run_on,
-                cmd="Commands/generate_report.py",
-                name=CommandName.GENERATE_REPORT,
-                dependencies=runs[-1],
-                base_dir=sgh.sparkle_tmp_path))
-
-        # Remove the below if block once runrunner works satisfactorily
+            base_dir=sgh.sparkle_tmp_path,
+            sbatch_options=sbatch_user_options))
         if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
+            sjh.write_active_job(runs[-1].run_id,
+                                 CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
 
-        if run_on == Runner.LOCAL:
-            print("Waiting for the local calculations to finish.")
-            for run in runs:
-                if run is not None:
-                    run.wait()
-            print("Running solvers done!")
-        elif run_on == Runner.SLURM_RR:
-            print("Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-                  f'{",".join(r.run_id for r in runs if r is not None)}')
+        runs.append(rrr.add_to_queue(
+            runner=run_on,
+            cmd="Commands/generate_report.py",
+            name=CommandName.GENERATE_REPORT,
+            dependencies=runs[-1],
+            base_dir=sgh.sparkle_tmp_path,
+            sbatch_options=sbatch_user_options))
+        if run_on == Runner.SLURM:
+            sjh.write_active_job(runs[-1].run_id,
+                                 CommandName.GENERATE_REPORT)
 
-    return
-
-
-def construct_selector_and_report(dependency_jobid_list: list[str] = []) -> str:
-    """Queue jobs for portfolio construction and report generation.
-
-    Returns a Slurm job ID as str.
-    """
-    job_script = "Commands/construct_sparkle_portfolio_selector.py"
-    run_job_parallel_jobid = sjph.running_job_parallel(
-        job_script,
-        dependency_jobid_list,
-        CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
-
-    if run_job_parallel_jobid:
-        dependency_jobid_list.append(run_job_parallel_jobid)
-
-    job_script = "Commands/generate_report.py"
-    run_job_parallel_jobid = sjph.running_job_parallel(
-        job_script, dependency_jobid_list, CommandName.GENERATE_REPORT)
-
-    return run_job_parallel_jobid
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        for run in runs:
+            if run is not None:
+                run.wait()
+        print("Running solvers done!")
+    elif run_on == Runner.SLURM:
+        print("Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+              f'{",".join(r.run_id for r in runs if r is not None)}')
 
 
 if __name__ == "__main__":
@@ -232,8 +176,9 @@ if __name__ == "__main__":
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
-        sgh.settings.set_general_performance_measure(
-            PerformanceMeasure.from_str(args.performance_measure), SettingState.CMD_LINE)
+        sgh.settings.set_general_sparkle_objectives(
+            args.performance_measure, SettingState.CMD_LINE
+        )
 
     if args.verifier is not None:
         sgh.settings.set_general_solution_verifier(

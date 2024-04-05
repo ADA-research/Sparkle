@@ -21,7 +21,7 @@ Commands/initialise.py > /dev/null
 configuration_results_path="Commands/test/test_files/results"
 configuration_files_path="Commands/test/test_files/PbO-CCSAT-Generic_PTN/PTN_train.txt"
 smac_path="Components/smac-v2.10.03-master-778/"
-smac_configuration_files_path="$smac_path/example_scenarios/PbO-CCSAT-Generic/"
+smac_configuration_files_path="$smac_path/scenarios/PbO-CCSAT-Generic/"
 # TODO: Save possibly existing results directory
 cp -r $configuration_results_path $smac_path
 mkdir -p $smac_configuration_files_path # Make sure directory exists
