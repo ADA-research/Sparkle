@@ -38,8 +38,7 @@ def get_running_jobs_for_command(command: CommandName) -> str:
     Returns:
         string with job ids.
     """
-    sjh.cleanup_active_jobs()
-    jobs = sjh.read_active_jobs()
+    jobs = sjh.get_active_jobs()
 
     command_jobs = get_jobs_for_command(jobs, command.name)
     command_jobs_ids = " ".join([x["job_id"] for x in command_jobs])
