@@ -8,8 +8,12 @@ import csv
 import time
 from enum import Enum
 
+import runrunner as rrr
+from runrunner.base import Status
+
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 class JobState(str, Enum):
@@ -54,13 +58,6 @@ def expand_total_job_from_list(list_jobs: list) -> list:
         for second_item in job[1]:
             total_job_list.append([first_item, second_item])
     return total_job_list
-
-
-def check_active_jobs_exist() -> bool:
-    """Return whether there are any active jobs."""
-    # Cleanup to make sure completed jobs are removed
-    cleanup_active_jobs()
-    return len(get_active_job_ids()) > 0
 
 
 def check_job_is_done(job_id: str) -> bool:
@@ -132,28 +129,69 @@ def wait_for_dependencies(command_to_run: CommandName) -> None:
         wait_for_job(job_id)
 
 
-def wait_for_job(job_id: str) -> None:
-    """Wait for a given job to finish executing.
+def wait_for_job(job: str | rrr.SlurmRun) -> None:
+    """Wait for a given Slurm job to finish executing.
 
     Args:
       job_id: String job identifier.
     """
-    n_seconds = 10
+    if isinstance(job, str):
+        job = find_run(job)
+    job.wait()
+    
+    print("Job with ID", job.run_id, "done!", flush=True)
 
-    while not check_job_is_done(job_id):
-        sleep(n_seconds)
+def find_run(job_id: str, path: Path = Path(sgh.sparkle_tmp_path))\
+    -> rrr.SlurmRun:
+    """Retrieve a specific RunRunner Slurm run using the job_id.
 
-    print("Job with ID", job_id, "done!", flush=True)
+    Args:
+        job_id: String identifier of the job
+        path: The Path where to look for the stored jobs. Sparkle's Tmp path by default.
 
+    Returns:
+        The SlurmRun with the matching run_id, None if no match.
+    """
+    for run in get_runs_from_file(path=path):
+        if run.run_id == job_id:
+            return run
+    return None
+
+def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
+    -> list[rrr.SlurmRun]:
+    """Retrieve all run objects from file storage.
+
+    Args:
+        path: Path object where to look for the files.
+
+    Returns:
+        List of all found SlumRun objects.
+    """
+    runs = []
+    for file in path.iterdir():
+        if file.suffix == ".json":
+            # TODO: RunRunner should be adapted to have more general methods for runs
+            # So this method can work for both local and slurm
+            try:
+                run_obj = rrr.SlurmRun.from_file(file)
+                runs.appends(run_obj)
+            except:
+                pass
+    return runs
 
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
-    remaining_jobs = cleanup_active_jobs()
+    remaining_jobs = [run for run in get_runs_from_file()
+                      if run.status == Status.WAITING | run.status == Status.RUNNING ]
     n_seconds = 10
-    print("Waiting for", remaining_jobs, "jobs...", flush=True)
-
-    while cleanup_active_jobs() > 0:
+    latest_length = len(remaining_jobs)
+    while latest_length > 0:
         sleep(n_seconds)
+        remaining_jobs = [run for run in remaining_jobs
+                          if run.status == Status.WAITING | run.status == Status.RUNNING]
+        if latest_length > len(remaining_jobs):
+            print(f"Waiting for {len(remaining_jobs)} jobs...", flush=True)
+        latest_length = len(remaining_jobs)
 
     print("All jobs done!")
 
