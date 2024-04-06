@@ -133,16 +133,17 @@ def wait_for_job(job: str | rrr.SlurmRun) -> None:
     """Wait for a given Slurm job to finish executing.
 
     Args:
-      job_id: String job identifier.
+      job: String job identifier.
     """
     if isinstance(job, str):
         job = find_run(job)
     job.wait()
-    
-    print("Job with ID", job.run_id, "done!", flush=True)
+
+    print(f"Job with ID {job.run_id} done!", flush=True)
+
 
 def find_run(job_id: str, path: Path = Path(sgh.sparkle_tmp_path))\
-    -> rrr.SlurmRun:
+        -> rrr.SlurmRun:
     """Retrieve a specific RunRunner Slurm run using the job_id.
 
     Args:
@@ -157,8 +158,9 @@ def find_run(job_id: str, path: Path = Path(sgh.sparkle_tmp_path))\
             return run
     return None
 
+
 def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
-    -> list[rrr.SlurmRun]:
+        -> list[rrr.SlurmRun]:
     """Retrieve all run objects from file storage.
 
     Args:
@@ -168,6 +170,7 @@ def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
         List of all found SlumRun objects.
     """
     runs = []
+    ignores = []
     for file in path.iterdir():
         if file.suffix == ".json":
             # TODO: RunRunner should be adapted to have more general methods for runs
@@ -175,14 +178,17 @@ def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
             try:
                 run_obj = rrr.SlurmRun.from_file(file)
                 runs.appends(run_obj)
-            except:
-                pass
+            except Exception:
+                # TODO: When we have a more sophisticated version of managing/
+                # remembering runs, we might as well remember which files to ignore.
+                ignores.append(file)
     return runs
+
 
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     remaining_jobs = [run for run in get_runs_from_file()
-                      if run.status == Status.WAITING | run.status == Status.RUNNING ]
+                      if run.status == Status.WAITING | run.status == Status.RUNNING]
     n_seconds = 10
     latest_length = len(remaining_jobs)
     while latest_length > 0:
@@ -196,6 +202,7 @@ def wait_for_all_jobs() -> None:
     print("All jobs done!")
 
 
+# No longer relevant due to RunRunner
 def write_active_job(job_id: str, command: CommandName) -> None:
     """Write a given command and job ID combination to the active jobs file.
 
