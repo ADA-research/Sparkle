@@ -16,7 +16,6 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import \
     sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
@@ -97,10 +96,6 @@ if __name__ == "__main__":
     global settings
     sgh.settings = sparkle_settings.Settings()
 
-    # Initialise latest scenario
-    global latest_scenario
-    sgh.latest_scenario = ReportingScenario()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -130,20 +125,20 @@ if __name__ == "__main__":
 
     # If no arguments are set get the latest scenario
     if not selection and test_case_directory is None and solver is None:
-        scenario = sgh.latest_scenario.get_latest_scenario()
+        scenario = sgh.latest_scenario().get_latest_scenario()
         if scenario == Scenario.SELECTION:
             selection = True
             test_case_directory = (
-                sgh.latest_scenario.get_selection_test_case_directory()
+                sgh.latest_scenario().get_selection_test_case_directory()
             )
         elif scenario == Scenario.CONFIGURATION:
-            solver = str(sgh.latest_scenario.get_config_solver())
-            instance_set_train = sgh.latest_scenario.get_config_instance_set_train()
-            instance_set_test = sgh.latest_scenario.get_config_instance_set_test()
+            solver = str(sgh.latest_scenario().get_config_solver())
+            instance_set_train = sgh.latest_scenario().get_config_instance_set_train()
+            instance_set_test = sgh.latest_scenario().get_config_instance_set_test()
         elif scenario == Scenario.PARALLEL_PORTFOLIO:
-            parallel_portfolio_path = sgh.latest_scenario.get_parallel_portfolio_path()
+            parallel_portfolio_path = sgh.latest_scenario().get_parallel_portfolio_path()
             pap_instance_list = (
-                sgh.latest_scenario.get_parallel_portfolio_instance_list())
+                sgh.latest_scenario().get_parallel_portfolio_instance_list())
 
     flag_instance_set_train = False if instance_set_train is None else True
     flag_instance_set_test = False if instance_set_test is None else True
@@ -176,7 +171,7 @@ if __name__ == "__main__":
             print("Report for test generated ...")
         status_info.delete()
 
-    elif sgh.latest_scenario.get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
+    elif sgh.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(sgh.ReportType.PARALLEL_PORTFOLIO)
