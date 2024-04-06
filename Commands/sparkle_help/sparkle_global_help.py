@@ -28,8 +28,6 @@ sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
 
-sparkle_default_settings_path = "Settings/sparkle_default_settings.txt"
-sparkle_smac_settings_path = "Settings/sparkle_smac_settings.txt"
 sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 
 sparkle_global_output_dir = Path("Output")
@@ -44,11 +42,7 @@ class ReportType(str, Enum):
 
 # Log that keeps track of which commands were executed and where output details can be
 # found
-sparkle_global_log_file = "sparkle.log"
-
-sparkle_global_log_dir = "Log/"
-
-sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_log_file)
+sparkle_global_log_path = PurePath("Log" / "sparkle.log")
 
 sparkle_tmp_path = "Tmp/"
 
@@ -76,9 +70,6 @@ performance_data_dir = Path("Performance_Data")
 sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio/")
 sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio/")
 
-sparkle_parallel_portfolio_path = (
-    sparkle_parallel_portfolio_dir / sparkle_parallel_portfolio_name)
-
 sparkle_marginal_contribution_perfect_path = (
     sparkle_algorithm_selector_dir / "margi_contr_perfect.csv")
 
@@ -98,10 +89,6 @@ smac_results_dir = Path(smac_dir) / "results"
 smac_tmp_dir = Path(smac_dir) / "tmp"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
-
-sparkle_run_generic_wrapper = "sparkle_run_generic_wrapper.py"
-
-sparkle_run_configured_wrapper = "sparkle_run_configured_wrapper.sh"
 
 smac_target_algorithm = "smac_target_algorithm.py"
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
