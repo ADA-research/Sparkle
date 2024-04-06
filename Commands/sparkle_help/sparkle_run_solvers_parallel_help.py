@@ -8,7 +8,6 @@ from runrunner.base import Runner
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
@@ -79,9 +78,5 @@ def running_solvers_parallel(
         base_dir=sgh.sparkle_tmp_path,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
-
-    if run_on == Runner.SLURM:
-        # Add the run to the list of active job.
-        sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
 
     return run

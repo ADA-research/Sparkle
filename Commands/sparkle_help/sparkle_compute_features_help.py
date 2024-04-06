@@ -225,10 +225,6 @@ def computing_features_parallel(feature_data_csv_path: Path,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
-    if run_on == Runner.SLURM:
-        # Add the run to the list of active job.
-        sjh.write_active_job(run.run_id, CommandName.RUN_SOLVERS)
-
     return run
 
 

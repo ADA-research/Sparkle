@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for job execution and maintenance."""
+from __future__ import annotations
 
 from pathlib import Path
 import subprocess
@@ -169,15 +170,16 @@ def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
     Returns:
         List of all found SlumRun objects.
     """
-    runs = []
-    ignores = []
+    runs, ignores = [], []
+    if not path.exists():
+        return runs
     for file in path.iterdir():
         if file.suffix == ".json":
             # TODO: RunRunner should be adapted to have more general methods for runs
             # So this method can work for both local and slurm
             try:
                 run_obj = rrr.SlurmRun.from_file(file)
-                runs.appends(run_obj)
+                runs.append(run_obj)
             except Exception:
                 # TODO: When we have a more sophisticated version of managing/
                 # remembering runs, we might as well remember which files to ignore.
@@ -187,44 +189,19 @@ def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
 
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
-    remaining_jobs = [run for run in get_runs_from_file()
-                      if run.status == Status.WAITING | run.status == Status.RUNNING]
-    n_seconds = 10
-    latest_length = len(remaining_jobs)
+    running_jobs = [run for run in get_runs_from_file()
+                    if run.status == Status.WAITING or run.status == Status.RUNNING]
+    latest_length = len(running_jobs)
+    print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
     while latest_length > 0:
-        sleep(n_seconds)
-        remaining_jobs = [run for run in remaining_jobs
-                          if run.status == Status.WAITING | run.status == Status.RUNNING]
-        if latest_length > len(remaining_jobs):
-            print(f"Waiting for {len(remaining_jobs)} jobs...", flush=True)
-        latest_length = len(remaining_jobs)
+        running_jobs = [run for run in running_jobs
+                        if run.status == Status.WAITING or run.status == Status.RUNNING]
+        if latest_length > len(running_jobs):
+            print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
+        latest_length = len(running_jobs)
+        sleep(n_seconds=10)
 
     print("All jobs done!")
-
-
-# No longer relevant due to RunRunner
-def write_active_job(job_id: str, command: CommandName) -> None:
-    """Write a given command and job ID combination to the active jobs file.
-
-    Args:
-      job_id: String job identifier.
-      command: Command name.
-    """
-    path = __jobs_path
-
-    # Write header if the file does not exist
-    if not path.is_file():
-        with Path(path).open("w", newline="") as outfile:
-            writer = csv.writer(outfile)
-            writer.writerow(__jobs_csv_header)
-
-    # Write job row if it did not finish yet
-    if not check_job_is_done(job_id) and not check_job_exists(job_id, command):
-        with Path(path).open("a", newline="") as outfile:
-            writer = csv.writer(outfile)
-            writer.writerow([job_id, command.name, JobState.RUNNING])
-
-    return
 
 
 def check_job_exists(job_id: str, command: CommandName) -> bool:

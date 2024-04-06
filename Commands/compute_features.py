@@ -16,7 +16,6 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
 
@@ -83,9 +82,6 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             if run is not None:
                 run.wait()
         print("Computing Features in parallel done!")
-    else:
-        sjh.write_active_job(runs[-1].run_id,
-                             CommandName.SPARKLE_CSV_MERGE)
 
 
 if __name__ == "__main__":

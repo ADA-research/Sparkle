@@ -22,7 +22,6 @@ from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 
 
@@ -308,10 +307,7 @@ def call_sparkle_portfolio_selector_solve_directory(
         sbatch_options=ssh.get_slurm_options_list(),
         srun_options=["-N1", "-n1", "--exclusive"])
 
-    if run_on == Runner.SLURM:
-        # Add the run to the list of active job.
-        sjh.write_active_job(run.run_id, CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR)
-    else:
+    if run_on == Runner.LOCAL:
         run.wait()
 
 
