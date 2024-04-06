@@ -42,7 +42,9 @@ class ReportType(str, Enum):
 
 # Log that keeps track of which commands were executed and where output details can be
 # found
-sparkle_global_log_path = PurePath("Log" / "sparkle.log")
+sparkle_global_log_file = "sparkle.log"
+sparkle_global_log_dir = "Log/"
+sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_log_file)
 
 sparkle_tmp_path = "Tmp/"
 
