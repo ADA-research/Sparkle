@@ -23,7 +23,10 @@ class TestConfigurator():
         """Test that Configurator initialization calls create_scenario() correctly."""
         mock_path = mocker.patch.object(Path, "mkdir")
 
-        configurator = Configurator(configurator_path)
+        configurator = Configurator(configurator_path=configurator_path,
+                                    executable_path=None,
+                                    settings_path=None,
+                                    result_path=None)
 
         assert configurator.configurator_path == configurator_path
 

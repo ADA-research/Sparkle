@@ -276,7 +276,7 @@ if __name__ == "__main__":
                                             time_budget, cutoff_time, cutoff_length,
                                             sparkle_objective, use_features,
                                             configurator_target, feature_data_df)
-    configurator = Configurator(configurator_path)
+    configurator = Configurator.smac_v2()
     configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario

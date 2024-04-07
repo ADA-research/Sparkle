@@ -19,13 +19,26 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 class Configurator:
     """Generic class to use different configurators like SMAC."""
 
-    def __init__(self: Configurator, configurator_path: Path) -> None:
+    def __init__(self: Configurator, configurator_path: Path, executable_path: Path,
+                 settings_path: Path, result_path: Path, tmp_path: Path = None,
+                 multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
-            configurator_path: Path to the configurator
+            configurator_path: Path to the configurator directory
+            executable_path: Executable of the configurator for Sparkle to call
+            settings_path: Path to the settings file for the configurator
+            result_path: Path for the result files of the configurator
+            tmp_path: Path for the temporary files of the configurator, optional
+            multi_objective_support: Whether the configurator supports
+                multi objective optimization for solvers.
         """
         self.configurator_path = configurator_path
+        self.settings_path = settings_path
+        self.result_path = result_path
+        self.tmp_path = tmp_path
+        self.executable_path = executable_path
+        self.multiobjective = multi_objective_support
 
         if not self.configurator_path.is_dir():
             print(f"The given configurator path '{self.configurator_path}' is not a "
@@ -33,19 +46,14 @@ class Configurator:
             sys.exit(-1)
 
         self.scenario = None
-
         self.sbatch_filename = ""
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
-        self.multiobjective = True
-        if configurator_path == sgh.smac_dir:
-            self.multiobjective = False
-
-        objectives = sgh.settings.get_general_sparkle_objectives()
-        if len(objectives) > 1 and not self.multiobjective:
+        self.objectives = sgh.settings.get_general_sparkle_objectives()
+        if len(self.objectives) > 1 and not self.multiobjective:
             print("Warning: Multiple objectives specified but current configurator "
                   f"{self.configurator_path.name} only supports single objective. "
-                  f"Defaulted to first specified objective: {objectives[0].name}")
+                  f"Defaulted to first specified objective: {self.objectives[0].name}")
 
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
@@ -113,3 +121,14 @@ class Configurator:
         else:
             sjh.write_active_job(run.run_id, CommandName.CONFIGURE_SOLVER_CALLBACK)
         return run
+
+    @staticmethod
+    def smac_v2() -> Configurator:
+        """Returns the default configurator, Java SMAC V2.10.03."""
+        smac_path = Path("Components/smac-v2.10.03-master-778/")
+        return Configurator(
+            configurator_path=smac_path,
+            executable_path=smac_path / "smac_target_algorithm.py",
+            settings_path=Path("Settings/sparkle_smac_settings.txt"),
+            result_path=smac_path / "results",
+            tmp_path=smac_path / "tmp")
