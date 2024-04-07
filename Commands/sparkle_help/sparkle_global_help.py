@@ -88,6 +88,7 @@ sparkle_marginal_contribution_actual_path = (
 sparkle_last_test_file_name = "last_test_configured_default.txt"
 
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+sparkle_report_bibliography_path = Path("Components/Sparkle-latex-generator/SparkleReport.bib")
 
 runsolver_path = "Components/runsolver/src/runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
