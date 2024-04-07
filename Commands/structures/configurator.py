@@ -74,7 +74,7 @@ class Configurator:
                              self.scenario.directory.name,
                              self.scenario.scenario_file_name)
         result_directory = Path("results", self.scenario.name)
-        cmds = [f"./each_smac_run_core.sh {scenario_file} {seed} "
+        cmds = [f"{self.executable_path} {scenario_file} {seed} "
                 f"{result_directory / f'{self.sbatch_filename}_seed_{seed}_smac.txt'} "
                 f"{Path('scenarios', self.scenario.name, str(seed) )}"
                 for seed in range(1, self.scenario.number_of_runs + 1)]
@@ -87,7 +87,7 @@ class Configurator:
             cmd=cmds,
             name=CommandName.CONFIGURE_SOLVER,
             base_dir=sgh.sparkle_tmp_path,
-            path=sgh.smac_dir,
+            path=self.configurator_path,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
@@ -101,7 +101,7 @@ class Configurator:
                                dependency_job: rrr.SlurmRun | rrr.LocalRun,
                                run_on: Runner = Runner.SLURM)\
             -> rrr.SlurmRun | rrr.LocalRun:
-        """Callback to be run once configurator is done.
+        """Callback to clean up once configurator is done.
 
         Returns:
             rrr.SlurmRun | rrr.LocalRun: Run object of the callback
@@ -128,7 +128,7 @@ class Configurator:
         smac_path = Path("Components/smac-v2.10.03-master-778/")
         return Configurator(
             configurator_path=smac_path,
-            executable_path=smac_path / "smac_target_algorithm.py",
+            executable_path=smac_path / "each_smac_run_core.sh",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             result_path=smac_path / "results",
             tmp_path=smac_path / "tmp")
