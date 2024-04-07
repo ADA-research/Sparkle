@@ -969,6 +969,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "timeoutsTrainOverlap": "1",
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path",
+        'bibpath': str(sgh.sparkle_report_bibliography_path.absolute()),
         "featuresBool": "featurestrue"
     }
 
