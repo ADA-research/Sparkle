@@ -12,6 +12,7 @@ import statistics
 from Commands.sparkle_help import sparkle_logging as slog
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.structures.sparkle_objective import SparkleObjective
+from Commands.structures.configurator import Configurator
 
 
 class SolutionVerifier(Enum):
@@ -68,6 +69,7 @@ class Settings:
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
+    DEFAULT_general_sparkle_configurator = Configurator.smac_v2
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
@@ -93,6 +95,7 @@ class Settings:
 
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
+        self.__general_sparkle_configurator_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_cap_value_set = SettingState.NOT_SET
@@ -143,6 +146,13 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             # Comma so python understands it's a tuple...
+            option_names = ("configurator",)
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = getattr(Configurator, file_settings.get(section, option))
+                    self.set_general_sparkle_configurator(value, state)
+                    file_settings.remove_option(section, option)
+
             option_names = ("solution_verifier",)
             for option in option_names:
                 if file_settings.has_option(section, option):
@@ -350,6 +360,27 @@ class Settings:
 
         return SparkleObjective.from_multi_str(
             self.__settings["general"]["objective"])
+
+    def set_general_sparkle_configurator(
+            self: Settings,
+            value: Callable = DEFAULT_general_sparkle_configurator,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the Sparkle configurator."""
+        section = "general"
+        name = "configurator"
+        if value is not None and self.__check_setting_state(
+                self.__general_sparkle_configurator_set, origin, name):
+            self.__init_section(section)
+            self.__general_sparkle_configurator_set = origin
+            self.__settings[section][name] = value.__name__
+
+        return
+
+    def get_general_sparkle_configurator(self: Settings) -> Configurator:
+        """Return the configurator init method."""
+        if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
+            self.set_general_sparkle_configurator()
+        return getattr(Configurator, self.__settings["general"]["configurator"])()
 
     def get_performance_metric_for_report(self: Settings) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""

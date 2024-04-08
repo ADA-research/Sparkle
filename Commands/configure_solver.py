@@ -23,7 +23,6 @@ from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_command_help as sch
-from Commands.structures.configurator import Configurator
 from Commands.structures.configuration_scenario import ConfigurationScenario
 from Commands.structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
@@ -277,7 +276,7 @@ if __name__ == "__main__":
                                             time_budget, cutoff_time, cutoff_length,
                                             sparkle_objective, use_features,
                                             configurator_target, feature_data_df)
-    configurator = Configurator.smac_v2()
+    configurator = sgh.settings.get_general_sparkle_configurator()
     configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
