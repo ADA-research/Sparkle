@@ -302,7 +302,7 @@ def check_configuration_permission_error(solver_name: str,
         instance_set_name: Name of the instance set
     """
     conf_res_dir = sgh.settings.get_general_sparkle_configurator().result_path
-    results_dir = conf_res_dir / f"results/{solver_name}_{instance_set_name}/"
+    results_dir = conf_res_dir / f"{solver_name}_{instance_set_name}/"
 
     # Get the name of the first file in the directory
     # If there is an error, it will be in all files, so checking one is sufficient
@@ -527,6 +527,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     print(file_content)
                 sys.exit(-1)
         # The 15th item contains the performance as float, but has trailing char
+        
         this_configuration_performance = float(smac_output_line[14][:-1])
         # We look for the data with the highest performance
         if (optimised_configuration_performance < 0

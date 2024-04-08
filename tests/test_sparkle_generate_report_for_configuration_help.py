@@ -251,7 +251,7 @@ def test_get_features_bool_false(mocker: MockFixture) -> None:
     solver_dir = Path("smac-solver-dir/")
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_path",
+                            "get_scenario_path",
                             return_value=solver_dir)
     file_content_mock = ""
     mock_open = mocker.patch("pathlib.Path.open",
@@ -274,7 +274,7 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
     instance_set = "train-instance"
     mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                             "configuration_help."
-                            "get_smac_solver_path",
+                            "get_scenario_path",
                             return_value=solver_dir)
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
