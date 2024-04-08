@@ -8,7 +8,6 @@ from pathlib import PurePath
 from enum import Enum
 
 from sparkle import about
-from Commands.structures.configurator import Configurator
 from Commands.structures.solver import Solver
 
 
@@ -19,17 +18,6 @@ def get_seed() -> int:
 
 
 latest_scenario = None
-_configurator: Configurator = None
-
-
-@property
-def configurator() -> Configurator:
-    """Retrieve the Configurator object from storage or create from settings."""
-    if _configurator is None:
-        # settings should be stored here?
-        return None
-    return _configurator
-
 
 sparkle_version = str(about.about_info["version"])
 
