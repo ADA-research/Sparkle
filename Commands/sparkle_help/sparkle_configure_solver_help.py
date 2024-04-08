@@ -486,8 +486,8 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_str = ""
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
-
-    conf_results_dir = sgh.smac_results_dir / f"{solver_name}_{instance_set_name}/"
+    conf_results_path = sgh.settings.get_general_sparkle_configurator().result_path
+    conf_results_dir = conf_results_path / f"{solver_name}_{instance_set_name}/"
     list_file_result_name = os.listdir(conf_results_dir)
     line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
@@ -514,7 +514,8 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
         if len(smac_output_line) == 0:
             print("Error: Configurator output file has unexpected format")
             # Find matching error file
-            error_files = [file for file in sgh.smac_tmp_dir.iterdir()
+            conf_tmp_path = sgh.settings.get_general_sparkle_configurator().tmp_path
+            error_files = [file for file in conf_tmp_path.iterdir()
                            if file.name.startswith(f"{solver_name}_{instance_set_name}")
                            and file.suffix == ".err"]
             # Output content of error file
