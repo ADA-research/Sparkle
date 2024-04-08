@@ -383,12 +383,12 @@ def get_figure_configured_vs_default_on_train_instance_set(
     configured_results_dir = (f"{smac_solver_dir}/outdir_train_configuration/"
                               f"{solver_name}_{instance_set_train_name}_scenario/"
                               f"{configured_results_file}")
-    default_results_dir = f"{smac_solver_dir}/outdir_train_default/{default_results_file}"
+    default_res_dir = f"{smac_solver_dir}/outdir_train_default/{default_results_file}"
 
     data_plot_configured_vs_default_on_train_instance_set_filename = (
         f"data_{solver_name}_configured_vs_default_on_{instance_set_train_name}_train")
     return get_figure_configure_vs_default(
-        configured_results_dir, default_results_dir, configuration_reports_directory,
+        configured_results_dir, default_res_dir, configuration_reports_directory,
         data_plot_configured_vs_default_on_train_instance_set_filename,
         smac_each_run_cutoff_time)
 
@@ -644,7 +644,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
 
     common_dict["optimisedConfiguration"] = str(optimised_configuration_str)
     conf_path = sgh.settings.get_general_sparkle_configurator().configurator_path
-    smac_solver_dir = str(conf_path) + f"/scenarios/{solver_name}_{instance_set_train_name}/"
+    smac_solver_dir = f"{conf_path}/scenarios/{solver_name}_{instance_set_train_name}/"
     (optimised_configuration_str, _,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)

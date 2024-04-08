@@ -107,7 +107,7 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     run_on = args.run_on
-    
+
     if args.configurator is not None:
         sgh.settings.set_general_sparkle_configurator(
             value=getattr(Configurator, args.configurator),
@@ -146,10 +146,11 @@ if __name__ == "__main__":
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name
 
-        # Create instance file list for test set in configurator        
+        # Create instance file list for test set in configurator
         instances_directory_test = Path("Instances/", instance_set_test_name)
         list_path = sih.get_list_all_path(instances_directory_test)
-        instance_list_test_path = configurator_path / "scenarios" / "instances" / instance_set_test_name / (instance_set_test_name + "_test.txt")
+        instance_list_test_path = configurator_path / "scenarios" / "instances"\
+            / instance_set_test_name / (instance_set_test_name + "_test.txt")
         instance_list_test_path.parent.mkdir(parents=True, exist_ok=True)
         with instance_list_test_path.open("w+") as fout:
             for instance in list_path:
@@ -213,8 +214,8 @@ if __name__ == "__main__":
     for instance_set_name, inst_type in [(instance_set_train.name, "train"),
                                          (instance_set_test_name, "test")]:
         if instance_set_name is not None:
-            smac_instance_file = (f"{configurator.configurator_path / scenario_dir / instance_set_name}_"
-                                  f"{inst_type}.txt")
+            dir = configurator.configurator_path / scenario_dir / instance_set_name
+            smac_instance_file = f"{dir}_{inst_type}.txt"
             if Path(smac_instance_file).is_file():
                 instance_count = sum(1 for _ in open(smac_instance_file, "r"))
                 instance_sizes.append(instance_count)

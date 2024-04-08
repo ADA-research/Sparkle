@@ -109,7 +109,8 @@ class ConfigurationScenario:
                               / f"{self.name}_scenario.txt")
         self.scenario_file_name = scenario_file_path.name
         with scenario_file_path.open("w") as file:
-            file.write(f"algo = {self.configurator_target.absolute()} {self.solver.directory.absolute()}\n"
+            file.write(f"algo = {self.configurator_target.absolute()} "
+                       f"{self.solver.directory.absolute()}\n"
                        f"execdir = {inner_directory}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
                        f"run_obj = {performance_measure}\n"

@@ -527,7 +527,6 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     print(file_content)
                 sys.exit(-1)
         # The 15th item contains the performance as float, but has trailing char
-        
         this_configuration_performance = float(smac_output_line[14][:-1])
         # We look for the data with the highest performance
         if (optimised_configuration_performance < 0

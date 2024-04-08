@@ -77,13 +77,15 @@ class Configurator:
                              self.scenario.directory.name,
                              self.scenario.scenario_file_name)
         result_directory = self.result_path / self.scenario.name
-        
+        exec_dir_conf = self.configurator_path /\
+            Path("scenarios", self.scenario.name, "tmp")
         cmds = [f"{self.executable_path.absolute()} "
                 f"--scenario-file {(self.configurator_path / scenario_file).absolute()} "
                 f"--seed {seed} "
-                f"--execdir {( self.configurator_path / Path('scenarios', self.scenario.name, 'tmp') ).absolute()}"
+                f"--execdir {exec_dir_conf.absolute()}"
                 for seed in range(1, self.scenario.number_of_runs + 1)]
-        output = [f"{(result_directory / self.scenario.name).absolute()}_seed_{seed}_smac.txt"
+        output = [f"{(result_directory / self.scenario.name).absolute()}"
+                  f"_seed_{seed}_smac.txt"
                   for seed in range(1, self.scenario.number_of_runs + 1)]
 
         parallel_jobs = max(sgh.settings.get_slurm_number_of_runs_in_parallel(),
@@ -141,5 +143,5 @@ class Configurator:
             executable_path=smac_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             result_path=smac_path / "results",
-            configurator_target= smac_path / "smac_target_algorithm.py",
+            configurator_target=smac_path / "smac_target_algorithm.py",
             tmp_path=smac_path / "tmp")

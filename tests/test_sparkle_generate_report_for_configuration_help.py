@@ -11,8 +11,8 @@ from Commands.sparkle_help import sparkle_settings
 
 global settings
 sgh.settings = sparkle_settings.Settings()
-
 configurator_path = sgh.settings.get_general_sparkle_configurator().configurator_path
+
 
 def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> None:
     """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
