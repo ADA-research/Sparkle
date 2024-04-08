@@ -54,8 +54,7 @@ if __name__ == "__main__":
               f"{run_solver.returncode}:\n {run_solver.stderr}")
         print(f"Result for SMAC: CRASHED, {run_time}, 0, 0, {args['seed']}")
         sys.exit()
-    print(run_solver)
-    print()
+
     outdict = ast.literal_eval(run_solver.stdout.decode())
 
     # Overwrite the CPU runtime with runsolver log value
