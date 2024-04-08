@@ -80,12 +80,6 @@ if __name__ == "__main__":
 
     shutil.rmtree(solver_path)
 
-    solver_name = sfh.get_last_level_directory_name(solver_path)
-    smac_solver_path = f"{sgh.smac_dir}scenarios/{solver_name}_*"
-
-    if Path(smac_solver_path).exists():
-        shutil.rmtree(smac_solver_path)
-
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         shutil.rmtree(sgh.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
