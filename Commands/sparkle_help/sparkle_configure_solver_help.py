@@ -61,34 +61,6 @@ def get_smac_settings() -> tuple[str]:
             smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel)
 
 
-def copy_file_instance(solver_name: str, instance_set_train_name: str,
-                       instance_set_target_name: str, instance_type: str) -> None:
-    """Copy instance file to the solver directory with the specified postfix.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of the instance set for training
-        instance_set_target_name: Target name of the instance set
-        instance_type: Instance type used for the file postfix
-    """
-    file_postfix = f"_{instance_type}.txt"
-
-    smac_solver_dir = get_smac_solver_path(solver_name, instance_set_train_name)
-    smac_file_instance_path_ori = (f"{sgh.smac_dir}scenarios/instances/"
-                                   f"{instance_set_target_name}{file_postfix}")
-
-    smac_file_instance_path_target = \
-        smac_solver_dir / (instance_set_target_name + file_postfix)
-
-    if not smac_solver_dir.exists():
-        smac_solver_dir.mkdir(parents=True)
-
-    shutil.copy(smac_file_instance_path_ori, smac_file_instance_path_target)
-
-    log_str = "List of instances to be used for configuration"
-    sl.add_output(str(smac_file_instance_path_target) + "/", log_str)
-
-
 def create_file_scenario_validate(solver_name: str, instance_set_train_name: str,
                                   instance_set_val_name: str,
                                   instance_type: InstanceType, default: bool) -> str:
@@ -116,7 +88,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     else:
         config_type = "configured"
 
-    smac_solver_path = get_smac_solver_path(solver_name, instance_set_train_name)
+    smac_solver_path = get_scenario_path(solver_name, instance_set_train_name)
     scenario_file_name = (
         f"{instance_set_val_name}_{inst_type}_{config_type}_scenario.txt")
     smac_file_scenario = smac_solver_path / scenario_file_name
@@ -129,12 +101,15 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     if instance_type == InstanceType.TRAIN:
         smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{inst_type}_{config_type}/")
+        smac_instance_file = (f"scenarios/instances/{instance_set_train_name}/"
+                              f"{instance_set_train_name}_{inst_type}.txt")
     else:
         smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
                        f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
-    smac_instance_file = (f"scenarios/instances/{instance_set_train_name}/"
-                          f"{instance_set_val_name}_{inst_type}.txt")
+        smac_instance_file = (f"scenarios/instances/{instance_set_val_name}/"
+                              f"{instance_set_val_name}_{inst_type}.txt")
     smac_test_instance_file = smac_instance_file
+
     solver = Solver.get_solver_by_name(solver_name)
     with smac_file_scenario.open("w+") as fout:
         fout.write(f"algo = ../../../{sgh.smac_target_algorithm}\n"
@@ -149,14 +124,14 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
                    f"instance_file = {smac_instance_file}\n"
                    f"test_instance_file = {smac_test_instance_file}\n")
 
-    log_str = (f"SMAC Scenario file for the validation of the {config_type} solver "
+    log_str = (f"Scenario file for the validation of the {config_type} solver "
                f"{solver_name} on the {inst_type}ing set")
     sl.add_output(str(smac_file_scenario), log_str)
 
     return scenario_file_name
 
 
-def get_smac_solver_path(solver_name: str, instance_set_name: str) -> Path:
+def get_scenario_path(solver_name: str, instance_set_name: str) -> Path:
     """Return the directory of a solver under the SMAC directory.
 
     Args:
@@ -166,10 +141,8 @@ def get_smac_solver_path(solver_name: str, instance_set_name: str) -> Path:
     Returns:
         String containing the scenario directory inside SMAC
     """
-    smac_scenario_path = Path(sgh.smac_dir) / "scenarios"
-    smac_solver_path = smac_scenario_path / f"{solver_name}_{instance_set_name}"
-
-    return smac_solver_path
+    conf = sgh.settings.get_general_sparkle_configurator()
+    return conf.configurator_path / "scenarios" / f"{solver_name}_{instance_set_name}"
 
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
@@ -204,7 +177,7 @@ def remove_validation_directories_execution_or_output(solver_name: str,
         instance_set_test_name: Name of instance set for testing
         exec_or_out: Postfix describing if execution or output directory is used
     """
-    solver_path = get_smac_solver_path(solver_name, instance_set_train_name)
+    solver_path = get_scenario_path(solver_name, instance_set_train_name)
     train_default_dir = solver_path / (exec_or_out + "_train_default/")
     shutil.rmtree(train_default_dir, ignore_errors=True)
 
@@ -248,7 +221,7 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     remove_validation_directories(solver_name, instance_set_train_name,
                                   instance_set_test_name)
 
-    smac_solver_path = get_smac_solver_path(solver_name, instance_set_train_name)
+    smac_solver_path = get_scenario_path(solver_name, instance_set_train_name)
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
     for _ in range(num_of_smac_run):
@@ -284,7 +257,8 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
         True if the results directory for this configuration exists.
     """
     # Check the results directory exists
-    smac_results_dir = Path(f"{sgh.smac_dir}/results/{solver_name}_{instance_set_name}/")
+    res_path = sgh.settings.get_general_sparkle_configurator().result_path
+    smac_results_dir = res_path / f"{solver_name}_{instance_set_name}/"
     all_good = smac_results_dir.is_dir()
 
     if not all_good:
@@ -295,15 +269,16 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
     return all_good
 
 
-def check_instance_list_file_exist(solver_name: str, instance_set_name: str) -> None:
+def check_instance_list_file_exist(instance_set_name: str) -> None:
     """Check the instance list file exists.
 
     Args:
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
     """
+    conf_path = sgh.settings.get_general_sparkle_configurator().configurator_path
     file_name = Path(instance_set_name + "_train.txt")
-    instance_list_file_path = Path(PurePath(Path(sgh.smac_dir)
+    instance_list_file_path = Path(PurePath(conf_path
                                    / Path("scenarios")
                                    / Path("instances")
                                    / Path(instance_set_name)
@@ -326,12 +301,13 @@ def check_configuration_permission_error(solver_name: str,
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
     """
-    smac_results_dir = Path(f"{sgh.smac_dir}/results/{solver_name}_{instance_set_name}/")
+    conf_res_dir = sgh.settings.get_general_sparkle_configurator().result_path
+    results_dir = conf_res_dir / f"results/{solver_name}_{instance_set_name}/"
 
     # Get the name of the first file in the directory
     # If there is an error, it will be in all files, so checking one is sufficient
-    filename = next(Path(smac_results_dir / f) for f in os.listdir(smac_results_dir)
-                    if Path(smac_results_dir / f).is_file())
+    filename = next((results_dir / f) for f in os.listdir(results_dir)
+                    if (results_dir / f).is_file())
 
     with Path(filename).open("r") as file:
         content = file.read()
@@ -350,7 +326,7 @@ def check_validation_prerequisites(solver_name: str, instance_set_name: str) -> 
         instance_set_name: Name of the instance set
     """
     check_configuration_exists(solver_name, instance_set_name)
-    check_instance_list_file_exist(solver_name, instance_set_name)
+    check_instance_list_file_exist(instance_set_name)
     check_configuration_permission_error(solver_name, instance_set_name)
 
 

@@ -20,6 +20,7 @@ from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
+from Commands.structures.configurator import Configurator
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_file_help as sfh
@@ -106,10 +107,13 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     run_on = args.run_on
+    
     if args.configurator is not None:
-        configurator_path = Path(args.configurator)
-    else:
-        configurator_path = Path("Components", "smac-v2.10.03-master-778")
+        sgh.settings.set_general_sparkle_configurator(
+            value=getattr(Configurator, args.configurator),
+            origin=SettingState.CMD_LINE)
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    configurator_path = configurator.configurator_path
 
     check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                          sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
@@ -142,27 +146,20 @@ if __name__ == "__main__":
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name
 
-        # Copy test instances to smac directory (train should already be there from
-        # configuration)
+        # Create instance file list for test set in configurator        
         instances_directory_test = Path("Instances/", instance_set_test_name)
         list_path = sih.get_list_all_path(instances_directory_test)
-        inst_dir_prefix = instances_directory_test
-        smac_inst_dir_prefix = Path(configurator_path, "scenarios/instances",
-                                    instance_set_test_name)
-        sih.copy_instances_to_smac(
-            list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
-        )
-
-        # Copy file listing test instances to smac solver directory
-        scsh.copy_file_instance(
-            solver.name, instance_set_train.name, instance_set_test_name, "test"
-        )
+        instance_list_test_path = configurator_path / "scenarios" / "instances" / instance_set_test_name / (instance_set_test_name + "_test.txt")
+        instance_list_test_path.parent.mkdir(parents=True, exist_ok=True)
+        with instance_list_test_path.open("w+") as fout:
+            for instance in list_path:
+                fout.write(f"{instance.absolute()}\n")
 
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(
         solver.name, instance_set_train.name, instance_set_test_name
     )
-
+    configurator = sgh.settings.get_general_sparkle_configurator()
     # Set up scenarios
     # 1. Set up the validation scenario for the training set
     cmd_base = "./smac-validate --use-scenario-outdir true --num-run 1 --cli-cores 8"
@@ -193,7 +190,7 @@ if __name__ == "__main__":
         # Write configuration to file to be used by smac-validate
         config_file_path = scenario_dir / "configuration_for_validation.txt"
         # open the file of sbatch script
-        with (Path(sgh.smac_dir) / config_file_path).open("w+") as fout:
+        with (configurator.configurator_path / config_file_path).open("w+") as fout:
             fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
             optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
                 solver.name, instance_set_train.name)
@@ -216,7 +213,7 @@ if __name__ == "__main__":
     for instance_set_name, inst_type in [(instance_set_train.name, "train"),
                                          (instance_set_test_name, "test")]:
         if instance_set_name is not None:
-            smac_instance_file = (f"{sgh.smac_dir}{scenario_dir}/{instance_set_name}_"
+            smac_instance_file = (f"{configurator.configurator_path / scenario_dir / instance_set_name}_"
                                   f"{inst_type}.txt")
             if Path(smac_instance_file).is_file():
                 instance_count = sum(1 for _ in open(smac_instance_file, "r"))
