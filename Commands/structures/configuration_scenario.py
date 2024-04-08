@@ -74,7 +74,6 @@ class ConfigurationScenario:
             / Path(str(self.instance_directory.name + "_train.txt")))
         self._prepare_scenario_directory()
         self._prepare_result_directory()
-        self._prepare_run_directories()
         self._prepare_instances()
 
         if self.use_features:
@@ -98,13 +97,6 @@ class ConfigurationScenario:
         shutil.rmtree(self.result_directory, ignore_errors=True)
         self.result_directory.mkdir(parents=True)
 
-    def _prepare_run_directories(self: ConfigurationScenario) -> None:
-        """Create directories for each configurator run and copy solver files to them."""
-        for i in range(self.number_of_runs):
-            run_path = self.directory / str(i + 1)
-            shutil.copytree(self.solver.directory, run_path)
-            (run_path / "tmp").mkdir()
-
     def _create_scenario_file(self: ConfigurationScenario) -> None:
         """Create a file with the configuration scenario."""
         inner_directory = Path("scenarios", self.name)
@@ -117,7 +109,7 @@ class ConfigurationScenario:
                               / f"{self.name}_scenario.txt")
         self.scenario_file_name = scenario_file_path.name
         with scenario_file_path.open("w") as file:
-            file.write(f"algo = {self.configurator_target.absolute()}\n"
+            file.write(f"algo = {self.configurator_target.absolute()} {self.solver.directory.absolute()}\n"
                        f"execdir = {inner_directory}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
                        f"run_obj = {performance_measure}\n"

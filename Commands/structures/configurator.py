@@ -76,24 +76,31 @@ class Configurator:
         scenario_file = Path(self.scenario.directory.parent.name,
                              self.scenario.directory.name,
                              self.scenario.scenario_file_name)
-        result_directory = Path("results", self.scenario.name)
-        cmds = [f"./{self.executable_path.name} {scenario_file} {seed} "
-                f"{result_directory / f'{self.sbatch_filename}_seed_{seed}_smac.txt'} "
-                f"{Path('scenarios', self.scenario.name, str(seed) )}"
+        result_directory = self.result_path / self.scenario.name
+        
+        cmds = [f"{self.executable_path.absolute()} "
+                f"--scenario-file {(self.configurator_path / scenario_file).absolute()} "
+                f"--seed {seed} "
+                f"--execdir {( self.configurator_path / Path('scenarios', self.scenario.name, 'tmp') ).absolute()}"
                 for seed in range(1, self.scenario.number_of_runs + 1)]
+        output = [f"{(result_directory / self.scenario.name).absolute()}_seed_{seed}_smac.txt"
+                  for seed in range(1, self.scenario.number_of_runs + 1)]
 
         parallel_jobs = max(sgh.settings.get_slurm_number_of_runs_in_parallel(),
                             self.scenario.number_of_runs)
         sbatch_options = ssh.get_slurm_options_list()
+
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
             name=CommandName.CONFIGURE_SOLVER,
             base_dir=sgh.sparkle_tmp_path,
+            output_path=output,
             path=self.configurator_path,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
+
         if run_on == Runner.LOCAL:
             run.wait()
         else:
@@ -131,7 +138,7 @@ class Configurator:
         smac_path = Path("Components/smac-v2.10.03-master-778/")
         return Configurator(
             configurator_path=smac_path,
-            executable_path=smac_path / "each_smac_run_core.sh",
+            executable_path=smac_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             result_path=smac_path / "results",
             configurator_target= smac_path / "smac_target_algorithm.py",

@@ -14,27 +14,30 @@ from Commands.sparkle_help import sparkle_run_solvers_help as srsh
 if __name__ == "__main__":
     # Incoming call from SMAC:
     # 1. Translate input from SMAC to standardized form
-    argsiter = iter(sys.argv[6:])
+    argsiter = iter(sys.argv[7:])
     args = zip(argsiter, argsiter)
     args = {arg.strip("-"): val for arg, val in args}
-    # Args 1-5 conditions of the run, the rest are configurations for the solver
-    args["instance"] = sys.argv[1]
-    args["specifics"] = sys.argv[2]
-    args["cutoff_time"] = float(sys.argv[3])
-    args["run_length"] = int(sys.argv[4])
-    args["seed"] = int(sys.argv[5])
+    # Args 1-6 conditions of the run, the rest are configurations for the solver
+    # First argument is the solver directory
+    solver_dir = Path(sys.argv[1])
+    args["solver_dir"] = str(solver_dir)
+    args["instance"] = sys.argv[2]
+    args["specifics"] = sys.argv[3]
+    args["cutoff_time"] = float(sys.argv[4])
+    args["run_length"] = int(sys.argv[5])
+    args["seed"] = int(sys.argv[6])
     cutoff_time = int(args["cutoff_time"])+1
 
     # 2. Build Run Solver call
-    runsolver_binary = "./runsolver"
+    runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
     runsolver_watch_data_path = f"{str(Path.cwd())}_"\
                                 f"{log_timestamp}.log"
 
-    runsolver_call = [runsolver_binary,
+    runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),
                       "--cpu-limit", str(cutoff_time),
-                      str(Path.cwd() / sgh.sparkle_solver_wrapper),
+                      str(solver_dir / sgh.sparkle_solver_wrapper),
                       str(args)]
 
     # 3. Call Runsolver with the solver configurator wrapper and its arguments
@@ -51,7 +54,8 @@ if __name__ == "__main__":
               f"{run_solver.returncode}:\n {run_solver.stderr}")
         print(f"Result for SMAC: CRASHED, {run_time}, 0, 0, {args['seed']}")
         sys.exit()
-
+    print(run_solver)
+    print()
     outdict = ast.literal_eval(run_solver.stdout.decode())
 
     # Overwrite the CPU runtime with runsolver log value
