@@ -5,9 +5,6 @@
 from __future__ import annotations
 from enum import Enum
 
-from Commands.sparkle_help import sparkle_snapshot_help as srh
-from Commands.sparkle_help import sparkle_file_help as sfh
-
 
 class CommandName(str, Enum):
     """Enum of all command names."""
@@ -116,27 +113,3 @@ COMMAND_DEPENDENCIES = {
         CommandName.INITIALISE,
         CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO]
 }
-
-
-def check_for_initialise(argv: list[str], requirements: list[CommandName] = None)\
-        -> None:
-    """Function to check if initialize command was executed and execute it otherwise.
-
-    Args:
-        argv: List of the arguments from the caller.
-        requirements: The requirements that have to be executed before the calling
-            function.
-    """
-    if not srh.detect_current_sparkle_platform_exists(check_all_dirs=True):
-        print("-----------------------------------------------")
-        print("No Sparkle platform found; "
-              + "The platform will now be initialized automatically")
-        if requirements is not None:
-            if len(requirements) == 1:
-                print(f"The command {requirements[0]} has \
-                      to be executed before executing this command.")
-            else:
-                print(f"""The commands {", ".join(requirements)} \
-                      have to be executed before executing this command.""")
-        print("-----------------------------------------------")
-        sfh.initialise_sparkle(argv)

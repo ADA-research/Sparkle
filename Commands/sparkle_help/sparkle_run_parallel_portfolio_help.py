@@ -21,7 +21,7 @@ from Commands.sparkle_help import sparkle_logging as slog
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
-from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.structures.sparkle_objective import PerformanceMeasure
 
 import functools
 print = functools.partial(print, flush=True)

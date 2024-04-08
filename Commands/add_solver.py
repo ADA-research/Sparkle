@@ -21,6 +21,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -94,8 +95,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     solver_source = args.solver_path
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.ADD_SOLVER])
+    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                         sch.CommandName.ADD_SOLVER])
 
     if not Path(solver_source).exists():
         print(f'Solver path "{solver_source}" does not exist!')

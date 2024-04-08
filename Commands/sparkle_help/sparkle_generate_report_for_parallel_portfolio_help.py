@@ -11,7 +11,7 @@ from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
 from Commands.sparkle_help import sparkle_tex_help as stex
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 
 
 def get_num_solvers(parallel_portfolio_path: Path) -> str:

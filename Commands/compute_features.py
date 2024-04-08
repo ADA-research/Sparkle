@@ -18,6 +18,7 @@ from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -102,8 +103,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.COMPUTE_FEATURES])
+    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                         sch.CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

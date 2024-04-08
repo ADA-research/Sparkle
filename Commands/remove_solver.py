@@ -11,6 +11,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -41,8 +42,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     solver_path = args.solver_path
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.REMOVE_SOLVER])
+    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                         sch.CommandName.REMOVE_SOLVER])
 
     if args.nickname:
         solver_path = sgh.solver_nickname_mapping[args.nickname]

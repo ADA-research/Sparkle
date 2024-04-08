@@ -8,9 +8,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, SparkleObjective
+from Commands.structures.sparkle_objective import SparkleObjective, PerformanceMeasure
 from Commands.structures.solver import Solver
-from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 
 
 class ConfigurationScenario:
@@ -174,17 +173,18 @@ class ConfigurationScenario:
         self.feature_data.to_csv(self.directory
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
 
-    def _clean_up_scenario_dirs(self: ConfigurationScenario) -> list[Path]:
+    def _clean_up_scenario_dirs(self: ConfigurationScenario,
+                                configurator_path: Path) -> list[Path]:
         """Yield directories to clean up after configuration scenario is done.
 
         Returns:
             list[str]: Full paths to directories that can be removed
         """
-        # Wait for jobs to be done
         result = []
-        smac_solver_path = scsh.get_smac_solver_path(self.solver.name,
-                                                     self.instance_directory.name)
+        configurator_solver_path = configurator_path / "scenarios"\
+            / f"{self.solver.name}_{self.instance_directory.name}"
+
         for index in range(self.number_of_runs):
-            dir = smac_solver_path / str(index + 1)
+            dir = configurator_solver_path / str(index + 1)
             result.append(dir)
         return result

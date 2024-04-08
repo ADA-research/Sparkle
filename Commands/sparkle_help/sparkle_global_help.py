@@ -8,6 +8,8 @@ from pathlib import PurePath
 from enum import Enum
 
 from sparkle import about
+from Commands.structures.configurator import Configurator
+from Commands.structures.solver import Solver
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
@@ -17,6 +19,17 @@ def get_seed() -> int:
 
 
 latest_scenario = None
+_configurator: Configurator = None
+
+
+@property
+def configurator() -> Configurator:
+    """Retrieve the Configurator object from storage or create from settings."""
+    if _configurator is None:
+        # settings should be stored here?
+        return None
+    return _configurator
+
 
 sparkle_version = str(about.about_info["version"])
 
@@ -124,7 +137,7 @@ extractor_list_path = str(reference_list_dir) + "/sparkle_extractor_list.txt"
 extractor_feature_vector_size_list_path = (
     f"{str(reference_list_dir)}/extractor_feature_vector_size_list.txt")
 solver_nickname_list_path = str(reference_list_dir) + "/sparkle_solver_nickname_list.txt"
-solver_list_path = str(reference_list_dir) + "/sparkle_solver_list.txt"
+solver_list_path = str(Solver.solver_list_path)
 instance_list_file = Path("sparkle" + instance_list_postfix)
 instance_list_path = Path(reference_list_dir / instance_list_file)
 
@@ -133,7 +146,7 @@ working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
                 test_data_dir]
 
-file_storage_data_mapping = {Path(solver_list_path): [],
+file_storage_data_mapping = {Solver.solver_list_path: Solver.get_solver_list(),
                              Path(solver_nickname_list_path): {},
                              Path(extractor_list_path): [],
                              Path(extractor_nickname_list_path): {},
@@ -146,7 +159,7 @@ for data_path in file_storage_data_mapping.keys():
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
-solver_list = file_storage_data_mapping[Path(solver_list_path)]
+solver_list = file_storage_data_mapping[Solver.solver_list_path]
 solver_nickname_mapping = file_storage_data_mapping[Path(solver_nickname_list_path)]
 extractor_list = file_storage_data_mapping[Path(extractor_list_path)]
 extractor_nickname_mapping =\

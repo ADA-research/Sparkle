@@ -21,7 +21,7 @@ from Commands.sparkle_help.sparkle_performance_data_csv_help import \
 from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from Commands.sparkle_help import sparkle_run_portfolio_selector_help as srps
 from Commands.sparkle_help import sparkle_logging as sl
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
 
 

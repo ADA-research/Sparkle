@@ -106,7 +106,7 @@ class Configurator:
         Returns:
             rrr.SlurmRun | rrr.LocalRun: Run object of the callback
         """
-        dir_list = self.scenario._clean_up_scenario_dirs()
+        dir_list = self.scenario._clean_up_scenario_dirs(self.configurator_path)
         cmd = "rm -rf " + " ".join([str(p) for p in dir_list])
         run = rrr.add_to_queue(
             runner=run_on,

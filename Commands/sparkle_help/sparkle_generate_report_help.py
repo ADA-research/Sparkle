@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_tex_help as stex
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 
 
 def underscore_for_latex(string: str) -> str:

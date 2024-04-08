@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.structures.reporting_scenario import ReportingScenario
@@ -24,6 +24,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -110,8 +111,8 @@ if __name__ == "__main__":
     else:
         configurator_path = Path("Components", "smac-v2.10.03-master-778")
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
+    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                         sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

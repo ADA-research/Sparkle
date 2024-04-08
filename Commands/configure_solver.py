@@ -16,7 +16,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
@@ -28,6 +28,7 @@ from Commands.structures.configuration_scenario import ConfigurationScenario
 from Commands.structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_job_help as sjh
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -219,8 +220,8 @@ if __name__ == "__main__":
         configurator_path = Path(sgh.smac_dir)
         configurator_target = sgh.smac_target_algorithm
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                         sch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:

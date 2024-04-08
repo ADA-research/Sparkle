@@ -17,6 +17,7 @@ from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -76,8 +77,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     instances_source = args.instances_path
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.ADD_INSTANCES])
+    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                         sch.CommandName.ADD_INSTANCES])
 
     if not Path(instances_source).exists():
         print(f'Instance set path "{instances_source}" does not exist!')

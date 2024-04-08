@@ -15,7 +15,7 @@ from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_run_solvers_help as srsh
 from Commands.sparkle_help import sparkle_compute_features_help as scfh
 from Commands.sparkle_help import sparkle_logging as sl
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:

@@ -15,6 +15,7 @@ from Commands.sparkle_help import sparkle_construct_parallel_portfolio_help as s
 from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -64,8 +65,8 @@ if __name__ == "__main__":
     portfolio_name = args.nickname
     list_of_solvers = args.solver
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO])
+    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
+                         sch.CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO])
 
     # If no solvers are given all previously added solvers are used
     if list_of_solvers is None:
