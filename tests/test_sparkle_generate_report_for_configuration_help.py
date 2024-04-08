@@ -12,6 +12,7 @@ from Commands.sparkle_help import sparkle_settings
 global settings
 sgh.settings = sparkle_settings.Settings()
 
+configurator_path = sgh.settings.get_general_sparkle_configurator().configurator_path
 
 def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> None:
     """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
@@ -56,7 +57,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
 
-    instance_directory = f"{sgh.smac_dir}scenarios/instances/{instance_set_name}/"
+    instance_directory = f"{configurator_path}scenarios/instances/{instance_set_name}/"
     mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
@@ -459,7 +460,7 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixtu
         test_instance,
         cutoff)
 
-    smac_solver_dir = f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/"
+    smac_solver_dir = f"{configurator_path}/scenarios/{solver_name}_{train_instance}/"
 
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
@@ -512,7 +513,7 @@ def test_get_figure_configured_vs_default_on_train_instance_set(mocker: MockFixt
     configured_results_file = ("validationObjectiveMatrix-traj-run-"
                                f"{seed}-walltime.csv")
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{train_instance}_scenario/"
                               f"{configured_results_file}")
@@ -561,7 +562,7 @@ def test_get_timeouts_test(mocker: MockFixture) -> None:
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
                               f"_test_configured/{configured_results_file}")
     default_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
@@ -607,7 +608,7 @@ def test_get_timeouts_train(mocker: MockFixture) -> None:
                                f"{optimised_configuration_seed}-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set}/")
+        f"{configurator_path}/scenarios/{solver_name}_{instance_set}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{instance_set}_scenario/"
                               f"{configured_results_file}")
@@ -917,7 +918,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                                         test_instance, report_dir)
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
     configured_results_train_file = ("validationObjectiveMatrix-traj-run-" + str(seed)
                                      + "-walltime.csv")
     configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
@@ -1018,7 +1019,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                     test_instance)
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
 
     configured_results_test_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
