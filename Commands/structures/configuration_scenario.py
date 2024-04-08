@@ -17,7 +17,7 @@ class ConfigurationScenario:
     def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
                  number_of_runs: int, time_budget: int, cutoff_time: int,
                  cutoff_length: int, sparkle_objective: SparkleObjective,
-                 use_features: bool, configurator_target: str,
+                 use_features: bool, configurator_target: Path,
                  feature_data_df: pd.DataFrame = None) -> None:
         """Initialize scenario paths and names.
 
@@ -117,7 +117,7 @@ class ConfigurationScenario:
                               / f"{self.name}_scenario.txt")
         self.scenario_file_name = scenario_file_path.name
         with scenario_file_path.open("w") as file:
-            file.write(f"algo = ../../../{self.configurator_target}\n"
+            file.write(f"algo = {self.configurator_target.absolute()}\n"
                        f"execdir = {inner_directory}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
                        f"run_obj = {performance_measure}\n"

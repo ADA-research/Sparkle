@@ -20,8 +20,8 @@ class Configurator:
     """Generic class to use different configurators like SMAC."""
 
     def __init__(self: Configurator, configurator_path: Path, executable_path: Path,
-                 settings_path: Path, result_path: Path, tmp_path: Path = None,
-                 multi_objective_support: bool = False) -> None:
+                 settings_path: Path, result_path: Path, configurator_target: Path,
+                 tmp_path: Path = None, multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
@@ -29,15 +29,18 @@ class Configurator:
             executable_path: Executable of the configurator for Sparkle to call
             settings_path: Path to the settings file for the configurator
             result_path: Path for the result files of the configurator
+            configurator_target: The wrapper algorithm to standardize configurator
+                input/output towards solver wrappers.
             tmp_path: Path for the temporary files of the configurator, optional
             multi_objective_support: Whether the configurator supports
                 multi objective optimization for solvers.
         """
         self.configurator_path = configurator_path
+        self.executable_path = executable_path
         self.settings_path = settings_path
         self.result_path = result_path
+        self.configurator_target = configurator_target
         self.tmp_path = tmp_path
-        self.executable_path = executable_path
         self.multiobjective = multi_objective_support
 
         if not self.configurator_path.is_dir():
@@ -131,4 +134,5 @@ class Configurator:
             executable_path=smac_path / "each_smac_run_core.sh",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             result_path=smac_path / "results",
+            configurator_target= smac_path / "smac_target_algorithm.py",
             tmp_path=smac_path / "tmp")
