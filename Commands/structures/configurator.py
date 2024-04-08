@@ -77,7 +77,7 @@ class Configurator:
                              self.scenario.directory.name,
                              self.scenario.scenario_file_name)
         result_directory = Path("results", self.scenario.name)
-        cmds = [f"{self.executable_path} {scenario_file} {seed} "
+        cmds = [f"./{self.executable_path.name} {scenario_file} {seed} "
                 f"{result_directory / f'{self.sbatch_filename}_seed_{seed}_smac.txt'} "
                 f"{Path('scenarios', self.scenario.name, str(seed) )}"
                 for seed in range(1, self.scenario.number_of_runs + 1)]

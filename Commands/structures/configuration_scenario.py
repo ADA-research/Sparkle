@@ -137,15 +137,10 @@ class ConfigurationScenario:
         source_instance_list = (
             [f for f in self.instance_directory.rglob("*") if f.is_file()])
 
-        instance_list_path = self.instance_file_path
-
-        instance_list_path.parent.mkdir(exist_ok=True, parents=True)
-
-        with instance_list_path.open("w+") as file:
-            for original_instance_path in source_instance_list:
-                file.write(f"../../../../../Instances/"
-                           f"{original_instance_path.parts[-2]}/"
-                           f"{original_instance_path.name}\n")
+        self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
+        with self.instance_file_path.open("w+") as file:
+            for instance_path in source_instance_list:
+                file.write(f"{instance_path.absolute()}\n")
 
     def _get_performance_measure(self: ConfigurationScenario) -> str:
         """Retrieve the performance measure of the SparkleObjective.
@@ -153,7 +148,6 @@ class ConfigurationScenario:
         Returns:
             Performance measure of the sparkle objective
         """
-        # Convert to SMAC format
         run_performance_measure = self.sparkle_objective.PerformanceMeasure
 
         if run_performance_measure == PerformanceMeasure.RUNTIME:
