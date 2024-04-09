@@ -125,8 +125,8 @@ class ConfigurationScenario:
                        f"cutoff_length = {self.cutoff_length}\n"
                        f"paramfile = {solver_param_file_path}\n"
                        f"outdir = {config_output_directory}\n"
-                       f"instance_file = {self.instance_file_path}\n"
-                       f"test_instance_file = {self.instance_file_path}\n")
+                       f"instance_file = {self.instance_file_path.absolute()}\n"
+                       f"test_instance_file = {self.instance_file_path.absolute()}\n")
             if self.use_features:
                 file.write(f"feature_file = {self.feature_file_path}\n")
             file.write("validation = true" + "\n")

@@ -98,18 +98,19 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
-    paramfile = get_pcs_file_from_solver_directory(configurator.scenario.solver)
+    paramfile = get_pcs_file_from_solver_directory(
+        configurator.scenario.solver.directory)
     if isinstance(paramfile, Path):
         paramfile = str(paramfile.absolute())
 
     if instance_type == InstanceType.TRAIN:
-        outdir = (f"{scenario_path.absolute()}"
+        outdir = (f"{scenario_path.absolute()}/"
                   f"outdir_{inst_type}_{config_type}/")
         instance_file = (f"{instances_path.absolute()}/"
                          f"{instance_set_train_name}/"
                          f"{instance_set_train_name}_{inst_type}.txt")
     else:
-        outdir = (f"{scenario_path.absolute()}"
+        outdir = (f"{scenario_path.absolute()}/"
                   f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
         instance_file = (f"{instances_path.absolute()}/{instance_set_val_name}/"
                          f"{instance_set_val_name}_{inst_type}.txt")
@@ -117,8 +118,9 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
 
     solver = Solver.get_solver_by_name(solver_name)
     with smac_file_scenario.open("w+") as fout:
-        fout.write(f"algo = ../../../{sgh.smac_target_algorithm}\n"
-                   f"execdir = scenarios/{solver_name}_{instance_set_train_name}/\n"
+        fout.write(f"algo = {configurator.configurator_target.absolute()} "
+                   f"{solver.directory.absolute()}\n"
+                   f"execdir = {scenario_path.absolute()}/\n"
                    f"deterministic = {solver.is_deterministic()}\n"
                    f"run_obj = {smac_run_obj}\n"
                    f"wallclock-limit = {smac_whole_time_budget}\n"

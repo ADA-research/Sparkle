@@ -164,7 +164,9 @@ if __name__ == "__main__":
     # Set up scenarios
     # 1. Set up the validation scenario for the training set
     cmd_base = "./smac-validate --use-scenario-outdir true --num-run 1 --cli-cores 8"
-    scenario_dir = configurator.scenario.directory
+    scenario_dir = configurator.scenario.directory.relative_to(
+        configurator.configurator_path)
+
     scenario_fn_train = scsh.create_file_scenario_validate(
         solver.name, instance_set_train.name, instance_set_train.name,
         scsh.InstanceType.TRAIN, default=True)
@@ -189,9 +191,10 @@ if __name__ == "__main__":
         exec_dir_conf = scenario_dir / dir_name
 
         # Write configuration to file to be used by smac-validate
-        config_file_path = scenario_dir / "configuration_for_validation.txt"
+        config_file_path = configurator.scenario.directory /\
+            "configuration_for_validation.txt"
         # open the file of sbatch script
-        with (configurator.configurator_path / config_file_path).open("w+") as fout:
+        with config_file_path.open("w+") as fout:
             fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
             optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
                 solver.name, instance_set_train.name)
