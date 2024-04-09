@@ -9,6 +9,7 @@ import datetime
 import fcntl
 import glob
 import sys
+import time
 from pathlib import Path
 from pathlib import PurePath
 
@@ -18,7 +19,6 @@ from runrunner.base import Runner
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as slog
-from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_settings import ProcessMonitoring
 from Commands.structures.sparkle_objective import PerformanceMeasure
@@ -362,7 +362,7 @@ def wait_for_finished_solver(
                 done = True  # No jobs are remaining
                 break
 
-            sjh.sleep(n_seconds)  # No jobs have started yet;
+            time.sleep(n_seconds)  # No jobs have started yet;
         # If the results are less than the number of solvers then this means that there
         # are finished solvers(+1 becuase of the header of results)
         elif len(result.stdout.strip().split("\n")) < (1 + number_of_solvers):
@@ -412,7 +412,7 @@ def wait_for_finished_solver(
 
                 started = True
 
-            sjh.sleep(n_seconds)
+            time.sleep(n_seconds)
             current_solver_list = list()
 
             # Check if the running jobs are from a portfolio which contain an already
@@ -716,11 +716,11 @@ def run_parallel_portfolio(instances: list[str],
                     # Wait until the last few seconds before checking often
                     if not wait_cutoff_time:
                         n_seconds = sgh.settings.get_general_target_cutoff_time() - 6
-                        sjh.sleep(n_seconds)
+                        time.sleep(n_seconds)
                         wait_cutoff_time = True
                         n_seconds = 1  # Start checking often
 
-                sjh.sleep(n_seconds)
+                time.sleep(n_seconds)
         else:
             run.wait()
 

@@ -14,7 +14,6 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.structures.solver import Solver
 
@@ -231,7 +230,6 @@ def submit_ablation(ablation_scenario_dir: str,
         run_ablation.wait()
     else:
         dependencies.append(run_ablation)
-        sjh.write_active_job(run_ablation.run_id, CommandName.RUN_ABLATION)
 
     # 2. Submit intermediate actions (copy path from log)
     log_source = "log/ablation-run1234.txt"
@@ -255,7 +253,6 @@ def submit_ablation(ablation_scenario_dir: str,
         run_cb.wait()
     else:
         dependencies.append(run_cb)
-        sjh.write_active_job(run_cb.run_id, CommandName.ABLATION_CALLBACK)
 
     # 3. Submit ablation validation run when nessesary, repeat process for the test set
     if instance_set_test is not None:
@@ -276,8 +273,6 @@ def submit_ablation(ablation_scenario_dir: str,
             run_ablation_validation.wait()
         else:
             dependencies.append(run_ablation_validation)
-            sjh.write_active_job(run_ablation_validation.run_id,
-                                 CommandName.RUN_ABLATION_VALIDATION)
 
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
@@ -301,7 +296,5 @@ def submit_ablation(ablation_scenario_dir: str,
             run_v_cb.wait()
         else:
             dependencies.append(run_v_cb)
-            sjh.write_active_job(run_v_cb.run_id,
-                                 CommandName.ABLATION_VALIDATION_CALLBACK)
 
     return dependencies

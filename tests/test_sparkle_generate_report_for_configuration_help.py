@@ -19,7 +19,9 @@ solver_name = "test-solver"
 train_instance = "train-instance"
 test_instance = "test-instance"
 
-def setup_conf():
+
+def setup_conf() -> None:
+    """Set up the configurator for the tests."""
     configurator = sgh.settings.get_general_sparkle_configurator()
     configurator_path = configurator.configurator_path
     configurator.scenario =\
@@ -275,7 +277,6 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
@@ -964,6 +965,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "timeoutsTrainOverlap": "1",
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path",
+        "bibpath": str(sgh.sparkle_report_bibliography_path.absolute()),
         "featuresBool": "featurestrue"
     }
 

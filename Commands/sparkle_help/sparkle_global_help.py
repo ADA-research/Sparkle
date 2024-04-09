@@ -9,6 +9,7 @@ from enum import Enum
 
 from sparkle import about
 from Commands.structures.solver import Solver
+from Commands.structures.reporting_scenario import ReportingScenario
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
@@ -17,7 +18,16 @@ def get_seed() -> int:
     return 1
 
 
-latest_scenario = None
+_latest_scenario = None
+
+
+def latest_scenario() -> ReportingScenario:
+    """Function to get the global latest scenario object."""
+    global _latest_scenario
+    if _latest_scenario is None:
+        _latest_scenario = ReportingScenario()
+    return _latest_scenario
+
 
 sparkle_version = str(about.about_info["version"])
 
@@ -29,8 +39,6 @@ sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
 
-sparkle_default_settings_path = "Settings/sparkle_default_settings.txt"
-sparkle_smac_settings_path = "Settings/sparkle_smac_settings.txt"
 sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 
 sparkle_global_output_dir = Path("Output")
@@ -46,9 +54,7 @@ class ReportType(str, Enum):
 # Log that keeps track of which commands were executed and where output details can be
 # found
 sparkle_global_log_file = "sparkle.log"
-
 sparkle_global_log_dir = "Log/"
-
 sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_log_file)
 
 sparkle_tmp_path = "Tmp/"
@@ -77,9 +83,6 @@ performance_data_dir = Path("Performance_Data")
 sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio/")
 sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio/")
 
-sparkle_parallel_portfolio_path = (
-    sparkle_parallel_portfolio_dir / sparkle_parallel_portfolio_name)
-
 sparkle_marginal_contribution_perfect_path = (
     sparkle_algorithm_selector_dir / "margi_contr_perfect.csv")
 
@@ -89,16 +92,14 @@ sparkle_marginal_contribution_actual_path = (
 sparkle_last_test_file_name = "last_test_configured_default.txt"
 
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+sparkle_report_bibliography_path =\
+    Path("Components/Sparkle-latex-generator/SparkleReport.bib")
 
 runsolver_path = "Components/runsolver/src/runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
 autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
-
-sparkle_run_generic_wrapper = "sparkle_run_generic_wrapper.py"
-
-sparkle_run_configured_wrapper = "sparkle_run_configured_wrapper.sh"
 
 smac_target_algorithm = "smac_target_algorithm.py"
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"

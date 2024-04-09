@@ -17,7 +17,6 @@ from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_instances_help as sih
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def call_configured_solver(instance_path_list: list[Path],
@@ -124,7 +123,6 @@ def call_configured_solver_parallel(
         run.wait()
     else:
         print(f"Configured solver added to {run_on} queue.")
-        sjh.write_active_job(run.run_id, CommandName.RUN_CONFIGURED_SOLVER)
 
     return run
 
@@ -137,9 +135,9 @@ def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
     """
     # Get latest configured solver + instance set
     solver_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario.get_config_solver()))
+        str(sgh.latest_scenario().get_config_solver()))
     instance_set_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario.get_config_instance_set_train()))
+        str(sgh.latest_scenario().get_config_instance_set_train()))
 
     if solver_name is None or instance_set_name is None:
         # Print error and stop execution
