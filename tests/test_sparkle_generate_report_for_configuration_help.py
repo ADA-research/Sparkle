@@ -8,10 +8,19 @@ from pytest_mock import MockFixture
 from Commands.sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.solver import Solver
 
 global settings
 sgh.settings = sparkle_settings.Settings()
-configurator_path = sgh.settings.get_general_sparkle_configurator().configurator_path
+configurator = sgh.settings.get_general_sparkle_configurator()
+configurator_path = configurator.configurator_path
+
+solver_name = "test-solver"
+train_instance = "train-instance"
+test_instance = "test-instance"
+configurator.scenario = ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
+configurator.scenario._set_paths(configurator_path)
 
 
 def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> None:
@@ -57,7 +66,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
 
-    instance_directory = f"{configurator_path}scenarios/instances/{instance_set_name}/"
+    instance_directory = configurator.instances_path / instance_set_name
     mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
@@ -553,9 +562,7 @@ def test_get_timeouts_test(mocker: MockFixture) -> None:
                                  "get_timeouts",
                                  return_value=(0, 1, 2))
 
-    configured, default, overlapping = sgr.get_timeouts_test(solver_name,
-                                                             train_instance,
-                                                             test_instance,
+    configured, default, overlapping = sgr.get_timeouts_test(test_instance,
                                                              cutoff)
 
     configured_results_file = (
@@ -653,9 +660,6 @@ def test_get_timeouts(mocker: MockFixture) -> None:
 
 def test_get_ablation_table(mocker: MockFixture) -> None:
     """Test get_ablation_table calls sah.get_ablation_table and transforms its string."""
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
     sah_ablation_table = (
         [["Round", "Flipped parameter", "Source value", "Target value",
           "Validation result"],
