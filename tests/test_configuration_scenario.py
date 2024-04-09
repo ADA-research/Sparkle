@@ -42,15 +42,16 @@ class TestConfigurationScenario(TestCase):
         self.sparkle_objective =\
             sgh.settings.get_general_sparkle_objectives()[0]
 
-        self.scenario = ConfigurationScenario(solver=self.solver,
-                                              instance_directory=self.instance_directory,
-                                              number_of_runs=self.run_number,
-                                              time_budget=self.time_budget,
-                                              cutoff_time=self.cutoff_time,
-                                              cutoff_length=self.cutoff_length,
-                                              sparkle_objective=self.sparkle_objective,
-                                              use_features=False,
-                                              configurator_target=Path(sgh.smac_target_algorithm))
+        self.scenario = ConfigurationScenario(
+            solver=self.solver,
+            instance_directory=self.instance_directory,
+            number_of_runs=self.run_number,
+            time_budget=self.time_budget,
+            cutoff_time=self.cutoff_time,
+            cutoff_length=self.cutoff_length,
+            sparkle_objective=self.sparkle_objective,
+            use_features=False,
+            configurator_target=Path(sgh.smac_target_algorithm))
 
     def tearDown(self: TestConfigurationScenario) -> None:
         """Cleanup executed after each test."""

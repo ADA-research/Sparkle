@@ -16,6 +16,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 global settings
 sgh.settings = sparkle_settings.Settings()
 
+
 class TestConfigurator():
     """Class bundling all tests regarding Configurator."""
 

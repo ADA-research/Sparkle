@@ -13,6 +13,7 @@ sgh.settings = sparkle_settings.Settings()
 test_solver_name = "solver_name"
 test_instance_set_name = "instance_set"
 
+
 @patch("pathlib.Path.is_dir")
 def test_check_configuration_exists_true(mock_is_dir: Mock) -> None:
     """Test whether True is returned when the configuration directory exists."""

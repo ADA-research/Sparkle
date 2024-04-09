@@ -19,7 +19,8 @@ configurator_path = configurator.configurator_path
 solver_name = "test-solver"
 train_instance = "train-instance"
 test_instance = "test-instance"
-configurator.scenario = ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
+configurator.scenario =\
+    ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
 configurator.scenario._set_paths(configurator_path)
 
 
