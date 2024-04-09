@@ -104,15 +104,15 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
 
     if instance_type == InstanceType.TRAIN:
         outdir = (f"{scenario_path.absolute()}"
-                       f"outdir_{inst_type}_{config_type}/")
+                  f"outdir_{inst_type}_{config_type}/")
         instance_file = (f"{instances_path.absolute()}/"
-                              f"{instance_set_train_name}/"
-                              f"{instance_set_train_name}_{inst_type}.txt")
+                         f"{instance_set_train_name}/"
+                         f"{instance_set_train_name}_{inst_type}.txt")
     else:
         outdir = (f"{scenario_path.absolute()}"
-                       f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
+                  f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
         instance_file = (f"{instances_path.absolute()}/{instance_set_val_name}/"
-                              f"{instance_set_val_name}_{inst_type}.txt")
+                         f"{instance_set_val_name}_{inst_type}.txt")
     test_instance_file = instance_file
 
     solver = Solver.get_solver_by_name(solver_name)

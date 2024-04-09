@@ -19,7 +19,7 @@ class ConfigurationScenario:
                  cutoff_time: int = None, cutoff_length: int = None,
                  sparkle_objective: SparkleObjective = None, use_features: bool = None,
                  configurator_target: Path = None, feature_data_df: pd.DataFrame = None)\
-                -> None:
+            -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -51,7 +51,7 @@ class ConfigurationScenario:
         self.use_features = use_features
         self.configurator_target = configurator_target
         self.feature_data = feature_data_df
-        
+
         self.parent_directory = Path()
         self.directory = Path()
         self.result_directory = Path()

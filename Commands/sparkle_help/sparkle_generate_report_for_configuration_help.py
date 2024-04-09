@@ -649,7 +649,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
 
     default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_train_dir = (f"{scen_path}/outdir_train_default/"
-                                f"{default_results_train_file}")
+                                 f"{default_results_train_file}")
     str_value = get_par_performance(default_results_train_dir,
                                     smac_each_run_cutoff_time)
     common_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
@@ -751,7 +751,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
     """
     all_good = True
     err_str = ""
-    configurator  = sgh.settings.get_general_sparkle_configurator()
+    configurator = sgh.settings.get_general_sparkle_configurator()
     scen_path = configurator.scenario.directory
     inst_path = configurator.instances_path
     # Check train instance dir exists

@@ -138,7 +138,8 @@ class Configurator:
             sjh.write_active_job(run.run_id, CommandName.CONFIGURE_SOLVER_CALLBACK)
         return run
 
-    def set_scenario_dirs(self: Configurator, solver: str, instance_set_name: str):
+    def set_scenario_dirs(self: Configurator,
+                          solver: str, instance_set_name: str) -> None:
         """Patching method to allow the rebuilding of configuratio scenario."""
         solver = Solver.get_solver_by_name(solver)
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))

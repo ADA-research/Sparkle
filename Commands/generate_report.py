@@ -149,8 +149,6 @@ if __name__ == "__main__":
     flag_instance_set_train = instance_set_train is not None
     flag_instance_set_test = instance_set_test is not None
 
-    
-
     # Reporting for algorithm selection
     if selection or test_case_directory is not None:
         performance_measure =\
@@ -189,7 +187,6 @@ if __name__ == "__main__":
         print("Parallel portfolio report generated ...")
         status_info.delete()
     else:
-        
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(sgh.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
