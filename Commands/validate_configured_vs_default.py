@@ -171,7 +171,7 @@ if __name__ == "__main__":
         solver.name, instance_set_train.name, instance_set_train.name,
         scsh.InstanceType.TRAIN, default=True)
     cmd_list = [f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_train} "
-                f"--execdir {scenario_dir / 'validate_train_default'} "
+                f"--execdir {scenario_dir} "
                 f"--configuration DEFAULT"]
     dest = [Path("results") / (solver.name + "_validation_" + scenario_fn_train)]
 
@@ -202,11 +202,11 @@ if __name__ == "__main__":
 
         # Extend job list
         cmd_list.extend([f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_tdef} "
-                         f"--execdir {exec_dir_def} "
+                         f"--execdir {scenario_dir} "
                          f"--configuration DEFAULT",
                          f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_tconf}"
-                         f" --execdir {exec_dir_conf}"
-                         f" --configuration-list {config_file_path}"])
+                         f" --execdir {scenario_dir}"
+                         f" --configuration-list {config_file_path.absolute()}"])
 
         dest.extend([f"results/{solver.name}_validation_{scenario_fn_tdef}",
                      f"results/{solver.name}_validation_{scenario_fn_tconf}"])

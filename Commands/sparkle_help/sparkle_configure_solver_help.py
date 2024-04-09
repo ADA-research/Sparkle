@@ -213,27 +213,6 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     # Make sure no old files remain that could interfere
     remove_validation_directories(solver_name, instance_set_train_name,
                                   instance_set_test_name)
-    scenario_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-    _, _, _, _, num_of_smac_run, _ = get_smac_settings()
-
-    for _ in range(num_of_smac_run):
-        solver_directory = f"Solvers/{solver_name}/"
-
-        # Train default
-        exec_path = scenario_path / "validate_train_default"
-        # Copy solver to execution directory
-        shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
-        # Test default
-        if instance_set_test_name is not None:
-            exec_path = scenario_path \
-                / f"validate_{instance_set_test_name}_test_default"
-            # Copy solver to execution directory
-            shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
-            # Test configured
-            exec_path = scenario_path \
-                / f"validate_{instance_set_test_name}_test_configured"
-            # Copy solver to execution directory
-            shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
 
 
 def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:

@@ -725,8 +725,7 @@ def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: s
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = (
-        get_timeouts_test(solver_name, instance_set_train_name, instance_set_test_name,
-                          float(smac_each_run_cutoff_time)))
+        get_timeouts_test(instance_set_test_name, float(smac_each_run_cutoff_time)))
 
     test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
     test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
