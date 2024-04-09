@@ -15,13 +15,16 @@ global settings
 sgh.settings = sparkle_settings.Settings()
 configurator = sgh.settings.get_general_sparkle_configurator()
 configurator_path = configurator.configurator_path
-
 solver_name = "test-solver"
 train_instance = "train-instance"
 test_instance = "test-instance"
-configurator.scenario =\
-    ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
-configurator.scenario._set_paths(configurator_path)
+
+def setup_conf():
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    configurator_path = configurator.configurator_path
+    configurator.scenario =\
+        ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
+    configurator.scenario._set_paths(configurator_path)
 
 
 def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> None:
@@ -256,6 +259,7 @@ def test_get_features_bool_false(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
+    setup_conf()
     file_content_mock = ""
     mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
@@ -271,14 +275,12 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_name = "test-solver"
-    instance_set = "train-instance"
 
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
 
-    features_bool = sgr.get_features_bool(solver_name, instance_set)
+    features_bool = sgr.get_features_bool(solver_name, train_instance)
 
     mock_open.assert_called_once_with("r")
     assert features_bool == r"\featurestrue"
@@ -1049,10 +1051,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
 
 def test_check_results_exist_all_good(mocker: MockFixture) -> None:
     """Test check_results_exist does not produce an error if all paths exist."""
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
-
     mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
 
     sgr.check_results_exist(solver_name, train_instance, test_instance)
@@ -1066,10 +1064,6 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     If none of the tested paths exist, test that a SystemExit is raised.
     Also, test that the correct error string is printed, explaining each missing path.
     """
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
-
     mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
     mock_print = mocker.patch("builtins.print")
 
