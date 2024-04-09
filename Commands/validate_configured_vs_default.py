@@ -113,7 +113,7 @@ if __name__ == "__main__":
             value=getattr(Configurator, args.configurator),
             origin=SettingState.CMD_LINE)
     configurator = sgh.settings.get_general_sparkle_configurator()
-    configurator_path = configurator.configurator_path
+    configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
 
     check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
                          sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
@@ -147,9 +147,9 @@ if __name__ == "__main__":
         instance_set_test_name = instance_set_test.name
 
         # Create instance file list for test set in configurator
-        instances_directory_test = Path("Instances/", instance_set_test_name)
+        instances_directory_test = configurator.instances_path / instance_set_test_name
         list_path = sih.get_list_all_path(instances_directory_test)
-        instance_list_test_path = configurator_path / "scenarios" / "instances"\
+        instance_list_test_path = configurator.instances_path\
             / instance_set_test_name / (instance_set_test_name + "_test.txt")
         instance_list_test_path.parent.mkdir(parents=True, exist_ok=True)
         with instance_list_test_path.open("w+") as fout:
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     # Set up scenarios
     # 1. Set up the validation scenario for the training set
     cmd_base = "./smac-validate --use-scenario-outdir true --num-run 1 --cli-cores 8"
-    scenario_dir = Path("scenarios") / (solver.name + "_" + instance_set_train.name)
+    scenario_dir = configurator.scenario.directory
     scenario_fn_train = scsh.create_file_scenario_validate(
         solver.name, instance_set_train.name, instance_set_train.name,
         scsh.InstanceType.TRAIN, default=True)
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     for instance_set_name, inst_type in [(instance_set_train.name, "train"),
                                          (instance_set_test_name, "test")]:
         if instance_set_name is not None:
-            dir = configurator.configurator_path / scenario_dir / instance_set_name
+            dir = configurator.scenarios_path / instance_set_name
             smac_instance_file = f"{dir}_{inst_type}.txt"
             if Path(smac_instance_file).is_file():
                 instance_count = sum(1 for _ in open(smac_instance_file, "r"))
@@ -242,7 +242,7 @@ if __name__ == "__main__":
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-        path=configurator_path,
+        path=configurator.configurator_path,
         base_dir=sgh.sparkle_tmp_path,
         parallel_jobs=parallel_jobs,
         sbatch_options=sbatch_options_list,
@@ -258,11 +258,8 @@ if __name__ == "__main__":
         run.wait()
 
     # Write most recent run to file
-    last_test_file_path = Path(
-        configurator_path,
-        "scenarios",
-        f"{solver.name}_{sgh.sparkle_last_test_file_name}"
-    )
+    last_test_file_path =\
+        configurator.scenarios_path / f"{solver.name}_{sgh.sparkle_last_test_file_name}"
 
     with Path(last_test_file_path).open("w+") as fout:
         fout.write(f"solver {solver}\n"

@@ -444,7 +444,7 @@ def get_timeouts_train(solver_name: str, instance_set_name: str,
     configured_results_dir = (f"{scen_path}/outdir_train_configuration/"
                               f"{solver_name}_{instance_set_name}_scenario/"
                               f"{configured_results_file}")
-    default_results_dir = f"{scen_path}outdir_train_default/{default_results_file}"
+    default_results_dir = f"{scen_path}/outdir_train_default/{default_results_file}"
     dict_instance_to_par_configured = get_dict_instance_to_performance(
         configured_results_dir, cutoff)
     dict_instance_to_par_default = get_dict_instance_to_performance(
@@ -651,8 +651,8 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     common_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
 
     default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_train_dir = (
-        smac_solver_dir + "/outdir_train_default/" + default_results_train_file)
+    default_results_train_dir = (f"{scen_path}/outdir_train_default/"
+                                f"{default_results_train_file}")
     str_value = get_par_performance(default_results_train_dir,
                                     smac_each_run_cutoff_time)
     common_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)

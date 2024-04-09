@@ -146,8 +146,10 @@ if __name__ == "__main__":
             pap_instance_list = (
                 sgh.latest_scenario.get_parallel_portfolio_instance_list())
 
-    flag_instance_set_train = False if instance_set_train is None else True
-    flag_instance_set_test = False if instance_set_test is None else True
+    flag_instance_set_train = instance_set_train is not None
+    flag_instance_set_test = instance_set_test is not None
+
+    
 
     # Reporting for algorithm selection
     if selection or test_case_directory is not None:
@@ -187,6 +189,7 @@ if __name__ == "__main__":
         print("Parallel portfolio report generated ...")
         status_info.delete()
     else:
+        
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(sgh.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
@@ -213,7 +216,7 @@ if __name__ == "__main__":
 
         instance_set_train_name = Path(instance_set_train).name
         sgh.settings.get_general_sparkle_configurator()\
-                .set_scenario_dirs(solver_name, instance_set_train_name)
+            .set_scenario_dirs(solver_name, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train and flag_instance_set_test:
             instance_set_test_name = Path(instance_set_test).name

@@ -109,13 +109,12 @@ class Settings:
         self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_clis_per_node_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
-
         self.__smac_target_cutoff_length_set = SettingState.NOT_SET
-
         self.__ablation_racing_flag_set = SettingState.NOT_SET
-
         self.__paraport_overwriting_flag_set = SettingState.NOT_SET
         self.__paraport_process_monitoring_set = SettingState.NOT_SET
+
+        self.__general_sparkle_configurator = None
 
         if file_path is None:
             # Initialise settings from default file path
@@ -380,7 +379,10 @@ class Settings:
         """Return the configurator init method."""
         if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
             self.set_general_sparkle_configurator()
-        return getattr(Configurator, self.__settings["general"]["configurator"])()
+        if self.__general_sparkle_configurator is None:
+            self.__general_sparkle_configurator =\
+                getattr(Configurator, self.__settings["general"]["configurator"])()
+        return self.__general_sparkle_configurator
 
     def get_performance_metric_for_report(self: Settings) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""
