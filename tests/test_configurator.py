@@ -10,8 +10,11 @@ from pathlib import Path
 from Commands.structures.solver import Solver
 from Commands.structures.configuration_scenario import ConfigurationScenario
 from Commands.structures.configurator import Configurator
+from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
 
+global settings
+sgh.settings = sparkle_settings.Settings()
 
 class TestConfigurator():
     """Class bundling all tests regarding Configurator."""
@@ -26,7 +29,8 @@ class TestConfigurator():
         configurator = Configurator(configurator_path=configurator_path,
                                     executable_path=None,
                                     settings_path=None,
-                                    result_path=None)
+                                    result_path=None,
+                                    configurator_target=None)
 
         assert configurator.configurator_path == configurator_path
 
