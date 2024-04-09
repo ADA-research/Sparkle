@@ -622,6 +622,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     common_dict["solver"] = solver_name
     common_dict["instanceSetTrain"] = instance_set_train_name
     common_dict["sparkleVersion"] = sgh.sparkle_version
+    common_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
     common_dict["numInstanceInTrainingInstanceSet"] = \
         get_num_instance_in_instance_set_smac_dir(instance_set_train_name)
 

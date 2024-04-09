@@ -518,6 +518,7 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
 
     latex_dict["customCommands"] = get_custom_commands()
     latex_dict["sparkle"] = get_sparkle()
+    latex_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
     latex_dict["numSolvers"] = get_num_solvers()
     latex_dict["solverList"] = get_solver_list()
     latex_dict["numFeatureExtractors"] = get_num_feature_extractors()

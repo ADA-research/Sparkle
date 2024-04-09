@@ -8,6 +8,7 @@ from pathlib import PurePath
 from enum import Enum
 
 from sparkle import about
+from Commands.structures.reporting_scenario import ReportingScenario
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function
@@ -16,7 +17,16 @@ def get_seed() -> int:
     return 1
 
 
-latest_scenario = None
+_latest_scenario = None
+
+
+def latest_scenario() -> ReportingScenario:
+    """Function to get the global latest scenario object."""
+    global _latest_scenario
+    if _latest_scenario is None:
+        _latest_scenario = ReportingScenario()
+    return _latest_scenario
+
 
 sparkle_version = str(about.about_info["version"])
 
@@ -81,6 +91,8 @@ sparkle_marginal_contribution_actual_path = (
 sparkle_last_test_file_name = "last_test_configured_default.txt"
 
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
+sparkle_report_bibliography_path =\
+    Path("Components/Sparkle-latex-generator/SparkleReport.bib")
 
 runsolver_path = "Components/runsolver/src/runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"

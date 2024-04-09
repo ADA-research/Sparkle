@@ -18,7 +18,6 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
-from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
@@ -180,10 +179,6 @@ if __name__ == "__main__":
     global settings
     sgh.settings = sparkle_settings.Settings()
 
-    # Initialise latest scenario
-    global latest_scenario
-    sgh.latest_scenario = ReportingScenario()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -277,15 +272,15 @@ if __name__ == "__main__":
     configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
-    sgh.latest_scenario.set_config_solver(solver.directory)
-    sgh.latest_scenario.set_config_instance_set_train(instance_set_train)
-    sgh.latest_scenario.set_latest_scenario(Scenario.CONFIGURATION)
+    sgh.latest_scenario().set_config_solver(solver.directory)
+    sgh.latest_scenario().set_config_instance_set_train(instance_set_train)
+    sgh.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        sgh.latest_scenario.set_config_instance_set_test(instance_set_test)
+        sgh.latest_scenario().set_config_instance_set_test(instance_set_test)
     else:
         # Set to default to overwrite possible old path
-        sgh.latest_scenario.set_config_instance_set_test()
+        sgh.latest_scenario().set_config_instance_set_test()
 
     dependency_job_list = [configure_job]
     callback_job = configurator.configuration_callback(configure_job, run_on=run_on)
@@ -316,4 +311,4 @@ if __name__ == "__main__":
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file
-    sgh.latest_scenario.write_scenario_ini()
+    sgh.latest_scenario().write_scenario_ini()

@@ -135,9 +135,9 @@ def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
     """
     # Get latest configured solver + instance set
     solver_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario.get_config_solver()))
+        str(sgh.latest_scenario().get_config_solver()))
     instance_set_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario.get_config_instance_set_train()))
+        str(sgh.latest_scenario().get_config_instance_set_train()))
 
     if solver_name is None or instance_set_name is None:
         # Print error and stop execution
