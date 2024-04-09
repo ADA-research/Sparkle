@@ -390,13 +390,10 @@ def get_figure_configured_vs_default_on_train_instance_set(
         smac_each_run_cutoff_time)
 
 
-def get_timeouts_test(solver_name: str, instance_set_train_name: str,
-                      instance_set_test_name: str, cutoff: int) -> tuple[int, int, int]:
+def get_timeouts_test(instance_set_test_name: str, cutoff: int) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
     Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of the training instance set
         instance_set_test_name: Name of the testing instance set
         cutoff: Cutoff time
 
