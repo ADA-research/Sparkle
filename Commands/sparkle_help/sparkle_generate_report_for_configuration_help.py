@@ -333,12 +333,10 @@ def get_figure_configured_vs_default_on_test_instance_set(
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    scen_path = sgh.settings.get_general_sparkle_configurator().scenarios_path
-    smac_solver_dir = str(scen_path) +\
-        f"/{solver_name}_{instance_set_train_name}/"
-    configured_results_dir = (f"{smac_solver_dir}/outdir_{instance_set_test_name}"
+    scen_dir = sgh.settings.get_general_sparkle_configurator().scenario.directory
+    configured_results_dir = (f"{scen_dir}/outdir_{instance_set_test_name}"
                               f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{smac_solver_dir}/outdir_{instance_set_test_name}"
+    default_results_dir = (f"{scen_dir}/outdir_{instance_set_test_name}"
                            f"_test_default/{default_results_file}")
 
     configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
