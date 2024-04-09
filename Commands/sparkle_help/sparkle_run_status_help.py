@@ -15,7 +15,7 @@ from Commands.structures.status_info import (SolverRunStatusInfo, StatusInfoType
 from Commands.sparkle_help.sparkle_command_help import CommandName
 
 
-def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
+def get_jobs_for_command(jobs: list[dict[str, str, str]], command: CommandName) \
         -> list[dict[str, str, str]]:
     """Filter jobs by a command.
 
@@ -26,7 +26,7 @@ def get_jobs_for_command(jobs: list[dict[str, str, str]], command: str) \
     Returns:
       Jobs that belong to the given command.
     """
-    return [x for x in jobs if x["command"] == command]
+    return [x for x in jobs if x["command"].split("-")[0].lower() == command.lower()]
 
 
 def get_running_jobs_for_command(command: CommandName) -> str:
@@ -38,8 +38,7 @@ def get_running_jobs_for_command(command: CommandName) -> str:
     Returns:
         string with job ids.
     """
-    sjh.cleanup_active_jobs()
-    jobs = sjh.read_active_jobs()
+    jobs = sjh.get_active_jobs()
 
     command_jobs = get_jobs_for_command(jobs, command.name)
     command_jobs_ids = " ".join([x["job_id"] for x in command_jobs])

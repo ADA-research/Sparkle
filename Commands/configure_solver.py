@@ -26,7 +26,6 @@ from Commands.structures.configurator import Configurator
 from Commands.structures.configuration_scenario import ConfigurationScenario
 from Commands.structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -172,8 +171,6 @@ def run_after(solver: Path,
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
         run.wait()
-    else:
-        sjh.write_active_job(run.run_id, command)
     return run
 
 

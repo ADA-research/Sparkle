@@ -22,7 +22,6 @@ from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -248,8 +247,6 @@ if __name__ == "__main__":
     if run_on == Runner.SLURM:
         print(f"Running validation in parallel. Waiting for Slurm job with id: "
               f"{run.run_id}")
-        sjh.write_active_job(run.run_id,
-                             CommandName.VALIDATE_CONFIGURED_VS_DEFAULT)
     else:
         run.wait()
 

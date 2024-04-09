@@ -19,7 +19,6 @@ from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 import functools
 print = functools.partial(print, flush=True)
@@ -119,9 +118,6 @@ def run_solvers_on_instances(
         dependencies=runs[-1],
         base_dir=sgh.sparkle_tmp_path,
         sbatch_options=sbatch_user_options))
-    if run_on == Runner.SLURM:
-        sjh.write_active_job(runs[-1].run_id,
-                             CommandName.SPARKLE_CSV_MERGE)
 
     if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
@@ -131,9 +127,6 @@ def run_solvers_on_instances(
             dependencies=runs[-1],
             base_dir=sgh.sparkle_tmp_path,
             sbatch_options=sbatch_user_options))
-        if run_on == Runner.SLURM:
-            sjh.write_active_job(runs[-1].run_id,
-                                 CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
 
         runs.append(rrr.add_to_queue(
             runner=run_on,
@@ -142,9 +135,6 @@ def run_solvers_on_instances(
             dependencies=runs[-1],
             base_dir=sgh.sparkle_tmp_path,
             sbatch_options=sbatch_user_options))
-        if run_on == Runner.SLURM:
-            sjh.write_active_job(runs[-1].run_id,
-                                 CommandName.GENERATE_REPORT)
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")

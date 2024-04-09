@@ -20,7 +20,6 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help import sparkle_job_help as sjh
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -192,9 +191,6 @@ if __name__ == "__main__":
                 base_dir=sgh.sparkle_tmp_path,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)
-            if run_on == Runner.SLURM:
-                sjh.write_active_job(run_construct_portfolio_selector.run_id,
-                                     CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR)
 
             dependency_run_list.append(run_construct_portfolio_selector)
 
@@ -205,9 +201,6 @@ if __name__ == "__main__":
                 base_dir=sgh.sparkle_tmp_path,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)
-            if run_on == Runner.SLURM:
-                sjh.write_active_job(run_generate_report.run_id,
-                                     CommandName.GENERATE_REPORT)
 
     # Write used settings to file
     sgh.settings.write_used_settings()
