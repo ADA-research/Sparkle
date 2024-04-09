@@ -255,20 +255,12 @@ def test_get_features_bool_false(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_name = "test-solver"
-    instance_set = "train-instance"
-    solver_dir = Path("smac-solver-dir/")
-    mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                            "configuration_help."
-                            "get_scenario_path",
-                            return_value=solver_dir)
     file_content_mock = ""
     mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
 
-    features_bool = sgr.get_features_bool(solver_name, instance_set)
+    features_bool = sgr.get_features_bool(solver_name, train_instance)
 
-    mock_dir.assert_called_once_with(solver_name, instance_set)
     mock_open.assert_called_once_with("r")
     assert features_bool == r"\featuresfalse"
 
@@ -278,20 +270,15 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_dir = Path("smac-solver-dir/")
     solver_name = "test-solver"
     instance_set = "train-instance"
-    mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                            "configuration_help."
-                            "get_scenario_path",
-                            return_value=solver_dir)
+
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
 
     features_bool = sgr.get_features_bool(solver_name, instance_set)
 
-    mock_dir.assert_called_once_with(solver_name, instance_set)
     mock_open.assert_called_once_with("r")
     assert features_bool == r"\featurestrue"
 
@@ -469,14 +456,14 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixtu
         test_instance,
         cutoff)
 
-    smac_solver_dir = f"{configurator_path}/scenarios/{solver_name}_{train_instance}/"
+    smac_solver_dir = configurator.scenarios_path / (f"{solver_name}_{train_instance}")
 
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    configured_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
+    configured_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
                               f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
+    default_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
                            f"_test_default/{default_results_file}")
     configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
                                        f"{train_instance}_"

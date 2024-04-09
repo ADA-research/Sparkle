@@ -112,10 +112,8 @@ class TestConfigurationScenario(TestCase):
     ) -> None:
         """Test if create_scenario() correctly creates the scenario file."""
         mock_abs.side_effect = [Path("tests/test_files/test_configurator"),
-                                Path("/"),
                                 Path("/configurator_dir/target_algorithm.py"),
                                 self.solver_path]
-        #mock_abs.return_value = [Path("tests/test_files/test_configurator"), Path("/configurator_dir/target_algorithm.py")]
         mock_deterministic.return_value = "0"
         self.scenario.create_scenario(self.parent_directory)
 
