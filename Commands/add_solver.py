@@ -135,6 +135,14 @@ if __name__ == "__main__":
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
+    # Add RunSolver executable to the solver
+    runsolver_path = Path(sgh.runsolver_path)
+    if runsolver_path.name in [file.name for file in Path(solver_directory).iterdir()]:
+        print("Warning! RunSolver executable detected in Solver "
+              f"{Path(solver_source).name}. This will be replaced with "
+              f"Sparkle's version of RunSolver. ({runsolver_path})")
+    shutil.copyfile(runsolver_path, Path(solver_directory) / runsolver_path.name)
+
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
     )
