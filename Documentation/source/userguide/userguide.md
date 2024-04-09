@@ -3,7 +3,7 @@
 ## Quick start
 
 ```{note}
-Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), and does not work without it.
+Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), but in some cases works locally as well.
 ```
 
 Follow these steps:
@@ -88,7 +88,6 @@ algorithm (for an example of a solver directory see {numref}`dir-solvers`):
 - A working solver executable
 - An algorithm wrapper called `sprakle_smac_wrapper.py`
 - A PCS (parameter configuration space) file
-- The runsolver binary (e.g. from `Examples/Resources/Solvers/PbO-CCSAT-Generic/`)
 
 Further, training and testing instance sets are needed (for an example
 of an instances directory see {numref}`dir-instances`). For
@@ -232,20 +231,15 @@ Solver/
     solver
     sparkle_smac_wrapper.py
     parameters.pcs
-    runsolver
 ```
 
 Here `solver` is a binary executable of the solver that is to be
 configured. The `sprakle_smac_wrapper.py` is a wrapper that Sparkle
 should call to run the solver with specific settings, and then returns a
 result for the configurator. In `parameters.pcs` the configurable
-parameters are described in the PCS format. Finally, `runsolver` is a
-binary executable of the runsolver tool. This allows Sparkle to make
-fair time measurements for all configuration experiments.
-
-```{note}
-Currently the runsolver binary has to be in every solver directory, it can be found in the `Examples/Resources/Solvers/PbO-CCSAT-Generic/` directory.
-```
+parameters are described in the PCS format. Finally, when importing your
+Solver into Sparkle, a binary executable of the runsolver tool `runsolver` is added.
+This allows Sparkle to make fair time measurements for all configuration experiments.
 
 (dir-solvers-selection)=
 

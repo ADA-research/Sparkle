@@ -13,7 +13,6 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from Commands.structures.reporting_scenario import ReportingScenario
 from sparkle_help import sparkle_command_help as sch
 
 
@@ -75,9 +74,6 @@ if __name__ == "__main__":
         sgh.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
-
-    # Initialise latest scenario
-    sgh.latest_scenario = ReportingScenario()
 
     # Validate input (is directory, or single instance (single-file or multi-file))
     if ((len(instance_path) == 1 and instance_path[0].is_dir())

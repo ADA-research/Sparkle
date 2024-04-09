@@ -18,7 +18,6 @@ from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
 
@@ -92,10 +91,6 @@ if __name__ == "__main__":
     global settings
     sgh.settings = sparkle_settings.Settings()
 
-    # Initialise latest scenario
-    global latest_scenario
-    sgh.latest_scenario = ReportingScenario()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -150,12 +145,12 @@ if __name__ == "__main__":
               f"{sgh.sparkle_algorithm_selector_path}")
 
         # Update latest scenario
-        sgh.latest_scenario.set_selection_portfolio_path(
+        sgh.latest_scenario().set_selection_portfolio_path(
             Path(sgh.sparkle_algorithm_selector_path)
         )
-        sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
+        sgh.latest_scenario().set_latest_scenario(Scenario.SELECTION)
         # Set to default to overwrite possible old path
-        sgh.latest_scenario.set_selection_test_case_directory()
+        sgh.latest_scenario().set_selection_test_case_directory()
 
         # Compute and print marginal contributions of the perfect and actual portfolio
         # selectors
@@ -170,4 +165,4 @@ if __name__ == "__main__":
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file
-    sgh.latest_scenario.write_scenario_ini()
+    sgh.latest_scenario().write_scenario_ini()
