@@ -15,10 +15,11 @@ from Commands.structures.solver import Solver
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
     def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
-                 number_of_runs: int, time_budget: int, cutoff_time: int,
-                 cutoff_length: int, sparkle_objective: SparkleObjective,
-                 use_features: bool, configurator_target: Path,
-                 feature_data_df: pd.DataFrame = None) -> None:
+                 number_of_runs: int = None, time_budget: int = None,
+                 cutoff_time: int = None, cutoff_length: int = None,
+                 sparkle_objective: SparkleObjective = None, use_features: bool = None,
+                 configurator_target: Path = None, feature_data_df: pd.DataFrame = None)\
+                -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -39,8 +40,9 @@ class ConfigurationScenario:
                 Defaults to None.
         """
         self.solver = solver
-        self.parent_directory = Path()
         self.instance_directory = instance_directory
+        self.name = f"{self.solver.name}_{self.instance_directory.name}"
+
         self.number_of_runs = number_of_runs
         self.time_budget = time_budget
         self.cutoff_time = cutoff_time
@@ -49,8 +51,8 @@ class ConfigurationScenario:
         self.use_features = use_features
         self.configurator_target = configurator_target
         self.feature_data = feature_data_df
-        self.name = f"{self.solver.name}_{self.instance_directory.name}"
-
+        
+        self.parent_directory = Path()
         self.directory = Path()
         self.result_directory = Path()
         self.scenario_file_name = ""
@@ -65,13 +67,8 @@ class ConfigurationScenario:
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        self.parent_directory = parent_directory.absolute()
-        self.directory = self.parent_directory / "scenarios" / self.name
-        self.result_directory = self.parent_directory / "results" / self.name
-        self.instance_file_path = (
-            Path(self.parent_directory / "scenarios"
-                 / "instances" / self.instance_directory.name)
-            / Path(str(self.instance_directory.name + "_train.txt")))
+        self._set_paths(parent_directory)
+
         self._prepare_scenario_directory()
         self._prepare_result_directory()
         self._prepare_instances()
@@ -80,6 +77,15 @@ class ConfigurationScenario:
             self._create_feature_file()
 
         self._create_scenario_file()
+
+    def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
+        self.parent_directory = parent_directory.absolute()
+        self.directory = self.parent_directory / "scenarios" / self.name
+        self.result_directory = self.parent_directory / "results" / self.name
+        self.instance_file_path = (
+            Path(self.parent_directory / "scenarios"
+                 / "instances" / self.instance_directory.name)
+            / Path(str(self.instance_directory.name + "_train.txt")))
 
     def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
         """Delete old scenario dir, recreate it, create empty dirs inside."""

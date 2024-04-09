@@ -88,27 +88,32 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     else:
         config_type = "configured"
 
-    smac_solver_path = get_scenario_path(solver_name, instance_set_train_name)
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    scenario_path = configurator.scenario.directory
+    instances_path = configurator.instances_path
     scenario_file_name = (
         f"{instance_set_val_name}_{inst_type}_{config_type}_scenario.txt")
-    smac_file_scenario = smac_solver_path / scenario_file_name
+    smac_file_scenario = scenario_path / scenario_file_name
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
-    smac_paramfile = (f"scenarios/{solver_name}_{instance_set_train_name}/"
-                      f"{get_pcs_file_from_solver_directory(smac_solver_path)}")
+    paramfile = get_pcs_file_from_solver_directory(configurator.scenario.solver)
+    if isinstance(paramfile, Path):
+        paramfile = str(paramfile.absolute())
+
     if instance_type == InstanceType.TRAIN:
-        smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
+        outdir = (f"{scenario_path.absolute()}"
                        f"outdir_{inst_type}_{config_type}/")
-        smac_instance_file = (f"scenarios/instances/{instance_set_train_name}/"
+        instance_file = (f"{instances_path.absolute()}/"
+                              f"{instance_set_train_name}/"
                               f"{instance_set_train_name}_{inst_type}.txt")
     else:
-        smac_outdir = (f"scenarios/{solver_name}_{instance_set_train_name}/"
+        outdir = (f"{scenario_path.absolute()}"
                        f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
-        smac_instance_file = (f"scenarios/instances/{instance_set_val_name}/"
+        instance_file = (f"{instances_path.absolute()}/{instance_set_val_name}/"
                               f"{instance_set_val_name}_{inst_type}.txt")
-    smac_test_instance_file = smac_instance_file
+    test_instance_file = instance_file
 
     solver = Solver.get_solver_by_name(solver_name)
     with smac_file_scenario.open("w+") as fout:
@@ -119,30 +124,16 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
                    f"wallclock-limit = {smac_whole_time_budget}\n"
                    f"cutoffTime = {smac_each_run_cutoff_time}\n"
                    f"cutoff_length = {smac_each_run_cutoff_length}\n"
-                   f"paramfile = {smac_paramfile}\n"
-                   f"outdir = {smac_outdir}\n"
-                   f"instance_file = {smac_instance_file}\n"
-                   f"test_instance_file = {smac_test_instance_file}\n")
+                   f"paramfile = {paramfile}\n"
+                   f"outdir = {outdir}\n"
+                   f"instance_file = {instance_file}\n"
+                   f"test_instance_file = {test_instance_file}\n")
 
     log_str = (f"Scenario file for the validation of the {config_type} solver "
                f"{solver_name} on the {inst_type}ing set")
     sl.add_output(str(smac_file_scenario), log_str)
 
     return scenario_file_name
-
-
-def get_scenario_path(solver_name: str, instance_set_name: str) -> Path:
-    """Return the directory of a solver under the SMAC directory.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set
-
-    Returns:
-        String containing the scenario directory inside SMAC
-    """
-    conf = sgh.settings.get_general_sparkle_configurator()
-    return conf.configurator_path / "scenarios" / f"{solver_name}_{instance_set_name}"
 
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
@@ -177,7 +168,7 @@ def remove_validation_directories_execution_or_output(solver_name: str,
         instance_set_test_name: Name of instance set for testing
         exec_or_out: Postfix describing if execution or output directory is used
     """
-    solver_path = get_scenario_path(solver_name, instance_set_train_name)
+    solver_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
     train_default_dir = solver_path / (exec_or_out + "_train_default/")
     shutil.rmtree(train_default_dir, ignore_errors=True)
 
@@ -220,25 +211,24 @@ def prepare_smac_execution_directories_validation(solver_name: str,
     # Make sure no old files remain that could interfere
     remove_validation_directories(solver_name, instance_set_train_name,
                                   instance_set_test_name)
-
-    smac_solver_path = get_scenario_path(solver_name, instance_set_train_name)
+    scenario_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
     _, _, _, _, num_of_smac_run, _ = get_smac_settings()
 
     for _ in range(num_of_smac_run):
         solver_directory = f"Solvers/{solver_name}/"
 
         # Train default
-        exec_path = smac_solver_path / "validate_train_default"
+        exec_path = scenario_path / "validate_train_default"
         # Copy solver to execution directory
         shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
         # Test default
         if instance_set_test_name is not None:
-            exec_path = smac_solver_path \
+            exec_path = scenario_path \
                 / f"validate_{instance_set_test_name}_test_default"
             # Copy solver to execution directory
             shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
             # Test configured
-            exec_path = smac_solver_path \
+            exec_path = scenario_path \
                 / f"validate_{instance_set_test_name}_test_configured"
             # Copy solver to execution directory
             shutil.copytree(solver_directory, exec_path, dirs_exist_ok=True)
@@ -276,11 +266,9 @@ def check_instance_list_file_exist(instance_set_name: str) -> None:
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
     """
-    conf_path = sgh.settings.get_general_sparkle_configurator().configurator_path
+    inst_path = sgh.settings.get_general_sparkle_configurator().instances_path
     file_name = Path(instance_set_name + "_train.txt")
-    instance_list_file_path = Path(PurePath(conf_path
-                                   / Path("scenarios")
-                                   / Path("instances")
+    instance_list_file_path = Path(PurePath(inst_path
                                    / Path(instance_set_name)
                                    / file_name))
 

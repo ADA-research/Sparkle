@@ -14,6 +14,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.structures.solver import Solver
 
 
 class Configurator:
@@ -42,6 +43,9 @@ class Configurator:
         self.configurator_target = configurator_target
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
+
+        self.scenarios_path = self.configurator_path / "scenarios"
+        self.instances_path = self.scenarios_path / "instances"
 
         if not self.configurator_path.is_dir():
             print(f"The given configurator path '{self.configurator_path}' is not a "
@@ -133,6 +137,12 @@ class Configurator:
         else:
             sjh.write_active_job(run.run_id, CommandName.CONFIGURE_SOLVER_CALLBACK)
         return run
+
+    def set_scenario_dirs(self: Configurator, solver: str, instance_set_name: str):
+        """Patching method to allow the rebuilding of configuratio scenario."""
+        solver = Solver.get_solver_by_name(solver)
+        self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
+        self.scenario._set_paths(self.configurator_path)
 
     @staticmethod
     def smac_v2() -> Configurator:

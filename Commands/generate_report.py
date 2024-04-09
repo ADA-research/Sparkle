@@ -211,14 +211,12 @@ if __name__ == "__main__":
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
 
+        instance_set_train_name = Path(instance_set_train).name
+        sgh.settings.get_general_sparkle_configurator()\
+                .set_scenario_dirs(solver_name, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train and flag_instance_set_test:
-            instance_set_train_name = sfh.get_last_level_directory_name(
-                str(instance_set_train)
-            )
-            instance_set_test_name = sfh.get_last_level_directory_name(
-                str(instance_set_test)
-            )
+            instance_set_test_name = Path(instance_set_test).name
             sgrfch.check_results_exist(
                 solver_name, instance_set_train_name, instance_set_test_name
             )
@@ -229,9 +227,6 @@ if __name__ == "__main__":
                 ablation=args.flag_ablation,
             )
         elif flag_instance_set_train:
-            instance_set_train_name = sfh.get_last_level_directory_name(
-                str(instance_set_train)
-            )
             sgrfch.check_results_exist(solver_name, instance_set_train_name)
             sgrfch.generate_report_for_configuration_train(
                 solver_name, instance_set_train_name, ablation=args.flag_ablation
