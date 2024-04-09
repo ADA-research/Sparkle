@@ -12,7 +12,6 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
-from Commands.structures.reporting_scenario import ReportingScenario
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
 
@@ -49,9 +48,6 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     sgh.settings = sparkle_settings.Settings()
-
-    # Initialise latest scenario
-    sgh.latest_scenario = ReportingScenario()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -99,10 +95,10 @@ if __name__ == "__main__":
         print("Sparkle parallel portfolio construction done!")
 
         # Update latest scenario
-        sgh.latest_scenario.set_parallel_portfolio_path(Path(portfolio_path))
-        sgh.latest_scenario.set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
+        sgh.latest_scenario().set_parallel_portfolio_path(Path(portfolio_path))
+        sgh.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
         # Set to default to overwrite instance from possible previous run
-        sgh.latest_scenario.set_parallel_portfolio_instance_list()
+        sgh.latest_scenario().set_parallel_portfolio_instance_list()
 
         status_info.delete()
 
