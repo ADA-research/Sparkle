@@ -972,8 +972,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     Test that all needed functions are called to retrieve values and that these
     values are added to the common dictionary.
     """
-    solver_name = "solver-name"
-    train_instance = "train-instance"
     test_instance = "test-instance"
     cutoff = "10"
 
@@ -1030,8 +1028,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     ])
     mock_figure.assert_called_once_with(solver_name, train_instance, test_instance,
                                         float(cutoff))
-    mock_timeouts.assert_called_once_with(solver_name, train_instance, test_instance,
-                                          float(cutoff))
+    mock_timeouts.assert_called_once_with(test_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver_name, train_instance,
                                                test_instance)
     mock_ablation_table.assert_called_once_with(solver_name, train_instance,
@@ -1083,20 +1080,19 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
         "Error: Results not found for the given solver and instance set(s) combination. "
         'Make sure the "configure_solver" and "validate_configured_vs_default" commands '
         "were correctly executed. \nDetected errors:\n training set not found in "
-        "configuration directory Components/smac-v2.10.03-master-778//scenarios/"
-        "instances/train-instance/; configured parameter results on the training set not"
-        " found in Components/smac-v2.10.03-master-778//scenarios/test-solver_"
-        "train-instance/outdir_train_configuration/test-solver_train-instance_scenario/;"
-        " default parameter results on the training set not found in Components/"
-        "smac-v2.10.03-master-778//scenarios/test-solver_train-instance/"
+        "configuration directory Components/smac-v2.10.03-master-778/scenarios/"
+        "instances/train-instance; configured parameter results on the training set not "
+        "found in Components/smac-v2.10.03-master-778/scenarios/test-solver_train-"
+        "instance/outdir_train_configuration/test-solver_train-instance_scenario/; "
+        "default parameter results on the training set not found in Components/"
+        "smac-v2.10.03-master-778/scenarios/test-solver_train-instance/"
         "outdir_train_default/; testing set not found in configuration directory "
-        "Components/smac-v2.10.03-master-778//scenarios/instances/test-"
-        "instance/; configured parameter results on the testing set not found in "
-        "Components/smac-v2.10.03-master-778//scenarios/test-solver_train-"
-        "instance/outdir_test-instance_test_configured/; default parameter results on "
-        "the testing set not found in Components/smac-v2.10.03-master-778//"
-        "scenarios/test-solver_train-instance/"
-        "outdir_test-instance_test_default/;")
+        "Components/smac-v2.10.03-master-778/scenarios/instances/test-instance; "
+        "configured parameter results on the testing set not found in Components/"
+        "smac-v2.10.03-master-778/scenarios/test-solver_train-instance/outdir_test-"
+        "instance_test_configured/; default parameter results on the testing set not "
+        "found in Components/smac-v2.10.03-master-778/scenarios/test-solver_train-"
+        "instance/outdir_test-instance_test_default/;")
 
     mock_exists.assert_called()
 
