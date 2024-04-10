@@ -264,7 +264,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
                   f"{str(total_job_num)}")
             current_job_num += 1
 
-    performance_data_csv.update_csv()
+    performance_data_csv.save_csv()
     print(f"Performance data file {performance_data_csv_path} has been updated!")
 
     return

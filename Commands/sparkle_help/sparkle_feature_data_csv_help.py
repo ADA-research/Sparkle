@@ -121,9 +121,9 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
             bool_in_rows = self.get_bool_in_rows(row_name_second_sfdcsv)
 
             for j in range(len_list_columns_second_sfdcsv):
-                column_name_second_sfdcsv = second_sfdcsv.get_column_name(j)
+                column_name_second_sfdcsv = second_sfdcsv.dataframe.columns[j]
                 bool_in_columns = self.get_bool_in_columns(column_name_second_sfdcsv)
-                value = second_sfdcsv.get_value_index(i, j)
+                value = second_sfdcsv.dataframe.iloc[i, j]
 
                 if bool_in_rows:
                     if bool_in_columns:

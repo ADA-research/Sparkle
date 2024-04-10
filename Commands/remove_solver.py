@@ -75,7 +75,7 @@ if __name__ == "__main__":
         for column_name in performance_data_csv.list_columns():
             if solver_path == column_name:
                 performance_data_csv.delete_column(column_name)
-        performance_data_csv.update_csv()
+        performance_data_csv.save_csv()
 
     shutil.rmtree(solver_path)
 

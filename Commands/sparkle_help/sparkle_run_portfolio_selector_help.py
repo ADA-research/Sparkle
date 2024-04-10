@@ -287,7 +287,7 @@ def call_sparkle_portfolio_selector_solve_directory(
     check_selector_status(solver_name)
     test_performance_data_csv.add_column(solver_name)
 
-    test_performance_data_csv.update_csv()
+    test_performance_data_csv.save_csv()
 
     n_jobs = len(total_job_list)
     target_call = "python Commands/sparkle_help/run_sparkle_portfolio_core.py" +\

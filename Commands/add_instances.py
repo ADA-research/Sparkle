@@ -124,8 +124,8 @@ if __name__ == "__main__":
 
             print(f"Instance {instance_line} has been added!\n")
 
-        feature_data_csv.update_csv()
-        performance_data_csv.update_csv()
+        feature_data_csv.save_csv()
+        performance_data_csv.save_csv()
     else:
         list_source_all_filename = sfh.get_list_all_filename_recursive(instances_source)
         target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
@@ -154,8 +154,8 @@ if __name__ == "__main__":
                 shutil.copy(intended_filename, instances_directory)
                 print(f"Instance {intended_filename.name} has been added!")
 
-        feature_data_csv.update_csv()
-        performance_data_csv.update_csv()
+        feature_data_csv.save_csv()
+        performance_data_csv.save_csv()
 
     print("\nAdding instance set "
           f"{instances_directory.name} done!")
