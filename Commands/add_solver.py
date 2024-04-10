@@ -144,7 +144,7 @@ if __name__ == "__main__":
               f"Sparkle's version of RunSolver. ({runsolver_path})")
     runsolver_target = Path(solver_directory) / runsolver_path.name
     shutil.copyfile(runsolver_path, runsolver_target)
-    os.chmod(runsolver_target, os.stat(runsolver_target).st_mode | stat.S_IEXEC)
+    runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
