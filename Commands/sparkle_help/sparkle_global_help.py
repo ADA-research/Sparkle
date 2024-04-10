@@ -6,6 +6,7 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
+import numpy as np
 
 from sparkle import about
 from Commands.structures.reporting_scenario import ReportingScenario
@@ -29,10 +30,6 @@ def latest_scenario() -> ReportingScenario:
 
 
 sparkle_version = str(about.about_info["version"])
-
-sparkle_maximum_int = 2147483647
-sparkle_missing_value = -(sparkle_maximum_int - 1)
-sparkle_minimum_int = -(sparkle_maximum_int - 2)
 
 sparkle_special_string = "__@@SPARKLE@@__"
 

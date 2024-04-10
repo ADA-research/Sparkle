@@ -4,6 +4,7 @@
 
 import subprocess
 import sys
+import numpy as np
 from pathlib import Path
 
 import runrunner as rrr
@@ -52,7 +53,7 @@ def generate_missing_value_csv_like_feature_data_csv(
     # WARNING: This currently does not correctly handle which columns should be set in
     # case of multiple feature extractors.
     length = int(sgh.extractor_feature_vector_size_mapping[str(extractor_path)])
-    value_list = [sgh.sparkle_missing_value] * length
+    value_list = [np.nan] * length
 
     zero_value_csv.add_row(instance_path, value_list)
 

@@ -3,8 +3,9 @@
 """Module to manage performance data CSV files and common operations on them."""
 
 from __future__ import annotations
-
 from typing import Callable
+
+import sys
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_csv_help as scsv
@@ -87,7 +88,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         scores = []
 
         for instance in self.list_rows():
-            score = sgh.sparkle_minimum_int
+            score = sys.float_info.min
 
             for solver in self.list_columns():
                 solver_score = self.get_value(instance, solver)
