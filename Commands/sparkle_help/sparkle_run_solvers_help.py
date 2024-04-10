@@ -194,12 +194,12 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
 
-    if rerun is False:
-        list_performance_computation_job = (
-            performance_data_csv.get_list_remaining_performance_computation_job())
-    elif rerun is True:
+    if rerun:
         list_performance_computation_job = (
             performance_data_csv.get_list_recompute_performance_computation_job())
+    else:
+        list_performance_computation_job = (
+            performance_data_csv.get_list_remaining_performance_computation_job())
 
     print("The cutoff time per algorithm run to solve an instance is set to "
           f"{cutoff_time_str} seconds")

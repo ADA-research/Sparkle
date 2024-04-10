@@ -35,7 +35,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
     def get_number_of_instances(self: SparklePerformanceDataCSV) -> int:
         """Return the number of instances."""
-        return len(self.list_rows())
+        return self.dataframe.index.size
 
     def get_list_recompute_performance_computation_job(self: SparklePerformanceDataCSV)\
             -> list[list[list]]:
