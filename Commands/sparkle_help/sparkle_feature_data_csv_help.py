@@ -168,9 +168,10 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         Calculates the mean (if possible) of the existing values and assigns it to
         the indices that have a missing value.
-                
+
         Args:
-            column_name: column to be imputed"""
+            column_name: column to be imputed
+        """
         sum_value = 0
         num = 0
 
