@@ -8,10 +8,8 @@ from pathlib import Path
 
 from runrunner.base import Runner
 
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.structures.sparkle_objective import PerformanceMeasure
@@ -128,10 +126,10 @@ if __name__ == "__main__":
                          sch.CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
+        # Do first, so other command line options can override settings from the file
         sgh.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
-        )  # Do first, so other command line options can override settings from the file
-        args.performance_measure = PerformanceMeasure.from_str(args.performance_measure)
+        )
     if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
@@ -153,16 +151,18 @@ if __name__ == "__main__":
             args.number_of_runs, SettingState.CMD_LINE
         )
 
-    solver_name = sfh.get_last_level_directory_name(solver)
-    instance_set_train_name = sfh.get_last_level_directory_name(instance_set_train)
+    solver_name = Path(solver).name
+    instance_set_train_name = Path(instance_set_train).name
     instance_set_test_name = None
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    configurator.set_scenario_dirs(solver_name, instance_set_train_name)
     if instance_set_test is not None:
-        instance_set_test_name = sfh.get_last_level_directory_name(instance_set_test)
+        instance_set_test_name = Path(instance_set_test).name
     else:
         instance_set_test = instance_set_train
         instance_set_test_name = instance_set_train_name
 
-    if not scsh.check_configuration_exists(solver_name, instance_set_train_name):
+    if not configurator.scenario.result_directory.is_dir():
         print("Error: No configuration results found for the given solver and training"
               " instance set. Ablation needs to have a target configuration.")
         print("Please run configuration first")

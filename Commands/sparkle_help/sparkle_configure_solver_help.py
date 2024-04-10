@@ -5,7 +5,6 @@
 import os
 import sys
 from pathlib import Path
-from pathlib import PurePath
 import shutil
 from enum import Enum
 
@@ -158,9 +157,7 @@ def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     return ""
 
 
-def remove_validation_directories_execution_or_output(solver_name: str,
-                                                      instance_set_train_name: str,
-                                                      instance_set_test_name: str,
+def remove_validation_directories_execution_or_output(instance_set_test_name: str,
                                                       exec_or_out: str) -> None:
     """Remove execution or output directories for validation.
 
@@ -183,8 +180,7 @@ def remove_validation_directories_execution_or_output(solver_name: str,
         shutil.rmtree(test_configured_dir, ignore_errors=True)
 
 
-def remove_validation_directories(solver_name: str, instance_set_train_name: str,
-                                  instance_set_test_name: str) -> None:
+def remove_validation_directories(instance_set_test_name: str) -> None:
     """Remove validation directories for a solver and instance set(s) combination.
 
     Args:
@@ -193,14 +189,12 @@ def remove_validation_directories(solver_name: str, instance_set_train_name: str
         instance_set_test_name: Name of the instance set for testing
     """
     remove_validation_directories_execution_or_output(
-        solver_name, instance_set_train_name, instance_set_test_name, "validate")
+        instance_set_test_name, "validate")
     remove_validation_directories_execution_or_output(
-        solver_name, instance_set_train_name, instance_set_test_name, "output")
+        instance_set_test_name, "output")
 
 
-def prepare_smac_execution_directories_validation(solver_name: str,
-                                                  instance_set_train_name: str,
-                                                  instance_set_test_name: str) -> None:
+def prepare_smac_execution_directories_validation(instance_set_test_name: str) -> None:
     """Create and copy required directories and files for validation with SMAC.
 
     Remove old directories and files as needed.
@@ -211,14 +205,11 @@ def prepare_smac_execution_directories_validation(solver_name: str,
         instance_set_test_name: Name of the instance set for testing
     """
     # Make sure no old files remain that could interfere
-    remove_validation_directories(solver_name, instance_set_train_name,
-                                  instance_set_test_name)
+    remove_validation_directories(instance_set_test_name)
 
 
-def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool:
+def check_configuration_exists() -> bool:
     """Check if the results directory for the solver and instance set combination exists.
-
-    NOTE: This function assumes SMAC output
 
     Args:
         solver_name: Name of the solver
@@ -228,9 +219,8 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
         True if the results directory for this configuration exists.
     """
     # Check the results directory exists
-    res_path = sgh.settings.get_general_sparkle_configurator().result_path
-    smac_results_dir = res_path / f"{solver_name}_{instance_set_name}/"
-    all_good = smac_results_dir.is_dir()
+    res_path = sgh.settings.get_general_sparkle_configurator().scenario.result_directory
+    all_good = res_path.is_dir()
 
     if not all_good:
         print("ERROR: No configuration results found for the given solver and training "
@@ -240,43 +230,37 @@ def check_configuration_exists(solver_name: str, instance_set_name: str) -> bool
     return all_good
 
 
-def check_instance_list_file_exist(instance_set_name: str) -> None:
+def check_instance_list_file_exist() -> None:
     """Check the instance list file exists.
 
     Args:
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
     """
-    inst_path = sgh.settings.get_general_sparkle_configurator().instances_path
-    file_name = Path(instance_set_name + "_train.txt")
-    instance_list_file_path = Path(PurePath(inst_path
-                                   / Path(instance_set_name)
-                                   / file_name))
-
-    all_good = instance_list_file_path.is_file()
+    file_name = sgh.settings.get_general_sparkle_configurator()\
+        .scenario.instance_file_path
+    all_good = file_name.is_file()
 
     if not all_good:
         print("ERROR: Instance list file not found, make sure configuration was "
               "completed correctly for this solver and instance set combination.\n"
-              f"Missing file:\n{instance_list_file_path}\n")
+              f"Missing file:\n{file_name}\n")
         sys.exit(-1)
 
 
-def check_configuration_permission_error(solver_name: str,
-                                         instance_set_name: str) -> None:
+def check_configuration_permission_error() -> None:
     """Check the files for solver permission errors.
 
     Args:
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
     """
-    conf_res_dir = sgh.settings.get_general_sparkle_configurator().result_path
-    results_dir = conf_res_dir / f"{solver_name}_{instance_set_name}/"
+    res_dir = sgh.settings.get_general_sparkle_configurator().scenario.result_directory
 
     # Get the name of the first file in the directory
     # If there is an error, it will be in all files, so checking one is sufficient
-    filename = next((results_dir / f) for f in os.listdir(results_dir)
-                    if (results_dir / f).is_file())
+    filename = next((res_dir / f) for f in os.listdir(res_dir)
+                    if (res_dir / f).is_file())
 
     with Path(filename).open("r") as file:
         content = file.read()
@@ -287,16 +271,16 @@ def check_configuration_permission_error(solver_name: str,
             sys.exit(-1)
 
 
-def check_validation_prerequisites(solver_name: str, instance_set_name: str) -> None:
+def check_validation_prerequisites() -> None:
     """Validate prerequisites for validation are available.
 
     Args:
         solver_name: Name of the solver
         instance_set_name: Name of the instance set
     """
-    check_configuration_exists(solver_name, instance_set_name)
-    check_instance_list_file_exist(instance_set_name)
-    check_configuration_permission_error(solver_name, instance_set_name)
+    check_configuration_exists()
+    check_instance_list_file_exist()
+    check_configuration_permission_error()
 
 
 def write_optimised_configuration_str(solver_name: str, instance_set_name: str) -> None:
@@ -455,14 +439,15 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_str = ""
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
-    conf_results_path = sgh.settings.get_general_sparkle_configurator().result_path
-    conf_results_dir = conf_results_path / f"{solver_name}_{instance_set_name}/"
-    list_file_result_name = os.listdir(conf_results_dir)
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    scen_results_dir = configurator.scenario.result_directory
+    target_alg = configurator.configurator_target
+    list_file_result_name = os.listdir(scen_results_dir)
     line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
     # among them
     for file_result_name in list_file_result_name:
-        file_result_path = conf_results_dir / file_result_name
+        file_result_path = scen_results_dir / file_result_name
         smac_output_line = ""
         target_call = ""
         extra_info_statement = ""
@@ -476,15 +461,14 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
                     target_call = lines[index + 2].strip()
                     # Format the target_call to only contain the actuall call
                     target_call =\
-                        target_call[target_call.find(sgh.smac_target_algorithm):]
+                        target_call[target_call.find(target_alg):]
                     extra_info_statement = lines[index + 3].strip()
         # TODO: General implementation of configurator output verification
         # Check whether the smac_output is empty
         if len(smac_output_line) == 0:
             print("Error: Configurator output file has unexpected format")
             # Find matching error file
-            conf_tmp_path = sgh.settings.get_general_sparkle_configurator().tmp_path
-            error_files = [file for file in conf_tmp_path.iterdir()
+            error_files = [file for file in configurator.tmp_path.iterdir()
                            if file.name.startswith(f"{solver_name}_{instance_set_name}")
                            and file.suffix == ".err"]
             # Output content of error file

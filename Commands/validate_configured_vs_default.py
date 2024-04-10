@@ -131,7 +131,7 @@ if __name__ == "__main__":
     instance_set_test_name = None
 
     # Make sure configuration results exist before trying to work with them
-    scsh.check_validation_prerequisites(solver.name, instance_set_train.name)
+    scsh.check_validation_prerequisites()
 
     # Record optimised configuration
     scsh.write_optimised_configuration_str(solver.name, instance_set_train.name)
