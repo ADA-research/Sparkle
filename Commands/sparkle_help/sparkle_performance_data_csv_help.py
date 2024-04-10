@@ -5,8 +5,6 @@
 from __future__ import annotations
 from typing import Callable
 
-import sys
-
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_csv_help as scsv
 
@@ -83,20 +81,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def get_maximum_performance_per_instance(self: SparklePerformanceDataCSV) \
             -> list[float]:
         """Return a list with the highest performance per instance."""
-        scores = []
-
-        for instance in self.list_rows():
-            score = sys.float_info.min
-
-            for solver in self.list_columns():
-                solver_score = self.get_value(instance, solver)
-
-                if solver_score > score:
-                    score = solver_score
-
-            scores.append(score)
-
-        return scores
+        return self.dataframe.max(axis=1).to_list()
 
     def calc_virtual_best_score_of_portfolio_on_instance(
             self: SparklePerformanceDataCSV, instance: str,
@@ -147,10 +132,9 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         """
         virtual_best = []
         capvalue = None
-        for instance_idx in range(len(self.list_rows())):
-            instance = self.get_row_name(instance_idx)
+        for idx, instance in enumerate(self.dataframe.index):
             if capvalue_list is not None:
-                capvalue = capvalue_list[instance_idx]
+                capvalue = capvalue_list[idx]
 
             virtual_best_score = (
                 self.calc_virtual_best_score_of_portfolio_on_instance(
@@ -162,41 +146,26 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def get_dict_vbs_penalty_time_on_each_instance(self: SparklePerformanceDataCSV) \
             -> dict:
         """Return a dictionary of penalised runtimes and instances for the VBS."""
-        mydict = {}
-        for instance in self.list_rows():
-            vbs_penalty_time = sgh.settings.get_penalised_time()
-            for solver in self.list_columns():
-                runtime = self.get_value(instance, solver)
-                if runtime < vbs_penalty_time:
-                    vbs_penalty_time = runtime
-            mydict[instance] = vbs_penalty_time
+        instance_penalized_runtimes = {}
+        vbs_penalty_time = sgh.settings.get_penalised_time()
+        for instance in self.dataframe.index:
+            runtime = self.dataframe.iloc[instance].min()
+            instance_penalized_runtimes[instance] = min(vbs_penalty_time, runtime)
 
-        return mydict
+        return instance_penalized_runtimes
 
     def calc_vbs_penalty_time(self: SparklePerformanceDataCSV) -> float:
         """Return the penalised performance of the VBS."""
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
-
         penalty_time_each_run = cutoff_time * penalty_multiplier
-        vbs_penalty_time = 0.0
-        vbs_count = 0
 
-        for instance in self.list_rows():
-            vbs_penalty_time_on_this_instance = -1
-            vbs_count += 1
-            for solver in self.list_columns():
-                this_run_time = self.get_value(instance, solver)
-                if (vbs_penalty_time_on_this_instance < 0
-                   or vbs_penalty_time_on_this_instance > this_run_time):
-                    vbs_penalty_time_on_this_instance = this_run_time
-            if vbs_penalty_time_on_this_instance > cutoff_time:
-                vbs_penalty_time_on_this_instance = penalty_time_each_run
-            vbs_penalty_time += vbs_penalty_time_on_this_instance
-
-        vbs_penalty_time = vbs_penalty_time / vbs_count
-
-        return vbs_penalty_time
+        # Calculate the minimum per instance
+        min_instance_val = self.dataframe.min(axis=1)
+        # Penalize those exceeding cutoff
+        min_instance_val[min_instance_val > cutoff_time] = penalty_time_each_run
+        # Return average
+        return min_instance_val.sum() / self.index.size
 
     def get_solver_penalty_time_ranking_list(self: SparklePerformanceDataCSV)\
             -> list[list[float]]:
@@ -206,20 +175,23 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
 
         solver_penalty_time_ranking_list = []
         penalty_time_each_run = cutoff_time * penalty_multiplier
+        num_instances = self.dataframe.index.size
 
         for solver in self.list_columns():
-            this_penalty_time = 0.0
-            this_count = 0
-            for instance in self.list_rows():
+            this_penalty_time = 0.0 #Time per solver, adjusted for penalty
+
+            for instance in self.list_rows(): #For every instance the solver did
                 this_run_time = self.get_value(instance, solver)
-                this_count += 1
+
                 if this_run_time <= cutoff_time:
                     this_penalty_time += this_run_time
                 else:
                     this_penalty_time += penalty_time_each_run
-            this_penalty_time = this_penalty_time / this_count
+
+            this_penalty_time = this_penalty_time / num_instances # Average
             solver_penalty_time_ranking_list.append([solver, this_penalty_time])
 
+        # Sort the list by second value (the penalised run time)
         solver_penalty_time_ranking_list.sort(
             key=lambda this_penalty_time: this_penalty_time[1])
 
