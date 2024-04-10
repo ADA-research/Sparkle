@@ -442,27 +442,23 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     configurator = sgh.settings.get_general_sparkle_configurator()
     scen_results_dir = configurator.scenario.result_directory
     target_alg = configurator.configurator_target
-    list_file_result_name = os.listdir(scen_results_dir)
     line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
     # among them
-    for file_result_name in list_file_result_name:
-        file_result_path = scen_results_dir / file_result_name
+    for result_file in scen_results_dir.iterdir():
         smac_output_line = ""
         target_call = ""
         extra_info_statement = ""
-        with Path(file_result_path).open("r+") as fin:
-            # Format the lines of log, but only take the lines with relevant prefix
-            lines = fin.readlines()
-            for index, line in enumerate(lines):
-                if line.startswith(line_key_prefix):
-                    smac_output_line = line.strip().split()
-                    # The call is printed two lines below the output
-                    target_call = lines[index + 2].strip()
-                    # Format the target_call to only contain the actuall call
-                    target_call =\
-                        target_call[target_call.find(target_alg):]
-                    extra_info_statement = lines[index + 3].strip()
+        lines = result_file.open("r+").readlines()
+        for index, line in enumerate(lines):
+            if line.startswith(line_key_prefix):
+                smac_output_line = line.strip().split()
+                # The call is printed two lines below the output
+                target_call = lines[index + 2].strip()
+                # Format the target_call to only contain the actuall call
+                target_call =\
+                    target_call[target_call.find(target_alg):]
+                extra_info_statement = lines[index + 3].strip()
         # TODO: General implementation of configurator output verification
         # Check whether the smac_output is empty
         if len(smac_output_line) == 0:
