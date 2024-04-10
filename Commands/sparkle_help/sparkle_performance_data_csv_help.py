@@ -171,24 +171,16 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
             -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
-        penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
 
         solver_penalty_time_ranking_list = []
-        penalty_time_each_run = cutoff_time * penalty_multiplier
+        penalty_time_each_run =\
+            cutoff_time * sgh.settings.get_general_penalty_multiplier()
         num_instances = self.dataframe.index.size
 
-        for solver in self.list_columns():
-            this_penalty_time = 0.0 #Time per solver, adjusted for penalty
-
-            for instance in self.list_rows(): #For every instance the solver did
-                this_run_time = self.get_value(instance, solver)
-
-                if this_run_time <= cutoff_time:
-                    this_penalty_time += this_run_time
-                else:
-                    this_penalty_time += penalty_time_each_run
-
-            this_penalty_time = this_penalty_time / num_instances # Average
+        for solver in self.dataframe.columns:
+            masked_col = self.dataframe[solver]
+            masked_col[masked_col > cutoff_time] = penalty_time_each_run
+            this_penalty_time = masked_col.sum() / num_instances
             solver_penalty_time_ranking_list.append([solver, this_penalty_time])
 
         # Sort the list by second value (the penalised run time)
