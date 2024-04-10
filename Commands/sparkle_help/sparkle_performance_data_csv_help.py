@@ -17,8 +17,6 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
     def __init__(self: SparklePerformanceDataCSV, csv_filepath: str) -> None:
         """Initialise a SparklePerformanceDataCSV object."""
         scsv.SparkleCSV.__init__(self, csv_filepath)
-        self.solver_list = sgh.solver_list
-        return
 
     def get_job_list(self: SparklePerformanceDataCSV, rerun: bool = False) \
             -> list[tuple[str, str]]:
