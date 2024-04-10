@@ -159,9 +159,17 @@ class TestPerformanceData(TestCase):
         result = self.pd.get_dict_vbs_penalty_time_on_each_instance()
         assert result == penalty_time_dict
 
-    def test_calc_vbs_penalty_time(self: TestPerformanceData) -> None:
+    @patch("Commands.sparkle_help.sparkle_global_help."
+           "settings.get_general_target_cutoff_time")
+    @patch("Commands.sparkle_help.sparkle_global_help."
+           "settings.get_general_penalty_multiplier")
+    def test_calc_vbs_penalty_time(self: TestPerformanceData,
+                                   mock_cutoff: Mock,
+                                   mock_multiplier: Mock) -> None:
         """Test calculating the penalized vbs."""
-        vbs_penalized = 17.4
+        mock_cutoff.return_value = 60
+        mock_multiplier.return_value = 10
+        vbs_penalized = 243.2
         result = self.pd.calc_vbs_penalty_time()
         assert result == vbs_penalized
 

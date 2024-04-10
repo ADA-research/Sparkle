@@ -149,7 +149,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         instance_penalized_runtimes = {}
         vbs_penalty_time = sgh.settings.get_penalised_time()
         for instance in self.dataframe.index:
-            runtime = self.dataframe.iloc[instance].min()
+            runtime = self.dataframe.loc[instance].min()
             instance_penalized_runtimes[instance] = min(vbs_penalty_time, runtime)
 
         return instance_penalized_runtimes
@@ -165,7 +165,7 @@ class SparklePerformanceDataCSV(scsv.SparkleCSV):
         # Penalize those exceeding cutoff
         min_instance_val[min_instance_val > cutoff_time] = penalty_time_each_run
         # Return average
-        return min_instance_val.sum() / self.index.size
+        return min_instance_val.sum() / self.dataframe.index.size
 
     def get_solver_penalty_time_ranking_list(self: SparklePerformanceDataCSV)\
             -> list[list[float]]:
