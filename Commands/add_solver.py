@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to add a solver to the Sparkle platform."""
-
+import os
+import stat
 import sys
 import argparse
 import shutil
@@ -139,7 +140,9 @@ if __name__ == "__main__":
         print("Warning! RunSolver executable detected in Solver "
               f"{Path(solver_source).name}. This will be replaced with "
               f"Sparkle's version of RunSolver. ({runsolver_path})")
-    shutil.copyfile(runsolver_path, Path(solver_directory) / runsolver_path.name)
+    runsolver_target = Path(solver_directory) / runsolver_path.name
+    shutil.copyfile(runsolver_path, runsolver_target)
+    runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path

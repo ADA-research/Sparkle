@@ -159,7 +159,7 @@ def wait_for_all_jobs() -> None:
         if latest_length > len(running_jobs):
             print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
         latest_length = len(running_jobs)
-        time.sleep(seconds=10.0)
+        time.sleep(10.0)
 
     print("All jobs done!")
 
