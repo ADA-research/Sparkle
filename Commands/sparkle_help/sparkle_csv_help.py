@@ -82,10 +82,6 @@ class SparkleCSV:
         """Return a list of rows."""
         return self.dataframe.index.tolist()
 
-    def get_row_name(self: SparkleCSV, index: int) -> str:
-        """Return the name of a row."""
-        return str(self.dataframe.index[index])
-
     def add_row(self: SparkleCSV, row_name: str, value_list: list[str] = []) -> None:
         """Add a row with the given values."""
         if row_name in self.list_rows():
