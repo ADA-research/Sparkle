@@ -38,7 +38,7 @@ class SparklePerformanceDataCSV():
             solvers: List of solver names to be added into the Dataframe
             instances: List of instance names to be added into the Dataframe
         """
-        self.csv_path = csv_filepath
+        self.csv_filepath = csv_filepath
         # Sanity check, remove later
         if not isinstance(self.csv_filepath, Path):
             self.csv_filepath = Path(self.csv_filepath)
@@ -79,9 +79,31 @@ class SparklePerformanceDataCSV():
             self.dataframe = pd.DataFrame(None, index=midx, columns=solvers, )
             self.save_csv()
 
+    def verify_objective(self: SparklePerformanceDataCSV,
+                         objective: str) -> str:
+        """Method to check whether objective is valid."""
+        if objective is None:
+            if self.multi_objective:
+                print("Error: MO Performance Data, but objective not specified.")
+                sys.exit(-1)
+            else:
+                objective = self.objective_names[0]
+        return objective
+
+    def verify_run_id(self: SparklePerformanceDataCSV,
+                      run_id: int) -> int:
+        """Method to check whether run id is valid."""
+        if run_id is None:
+            if self.n_runs > 1:
+                print("Error: Multiple run performance data, but run not specified")
+                sys.exit(-1)
+            else:
+                run_id = self.run_ids[0]
+        return run_id
+
     def verify_indexing(self: SparklePerformanceDataCSV,
                         objective: str,
-                        run: int) -> tuple[str, int]:
+                        run_id: int) -> tuple[str, int]:
         """Method to check whether data indexing is correct.
 
         Users are allowed to use the Performance Dataframe without the second and
@@ -91,24 +113,14 @@ class SparklePerformanceDataCSV():
 
         Args:
             objective: The given objective name
-            run: The given run index
+            run_id: The given run index
 
         Returns:
             A tuple representing the (possibly adjusted) objective and run index.
         """
-        if objective is None:
-            if self.multi_objective:
-                print("Error: MO Performance Data, but objective not specified.")
-                sys.exit(-1)
-            else:
-                objective = self.objective_names[0]
-        if run is None:
-            if self.n_runs > 1:
-                print("Error: Multiple run performance data, but run not specified")
-                sys.exit(-1)
-            else:
-                run = self.run_ids[0]
-        return objective, run
+        objective = self.verify_objective(objective)
+        run_id = self.verify_run_id(run_id)
+        return objective, run_id
 
     def add_solver(self: SparklePerformanceDataCSV,
                    solver_name: str,
@@ -236,10 +248,10 @@ class SparklePerformanceDataCSV():
         value in the table, else (True) get all the tuples.
         """
         df = self.dataframe.stack(future_stack=True)
-
         if not rerun:
             df = df[df.isnull()]
-
+        if not self.multi_objective and self.n_runs == 1:
+            df.index = df.index.droplevel(["Objective", "Run"])
         return df.index.tolist()
 
     def get_list_recompute_performance_computation_job(self: SparklePerformanceDataCSV)\
@@ -249,7 +261,11 @@ class SparklePerformanceDataCSV():
         list_column_name = self.dataframe.columns.to_list()
 
         for row_name in self.dataframe.index:
-            list_item = [row_name, list_column_name]
+            if not self.multi_objective and self.n_runs == 1:
+                # Simplification for unused dimensions
+                list_item = [row_name[1], list_column_name]
+            else:
+                list_item = [row_name, list_column_name]
             list_recompute_performance_computation_job.append(list_item)
 
         return list_recompute_performance_computation_job
@@ -265,7 +281,11 @@ class SparklePerformanceDataCSV():
                 flag_value_is_null = bool_array_isnull.at[row_name, column_name]
                 if flag_value_is_null:
                     current_solver_list.append(column_name)
-            list_item = [row_name, current_solver_list]
+            if not self.multi_objective and self.n_runs == 1:
+                # Simplification for unused dimensions
+                list_item = [row_name[1], current_solver_list]
+            else:
+                list_item = [row_name, current_solver_list]
             list_remaining_performance_computation_job.append(list_item)
         return list_remaining_performance_computation_job
 
@@ -276,11 +296,14 @@ class SparklePerformanceDataCSV():
         bool_array_isnull = self.dataframe.isnull()
         for row_name in self.dataframe.index:
             current_solver_list = []
-            for column_name in self.dataframe.columns:
-                flag_value_is_null = bool_array_isnull.at[row_name, column_name]
+            for solver in self.dataframe.columns:
+                flag_value_is_null = bool_array_isnull.at[row_name, solver]
                 if not flag_value_is_null:
-                    current_solver_list.append(column_name)
-            list_item = [row_name, current_solver_list]
+                    current_solver_list.append(solver)
+            if not self.multi_objective and self.n_runs == 1:
+                list_item = [row_name[1], current_solver_list]
+            else:
+                list_item = [row_name, current_solver_list]
             list_processed_performance_computation_job.append(list_item)
         return list_processed_performance_computation_job
 
@@ -352,42 +375,58 @@ class SparklePerformanceDataCSV():
 
         return aggregation_function(virtual_best)
 
-    def get_dict_vbs_penalty_time_on_each_instance(self: SparklePerformanceDataCSV) \
-            -> dict:
+    def get_dict_vbs_penalty_time_on_each_instance(
+            self: SparklePerformanceDataCSV,
+            objective: str = None,
+            run_id: int = None) -> dict:
         """Return a dictionary of penalised runtimes and instances for the VBS."""
+        objective = self.verify_objective(objective)
         instance_penalized_runtimes = {}
         vbs_penalty_time = sgh.settings.get_penalised_time()
-        for instance in self.dataframe.index:
-            runtime = self.dataframe.loc[instance].min()
+        for instance in self.dataframe.index.levels[1]:
+            if run_id is None:
+                runtime = self.dataframe.loc[(objective, instance), :].min(axis=None)
+            else:
+                runtime =\
+                    self.dataframe.loc[(objective, instance, run_id), :].min(axis=None)
             instance_penalized_runtimes[instance] = min(vbs_penalty_time, runtime)
 
         return instance_penalized_runtimes
 
-    def calc_vbs_penalty_time(self: SparklePerformanceDataCSV) -> float:
+    def calc_vbs_penalty_time(self: SparklePerformanceDataCSV,
+                              objective: str = None,
+                              run_id: int = None) -> float:
         """Return the penalised performance of the VBS."""
+        objective = self.verify_objective(objective)
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
         penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
         penalty_time_each_run = cutoff_time * penalty_multiplier
 
-        # Calculate the minimum per instance
-        min_instance_val = self.dataframe.min(axis=1)
+        # Calculate the minimum for the selected objective per instance
+        if run_id is not None:
+            min_instance_df =\
+                self.dataframe.loc(axis=0)[objective, :, run_id].min(axis=1)
+        else:
+            min_instance_df =\
+                self.dataframe.loc(axis=0)[objective, :, :].min(axis=1)
         # Penalize those exceeding cutoff
-        min_instance_val[min_instance_val > cutoff_time] = penalty_time_each_run
+        min_instance_df[min_instance_df > cutoff_time] = penalty_time_each_run
         # Return average
-        return min_instance_val.sum() / self.dataframe.index.size
+        return min_instance_df.sum() / self.dataframe.index.size
 
-    def get_solver_penalty_time_ranking_list(self: SparklePerformanceDataCSV)\
-            -> list[list[float]]:
+    def get_solver_penalty_time_ranking_list(self: SparklePerformanceDataCSV,
+                                             objective: str = None) -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
+        objective = self.verify_objective(objective)
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
 
         solver_penalty_time_ranking_list = []
         penalty_time_each_run =\
             cutoff_time * sgh.settings.get_general_penalty_multiplier()
         num_instances = self.dataframe.index.size
-
+        sub_df = self.dataframe.loc(axis=0)[objective, :, :]
         for solver in self.dataframe.columns:
-            masked_col = self.dataframe[solver]
+            masked_col = sub_df[solver]
             masked_col[masked_col > cutoff_time] = penalty_time_each_run
             this_penalty_time = masked_col.sum() / num_instances
             solver_penalty_time_ranking_list.append([solver, this_penalty_time])

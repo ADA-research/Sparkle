@@ -50,10 +50,10 @@ class TestPerformanceData(TestCase):
         result = self.pd.get_job_list(rerun=True)
         assert result == job_list
 
-    def test_get_number_of_instances(self: TestPerformanceData) -> None:
+    def test_get_num_instances(self: TestPerformanceData) -> None:
         """Test the number of instances getter method."""
         num_instances = 5
-        result = self.pd.get_number_of_instances()
+        result = self.pd.get_num_instances()
         assert result == num_instances
 
     def test_get_list_recompute_performance_computation_job(self: TestPerformanceData)\
@@ -64,7 +64,6 @@ class TestPerformanceData(TestCase):
             [["Instance1", algs], ["Instance2", algs], ["Instance3", algs],
              ["Instance4", algs], ["Instance5", algs]]
         result = self.pd.get_list_recompute_performance_computation_job()
-        print(result)
         assert result == list_recompute
 
     def test_get_list_remaining_performance_computation_job(self: TestPerformanceData)\
@@ -157,6 +156,7 @@ class TestPerformanceData(TestCase):
         penalty_time_dict = {"Instance1": 30, "Instance2": 5, "Instance3": 3,
                              "Instance4": 8, "Instance5": 40}
         result = self.pd.get_dict_vbs_penalty_time_on_each_instance()
+        print(result)
         assert result == penalty_time_dict
 
     @patch("Commands.sparkle_help.sparkle_global_help."
