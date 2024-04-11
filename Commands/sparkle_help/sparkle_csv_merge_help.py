@@ -55,13 +55,13 @@ def performance_data_csv_merge() -> None:
                 if not runtime_str:
                     continue
                 runtime = float(runtime_str)
-                performance_data_csv.set_value(instance_path, solver_path, runtime)
+                performance_data_csv.set_value(runtime, solver_path, instance_path)
             performance_data_csv.save_csv()
             sfh.rmfiles(result_path)
         except Exception:
             print(f"ERROR: Could not remove file: {result_path}")
     for wrong_solver_path in wrong_solver_list:
-        performance_data_csv.delete_column(wrong_solver_path)
+        performance_data_csv.remove_solver(wrong_solver_path)
         performance_data_csv.save_csv()
         sfh.add_remove_platform_item(wrong_solver_path,
                                      sgh.solver_list_path,
@@ -75,8 +75,5 @@ def performance_data_csv_merge() -> None:
 
 
 if __name__ == "__main__":
-    feature_data_csv_merge()
-    performance_data_csv_merge()
-else:
     feature_data_csv_merge()
     performance_data_csv_merge()
