@@ -136,7 +136,8 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             performance_data_csv = spdcsv.SparklePerformanceDataCSV(
                 performance_data_csv_path)
-            performance_data_csv.set_value(cpu_time_penalised, solver_name, instance_path)
+            performance_data_csv.set_value(cpu_time_penalised,
+                                           solver_name, instance_path)
             performance_data_csv.save_csv()
     else:
         if flag_solved:
