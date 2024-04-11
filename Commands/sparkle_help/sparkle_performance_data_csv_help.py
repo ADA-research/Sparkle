@@ -142,7 +142,7 @@ class SparklePerformanceDataCSV():
                      instance_name: str,
                      initial_value: float | list[float] = None) -> None:
         """Add and instance to the DataFrame."""
-        if self.dataframe.index == 0 or self.dataframe.columns == 0:
+        if self.dataframe.index.size == 0 or self.dataframe.columns.size == 0:
             # First instance or no Solvers yet
             solvers = self.dataframe.columns.to_list()
             instances = [instance_name]
