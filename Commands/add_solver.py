@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Sparkle command to add a solver to the Sparkle platform."""
-
 import os
 import stat
 import sys
