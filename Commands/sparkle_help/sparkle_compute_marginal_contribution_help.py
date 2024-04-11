@@ -105,12 +105,12 @@ def compute_perfect_selector_marginal_contribution(
           f"{str(virtual_best_performance)}")
     print("Computing done!")
 
-    for solver in performance_data_csv.list_columns():
+    for solver in performance_data_csv.dataframe.columns:
         print("Computing virtual best performance for portfolio selector excluding "
               f"solver {sfh.get_last_level_directory_name(solver)} ...")
         tmp_performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             performance_data_csv_path)
-        tmp_performance_data_csv.delete_column(solver)
+        tmp_performance_data_csv.remove_solver(solver)
         tmp_virt_best_perf = (
             tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
                 aggregation_function, minimise, capvalue_list))
@@ -213,7 +213,7 @@ def compute_actual_selector_performance(
     performances = []
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     capvalue = None
-    for index, instance in enumerate(performance_data_csv.list_rows()):
+    for index, instance in enumerate(performance_data_csv.get_instances()):
         if capvalue_list is not None:
             capvalue = capvalue_list[index]
         performance_instance, flag_success = compute_actual_performance_for_instance(
@@ -267,7 +267,7 @@ def compute_actual_performance_for_instance(
         # In case of Runtime, we loop through the selected solvers
         for prediction in list_predict_schedule:
             # A prediction is a solver and its score given by the Selector
-            performance = float(performance_data_csv.get_value(instance, prediction[0]))
+            performance = float(performance_data_csv.get_value(prediction[0], instance))
             performance_list.append(performance)
             scheduled_cutoff_time_this_run = prediction[1]
             # 1. if performance <= predicted runtime we have a successfull solver
@@ -288,7 +288,7 @@ def compute_actual_performance_for_instance(
         # Minimum or maximum of predicted solvers (Aggregation function)
         performance_list = []
         for prediction in list_predict_schedule:
-            solver_performance = performance_data_csv.get_value(instance, prediction[0])
+            solver_performance = performance_data_csv.get_value(prediction[0], instance)
             performance_list.append(float(solver_performance))
 
         if minimise:
@@ -371,13 +371,13 @@ def compute_actual_selector_marginal_contribution(
     print("Computing done!")
 
     # Compute contribution per solver
-    for solver in performance_data_csv.list_columns():
+    for solver in performance_data_csv.dataframe.columns:
         solver_name = sfh.get_last_level_directory_name(solver)
         print("Computing actual performance for portfolio selector excluding solver "
               f"{solver_name} ...")
         tmp_performance_data_csv = \
             spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-        tmp_performance_data_csv.delete_column(solver)
+        tmp_performance_data_csv.remove_solver(solver)
         tmp_performance_data_csv_file = (
             f"tmp_performance_data_csv_without_{solver_name}_"
             f"{sparkle_basic_help.get_time_pid_random_string()}.csv")

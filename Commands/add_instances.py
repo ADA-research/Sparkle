@@ -120,7 +120,7 @@ if __name__ == "__main__":
             intended_instance_line = intended_instance_line.strip()
             sfh.add_remove_platform_item(intended_instance_line, sgh.instance_list_path)
             feature_data_csv.add_row(intended_instance_line)
-            performance_data_csv.add_row(intended_instance_line)
+            performance_data_csv.add_instance(intended_instance_line)
 
             print(f"Instance {instance_line} has been added!\n")
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             else:
                 sfh.add_remove_platform_item(intended_filename, sgh.instance_list_path)
                 feature_data_csv.add_row(intended_filename)
-                performance_data_csv.add_row(intended_filename)
+                performance_data_csv.add_instance(intended_filename)
                 shutil.copy(intended_filename, instances_directory)
                 print(f"Instance {intended_filename.name} has been added!")
 

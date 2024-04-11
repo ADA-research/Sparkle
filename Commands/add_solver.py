@@ -147,7 +147,7 @@ if __name__ == "__main__":
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         sgh.performance_data_csv_path
     )
-    performance_data_csv.add_column(solver_directory)
+    performance_data_csv.add_solver(solver_directory)
     performance_data_csv.save_csv()
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)

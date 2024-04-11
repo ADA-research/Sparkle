@@ -70,7 +70,7 @@ if __name__ == "__main__":
         sfh.add_remove_platform_item(intended_instance,
                                      sgh.instance_list_path, remove=True)
         feature_data_csv.delete_row(intended_instance)
-        performance_data_csv.delete_row(intended_instance)
+        performance_data_csv.remove_instance(intended_instance)
 
         # Delete instance file(s)
         for instance_file in intended_instance.split():

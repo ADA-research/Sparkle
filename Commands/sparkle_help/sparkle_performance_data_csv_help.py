@@ -20,7 +20,7 @@ class SparklePerformanceDataCSV():
     """Class to manage performance data CSV files and common operations on them."""
 
     def __init__(self: SparklePerformanceDataCSV,
-                 csv_filepath: Path = None,
+                 csv_filepath: Path,
                  instances: list[str] = [],
                  solvers: list[str] = []
         ) -> None:
@@ -33,8 +33,12 @@ class SparklePerformanceDataCSV():
                 * Instance
                 * Run (Static, from settings)
         Args:
-            csv_filepath: If not none, load from Path
+            csv_filepath: If path exists, load from Path
         """
+        self.csv_path = csv_filepath
+        # Sanity check, remove later
+        if not isinstance(self.csv_filepath, Path):
+            self.csv_filepath = Path(self.csv_filepath)
         self.multi_dim_names = ["Objective", "Instance", "Run"]
         # Objectives is a ``static'' dimension
         self.objective_names = [o.name for o in 
@@ -44,10 +48,7 @@ class SparklePerformanceDataCSV():
         self.n_runs = sgh.settings.get_config_number_of_runs()
         self.run_ids = list(range(1, self.n_runs+1))
 
-        # Sanity check, remove later
-        if not isinstance(csv_filepath, Path):
-            csv_filepath = Path(csv_filepath)
-        if csv_filepath.exists():
+        if self.csv_filepath.exists():
             self.dataframe = pd.read_csv(csv_filepath, index_col=0)
             # Enforce dimensions
             if self.multi_dim_names[0] not in self.dataframe.columns:
@@ -93,6 +94,10 @@ class SparklePerformanceDataCSV():
         return objective, run
 
     def add_solver(self: SparklePerformanceDataCSV, solver_name: str) -> None:
+        if solver_name in self.dataframe.columns:
+            print(f"WARNING: Tried adding already existing solver {solver_name} to "
+                  f"Performance DataFrame: {self.csv_filepath}")
+            return
         self.dataframe[solver_name] = None
 
     def add_instance(self: SparklePerformanceDataCSV, instance_name: str) -> None:
@@ -104,6 +109,10 @@ class SparklePerformanceDataCSV():
                                               names=self.multi_dim_names)
             self.dataframe = pd.DataFrame(None, index = midx, columns=solvers, )
         else:
+            if instance_name in self.dataframe.index.levels[1]:
+                print(f"WARNING: Tried adding already existing solver {instance_name} "
+                      f"to Performance DataFrame: {self.csv_filepath}")
+                return
             # Create a None value for every possible combination (This should be doable with pandas functions I think)
             for obj in self.objective_names:
                 for run in self.run_ids:
@@ -144,7 +153,7 @@ class SparklePerformanceDataCSV():
     def get_num_objectives(self: SparklePerformanceDataCSV) -> int:
         return self.dataframe.index.levels[0].size
 
-    def get_number_of_instances(self: SparklePerformanceDataCSV) -> int:
+    def get_num_instances(self: SparklePerformanceDataCSV) -> int:
         """Return the number of instances."""
         return self.dataframe.index.levels[1].size
 
@@ -153,6 +162,9 @@ class SparklePerformanceDataCSV():
 
     def get_num_solvers(self: SparklePerformanceDataCSV) -> int:
         return self.dataframe.columns.size
+
+    def get_instances(self: SparklePerformanceDataCSV) -> list[str]:
+        return self.dataframe.index.levels[1]
 
     def save_csv(self: SparklePerformanceDataCSV, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.

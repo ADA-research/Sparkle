@@ -159,7 +159,7 @@ def check_solver_output_for_errors(raw_result_path: Path) -> None:
 
 def run_solver_on_instance_and_process_results(
         solver_path: str, instance_path: str, seed_str: str = None,
-        custom_cutoff: int = None) -> (float, float, float, list[float], str, str):
+        custom_cutoff: int = None) -> tuple[float, float, float, list[float], str, str]:
     """Prepare and run a given the solver and instance, and process output."""
     # Prepare paths
     # TODO: Fix result path for multi-file instances (only a single file is part of the
@@ -251,12 +251,12 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             if perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
                perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
                 # TODO: Handle the multi-objective case for quality
-                performance_data_csv.set_value(instance_path, solver_path, quality[0])
+                performance_data_csv.set_value(quality[0], solver_path, instance_path)
                 print(f"Running Result: Status: {status}, Quality{penalised_str}: "
                       f"{str(quality[0])}")
             else:
-                performance_data_csv.set_value(instance_path, solver_path,
-                                               cpu_time_penalised)
+                performance_data_csv.set_value(cpu_time_penalised, solver_path,
+                                               instance_path)
                 print(f"Running Result: Status {status}, Runtime{penalised_str}: "
                       f"{str(cpu_time_penalised)}")
 
@@ -271,7 +271,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
 
 
 def handle_timeouts(runtime: float, status: str,
-                    custom_cutoff: int = None) -> (float, str):
+                    custom_cutoff: int = None) -> tuple[float, str]:
     """Check if there is a timeout and return the status and penalised runtime."""
     if custom_cutoff is None:
         cutoff_time = sgh.settings.get_general_target_cutoff_time()
@@ -300,8 +300,9 @@ def verify(instance_path: str, raw_result_path: str, solver_path: str, status: s
     return status
 
 
-def process_results(raw_result_path: str, solver_wrapper_path: str,
-                    runsolver_values_path: str) -> (float, float, list[float], str):
+def process_results(
+        raw_result_path: str, solver_wrapper_path: str,
+        runsolver_values_path: str) -> tuple[float, float, list[float], str]:
     """Process results from raw output, the wrapper, and runsolver."""
     # By default runtime comes from runsolver, may be overwritten by user wrapper
     cpu_time, wc_time = get_runtime_from_runsolver(runsolver_values_path)
@@ -410,7 +411,7 @@ def get_runtime_from_wrapper(result: str) -> float:
     return runtime
 
 
-def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
+def get_runtime_from_runsolver(runsolver_values_path: str) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver."""
     cpu_time = -1.0
     wc_time = -1.0
@@ -447,14 +448,14 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
 
     Input: Path to solver, path to instance it failed on
     """
-    print(f"Warning: Solver {sfh.get_last_level_directory_name(solver_path)} reports "
-          "the wrong answer on instance "
-          f"{sfh.get_last_level_directory_name(instance_path)}!")
-    print(f"Warning: Solver {sfh.get_last_level_directory_name(solver_path)} will be "
-          "removed!")
+    solver_name = Path(solver_path).name
+    instance_name = Path(instance_path).name
+    print(f"Warning: Solver {solver_name} reports the wrong answer "
+          f"on instance {instance_name}!\n"
+          f"Warning: Solver {solver_name} will be removed!")
 
     # TODO: Fix solver removal from performanc data CSV file
-    # performance_data_csv.delete_column(solver_path)
+    # performance_data_csv.remove_solver(solver_path)
     sfh.add_remove_platform_item(solver_path,
                                  sgh.solver_list_path,
                                  remove=True)
@@ -463,11 +464,8 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
                                  key=solver_path,
                                  remove=True)
 
-    print(f"Solver {sfh.get_last_level_directory_name(solver_path)} is a wrong solver")
-    print(f"Solver {sfh.get_last_level_directory_name(solver_path)} running on "
-          f"instance {sfh.get_last_level_directory_name(instance_path)} ignored!\n")
-
-    return
+    print(f"Solver {solver_name} is a wrong solver")
+    print(f"Solver {solver_name} running on instance {instance_name} ignored!")
 
 
 def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:

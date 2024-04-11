@@ -282,8 +282,8 @@ def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
         performance_data_csv.get_solver_penalty_time_ranking_list())
     sbs_solver = solver_penalty_time_ranking_list[0][0]
 
-    for instance in performance_data_csv.list_rows():
-        this_run_time = performance_data_csv.get_value(instance, sbs_solver)
+    for instance in performance_data_csv.get_instances():
+        this_run_time = performance_data_csv.get_value(sbs_solver, instance)
 
         if this_run_time <= cutoff_time:
             mydict[instance] = this_run_time
@@ -299,11 +299,9 @@ def get_dict_vbs_penalty_time_on_each_instance() -> dict[str, int]:
     Returns:
         A dict that maps instance name str to their penalised performance int.
     """
-    performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
-    mydict = performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
-
-    return mydict
+    performance_data_csv = \
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path)
+    return performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
 
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[str, int]:
@@ -313,8 +311,8 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
         A dict that maps instance name str to their penalised performance int.
     """
     mydict = {}
-    performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+    performance_data_csv = \
+        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path)
     actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
     minimise = True
     performance_measure = \
@@ -324,7 +322,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         minimise = False
 
-    for instance in performance_data_csv.list_rows():
+    for instance in performance_data_csv.get_instances():
         used_time_for_this_instance, flag_successfully_solving = \
             scmch.compute_actual_performance_for_instance(
                 actual_portfolio_selector_path, instance, sgh.feature_data_csv_path,
@@ -465,12 +463,9 @@ def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
     Returns:
         The number of instances in a test instance set as string.
     """
-    str_value = ""
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + "sparkle_performance_data.csv")
-    str_value = str(len(performance_data_csv.list_rows()))
-
-    return str_value
+    return str(performance_data_csv.get_num_instances())
 
 
 def get_test_actual_par(test_case_directory: str) -> str:
@@ -485,15 +480,16 @@ def get_test_actual_par(test_case_directory: str) -> str:
     str_value = ""
     performance_data_csv = spdcsv.SparklePerformanceDataCSV(
         test_case_directory + "sparkle_performance_data.csv")
-    solver = performance_data_csv.list_columns()[0]
+    # Why is it selecting the first solver?
+    solver = performance_data_csv.dataframe.columns[0]
 
     cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
 
     sparkle_penalty_time = 0.0
     sparkle_penalty_time_count = 0
 
-    for instance in performance_data_csv.list_rows():
-        this_run_time = performance_data_csv.get_value(instance, solver)
+    for instance in performance_data_csv.get_instances():
+        this_run_time = performance_data_csv.get_value(solver, instance)
         sparkle_penalty_time_count += 1
         if this_run_time <= cutoff_time_each_run:
             sparkle_penalty_time += this_run_time

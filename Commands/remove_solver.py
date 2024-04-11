@@ -72,9 +72,9 @@ if __name__ == "__main__":
         performance_data_csv = spdcsv.SparklePerformanceDataCSV(
             sgh.performance_data_csv_path
         )
-        for column_name in performance_data_csv.list_columns():
+        for column_name in performance_data_csv.dataframe.columns:
             if solver_path == column_name:
-                performance_data_csv.delete_column(column_name)
+                performance_data_csv.remove_solver(column_name)
         performance_data_csv.save_csv()
 
     shutil.rmtree(solver_path)
