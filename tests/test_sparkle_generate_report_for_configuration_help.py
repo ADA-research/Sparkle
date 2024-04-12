@@ -8,9 +8,25 @@ from pytest_mock import MockFixture
 from Commands.sparkle_help import sparkle_generate_report_for_configuration_help as sgr
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.solver import Solver
 
 global settings
 sgh.settings = sparkle_settings.Settings()
+configurator = sgh.settings.get_general_sparkle_configurator()
+configurator_path = configurator.configurator_path
+solver_name = "test-solver"
+train_instance = "train-instance"
+test_instance = "test-instance"
+
+
+def setup_conf() -> None:
+    """Set up the configurator for the tests."""
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    configurator_path = configurator.configurator_path
+    configurator.scenario =\
+        ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
+    configurator.scenario._set_paths(configurator_path)
 
 
 def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> None:
@@ -56,7 +72,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
 
-    instance_directory = f"{sgh.smac_dir}scenarios/instances/{instance_set_name}/"
+    instance_directory = configurator.instances_path / instance_set_name
     mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
@@ -245,20 +261,13 @@ def test_get_features_bool_false(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_name = "test-solver"
-    instance_set = "train-instance"
-    solver_dir = Path("smac-solver-dir/")
-    mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                            "configuration_help."
-                            "get_smac_solver_path",
-                            return_value=solver_dir)
+    setup_conf()
     file_content_mock = ""
     mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
 
-    features_bool = sgr.get_features_bool(solver_name, instance_set)
+    features_bool = sgr.get_features_bool(solver_name, train_instance)
 
-    mock_dir.assert_called_once_with(solver_name, instance_set)
     mock_open.assert_called_once_with("r")
     assert features_bool == r"\featuresfalse"
 
@@ -268,20 +277,12 @@ def test_get_features_bool_true(mocker: MockFixture) -> None:
 
     The function should check the scenario file for a link to the feature file.
     """
-    solver_dir = Path("smac-solver-dir/")
-    solver_name = "test-solver"
-    instance_set = "train-instance"
-    mock_dir = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                            "configuration_help."
-                            "get_smac_solver_path",
-                            return_value=solver_dir)
     file_content_mock = "feature_file = some/file"
     mock_open = mocker.patch("pathlib.Path.open",
                              mocker.mock_open(read_data=file_content_mock))
 
-    features_bool = sgr.get_features_bool(solver_name, instance_set)
+    features_bool = sgr.get_features_bool(solver_name, train_instance)
 
-    mock_dir.assert_called_once_with(solver_name, instance_set)
     mock_open.assert_called_once_with("r")
     assert features_bool == r"\featurestrue"
 
@@ -459,14 +460,14 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixtu
         test_instance,
         cutoff)
 
-    smac_solver_dir = f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/"
+    smac_solver_dir = configurator.scenarios_path / (f"{solver_name}_{train_instance}")
 
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    configured_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
+    configured_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
                               f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
+    default_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
                            f"_test_default/{default_results_file}")
     configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
                                        f"{train_instance}_"
@@ -512,7 +513,7 @@ def test_get_figure_configured_vs_default_on_train_instance_set(mocker: MockFixt
     configured_results_file = ("validationObjectiveMatrix-traj-run-"
                                f"{seed}-walltime.csv")
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{train_instance}_scenario/"
                               f"{configured_results_file}")
@@ -552,16 +553,14 @@ def test_get_timeouts_test(mocker: MockFixture) -> None:
                                  "get_timeouts",
                                  return_value=(0, 1, 2))
 
-    configured, default, overlapping = sgr.get_timeouts_test(solver_name,
-                                                             train_instance,
-                                                             test_instance,
+    configured, default, overlapping = sgr.get_timeouts_test(test_instance,
                                                              cutoff)
 
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
                               f"_test_configured/{configured_results_file}")
     default_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
@@ -607,7 +606,7 @@ def test_get_timeouts_train(mocker: MockFixture) -> None:
                                f"{optimised_configuration_seed}-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{instance_set}/")
+        f"{configurator_path}/scenarios/{solver_name}_{instance_set}/")
     configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
                               f"{solver_name}_{instance_set}_scenario/"
                               f"{configured_results_file}")
@@ -652,9 +651,6 @@ def test_get_timeouts(mocker: MockFixture) -> None:
 
 def test_get_ablation_table(mocker: MockFixture) -> None:
     """Test get_ablation_table calls sah.get_ablation_table and transforms its string."""
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
     sah_ablation_table = (
         [["Round", "Flipped parameter", "Source value", "Target value",
           "Validation result"],
@@ -917,7 +913,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                                         test_instance, report_dir)
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
     configured_results_train_file = ("validationObjectiveMatrix-traj-run-" + str(seed)
                                      + "-walltime.csv")
     configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
@@ -980,8 +976,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     Test that all needed functions are called to retrieve values and that these
     values are added to the common dictionary.
     """
-    solver_name = "solver-name"
-    train_instance = "train-instance"
     test_instance = "test-instance"
     cutoff = "10"
 
@@ -1019,7 +1013,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                     test_instance)
 
     smac_solver_dir = (
-        f"{sgh.smac_dir}/scenarios/{solver_name}_{train_instance}/")
+        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
 
     configured_results_test_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
@@ -1038,8 +1032,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     ])
     mock_figure.assert_called_once_with(solver_name, train_instance, test_instance,
                                         float(cutoff))
-    mock_timeouts.assert_called_once_with(solver_name, train_instance, test_instance,
-                                          float(cutoff))
+    mock_timeouts.assert_called_once_with(test_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver_name, train_instance,
                                                test_instance)
     mock_ablation_table.assert_called_once_with(solver_name, train_instance,
@@ -1060,10 +1053,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
 
 def test_check_results_exist_all_good(mocker: MockFixture) -> None:
     """Test check_results_exist does not produce an error if all paths exist."""
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
-
     mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
 
     sgr.check_results_exist(solver_name, train_instance, test_instance)
@@ -1077,10 +1066,6 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     If none of the tested paths exist, test that a SystemExit is raised.
     Also, test that the correct error string is printed, explaining each missing path.
     """
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
-
     mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
     mock_print = mocker.patch("builtins.print")
 
@@ -1091,20 +1076,19 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
         "Error: Results not found for the given solver and instance set(s) combination. "
         'Make sure the "configure_solver" and "validate_configured_vs_default" commands '
         "were correctly executed. \nDetected errors:\n training set not found in "
-        "configuration directory Components/smac-v2.10.03-master-778//scenarios/"
-        "instances/train-instance/; configured parameter results on the training set not"
-        " found in Components/smac-v2.10.03-master-778//scenarios/test-solver_"
-        "train-instance/outdir_train_configuration/test-solver_train-instance_scenario/;"
-        " default parameter results on the training set not found in Components/"
-        "smac-v2.10.03-master-778//scenarios/test-solver_train-instance/"
+        "configuration directory Components/smac-v2.10.03-master-778/scenarios/"
+        "instances/train-instance; configured parameter results on the training set not "
+        "found in Components/smac-v2.10.03-master-778/scenarios/test-solver_train-"
+        "instance/outdir_train_configuration/test-solver_train-instance_scenario/; "
+        "default parameter results on the training set not found in Components/"
+        "smac-v2.10.03-master-778/scenarios/test-solver_train-instance/"
         "outdir_train_default/; testing set not found in configuration directory "
-        "Components/smac-v2.10.03-master-778//scenarios/instances/test-"
-        "instance/; configured parameter results on the testing set not found in "
-        "Components/smac-v2.10.03-master-778//scenarios/test-solver_train-"
-        "instance/outdir_test-instance_test_configured/; default parameter results on "
-        "the testing set not found in Components/smac-v2.10.03-master-778//"
-        "scenarios/test-solver_train-instance/"
-        "outdir_test-instance_test_default/;")
+        "Components/smac-v2.10.03-master-778/scenarios/instances/test-instance; "
+        "configured parameter results on the testing set not found in Components/"
+        "smac-v2.10.03-master-778/scenarios/test-solver_train-instance/outdir_test-"
+        "instance_test_configured/; default parameter results on the testing set not "
+        "found in Components/smac-v2.10.03-master-778/scenarios/test-solver_train-"
+        "instance/outdir_test-instance_test_default/;")
 
     mock_exists.assert_called()
 

@@ -11,62 +11,8 @@ import statistics
 
 from Commands.sparkle_help import sparkle_logging as slog
 from Commands.sparkle_help import sparkle_global_help as sgh
-
-
-class PerformanceMeasure(Enum):
-    """Possible performance measures."""
-    ERR = -1
-    RUNTIME = 0
-    QUALITY_ABSOLUTE = 1
-    QUALITY = 1
-    QUALITY_ABSOLUTE_MINIMISATION = 1
-    QUALITY_ABSOLUTE_MAXIMISATION = 2
-
-    @staticmethod
-    def from_str(performance_measure: str) -> PerformanceMeasure:
-        """Return a given str as PerformanceMeasure."""
-        if performance_measure == "RUNTIME":
-            performance_measure = PerformanceMeasure.RUNTIME
-        elif performance_measure == "QUALITY_ABSOLUTE":
-            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
-        elif performance_measure == "QUALITY_ABSOLUTE_MAXIMISATION":
-            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
-        elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
-            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
-        else:
-            performance_measure = PerformanceMeasure.ERR
-
-        return performance_measure
-
-
-class SparkleObjective():
-    """Objective for Sparkle specified by user.
-
-    Specified in settings.ini's [general] performance_measure.
-    Contains the type of Performance Measure, and the type of metric.
-    """
-
-    def __init__(self: SparkleObjective, performance_setting: str) -> None:
-        """Create sparkle objective from string of format TYPE:METRIC."""
-        self.name = performance_setting
-        if ":" not in performance_setting:
-            print(f"WARNING: Objective {performance_setting} not fully specified. "
-                  "Continuing with default values.")
-            performance_measure, metric = performance_setting, ""
-        else:
-            performance_measure, metric = performance_setting.split(":")
-        self.PerformanceMeasure = PerformanceMeasure.from_str(performance_measure)
-        self.metric = metric
-
-        if self.PerformanceMeasure == PerformanceMeasure.ERR:
-            print(f"WARNING: Performance measure {performance_measure} not found!")
-        return
-
-    @staticmethod
-    def from_multi_str(performance_setting: str) -> list[SparkleObjective]:
-        """Create one or more Objectives from the settings string."""
-        objectives_str = performance_setting.split(",")
-        return [SparkleObjective(objective.strip()) for objective in objectives_str]
+from Commands.structures.sparkle_objective import SparkleObjective
+from Commands.structures.configurator import Configurator
 
 
 class SolutionVerifier(Enum):
@@ -123,6 +69,7 @@ class Settings:
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
+    DEFAULT_general_sparkle_configurator = Configurator.smac_v2
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
@@ -148,6 +95,7 @@ class Settings:
 
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
+        self.__general_sparkle_configurator_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_cap_value_set = SettingState.NOT_SET
@@ -161,13 +109,12 @@ class Settings:
         self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_clis_per_node_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
-
         self.__smac_target_cutoff_length_set = SettingState.NOT_SET
-
         self.__ablation_racing_flag_set = SettingState.NOT_SET
-
         self.__paraport_overwriting_flag_set = SettingState.NOT_SET
         self.__paraport_process_monitoring_set = SettingState.NOT_SET
+
+        self.__general_sparkle_configurator = None
 
         if file_path is None:
             # Initialise settings from default file path
@@ -198,6 +145,13 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             # Comma so python understands it's a tuple...
+            option_names = ("configurator",)
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = getattr(Configurator, file_settings.get(section, option))
+                    self.set_general_sparkle_configurator(value, state)
+                    file_settings.remove_option(section, option)
+
             option_names = ("solution_verifier",)
             for option in option_names:
                 if file_settings.has_option(section, option):
@@ -405,6 +359,30 @@ class Settings:
 
         return SparkleObjective.from_multi_str(
             self.__settings["general"]["objective"])
+
+    def set_general_sparkle_configurator(
+            self: Settings,
+            value: Callable = DEFAULT_general_sparkle_configurator,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the Sparkle configurator."""
+        section = "general"
+        name = "configurator"
+        if value is not None and self.__check_setting_state(
+                self.__general_sparkle_configurator_set, origin, name):
+            self.__init_section(section)
+            self.__general_sparkle_configurator_set = origin
+            self.__settings[section][name] = value.__name__
+
+        return
+
+    def get_general_sparkle_configurator(self: Settings) -> Configurator:
+        """Return the configurator init method."""
+        if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
+            self.set_general_sparkle_configurator()
+        if self.__general_sparkle_configurator is None:
+            self.__general_sparkle_configurator =\
+                getattr(Configurator, self.__settings["general"]["configurator"])()
+        return self.__general_sparkle_configurator
 
     def get_performance_metric_for_report(self: Settings) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""

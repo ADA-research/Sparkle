@@ -8,6 +8,7 @@ from pathlib import PurePath
 from enum import Enum
 
 from sparkle import about
+from Commands.structures.solver import Solver
 from Commands.structures.reporting_scenario import ReportingScenario
 
 
@@ -98,10 +99,6 @@ runsolver_path = "Components/runsolver/src/runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
 autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
-smac_dir = "Components/smac-v2.10.03-master-778/"
-smac_results_dir = Path(smac_dir) / "results"
-smac_tmp_dir = Path(smac_dir) / "tmp"
-
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 
 smac_target_algorithm = "smac_target_algorithm.py"
@@ -125,7 +122,7 @@ extractor_list_path = str(reference_list_dir) + "/sparkle_extractor_list.txt"
 extractor_feature_vector_size_list_path = (
     f"{str(reference_list_dir)}/extractor_feature_vector_size_list.txt")
 solver_nickname_list_path = str(reference_list_dir) + "/sparkle_solver_nickname_list.txt"
-solver_list_path = str(reference_list_dir) + "/sparkle_solver_list.txt"
+solver_list_path = str(Solver.solver_list_path)
 instance_list_file = Path("sparkle" + instance_list_postfix)
 instance_list_path = Path(reference_list_dir / instance_list_file)
 
@@ -134,7 +131,7 @@ working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
                 test_data_dir]
 
-file_storage_data_mapping = {Path(solver_list_path): [],
+file_storage_data_mapping = {Solver.solver_list_path: Solver.get_solver_list(),
                              Path(solver_nickname_list_path): {},
                              Path(extractor_list_path): [],
                              Path(extractor_nickname_list_path): {},
@@ -147,7 +144,7 @@ for data_path in file_storage_data_mapping.keys():
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
-solver_list = file_storage_data_mapping[Path(solver_list_path)]
+solver_list = file_storage_data_mapping[Solver.solver_list_path]
 solver_nickname_mapping = file_storage_data_mapping[Path(solver_nickname_list_path)]
 extractor_list = file_storage_data_mapping[Path(extractor_list_path)]
 extractor_nickname_mapping =\

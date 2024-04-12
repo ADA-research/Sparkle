@@ -14,11 +14,12 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsph
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 
 import functools
 print = functools.partial(print, flush=True)
@@ -180,8 +181,8 @@ if __name__ == "__main__":
 
     print("Start running solvers ...")
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.RUN_SOLVERS])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
 
     print("Start running solvers ...")
 

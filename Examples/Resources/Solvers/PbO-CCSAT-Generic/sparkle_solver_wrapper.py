@@ -11,10 +11,12 @@ from pathlib import Path
 args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
+solver_dir = Path(args["solver_dir"])
 instance = Path(args["instance"])
 specifics = args["specifics"]
 seed = args["seed"]
 
+del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
@@ -22,7 +24,7 @@ del args["specifics"]
 del args["run_length"]
 
 solver_name = "PbO-CCSAT"
-solver_cmd = ["./" + solver_name,
+solver_cmd = [f"{solver_dir / solver_name}",
               "-inst", str(instance),
               "-seed", str(seed)]
 

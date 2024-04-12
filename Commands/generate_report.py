@@ -13,13 +13,14 @@ from Commands.sparkle_help import \
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import \
     sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -111,8 +112,8 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.GENERATE_REPORT])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.GENERATE_REPORT])
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):
@@ -140,8 +141,8 @@ if __name__ == "__main__":
             pap_instance_list = (
                 sgh.latest_scenario().get_parallel_portfolio_instance_list())
 
-    flag_instance_set_train = False if instance_set_train is None else True
-    flag_instance_set_test = False if instance_set_test is None else True
+    flag_instance_set_train = instance_set_train is not None
+    flag_instance_set_test = instance_set_test is not None
 
     # Reporting for algorithm selection
     if selection or test_case_directory is not None:
@@ -205,14 +206,12 @@ if __name__ == "__main__":
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
 
+        instance_set_train_name = Path(instance_set_train).name
+        sgh.settings.get_general_sparkle_configurator()\
+            .set_scenario_dirs(solver_name, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train and flag_instance_set_test:
-            instance_set_train_name = sfh.get_last_level_directory_name(
-                str(instance_set_train)
-            )
-            instance_set_test_name = sfh.get_last_level_directory_name(
-                str(instance_set_test)
-            )
+            instance_set_test_name = Path(instance_set_test).name
             sgrfch.check_results_exist(
                 solver_name, instance_set_train_name, instance_set_test_name
             )
@@ -223,9 +222,6 @@ if __name__ == "__main__":
                 ablation=args.flag_ablation,
             )
         elif flag_instance_set_train:
-            instance_set_train_name = sfh.get_last_level_directory_name(
-                str(instance_set_train)
-            )
             sgrfch.check_results_exist(solver_name, instance_set_train_name)
             sgrfch.generate_report_for_configuration_train(
                 solver_name, instance_set_train_name, ablation=args.flag_ablation

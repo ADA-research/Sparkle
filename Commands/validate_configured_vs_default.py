@@ -15,13 +15,15 @@ from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
 from Commands.structures.reporting_scenario import Scenario
+from Commands.structures.configurator import Configurator
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -99,13 +101,18 @@ if __name__ == "__main__":
     instance_set_train = args.instance_set_train
     instance_set_test = args.instance_set_test
     run_on = args.run_on
-    if args.configurator is not None:
-        configurator_path = Path(args.configurator)
-    else:
-        configurator_path = Path("Components", "smac-v2.10.03-master-778")
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
+    if args.configurator is not None:
+        sgh.settings.set_general_sparkle_configurator(
+            value=getattr(Configurator, args.configurator),
+            origin=SettingState.CMD_LINE)
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
+
+    check_for_initialise(
+        sys.argv,
+        sch.COMMAND_DEPENDENCIES[sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
+    )
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
@@ -126,7 +133,7 @@ if __name__ == "__main__":
     instance_set_test_name = None
 
     # Make sure configuration results exist before trying to work with them
-    scsh.check_validation_prerequisites(solver.name, instance_set_train.name)
+    scsh.check_validation_prerequisites()
 
     # Record optimised configuration
     scsh.write_optimised_configuration_str(solver.name, instance_set_train.name)
@@ -135,36 +142,32 @@ if __name__ == "__main__":
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name
 
-        # Copy test instances to smac directory (train should already be there from
-        # configuration)
-        instances_directory_test = Path("Instances/", instance_set_test_name)
+        # Create instance file list for test set in configurator
+        instances_directory_test = configurator.instances_path / instance_set_test_name
         list_path = sih.get_list_all_path(instances_directory_test)
-        inst_dir_prefix = instances_directory_test
-        smac_inst_dir_prefix = Path(configurator_path, "scenarios/instances",
-                                    instance_set_test_name)
-        sih.copy_instances_to_smac(
-            list_path, inst_dir_prefix, smac_inst_dir_prefix, "test"
-        )
-
-        # Copy file listing test instances to smac solver directory
-        scsh.copy_file_instance(
-            solver.name, instance_set_train.name, instance_set_test_name, "test"
-        )
+        instance_list_test_path = configurator.instances_path\
+            / instance_set_test_name / (instance_set_test_name + "_test.txt")
+        instance_list_test_path.parent.mkdir(parents=True, exist_ok=True)
+        with instance_list_test_path.open("w+") as fout:
+            for instance in list_path:
+                fout.write(f"{instance.absolute()}\n")
 
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(
         solver.name, instance_set_train.name, instance_set_test_name
     )
-
+    configurator = sgh.settings.get_general_sparkle_configurator()
     # Set up scenarios
     # 1. Set up the validation scenario for the training set
     cmd_base = "./smac-validate --use-scenario-outdir true --num-run 1 --cli-cores 8"
-    scenario_dir = Path("scenarios") / (solver.name + "_" + instance_set_train.name)
+    scenario_dir = configurator.scenario.directory.relative_to(
+        configurator.configurator_path)
+
     scenario_fn_train = scsh.create_file_scenario_validate(
         solver.name, instance_set_train.name, instance_set_train.name,
         scsh.InstanceType.TRAIN, default=True)
     cmd_list = [f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_train} "
-                f"--execdir {scenario_dir / 'validate_train_default'} "
+                f"--execdir {scenario_dir} "
                 f"--configuration DEFAULT"]
     dest = [Path("results") / (solver.name + "_validation_" + scenario_fn_train)]
 
@@ -184,9 +187,10 @@ if __name__ == "__main__":
         exec_dir_conf = scenario_dir / dir_name
 
         # Write configuration to file to be used by smac-validate
-        config_file_path = scenario_dir / "configuration_for_validation.txt"
+        config_file_path = configurator.scenario.directory /\
+            "configuration_for_validation.txt"
         # open the file of sbatch script
-        with (Path(sgh.smac_dir) / config_file_path).open("w+") as fout:
+        with config_file_path.open("w+") as fout:
             fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
             optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
                 solver.name, instance_set_train.name)
@@ -194,11 +198,11 @@ if __name__ == "__main__":
 
         # Extend job list
         cmd_list.extend([f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_tdef} "
-                         f"--execdir {exec_dir_def} "
+                         f"--execdir {scenario_dir} "
                          f"--configuration DEFAULT",
                          f"{cmd_base} --scenario-file {scenario_dir / scenario_fn_tconf}"
-                         f" --execdir {exec_dir_conf}"
-                         f" --configuration-list {config_file_path}"])
+                         f" --execdir {scenario_dir}"
+                         f" --configuration-list {config_file_path.absolute()}"])
 
         dest.extend([f"results/{solver.name}_validation_{scenario_fn_tdef}",
                      f"results/{solver.name}_validation_{scenario_fn_tconf}"])
@@ -209,8 +213,8 @@ if __name__ == "__main__":
     for instance_set_name, inst_type in [(instance_set_train.name, "train"),
                                          (instance_set_test_name, "test")]:
         if instance_set_name is not None:
-            smac_instance_file = (f"{sgh.smac_dir}{scenario_dir}/{instance_set_name}_"
-                                  f"{inst_type}.txt")
+            dir = configurator.scenarios_path / instance_set_name
+            smac_instance_file = f"{dir}_{inst_type}.txt"
             if Path(smac_instance_file).is_file():
                 instance_count = sum(1 for _ in open(smac_instance_file, "r"))
                 instance_sizes.append(instance_count)
@@ -237,7 +241,7 @@ if __name__ == "__main__":
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT,
-        path=configurator_path,
+        path=configurator.configurator_path,
         base_dir=sgh.sparkle_tmp_path,
         parallel_jobs=parallel_jobs,
         sbatch_options=sbatch_options_list,
@@ -251,11 +255,8 @@ if __name__ == "__main__":
         run.wait()
 
     # Write most recent run to file
-    last_test_file_path = Path(
-        configurator_path,
-        "scenarios",
-        f"{solver.name}_{sgh.sparkle_last_test_file_name}"
-    )
+    last_test_file_path =\
+        configurator.scenarios_path / f"{solver.name}_{sgh.sparkle_last_test_file_name}"
 
     with Path(last_test_file_path).open("w+") as fout:
         fout.write(f"solver {solver}\n"

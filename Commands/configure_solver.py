@@ -16,7 +16,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -26,6 +26,7 @@ from Commands.structures.configurator import Configurator
 from Commands.structures.configuration_scenario import ConfigurationScenario
 from Commands.structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -197,22 +198,12 @@ if __name__ == "__main__":
     use_features = args.use_features
     run_on = args.run_on
     if args.configurator is not None:
-        configurator_path = args.configurator
-        configurator_target = [file for file in os.listdir(configurator_path)
-                               if file.endswith("_target_algorithm.py")]
-        if len(configurator_target) != 1:
-            print("Configurator Error: "
-                  f"Could not determine target script for {configurator_path}\n"
-                  "Please check target script file '*_target_algorithm.py'")
-            sys.exit(-1)
-        configurator_target = configurator_target[0]
-    else:
-        # SMAC is the default configurator
-        configurator_path = Path(sgh.smac_dir)
-        configurator_target = sgh.smac_target_algorithm
+        sgh.settings.set_general_sparkle_configurator(
+            value=getattr(Configurator, args.configurator),
+            origin=SettingState.CMD_LINE)
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:
@@ -264,11 +255,12 @@ if __name__ == "__main__":
     cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
         sgh.settings.get_general_sparkle_objectives()[0]
-    config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
-                                            time_budget, cutoff_time, cutoff_length,
-                                            sparkle_objective, use_features,
-                                            configurator_target, feature_data_df)
-    configurator = Configurator(configurator_path)
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    config_scenario = ConfigurationScenario(
+        solver, instance_set_train, number_of_runs, time_budget, cutoff_time,
+        cutoff_length, sparkle_objective, use_features,
+        configurator.configurator_target, feature_data_df)
+
     configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
