@@ -375,17 +375,27 @@ def compute_actual_selector_marginal_contribution(
         solver_name = Path(solver).name
         print("Computing actual performance for portfolio selector excluding solver "
               f"{solver_name} ...")
+        
+        #1. Remake the dataframe from CSV path
         tmp_performance_data_csv = \
             spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+        #2. Remove the solver from this copy
         tmp_performance_data_csv.remove_solver(solver)
+
+        #3. create a temporary csv file name
         tmp_performance_data_csv_file = (
             f"tmp_performance_data_csv_without_{solver_name}_"
             f"{sparkle_basic_help.get_time_pid_random_string()}.csv")
+        #4. Create the path using the log dir and the file name
         tmp_performance_data_csv_path = (
             str(Path(sl.caller_log_dir / tmp_performance_data_csv_file)))
+        #5. Log this action
         sl.add_output(tmp_performance_data_csv_path,
                       "[written] Temporary performance data")
+        #6. Save the sub-dataframe to the CSV path
         tmp_performance_data_csv.save_csv(Path(tmp_performance_data_csv_path))
+
+        #7. 
         tmp_actual_portfolio_selector_path = (
             "Tmp/tmp_actual_portfolio_selector_"
             f"{sparkle_basic_help.get_time_pid_random_string()}")

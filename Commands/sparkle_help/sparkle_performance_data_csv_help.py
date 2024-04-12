@@ -8,6 +8,7 @@ import fcntl
 from pathlib import Path
 import sys
 
+from statistics import mean
 import pandas as pd
 
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -314,29 +315,45 @@ class SparklePerformanceDataCSV():
             list_processed_performance_computation_job.append(list_item)
         return list_processed_performance_computation_job
 
-    def get_maximum_performance_per_instance(self: SparklePerformanceDataCSV) \
-            -> list[float]:
+    def get_maximum_performance_per_instance(
+            self: SparklePerformanceDataCSV,
+            objective: str = None) -> list[float]:
         """Return a list with the highest performance per instance."""
-        return self.dataframe.max(axis=1).to_list()
+        objective = self.verify_objective(objective)
+        return self.dataframe.loc[(objective), :].max(axis=1).to_list()
 
     def calc_virtual_best_score_of_portfolio_on_instance(
-            self: SparklePerformanceDataCSV, instance: str,
-            minimise: bool, capvalue: float = None) -> float:
+            self: SparklePerformanceDataCSV,
+            instance: str,
+            minimise: bool,
+            objective: str = None,
+            capvalue: float = None,
+            run_aggregator: Callable = mean) -> float:
         """Return the VBS performance for a specific instance.
 
         Args:
             instance: For which instance we shall calculate the VBS
             minimise: Whether we should minimise or maximise the score
+            objective: The objective for which we calculate the VBS
             capvalue: The minimum/maximum scoring value the VBS is allowed to have
+            run_aggregator: How we aggregate multiple runs for an instance-solver
+                combination. Only relevant for multi-runs.
 
         Returns:
             The virtual best solver performance for this instance.
         """
+        objective = self.verify_objective(objective)
         penalty_factor = sgh.settings.get_general_penalty_multiplier()
+        penalty = penalty_factor * virtual_best_score
         virtual_best_score = None
         for solver in self.dataframe.columns:
             if isinstance(instance, str):
-                score_solver = float(self.get_value(solver, instance))
+                runs = self.dataframe.loc[(objective, instance), solver]
+                if minimise:
+                    runs[runs > capvalue] = penalty
+                else:
+                    runs[runs < capvalue] = penalty
+                score_solver = run_aggregator(runs)
             else:
                 score_solver = float(self.dataframe.loc[instance, solver])
             if virtual_best_score is None or\
@@ -347,10 +364,6 @@ class SparklePerformanceDataCSV():
         # Shouldn't this throw an error?
         if virtual_best_score is None and len(self.dataframe.columns) == 0:
             virtual_best_score = 0
-        elif capvalue is not None:
-            if minimise and virtual_best_score > capvalue or not minimise and\
-                    virtual_best_score < capvalue:
-                virtual_best_score = capvalue * penalty_factor
 
         return virtual_best_score
 
@@ -358,7 +371,8 @@ class SparklePerformanceDataCSV():
             self: SparklePerformanceDataCSV,
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
-            capvalue_list: list[float]) -> float:
+            capvalue_list: list[float],
+            objective: str = None) -> float:
         """Return the overall VBS performance of the portfolio.
 
         Args:
@@ -369,6 +383,7 @@ class SparklePerformanceDataCSV():
         Returns:
             The combined virtual best performance of the portfolio over all instances.
         """
+        objective = self.verify_objective(objective)
         virtual_best = []
         capvalue = None
         for idx, instance in enumerate(self.dataframe.index):
@@ -377,7 +392,7 @@ class SparklePerformanceDataCSV():
 
             virtual_best_score = (
                 self.calc_virtual_best_score_of_portfolio_on_instance(
-                    instance, minimise, capvalue))
+                    instance, minimise, objective, capvalue))
             virtual_best.append(virtual_best_score)
 
         return aggregation_function(virtual_best)
