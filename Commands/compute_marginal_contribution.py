@@ -69,8 +69,10 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                         sch.CommandName.COMPUTE_MARGINAL_CONTRIBUTION])
+    check_for_initialise(
+        sys.argv,
+        sch.COMMAND_DEPENDENCIES[sch.CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
+    )
 
     print("[Deprecated] command, functionality is called automatically by other commands"
           " when needed.")

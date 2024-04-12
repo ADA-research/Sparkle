@@ -202,8 +202,8 @@ if __name__ == "__main__":
             value=getattr(Configurator, args.configurator),
             origin=SettingState.CMD_LINE)
 
-    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                         sch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:

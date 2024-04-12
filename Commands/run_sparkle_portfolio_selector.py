@@ -68,8 +68,10 @@ if __name__ == "__main__":
     )  # Turn multiple instance files into a space separated string
     run_on = args.run_on
 
-    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                         sch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR])
+    check_for_initialise(
+        sys.argv,
+        sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
+    )
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

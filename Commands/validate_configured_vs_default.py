@@ -109,8 +109,10 @@ if __name__ == "__main__":
     configurator = sgh.settings.get_general_sparkle_configurator()
     configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
 
-    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                         sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT])
+    check_for_initialise(
+        sys.argv,
+        sch.COMMAND_DEPENDENCIES[sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
+    )
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

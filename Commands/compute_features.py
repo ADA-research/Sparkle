@@ -99,8 +99,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                         sch.CommandName.COMPUTE_FEATURES])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(
