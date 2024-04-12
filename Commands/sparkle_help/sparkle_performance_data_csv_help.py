@@ -11,6 +11,10 @@ import sys
 import pandas as pd
 
 from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_settings
+
+global settings
+sgh.settings = sparkle_settings.Settings()
 
 
 # TODO:
@@ -22,7 +26,8 @@ class SparklePerformanceDataCSV():
     def __init__(self: SparklePerformanceDataCSV,
                  csv_filepath: Path,
                  solvers: list[str] = [],
-                 instances: list[str] = []) -> None:
+                 instances: list[str] = [],
+                 n_runs: int = 1) -> None:
         """Initialise a SparklePerformanceDataCSV object.
 
         Consists of:
@@ -30,13 +35,15 @@ class SparklePerformanceDataCSV():
             - Rows representing the result per multi-index in order of:
                 * Objective (Static, from settings)
                 * Instance
-                * Run (Static, from settings)
+                * Runs (Static, given in constructor)
 
         Args:
             csv_filepath: If path exists, load from Path.
                 Otherwise create new and save to this path.
             solvers: List of solver names to be added into the Dataframe
             instances: List of instance names to be added into the Dataframe
+            n_runs: The number of runs to consider per Solver/Objective/Instance comb.
+
         """
         self.csv_filepath = csv_filepath
         # Sanity check, remove later
@@ -48,7 +55,7 @@ class SparklePerformanceDataCSV():
                                 sgh.settings.get_general_sparkle_objectives()]
         self.multi_objective = len(self.objective_names)
         # Runs is a ``static'' dimension
-        self.n_runs = sgh.settings.get_config_number_of_runs()
+        self.n_runs = n_runs
         self.run_ids = list(range(1, self.n_runs + 1))
 
         if self.csv_filepath.exists():
@@ -145,7 +152,7 @@ class SparklePerformanceDataCSV():
         if self.dataframe.index.size == 0 or self.dataframe.columns.size == 0:
             # First instance or no Solvers yet
             solvers = self.dataframe.columns.to_list()
-            instances = [instance_name]
+            instances = self.dataframe.index.levels[1].to_list() + [instance_name]
             midx = pd.MultiIndex.from_product(
                 [self.objective_names, instances, self.run_ids],
                 names=self.multi_dim_names)
@@ -441,3 +448,15 @@ class SparklePerformanceDataCSV():
         """Set all values in Performance Data to None."""
         self.dataframe[:] = None
         self.save_csv()
+
+    def to_autofolio(self: SparklePerformanceDataCSV) -> Path:
+        """Port the data to a format acceptable for AutoFolio."""
+        if self.multi_objective or self.n_runs > 1:
+            print(f"ERROR: Currently no porting available for {self.csv_filepath} "
+                  "to Autofolio due to multi objective or number of runs.")
+            return
+        autofolio_df = self.dataframe.copy()
+        autofolio_df.index = autofolio_df.index.droplevel(["Objective", "Run"])
+        path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
+        autofolio_df.to_csv(path)
+        return path

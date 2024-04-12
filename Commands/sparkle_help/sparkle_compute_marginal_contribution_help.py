@@ -496,7 +496,7 @@ def compute_marginal_contribution(
         capvalue = sgh.settings.get_general_target_cutoff_time()
         minimise = True
 
-    num_of_instances = performance_data_csv.get_number_of_instances()
+    num_of_instances = performance_data_csv.get_num_instances()
     if capvalue is list or capvalue is None:
         capvalue_list = capvalue
     else:

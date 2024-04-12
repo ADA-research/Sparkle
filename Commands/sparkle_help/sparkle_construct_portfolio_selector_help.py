@@ -12,6 +12,7 @@ from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from Commands.sparkle_help import sparkle_performance_data_csv_help as spfcsv
 from Commands.sparkle_help import sparkle_run_solvers_help as srsh
 from Commands.sparkle_help import sparkle_compute_features_help as scfh
 from Commands.sparkle_help import sparkle_logging as sl
@@ -205,8 +206,10 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     err_file = selector_path.parent.name + "_autofolio.err"
     log_path_str = str(Path(sl.caller_log_dir / log_file))
     err_path_str = str(Path(sl.caller_log_dir / err_file))
+    performance_data = spfcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    pf_data_autofolio_path = str(performance_data.to_autofolio())
     cmd_list = [python_executable, sgh.autofolio_path, "--performance_csv",
-                performance_data_csv_path, "--feature_csv", feature_data_csv_path,
+                pf_data_autofolio_path, "--feature_csv", feature_data_csv_path,
                 objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
                 "--save", str(selector_path)]
     # Write command line to log

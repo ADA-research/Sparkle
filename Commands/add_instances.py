@@ -92,7 +92,7 @@ if __name__ == "__main__":
     if nickname_str is not None:
         last_level_directory = nickname_str
     else:
-        last_level_directory = sfh.get_last_level_directory_name(instances_source)
+        last_level_directory = Path(instances_source).name
 
     instances_directory = sgh.instance_dir / last_level_directory
     if not instances_directory.exists():
@@ -138,7 +138,6 @@ if __name__ == "__main__":
         num_inst = len(list_source_all_filename)
 
         print(f"Number of instances to be added: {str(num_inst)}")
-
         for i, intended_filename in enumerate(list_source_all_filename):
             print("")
             print(f"Adding {intended_filename.name} ... "

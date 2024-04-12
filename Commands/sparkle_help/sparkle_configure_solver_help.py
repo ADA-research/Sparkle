@@ -441,7 +441,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_seed = -1
     configurator = sgh.settings.get_general_sparkle_configurator()
     scen_results_dir = configurator.scenario.result_directory
-    target_alg = configurator.configurator_target
+    target_alg = configurator.configurator_target.name
     line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
     # among them
