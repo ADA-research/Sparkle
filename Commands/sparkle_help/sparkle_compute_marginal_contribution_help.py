@@ -372,7 +372,7 @@ def compute_actual_selector_marginal_contribution(
 
     # Compute contribution per solver
     for solver in performance_data_csv.dataframe.columns:
-        solver_name = sfh.get_last_level_directory_name(solver)
+        solver_name = Path(solver).name
         print("Computing actual performance for portfolio selector excluding solver "
               f"{solver_name} ...")
         tmp_performance_data_csv = \
@@ -385,7 +385,7 @@ def compute_actual_selector_marginal_contribution(
             str(Path(sl.caller_log_dir / tmp_performance_data_csv_file)))
         sl.add_output(tmp_performance_data_csv_path,
                       "[written] Temporary performance data")
-        tmp_performance_data_csv.save_csv(tmp_performance_data_csv_path)
+        tmp_performance_data_csv.save_csv(Path(tmp_performance_data_csv_path))
         tmp_actual_portfolio_selector_path = (
             "Tmp/tmp_actual_portfolio_selector_"
             f"{sparkle_basic_help.get_time_pid_random_string()}")
@@ -393,7 +393,7 @@ def compute_actual_selector_marginal_contribution(
             sgh.sparkle_algorithm_selector_dir / f"without_{solver_name}"
             / f"{sgh.sparkle_algorithm_selector_name}")
 
-        if len(tmp_performance_data_csv.list_columns()) >= 1:
+        if tmp_performance_data_csv.get_num_solvers() >= 1:
             scps.construct_sparkle_portfolio_selector(
                 tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path,
                 feature_data_csv_path)
