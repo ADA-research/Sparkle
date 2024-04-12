@@ -9,7 +9,7 @@ from pathlib import PurePath
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 
 
 if __name__ == "__main__":

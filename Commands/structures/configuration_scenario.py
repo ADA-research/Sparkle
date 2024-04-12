@@ -8,18 +8,18 @@ from pathlib import Path
 
 import pandas as pd
 
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, SparkleObjective
+from Commands.structures.sparkle_objective import SparkleObjective, PerformanceMeasure
 from Commands.structures.solver import Solver
-from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 
 
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
     def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
-                 number_of_runs: int, time_budget: int, cutoff_time: int,
-                 cutoff_length: int, sparkle_objective: SparkleObjective,
-                 use_features: bool, configurator_target: str,
-                 feature_data_df: pd.DataFrame = None) -> None:
+                 number_of_runs: int = None, time_budget: int = None,
+                 cutoff_time: int = None, cutoff_length: int = None,
+                 sparkle_objective: SparkleObjective = None, use_features: bool = None,
+                 configurator_target: Path = None, feature_data_df: pd.DataFrame = None)\
+            -> None:
         """Initialize scenario paths and names.
 
         Args:
@@ -40,8 +40,9 @@ class ConfigurationScenario:
                 Defaults to None.
         """
         self.solver = solver
-        self.parent_directory = Path()
         self.instance_directory = instance_directory
+        self.name = f"{self.solver.name}_{self.instance_directory.name}"
+
         self.number_of_runs = number_of_runs
         self.time_budget = time_budget
         self.cutoff_time = cutoff_time
@@ -50,8 +51,8 @@ class ConfigurationScenario:
         self.use_features = use_features
         self.configurator_target = configurator_target
         self.feature_data = feature_data_df
-        self.name = f"{self.solver.name}_{self.instance_directory.name}"
 
+        self.parent_directory = Path()
         self.directory = Path()
         self.result_directory = Path()
         self.scenario_file_name = ""
@@ -66,22 +67,25 @@ class ConfigurationScenario:
         Args:
             parent_directory: Directory in which the scenario should be created.
         """
-        self.parent_directory = parent_directory.absolute()
-        self.directory = self.parent_directory / "scenarios" / self.name
-        self.result_directory = self.parent_directory / "results" / self.name
-        self.instance_file_path = (
-            Path(self.parent_directory / "scenarios"
-                 / "instances" / self.instance_directory.name)
-            / Path(str(self.instance_directory.name + "_train.txt")))
+        self._set_paths(parent_directory)
+
         self._prepare_scenario_directory()
         self._prepare_result_directory()
-        self._prepare_run_directories()
         self._prepare_instances()
 
         if self.use_features:
             self._create_feature_file()
 
         self._create_scenario_file()
+
+    def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
+        self.parent_directory = parent_directory
+        self.directory = self.parent_directory / "scenarios" / self.name
+        self.result_directory = self.parent_directory / "results" / self.name
+        self.instance_file_path = (
+            Path(self.parent_directory / "scenarios"
+                 / "instances" / self.instance_directory.name)
+            / Path(str(self.instance_directory.name + "_train.txt")))
 
     def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
         """Delete old scenario dir, recreate it, create empty dirs inside."""
@@ -99,13 +103,6 @@ class ConfigurationScenario:
         shutil.rmtree(self.result_directory, ignore_errors=True)
         self.result_directory.mkdir(parents=True)
 
-    def _prepare_run_directories(self: ConfigurationScenario) -> None:
-        """Create directories for each configurator run and copy solver files to them."""
-        for i in range(self.number_of_runs):
-            run_path = self.directory / str(i + 1)
-            shutil.copytree(self.solver.directory, run_path)
-            (run_path / "tmp").mkdir()
-
     def _create_scenario_file(self: ConfigurationScenario) -> None:
         """Create a file with the configuration scenario."""
         inner_directory = Path("scenarios", self.name)
@@ -118,7 +115,8 @@ class ConfigurationScenario:
                               / f"{self.name}_scenario.txt")
         self.scenario_file_name = scenario_file_path.name
         with scenario_file_path.open("w") as file:
-            file.write(f"algo = ../../../{self.configurator_target}\n"
+            file.write(f"algo = {self.configurator_target.absolute()} "
+                       f"{self.solver.directory.absolute()}\n"
                        f"execdir = {inner_directory}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
                        f"run_obj = {performance_measure}\n"
@@ -127,8 +125,8 @@ class ConfigurationScenario:
                        f"cutoff_length = {self.cutoff_length}\n"
                        f"paramfile = {solver_param_file_path}\n"
                        f"outdir = {config_output_directory}\n"
-                       f"instance_file = {self.instance_file_path}\n"
-                       f"test_instance_file = {self.instance_file_path}\n")
+                       f"instance_file = {self.instance_file_path.absolute()}\n"
+                       f"test_instance_file = {self.instance_file_path.absolute()}\n")
             if self.use_features:
                 file.write(f"feature_file = {self.feature_file_path}\n")
             file.write("validation = true" + "\n")
@@ -138,15 +136,10 @@ class ConfigurationScenario:
         source_instance_list = (
             [f for f in self.instance_directory.rglob("*") if f.is_file()])
 
-        instance_list_path = self.instance_file_path
-
-        instance_list_path.parent.mkdir(exist_ok=True, parents=True)
-
-        with instance_list_path.open("w+") as file:
-            for original_instance_path in source_instance_list:
-                file.write(f"../../../../../Instances/"
-                           f"{original_instance_path.parts[-2]}/"
-                           f"{original_instance_path.name}\n")
+        self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
+        with self.instance_file_path.open("w+") as file:
+            for instance_path in source_instance_list:
+                file.write(f"{instance_path.absolute()}\n")
 
     def _get_performance_measure(self: ConfigurationScenario) -> str:
         """Retrieve the performance measure of the SparkleObjective.
@@ -154,7 +147,6 @@ class ConfigurationScenario:
         Returns:
             Performance measure of the sparkle objective
         """
-        # Convert to SMAC format
         run_performance_measure = self.sparkle_objective.PerformanceMeasure
 
         if run_performance_measure == PerformanceMeasure.RUNTIME:
@@ -174,17 +166,18 @@ class ConfigurationScenario:
         self.feature_data.to_csv(self.directory
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
 
-    def _clean_up_scenario_dirs(self: ConfigurationScenario) -> list[Path]:
+    def _clean_up_scenario_dirs(self: ConfigurationScenario,
+                                configurator_path: Path) -> list[Path]:
         """Yield directories to clean up after configuration scenario is done.
 
         Returns:
             list[str]: Full paths to directories that can be removed
         """
-        # Wait for jobs to be done
         result = []
-        smac_solver_path = scsh.get_smac_solver_path(self.solver.name,
-                                                     self.instance_directory.name)
+        configurator_solver_path = configurator_path / "scenarios"\
+            / f"{self.solver.name}_{self.instance_directory.name}"
+
         for index in range(self.number_of_runs):
-            dir = smac_solver_path / str(index + 1)
+            dir = configurator_solver_path / str(index + 1)
             result.append(dir)
         return result

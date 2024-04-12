@@ -4,14 +4,16 @@
 
 from __future__ import annotations
 import sys
-
+import fcntl
+import ast
 from pathlib import Path
-
-from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 class Solver:
     """Class to handle a solver and its directories."""
+    solver_dir = Path("Solvers/")
+    solver_list_path = Path("Reference_Lists/") / "sparkle_solver_list.txt"
+
     def __init__(self: Solver, solver_directory: Path) -> None:
         """Initialize solver.
 
@@ -43,6 +45,8 @@ class Solver:
 
         return self.directory / file_name
 
+    # TODO: This information should be stored in the solver as an attribute too.
+    # That will allow us to at least skip this method.
     def is_deterministic(self: Solver) -> str:
         """Return a string indicating whether a given solver is deterministic or not.
 
@@ -51,7 +55,7 @@ class Solver:
         """
         deterministic = ""
         target_solver_path = "Solvers/" + self.name
-        for solver in sgh.solver_list:
+        for solver in Solver.get_solver_list():
             solver_line = solver.strip().split()
             if (solver_line[0] == target_solver_path):
                 deterministic = solver_line[1]
@@ -69,6 +73,15 @@ class Solver:
         Returns:
             A Solver object if found, None otherwise
         """
-        if (sgh.solver_dir / name).exists():
-            return Solver(sgh.solver_dir / name)
+        if (Solver.solver_dir / name).exists():
+            return Solver(Solver.solver_dir / name)
         return None
+
+    @staticmethod
+    def get_solver_list() -> list[str]:
+        """Get solver list from file."""
+        if Solver.solver_list_path.exists():
+            with Solver.solver_list_path.open("r+") as fo:
+                fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+                return ast.literal_eval(fo.read())
+        return []

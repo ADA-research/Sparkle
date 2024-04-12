@@ -90,9 +90,10 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
      smac_each_run_cutoff_length, _, _) = scsh.get_smac_settings()
     concurrent_clis = sgh.settings.get_slurm_clis_per_node()
     ablation_racing = sgh.settings.get_ablation_racing_flag()
+    configurator = sgh.settings.get_general_sparkle_configurator()
 
     with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
-        fout.write(f"algo = ../../../../../{sgh.smac_dir}{sgh.smac_target_algorithm}\n"
+        fout.write(f"algo = {configurator.configurator_target.absolute()}\n"
                    "execdir = ./solver/\n"
                    "experimentDir = ./\n")
         solver = Solver.get_solver_by_name(solver_name)
