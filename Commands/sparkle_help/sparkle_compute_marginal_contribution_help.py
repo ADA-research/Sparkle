@@ -395,15 +395,17 @@ def compute_actual_selector_marginal_contribution(
         #6. Save the sub-dataframe to the CSV path
         tmp_performance_data_csv.save_csv(Path(tmp_performance_data_csv_path))
 
-        #7. 
+        #7. Create a temporary portfolio selector path?
         tmp_actual_portfolio_selector_path = (
             "Tmp/tmp_actual_portfolio_selector_"
             f"{sparkle_basic_help.get_time_pid_random_string()}")
+        #8. create the full path
         tmp_actual_portfolio_selector_path = (
             sgh.sparkle_algorithm_selector_dir / f"without_{solver_name}"
             / f"{sgh.sparkle_algorithm_selector_name}")
 
         if tmp_performance_data_csv.get_num_solvers() >= 1:
+            #9. Construct the portfolio selector for this subset
             scps.construct_sparkle_portfolio_selector(
                 tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path,
                 feature_data_csv_path)
