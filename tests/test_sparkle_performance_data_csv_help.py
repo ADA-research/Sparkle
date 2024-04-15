@@ -113,20 +113,20 @@ class TestPerformanceData(TestCase):
 
     @patch("Commands.sparkle_help.sparkle_global_help."
            "settings.get_general_penalty_multiplier")
-    def test_calc_virtual_best_score_of_portfolio_on_instance(self: TestPerformanceData,
-                                                              mock_penalty: Mock)\
+    def test_calc_portfolio_vbs_instance(self: TestPerformanceData,
+                                         mock_penalty: Mock)\
             -> None:
         """Test calculating virtual best score on instance."""
         vbs_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
         vbs_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
         mock_penalty.return_value = 10
         for idx, instance in enumerate(self.pd.dataframe.index):
-            result = self.pd.calc_virtual_best_score_of_portfolio_on_instance(
+            result = self.pd.calc_portfolio_vbs_instance(
                 instance=instance, minimise=True, capvalue=None
             )
             assert result == vbs_instance_min[idx]
 
-            result = self.pd.calc_virtual_best_score_of_portfolio_on_instance(
+            result = self.pd.calc_portfolio_vbs_instance(
                 instance=instance, minimise=False, capvalue=None
             )
             assert result == vbs_instance_max[idx]

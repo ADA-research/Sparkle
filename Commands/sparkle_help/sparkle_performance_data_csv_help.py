@@ -254,6 +254,9 @@ class SparklePerformanceDataCSV():
         Get a list of tuple[instance, solver] to run from the performance data
         csv file. If rerun is False (default), get only the tuples that don't have a
         value in the table, else (True) get all the tuples.
+
+        Args:
+            rerun: Boolean indicating if we want to rerun all jobs
         """
         df = self.dataframe.stack(future_stack=True)
         if not rerun:
@@ -280,7 +283,10 @@ class SparklePerformanceDataCSV():
 
     def get_list_remaining_performance_computation_job(self: SparklePerformanceDataCSV) \
             -> list[list[list]]:
-        """Return a list of needed performance computations per instance and solver."""
+        """Return a list of needed performance computations per instance and solver.
+
+        This will return any objective/instance/run combination.
+        """
         list_remaining_performance_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
         for row_name in self.dataframe.index:
@@ -299,7 +305,10 @@ class SparklePerformanceDataCSV():
 
     def get_list_processed_performance_computation_job(self: SparklePerformanceDataCSV) \
             -> list[list[list]]:
-        """Return a list of existing performance values per instance and solver."""
+        """Return a list of existing performance values per instance and solver.
+
+        It will return the index for any objective/instance/run combination.
+        """
         list_processed_performance_computation_job = []
         bool_array_isnull = self.dataframe.isnull()
         for row_name in self.dataframe.index:
@@ -322,7 +331,7 @@ class SparklePerformanceDataCSV():
         objective = self.verify_objective(objective)
         return self.dataframe.loc[(objective), :].max(axis=1).to_list()
 
-    def calc_virtual_best_score_of_portfolio_on_instance(
+    def calc_portfolio_vbs_instance(
             self: SparklePerformanceDataCSV,
             instance: str,
             minimise: bool,
@@ -344,7 +353,12 @@ class SparklePerformanceDataCSV():
         """
         objective = self.verify_objective(objective)
         penalty_factor = sgh.settings.get_general_penalty_multiplier()
-        penalty = penalty_factor * virtual_best_score
+        if capvalue is None:
+            capvalue = sys.float_info.max
+            if not minimise:
+                capvalue = capvalue * -1
+        else:
+            penalty = penalty_factor * capvalue
         virtual_best_score = None
         for solver in self.dataframe.columns:
             if isinstance(instance, str):
@@ -391,7 +405,7 @@ class SparklePerformanceDataCSV():
                 capvalue = capvalue_list[idx]
 
             virtual_best_score = (
-                self.calc_virtual_best_score_of_portfolio_on_instance(
+                self.calc_portfolio_vbs_instance(
                     instance, minimise, objective, capvalue))
             virtual_best.append(virtual_best_score)
 
