@@ -151,15 +151,14 @@ def get_running_jobs() -> list[SlurmRun]:
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     running_jobs = get_running_jobs()
-    latest_length = len(running_jobs)
-    print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
-    while latest_length > 0:
+    prev_jobs = len(running_jobs) + 1
+    while len(running_jobs) > 0:
+        if len(running_jobs) < prev_jobs:
+            print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
+        time.sleep(10.0)
+        prev_jobs = len(running_jobs)
         running_jobs = [run for run in running_jobs
                         if run.status == Status.WAITING or run.status == Status.RUNNING]
-        if latest_length > len(running_jobs):
-            print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
-        latest_length = len(running_jobs)
-        time.sleep(10.0)
 
     print("All jobs done!")
 
