@@ -6,8 +6,7 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 from pathlib import Path
 
-from Commands.sparkle_help.sparkle_performance_data_csv_help\
-    import PerformanceDataFrame
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
 

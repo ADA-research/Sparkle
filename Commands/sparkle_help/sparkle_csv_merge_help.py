@@ -8,7 +8,7 @@ from pathlib import Path
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 
 
 def feature_data_csv_merge() -> None:
@@ -31,7 +31,7 @@ def feature_data_csv_merge() -> None:
 def performance_data_csv_merge() -> None:
     """Merge performance data of new results into the main performance data CSV."""
     try:
-        performance_data_csv = spdcsv.PerformanceDataFrame(
+        performance_data_csv = PerformanceDataFrame(
             sgh.performance_data_csv_path)
         tmp_performance_data_result_directory = sgh.performance_data_dir / "Tmp"
         result_list = sfh.get_list_all_extensions(

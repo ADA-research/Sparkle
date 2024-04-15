@@ -7,7 +7,7 @@ from pathlib import Path
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_job_help
 
 
@@ -120,8 +120,7 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
         verbose: Indicating, if output should be verbose
     """
     try:
-        performance_data_csv = spdcsv.PerformanceDataFrame(
-            performance_data_csv_path)
+        performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
         list_performance_computation_job = (
             performance_data_csv.get_list_remaining_performance_computation_job())
     except Exception:

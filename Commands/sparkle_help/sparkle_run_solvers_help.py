@@ -11,7 +11,7 @@ from pathlib import Path
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SolutionVerifier
@@ -192,7 +192,7 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     """
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
 
     if rerun:
         list_performance_computation_job = (

@@ -15,9 +15,7 @@ from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
-from Commands.sparkle_help.sparkle_performance_data_csv_help import \
-    PerformanceDataFrame
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from Commands.sparkle_help import sparkle_run_portfolio_selector_help as srps
 from Commands.sparkle_help import sparkle_logging as sl
@@ -94,7 +92,7 @@ def compute_perfect_selector_marginal_contribution(
           f"{sgh.settings.get_general_target_cutoff_time()} seconds")
 
     rank_list = []
-    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
@@ -108,8 +106,7 @@ def compute_perfect_selector_marginal_contribution(
     for solver in performance_data_csv.dataframe.columns:
         print("Computing virtual best performance for portfolio selector excluding "
               f"solver {sfh.get_last_level_directory_name(solver)} ...")
-        tmp_performance_data_csv = spdcsv.PerformanceDataFrame(
-            performance_data_csv_path)
+        tmp_performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
         tmp_performance_data_csv.remove_solver(solver)
         tmp_virt_best_perf = (
             tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
@@ -208,7 +205,7 @@ def compute_actual_selector_performance(
     Returns:
       The selector performance as a single floating point number.
     """
-    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
     penalty_factor = sgh.settings.get_general_penalty_multiplier()
     performances = []
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
@@ -342,7 +339,7 @@ def compute_actual_selector_marginal_contribution(
     rank_list = []
 
     # Get values from CSV while all solvers and instances are included
-    performance_df = spdcsv.PerformanceDataFrame(performance_data_csv_path)
+    performance_df = PerformanceDataFrame(performance_data_csv_path)
 
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
@@ -487,8 +484,7 @@ def compute_marginal_contribution(
         flag_recompute: Flag indicating whether marginal contributions
             should be recalculated.
     """
-    performance_data_csv = (
-        spdcsv.PerformanceDataFrame(sgh.performance_data_csv_path))
+    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     performance_measure =\
         sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     aggregation_function = sgh.settings.get_general_metric_aggregation_function()
