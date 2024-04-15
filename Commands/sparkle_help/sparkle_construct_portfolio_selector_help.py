@@ -207,9 +207,9 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     log_path_str = str(Path(sl.caller_log_dir / log_file))
     err_path_str = str(Path(sl.caller_log_dir / err_file))
     performance_data = spfcsv.PerformanceDataFrame(performance_data_csv_path)
-    pf_data_autofolio_path = str(performance_data.to_autofolio())
+    pf_data_autofolio_path = performance_data.to_autofolio()
     cmd_list = [python_executable, sgh.autofolio_path, "--performance_csv",
-                pf_data_autofolio_path, "--feature_csv", feature_data_csv_path,
+                str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
                 objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
                 "--save", str(selector_path)]
     # Write command line to log
@@ -235,6 +235,8 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         print("Error output log:", err_path_str)
         sys.exit(-1)
 
+    # Remove the data copy for AutoFolio
+    pf_data_autofolio_path.unlink()
     # Update data IDs associated with this selector
     write_selector_pd_id(selector_path)
     write_selector_fd_id(selector_path)
