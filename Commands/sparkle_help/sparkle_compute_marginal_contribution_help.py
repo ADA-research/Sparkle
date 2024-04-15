@@ -11,13 +11,13 @@ from pathlib import Path
 from typing import Callable
 from statistics import mean
 
-from Commands.sparkle_help import sparkle_basic_help
+from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help.sparkle_performance_data_csv_help import \
-    SparklePerformanceDataCSV
+    PerformanceDataFrame
 from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from Commands.sparkle_help import sparkle_run_portfolio_selector_help as srps
 from Commands.sparkle_help import sparkle_logging as sl
@@ -94,7 +94,7 @@ def compute_perfect_selector_marginal_contribution(
           f"{sgh.settings.get_general_target_cutoff_time()} seconds")
 
     rank_list = []
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
@@ -108,7 +108,7 @@ def compute_perfect_selector_marginal_contribution(
     for solver in performance_data_csv.dataframe.columns:
         print("Computing virtual best performance for portfolio selector excluding "
               f"solver {sfh.get_last_level_directory_name(solver)} ...")
-        tmp_performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+        tmp_performance_data_csv = spdcsv.PerformanceDataFrame(
             performance_data_csv_path)
         tmp_performance_data_csv.remove_solver(solver)
         tmp_virt_best_perf = (
@@ -159,7 +159,7 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
     feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
 
     pred_sched_file = ("predict_schedule_"
-                       f"{sparkle_basic_help.get_time_pid_random_string()}.predres")
+                       f"{sbh.get_time_pid_random_string()}.predres")
     log_file = "predict_schedule_autofolio.out"
     err_file = "predict_schedule_autofolio.err"
     predict_schedule_result_file = str(sl.caller_log_dir) + "/" + pred_sched_file
@@ -208,7 +208,7 @@ def compute_actual_selector_performance(
     Returns:
       The selector performance as a single floating point number.
     """
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
     penalty_factor = sgh.settings.get_general_penalty_multiplier()
     performances = []
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
@@ -232,7 +232,7 @@ def compute_actual_performance_for_instance(
         actual_portfolio_selector_path: str,
         instance: str,
         feature_data_csv_path: str,
-        performance_data_csv: SparklePerformanceDataCSV,
+        performance_data_csv: PerformanceDataFrame,
         minimise: bool,
         objective_type: PerformanceMeasure,
         capvalue: float) -> tuple[float, bool]:
@@ -342,7 +342,7 @@ def compute_actual_selector_marginal_contribution(
     rank_list = []
 
     # Get values from CSV while all solvers and instances are included
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_df = spdcsv.PerformanceDataFrame(performance_data_csv_path)
 
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
@@ -371,43 +371,38 @@ def compute_actual_selector_marginal_contribution(
     print("Computing done!")
 
     # Compute contribution per solver
-    for solver in performance_data_csv.dataframe.columns:
+    for solver in performance_df.dataframe.columns:
         solver_name = Path(solver).name
         print("Computing actual performance for portfolio selector excluding solver "
               f"{solver_name} ...")
-        
-        #1. Remake the dataframe from CSV path
-        tmp_performance_data_csv = \
-            spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
-        #2. Remove the solver from this copy
-        tmp_performance_data_csv.remove_solver(solver)
-
-        #3. create a temporary csv file name
-        tmp_performance_data_csv_file = (
+        # 1. Create a temporary df file name
+        tmp_performance_df_file = (
             f"tmp_performance_data_csv_without_{solver_name}_"
-            f"{sparkle_basic_help.get_time_pid_random_string()}.csv")
-        #4. Create the path using the log dir and the file name
-        tmp_performance_data_csv_path = (
-            str(Path(sl.caller_log_dir / tmp_performance_data_csv_file)))
-        #5. Log this action
-        sl.add_output(tmp_performance_data_csv_path,
-                      "[written] Temporary performance data")
-        #6. Save the sub-dataframe to the CSV path
-        tmp_performance_data_csv.save_csv(Path(tmp_performance_data_csv_path))
+            f"{sbh.get_time_pid_random_string()}.csv")
+        # 2. Create the path using the log dir and the file name
+        tmp_performance_df_path = sl.caller_log_dir / tmp_performance_df_file
 
-        #7. Create a temporary portfolio selector path?
-        tmp_actual_portfolio_selector_path = (
-            "Tmp/tmp_actual_portfolio_selector_"
-            f"{sparkle_basic_help.get_time_pid_random_string()}")
-        #8. create the full path
+        # 3. Copy the dataframe original df
+        tmp_performance_df = performance_df.copy(tmp_performance_df_path)
+
+        # 4. Remove the solver from this copy
+        tmp_performance_df.remove_solver(solver)
+
+        # 5. Log this action
+        sl.add_output(str(tmp_performance_df_path),
+                      "[written] Temporary performance data")
+        # 6. Save the sub-dataframe with the removed solver
+        tmp_performance_df.save_csv()
+
+        # 7. create the actual selector path
         tmp_actual_portfolio_selector_path = (
             sgh.sparkle_algorithm_selector_dir / f"without_{solver_name}"
             / f"{sgh.sparkle_algorithm_selector_name}")
 
-        if tmp_performance_data_csv.get_num_solvers() >= 1:
-            #9. Construct the portfolio selector for this subset
+        if tmp_performance_df.get_num_solvers() >= 1:
+            # 8. Construct the portfolio selector for this subset
             scps.construct_sparkle_portfolio_selector(
-                tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path,
+                tmp_actual_portfolio_selector_path, tmp_performance_df_path,
                 feature_data_csv_path)
         else:
             print("****** WARNING: No solver exists ! ******")
@@ -420,13 +415,13 @@ def compute_actual_selector_marginal_contribution(
             sys.exit(-1)
 
         tmp_asp = compute_actual_selector_performance(
-            tmp_actual_portfolio_selector_path, tmp_performance_data_csv_path,
+            tmp_actual_portfolio_selector_path, tmp_performance_df_path,
             feature_data_csv_path, minimise, aggregation_function, capvalue_list)
 
         print(f"Actual performance for portfolio selector excluding solver "
               f"{solver_name} is {str(tmp_asp)}")
-        sfh.rmfiles(tmp_performance_data_csv_path)
-        sl.add_output(tmp_performance_data_csv_path,
+        sfh.rmfiles(tmp_performance_df_path)
+        sl.add_output(str(tmp_performance_df_path),
                       "[removed] Temporary performance data")
         print("Computing done!")
 
@@ -493,7 +488,7 @@ def compute_marginal_contribution(
             should be recalculated.
     """
     performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+        spdcsv.PerformanceDataFrame(sgh.performance_data_csv_path))
     performance_measure =\
         sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     aggregation_function = sgh.settings.get_general_metric_aggregation_function()

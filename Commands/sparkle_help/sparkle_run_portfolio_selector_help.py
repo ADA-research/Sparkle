@@ -134,7 +134,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
         check_selector_status(solver_name)
         with Path(performance_data_csv_path).open("r+") as fo:
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-            performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+            performance_data_csv = spdcsv.PerformanceDataFrame(
                 performance_data_csv_path)
             performance_data_csv.set_value(cpu_time_penalised,
                                            solver_name, instance_path)
@@ -271,7 +271,7 @@ def call_sparkle_portfolio_selector_solve_directory(
     test_performance_data_csv_name = "sparkle_performance_data.csv"
     test_performance_data_csv_path = (
         test_case_directory_path + test_performance_data_csv_name)
-    test_performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+    test_performance_data_csv = spdcsv.PerformanceDataFrame(
         test_performance_data_csv_path)
 
     total_job_list = []

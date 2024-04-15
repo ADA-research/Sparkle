@@ -93,7 +93,7 @@ def run_solvers_on_instances(
         If True, the selector will be constructed and a report will be produced.
     """
     if recompute:
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path).clean_csv()
+        spdcsv.PerformanceDataFrame(sgh.performance_data_csv_path).clean_csv()
     num_job_in_parallel = 1
     if parallel:
         num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()

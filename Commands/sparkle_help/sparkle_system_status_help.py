@@ -120,7 +120,7 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
         verbose: Indicating, if output should be verbose
     """
     try:
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+        performance_data_csv = spdcsv.PerformanceDataFrame(
             performance_data_csv_path)
         list_performance_computation_job = (
             performance_data_csv.get_list_remaining_performance_computation_job())

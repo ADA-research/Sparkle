@@ -40,7 +40,7 @@ def running_solvers_parallel(
         the run.
     """
     # Open the performance data csv file
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
 
     # List of jobs to do
     jobs = performance_data_csv.get_job_list(rerun=rerun)

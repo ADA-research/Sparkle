@@ -70,7 +70,7 @@ if __name__ == "__main__":
                                sgh.solver_nickname_mapping)
 
     if Path(sgh.performance_data_csv_path).exists():
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+        performance_data_csv = spdcsv.PerformanceDataFrame(
             sgh.performance_data_csv_path
         )
         for column_name in performance_data_csv.dataframe.columns:

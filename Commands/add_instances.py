@@ -103,7 +103,7 @@ if __name__ == "__main__":
         list_instance = sih._get_list_instance(instances_source)
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+        performance_data_csv = spdcsv.PerformanceDataFrame(
             sgh.performance_data_csv_path)
 
         print(f"Number of instances to be added: {len(list_instance)}")
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+        performance_data_csv = spdcsv.PerformanceDataFrame(
             sgh.performance_data_csv_path)
 
         num_inst = len(list_source_all_filename)

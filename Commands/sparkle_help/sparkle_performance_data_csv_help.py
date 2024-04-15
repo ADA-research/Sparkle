@@ -21,19 +21,21 @@ sgh.settings = sparkle_settings.Settings()
 # TODO:
 # Maybe it can directly wrap around pandas.DataFrame?
 # Then on init we either load from csv, or pre-set the dimensions of the DataFrame
-class SparklePerformanceDataCSV():
+class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
 
-    def __init__(self: SparklePerformanceDataCSV,
+    def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
                  solvers: list[str] = [],
+                 objectives: list[str] | list[sparkle_settings.SparkleObjective] = None,
                  instances: list[str] = [],
-                 n_runs: int = 1) -> None:
+                 n_runs: int = 1,
+                 init_df: bool = True) -> None:
         """Initialise a SparklePerformanceDataCSV object.
 
         Consists of:
             - Columns representing the Solvers
-            - Rows representing the result per multi-index in order of:
+            - Rows representing the result by multi-index in order of:
                 * Objective (Static, from settings)
                 * Instance
                 * Runs (Static, given in constructor)
@@ -42,9 +44,12 @@ class SparklePerformanceDataCSV():
             csv_filepath: If path exists, load from Path.
                 Otherwise create new and save to this path.
             solvers: List of solver names to be added into the Dataframe
+            objectives: List of SparkleObjectives or objective names. By default None,
+                then the objectives will be derived from Sparkle Settings if possible.
             instances: List of instance names to be added into the Dataframe
             n_runs: The number of runs to consider per Solver/Objective/Instance comb.
-
+            init_df: Whether the dataframe should be initialised. Set to false to reduce
+                heavy IO loads.
         """
         self.csv_filepath = csv_filepath
         # Sanity check, remove later
@@ -52,42 +57,46 @@ class SparklePerformanceDataCSV():
             self.csv_filepath = Path(self.csv_filepath)
         self.multi_dim_names = ["Objective", "Instance", "Run"]
         # Objectives is a ``static'' dimension
-        self.objective_names = [o.name for o in
-                                sgh.settings.get_general_sparkle_objectives()]
-        self.multi_objective = len(self.objective_names)
+        if objectives is None:
+            objectives = sgh.settings.get_general_sparkle_objectives()
+        if isinstance(objectives[0], sparkle_settings.SparkleObjective):
+            self.objective_names = [o.name for o in objectives]
+        else:
+            self.objective_names = objectives
+        self.multi_objective = len(self.objective_names) > 1
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
         self.run_ids = list(range(1, self.n_runs + 1))
+        if init_df:
+            if self.csv_filepath.exists():
+                self.dataframe = pd.read_csv(csv_filepath, index_col=0)
+                # Enforce dimensions
+                if self.multi_dim_names[0] not in self.dataframe.columns:
+                    # No Objective, cast column
+                    self.objective_names = [self.multi_dim_names[0]]
+                    self.dataframe[self.multi_dim_names[0]] = self.objective_names[0]
+                    self.multi_objective = False
+                if self.multi_dim_names[2] not in self.dataframe.columns:
+                    # No runs column
+                    self.n_runs = 1
+                    self.dataframe[self.multi_dim_names[2]] = self.n_runs
+                    self.run_ids = [self.n_runs]
+                if self.multi_dim_names[1] not in self.dataframe.columns:
+                    # Instances are listed as rows, force into column
+                    self.dataframe = self.dataframe.reset_index().rename(
+                        columns={"index": self.multi_dim_names[1]})
 
-        if self.csv_filepath.exists():
-            self.dataframe = pd.read_csv(csv_filepath, index_col=0)
-            # Enforce dimensions
-            if self.multi_dim_names[0] not in self.dataframe.columns:
-                # No Objective, cast column
-                self.objective_names = [self.multi_dim_names[0]]
-                self.dataframe[self.multi_dim_names[0]] = self.objective_names[0]
-                self.multi_objective = False
-            if self.multi_dim_names[2] not in self.dataframe.columns:
-                # No runs column
-                self.n_runs = 1
-                self.dataframe[self.multi_dim_names[2]] = self.n_runs
-                self.run_ids = [self.n_runs]
-            if self.multi_dim_names[1] not in self.dataframe.columns:
-                # Instances are listed as rows, force into column
-                self.dataframe = self.dataframe.reset_index().rename(
-                    columns={"index": self.multi_dim_names[1]})
+                # Cast Columns to multi dim
+                self.dataframe = self.dataframe.set_index(self.multi_dim_names)
+            else:
+                # Initialize empty DataFrame
+                midx = pd.MultiIndex.from_product(
+                    [self.objective_names, instances, self.run_ids],
+                    names=self.multi_dim_names)
+                self.dataframe = pd.DataFrame(None, index=midx, columns=solvers, )
+                self.save_csv()
 
-            # Cast Columns to multi dim
-            self.dataframe = self.dataframe.set_index(self.multi_dim_names)
-        else:
-            # Initialize empty DataFrame
-            midx = pd.MultiIndex.from_product(
-                [self.objective_names, instances, self.run_ids],
-                names=self.multi_dim_names)
-            self.dataframe = pd.DataFrame(None, index=midx, columns=solvers, )
-            self.save_csv()
-
-    def verify_objective(self: SparklePerformanceDataCSV,
+    def verify_objective(self: PerformanceDataFrame,
                          objective: str) -> str:
         """Method to check whether objective is valid."""
         if objective is None:
@@ -98,7 +107,7 @@ class SparklePerformanceDataCSV():
                 objective = self.objective_names[0]
         return objective
 
-    def verify_run_id(self: SparklePerformanceDataCSV,
+    def verify_run_id(self: PerformanceDataFrame,
                       run_id: int) -> int:
         """Method to check whether run id is valid."""
         if run_id is None:
@@ -109,7 +118,7 @@ class SparklePerformanceDataCSV():
                 run_id = self.run_ids[0]
         return run_id
 
-    def verify_indexing(self: SparklePerformanceDataCSV,
+    def verify_indexing(self: PerformanceDataFrame,
                         objective: str,
                         run_id: int) -> tuple[str, int]:
         """Method to check whether data indexing is correct.
@@ -130,7 +139,7 @@ class SparklePerformanceDataCSV():
         run_id = self.verify_run_id(run_id)
         return objective, run_id
 
-    def add_solver(self: SparklePerformanceDataCSV,
+    def add_solver(self: PerformanceDataFrame,
                    solver_name: str,
                    initial_value: float | list[float] = None) -> None:
         """Add a new solver to the dataframe. Initializes value to None by default.
@@ -146,7 +155,7 @@ class SparklePerformanceDataCSV():
             return
         self.dataframe[solver_name] = initial_value
 
-    def add_instance(self: SparklePerformanceDataCSV,
+    def add_instance(self: PerformanceDataFrame,
                      instance_name: str,
                      initial_value: float | list[float] = None) -> None:
         """Add and instance to the DataFrame."""
@@ -171,7 +180,7 @@ class SparklePerformanceDataCSV():
         return
 
     # Can we make this handle a sequence of inputs instead of just 1?
-    def set_value(self: SparklePerformanceDataCSV,
+    def set_value(self: PerformanceDataFrame,
                   value: float,
                   solver: str,
                   instance: str,
@@ -191,15 +200,15 @@ class SparklePerformanceDataCSV():
         objective, run = self.verify_indexing(objective, run)
         self.dataframe.loc[(objective, instance, run), solver] = value
 
-    def remove_solver(self: SparklePerformanceDataCSV, solver_name: str) -> None:
+    def remove_solver(self: PerformanceDataFrame, solver_name: str) -> None:
         """Drop a solver from the Dataframe."""
         self.dataframe.drop(solver_name, axis=1, inplace=True)
 
-    def remove_instance(self: SparklePerformanceDataCSV, instance_name: str) -> None:
+    def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:
         """Drop an instance from the Dataframe."""
         self.dataframe.drop(instance_name, axis=0, level="Instance")
 
-    def reset_value(self: SparklePerformanceDataCSV,
+    def reset_value(self: PerformanceDataFrame,
                     solver: str,
                     instance: str,
                     objective: str = None,
@@ -207,7 +216,7 @@ class SparklePerformanceDataCSV():
         """Reset a value in the dataframe."""
         self.set_value(None, solver, instance, objective, run)
 
-    def get_value(self: SparklePerformanceDataCSV,
+    def get_value(self: PerformanceDataFrame,
                   solver: str,
                   instance: str,
                   objective: str = None,
@@ -216,27 +225,27 @@ class SparklePerformanceDataCSV():
         objective, run = self.verify_indexing(objective, run)
         return self.dataframe.loc[(objective, instance, run), solver]
 
-    def get_num_objectives(self: SparklePerformanceDataCSV) -> int:
+    def get_num_objectives(self: PerformanceDataFrame) -> int:
         """Retrieve the number of objectives in the DataFrame."""
         return self.dataframe.index.levels[0].size
 
-    def get_num_instances(self: SparklePerformanceDataCSV) -> int:
+    def get_num_instances(self: PerformanceDataFrame) -> int:
         """Return the number of instances."""
         return self.dataframe.index.levels[1].size
 
-    def get_num_runs(self: SparklePerformanceDataCSV) -> int:
+    def get_num_runs(self: PerformanceDataFrame) -> int:
         """Return the number of runs."""
         return self.dataframe.index.levels[2].size
 
-    def get_num_solvers(self: SparklePerformanceDataCSV) -> int:
+    def get_num_solvers(self: PerformanceDataFrame) -> int:
         """Return the number of solvers."""
         return self.dataframe.columns.size
 
-    def get_instances(self: SparklePerformanceDataCSV) -> pd.core.indexes.base.Index:
+    def get_instances(self: PerformanceDataFrame) -> pd.core.indexes.base.Index:
         """Return the instances as a Pandas Index object."""
         return self.dataframe.index.levels[1]
 
-    def save_csv(self: SparklePerformanceDataCSV, csv_filepath: Path = None) -> None:
+    def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
 
         Args:
@@ -247,7 +256,7 @@ class SparklePerformanceDataCSV():
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             self.dataframe.to_csv(csv_filepath)
 
-    def get_job_list(self: SparklePerformanceDataCSV, rerun: bool = False) \
+    def get_job_list(self: PerformanceDataFrame, rerun: bool = False) \
             -> list[tuple[str, str]]:
         """Return a list of performance computation jobs thare are to be done.
 
@@ -265,7 +274,7 @@ class SparklePerformanceDataCSV():
             df.index = df.index.droplevel(["Objective", "Run"])
         return df.index.tolist()
 
-    def get_list_recompute_performance_computation_job(self: SparklePerformanceDataCSV)\
+    def get_list_recompute_performance_computation_job(self: PerformanceDataFrame)\
             -> list[list[list]]:
         """Return column-row combinations in the dataframe as [[row, all_columns]]."""
         list_recompute_performance_computation_job = []
@@ -281,7 +290,7 @@ class SparklePerformanceDataCSV():
 
         return list_recompute_performance_computation_job
 
-    def get_list_remaining_performance_computation_job(self: SparklePerformanceDataCSV) \
+    def get_list_remaining_performance_computation_job(self: PerformanceDataFrame) \
             -> list[list[list]]:
         """Return a list of needed performance computations per instance and solver.
 
@@ -303,7 +312,7 @@ class SparklePerformanceDataCSV():
             list_remaining_performance_computation_job.append(list_item)
         return list_remaining_performance_computation_job
 
-    def get_list_processed_performance_computation_job(self: SparklePerformanceDataCSV) \
+    def get_list_processed_performance_computation_job(self: PerformanceDataFrame) \
             -> list[list[list]]:
         """Return a list of existing performance values per instance and solver.
 
@@ -325,14 +334,14 @@ class SparklePerformanceDataCSV():
         return list_processed_performance_computation_job
 
     def get_maximum_performance_per_instance(
-            self: SparklePerformanceDataCSV,
+            self: PerformanceDataFrame,
             objective: str = None) -> list[float]:
         """Return a list with the highest performance per instance."""
         objective = self.verify_objective(objective)
         return self.dataframe.loc[(objective), :].max(axis=1).to_list()
 
     def calc_portfolio_vbs_instance(
-            self: SparklePerformanceDataCSV,
+            self: PerformanceDataFrame,
             instance: str,
             minimise: bool,
             objective: str = None,
@@ -382,7 +391,7 @@ class SparklePerformanceDataCSV():
         return virtual_best_score
 
     def calc_virtual_best_performance_of_portfolio(
-            self: SparklePerformanceDataCSV,
+            self: PerformanceDataFrame,
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
             capvalue_list: list[float],
@@ -412,7 +421,7 @@ class SparklePerformanceDataCSV():
         return aggregation_function(virtual_best)
 
     def get_dict_vbs_penalty_time_on_each_instance(
-            self: SparklePerformanceDataCSV,
+            self: PerformanceDataFrame,
             objective: str = None,
             run_id: int = None) -> dict:
         """Return a dictionary of penalised runtimes and instances for the VBS."""
@@ -429,7 +438,7 @@ class SparklePerformanceDataCSV():
 
         return instance_penalized_runtimes
 
-    def calc_vbs_penalty_time(self: SparklePerformanceDataCSV,
+    def calc_vbs_penalty_time(self: PerformanceDataFrame,
                               objective: str = None,
                               run_id: int = None) -> float:
         """Return the penalised performance of the VBS."""
@@ -450,7 +459,7 @@ class SparklePerformanceDataCSV():
         # Return average
         return min_instance_df.sum() / self.dataframe.index.size
 
-    def get_solver_penalty_time_ranking_list(self: SparklePerformanceDataCSV,
+    def get_solver_penalty_time_ranking_list(self: PerformanceDataFrame,
                                              objective: str = None) -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
         objective = self.verify_objective(objective)
@@ -473,12 +482,25 @@ class SparklePerformanceDataCSV():
 
         return solver_penalty_time_ranking_list
 
-    def clean_csv(self: SparklePerformanceDataCSV) -> None:
+    def clean_csv(self: PerformanceDataFrame) -> None:
         """Set all values in Performance Data to None."""
         self.dataframe[:] = None
         self.save_csv()
 
-    def to_autofolio(self: SparklePerformanceDataCSV) -> Path:
+    def copy(self: PerformanceDataFrame,
+             csv_filepath: Path = None) -> PerformanceDataFrame:
+        """Create a copy of this object.
+
+        Args:
+            csv_filepath: The new filepath to use for saving the object to.
+                Warning: If None, the original path is used and could lead to dataloss!
+        """
+        csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
+        pd_copy = PerformanceDataFrame(csv_filepath, init_df=False)
+        pd_copy.dataframe = self.dataframe.copy()
+        return pd_copy
+
+    def to_autofolio(self: PerformanceDataFrame) -> Path:
         """Port the data to a format acceptable for AutoFolio."""
         if self.multi_objective or self.n_runs > 1:
             print(f"ERROR: Currently no porting available for {self.csv_filepath} "

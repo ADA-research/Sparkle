@@ -62,7 +62,7 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
     if total_job_num > 0:
         return True
 
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
     performance_computation_jobs =\
         performance_data_csv.get_list_remaining_performance_computation_job()
     total_job_num = sjh.get_num_of_total_job_from_list(performance_computation_jobs)

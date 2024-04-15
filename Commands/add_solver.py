@@ -145,7 +145,7 @@ if __name__ == "__main__":
     shutil.copyfile(runsolver_path, runsolver_target)
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+    performance_data_csv = spdcsv.PerformanceDataFrame(
         sgh.performance_data_csv_path
     )
     performance_data_csv.add_solver(solver_directory)

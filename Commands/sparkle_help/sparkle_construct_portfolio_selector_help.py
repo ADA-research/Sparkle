@@ -206,7 +206,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     err_file = selector_path.parent.name + "_autofolio.err"
     log_path_str = str(Path(sl.caller_log_dir / log_file))
     err_path_str = str(Path(sl.caller_log_dir / err_file))
-    performance_data = spfcsv.SparklePerformanceDataCSV(performance_data_csv_path)
+    performance_data = spfcsv.PerformanceDataFrame(performance_data_csv_path)
     pf_data_autofolio_path = str(performance_data.to_autofolio())
     cmd_list = [python_executable, sgh.autofolio_path, "--performance_csv",
                 pf_data_autofolio_path, "--feature_csv", feature_data_csv_path,

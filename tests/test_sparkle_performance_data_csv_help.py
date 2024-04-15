@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 from pathlib import Path
 
 from Commands.sparkle_help.sparkle_performance_data_csv_help\
-    import SparklePerformanceDataCSV
+    import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
 
@@ -22,11 +22,11 @@ class TestPerformanceData(TestCase):
         """Create csv objects from files for the tests."""
         self.csv_example_path =\
             Path("tests/test_files/performance/example-runtime-performance.csv")
-        self.pd = SparklePerformanceDataCSV(str(self.csv_example_path))
+        self.pd = PerformanceDataFrame(str(self.csv_example_path))
         self.csv_example_with_nan_path =\
             Path("tests/test_files/performance/"
                  "example-runtime-performance-with-empty.csv")
-        self.pd_nan = SparklePerformanceDataCSV(str(self.csv_example_with_nan_path))
+        self.pd_nan = PerformanceDataFrame(str(self.csv_example_with_nan_path))
 
     def test_get_job_list(self: TestPerformanceData) -> None:
         """Test job list method, without and with recompute bool."""

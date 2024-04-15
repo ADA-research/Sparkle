@@ -31,7 +31,7 @@ def feature_data_csv_merge() -> None:
 def performance_data_csv_merge() -> None:
     """Merge performance data of new results into the main performance data CSV."""
     try:
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+        performance_data_csv = spdcsv.PerformanceDataFrame(
             sgh.performance_data_csv_path)
         tmp_performance_data_result_directory = sgh.performance_data_dir / "Tmp"
         result_list = sfh.get_list_all_extensions(
