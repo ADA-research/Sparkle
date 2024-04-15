@@ -179,8 +179,6 @@ if __name__ == "__main__":
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
 
-    print("Start running solvers ...")
-
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
 
