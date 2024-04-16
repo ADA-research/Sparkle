@@ -816,11 +816,11 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
     """
     if instance_set_test_name is None:
         configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
-                                       f"{instance_set_train_name}/")
+                                           f"{instance_set_train_name}/")
     else:
         configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
-                                       f"{instance_set_train_name}_"
-                                       f"{instance_set_test_name}/")
+                                           f"{instance_set_train_name}_"
+                                           f"{instance_set_test_name}/")
     generate_report_for_configuration_prep(configuration_reports_directory)
     dict_variable_to_value = (
         get_dict_variable_to_value(solver_name, instance_set_train_name,

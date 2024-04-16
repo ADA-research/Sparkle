@@ -403,10 +403,10 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     variables_dict["numInstanceClasses"] = len(set([Path(instance_path).parent.name
                                                     for instance_path in instances]))
     variables_dict["cutoffTime"] = str(sgh.settings.get_general_target_cutoff_time())
-    variables_dict["performanceMetric"] = sgh.settings.get_performance_metric_for_report()
+    variables_dict["performanceMetric"] =\
+        sgh.settings.get_performance_metric_for_report()
 
-    latex_itemize = sgrh.get_instance_set_count_list(instances)
-    variables_dict["instanceClassList"] = latex_itemize    
+    variables_dict["instanceClassList"] = sgrh.get_instance_set_count_list(instances)
 
     inst_succes, solvers_with_solution, unsolved_instances = get_solvers_with_solution()
     variables_dict["solversWithSolution"] = inst_succes

@@ -1230,8 +1230,8 @@ def test_generate_report_for_configuration_common(mocker: MockFixture) -> None:
 
     latex_directory_path = Path(config_reports_dir,
                                 "Sparkle-latex-generator-for-configuration/")
-    latex_report_filename = Path("Sparkle_Report_for_Configuration")
-    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
+    latex_report_name = Path("Sparkle_Report_for_Configuration")
+    latex_report_filepath = Path(latex_directory_path / latex_report_name)
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
 
     mock_open.assert_any_call("r")
@@ -1239,7 +1239,7 @@ def test_generate_report_for_configuration_common(mocker: MockFixture) -> None:
 
     mock_open().write.assert_called_once_with(file_write)
     mock_check.assert_called_once_with(latex_directory_path)
-    mock_compile.assert_called_once_with(latex_directory_path, latex_report_filename.stem)
+    mock_compile.assert_called_once_with(latex_directory_path, latex_report_name.stem)
     mock_print.assert_has_calls([
         mocker.call(f"Report is placed at: {report_path}\n"
                     "Generating report for configuration done!")

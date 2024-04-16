@@ -395,23 +395,26 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
 
     return latex_dict
 
+
 def fill_template_tex(template_tex: str, variables: dict) -> str:
-        """Given a latex template, replaces all the @@ variables using the dict.
+    """Given a latex template, replaces all the @@ variables using the dict.
 
-        Args:
-            template_tex: The template to be populated
-            variables: Variable names (key) with their target (value)
+    Args:
+        template_tex: The template to be populated
+        variables: Variable names (key) with their target (value)
 
-        Returns:
-            The populated latex string."""
-        for variable_key, target_value in variables.items():
-            variable = "@@" + variable_key + "@@"
-            # We don't modify variable names in the Latex file
-            if re.match(".*{.*}.*", target_value) is None:
-                # Rectify underscores in 
-                target_value = target_value.replace("_", r"\textunderscore ")
-            template_tex = template_tex.replace(variable, target_value)
-        return template_tex
+    Returns:
+        The populated latex string.
+    """
+    for variable_key, target_value in variables.items():
+        variable = "@@" + variable_key + "@@"
+        # We don't modify variable names in the Latex file
+        if re.match(".*{.*}.*", target_value) is None:
+            # Rectify underscores in target_value
+            target_value = target_value.replace("_", r"\textunderscore ")
+        template_tex = template_tex.replace(variable, target_value)
+    return template_tex
+
 
 def generate_report(test_case_directory: str = None) -> None:
     """Generate a report for algorithm selection.
@@ -611,5 +614,4 @@ def generate_comparison_plot(points: list,
     if subprocess_epstopdf.returncode != 0:
         print(f"(Eps To PDF) Error whilst converting Eps to PDF {output_eps_file}"
               f"{subprocess_epstopdf.stderr.decode()}")
-
     sfh.rmfiles(output_gnuplot_script)
