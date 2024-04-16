@@ -5,18 +5,19 @@ import sys
 import argparse
 from pathlib import Path
 
+from runrunner.base import Runner
+import runrunner as rrr
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_compute_features_help as scf
-from Commands.sparkle_help import sparkle_job_parallel_help as sjph
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
-import runrunner as rrr
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help.sparkle_command_help import CommandName
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -44,8 +45,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: Local, Slurm. Default: Slurm")
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
     )
 
     return parser
@@ -60,61 +61,28 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             On which computer or cluster environment to run the solvers.
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
     """
-    if run_on == Runner.SLURM:
-        print("Running on Slurm")
-        compute_features_parallel_jobid = scf.computing_features_parallel(
-            Path(sgh.feature_data_csv_path), recompute
-        )
+    runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
+                                            recompute, run_on=run_on)]
+    # If there are no jobs return
+    if all(run is None for run in runs):
+        print("Running solvers done!")
+        return
 
-        dependency_jobid_list = []
+    # Update performance data csv after the last job is done
+    runs.append(rrr.add_to_queue(
+        runner=run_on,
+        cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
+        name=CommandName.SPARKLE_CSV_MERGE,
+        dependencies=runs[-1],
+        base_dir=sgh.sparkle_tmp_path,
+        sbatch_options=ssh.get_slurm_options_list()))
 
-        if compute_features_parallel_jobid:
-            dependency_jobid_list.append(compute_features_parallel_jobid)
-
-        # Update feature data csv after the last job is done
-        job_script = "Commands/sparkle_help/sparkle_csv_merge_help.py"
-        compute_features_parallel_jobid = sjph.running_job_parallel(
-            job_script, dependency_jobid_list, CommandName.COMPUTE_FEATURES
-        )
-        dependency_jobid_list.append(compute_features_parallel_jobid)
-
-        job_id_str = ",".join(dependency_jobid_list)
-        print(f"Computing features in parallel. Waiting for Slurm job(s) with id(s): "
-              f"{job_id_str}")
-    else:
-        print("Running Locally")
-        runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
-                                                recompute, run_on=run_on)]
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM_RR:
-            run_on = Runner.SLURM
-
-        # If there are no jobs return
-        if all(run is None for run in runs):
-            print("Running solvers done!")
-
-            return
-
-        # Update performance data csv after the last job is done
-        runs.append(rrr.add_to_queue(
-            runner=run_on,
-            cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-            name="sprkl_csv_merge",
-            dependencies=runs[-1],
-            base_dir=sgh.sparkle_tmp_path))
-
-        # Remove the below if block once runrunner works satisfactorily
-        if run_on == Runner.SLURM:
-            run_on = Runner.SLURM_RR
-
-        if run_on == Runner.LOCAL:
-            print("Waiting for the local calculations to finish.")
-            for run in runs:
-                if run is not None:
-                    run.wait()
-            print("Computing Features in parallel done!")
-
-    return
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        for run in runs:
+            if run is not None:
+                run.wait()
+        print("Computing Features in parallel done!")
 
 
 if __name__ == "__main__":
@@ -131,8 +99,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.COMPUTE_FEATURES])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
         sgh.settings.read_settings_ini(

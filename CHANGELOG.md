@@ -2,6 +2,27 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.7] - 2024/04/05
+
+### Added
+- SMAC target algorithm, a SMAC handler that takes in input from SMAC and structures it for the targeted solvers. Takes solver output and yields it to SMAC. Preparation for detaching from SMAC to allow for various optimizers in Sparkle.
+
+### Changed
+- All SBATCH scripts in sparkle are no longer internally generated but are now done by a sub-library called RunRunner
+- Smac dir is automatically cleaned after use of unnecessary files to reduce bloating
+- Forked AutoFolio repository
+- Configuration scenarios keeps track of its own settings, not general Settings class
+- Changed environment .ymls for Pandas requirements
+- Started to add in Multi-Objective support. Currently users can specify MO, but SMAC can not handle this for configuration. When this happens, users are warned that the first objective is selected.
+- (!) Major code refactorings and redudant code removal
+
+### Fixed
+- Fixed AutoFolio parameter warnings
+- Fixed various risks with executing subscripts with os.system, now uisng subprocess everywhere instead
+- User inputted sbatch options (slurm settings) are always superior and will overwrite any presets
+- Got rid of unnecesarry delays around executing runrunner across various nodes
+- Fixed AutoFolio compatibility with SMAC 1.4
+
 ## [0.6] - 2023/12/14
 
 ### Added

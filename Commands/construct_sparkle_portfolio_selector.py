@@ -5,7 +5,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from Commands.Structures.status_info import ConstructPortfolioSelectorStatusInfo
+from Commands.structures.status_info import ConstructPortfolioSelectorStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -15,12 +15,12 @@ from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as 
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.sparkle_help import argparse_custom as ac
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -92,10 +92,6 @@ if __name__ == "__main__":
     global settings
     sgh.settings = sparkle_settings.Settings()
 
-    # Initialise latest scenario
-    global latest_scenario
-    sgh.latest_scenario = ReportingScenario()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -107,8 +103,10 @@ if __name__ == "__main__":
     flag_recompute_portfolio = args.recompute_portfolio_selector
     flag_recompute_marg_cont = args.recompute_marginal_contribution
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR])
+    check_for_initialise(
+        sys.argv,
+        sch.COMMAND_DEPENDENCIES[sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
+    )
 
     if ac.set_by_user(args, "performance_measure"):
         sgh.settings.set_general_sparkle_objectives(
@@ -150,12 +148,12 @@ if __name__ == "__main__":
               f"{sgh.sparkle_algorithm_selector_path}")
 
         # Update latest scenario
-        sgh.latest_scenario.set_selection_portfolio_path(
+        sgh.latest_scenario().set_selection_portfolio_path(
             Path(sgh.sparkle_algorithm_selector_path)
         )
-        sgh.latest_scenario.set_latest_scenario(Scenario.SELECTION)
+        sgh.latest_scenario().set_latest_scenario(Scenario.SELECTION)
         # Set to default to overwrite possible old path
-        sgh.latest_scenario.set_selection_test_case_directory()
+        sgh.latest_scenario().set_selection_test_case_directory()
 
         # Compute and print marginal contributions of the perfect and actual portfolio
         # selectors
@@ -170,4 +168,4 @@ if __name__ == "__main__":
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file
-    sgh.latest_scenario.write_scenario_ini()
+    sgh.latest_scenario().write_scenario_ini()

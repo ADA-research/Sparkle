@@ -13,6 +13,7 @@ from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -44,8 +45,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     instances_path = args.instances_path
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.REMOVE_INSTANCES])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.REMOVE_INSTANCES])
 
     if args.nickname:
         instances_path = "Instances/" + args.nickname
@@ -87,25 +88,6 @@ if __name__ == "__main__":
     # Remove instance reference list (for multi-file instances)
     instance_set_name = Path(instances_path).name
     sih.remove_reference_instance_list(instance_set_name)
-    smac_instance_dir = sgh.smac_dir + "/scenarios/instances/"
-    # Remove instance set from SMAC directories
-    smac_train_instances_path = sgh.smac_dir + "/scenarios/instances/" +\
-        instance_set_name
-
-    smace_instance_test_dir = sgh.smac_dir + "/scenarios/instances_test/"
-    file_smac_train_instances = smace_instance_test_dir +\
-        instance_set_name + "_train.txt"
-
-    shutil.rmtree(Path(smac_train_instances_path), ignore_errors=True)
-    Path(file_smac_train_instances).unlink(missing_ok=True)
-
-    smac_test_instances_path = smace_instance_test_dir +\
-        instance_set_name
-    file_smac_test_instances = smace_instance_test_dir +\
-        instance_set_name + "_test.txt"
-
-    shutil.rmtree(Path(smac_test_instances_path), ignore_errors=True)
-    Path(file_smac_test_instances).unlink(missing_ok=True)
 
     feature_data_csv.update_csv()
     performance_data_csv.update_csv()

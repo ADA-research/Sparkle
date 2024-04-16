@@ -9,21 +9,20 @@ import datetime
 import fcntl
 import glob
 import sys
+import time
 from pathlib import Path
 from pathlib import PurePath
 
-from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_basic_help as sbh
-from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_logging as slog
-from Commands.sparkle_help import sparkle_job_help as sjh
-from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure, ProcessMonitoring
-from Commands.sparkle_help.sparkle_command_help import CommandName
-
-from sparkle.slurm_parsing import SlurmBatch
 import runrunner as rrr
 from runrunner.base import Runner
+
+from Commands.sparkle_help import sparkle_file_help as sfh
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_logging as slog
+from Commands.sparkle_help import sparkle_slurm_help as ssh
+from Commands.sparkle_help.sparkle_settings import ProcessMonitoring
+from Commands.structures.sparkle_objective import PerformanceMeasure
+from Commands.sparkle_help.sparkle_command_help import CommandName
 
 import functools
 print = functools.partial(print, flush=True)
@@ -363,7 +362,7 @@ def wait_for_finished_solver(
                 done = True  # No jobs are remaining
                 break
 
-            sjh.sleep(n_seconds)  # No jobs have started yet;
+            time.sleep(n_seconds)  # No jobs have started yet;
         # If the results are less than the number of solvers then this means that there
         # are finished solvers(+1 becuase of the header of results)
         elif len(result.stdout.strip().split("\n")) < (1 + number_of_solvers):
@@ -413,7 +412,7 @@ def wait_for_finished_solver(
 
                 started = True
 
-            sjh.sleep(n_seconds)
+            time.sleep(n_seconds)
             current_solver_list = list()
 
             # Check if the running jobs are from a portfolio which contain an already
@@ -441,105 +440,6 @@ def wait_for_finished_solver(
                     current_solver_list.append(jobid[jobid.find("_") + 1:])
 
     return finished_solver_list, pending_job_with_new_cutoff, started
-
-
-def generate_parallel_portfolio_sbatch_script(parameters: list[str],
-                                              num_jobs: int) -> Path:
-    """Generate an sbatch script for the PAP (parallel algorithm portfolio).
-
-    Args:
-        parameters: List of str parameters for the Slurm batch job.
-        num_jobs: Number of jobs.
-
-    Returns:
-        Path to the generated sbatch script.
-    """
-    # Set script name and path
-    sbatch_script_name = (f"parallel_portfolio_sbatch_shell_script_{str(num_jobs)}_"
-                          f"{sbh.get_time_pid_random_string()}.sh")
-    sbatch_script_path = Path(f"{sgh.sparkle_tmp_path}{sbatch_script_name}")
-
-    # Set sbatch options
-    job = "run_parallel_portfolio"
-    sbatch_options_list = ssh.get_sbatch_options_list(sbatch_script_path, num_jobs, job,
-                                                      smac=False)
-
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_default_options_list())
-    # Get user options second to overrule defaults
-    sbatch_options_list.extend(ssh.get_slurm_sbatch_user_options_list())
-
-    # Create job list
-    job_params_list = parameters
-
-    # Set srun options
-    srun_options_str = f"--nodes=1 --ntasks=1 {ssh.get_slurm_srun_user_options_str()}"
-
-    # Create target call
-    target_call_str = ("Commands/sparkle_help/run_solvers_core.py --run-status-path "
-                       f"{str(sgh.pap_sbatch_tmp_path)}")
-
-    # Generate script
-    ssh.generate_sbatch_script_generic(sbatch_script_path, sbatch_options_list,
-                                       job_params_list, srun_options_str,
-                                       target_call_str)
-
-    return sbatch_script_path
-
-
-def generate_sbatch_job_list(
-        solver_list: list[str],
-        instance_path_list: list[str],
-        num_jobs: int) -> tuple[list[str], int, list[str], list[str]]:
-    """Generate a list of jobs to be executed in the sbatch script.
-
-    Args:
-        solver_list: List of solvers.
-        instance_path_list: List of instance paths.
-        num_jobs: Number of jobs.
-
-    Returns:
-        A list of parameters used in the sbatch script.
-        Number of new jobs.
-        A list of solver instances.
-        A list of temp solver instances.
-    """
-    # The function generates the parameters used in the SBATCH script of the portfolio
-    parameters = list()
-    new_num_jobs = num_jobs
-    solver_instance_list = list()
-    tmp_solver_instances = list()
-    performance_measure =\
-        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-
-    # Adds all the jobs of instances and their portfolio to the parameter list
-    for instance_path in instance_path_list:
-        for solver in solver_list:
-            if " " in solver:
-                solver_path, _, seed = solver.strip().split()
-                solver_name = Path(solver_path).name
-                tmp_solver_instances.append(f"{solver_name}_seed_")
-                new_num_jobs = new_num_jobs + int(seed) - 1
-
-                for instance in range(1, int(seed) + 1):
-                    commandline = (f"--instance {str(instance_path)} --solver "
-                                   f"{str(solver_path)} --performance-measure "
-                                   f"{performance_measure.name} --seed {str(instance)}")
-                    parameters.append(commandline)
-                    instance_name = Path(instance_path).name
-                    solver_instance_list.append(
-                        f"{solver_name}_seed_{str(instance)}_{instance_name}")
-            else:
-                solver_path = Path(solver)
-                solver_name = solver_path.name
-                instance_name = Path(instance_path).name
-                solver_instance_list.append(f"{solver_name}_{instance_name}")
-                commandline = (f"--instance {str(instance_path)} --solver "
-                               f"{str(solver_path)} --performance-measure "
-                               f"{performance_measure.name}")
-                parameters.append(commandline)
-
-    temp_solvers = list(dict.fromkeys(tmp_solver_instances))
-    return (parameters, new_num_jobs, solver_instance_list, temp_solvers)
 
 
 def handle_waiting_and_removal_process(
@@ -706,60 +606,78 @@ def run_parallel_portfolio(instances: list[str],
     """
     # Remove existing result files
     remove_result_files(instances)
-
     solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
-    num_jobs = len(solver_list) * len(instances)
 
-    # Makes SBATCH scripts for all individual solvers in a list
-    parameters, num_jobs, solver_instance_list, temp_solvers = generate_sbatch_job_list(
-        solver_list, instances, num_jobs)
-    # Generates a SBATCH script which uses the created parameters
-    sbatch_script_path = generate_parallel_portfolio_sbatch_script(parameters, num_jobs)
+    performance_measure =\
+        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    parameters = []
+    num_jobs = len(solver_list) * len(instances)
+    temp_solvers = []
+    solver_instance_list = []
+    # Create a command for each instance-solver combination
+    for instance_path in instances:
+        instance_name = Path(instance_path).name
+        for solver_path in solver_list:
+            seeds = []
+            # If the solver has a seed range specified, create a call per seed
+            if " " in solver_path:
+                solver_path, _, seed_range = solver_path.strip().split()
+                seed_range = int(seed_range)
+                seeds = [seed_val for seed_val in range(1, seed_range + 1)]
+                solver_name = Path(solver_path).name
+                temp_solvers.append(f"{solver_name}_seed_")
+                num_jobs += (seed_range - 1)
+            else:
+                solver_path = Path(solver_path)
+
+            base_param = f"--instance {(instance_path)} --solver "\
+                         f"{str(solver_path)} --performance-measure "\
+                         f"{performance_measure.name}"
+            if len(seeds) > 0:
+                for seed_idx in seeds:
+                    parameters.append(f"{base_param} --seed {seed_idx}")
+                    solver_instance_list.append(
+                        f"{solver_name}_seed_{str(seed_idx)}_{instance_name}")
+            else:
+                parameters.append(base_param)
+                solver_instance_list.append(f"{solver_name}_{instance_name}")
 
     # Run the script and cancel the remaining solvers if a solver finishes before the
     # end of the cutoff_time
     file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
     sfh.create_new_empty_file(file_path_output1)
+    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
+    parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
+    sbatch_options_list = ssh.get_slurm_options_list()
+    # Create cmd list
+    base_cmd_str = ("Commands/sparkle_help/run_solvers_core.py --run-status-path "
+                    f"{str(sgh.pap_sbatch_tmp_path)}")
+    cmd_list = [f"{base_cmd_str} {params}" for params in parameters]
+
     # TODO: This try/except structure is absolutely massive.
     # This entire method should be refactored after everything works with RunRunner
     try:
-        command_name = CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO
-        execution_dir = "./"
-        job = ""
-        # NOTE: Once runrunner works satisfactorily this should be refactored
-        if run_on == Runner.SLURM:
-            job = ssh.submit_sbatch_script(str(sbatch_script_path), command_name,
-                                           execution_dir)
-        else:
-            # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM_RR:
-                run_on = Runner.SLURM
-            batch = SlurmBatch(sbatch_script_path)
-            cmd_list = [f"{batch.cmd} {param}" for param in batch.cmd_params]
+        run = rrr.add_to_queue(
+            runner=run_on,
+            cmd=cmd_list,
+            name=CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO,
+            parallel_jobs=parallel_jobs,
+            path="./",
+            base_dir=sgh.sparkle_tmp_path,
+            sbatch_options=sbatch_options_list,
+            srun_options=srun_options)
+        if run_on == Runner.LOCAL:
+            run.wait()
 
-            run = rrr.add_to_queue(
-                runner=run_on,
-                cmd=cmd_list,
-                name=command_name,
-                path=execution_dir,
-                base_dir=sgh.sparkle_tmp_path,
-                sbatch_options=batch.sbatch_options,
-                srun_options=batch.srun_options)
-            # Remove SLURM_RR once runrunner works satisfactorily
-            if run_on == Runner.SLURM or run_on == Runner.SLURM_RR:
-                job = run
-            elif run_on == Runner.LOCAL:
-                run.wait()
-            # Remove the below if block once runrunner works satisfactorily
-            if run_on == Runner.SLURM:
-                run_on = Runner.SLURM_RR
         # NOTE: the IF statement below is Slurm only as well?
         # As running runtime based performance may be less relevant for Local
+        # NOTE: Why does this command have its own waiting process? If we need to handle
+        # Something after the job is done, we can just create a callback script to that
         perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if (run_on == Runner.SLURM and perf_m == PerformanceMeasure.RUNTIME):
-            handle_waiting_and_removal_process(instances, file_path_output1, job,
-                                               solver_instance_list, sbatch_script_path,
+            handle_waiting_and_removal_process(instances, file_path_output1, run.run_id,
+                                               solver_instance_list, run.script_filepath,
                                                num_jobs / len(instances))
 
             now = datetime.datetime.now()
@@ -772,7 +690,7 @@ def run_parallel_portfolio(instances: list[str],
             # After all jobs have finished remove/extract the files in temp only needed
             # for the running of the portfolios.
             remove_temp_files_unfinished_solvers(solver_instance_list,
-                                                 sbatch_script_path,
+                                                 run.script_filepath,
                                                  temp_solvers)
         elif run_on == Runner.SLURM:
             done = False
@@ -783,7 +701,7 @@ def run_parallel_portfolio(instances: list[str],
             while not done:
                 # Ask the cluster for a list of all jobs which are currently running
                 result = subprocess.run(["squeue", "--array",
-                                         "--jobs", job,
+                                         "--jobs", run.run_id,
                                          "--format",
                                          "%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R"],
                                         capture_output=True, text=True)
@@ -798,11 +716,11 @@ def run_parallel_portfolio(instances: list[str],
                     # Wait until the last few seconds before checking often
                     if not wait_cutoff_time:
                         n_seconds = sgh.settings.get_general_target_cutoff_time() - 6
-                        sjh.sleep(n_seconds)
+                        time.sleep(n_seconds)
                         wait_cutoff_time = True
                         n_seconds = 1  # Start checking often
 
-                sjh.sleep(n_seconds)
+                time.sleep(n_seconds)
         else:
             run.wait()
 
@@ -838,7 +756,8 @@ def run_parallel_portfolio(instances: list[str],
             else:
                 print(f"{str(instances)} was not solved in the given cutoff-time.")
     except Exception as except_msg:
-        print(f"Exception thrown during {command_name} call: {except_msg}")
+        print(f"Exception thrown during {CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO}: "
+              f"{except_msg}")
         return False
 
     return True

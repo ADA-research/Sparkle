@@ -5,9 +5,6 @@
 from __future__ import annotations
 from enum import Enum
 
-from Commands.sparkle_help import sparkle_snapshot_help as srh
-from Commands.sparkle_help import sparkle_file_help as sfh
-
 
 class CommandName(str, Enum):
     """Enum of all command names."""
@@ -21,6 +18,7 @@ class CommandName(str, Enum):
     COMPUTE_FEATURES = "compute_features"
     COMPUTE_MARGINAL_CONTRIBUTION = "compute_marginal_contribution"
     CONFIGURE_SOLVER = "configure_solver"
+    CONFIGURE_SOLVER_CALLBACK = "configure_solver_callback"
     CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR = "construct_sparkle_portfolio_selector"
     GENERATE_REPORT = "generate_report"
     INITIALISE = "initialise"
@@ -29,6 +27,9 @@ class CommandName(str, Enum):
     REMOVE_INSTANCES = "remove_instances"
     REMOVE_SOLVER = "remove_solver"
     RUN_ABLATION = "run_ablation"
+    RUN_ABLATION_VALIDATION = "run_ablation_validation"
+    ABLATION_CALLBACK = "ablation_callback"
+    ABLATION_VALIDATION_CALLBACK = "ablation_validation_callback"
     RUN_SOLVERS = "run_solvers"
     RUN_SPARKLE_PORTFOLIO_SELECTOR = "run_sparkle_portfolio_selector"
     RUN_STATUS = "run_status"
@@ -39,6 +40,7 @@ class CommandName(str, Enum):
     RUN_CONFIGURED_SOLVER = "run_configured_solver"
     CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO = "construct_sparkle_parallel_portfolio"
     RUN_SPARKLE_PARALLEL_PORTFOLIO = "run_sparkle_parallel_portfolio"
+    SPARKLE_CSV_MERGE = "sparkle_csv_merge"
 
     @staticmethod
     def from_str(command_name: str) -> CommandName:
@@ -111,27 +113,3 @@ COMMAND_DEPENDENCIES = {
         CommandName.INITIALISE,
         CommandName.CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO]
 }
-
-
-def check_for_initialise(argv: list[str], requirements: list[CommandName] = None)\
-        -> None:
-    """Function to check if initialize command was executed and execute it otherwise.
-
-    Args:
-        argv: List of the arguments from the caller.
-        requirements: The requirements that have to be executed before the calling
-            function.
-    """
-    if not srh.detect_current_sparkle_platform_exists(check_all_dirs=True):
-        print("-----------------------------------------------")
-        print("No Sparkle platform found; "
-              + "The platform will now be initialized automatically")
-        if requirements is not None:
-            if len(requirements) == 1:
-                print(f"The command {requirements[0]} has \
-                      to be executed before executing this command.")
-            else:
-                print(f"""The commands {", ".join(requirements)} \
-                      have to be executed before executing this command.""")
-        print("-----------------------------------------------")
-        sfh.initialise_sparkle(argv)

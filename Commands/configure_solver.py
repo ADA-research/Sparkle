@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to configure a solver."""
+from __future__ import annotations
 
 import argparse
 import sys
@@ -7,24 +8,25 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
-from Commands.Structures.status_info import ConfigureSolverStatusInfo
+from runrunner.base import Runner
+import runrunner as rrr
+
+from Commands.structures.status_info import ConfigureSolverStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SettingState
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
-from Commands.sparkle_help.reporting_scenario import Scenario
+from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_command_help as sch
-from Commands.sparkle_help.configurator import Configurator
-from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
-from Commands.sparkle_help.solver import Solver
+from Commands.structures.configurator import Configurator
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.solver import Solver
 from Commands.sparkle_help.sparkle_command_help import CommandName
-
-from runrunner.base import Runner
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -102,9 +104,9 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
-
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
+    )
     return parser
 
 
@@ -130,14 +132,53 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
             args.number_of_runs, SettingState.CMD_LINE)
 
 
+def run_after(solver: Path,
+              instance_set_train: Path,
+              instance_set_test: Path,
+              dependency: rrr.SlurmRun | rrr.LocalRun,
+              command: CommandName,
+              run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+    """Add a command to run after configuration to RunRunner queue.
+
+    Args:
+      solver: Path (object) to solver.
+      instance_set_train: Path (object) to instances used for training.
+      instance_set_test: Path (object) to instances used for testing.
+      dependency: String of job dependencies.
+      command: The command to run. Currently supported: Validation and Ablation.
+      run_on: Whether the job is executed on Slurm or locally.
+
+    Returns:
+      RunRunner Run object regarding the callback
+    """
+    cmd_file = "validate_configured_vs_default.py"
+    if command == CommandName.RUN_ABLATION:
+        cmd_file = "run_ablation.py"
+
+    command_line = f"./Commands/{cmd_file} --settings-file Settings/latest.ini "\
+                   f"--solver {solver.name} --instance-set-train {instance_set_train}"\
+                   f" --run-on {run_on}"
+    if instance_set_test is not None:
+        command_line += f" --instance-set-test {instance_set_test}"
+
+    run = rrr.add_to_queue(runner=run_on,
+                           cmd=command_line,
+                           name=command,
+                           dependencies=dependency,
+                           base_dir=sgh.sparkle_tmp_path,
+                           srun_options=["-N1", "-n1"],
+                           sbatch_options=ssh.get_slurm_options_list())
+
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        run.wait()
+    return run
+
+
 if __name__ == "__main__":
     # Initialise settings
     global settings
     sgh.settings = sparkle_settings.Settings()
-
-    # Initialise latest scenario
-    global latest_scenario
-    sgh.latest_scenario = ReportingScenario()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -157,22 +198,12 @@ if __name__ == "__main__":
     use_features = args.use_features
     run_on = args.run_on
     if args.configurator is not None:
-        configurator_path = args.configurator
-        configurator_target = [file for file in os.listdir(configurator_path)
-                               if file.endswith("_target_algorithm.py")]
-        if len(configurator_target) != 1:
-            print("Configurator Error: "
-                  f"Could not determine target script for {configurator_path}\n"
-                  "Please check target script file '*_target_algorithm.py'")
-            sys.exit(-1)
-        configurator_target = configurator_target[0]
-    else:
-        # SMAC is the default configurator
-        configurator_path = Path(sgh.smac_dir)
-        configurator_target = sgh.smac_target_algorithm
+        sgh.settings.set_general_sparkle_configurator(
+            value=getattr(Configurator, args.configurator),
+            origin=SettingState.CMD_LINE)
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.CONFIGURE_SOLVER])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:
@@ -224,45 +255,45 @@ if __name__ == "__main__":
     cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
         sgh.settings.get_general_sparkle_objectives()[0]
-    config_scenario = ConfigurationScenario(solver, instance_set_train, number_of_runs,
-                                            time_budget, cutoff_time, cutoff_length,
-                                            sparkle_objective, use_features,
-                                            configurator_target, feature_data_df)
-    configurator = Configurator(configurator_path)
-    configurator.create_sbatch_script(config_scenario)
-    configure_jobid = configurator.configure(run_on=run_on)
+    configurator = sgh.settings.get_general_sparkle_configurator()
+    config_scenario = ConfigurationScenario(
+        solver, instance_set_train, number_of_runs, time_budget, cutoff_time,
+        cutoff_length, sparkle_objective, use_features,
+        configurator.configurator_target, feature_data_df)
+
+    configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
-    sgh.latest_scenario.set_config_solver(solver.directory)
-    sgh.latest_scenario.set_config_instance_set_train(instance_set_train)
-    sgh.latest_scenario.set_latest_scenario(Scenario.CONFIGURATION)
+    sgh.latest_scenario().set_config_solver(solver.directory)
+    sgh.latest_scenario().set_config_instance_set_train(instance_set_train)
+    sgh.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        sgh.latest_scenario.set_config_instance_set_test(instance_set_test)
+        sgh.latest_scenario().set_config_instance_set_test(instance_set_test)
     else:
         # Set to default to overwrite possible old path
-        sgh.latest_scenario.set_config_instance_set_test()
+        sgh.latest_scenario().set_config_instance_set_test()
 
-    dependency_jobid_list = [configure_jobid]
-    callback_jobid = configurator.configuration_callback(configure_jobid, run_on=run_on)
+    dependency_job_list = [configure_job]
+    callback_job = configurator.configuration_callback(configure_job, run_on=run_on)
 
     # Set validation to wait until configuration is done
     if validate:
-        validate_jobid = ssh.run_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid,
+        validate_jobid = run_after(
+            solver, instance_set_train, instance_set_test, configure_job,
             command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
-        dependency_jobid_list.append(validate_jobid)
+        dependency_job_list.append(validate_jobid)
 
     if ablation:
-        ablation_jobid = ssh.run_callback(
-            solver, instance_set_train, instance_set_test, configure_jobid,
+        ablation_jobid = run_after(
+            solver, instance_set_train, instance_set_test, configure_job,
             command=CommandName.RUN_ABLATION, run_on=run_on
         )
-        dependency_jobid_list.append(ablation_jobid)
+        dependency_job_list.append(ablation_jobid)
 
     if run_on == Runner.SLURM:
-        job_id_str = ",".join(dependency_jobid_list)
+        job_id_str = ",".join([run.run_id for run in dependency_job_list])
         print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
     else:
@@ -272,4 +303,4 @@ if __name__ == "__main__":
     # Write used settings to file
     sgh.settings.write_used_settings()
     # Write used scenario to file
-    sgh.latest_scenario.write_scenario_ini()
+    sgh.latest_scenario().write_scenario_ini()

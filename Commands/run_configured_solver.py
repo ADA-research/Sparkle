@@ -5,16 +5,16 @@ import sys
 import argparse
 from pathlib import Path
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help.sparkle_settings import SettingState
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -43,8 +43,9 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
+    )
     return parser
 
 
@@ -64,8 +65,8 @@ if __name__ == "__main__":
     instance_path = args.instance_path
     run_on = args.run_on
 
-    sch.check_for_initialise(
-        sys.argv, sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
@@ -75,16 +76,13 @@ if __name__ == "__main__":
             args.performance_measure, SettingState.CMD_LINE
         )
 
-    # Initialise latest scenario
-    sgh.latest_scenario = ReportingScenario()
-
     # Validate input (is directory, or single instance (single-file or multi-file))
     if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Call the configured solver
-        job_id_str = srcsh.call_configured_solver(args.instance_path,
-                                                  args.parallel,
-                                                  run_on=run_on)
+        run = srcsh.call_configured_solver(args.instance_path,
+                                           args.parallel,
+                                           run_on=run_on)
     else:
         print("ERROR: Faulty input instance or instance directory!")
         sys.exit(-1)
@@ -92,7 +90,7 @@ if __name__ == "__main__":
     # Print result
     if args.parallel and run_on == Runner.SLURM:
         print(f"Running configured solver in parallel. Waiting for Slurm "
-              f"job(s) with id(s): {job_id_str}")
+              f"job(s) with id(s): {run.run_id}")
     else:
         print("Running configured solver done!")
 

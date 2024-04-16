@@ -9,9 +9,13 @@ from unittest.mock import patch
 from unittest.mock import Mock
 from pathlib import Path
 
-from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
-from Commands.sparkle_help.solver import Solver
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.solver import Solver
+from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
+
+global settings
+sgh.settings = sparkle_settings.Settings()
 
 
 class TestConfigurationScenario(TestCase):
@@ -38,15 +42,16 @@ class TestConfigurationScenario(TestCase):
         self.sparkle_objective =\
             sgh.settings.get_general_sparkle_objectives()[0]
 
-        self.scenario = ConfigurationScenario(self.solver,
-                                              self.instance_directory,
-                                              self.run_number,
-                                              self.time_budget,
-                                              self.cutoff_time,
-                                              self.cutoff_length,
-                                              self.sparkle_objective,
-                                              False,
-                                              sgh.smac_target_algorithm)
+        self.scenario = ConfigurationScenario(
+            solver=self.solver,
+            instance_directory=self.instance_directory,
+            number_of_runs=self.run_number,
+            time_budget=self.time_budget,
+            cutoff_time=self.cutoff_time,
+            cutoff_length=self.cutoff_length,
+            sparkle_objective=self.sparkle_objective,
+            use_features=False,
+            configurator_target=Path(sgh.smac_target_algorithm))
 
     def tearDown(self: TestConfigurationScenario) -> None:
         """Cleanup executed after each test."""
@@ -90,18 +95,6 @@ class TestConfigurationScenario(TestCase):
         self.assertTrue(self.scenario.result_directory.is_dir())
 
     @patch.object(Solver, "is_deterministic")
-    def test_configuration_scenario_check_run_folders(self: TestConfigurationScenario,
-                                                      mock_deterministic: Mock) -> None:
-        """Test if create_scenario() correctly creates the run directories."""
-        self.scenario.create_scenario(self.parent_directory)
-
-        for i in range(self.run_number):
-            run_path = self.scenario.directory / str(i + 1)
-            self.assertTrue(run_path.is_dir())
-            self.assertTrue((run_path / "PbO-CCSAT").is_file())
-            self.assertTrue((run_path / "tmp").is_dir())
-
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_instance_directory(
         self: TestConfigurationScenario,
         mock_deterministic: Mock
@@ -119,10 +112,15 @@ class TestConfigurationScenario(TestCase):
         mock_deterministic: Mock
     ) -> None:
         """Test if create_scenario() correctly creates the scenario file."""
-        mock_abs.side_effect = [Path("tests/test_files/test_configurator")]
+        inst_list_path = Path("tests/test_files/test_configurator/scenarios/instances/"
+                              "Test-Instance-Set/Test-Instance-Set_train.txt")
+        mock_abs.side_effect = [Path("tests/test_files/test_configurator"),
+                                Path("/configurator_dir/target_algorithm.py"),
+                                self.solver_path,
+                                inst_list_path,
+                                inst_list_path]
         mock_deterministic.return_value = "0"
-
-        self.scenario.create_scenario(self.parent_directory, )
+        self.scenario.create_scenario(self.parent_directory)
 
         scenario_file_path = self.scenario.directory / self.scenario.scenario_file_name
         reference_scenario_file = Path("tests", "test_files", "reference_files",

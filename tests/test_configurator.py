@@ -7,10 +7,14 @@ from pytest_mock import MockerFixture
 
 from pathlib import Path
 
-from Commands.sparkle_help.solver import Solver
-from Commands.sparkle_help.configuration_scenario import ConfigurationScenario
-from Commands.sparkle_help.configurator import Configurator
+from Commands.structures.solver import Solver
+from Commands.structures.configuration_scenario import ConfigurationScenario
+from Commands.structures.configurator import Configurator
+from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
+
+global settings
+sgh.settings = sparkle_settings.Settings()
 
 
 class TestConfigurator():
@@ -23,39 +27,15 @@ class TestConfigurator():
         """Test that Configurator initialization calls create_scenario() correctly."""
         mock_path = mocker.patch.object(Path, "mkdir")
 
-        configurator = Configurator(configurator_path)
+        configurator = Configurator(configurator_path=configurator_path,
+                                    executable_path=None,
+                                    settings_path=None,
+                                    result_path=None,
+                                    configurator_target=None)
 
         assert configurator.configurator_path == configurator_path
 
         mock_path.assert_called_once()
-
-    def test_create_sbatch_script(self: TestConfigurator,
-                                  mocker: MockerFixture,
-                                  scenario_fixture: ConfigurationScenario,
-                                  configurator_path: Path) -> None:
-        """Test correct sbatch script creation."""
-        mocker.patch.object(Path, "mkdir")
-        mocker.patch.object(ConfigurationScenario, "create_scenario", return_value=None)
-        scenario_fixture.directory = Path("parent_dir", "scenarios",
-                                          scenario_fixture.name)
-        scenario_fixture.scenario_file_name = f"{scenario_fixture.name}_scenario.txt"
-
-        mock_config_scenario = mocker.patch.object(ConfigurationScenario,
-                                                   "create_scenario",
-                                                   return_value=False)
-
-        configurator = Configurator(configurator_path)
-
-        reference_file_path = Path("tests", "test_files", "reference_files", "sbatch.sh")
-        with reference_file_path.open("r") as file:
-            reference_file_content = file.read()
-
-        mocked_file = mocker.patch("pathlib.Path.open", mocker.mock_open())
-
-        configurator.create_sbatch_script(scenario_fixture)
-
-        mocked_file().write.assert_called_with(reference_file_content)
-        mock_config_scenario.assert_called_with(parent_directory=configurator_path)
 
 
 @pytest.fixture

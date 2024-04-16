@@ -9,12 +9,12 @@ dependencies:
   - gnuplot
   - pip
   - pip:
-    - --editable .  # self install !
-    - runrunner @ git+https://bitbucket.org/sparkle-ai/runrunner.git@main#egg=runrunner
     # For Sparkle
+    - --editable .  # self install !
     - swig==3.0.6 #Changed from 3.0 to 3.0.6
     - numpy
     - pandas
+    - RunRunner==0.1.2
     # Testing
     - pytest
     - pytest-mock==3.10.0

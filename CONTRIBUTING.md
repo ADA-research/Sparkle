@@ -85,7 +85,7 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 6. Only if all checks were passed successfully, move on to the steps for release. Otherwise, first fix what is failing and then re-do all the checks.
 
 ### Release
-1. Create a branch with the version number of the release from the `development` branch
+1. Create a branch with the version number of the release from the `development` branch, named ``release/$VERSION''
 2. Update and commit `CHANGELOG.md` by creating a header with the release number and date; move everything from the `[unreleased]` header to the new release header (leaving the `[unreleased]` header empty for the next release).
 3. Update and commit `sparkle/about.py` by changing the version number.
 4. Merge the new version branch into both `development` and `main`, DO NOT delete the version branch!

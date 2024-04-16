@@ -7,16 +7,16 @@ import os
 import argparse
 from pathlib import Path
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help.reporting_scenario import ReportingScenario
 from Commands.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from Commands.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help import sparkle_command_help as sch
-
-from runrunner.base import Runner
+from Commands.initialise import check_for_initialise
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -25,10 +25,10 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
         parser: The parser with the parsed command line arguments
     """
-    if sgh.latest_scenario is None:
+    if sgh._latest_scenario is None:
         latest = "no scenario found, you have to construct a parallel portfolio first."
     else:
-        latest = sgh.latest_scenario.get_parallel_portfolio_path()
+        latest = sgh.latest_scenario().get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
     performance_measure =\
         sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
@@ -79,8 +79,8 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
-        help=("On which computer or cluster environment to execute the calculation."
-              "Available: local, slurm. Default: slurm"))
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation."))
     parser.add_argument(
         "--settings-file",
         type=Path,
@@ -93,9 +93,6 @@ if __name__ == "__main__":
     # Initialise settings
     sgh.settings = sparkle_settings.Settings()
 
-    # Initialise latest scenario
-    sgh.latest_scenario = ReportingScenario()
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -105,8 +102,10 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    sch.check_for_initialise(sys.argv, sch.COMMAND_DEPENDENCIES[
-                             sch.CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO])
+    check_for_initialise(
+        sys.argv,
+        sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO]
+    )
 
     # Do first, so other command line options can override settings from the file
     if args.settings_file is not None:
@@ -120,7 +119,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     if args.portfolio_name is None:
-        portfolio_path = sgh.latest_scenario.get_parallel_portfolio_path()
+        portfolio_path = sgh.latest_scenario().get_parallel_portfolio_path()
     elif not portfolio_path.is_dir():
         portfolio_path = Path(sgh.sparkle_parallel_portfolio_dir / args.portfolio_name)
 
@@ -167,7 +166,7 @@ if __name__ == "__main__":
     succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path, run_on=run_on)
 
     if succes:
-        sgh.latest_scenario.set_parallel_portfolio_instance_list(instance_paths)
+        sgh.latest_scenario().set_parallel_portfolio_instance_list(instance_paths)
         print("Running Sparkle parallel portfolio is done!")
 
         # Write used settings to file

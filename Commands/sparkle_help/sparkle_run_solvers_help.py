@@ -13,7 +13,7 @@ from Commands.sparkle_help import sparkle_basic_help as sbh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
 from Commands.sparkle_help import sparkle_job_help as sjh
-from Commands.sparkle_help.sparkle_settings import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 
 import functools
@@ -70,7 +70,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
                                     custom_cutoff: int = None,
                                     is_configured: bool = False) -> Path:
     """Run the solver on the given instance, with a given command line call.
-    
+
     Parameters
     ----------
     solver_path: Path
@@ -89,7 +89,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
     Returns
     -------
-    raw_result_path: 
+    raw_result_path:
         Path to the solver output
     """
     if custom_cutoff is None:
@@ -436,18 +436,18 @@ def get_runtime_from_runsolver(runsolver_values_path: str) -> (float, float):
     """Return the CPU and wallclock time reported by runsolver."""
     cpu_time = -1.0
     wc_time = -1.0
-
-    with Path(runsolver_values_path).open("r+") as infile:
-        fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip().split("=") for line in infile.readlines()
-                 if len(line.split("=")) == 2]
-        for keyword, value in lines:
-            if keyword == "WCTIME":
-                wc_time = float(value)
-            elif keyword == "CPUTIME":
-                cpu_time = float(value)
-                # Order is fixed, CPU is the last thing we want to read, so break
-                break
+    if Path(runsolver_values_path).exists():
+        with Path(runsolver_values_path).open("r+") as infile:
+            fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
+            lines = [line.strip().split("=") for line in infile.readlines()
+                     if len(line.split("=")) == 2]
+            for keyword, value in lines:
+                if keyword == "WCTIME":
+                    wc_time = float(value)
+                elif keyword == "CPUTIME":
+                    cpu_time = float(value)
+                    # Order is fixed, CPU is the last thing we want to read, so break
+                    break
     return cpu_time, wc_time
 
 

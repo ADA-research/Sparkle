@@ -14,27 +14,29 @@ from pathlib import Path
 args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
+solver_dir = Path(args["solver_dir"])
 instance = args["instance"]
 specifics = args["specifics"]
 cutoff_time = int(args["cutoff_time"]) + 1
 run_length = args["run_length"]
 seed = args["seed"]
 
+del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
 del args["specifics"]
 del args["run_length"]
 
-runsolver_binary = "./runsolver"
 # TODO: Change solver name
-solver_binary = "./SOME_SOLVER_NAME"
+solver_bin = "SOME_SOLVER_NAME"
+solver_exec_path = f"{solver_dir / solver_bin}"
 
 tmp_directory = Path("tmp/")
 tmp_directory.mkdir(exist_ok=True)
 
 instance_name = Path(instance).name
-solver_name = Path(solver_binary).name
+solver_name = Path(solver_exec_path).name
 # Create a unique name for your runsolver log file, for example:
 runsolver_watch_data_path = tmp_directory \
     / f"{solver_name}_{instance_name}_{random.randint()}.log"
@@ -46,10 +48,7 @@ for key in args:
     if args[key] is not None:
         params.extend(["-" + str(key), str(args[key])])
 # TODO: Change call to solver (Solver_binary)
-runsolver_call = [runsolver_binary,
-                  "-w", str(runsolver_watch_data_path),
-                  "--cpu-limit", str(cutoff_time),
-                  solver_binary,
+runsolver_call = [solver_exec_path,
                   "-inst", instance,
                   "-seed", str(seed)]
 
@@ -80,8 +79,7 @@ for line in output_list:
 # Output results in the format target_algorithm requires
 outdir = {"status": status,
           "quality": 0,
-          "solver_call": runsolver_call + params,
-          "raw_output": output_list}
+          "solver_call": runsolver_call + params}
 
 # Write raw solver output to file for Sparkle when calling run_configured_solver.py
 if specifics == "rawres":

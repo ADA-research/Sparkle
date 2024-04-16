@@ -31,7 +31,7 @@ def compile_pdf(latex_directory_path: Path, latex_report_filename: Path) -> Path
                                  cwd=latex_directory_path, capture_output=True)
 
     if pdf_process.returncode != 0:
-        print(f"ERROR {pdf_process.returncode} generating with PDFLatex command:\n"
+        print(f"[{pdf_process.returncode}] ERROR generating with PDFLatex command:\n"
               f"{pdf_process.stdout.decode()}\n {pdf_process.stderr.decode()}\n")
 
     bibtex_process = subprocess.run(["bibtex", f"{latex_report_filename}.aux"],
