@@ -163,7 +163,7 @@ if __name__ == "__main__":
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(sgh.ReportType.ALGORITHM_SELECTION)
         status_info.save()
-        sgrh.generate_report(test_case_directory)
+        sgrh.generate_report_selection(test_case_directory)
         if test_case_directory is None:
             print("Report generated ...")
         else:
@@ -176,7 +176,8 @@ if __name__ == "__main__":
         status_info.set_report_type(sgh.ReportType.PARALLEL_PORTFOLIO)
         status_info.save()
 
-        sgrfpph.generate_report(parallel_portfolio_path, pap_instance_list)
+        sgrfpph.generate_report_parallel_portfolio(
+            parallel_portfolio_path, pap_instance_list)
         print("Parallel portfolio report generated ...")
         status_info.delete()
     else:

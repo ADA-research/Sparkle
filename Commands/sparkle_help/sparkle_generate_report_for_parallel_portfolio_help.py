@@ -9,7 +9,6 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
-from Commands.sparkle_help import sparkle_tex_help as stex
 from Commands.structures.sparkle_objective import PerformanceMeasure
 
 
@@ -430,33 +429,23 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     return variables_dict
 
 
-def generate_report(parallel_portfolio_path: Path, instances: list[str]) -> None:
+def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
+                                       instances: list[str]) -> None:
     """Generate a report for a parallel algorithm portfolio.
 
     Args:
         parallel_portfolio_path: Parallel portfolio path.
         instances: List of instances.
     """
-    latex_report_filename = Path("Sparkle_Report")
     dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path,
                                                         instances)
-
+    target_path = Path()
     latex_directory_path = Path(
         "Components/Sparkle-latex-generator-for-parallel-portfolio/")
-    latex_template_filename = Path("template-Sparkle.tex")
-    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
-    report_content = latex_template_filepath.open("r").read()
-    report_content = sgrh.fill_template_tex(report_content, dict_variable_to_value)
 
-    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
-    latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-
-    with Path(latex_report_filepath).open("w+") as outfile:
-        for line in report_content:
-            outfile.write(line)
-
-    stex.check_tex_commands_exist(latex_directory_path)
-    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
-
-    print(f"Report is placed at: {report_path}")
-    sl.add_output(str(report_path), "Sparkle parallel portfolio report")
+    sgrh.generate_report(latex_directory_path,
+                         "template-Sparkle.tex",
+                         target_path,
+                         "Sparkle_Report_Parallel_Portfolio",
+                         dict_variable_to_value)
+    sl.add_output(str(target_path), "Sparkle parallel portfolio report")

@@ -14,7 +14,6 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
 from Commands.sparkle_help import sparkle_run_ablation_help as sah
-from Commands.sparkle_help import sparkle_tex_help as stex
 from Commands.sparkle_help.sparkle_generate_report_help import generate_comparison_plot
 
 
@@ -825,35 +824,12 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
     dict_variable_to_value = (
         get_dict_variable_to_value(solver_name, instance_set_train_name,
                                    instance_set_test_name, ablation=ablation))
+    target_path = Path()
+    latex_dir = Path(configuration_reports_directory) /\
+        "Sparkle-latex-generator-for-configuration"
+    sgrh.generate_report(latex_dir,
+                         "template-Sparkle-for-configuration.tex",
+                         target_path,
+                         "Sparkle_Report_for_Configuration",
+                         dict_variable_to_value)
 
-    generate_report_for_configuration_common(configuration_reports_directory,
-                                             dict_variable_to_value)
-
-
-def generate_report_for_configuration_common(configuration_reports_directory: str,
-                                             dict_variable_to_value: dict) -> None:
-    """Generate the common part of all algorithm configuration reports.
-
-    Args:
-        configuration_reports_directory: Directory for the configuration reports
-        dict_variable_to_value: Dictionary containing values for LaTeX
-    """
-    latex_dir_path = Path(configuration_reports_directory) /\
-        "Sparkle-latex-generator-for-configuration/"
-
-    # Read in the report template from file
-    latex_template_path = latex_dir_path / "template-Sparkle-for-configuration.tex"
-    report_content = latex_template_path.open("r").read()
-    # Replace variables in the report template with their value
-    report_content = sgrh.fill_template_tex(report_content, dict_variable_to_value)
-
-    # Write the completed report to a tex file
-    latex_report_filepath = latex_dir_path / "Sparkle_Report_for_Configuration.tex"
-    latex_report_filepath.open("w+").write(report_content)
-
-    # Compile the report
-    stex.check_tex_commands_exist(latex_dir_path)
-    report_path = stex.compile_pdf(latex_dir_path, latex_report_filepath.stem)
-
-    print(f"Report is placed at: {report_path}\n"
-          "Generating report for configuration done!")

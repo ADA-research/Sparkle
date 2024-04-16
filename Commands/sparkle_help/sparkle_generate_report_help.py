@@ -416,7 +416,7 @@ def fill_template_tex(template_tex: str, variables: dict) -> str:
     return template_tex
 
 
-def generate_report(test_case_directory: str = None) -> None:
+def generate_report_selection(test_case_directory: str = None) -> None:
     """Generate a report for algorithm selection.
 
     Args:
@@ -432,35 +432,50 @@ def generate_report(test_case_directory: str = None) -> None:
             test_case_directory += "/"
 
         latex_report_filename = Path("Sparkle_Report_for_Test")
-        dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
+        
     # Only look at the training instance set(s)
     else:
         latex_report_filename = Path("Sparkle_Report")
-        dict_variable_to_value = get_dict_variable_to_value()
 
-    latex_directory_path = Path("Components/Sparkle-latex-generator/")
+    dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
+    target_path = Path()
 
-    latex_template_filepath = latex_directory_path / "template-Sparkle.tex"
-    report_content = Path(latex_template_filepath).open("r").read()
+    generate_report(Path("Components/Sparkle-latex-generator/"),
+                    "template-Sparkle.tex",
+                    target_path,
+                    latex_report_filename,
+                    dict_variable_to_value)
+    sl.add_output(str(target_path), "Sparkle portfolio selector report")
 
-    for variable_key, str_value in dict_variable_to_value.items():
-        variable = r"@@" + variable_key + r"@@"
-        if (variable_key != "figure-portfolio-selector-sparkle-vs-sbs"
-           and variable_key != "figure-portfolio-selector-sparkle-vs-vbs"):
-            str_value = str_value.replace("_", r"\textunderscore ")
-        report_content = report_content.replace(variable, str_value)
 
-    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
+def generate_report(latex_source_path: Path,
+                    latex_template_name: str,
+                    target_path: Path,
+                    report_name: str,
+                    variable_dict: dict) -> None:
+    """General steps to generate a report.
+
+    Args:
+        latex_source_path: The path to the template
+        latex_template_name: The template name
+        target_path: The directory where the result should be placed
+        report_name: The name of the pdf (without suffix)
+        variable_dict: TBD
+    """
+
+    latex_template_filepath = latex_source_path / latex_template_name
+
+    report_content = latex_template_filepath.open("r").read()
+    report_content = fill_template_tex(report_content, variable_dict)
+
+    latex_report_filepath = latex_source_path / report_name
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-
     Path(latex_report_filepath).open("w+").write(report_content)
 
-    stex.check_tex_commands_exist(latex_directory_path)
-
-    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
+    stex.check_tex_commands_exist(latex_source_path)
+    report_path = stex.compile_pdf(latex_source_path, report_name)
 
     print(f"Report is placed at: {report_path}")
-    sl.add_output(str(report_path), "Sparkle portfolio selector report")
 
 
 def generate_comparison_plot(points: list,
