@@ -42,7 +42,7 @@ def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> N
                                         return_value=3)
     instance_set_name = "test-instance"
 
-    number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
+    number = sgr.get_num_instance_for_configurator(instance_set_name)
 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_called_once_with(instance_set_name)
@@ -67,7 +67,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
                                                     Path("instance-2")])
     instance_set_name = "test-instance"
 
-    number = sgr.get_num_instance_in_instance_set_smac_dir(instance_set_name)
+    number = sgr.get_num_instance_for_configurator(instance_set_name)
 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
@@ -85,19 +85,19 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     """
     results_file = "example_file"
     cutoff = 42
-    mock_construct_list = mocker.patch("Commands.sparkle_help.sparkle_generate_"
-                                       "report_for_configuration_help."
-                                       "construct_list_instance_and_performance",
-                                       return_value=[["one", 10], ["two", 5]])
+    mock_get_list = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+                                 "report_for_configuration_help."
+                                 "get_instance_performance_from_csv",
+                                 return_value=[("one", 10), ("two", 5)])
 
     par = sgr.get_par_performance(results_file, cutoff)
 
-    mock_construct_list.assert_called_once_with(results_file, cutoff)
+    mock_get_list.assert_called_once_with(results_file, cutoff)
     assert par == 7.5
 
 
-def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
-    """Test construct_list_instance_and_performance creates list from file content."""
+def test_get_instance_performance_from_csv(mocker: MockFixture) -> None:
+    """Test get_instance_performance_from_csv creates list from file content."""
     file_content_mock = ('"Problem Instance","Seed",'
                          '"Objective of validation config #1"\n'
                          '"../../instances/instances/instance-1.cnf","null","0.001"\n'
@@ -108,22 +108,21 @@ def test_construct_list_instance_and_performance(mocker: MockFixture) -> None:
                  return_value=("RUNTIME", "", "", "", "", ""))
 
     result_file = ""
-    cutoff = 10
-    list = sgr.construct_list_instance_and_performance(result_file, cutoff)
-
-    assert list == (
-        [["instance-1.cnf", 0.01001], ["instance-2.cnf", 1.0], ["instance-3.cnf", 100.0]]
-    )
+    cutoff = 10.0
+    list = sgr.get_instance_performance_from_csv(result_file, cutoff)
+    assert list == [("instance-1.cnf", 0.001),
+                    ("instance-2.cnf", 1.0),
+                    ("instance-3.cnf", 100.0)]
 
 
 def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     """Test get_dict_instance_to_performance creates dict from performance list."""
-    instance_list = [["instance-1.cnf", 0.01001],
-                     ["instance-2.cnf", 1.0],
-                     ["instance-3.cnf", 100]]
+    instance_list = [("instance-1.cnf", 0.01001),
+                     ("instance-2.cnf", 1.0),
+                     ("instance-3.cnf", 100)]
     mock_construct = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                   "configuration_help."
-                                  "construct_list_instance_and_performance",
+                                  "get_instance_performance_from_csv",
                                   return_value=instance_list)
 
     result_file = "results.file"
@@ -188,7 +187,7 @@ def test_get_performance_measure_performance(mocker: MockFixture) -> None:
     assert measure == "performance"
 
 
-def test_get_runtime_bool_runtime(mocker: MockFixture) -> None:
+def test_get_runtime_bool(mocker: MockFixture) -> None:
     """Test get_runtime_bool returns correct string for objective RUNTIME."""
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
@@ -199,9 +198,7 @@ def test_get_runtime_bool_runtime(mocker: MockFixture) -> None:
     mock_settings.assert_called_once_with()
     assert runtime_bool == r"\runtimetrue"
 
-
-def test_get_runtime_bool_quality(mocker: MockFixture) -> None:
-    """Test get_runtime_bool returns correct string for objective QUALITY."""
+    # Quality
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("QUALITY", "", "", "", "", ""))
@@ -211,9 +208,7 @@ def test_get_runtime_bool_quality(mocker: MockFixture) -> None:
     mock_settings.assert_called_once_with()
     assert runtime_bool == r"\runtimefalse"
 
-
-def test_get_runtime_bool_other(mocker: MockFixture) -> None:
-    """Test get_runtime_bool returns correct string for no given objective."""
+    # Other
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("ERROR", "", "", "", "", ""))
@@ -818,15 +813,9 @@ def test_get_dict_variable_to_value_with_features(mocker: MockFixture) -> None:
                              "configuration_help."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
-    mock_num_extractors = mocker.patch("Commands.sparkle_help.sparkle_generate_report_"
-                                       "help.get_num_feature_extractors",
-                                       return_value="42")
     mock_extractor_list = mocker.patch("Commands.sparkle_help.sparkle_generate_report_"
                                        "help.get_feature_extractor_list",
                                        return_value="43")
-    mock_cutoff = mocker.patch("Commands.sparkle_help.sparkle_generate_report_help."
-                               "get_feature_computation_cutoff_time",
-                               return_value="44")
 
     full_dict = sgr.get_dict_variable_to_value(solver_name, train_instance,
                                                test_instance, ablation)
@@ -834,9 +823,7 @@ def test_get_dict_variable_to_value_with_features(mocker: MockFixture) -> None:
     mock_common.assert_called_once_with(solver_name, train_instance,
                                         test_instance, config_reports_dir)
     mock_test.assert_called_once_with(solver_name, train_instance, test_instance)
-    mock_num_extractors.assert_called_once_with()
     mock_extractor_list.assert_called_once_with()
-    mock_cutoff.assert_called_once_with()
     assert full_dict == {
         "testBool": r"\testtrue",
         "numFeatureExtractors": "42",
@@ -871,17 +858,11 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                 "configuration_help."
                                 "get_runtime_bool",
                                 return_value="runtimetrue")
-    mock_commands = mocker.patch("Commands.sparkle_help.sparkle_generate_report_help."
-                                 "get_custom_commands",
-                                 return_value="commands")
-    mock_sparkle = mocker.patch("Commands.sparkle_help.sparkle_generate_report_help."
-                                "get_sparkle",
-                                return_value="emph{Sparkle}")
     mocker.patch("Commands.sparkle_help.sparkle_global_help."
-                 "sparkle_version", "0.3")
+                 "sparkle_version", "0.7")
     mock_instance_num = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                      "configuration_help."
-                                     "get_num_instance_in_instance_set_smac_dir",
+                                     "get_num_instance_for_configurator",
                                      return_value="4")
     mock_par_perf = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                  "configuration_help."
@@ -928,8 +909,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     mock_config.assert_called_with(solver_name, train_instance)
     mock_perf.assert_called_once_with()
     mock_runtime.assert_called_once_with()
-    mock_commands.assert_called_once_with()
-    mock_sparkle.assert_called_once_with()
     mock_instance_num.assert_called_once_with(train_instance)
     mock_par_perf.assert_has_calls([
         mocker.call(configured_results_train_dir, cutoff),
@@ -946,11 +925,9 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     assert common_dict == {
         "performanceMeasure": "PERF",
         "runtimeBool": "runtimetrue",
-        "customCommands": "commands",
-        "sparkle": "emph{Sparkle}",
         "solver": solver_name,
         "instanceSetTrain": train_instance,
-        "sparkleVersion": "0.3",
+        "sparkleVersion": "0.7",
         "numInstanceInTrainingInstanceSet": "4",
         "numSmacRuns": "11",
         "smacObjective": "OBJ",
@@ -981,7 +958,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
 
     mock_instance_num = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
                                      "configuration_help."
-                                     "get_num_instance_in_instance_set_smac_dir",
+                                     "get_num_instance_for_configurator",
                                      return_value="4")
     mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
                                  "get_smac_settings",
@@ -1099,7 +1076,6 @@ def test_get_most_recent_test_run_full(mocker: MockFixture) -> None:
     If the last test file contains information on train and test instances, return the
     corresponding information and set the flags to True.
     """
-    solver_name = "solver-name"
     file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n"
                          "train Instances/PTN\n"
                          "test Instances/PTN2")
@@ -1107,7 +1083,7 @@ def test_get_most_recent_test_run_full(mocker: MockFixture) -> None:
     mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
 
     (train_instance, test_instance, train_flag, test_flag) = (
-        sgr.get_most_recent_test_run(solver_name))
+        sgr.get_most_recent_test_run())
 
     assert train_instance == "Instances/PTN"
     assert test_instance == "Instances/PTN2"
@@ -1121,13 +1097,12 @@ def test_get_most_recent_test_run_empty(mocker: MockFixture) -> None:
     If the last test file contains no information on train and test instances, return the
     empty strings and set the flags to False.
     """
-    solver_name = "solver-name"
     file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n")
 
     mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
 
     (train_instance, test_instance, train_flag, test_flag) = (
-        sgr.get_most_recent_test_run(solver_name))
+        sgr.get_most_recent_test_run())
 
     assert train_instance == ""
     assert test_instance == ""

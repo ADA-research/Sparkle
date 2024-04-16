@@ -18,8 +18,8 @@ from Commands.sparkle_help import sparkle_tex_help as stex
 from Commands.sparkle_help.sparkle_generate_report_help import generate_comparison_plot
 
 
-def get_num_instance_in_instance_set_smac_dir(instance_set_name: str) -> str:
-    """Return the number of instances for an instance set used by SMAC.
+def get_num_instance_for_configurator(instance_set_name: str) -> str:
+    """Return the number of instances for an instance set used by configurator.
 
     Args:
         instance_set_name: Name of the instance set
@@ -63,24 +63,21 @@ def get_par_performance(results_file: str, cutoff: int) -> float:
     Returns:
         PAR performance value
     """
-    list_instance_and_par = construct_list_instance_and_performance(results_file,
-                                                                    cutoff)
+    list_instance_and_par = get_instance_performance_from_csv(results_file,
+                                                              float(cutoff))
     sum_par = 0.0
-    num_instances = 0
+    num_instances = len(list_instance_and_par)
 
     for item in list_instance_and_par:
-        num_instances += 1
         sum_par += float(item[1])
 
-    mean_par = float(sum_par / num_instances)
-
-    return mean_par
+    return float(sum_par / num_instances)
 
 
 # Retrieve instances and corresponding performance values from smac validation objective
 # matrix
-def construct_list_instance_and_performance(result_file: str,
-                                            cutoff: int) -> list[list[str | float]]:
+def get_instance_performance_from_csv(result_file: str,
+                                      cutoff: float) -> list[tuple[str | float]]:
     """Extracts a list of [instance, performance] pairs from a result file.
 
     Args:
@@ -91,29 +88,24 @@ def construct_list_instance_and_performance(result_file: str,
         A list containing the performance for each instance
     """
     list_instance_and_performance = []
-
-    csv_lines = Path(result_file).open("r").readlines()
-    csv_lines = csv_lines[1:]  # Skip column titles
-
+    # Read CSV, skip column titles
+    csv_lines = Path(result_file).open("r").readlines()[1:]
+    # If the objective is runtime, compute the PAR score; otherwise don't modify
+    # the value
+    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    penalty = sgh.settings.get_general_penalty_multiplier()
     for csv_line in csv_lines:
         values = csv_line.strip().split(",")
         instance = Path(values[0].strip('"')).name
         performance = float(values[2].strip('"'))
 
-        # If the objective is runtime, compute the PAR score; otherwise don't modify
-        # the value
-        smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
-
         if smac_run_obj == "RUNTIME":
-            # TODO: Verifiy/explain why this is Incorrect/Correct flow
-            # Minimum runtime. Is lower than this not accurate?
-            if performance < 0.01001:
-                performance = 0.01001
+            if performance < 0.0:
+                performance = 0.0
             elif performance >= cutoff:
-                penalty = sgh.settings.get_general_penalty_multiplier()
-                performance = float(cutoff) * penalty
+                performance = cutoff * penalty
 
-        list_instance_and_performance.append([instance, performance])
+        list_instance_and_performance.append((instance, performance))
     return list_instance_and_performance
 
 
@@ -127,17 +119,11 @@ def get_dict_instance_to_performance(results_file: str, cutoff: int) -> dict[str
     Returns:
         A dictionary containing the performance for each instance
     """
-    list_instance_and_performance = construct_list_instance_and_performance(
+    instance_performance = get_instance_performance_from_csv(
         results_file, float(cutoff))
 
-    dict_instance_to_performance = {}
-
-    for item in list_instance_and_performance:
-        instance = Path(item[0]).name
-        performance_value = item[1]
-        dict_instance_to_performance[instance] = performance_value
-
-    return dict_instance_to_performance
+    return {Path(instance).name: performance
+            for instance, performance in instance_performance}
 
 
 def get_performance_measure() -> str:
@@ -146,17 +132,13 @@ def get_performance_measure() -> str:
     Returns:
         A string containing the performance measure
     """
-    performance_measure = ""
-
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
     if smac_run_obj == "RUNTIME":
         penalty = sgh.settings.get_general_penalty_multiplier()
-        performance_measure = f"PAR{penalty}"
+        return f"PAR{penalty}"
     elif smac_run_obj == "QUALITY":
-        performance_measure = "performance"
-
-    return performance_measure
+        return "performance"
 
 
 def get_runtime_bool() -> str:
@@ -165,16 +147,13 @@ def get_runtime_bool() -> str:
     Returns:
         A string containing the runtime boolean
     """
-    runtime_bool = ""
-
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
 
     if smac_run_obj == "RUNTIME":
-        runtime_bool = r"\runtimetrue"
+        return "\\runtimetrue"
     elif smac_run_obj == "QUALITY":
-        runtime_bool = r"\runtimefalse"
-
-    return runtime_bool
+        return "\\runtimefalse"
+    return ""
 
 
 def get_ablation_bool(solver_name: str, instance_train_name: str,
@@ -189,14 +168,9 @@ def get_ablation_bool(solver_name: str, instance_train_name: str,
     Returns:
         A string describing whether ablation was run or not
     """
-    ablation_bool = ""
-
     if sah.check_for_ablation(solver_name, instance_train_name, instance_test_name):
-        ablation_bool = r"\ablationtrue"
-    else:
-        ablation_bool = r"\ablationfalse"
-
-    return ablation_bool
+        return "\\ablationtrue"
+    return "\\ablationfalse"
 
 
 def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
@@ -213,15 +187,11 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
     """
     scenario_file = sgh.settings.get_general_sparkle_configurator().scenario.directory \
         / f"{solver_name}_{instance_set_train_name}_scenario.txt"
-    features_bool = r"\featuresfalse"
 
-    with scenario_file.open("r") as f:
-        for line in f.readlines():
-            if line.split(" ")[0] == "feature_file":
-                features_bool = r"\featurestrue"
-                break
-
-    return features_bool
+    for line in scenario_file.open("r").readlines():
+        if line.split(" ")[0] == "feature_file":
+            return "\\featurestrue"
+    return "\\featuresfalse"
 
 
 def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
@@ -279,8 +249,8 @@ def get_figure_configure_vs_default(configured_results_dir: str,
     Returns:
         A string containing the latex command to include the figure
     """
-    latex_directory_path = (
-        configuration_reports_directory + "Sparkle-latex-generator-for-configuration/")
+    latex_directory_path =\
+        configuration_reports_directory + "Sparkle-latex-generator-for-configuration/"
     points = get_data_for_plot(configured_results_dir, default_results_dir,
                                smac_each_run_cutoff_time)
 
@@ -449,8 +419,8 @@ def get_timeouts_train(solver_name: str, instance_set_name: str,
                         dict_instance_to_par_default, cutoff)
 
 
-def get_timeouts(dict_instance_to_par_configured: dict,
-                 dict_instance_to_par_default: dict,
+def get_timeouts(instance_to_par_configured: dict,
+                 instance_to_par_default: dict,
                  cutoff: int) -> tuple[int, int, int]:
     """Return the number of timeouts for given dicts.
 
@@ -469,17 +439,14 @@ def get_timeouts(dict_instance_to_par_configured: dict,
     default_timeouts = 0
     overlapping_timeouts = 0
 
-    for instance in dict_instance_to_par_configured:
-        configured_par_value = dict_instance_to_par_configured[instance]
-        default_par_value = dict_instance_to_par_default[instance]
-
-        if configured_par_value == timeout_value:
-            configured_timeouts += 1
-        if default_par_value == timeout_value:
-            default_timeouts += 1
-        if (configured_par_value == timeout_value
-           and default_par_value == timeout_value):
-            overlapping_timeouts += 1
+    for instance in instance_to_par_configured:
+        configured_par = instance_to_par_configured[instance]
+        default_par = instance_to_par_default[instance]
+        # Count the amount of values that are equal to timeout
+        configured_timeouts += (configured_par == timeout_value)
+        default_timeouts += (default_par == timeout_value)
+        overlapping_timeouts += (configured_par == timeout_value
+                                 and default_par == timeout_value)
 
     return configured_timeouts, default_timeouts, overlapping_timeouts
 
@@ -549,47 +516,33 @@ def get_dict_variable_to_value(solver_name: str, instance_set_train_name: str,
     Returns:
         A dictionary containing the variables and values
     """
-    full_dict = {}
-
-    if instance_set_test_name is not None:
+    has_test = instance_set_test_name is not None
+    if has_test:
         configuration_reports_directory = (
             f"Configuration_Reports/{solver_name}_{instance_set_train_name}_"
             f"{instance_set_test_name}/")
     else:
         configuration_reports_directory = (
-            "Configuration_Reports/" + solver_name + "_" + instance_set_train_name + "/")
+            f"Configuration_Reports/{solver_name}_{instance_set_train_name}/")
 
-    common_dict = get_dict_variable_to_value_common(solver_name, instance_set_train_name,
-                                                    instance_set_test_name,
-                                                    configuration_reports_directory)
-    full_dict.update(common_dict)
+    full_dict = get_dict_variable_to_value_common(solver_name, instance_set_train_name,
+                                                  instance_set_test_name,
+                                                  configuration_reports_directory)
 
-    variable = "testBool"
-
-    if instance_set_test_name is not None:
+    if has_test:
         test_dict = get_dict_variable_to_value_test(solver_name, instance_set_train_name,
                                                     instance_set_test_name)
         full_dict.update(test_dict)
-        str_value = r"\testtrue"
-    else:
-        str_value = r"\testfalse"
-    full_dict[variable] = str_value
+    full_dict["testBool"] = f"\\test{str(has_test).lower()}"
 
     if not ablation:
-        full_dict["ablationBool"] = r"\ablationfalse"
+        full_dict["ablationBool"] = "\\ablationfalse"
 
-    if full_dict["featuresBool"] == r"\featurestrue":
-        variable = "numFeatureExtractors"
-        str_value = str(len(sgh.extractor_list))
-        full_dict[variable] = str_value
-
-        variable = "featureExtractorList"
-        str_value = sgrh.get_feature_extractor_list()
-        full_dict[variable] = str_value
-
-        variable = "featureComputationCutoffTime"
-        str_value = str(sgh.settings.get_general_extractor_cutoff_time())
-        full_dict[variable] = str_value
+    if full_dict["featuresBool"] == "\\featurestrue":
+        full_dict["numFeatureExtractors"] = str(len(sgh.extractor_list))
+        full_dict["featureExtractorList"] = sgrh.get_feature_extractor_list()
+        full_dict["featureComputationCutoffTime"] =\
+            str(sgh.settings.get_general_extractor_cutoff_time())
 
     return full_dict
 
@@ -616,7 +569,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     common_dict["sparkleVersion"] = sgh.sparkle_version
     common_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
     common_dict["numInstanceInTrainingInstanceSet"] = \
-        get_num_instance_in_instance_set_smac_dir(instance_set_train_name)
+        get_num_instance_for_configurator(instance_set_train_name)
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      _, num_of_smac_run_str, _) = scsh.get_smac_settings()
@@ -691,13 +644,10 @@ def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: s
     """
     test_dict = {}
 
-    variable = "instanceSetTest"
-    str_value = instance_set_test_name
-    test_dict[variable] = str_value
+    test_dict["instanceSetTest"] = instance_set_test_name
 
-    variable = "numInstanceInTestingInstanceSet"
-    str_value = get_num_instance_in_instance_set_smac_dir(instance_set_test_name)
-    test_dict[variable] = str_value
+    test_dict["numInstanceInTestingInstanceSet"] =\
+        get_num_instance_for_configurator(instance_set_test_name)
 
     (_, _, smac_each_run_cutoff_time, _, _, _) = scsh.get_smac_settings()
     scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
@@ -807,7 +757,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
     return
 
 
-def get_most_recent_test_run(solver_name: str) -> tuple[str, str, bool, bool]:
+def get_most_recent_test_run() -> tuple[str, str, bool, bool]:
     """Return the instance sets used most recently to configure a given solver.
 
     Args:
@@ -824,28 +774,18 @@ def get_most_recent_test_run(solver_name: str) -> tuple[str, str, bool, bool]:
     # Read most recent run from file
     last_test_file_path =\
         sgh.settings.get_general_sparkle_configurator().scenario.directory
-    # TODO: Bugfix, this if produces failures in the pytest.
-    # The file does not exist in the pytest, but its unclear why
-    """if False and not last_test_file_path.exists():
-        # Report error when file does not exist
-        print("Error: The most recent results do not match the given solver. Please "
-              "specify which instance sets you want a report for with this solver. "
-              'Alternatively, make sure the "test_configured_solver_and_default_solver" '
-              "command was executed for this solver.")
-        sys.exit(-1)"""
 
-    with last_test_file_path.open("r") as fin:
-        test_file_lines = fin.read().splitlines()
-        for myline in test_file_lines:
-            words = myline.split()
-            if words[0] == "train":
-                instance_set_train = words[1]
-                if instance_set_train != "":
-                    flag_instance_set_train = True
-            elif words[0] == "test":
-                instance_set_test = words[1]
-                if instance_set_test != "":
-                    flag_instance_set_test = True
+    test_file_lines = last_test_file_path.open("r").readlines()
+    for line in test_file_lines:
+        words = line.split()
+        if words[0] == "train":
+            instance_set_train = words[1]
+            if instance_set_train != "":
+                flag_instance_set_train = True
+        elif words[0] == "test":
+            instance_set_test = words[1]
+            if instance_set_test != "":
+                flag_instance_set_test = True
     return (instance_set_train, instance_set_test, flag_instance_set_train,
             flag_instance_set_test)
 

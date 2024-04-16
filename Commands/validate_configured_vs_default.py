@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(
-        solver.name, instance_set_train.name, instance_set_test_name
+        instance_set_test_name
     )
     configurator = sgh.settings.get_general_sparkle_configurator()
     # Set up scenarios

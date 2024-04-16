@@ -61,7 +61,7 @@ def get_solver_list(parallel_portfolio_path: Path) -> str:
 
         x = solver_name.rfind("_")
 
-        if str(x) != "-1":
+        if x != -1:
             solver_name = solver_name[:x] + "\\" + solver_name[x:]
 
         str_value += f"\\item \textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"

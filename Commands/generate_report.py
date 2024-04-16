@@ -196,7 +196,7 @@ if __name__ == "__main__":
                 instance_set_test,
                 flag_instance_set_train,
                 flag_instance_set_test,
-            ) = sgrfch.get_most_recent_test_run(solver_name)
+            ) = sgrfch.get_most_recent_test_run()
 
         # If only the testing set is given return an error
         elif not flag_instance_set_train and flag_instance_set_test:
