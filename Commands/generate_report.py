@@ -10,7 +10,6 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
 from Commands.sparkle_help import \
     sparkle_generate_report_for_configuration_help as sgrfch
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.structures.sparkle_objective import PerformanceMeasure
@@ -164,11 +163,10 @@ if __name__ == "__main__":
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(sgh.ReportType.ALGORITHM_SELECTION)
         status_info.save()
+        sgrh.generate_report(test_case_directory)
         if test_case_directory is None:
-            sgrh.generate_report()
             print("Report generated ...")
         else:
-            sgrh.generate_report(str(test_case_directory))
             print("Report for test generated ...")
         status_info.delete()
 
@@ -210,6 +208,7 @@ if __name__ == "__main__":
             sys.exit(-1)
 
         instance_set_train_name = Path(instance_set_train).name
+        instance_set_test_name = None
         sgh.settings.get_general_sparkle_configurator()\
             .set_scenario_dirs(solver_name, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
@@ -218,21 +217,19 @@ if __name__ == "__main__":
             sgrfch.check_results_exist(
                 solver_name, instance_set_train_name, instance_set_test_name
             )
-            sgrfch.generate_report_for_configuration(
-                solver_name,
-                instance_set_train_name,
-                instance_set_test_name,
-                ablation=args.flag_ablation,
-            )
         elif flag_instance_set_train:
             sgrfch.check_results_exist(solver_name, instance_set_train_name)
-            sgrfch.generate_report_for_configuration_train(
-                solver_name, instance_set_train_name, ablation=args.flag_ablation
-            )
         else:
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
             sys.exit(-1)
+
+        sgrfch.generate_report_for_configuration(
+            solver_name,
+            instance_set_train_name,
+            instance_set_test_name,
+            ablation=args.flag_ablation,
+        )
 
         status_info.delete()
 

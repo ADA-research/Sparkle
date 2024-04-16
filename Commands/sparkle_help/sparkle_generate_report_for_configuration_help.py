@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import sys
 import shutil
+import re
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
@@ -88,13 +89,13 @@ def get_instance_performance_from_csv(result_file: str,
         A list containing the performance for each instance
     """
     list_instance_and_performance = []
-    # Read CSV, skip column titles
-    csv_lines = Path(result_file).open("r").readlines()[1:]
     # If the objective is runtime, compute the PAR score; otherwise don't modify
     # the value
     smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
     penalty = sgh.settings.get_general_penalty_multiplier()
-    for csv_line in csv_lines:
+
+    # Read CSV, skip column titles
+    for csv_line in Path(result_file).open("r").readlines()[1:]:
         values = csv_line.strip().split(",")
         instance = Path(values[0].strip('"')).name
         performance = float(values[2].strip('"'))
@@ -803,28 +804,8 @@ def generate_report_for_configuration_prep(configuration_reports_directory: str)
     shutil.copytree(template_latex_path, full_conf_reports_dir, dirs_exist_ok=True)
 
 
-def generate_report_for_configuration_train(solver_name: str,
-                                            instance_set_train_name: str,
-                                            ablation: bool = True) -> None:
-    """Generate a report for algorithm configuration with only a training set.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of the instance set for training
-        ablation: Whether or not ablation is used. Defaults to True.
-    """
-    configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
-                                       f"{instance_set_train_name}/")
-    generate_report_for_configuration_prep(configuration_reports_directory)
-    dict_variable_to_value = get_dict_variable_to_value(
-        solver_name, instance_set_train_name, ablation=ablation)
-
-    generate_report_for_configuration_common(configuration_reports_directory,
-                                             dict_variable_to_value)
-
-
 def generate_report_for_configuration(solver_name: str, instance_set_train_name: str,
-                                      instance_set_test_name: str,
+                                      instance_set_test_name: str = None,
                                       ablation: bool = True) -> None:
     """Generate a report for algorithm configuration.
 
@@ -834,7 +815,11 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
         instance_set_test_name: Name of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
-    configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
+    if instance_set_test_name is None:
+        configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
+                                       f"{instance_set_train_name}/")
+    else:
+        configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
                                        f"{instance_set_train_name}_"
                                        f"{instance_set_test_name}/")
     generate_report_for_configuration_prep(configuration_reports_directory)
@@ -854,35 +839,27 @@ def generate_report_for_configuration_common(configuration_reports_directory: st
         configuration_reports_directory: Directory for the configuration reports
         dict_variable_to_value: Dictionary containing values for LaTeX
     """
-    latex_directory_path = Path(
-        f"{configuration_reports_directory}Sparkle-latex-generator-for-configuration/")
-    latex_template_filename = "template-Sparkle-for-configuration.tex"
-    latex_report_filename = Path("Sparkle_Report_for_Configuration")
+    latex_dir_path = Path(configuration_reports_directory) /\
+        "Sparkle-latex-generator-for-configuration/"
 
     # Read in the report template from file
-    latex_template_filepath = Path(latex_directory_path / latex_template_filename)
-    report_content = Path(latex_template_filepath).open("r").read()
-
+    latex_template_path = latex_dir_path / "template-Sparkle-for-configuration.tex"
+    report_content = latex_template_path.open("r").read()
     # Replace variables in the report template with their value
     for variable_key, str_value in dict_variable_to_value.items():
         variable = "@@" + variable_key + "@@"
-        if (variable_key != "figure-configured-vs-default-test") and (
-                variable_key != "figure-configured-vs-default-train"):
+        # We don't modify variable names in the Latex file
+        if re.match(".*{.*}.*", str_value) is None:
             str_value = str_value.replace("_", r"\textunderscore ")
-        else:
-            print(str_value)
         report_content = report_content.replace(variable, str_value)
 
     # Write the completed report to a tex file
-    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
-    latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-    with Path(latex_report_filepath).open("w+") as fout:
-        fout.write(report_content)
-
-    stex.check_tex_commands_exist(latex_directory_path)
+    latex_report_filepath = latex_dir_path / "Sparkle_Report_for_Configuration.tex"
+    latex_report_filepath.open("w+").write(report_content)
 
     # Compile the report
-    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
+    stex.check_tex_commands_exist(latex_dir_path)
+    report_path = stex.compile_pdf(latex_dir_path, latex_report_filepath.stem)
 
-    print(f"Report is placed at: {report_path}")
-    print("Generating report for configuration done!")
+    print(f"Report is placed at: {report_path}\n"
+          "Generating report for configuration done!")
