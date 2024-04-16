@@ -69,7 +69,29 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
                                     raw_result_path: Path, runsolver_values_path: Path,
                                     custom_cutoff: int = None,
                                     is_configured: bool = False) -> Path:
-    """Run the solver on the given instance, with a given command line call."""
+    """Run the solver on the given instance, with a given command line call.
+    
+    Parameters
+    ----------
+    solver_path: Path
+        The path to the solver
+    cmd_solver_call: str
+        The cmd wrapper containing relevant information
+    raw_result_path: Path
+        Path to the .rawres file for storing results (?)
+    runsolver_values_path: Path
+        Path to the .val file for storing values (?)
+    custom_cutoff: int
+        A custom cpu time limit
+    is_configured: bool
+        Whether the solver is configured (config is contained
+        in the wrapper)
+
+    Returns
+    -------
+    raw_result_path: 
+        Path to the solver output
+    """
     if custom_cutoff is None:
         custom_cutoff = sgh.settings.get_general_target_cutoff_time()
 
