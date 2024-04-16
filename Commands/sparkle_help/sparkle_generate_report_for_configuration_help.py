@@ -580,7 +580,7 @@ def get_dict_variable_to_value(solver_name: str, instance_set_train_name: str,
 
     if full_dict["featuresBool"] == r"\featurestrue":
         variable = "numFeatureExtractors"
-        str_value = sgrh.get_num_feature_extractors()
+        str_value = str(len(sgh.extractor_list))
         full_dict[variable] = str_value
 
         variable = "featureExtractorList"
@@ -588,7 +588,7 @@ def get_dict_variable_to_value(solver_name: str, instance_set_train_name: str,
         full_dict[variable] = str_value
 
         variable = "featureComputationCutoffTime"
-        str_value = sgrh.get_feature_computation_cutoff_time()
+        str_value = str(sgh.settings.get_general_extractor_cutoff_time())
         full_dict[variable] = str_value
 
     return full_dict
@@ -611,8 +611,6 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     common_dict = {}
     common_dict["performanceMeasure"] = get_performance_measure()
     common_dict["runtimeBool"] = get_runtime_bool()
-    common_dict["customCommands"] = sgrh.get_custom_commands()
-    common_dict["sparkle"] = sgrh.get_sparkle()
     common_dict["solver"] = solver_name
     common_dict["instanceSetTrain"] = instance_set_train_name
     common_dict["sparkleVersion"] = sgh.sparkle_version

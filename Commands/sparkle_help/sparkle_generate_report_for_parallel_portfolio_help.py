@@ -488,14 +488,6 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     """
     mydict = {}
 
-    variable = "customCommands"
-    str_value = sgrh.get_custom_commands()
-    mydict[variable] = str_value
-
-    variable = "sparkle"
-    str_value = sgrh.get_sparkle()
-    mydict[variable] = str_value
-
     variable = "numSolvers"
     str_value = get_num_solvers(parallel_portfolio_path)
     mydict[variable] = str_value
