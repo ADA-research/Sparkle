@@ -869,6 +869,8 @@ def generate_report_for_configuration_common(configuration_reports_directory: st
         if (variable_key != "figure-configured-vs-default-test") and (
                 variable_key != "figure-configured-vs-default-train"):
             str_value = str_value.replace("_", r"\textunderscore ")
+        else:
+            print(str_value)
         report_content = report_content.replace(variable, str_value)
 
     # Write the completed report to a tex file

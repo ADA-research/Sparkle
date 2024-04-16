@@ -186,7 +186,10 @@ if __name__ == "__main__":
         status_info.set_report_type(sgh.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
         # Reporting for algorithm configuration
-        solver_name = sfh.get_last_level_directory_name(solver)
+        if solver is None:
+            print("Error! No Solver found for configuration report generation.")
+            sys.exit(-1)
+        solver_name = Path(solver).name
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
         # validate_configured_vs_default
