@@ -1140,7 +1140,6 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     """
     solver_name = "solver-name"
     train_instance = "train-instance"
-    ablation = True
 
     value_dict = {
         "key-1": "value-1",
@@ -1158,13 +1157,12 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
                                           "report_for_configuration_help."
                                           "generate_report_for_configuration_common")
 
-    sgr.generate_report_for_configuration_train(solver_name,
-                                                train_instance,
-                                                ablation)
+    sgr.generate_report_for_configuration(solver_name, train_instance, ablation=True)
 
     config_report_dir = (f"Configuration_Reports/{solver_name}_{train_instance}/")
     mock_report_for_prep.assert_called_once_with(config_report_dir)
-    mock_dict.assert_called_once_with(solver_name, train_instance, ablation=ablation)
+    mock_dict.assert_called_once_with(solver_name, train_instance,
+                                      None, ablation=True)
     mock_report_for_common.assert_called_once_with(config_report_dir, value_dict)
 
 
@@ -1241,8 +1239,8 @@ def test_generate_report_for_configuration_common(mocker: MockFixture) -> None:
 
     mock_open().write.assert_called_once_with(file_write)
     mock_check.assert_called_once_with(latex_directory_path)
-    mock_compile.assert_called_once_with(latex_directory_path, latex_report_filename)
+    mock_compile.assert_called_once_with(latex_directory_path, latex_report_filename.stem)
     mock_print.assert_has_calls([
-        mocker.call(f"Report is placed at: {report_path}"),
-        mocker.call("Generating report for configuration done!")
+        mocker.call(f"Report is placed at: {report_path}\n"
+                    "Generating report for configuration done!")
     ])

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import sys
 import shutil
-import re
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
@@ -846,12 +845,7 @@ def generate_report_for_configuration_common(configuration_reports_directory: st
     latex_template_path = latex_dir_path / "template-Sparkle-for-configuration.tex"
     report_content = latex_template_path.open("r").read()
     # Replace variables in the report template with their value
-    for variable_key, str_value in dict_variable_to_value.items():
-        variable = "@@" + variable_key + "@@"
-        # We don't modify variable names in the Latex file
-        if re.match(".*{.*}.*", str_value) is None:
-            str_value = str_value.replace("_", r"\textunderscore ")
-        report_content = report_content.replace(variable, str_value)
+    report_content = sgrh.fill_template_tex(report_content, dict_variable_to_value)
 
     # Write the completed report to a tex file
     latex_report_filepath = latex_dir_path / "Sparkle_Report_for_Configuration.tex"

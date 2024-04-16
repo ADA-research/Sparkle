@@ -4,6 +4,7 @@
 
 import os
 import sys
+import re
 import numpy as np
 from shutil import which
 from pathlib import Path
@@ -31,14 +32,16 @@ def underscore_for_latex(string: str) -> str:
     return string.replace("_", "\\_")
 
 
-def get_solver_list() -> str:
-    """Get the list of solvers for use in a LaTeX document.
+def get_solver_list_latex(solver_list: list[str] = None) -> str:
+    """Get the list of solvers for use in a LaTeX document. Defaults to sgh.solver_list.
 
     Returns:
         The list of solver names as LaTeX str.
     """
+    if solver_list is None:
+        solver_list = sgh.solver_list
     return "".join(f"\\item \\textbf{{{Path(solver_path).name}}}\n"
-                   for solver_path in sgh.solver_list)
+                   for solver_path in solver_list)
 
 
 def get_feature_extractor_list() -> str:
@@ -61,14 +64,16 @@ def get_num_instance_classes() -> str:
                     for instance_path in sgh.instance_list]))
 
 
-def get_instance_class_list() -> str:
-    """Get the instance sets for use in a LaTeX document.
+def get_instance_set_count_list(instance_list: list[str]) -> str:
+    """Get the instance sets for use in a LaTeX document. Defaults to sgh.instance_list.
 
     Returns:
         The list of instance sets as LaTeX str.
     """
+    if instance_list is None:
+        instance_list = sgh.instance_list
     instance_list = [Path(instance_path).parent.name
-                     for instance_path in sgh.instance_list]
+                     for instance_path in instance_list]
     count = Counter(instance_list)
     return "".join(f"\\item \\textbf{ {inst_key} }, consisting of {count[inst_key]} "
                    "instances\n" for inst_key in count)
@@ -359,11 +364,11 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
 
     latex_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
     latex_dict["numSolvers"] = str(len(sgh.solver_list))
-    latex_dict["solverList"] = get_solver_list()
+    latex_dict["solverList"] = get_solver_list_latex()
     latex_dict["numFeatureExtractors"] = str(len(sgh.extractor_list))
     latex_dict["featureExtractorList"] = get_feature_extractor_list()
     latex_dict["numInstanceClasses"] = get_num_instance_classes()
-    latex_dict["instanceClassList"] = get_instance_class_list()
+    latex_dict["instanceClassList"] = get_instance_set_count_list()
     latex_dict["featureComputationCutoffTime"] =\
         str(sgh.settings.get_general_extractor_cutoff_time())
     latex_dict["performanceComputationCutoffTime"] =\
@@ -390,6 +395,23 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
 
     return latex_dict
 
+def fill_template_tex(template_tex: str, variables: dict) -> str:
+        """Given a latex template, replaces all the @@ variables using the dict.
+
+        Args:
+            template_tex: The template to be populated
+            variables: Variable names (key) with their target (value)
+
+        Returns:
+            The populated latex string."""
+        for variable_key, target_value in variables.items():
+            variable = "@@" + variable_key + "@@"
+            # We don't modify variable names in the Latex file
+            if re.match(".*{.*}.*", target_value) is None:
+                # Rectify underscores in 
+                target_value = target_value.replace("_", r"\textunderscore ")
+            template_tex = template_tex.replace(variable, target_value)
+        return template_tex
 
 def generate_report(test_case_directory: str = None) -> None:
     """Generate a report for algorithm selection.
