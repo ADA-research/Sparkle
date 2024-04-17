@@ -158,7 +158,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                   f"{str(total_job_num)}")
             current_job_num += 1
 
-            feature_data_csv.update_csv()
+            feature_data_csv.save_csv()
 
             print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)}"
                   " computation of feature vector of instance "

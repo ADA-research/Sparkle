@@ -107,6 +107,12 @@ if __name__ == "__main__":
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
 
+    # Check if there are any feature extractors registered
+    if not sgh.extractor_list:
+        print("No feature extractors present! Add feature extractors to Sparkle "
+              "by using the add_feature_extractor command.")
+        sys.exit()
+
     # Start compute features
     print("Start computing features ...")
 

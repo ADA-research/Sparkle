@@ -8,7 +8,7 @@ from pathlib import Path
 
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures import sparkle_performance_dataframe as spdcsv
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.initialise import check_for_initialise
@@ -70,13 +70,13 @@ if __name__ == "__main__":
                                sgh.solver_nickname_mapping)
 
     if Path(sgh.performance_data_csv_path).exists():
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+        performance_data_csv = spdcsv.PerformanceDataFrame(
             sgh.performance_data_csv_path
         )
-        for column_name in performance_data_csv.list_columns():
+        for column_name in performance_data_csv.dataframe.columns:
             if solver_path == column_name:
-                performance_data_csv.delete_column(column_name)
-        performance_data_csv.update_csv()
+                performance_data_csv.remove_solver(column_name)
+        performance_data_csv.save_csv()
 
     shutil.rmtree(solver_path)
 

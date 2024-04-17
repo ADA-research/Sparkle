@@ -12,7 +12,7 @@ import subprocess
 
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_tex_help as stex
@@ -111,7 +111,7 @@ def get_par_ranking_list() -> str:
         The list of solvers ranked by PAR as LaTeX str.
     """
     performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+        PerformanceDataFrame(sgh.performance_data_csv_path))
 
     solver_penalty_ranking =\
         performance_data_csv.get_solver_penalty_time_ranking_list()
@@ -127,8 +127,7 @@ def get_vbs_par() -> str:
         The PAR (Penalised Average Runtime) of the VBS (virtual best solver) over a set
         of instances.
     """
-    performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     return str(performance_data_csv.calc_vbs_penalty_time())
 
 
@@ -151,16 +150,15 @@ def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
         A dict that maps instance name str to their penalised performance int.
     """
     sbs_dict = {}
-    performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
 
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
     sbs_solver = solver_penalty_time_ranking_list[0][0]
 
-    for instance in performance_data_csv.list_rows():
-        this_run_time = performance_data_csv.get_value(instance, sbs_solver)
+    for instance in performance_data_csv.get_instances():
+        this_run_time = performance_data_csv.get_value(sbs_solver, instance)
 
         if this_run_time <= cutoff_time:
             sbs_dict[instance] = this_run_time
@@ -176,8 +174,7 @@ def get_dict_vbs_penalty_time_on_each_instance() -> dict[str, int]:
     Returns:
         A dict that maps instance name str to their penalised performance int.
     """
-    performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     return performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
 
 
@@ -188,8 +185,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
         A dict that maps instance name str to their penalised performance int.
     """
     actual_selector_penalty = {}
-    performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
     minimise = True
     performance_measure = \
@@ -199,7 +195,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         minimise = False
 
-    for instance in performance_data_csv.list_rows():
+    for instance in performance_data_csv.get_instances():
         used_time_for_this_instance, flag_successfully_solving = \
             scmch.compute_actual_performance_for_instance(
                 actual_portfolio_selector_path, instance, sgh.feature_data_csv_path,
@@ -241,8 +237,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path) -> str:
     figure_filename = (
         "figure_portfolio_selector_sparkle_vs_sbs")
 
-    performance_data_csv = (
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path))
+    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
     sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
@@ -313,9 +308,9 @@ def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
     Returns:
         The number of instances in a test instance set as string.
     """
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-        test_case_directory + "sparkle_performance_data.csv")
-    return str(len(performance_data_csv.list_rows()))
+    performance_data_csv = PerformanceDataFrame(
+        f"{test_case_directory}sparkle_performance_data.csv")
+    return str(performance_data_csv.get_num_instances())
 
 
 def get_test_actual_par(test_case_directory: str) -> str:
@@ -327,25 +322,25 @@ def get_test_actual_par(test_case_directory: str) -> str:
     Returns:
         PAR score (Penalised Average Runtime) as string.
     """
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-        test_case_directory + "sparkle_performance_data.csv")
-    solver = performance_data_csv.list_columns()[0]
+    performance_data_csv =\
+        PerformanceDataFrame(f"{test_case_directory}sparkle_performance_data.csv")
+    # Why is it selecting the first solver?
+    solver = performance_data_csv.dataframe.columns[0]
 
     cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
 
     sparkle_penalty_time = 0.0
     sparkle_penalty_time_count = 0
 
-    for instance in performance_data_csv.list_rows():
-        this_run_time = performance_data_csv.get_value(instance, solver)
+    for instance in performance_data_csv.get_instances():
+        this_run_time = performance_data_csv.get_value(solver, instance)
         sparkle_penalty_time_count += 1
         if this_run_time <= cutoff_time_each_run:
             sparkle_penalty_time += this_run_time
         else:
             sparkle_penalty_time += sgh.settings.get_penalised_time()
 
-    sparkle_penalty_time = sparkle_penalty_time / sparkle_penalty_time_count
-    return str(sparkle_penalty_time)
+    return str(sparkle_penalty_time / sparkle_penalty_time_count)
 
 
 def selection_report_variables(target_dir: Path,
@@ -482,7 +477,7 @@ def generate_comparison_plot(points: list,
                              limit_max: float = 0.2,
                              penalty_time: float = None,
                              replace_zeros: bool = True,
-                             magnitude_lines: int = sgh.sparkle_maximum_int,
+                             magnitude_lines: int = 2147483647,
                              output_dir: Path = None) -> None:
     """Create comparison plots between two different solvers/portfolios.
 
