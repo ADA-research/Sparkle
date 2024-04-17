@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import sys
-import shutil
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_logging as sl

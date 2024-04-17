@@ -226,8 +226,8 @@ def test_get_ablation_bool_true(mocker: MockFixture) -> None:
                               return_value=True)
 
     ablation_bool = sgrch.get_ablation_bool("test-solver",
-                                          "train-instance",
-                                          "test-instance")
+                                            "train-instance",
+                                            "test-instance")
 
     mock_check.assert_called_once_with("test-solver",
                                        "train-instance",
@@ -242,8 +242,8 @@ def test_get_ablation_bool_false(mocker: MockFixture) -> None:
                               return_value=False)
 
     ablation_bool = sgrch.get_ablation_bool("test-solver",
-                                          "train-instance",
-                                          "test-instance")
+                                            "train-instance",
+                                            "test-instance")
 
     mock_check.assert_called_once_with("test-solver",
                                        "train-instance",
@@ -633,12 +633,12 @@ def test_get_timeouts(mocker: MockFixture) -> None:
                                    "get_general_penalty_multiplier",
                                    return_value=10)
 
-    configured, default, overlapping = sgrch.get_timeouts(conf_dict, default_dict, cutoff)
+    configured, default, overlap = sgrch.get_timeouts(conf_dict, default_dict, cutoff)
 
     mock_multiplier.assert_called_once()
     assert configured == 2
     assert default == 3
-    assert overlapping == 1
+    assert overlap == 1
 
 
 def test_get_ablation_table(mocker: MockFixture) -> None:
@@ -701,7 +701,8 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
 
     mock_common.assert_called_once_with(solver_name, train_instance,
                                         test_instance, output_dir)
-    mock_test.assert_called_once_with(output_dir, solver_name, train_instance, test_instance)
+    mock_test.assert_called_once_with(output_dir, solver_name,
+                                      train_instance, test_instance)
     assert full_dict == {
         "testBool": r"\testtrue",
         "ablationBool": r"\ablationfalse"
@@ -776,7 +777,8 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
 
     mock_common.assert_called_once_with(solver_name, train_instance,
                                         test_instance, output_dir)
-    mock_test.assert_called_once_with(output_dir, solver_name, train_instance, test_instance)
+    mock_test.assert_called_once_with(output_dir, solver_name,
+                                      train_instance, test_instance)
     assert full_dict == {
         "testBool": r"\testtrue"
     } | common_dict | test_dict
@@ -821,7 +823,8 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
 
     mock_common.assert_called_once_with(solver_name, train_instance,
                                         test_instance, output_dir)
-    mock_test.assert_called_once_with(output_dir, solver_name, train_instance, test_instance)
+    mock_test.assert_called_once_with(output_dir, solver_name,
+                                      train_instance, test_instance)
     mock_extractor_list.assert_called_once_with()
     assert full_dict == {
         "testBool": r"\testtrue",
@@ -891,7 +894,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  return_value="featurestrue")
 
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
-                                                        test_instance, report_dir)
+                                                          test_instance, report_dir)
 
     smac_solver_dir = (
         f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
@@ -1136,8 +1139,8 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
                                         "_help.generate_report", return_value=None)
 
     sgrch.generate_report_for_configuration(solver_name, train_instance, ablation=True)
-    mock_dict.assert_called_once_with(sgh.configuration_output_analysis, solver_name, train_instance,
-                                      None, True)
+    mock_dict.assert_called_once_with(sgh.configuration_output_analysis, solver_name,
+                                      train_instance, None, True)
     mock_generate_report.assert_called_once()
 
 
@@ -1162,10 +1165,10 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
                              "configuration_report_variables",
                              return_value=value_dict)
     mock_generate_report = mocker.patch("Commands.sparkle_help.sparkle_generate_report"
-                                        "_help.generate_report", return_value=None)                         
+                                        "_help.generate_report", return_value=None)
 
     sgrch.generate_report_for_configuration(solver_name, train_instance,
-                                          test_instance, ablation)
+                                            test_instance, ablation)
 
     mock_dict.assert_called_once_with(
         sgh.configuration_output_analysis,
