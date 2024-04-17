@@ -125,13 +125,14 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     print(cmd_solver_call)
     print('TEEEESSSTTT ---')
     print(cmd)
-
+    print("--------")
+    print(exec_path)
     #Not sure if cwd=exec_path is the correct implementation
     process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
     import time
 
     start_time = time.time()
-    while time.time() - start_time < 10000:
+    while time.time() - start_time < 4:
         elapsed_time = int(time.time() - start_time)
         print(f"Elapsed Time: {elapsed_time} seconds")
         time.sleep(1)

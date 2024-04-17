@@ -30,7 +30,8 @@ del args["run_length"]
 
 # TODO: Change solver name
 solver_bin = "SOME_SOLVER_NAME"
-solver_exec_path = f"{solver_dir / solver_bin}"
+solver_exec = f"{solver_dir / solver_bin}" if solver_dir != Path(".") else "./" + solver_bin
+
 
 tmp_directory = Path("tmp/")
 tmp_directory.mkdir(exist_ok=True)
@@ -48,7 +49,7 @@ for key in args:
     if args[key] is not None:
         params.extend(["-" + str(key), str(args[key])])
 # TODO: Change call to solver (Solver_binary)
-runsolver_call = [solver_exec_path,
+runsolver_call = [solver_exec,
                   "-inst", instance,
                   "-seed", str(seed)]
 
