@@ -80,34 +80,14 @@ class TestPerformanceData(TestCase):
         result = self.pd_nan.get_list_remaining_performance_computation_job()
         assert result == remaining
 
-    def test_get_list_processed_performance_computation_job(self: TestPerformanceData)\
-            -> None:
-        """Test get processed performance computation job getter."""
-        algs = ["AlgorithmA", "AlgorithmB", "AlgorithmC", "AlgorithmD", "AlgorithmE"]
-        processed =\
-            [["Instance1", algs], ["Instance2", algs], ["Instance3", algs],
-             ["Instance4", algs], ["Instance5", algs]]
-        result = self.pd.get_list_processed_performance_computation_job()
-        assert result == processed
-
-        processed = [
-            ["Instance1", ["AlgorithmB", "AlgorithmC", "AlgorithmD", "AlgorithmE"]],
-            ["Instance2", ["AlgorithmB", "AlgorithmC", "AlgorithmD", "AlgorithmE"]],
-            ["Instance3", ["AlgorithmB", "AlgorithmD", "AlgorithmE"]],
-            ["Instance4", ["AlgorithmB", "AlgorithmC", "AlgorithmD"]],
-            ["Instance5", ["AlgorithmB", "AlgorithmC", "AlgorithmD", "AlgorithmE"]]
-        ]
-        result = self.pd_nan.get_list_processed_performance_computation_job()
-        assert result == processed
-
-    def test_get_maximum_performance_per_instance(self: TestPerformanceData) -> None:
+    def test_get_best_performance_per_instance(self: TestPerformanceData) -> None:
         """Test getting the maximum performance on each instance."""
         max_perf = [64, 87, 87, 96, 86]
-        result = self.pd.get_maximum_performance_per_instance()
+        result = self.pd.get_best_performance_per_instance()
         assert result == max_perf
 
         max_perf = [64, 87.0, 87, 49, 86]
-        result = self.pd_nan.get_maximum_performance_per_instance()
+        result = self.pd_nan.get_best_performance_per_instance()
         assert result == max_perf
 
     @patch("Commands.sparkle_help.sparkle_global_help."

@@ -18,16 +18,13 @@ global settings
 sgh.settings = sparkle_settings.Settings()
 
 
-# TODO:
-# Maybe it can directly wrap around pandas.DataFrame?
-# Then on init we either load from csv, or pre-set the dimensions of the DataFrame
 class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
 
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
                  solvers: list[str] = [],
-                 objectives: list[str] | list[sparkle_settings.SparkleObjective] = None,
+                 objectives: list[str | sparkle_settings.SparkleObjective] = None,
                  instances: list[str] = [],
                  n_runs: int = 1,
                  init_df: bool = True) -> None:
@@ -59,10 +56,9 @@ class PerformanceDataFrame():
         # Objectives is a ``static'' dimension
         if objectives is None:
             objectives = sgh.settings.get_general_sparkle_objectives()
-        if isinstance(objectives[0], sparkle_settings.SparkleObjective):
-            self.objective_names = [o.name for o in objectives]
-        else:
-            self.objective_names = objectives
+        self.objective_names =\
+            [o.name if isinstance(o, sparkle_settings.SparkleObjective) else o
+             for o in objectives]
         self.multi_objective = len(self.objective_names) > 1
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
@@ -98,18 +94,32 @@ class PerformanceDataFrame():
 
     def verify_objective(self: PerformanceDataFrame,
                          objective: str) -> str:
-        """Method to check whether objective is valid."""
+        """Method to check whether the specified objective is valid.
+
+        Users are allowed to index the dataframe without specifying all dimensions.
+        However, when dealing with multiple objectives this is not allowed and this
+        is verified here. If we have only one objective this is returned. Otherwise,
+        if an objective is specified by the user this is returned.
+
+        Args:
+            objective: The objective given by the user
+        """
         if objective is None:
             if self.multi_objective:
                 print("Error: MO Performance Data, but objective not specified.")
                 sys.exit(-1)
-            else:
-                objective = self.objective_names[0]
+            return self.objective_names[0]
         return objective
 
     def verify_run_id(self: PerformanceDataFrame,
                       run_id: int) -> int:
-        """Method to check whether run id is valid."""
+        """Method to check whether run id is valid.
+
+        Similar to verify_objective but here we check the dimensionality of runs.
+
+        Args:
+            run_id: the run as specified by the user.
+        """
         if run_id is None:
             if self.n_runs > 1:
                 print("Error: Multiple run performance data, but run not specified")
@@ -124,7 +134,7 @@ class PerformanceDataFrame():
         """Method to check whether data indexing is correct.
 
         Users are allowed to use the Performance Dataframe without the second and
-        fourth dimension (Objective and run respectively) in the case they only
+        fourth dimension (Objective and Run respectively) in the case they only
         have one objective or only do one run. This method adjusts the indexing for
         those cases accordingly.
 
@@ -133,7 +143,7 @@ class PerformanceDataFrame():
             run_id: The given run index
 
         Returns:
-            A tuple representing the (possibly adjusted) objective and run index.
+            A tuple representing the (possibly adjusted) Objective and Run index.
         """
         objective = self.verify_objective(objective)
         run_id = self.verify_run_id(run_id)
@@ -172,11 +182,11 @@ class PerformanceDataFrame():
                 print(f"WARNING: Tried adding already existing solver {instance_name} "
                       f"to Performance DataFrame: {self.csv_filepath}")
                 return
-            # Create a None value for every possible combination
+            # Create a missing value for every possible combination
             # (This should be doable with pandas functions I think)
             for obj in self.objective_names:
                 for run in self.run_ids:
-                    self.dataframe[(obj, instance_name, run)] = None
+                    self.dataframe[(obj, instance_name, run)] = sgh.sparkle_missing_value
         return
 
     # Can we make this handle a sequence of inputs instead of just 1?
@@ -214,7 +224,7 @@ class PerformanceDataFrame():
                     objective: str = None,
                     run: int = None) -> None:
         """Reset a value in the dataframe."""
-        self.set_value(None, solver, instance, objective, run)
+        self.set_value(sgh.sparkle_missing_value, solver, instance, objective, run)
 
     def get_value(self: PerformanceDataFrame,
                   solver: str,
@@ -241,9 +251,9 @@ class PerformanceDataFrame():
         """Return the number of solvers."""
         return self.dataframe.columns.size
 
-    def get_instances(self: PerformanceDataFrame) -> pd.core.indexes.base.Index:
+    def get_instances(self: PerformanceDataFrame) -> list[str]:
         """Return the instances as a Pandas Index object."""
-        return self.dataframe.index.levels[1]
+        return self.dataframe.index.levels[1].tolist()
 
     def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
@@ -258,7 +268,7 @@ class PerformanceDataFrame():
 
     def get_job_list(self: PerformanceDataFrame, rerun: bool = False) \
             -> list[tuple[str, str]]:
-        """Return a list of performance computation jobs thare are to be done.
+        """Return a list of performance computation jobs there are to be done.
 
         Get a list of tuple[instance, solver] to run from the performance data
         csv file. If rerun is False (default), get only the tuples that don't have a
@@ -270,8 +280,10 @@ class PerformanceDataFrame():
         df = self.dataframe.stack(future_stack=True)
         if not rerun:
             df = df[df.isnull()]
-        if not self.multi_objective and self.n_runs == 1:
-            df.index = df.index.droplevel(["Objective", "Run"])
+        if not self.multi_objective:
+            df.index = df.index.droplevel(["Objective"])
+        if self.n_runs == 1:
+            df.index = df.index.droplevel(["Run"])
         return df.index.tolist()
 
     def get_list_recompute_performance_computation_job(self: PerformanceDataFrame)\
@@ -312,33 +324,28 @@ class PerformanceDataFrame():
             list_remaining_performance_computation_job.append(list_item)
         return list_remaining_performance_computation_job
 
-    def get_list_processed_performance_computation_job(self: PerformanceDataFrame) \
-            -> list[list[list]]:
-        """Return a list of existing performance values per instance and solver.
-
-        It will return the index for any objective/instance/run combination.
-        """
-        list_processed_performance_computation_job = []
-        bool_array_isnull = self.dataframe.isnull()
-        for row_name in self.dataframe.index:
-            current_solver_list = []
-            for solver in self.dataframe.columns:
-                flag_value_is_null = bool_array_isnull.at[row_name, solver]
-                if not flag_value_is_null:
-                    current_solver_list.append(solver)
-            if not self.multi_objective and self.n_runs == 1:
-                list_item = [row_name[1], current_solver_list]
-            else:
-                list_item = [row_name, current_solver_list]
-            list_processed_performance_computation_job.append(list_item)
-        return list_processed_performance_computation_job
-
-    def get_maximum_performance_per_instance(
+    def get_best_performance_per_instance(
             self: PerformanceDataFrame,
-            objective: str = None) -> list[float]:
-        """Return a list with the highest performance per instance."""
+            objective: str = None,
+            run_agg: Callable = None,
+            best: Callable = pd.DataFrame.max) -> list[float]:
+        """Return a list with the best performance per instance.
+
+        Allows user to specify how to aggregate runs together.
+        Must be pandas accepted callable.
+
+        Args:
+            objective: The objective over which we want the maximum
+            run_agg: The method defining how runs are combined per Instance/solver
+            best: Callable, replace with pd.DataFrame.min to minimise
+        """
         objective = self.verify_objective(objective)
-        return self.dataframe.loc[(objective), :].max(axis=1).to_list()
+        if run_agg is None:
+            return best(self.dataframe.loc[(objective), :], axis=1).to_list()
+        else:
+            # Select the objective, group by runs, apply the aggregator and select max
+            agg_runs = self.dataframe.loc[(objective), :].groupby(level=0).run_agg()
+            return best(agg_runs, axis=1).to_list()
 
     def calc_portfolio_vbs_instance(
             self: PerformanceDataFrame,
@@ -366,8 +373,7 @@ class PerformanceDataFrame():
             capvalue = sys.float_info.max
             if not minimise:
                 capvalue = capvalue * -1
-        else:
-            penalty = penalty_factor * capvalue
+        penalty = penalty_factor * capvalue
         virtual_best_score = None
         for solver in self.dataframe.columns:
             if isinstance(instance, str):
@@ -386,6 +392,8 @@ class PerformanceDataFrame():
 
         # Shouldn't this throw an error?
         if virtual_best_score is None and len(self.dataframe.columns) == 0:
+            print("WARNING: PerformanceDataFrame could not calculate VBS "
+                  f"instance {instance}")
             virtual_best_score = 0
 
         return virtual_best_score
@@ -484,7 +492,7 @@ class PerformanceDataFrame():
 
     def clean_csv(self: PerformanceDataFrame) -> None:
         """Set all values in Performance Data to None."""
-        self.dataframe[:] = None
+        self.dataframe[:] = sgh.sparkle_missing_value
         self.save_csv()
 
     def copy(self: PerformanceDataFrame,

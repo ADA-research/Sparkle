@@ -6,7 +6,7 @@ from __future__ import annotations
 import sys
 import numpy as np
 
-from Commands.sparkle_help import sparkle_global_help
+from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_csv_help as scsv
 
 
@@ -16,7 +16,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
     def __init__(self: SparkleFeatureDataCSV, csv_filepath: str) -> None:
         """Initialise a SparkleFeatureDataCSV object."""
         scsv.SparkleCSV.__init__(self, csv_filepath)
-        self.extractor_list = sparkle_global_help.extractor_list
+        self.extractor_list = sgh.extractor_list
 
     def get_list_recompute_feature_computation_job(self: SparkleFeatureDataCSV)  \
             -> list[list[str | list[str]]]:
@@ -64,7 +64,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
     def get_extractor_path_from_feature(self: SparkleFeatureDataCSV,
                                         given_column_name: str) -> str:
         """Return the path to the feature extractor for a given feature."""
-        sparkle_special_string = sparkle_global_help.sparkle_special_string
+        sparkle_special_string = sgh.sparkle_special_string
         index = given_column_name.find(sparkle_special_string)
         length = len(sparkle_special_string)
         extractor_name = given_column_name[index + length:]
@@ -142,13 +142,13 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         for row_name in self.list_rows():
             tmp_value = self.get_value(row_name, column_name)
-            if tmp_value != np.nan:
+            if tmp_value != sgh.sparkle_missing_value:
                 num += 1
                 sum_value += tmp_value
 
         if num == 0:
             # all values are missing value
-            return np.nan
+            return sgh.sparkle_missing_value
 
         return sum_value / num
 
