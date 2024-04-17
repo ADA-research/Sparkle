@@ -20,36 +20,21 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
     Returns:
         A list of solvers in the parallel portfolio as str.
     """
-    str_value = ""
+    latex_itemize = ""
 
-    for solver_path in solver_list:
-        solver_variations = 0
+    for solver_str in solver_list:
+        # Solver string may contain path and variation seed
+        solver_split = solver_str.split(" ")
+        solver_name = Path(solver_split[0]).name
+        solver_seeds = int(solver_split[2]) if len(solver_split) == 3 else 0
 
-        if " " in solver_path:
-            solver_variations = int(solver_path[solver_path.rfind(" ") + 1:])
-            solver_path = solver_path[:solver_path.rfind(" ")]
+        latex_itemize += f"\\item \\textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"
+        # Only include if we used more than one seed
+        if solver_seeds > 1:
+            seeds = ",".join(list[range(1, solver_seeds + 1)])
+            latex_itemize += f"\\item[]With seeds: {seeds}\n"
 
-        solver_name = Path(solver_path).name
-
-        x = solver_name.rfind("_")
-
-        if x != -1:
-            solver_name = solver_name[:x] + "\\" + solver_name[x:]
-
-        str_value += f"\\item \\textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"
-
-        if solver_variations > 1:
-            seed_number = ""
-
-            for instances in range(1, solver_variations + 1):
-                seed_number += str(instances)
-
-                if instances != solver_variations:
-                    seed_number += ","
-
-            str_value += f"\\item[]With seeds: {seed_number}\n"
-
-    return str_value
+    return latex_itemize
 
 
 def get_results() -> dict[str, list[str, str]]:
@@ -94,7 +79,7 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
             unsolved_instances: number of unsolved instances.
     """
     results_on_instances = get_results()
-    str_value = ""
+    latex_itemize = ""
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     # Count the number of solved instances per solver, and the unsolved instances
     if perf_measure == PerformanceMeasure.RUNTIME:
@@ -118,23 +103,23 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
         print("*** ERROR: Parallel Portfolio is not available currently for"
               f" performance measure: {perf_measure}")
     elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        for instances in results_on_instances:
-            str_value += (r"\item \textbf{" + sgrh.underscore_for_latex(instances)
-                          + "}, was scored by: " + r"\textbf{"
-                          + sgrh.underscore_for_latex(sfh.get_last_level_directory_name(
-                              results_on_instances[instances][0]))
-                          + "} with a score of "
-                          + str(results_on_instances[instances][1]))
+        for instance in results_on_instances:
+            solver_name = sgrh.underscore_for_latex(
+                Path(results_on_instances[instances][0]).name)
+            score = results_on_instances[instances][1]
+            latex_itemize += (f"\\item \\textbf{{{sgrh.underscore_for_latex(instance)}}}"
+                              f", was scored by: \\textbf{{{solver_name}}} with a score "
+                              f"of {score}")
     else:
         for solver in solver_dict:
-            str_value += (r"\item Solver \textbf{" + sgrh.underscore_for_latex(solver)
-                          + "}, was the best solver on " + r"\textbf{"
-                          + str(solver_dict[solver]) + "} instance(s)")
+            latex_itemize += \
+                f"\\item Solver \\textbf{{{sgrh.underscore_for_latex(solver)}}}, "\
+                f"was the best solver on \\textbf{{{solver_dict[solver]}}} instance(s)"
         if unsolved_instances:
-            str_value += (r"\item \textbf{" + str(unsolved_instances)
-                          + "} instance(s) remained unsolved")
+            latex_itemize += \
+                f"\\item \\textbf{{{unsolved_instances}}} instances(s) remained unsolved"
 
-    return str_value, solver_dict, unsolved_instances
+    return latex_itemize, solver_dict, unsolved_instances
 
 
 def get_dict_sbs_penalty_time_on_each_instance(
@@ -261,11 +246,13 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
+        target_directory: Path,
         parallel_portfolio_path: Path, instances: list[str]) -> tuple[
         str, dict[str, float], dict[str, float]]:
     """Generate PaP vs SBS figure and return a string to include it in LaTeX.
 
     Args:
+        target_directory: Path where to place the files
         parallel_portfolio_path: Parallel portfolio path.
         instances: List of instances.
 
@@ -282,12 +269,11 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     dict_actual_parallel_portfolio_penalty_time_on_each_instance = (
         get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances))
 
-    latex_directory_path = "Components/Sparkle-latex-generator-for-parallel-portfolio/"
     figure_filename = "figure_parallel_portfolio_sparkle_vs_sbs"
     data_filename = "data_parallel_portfolio_sparkle_vs_sbs.dat"
-    data_filepath = latex_directory_path + data_filename
+    data_filepath = target_directory / data_filename
 
-    with Path(data_filepath).open("w+") as outfile:
+    with data_filepath.open("w+") as outfile:
         for instance in dict_sbs_penalty_time_on_each_instance:
             sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
             sparkle_penalty_time = (
@@ -297,7 +283,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     penalised_time_str = str(sgh.settings.get_penalised_time())
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
-    generate_image(Path(latex_directory_path), data_filename, penalised_time_str,
+    generate_image(target_directory, data_filename, penalised_time_str,
                    f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
                    "Parallel-Portfolio", figure_filename, performance_metric_str)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
@@ -378,18 +364,21 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
     return table_string
 
 
-def get_dict_variable_to_value(parallel_portfolio_path: Path,
-                               instances: list[str]) -> dict[str, str]:
+def parallel_report_variables(target_directory: Path,
+                              parallel_portfolio_path: Path,
+                              instances: list[str]) -> dict[str, str]:
     """Returns a mapping between LaTeX report variables and their values.
 
     Args:
+        target_directory: Path to where to place the generated files.
         parallel_portfolio_path: Parallel portfolio path.
         instances: List of instances.
 
     Returns:
         A dictionary that maps variables used in the LaTeX report to values.
     """
-    variables_dict = {}
+    variables_dict = {"bibliographypath":
+                      str(sgh.sparkle_report_bibliography_path.absolute())}
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     variables_dict["numSolvers"] = str(len(solver_list))
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
@@ -406,7 +395,8 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
 
     (figure_name, dict_all_solvers,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance) = (
-        get_figure_parallel_portfolio_sparkle_vs_sbs(parallel_portfolio_path, instances))
+        get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory,
+                                                     parallel_portfolio_path, instances))
     variables_dict["figure-parallel-portfolio-sparkle-vs-sbs"] = figure_name
 
     variables_dict["resultsTable"] = get_results_table(
@@ -419,7 +409,6 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
         variables_dict["decisionBool"] = "\\decisionfalse"
     else:
         variables_dict["decisionBool"] = "\\decisiontrue"
-
     return variables_dict
 
 
@@ -479,14 +468,16 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         parallel_portfolio_path: Parallel portfolio path.
         instances: List of instances.
     """
-    dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path,
-                                                        instances)
-    target_path = Path()
     latex_directory_path = Path(
-        "Components/Sparkle-latex-generator-for-parallel-portfolio/")
+        "Components/Sparkle-latex-generator/")
+    target_path = Path("Output/Sparkle_Report_Parallel_Portfolio/")
+    target_path.mkdir(parents=True, exist_ok=True)
+    dict_variable_to_value = parallel_report_variables(
+        target_path,
+        parallel_portfolio_path,instances)
 
     sgrh.generate_report(latex_directory_path,
-                         "template-Sparkle.tex",
+                         "template-Sparkle-for-parallel-portfolio.tex",
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",
                          dict_variable_to_value)

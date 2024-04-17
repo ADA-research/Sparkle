@@ -501,9 +501,9 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
     return table_string
 
 
-def get_dict_variable_to_value(solver_name: str, instance_set_train_name: str,
-                               instance_set_test_name: str = None,
-                               ablation: bool = True) -> dict:
+def configuration_report_variables(solver_name: str, instance_set_train_name: str,
+                                   instance_set_test_name: str = None,
+                                   ablation: bool = True) -> dict:
     """Return a dict matching LaTeX variables and their values.
 
     Args:
@@ -560,29 +560,29 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     Returns:
         A dictionary containing the variables and values
     """
-    common_dict = {}
-    common_dict["performanceMeasure"] = get_performance_measure()
-    common_dict["runtimeBool"] = get_runtime_bool()
-    common_dict["solver"] = solver_name
-    common_dict["instanceSetTrain"] = instance_set_train_name
-    common_dict["sparkleVersion"] = sgh.sparkle_version
-    common_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
-    common_dict["numInstanceInTrainingInstanceSet"] = \
+    latex_dict = {"bibliographypath":
+                  str(sgh.sparkle_report_bibliography_path.absolute())}
+    latex_dict["performanceMeasure"] = get_performance_measure()
+    latex_dict["runtimeBool"] = get_runtime_bool()
+    latex_dict["solver"] = solver_name
+    latex_dict["instanceSetTrain"] = instance_set_train_name
+    latex_dict["sparkleVersion"] = sgh.sparkle_version
+    latex_dict["numInstanceInTrainingInstanceSet"] = \
         get_num_instance_for_configurator(instance_set_train_name)
 
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      _, num_of_smac_run_str, _) = scsh.get_smac_settings()
 
-    common_dict["numSmacRuns"] = str(num_of_smac_run_str)
-    common_dict["smacObjective"] = str(smac_run_obj)
-    common_dict["smacWholeTimeBudget"] = str(smac_whole_time_budget)
-    common_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
+    latex_dict["numSmacRuns"] = str(num_of_smac_run_str)
+    latex_dict["smacObjective"] = str(smac_run_obj)
+    latex_dict["smacWholeTimeBudget"] = str(smac_whole_time_budget)
+    latex_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
 
     (optimised_configuration_str, _,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
 
-    common_dict["optimisedConfiguration"] = str(optimised_configuration_str)
+    latex_dict["optimisedConfiguration"] = str(optimised_configuration_str)
     scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
     (optimised_configuration_str, _,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
@@ -594,39 +594,39 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
                                     f"{configured_results_train_file}")
     str_value = get_par_performance(configured_results_train_dir,
                                     smac_each_run_cutoff_time)
-    common_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
+    latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
 
     default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_train_dir = (f"{scen_path}/outdir_train_default/"
                                  f"{default_results_train_file}")
     str_value = get_par_performance(default_results_train_dir,
                                     smac_each_run_cutoff_time)
-    common_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
+    latex_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
 
     str_value = get_figure_configured_vs_default_on_train_instance_set(
         solver_name, instance_set_train_name, configuration_reports_directory,
         float(smac_each_run_cutoff_time))
-    common_dict["figure-configured-vs-default-train"] = str_value
+    latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = (
         get_timeouts_train(solver_name, instance_set_train_name,
                            float(smac_each_run_cutoff_time)))
 
-    common_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
-    common_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
-    common_dict["timeoutsTrainOverlap"] = str(overlapping_timeouts_train)
+    latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
+    latex_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
+    latex_dict["timeoutsTrainOverlap"] = str(overlapping_timeouts_train)
 
     ablation_validation_name = instance_set_test_name
     if ablation_validation_name is None:
         ablation_validation_name = instance_set_train_name
-    common_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
+    latex_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
                                                     ablation_validation_name)
-    common_dict["ablationPath"] = get_ablation_table(
+    latex_dict["ablationPath"] = get_ablation_table(
         solver_name, instance_set_train_name, ablation_validation_name)
-    common_dict["featuresBool"] = get_features_bool(solver_name, instance_set_train_name)
+    latex_dict["featuresBool"] = get_features_bool(solver_name, instance_set_train_name)
 
-    return common_dict
+    return latex_dict
 
 
 def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: str,
@@ -813,6 +813,7 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
         instance_set_test_name: Name of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
+    latex_dir = Path("Components/Sparkle-latex-generator")
     if instance_set_test_name is None:
         configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
                                            f"{instance_set_train_name}/")
@@ -822,10 +823,9 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
                                            f"{instance_set_test_name}/")
     generate_report_for_configuration_prep(configuration_reports_directory)
     dict_variable_to_value = (
-        get_dict_variable_to_value(solver_name, instance_set_train_name,
-                                   instance_set_test_name, ablation=ablation))
-    target_path = Path()
-    latex_dir = Path(configuration_reports_directory) /\
+        configuration_report_variables(solver_name, instance_set_train_name,
+                                       instance_set_test_name, ablation=ablation))
+    target_path = Path(configuration_reports_directory) /\
         "Sparkle-latex-generator-for-configuration"
     sgrh.generate_report(latex_dir,
                          "template-Sparkle-for-configuration.tex",

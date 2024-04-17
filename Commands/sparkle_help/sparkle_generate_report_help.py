@@ -350,7 +350,7 @@ def get_test_actual_par(test_case_directory: str) -> str:
     return str(sparkle_penalty_time)
 
 
-def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str]:
+def selection_report_variables(test_case_directory: str = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
@@ -359,8 +359,8 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
     Returns:
         A dict matching str variables in the LaTeX template with their value str.
     """
-    latex_dict = {}
-
+    latex_dict = {"bibliographypath":
+                  str(sgh.sparkle_report_bibliography_path.absolute())}
     latex_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
     latex_dict["numSolvers"] = str(len(sgh.solver_list))
     latex_dict["solverList"] = get_solver_list_latex()
@@ -435,7 +435,7 @@ def generate_report_selection(test_case_directory: str = None) -> None:
     else:
         latex_report_filename = Path("Sparkle_Report")
 
-    dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
+    dict_variable_to_value = selection_report_variables(test_case_directory)
     target_path = Path()
 
     generate_report(Path("Components/Sparkle-latex-generator/"),
@@ -465,12 +465,12 @@ def generate_report(latex_source_path: Path,
     report_content = latex_template_filepath.open("r").read()
     report_content = fill_template_tex(report_content, variable_dict)
 
-    latex_report_filepath = latex_source_path / report_name
+    latex_report_filepath = target_path / report_name
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
     Path(latex_report_filepath).open("w+").write(report_content)
 
-    stex.check_tex_commands_exist(latex_source_path)
-    report_path = stex.compile_pdf(latex_source_path, report_name)
+    stex.check_tex_commands_exist(target_path)
+    report_path = stex.compile_pdf(target_path, report_name)
 
     print(f"Report is placed at: {report_path}")
 
