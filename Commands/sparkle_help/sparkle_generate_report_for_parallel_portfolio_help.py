@@ -424,28 +424,6 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     return variables_dict
 
 
-def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
-                                       instances: list[str]) -> None:
-    """Generate a report for a parallel algorithm portfolio.
-
-    Args:
-        parallel_portfolio_path: Parallel portfolio path.
-        instances: List of instances.
-    """
-    dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path,
-                                                        instances)
-    target_path = Path()
-    latex_directory_path = Path(
-        "Components/Sparkle-latex-generator-for-parallel-portfolio/")
-
-    sgrh.generate_report(latex_directory_path,
-                         "template-Sparkle.tex",
-                         target_path,
-                         "Sparkle_Report_Parallel_Portfolio",
-                         dict_variable_to_value)
-    sl.add_output(str(target_path), "Sparkle parallel portfolio report")
-
-
 def generate_image(target_directory: Path,
         data_parallel_portfolio_sparkle_vs_sbs_filename: str,
         penalty_time: float, sbs_name: str, parallel_portfolio_sparkle_name: str,
@@ -496,3 +474,25 @@ def generate_image(target_directory: Path,
     sgrh.generate_gnuplot(output_gnuplot_script, target_directory)
     sgrh.generate_pdf(output_eps_file, target_directory)
     Path(output_gnuplot_script).unlink(missing_ok=True)
+
+
+def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
+                                       instances: list[str]) -> None:
+    """Generate a report for a parallel algorithm portfolio.
+
+    Args:
+        parallel_portfolio_path: Parallel portfolio path.
+        instances: List of instances.
+    """
+    dict_variable_to_value = get_dict_variable_to_value(parallel_portfolio_path,
+                                                        instances)
+    target_path = Path()
+    latex_directory_path = Path(
+        "Components/Sparkle-latex-generator-for-parallel-portfolio/")
+
+    sgrh.generate_report(latex_directory_path,
+                         "template-Sparkle.tex",
+                         target_path,
+                         "Sparkle_Report_Parallel_Portfolio",
+                         dict_variable_to_value)
+    sl.add_output(str(target_path), "Sparkle parallel portfolio report")
