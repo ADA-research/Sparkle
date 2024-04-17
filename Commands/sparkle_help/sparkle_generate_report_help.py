@@ -60,7 +60,7 @@ def get_num_instance_classes() -> str:
         The number of instance sets as LaTeX str.
     """
     return str(len(set([Path(instance_path).parent.name
-                    for instance_path in sgh.instance_list])))
+                        for instance_path in sgh.instance_list])))
 
 
 def get_instance_set_count_list(instance_list: list[str] = None) -> str:
@@ -408,7 +408,7 @@ def fill_template_tex(template_tex: str, variables: dict) -> str:
     for variable_key, target_value in variables.items():
         variable = "@@" + variable_key + "@@"
         # We don't modify variable names in the Latex file
-        if "\includegraphics" not in target_value and "\label" not in target_value:
+        if "\\includegraphics" not in target_value and "\\label" not in target_value:
             # Rectify underscores in target_value
             target_value = target_value.replace("_", r"\textunderscore ")
         template_tex = template_tex.replace(variable, target_value)
@@ -431,7 +431,6 @@ def generate_report_selection(test_case_directory: str = None) -> None:
             test_case_directory += "/"
 
         latex_report_filename = Path("Sparkle_Report_for_Test")
-        
     # Only look at the training instance set(s)
     else:
         latex_report_filename = Path("Sparkle_Report")
@@ -461,7 +460,6 @@ def generate_report(latex_source_path: Path,
         report_name: The name of the pdf (without suffix)
         variable_dict: TBD
     """
-
     latex_template_filepath = latex_source_path / latex_template_name
 
     report_content = latex_template_filepath.open("r").read()
@@ -479,7 +477,7 @@ def generate_report(latex_source_path: Path,
 
 def generate_gnuplot(output_gnuplot_script: str,
                      output_dir: Path = None) -> None:
-    """Generates plot using GNU plot using script"""
+    """Generates plot from script using GNU plot."""
     subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
                                      capture_output=True,
                                      cwd=output_dir)
@@ -488,8 +486,9 @@ def generate_gnuplot(output_gnuplot_script: str,
         print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:\n"
               f"{subprocess_plot.stderr.decode()}\n")
 
+
 def generate_pdf(eps_file: str,
-                output_dir: Path = None) -> None:
+                 output_dir: Path = None) -> None:
     """Generate PDF using epstopdf."""
     # Some systems are missing epstopdf so a copy is included
     epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"

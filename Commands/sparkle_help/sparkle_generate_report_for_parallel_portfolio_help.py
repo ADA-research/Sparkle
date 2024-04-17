@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio report generation."""
 
-import subprocess
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -394,8 +393,8 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     variables_dict["numSolvers"] = str(len(solver_list))
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
-    variables_dict["numInstanceClasses"] = str(len(set([Path(instance_path).parent.name
-                                                    for instance_path in instances])))
+    variables_dict["numInstanceClasses"] = str(len(set(
+        [Path(instance_path).parent.name for instance_path in instances])))
     variables_dict["cutoffTime"] = str(sgh.settings.get_general_target_cutoff_time())
     variables_dict["performanceMetric"] =\
         sgh.settings.get_performance_metric_for_report()
@@ -417,29 +416,25 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
 
     if (sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
             == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
-        variables_dict["decisionBool"] = r"\decisionfalse"
+        variables_dict["decisionBool"] = "\\decisionfalse"
     else:
-        variables_dict["decisionBool"] = r"\decisiontrue"
+        variables_dict["decisionBool"] = "\\decisiontrue"
 
     return variables_dict
 
 
-def generate_image(target_directory: Path,
-        data_parallel_portfolio_sparkle_vs_sbs_filename: str,
+def generate_image(
+        target_directory: Path, data_parallel_portfolio_sparkle_vs_sbs_filename: str,
         penalty_time: float, sbs_name: str, parallel_portfolio_sparkle_name: str,
         figure_parallel_portfolio_sparkle_vs_sbs_filename: str,
         performance_measure: str) -> None:
     """Generates image for parallel portfolio report."""
-
     upper_bound = float(penalty_time) * 1.5
     lower_bound = 0.01
 
     output_eps_file =\
         f"{figure_parallel_portfolio_sparkle_vs_sbs_filename}.eps"
-    #output_pdf_file = f"{figure_parallel_portfolio_sparkle_vs_sbs_filename}.pdf"
-
     sbs_name = sbs_name.replace("/", "_")
-    #sbs_name_path = sbs_name.replace("\\", "")
     output_gnuplot_script = f"{parallel_portfolio_sparkle_name}_vs_{sbs_name}.plt"
 
     with (target_directory / output_gnuplot_script).open("w+") as outfile:
@@ -460,16 +455,16 @@ def generate_image(target_directory: Path,
         if performance_measure == "PAR10":
             # Cutoff time x axis
             outfile.write(f"set arrow from {penalty_time},{lower_bound} to "
-                            f"{penalty_time},{upper_bound} nohead lc rgb 'black' lt 2\n")
+                          f"{penalty_time},{upper_bound} nohead lc rgb 'black' lt 2\n")
             # Cutoff time y axis
             outfile.write(f"set arrow from {lower_bound},{penalty_time} to {upper_bound}"
-                            f",{penalty_time} nohead lc rgb 'black' lt 2\n")
+                          f",{penalty_time} nohead lc rgb 'black' lt 2\n")
 
         outfile.write('set terminal postscript eps color dashed linewidth "Helvetica"'
-                        " 20\n")
-        outfile.write(f"set output '{output_eps_file}'\n")
-        outfile.write(f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
-                        "points pt 2 ps 2\n")
+                      " 20\n")
+        outfile.write(f"set output '{output_eps_file}'\n"
+                      f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
+                      "points pt 2 ps 2\n")
 
     sgrh.generate_gnuplot(output_gnuplot_script, target_directory)
     sgrh.generate_pdf(output_eps_file, target_directory)

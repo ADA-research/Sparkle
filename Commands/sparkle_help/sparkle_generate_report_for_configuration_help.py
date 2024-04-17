@@ -832,4 +832,3 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
                          target_path,
                          "Sparkle_Report_for_Configuration",
                          dict_variable_to_value)
-
