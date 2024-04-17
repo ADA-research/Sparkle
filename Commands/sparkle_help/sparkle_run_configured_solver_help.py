@@ -54,7 +54,7 @@ def call_configured_solver(instance_path_list: list[Path],
 
     # If parallel, pass instances list to parallel function
     if parallel:
-        job_id_str = call_configured_solver_parallel(instances_list, run_on=run_on)
+        job_id_str = call_configured_solver_parallel(instances_list, solver_name, config_str, run_on=run_on)
     # Else, pass instances list to sequential function
     else:
         call_configured_solver_sequential(instances_list, solver_name, config_str)
@@ -173,7 +173,7 @@ def run_configured_solver(instance_path_list: list[Path], solver_name: str,
                                                          is_configured=True)
 
     # Process 'Result for SMAC' line from raw_result_path
-    with Path(raw_result_path).open("r") as infile:
+    with Path(rawres_solver).open("r") as infile:
         results_good = False
 
         for line in infile:

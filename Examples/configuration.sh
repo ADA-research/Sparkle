@@ -101,3 +101,5 @@ Commands/run_configured_solver.py Examples/Resources/Instances/PTN2/Ptn-7824-b20
 #It is also possible to run a configured solver directly on an entire directory of instances in parallel.
 
 Commands/run_configured_solver.py Examples/Resources/Instances/PTN2 --parallel
+
+# TODO: Isn't there some form of final report missing?
