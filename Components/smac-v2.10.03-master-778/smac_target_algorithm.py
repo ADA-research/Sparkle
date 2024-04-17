@@ -61,6 +61,7 @@ if __name__ == "__main__":
               f"stdout: {run_solver.stdout}\n "
               f"stderr: {run_solver.stderr}\n "
               f"Exception whilst decoding dictionary: {ex}")
+        sys.exit(-1)
 
     # Overwrite the CPU runtime with runsolver log value
     # TODO: Runsolver also registers WALL time, add as a settings option in Sparkle
