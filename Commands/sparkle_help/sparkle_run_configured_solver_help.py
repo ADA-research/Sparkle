@@ -20,12 +20,16 @@ from Commands.sparkle_help import sparkle_instances_help as sih
 
 
 def call_configured_solver(instance_path_list: list[Path],
+                           solver_name: str,
+                           config_str: str,
                            parallel: bool,
                            run_on: Runner = Runner.SLURM) -> str:
     """Create list of instance path lists, and call solver in parallel or sequential.
 
     Args:
         instance_path_list: List of paths to all the instances.
+        solver_name: Name of the solver to be used.
+        config_str: Configuration to be used.
         parallel: Boolean indicating a parallel call if True. Sequential otherwise.
         run_on: Whether the command is run with Slurm or not.
 
@@ -53,16 +57,19 @@ def call_configured_solver(instance_path_list: list[Path],
         job_id_str = call_configured_solver_parallel(instances_list, run_on=run_on)
     # Else, pass instances list to sequential function
     else:
-        call_configured_solver_sequential(instances_list)
+        call_configured_solver_sequential(instances_list, solver_name, config_str)
 
     return job_id_str
 
 
-def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
-    """Prepare to run and run the latest configured solver sequentially on instances.
+def call_configured_solver_sequential(instances_list: list[list[Path]], solver_name: str, 
+                                      config_str: str) -> None:
+    """Prepare to run and run the configured solver sequentially on instances.
 
     Args:
         instances_list: The paths to all the instances
+        solver_name: Name of the solver to be used.
+        config_str: Configuration to be used.
     """
     for instance_path_list in instances_list:
         # Use original path for output string
@@ -74,15 +81,15 @@ def call_configured_solver_sequential(instances_list: list[list[Path]]) -> None:
         # Run the configured solver
         print(f"c Start running the latest configured solver to solve instance "
               f"{instance_path_str} ...")
-        run_configured_solver(instance_path_list)
+        run_configured_solver(instance_path_list, solver_name, config_str)
 
     return
 
 
 def call_configured_solver_parallel(
-        instances_list: list[list[Path]], run_on: Runner = Runner.SLURM)\
-        -> rrr.SlurmRun | rrr.LocalRun:
-    """Run the latest configured solver in parallel on all given instances.
+        instances_list: list[list[Path]], solver_name: str, config_str: str,
+        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+    """Run the configured solver in parallel on all given instances.
 
     Args:
         instance_list: A list of all paths in a directory of instances.
@@ -103,6 +110,8 @@ def call_configured_solver_parallel(
     cmd_list = [f"{sgh.python_executable} "
                 f"Commands/sparkle_help/run_configured_solver_core.py "
                 f"--instance {instance}"
+                f"--solver {solver_name}"
+                f"--config {config_str}"
                 f"--performance-measure {perf_name}" for instance in instances_list]
 
     sbatch_options = ssh.get_slurm_options_list()
@@ -127,38 +136,15 @@ def call_configured_solver_parallel(
     return run
 
 
-def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
-    """Return the name and parameter string of the latest configured solver.
-
-    Returns:
-        Tuple(str, str): A tuple containing the solver name and its configuration string.
-    """
-    # Get latest configured solver + instance set
-    solver_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario().get_config_solver()))
-    instance_set_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario().get_config_instance_set_train()))
-
-    if solver_name is None or instance_set_name is None:
-        # Print error and stop execution
-        print("ERROR: No configured solver found! Stopping execution.")
-        sys.exit(-1)
-
-    # Get optimised configuration
-    config_str = scsh.get_optimised_configuration_params(solver_name, instance_set_name)
-
-    return solver_name, config_str
-
-
-def run_configured_solver(instance_path_list: list[Path]) -> None:
-    """Run the latest configured solver on the given instance.
+def run_configured_solver(instance_path_list: list[Path], solver_name: str, 
+                          config_str: str) -> None:
+    """Run solver with the configuration on the given instance.
 
     Args:
         instance_path_list: List of paths to the instances.
-        run_on: Whether the command is run with Slurm or not.
+        solver_name: Name of the solver to be used.
+        config_str: Configuration to be used.
     """
-    # Get latest configured solver and the corresponding optimised configuration
-    solver_name, config_str = get_latest_configured_solver_and_configuration()
     # a) Create cmd_solver_call that could call sparkle_smac_wrapper
     instance_path_str = " ".join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
@@ -170,9 +156,7 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
                      "run_length": "2147483647",  # Arbitrary, not used by SMAC wrapper
                      "seed": sgh.get_seed()}
     config_list = config_str.split(" ")
-    for i in range(len(config_list)):
-        if i + 1 >= len(config_list):
-            break
+    for i in range((len(config_list) - 1)):
         solver_params[config_list[i]] = config_list[i + 1]
     cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
     # Prepare paths

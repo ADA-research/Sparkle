@@ -10,6 +10,7 @@ from runrunner.base import Runner
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
+from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
@@ -79,8 +80,22 @@ if __name__ == "__main__":
     # Validate input (is directory, or single instance (single-file or multi-file))
     if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
+        
+        # Get the name of the configured solver and the training set
+        solver_name = Path(sgh.latest_scenario().get_config_solver()).name
+        instance_set_name = Path(sgh.latest_scenario().get_config_instance_set_train()).name
+        if solver_name is None or instance_set_name is None:
+            # Print error and stop execution
+            print("ERROR: No configured solver found! Stopping execution.")
+            sys.exit(-1)
+
+        # Get optimised configuration
+        config_str = scsh.get_optimised_configuration_params(solver_name, instance_set_name)
+
         # Call the configured solver
         run = srcsh.call_configured_solver(args.instance_path,
+                                           solver_name,
+                                           config_str,
                                            args.parallel,
                                            run_on=run_on)
     else:
