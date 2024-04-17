@@ -4,7 +4,6 @@
 
 import os
 import sys
-import re
 import numpy as np
 from shutil import which
 from pathlib import Path
@@ -479,7 +478,7 @@ def generate_report(latex_source_path: Path,
 
 
 def generate_gnuplot(output_gnuplot_script: str,
-                     output_dir: Path) -> None:
+                     output_dir: Path = None) -> None:
     """Generates plot using GNU plot using script"""
     subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
                                      capture_output=True,
@@ -490,7 +489,7 @@ def generate_gnuplot(output_gnuplot_script: str,
               f"{subprocess_plot.stderr.decode()}\n")
 
 def generate_pdf(eps_file: str,
-                output_dir: Path) -> None:
+                output_dir: Path = None) -> None:
     """Generate PDF using epstopdf."""
     # Some systems are missing epstopdf so a copy is included
     epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"

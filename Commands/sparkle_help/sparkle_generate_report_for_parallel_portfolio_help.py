@@ -278,7 +278,6 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
             dict_actual_parallel_portfolio_penalty_time_on_each_instance: A dict with
                 instance names and the penalised running time of the PaP.
     """
-    str_value = ""
     dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = (
         get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances))
     dict_actual_parallel_portfolio_penalty_time_on_each_instance = (
@@ -299,15 +298,11 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     penalised_time_str = str(sgh.settings.get_penalised_time())
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
-    gnuplot_cmd_list = ["python", "auto_gen_plot.py", data_filename, penalised_time_str,
-                        f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
-                        "Parallel-Portfolio", figure_filename, performance_metric_str]
-
-    subprocess.run(gnuplot_cmd_list, cwd=latex_directory_path)
-
-    str_value = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
-
-    return (str_value, dict_all_solvers,
+    generate_image(Path(latex_directory_path), data_filename, penalised_time_str,
+                   f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
+                   "Parallel-Portfolio", figure_filename, performance_metric_str)
+    latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
+    return (latex_include, dict_all_solvers,
             dict_actual_parallel_portfolio_penalty_time_on_each_instance)
 
 
@@ -399,8 +394,8 @@ def get_dict_variable_to_value(parallel_portfolio_path: Path,
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     variables_dict["numSolvers"] = str(len(solver_list))
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
-    variables_dict["numInstanceClasses"] = len(set([Path(instance_path).parent.name
-                                                    for instance_path in instances]))
+    variables_dict["numInstanceClasses"] = str(len(set([Path(instance_path).parent.name
+                                                    for instance_path in instances])))
     variables_dict["cutoffTime"] = str(sgh.settings.get_general_target_cutoff_time())
     variables_dict["performanceMetric"] =\
         sgh.settings.get_performance_metric_for_report()
@@ -449,3 +444,55 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
                          "Sparkle_Report_Parallel_Portfolio",
                          dict_variable_to_value)
     sl.add_output(str(target_path), "Sparkle parallel portfolio report")
+
+
+def generate_image(target_directory: Path,
+        data_parallel_portfolio_sparkle_vs_sbs_filename: str,
+        penalty_time: float, sbs_name: str, parallel_portfolio_sparkle_name: str,
+        figure_parallel_portfolio_sparkle_vs_sbs_filename: str,
+        performance_measure: str) -> None:
+    """Generates image for parallel portfolio report."""
+
+    upper_bound = float(penalty_time) * 1.5
+    lower_bound = 0.01
+
+    output_eps_file =\
+        f"{figure_parallel_portfolio_sparkle_vs_sbs_filename}.eps"
+    #output_pdf_file = f"{figure_parallel_portfolio_sparkle_vs_sbs_filename}.pdf"
+
+    sbs_name = sbs_name.replace("/", "_")
+    #sbs_name_path = sbs_name.replace("\\", "")
+    output_gnuplot_script = f"{parallel_portfolio_sparkle_name}_vs_{sbs_name}.plt"
+
+    with (target_directory / output_gnuplot_script).open("w+") as outfile:
+        outfile.write(f"set xlabel '{sbs_name}, {performance_measure}'\n"
+                      f"set ylabel '{parallel_portfolio_sparkle_name}, "
+                      f"{performance_measure}'\n"
+                      f"set title '{parallel_portfolio_sparkle_name} vs {sbs_name}'\n"
+                      "unset key\n"
+                      f"set xrange [{lower_bound}:{upper_bound}]\n"
+                      f"set yrange [{lower_bound}:{upper_bound}]\n"
+                      "set logscale x\n"
+                      "set logscale y\n"
+                      "set grid\n"
+                      "set size square\n"
+                      f"set arrow from {lower_bound},{lower_bound} to {upper_bound},"
+                      f"{upper_bound} nohead lc rgb 'black'\n")
+
+        if performance_measure == "PAR10":
+            # Cutoff time x axis
+            outfile.write(f"set arrow from {penalty_time},{lower_bound} to "
+                            f"{penalty_time},{upper_bound} nohead lc rgb 'black' lt 2\n")
+            # Cutoff time y axis
+            outfile.write(f"set arrow from {lower_bound},{penalty_time} to {upper_bound}"
+                            f",{penalty_time} nohead lc rgb 'black' lt 2\n")
+
+        outfile.write('set terminal postscript eps color dashed linewidth "Helvetica"'
+                        " 20\n")
+        outfile.write(f"set output '{output_eps_file}'\n")
+        outfile.write(f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
+                        "points pt 2 ps 2\n")
+
+    sgrh.generate_gnuplot(output_gnuplot_script, target_directory)
+    sgrh.generate_pdf(output_eps_file, target_directory)
+    Path(output_gnuplot_script).unlink(missing_ok=True)
