@@ -89,6 +89,8 @@ Commands/sparkle_wait.py
 
 Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/ --ablation --validate
 
+Commands/sparkle_wait.py
+
 ### Running a configured solver
 
 #Now that we have a configured solver, we can run it on a single instance to get a result.

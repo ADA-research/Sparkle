@@ -143,7 +143,7 @@ if __name__ == "__main__":
         instance_set_test_name = instance_set_test.name
 
         # Create instance file list for test set in configurator
-        instances_directory_test = configurator.instances_path / instance_set_test_name
+        instances_directory_test = sgh.instance_dir / instance_set_test_name
         list_path = sih.get_list_all_path(instances_directory_test)
         instance_list_test_path = configurator.instances_path\
             / instance_set_test_name / (instance_set_test_name + "_test.txt")
@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(
-        solver.name, instance_set_train.name, instance_set_test_name
+        instance_set_test_name
     )
     configurator = sgh.settings.get_general_sparkle_configurator()
     # Set up scenarios

@@ -200,8 +200,6 @@ def prepare_smac_execution_directories_validation(instance_set_test_name: str) -
     Remove old directories and files as needed.
 
     Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing
     """
     # Make sure no old files remain that could interfere
@@ -440,8 +438,10 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
     configurator = sgh.settings.get_general_sparkle_configurator()
+    if configurator.scenario is None:
+        configurator.set_scenario_dirs(solver_name, instance_set_name)
     scen_results_dir = configurator.scenario.result_directory
-    target_alg = configurator.configurator_target
+    target_alg = configurator.configurator_target.name
     line_key_prefix = "Estimated mean quality of final incumbent config"
     # Compare results of each run on the training set to find the best configuration
     # among them
