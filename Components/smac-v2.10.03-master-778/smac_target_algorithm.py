@@ -57,7 +57,8 @@ if __name__ == "__main__":
     try:
         outdict = ast.literal_eval(run_solver.stdout.decode())
     except Exception as ex:
-        print("ERROR: Could not decode Solver Wrapper output:"
+        print("ERROR: Could not decode Solver Wrapper output:\n"
+              f"Return code: {run_solver.returncode}"
               f"stdout: {run_solver.stdout}\n "
               f"stderr: {run_solver.stderr}\n "
               f"Exception whilst decoding dictionary: {ex}")

@@ -462,7 +462,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
         # TODO: General implementation of configurator output verification
         # Check whether the smac_output is empty
         if len(smac_output_line) == 0:
-            print("Error: Configurator output file has unexpected format")
+            print(f"Error: Configurator output file {result_file} has unexpected format")
             # Find matching error file
             error_files = [file for file in configurator.tmp_path.iterdir()
                            if file.name.startswith(f"{solver_name}_{instance_set_name}")
