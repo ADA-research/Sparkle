@@ -795,4 +795,4 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
                          target_path,
                          "Sparkle_Report_for_Configuration",
                          variables_dict)
-    sl.add_output(str(target_path), "Sparkle parallel portfolio report")
+    sl.add_output(str(target_path), "Sparkle Configuration report")

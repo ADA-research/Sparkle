@@ -1137,11 +1137,14 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
                              return_value=value_dict)
     mock_generate_report = mocker.patch("Commands.sparkle_help.sparkle_generate_report"
                                         "_help.generate_report", return_value=None)
+    mock_log = mocker.patch("Commands.sparkle_help.sparkle_logging.add_output",
+                            return_value=None)
 
     sgrch.generate_report_for_configuration(solver_name, train_instance, ablation=True)
     mock_dict.assert_called_once_with(sgh.configuration_output_analysis, solver_name,
                                       train_instance, None, True)
     mock_generate_report.assert_called_once()
+    mock_log.assert_called_once()
 
 
 def test_generate_report_for_configuration(mocker: MockFixture) -> None:
@@ -1166,6 +1169,8 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
                              return_value=value_dict)
     mock_generate_report = mocker.patch("Commands.sparkle_help.sparkle_generate_report"
                                         "_help.generate_report", return_value=None)
+    mock_log = mocker.patch("Commands.sparkle_help.sparkle_logging.add_output",
+                            return_value=None)
 
     sgrch.generate_report_for_configuration(solver_name, train_instance,
                                             test_instance, ablation)
@@ -1174,3 +1179,4 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
         sgh.configuration_output_analysis,
         solver_name, train_instance, test_instance, ablation)
     mock_generate_report.assert_called_once()
+    mock_log.assert_called_once()
