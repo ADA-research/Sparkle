@@ -90,7 +90,7 @@ if __name__ == "__main__":
             )
             if extractor_path == tmp_extractor_path:
                 feature_data_csv.delete_column(column_name)
-        feature_data_csv.update_csv()
+        feature_data_csv.save_csv()
         shutil.rmtree(extractor_path)
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():

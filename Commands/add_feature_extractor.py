@@ -161,7 +161,7 @@ if __name__ == "__main__":
     for column_name in list_columns:
         feature_data_csv.add_column(column_name)
 
-    feature_data_csv.update_csv()
+    feature_data_csv.save_csv()
     sfh.add_remove_platform_item(len(list_columns),
                                  sgh.extractor_feature_vector_size_list_path,
                                  key=extractor_directory)

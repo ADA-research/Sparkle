@@ -153,9 +153,7 @@ if __name__ == "__main__":
                 fout.write(f"{instance.absolute()}\n")
 
     # Create solver execution directories, and copy necessary files there
-    scsh.prepare_smac_execution_directories_validation(
-        instance_set_test_name
-    )
+    scsh.prepare_smac_execution_directories_validation(instance_set_test_name)
     configurator = sgh.settings.get_general_sparkle_configurator()
     # Set up scenarios
     # 1. Set up the validation scenario for the training set

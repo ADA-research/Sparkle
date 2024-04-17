@@ -16,7 +16,7 @@ from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_instances_help as sih
@@ -132,13 +132,12 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
     if performance_data_csv_path is not None:
         solver_name = "Sparkle_Portfolio_Selector"
         check_selector_status(solver_name)
-        fo = Path(performance_data_csv_path).open("r+")
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-            performance_data_csv_path)
-        performance_data_csv.set_value(instance_path, solver_name, cpu_time_penalised)
-        performance_data_csv.dataframe.to_csv(performance_data_csv_path)
-        fo.close()
+        with Path(performance_data_csv_path).open("r+") as fo:
+            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+            performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+            performance_data_csv.set_value(cpu_time_penalised,
+                                           solver_name, instance_path)
+            performance_data_csv.save_csv()
     else:
         if flag_solved:
             print("instance solved by solver " + solver_path)
@@ -268,26 +267,23 @@ def call_sparkle_portfolio_selector_solve_directory(
 
     Path(test_case_directory_path + "Tmp/").mkdir(parents=True, exist_ok=True)
 
-    test_performance_data_csv_name = "sparkle_performance_data.csv"
-    test_performance_data_csv_path = (
-        test_case_directory_path + test_performance_data_csv_name)
-    spdcsv.SparklePerformanceDataCSV.create_empty_csv(test_performance_data_csv_path)
-    test_performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-        test_performance_data_csv_path)
+    test_performance_data_csv_path =\
+        f"{test_case_directory_path}sparkle_performance_data.csv"
+    test_performance_data_csv = PerformanceDataFrame(test_performance_data_csv_path)
 
     total_job_list = []
 
     list_all_filename = sih.get_instance_list_from_path(Path(instance_directory_path))
 
     for filename in list_all_filename:
-        test_performance_data_csv.add_row(str(filename))
+        test_performance_data_csv.add_instance(str(filename))
         total_job_list.append([str(filename)])
 
     solver_name = "Sparkle_Portfolio_Selector"
     check_selector_status(solver_name)
-    test_performance_data_csv.add_column(solver_name)
+    test_performance_data_csv.add_solver(solver_name)
 
-    test_performance_data_csv.update_csv()
+    test_performance_data_csv.save_csv()
 
     n_jobs = len(total_job_list)
     target_call = "python Commands/sparkle_help/run_sparkle_portfolio_core.py" +\

@@ -9,7 +9,7 @@ import shutil
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_compute_features_help as scf
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsp
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     if nickname_str is not None:
         last_level_directory = nickname_str
     else:
-        last_level_directory = sfh.get_last_level_directory_name(instances_source)
+        last_level_directory = Path(instances_source).name
 
     instances_directory = sgh.instance_dir / last_level_directory
     if not instances_directory.exists():
@@ -103,8 +103,7 @@ if __name__ == "__main__":
         list_instance = sih._get_list_instance(instances_source)
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-            sgh.performance_data_csv_path)
+        performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
 
         print(f"Number of instances to be added: {len(list_instance)}")
 
@@ -121,24 +120,22 @@ if __name__ == "__main__":
             intended_instance_line = intended_instance_line.strip()
             sfh.add_remove_platform_item(intended_instance_line, sgh.instance_list_path)
             feature_data_csv.add_row(intended_instance_line)
-            performance_data_csv.add_row(intended_instance_line)
+            performance_data_csv.add_instance(intended_instance_line)
 
             print(f"Instance {instance_line} has been added!\n")
 
-        feature_data_csv.update_csv()
-        performance_data_csv.update_csv()
+        feature_data_csv.save_csv()
+        performance_data_csv.save_csv()
     else:
         list_source_all_filename = sfh.get_list_all_filename_recursive(instances_source)
         target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
 
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-            sgh.performance_data_csv_path)
+        performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
 
         num_inst = len(list_source_all_filename)
 
         print(f"Number of instances to be added: {str(num_inst)}")
-
         for i, intended_filename in enumerate(list_source_all_filename):
             print("")
             print(f"Adding {intended_filename.name} ... "
@@ -151,12 +148,12 @@ if __name__ == "__main__":
             else:
                 sfh.add_remove_platform_item(intended_filename, sgh.instance_list_path)
                 feature_data_csv.add_row(intended_filename)
-                performance_data_csv.add_row(intended_filename)
+                performance_data_csv.add_instance(intended_filename)
                 shutil.copy(intended_filename, instances_directory)
                 print(f"Instance {intended_filename.name} has been added!")
 
-        feature_data_csv.update_csv()
-        performance_data_csv.update_csv()
+        feature_data_csv.save_csv()
+        performance_data_csv.save_csv()
 
     print("\nAdding instance set "
           f"{instances_directory.name} done!")

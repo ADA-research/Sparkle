@@ -136,6 +136,29 @@ def call_configured_solver_parallel(
     return run
 
 
+def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
+    """Return the name and parameter string of the latest configured solver.
+
+    Returns:
+        Tuple(str, str): A tuple containing the solver name and its configuration string.
+    """
+    # Get latest configured solver + instance set
+    solver_name = sfh.get_last_level_directory_name(
+        str(sgh.latest_scenario().get_config_solver()))
+    instance_set_name = sfh.get_last_level_directory_name(
+        str(sgh.latest_scenario().get_config_instance_set_train()))
+
+    if solver_name is None or instance_set_name is None:
+        # Print error and stop execution
+        print("ERROR: No configured solver found! Stopping execution.")
+        sys.exit(-1)
+
+    # Get optimised configuration
+    config_str = scsh.get_optimised_configuration_params(solver_name, instance_set_name)
+
+    return solver_name, config_str
+
+
 def run_configured_solver(instance_path_list: list[Path], solver_name: str, 
                           config_str: str) -> None:
     """Run solver with the configuration on the given instance.

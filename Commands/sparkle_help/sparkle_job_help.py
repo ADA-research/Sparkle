@@ -6,7 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 import time
 
-import runrunner as rrr
+from runrunner import SlurmRun
 from runrunner.base import Status
 
 from Commands.sparkle_help.sparkle_command_help import CommandName
@@ -85,7 +85,7 @@ def wait_for_dependencies(command_to_run: CommandName) -> None:
         wait_for_job(job_id)
 
 
-def wait_for_job(job: str | rrr.SlurmRun) -> None:
+def wait_for_job(job: str | SlurmRun) -> None:
     """Wait for a given Slurm job to finish executing.
 
     Args:
@@ -99,7 +99,7 @@ def wait_for_job(job: str | rrr.SlurmRun) -> None:
 
 
 def find_run(job_id: str, path: Path = Path(sgh.sparkle_tmp_path))\
-        -> rrr.SlurmRun:
+        -> SlurmRun:
     """Retrieve a specific RunRunner Slurm run using the job_id.
 
     Args:
@@ -116,7 +116,7 @@ def find_run(job_id: str, path: Path = Path(sgh.sparkle_tmp_path))\
 
 
 def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
-        -> list[rrr.SlurmRun]:
+        -> list[SlurmRun]:
     """Retrieve all run objects from file storage.
 
     Args:
@@ -133,7 +133,7 @@ def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
             # TODO: RunRunner should be adapted to have more general methods for runs
             # So this method can work for both local and slurm
             try:
-                run_obj = rrr.SlurmRun.from_file(file)
+                run_obj = SlurmRun.from_file(file)
                 runs.append(run_obj)
             except Exception:
                 # TODO: When we have a more sophisticated version of managing/
@@ -142,7 +142,7 @@ def get_runs_from_file(path: Path = Path(sgh.sparkle_tmp_path))\
     return runs
 
 
-def get_running_jobs() -> list[rrr.SlurmRun]:
+def get_running_jobs() -> list[SlurmRun]:
     """Returns all waiting or running jobs."""
     return [run for run in get_runs_from_file()
             if run.status == Status.WAITING or run.status == Status.RUNNING]

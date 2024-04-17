@@ -9,7 +9,7 @@ from pathlib import Path
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures import sparkle_performance_dataframe as spdcsv
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_command_help as sch
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     list_instances = sfh.get_instance_list_from_reference(instances_path)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+    performance_data_csv = spdcsv.PerformanceDataFrame(
         sgh.performance_data_csv_path
     )
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         sfh.add_remove_platform_item(intended_instance,
                                      sgh.instance_list_path, remove=True)
         feature_data_csv.delete_row(intended_instance)
-        performance_data_csv.delete_row(intended_instance)
+        performance_data_csv.remove_instance(intended_instance)
 
         # Delete instance file(s)
         for instance_file in intended_instance.split():
@@ -89,8 +89,8 @@ if __name__ == "__main__":
     instance_set_name = Path(instances_path).name
     sih.remove_reference_instance_list(instance_set_name)
 
-    feature_data_csv.update_csv()
-    performance_data_csv.update_csv()
+    feature_data_csv.save_csv()
+    performance_data_csv.save_csv()
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         shutil.rmtree(sgh.sparkle_algorithm_selector_path)

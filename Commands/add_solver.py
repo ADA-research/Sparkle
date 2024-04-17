@@ -12,7 +12,7 @@ from runrunner.base import Runner
 
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures import sparkle_performance_dataframe as spdcsv
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from Commands.sparkle_help import sparkle_add_solver_help as sash
@@ -145,11 +145,11 @@ if __name__ == "__main__":
     shutil.copyfile(runsolver_path, runsolver_target)
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
-    performance_data_csv = spdcsv.SparklePerformanceDataCSV(
+    performance_data_csv = spdcsv.PerformanceDataFrame(
         sgh.performance_data_csv_path
     )
-    performance_data_csv.add_column(solver_directory)
-    performance_data_csv.update_csv()
+    performance_data_csv.add_solver(solver_directory)
+    performance_data_csv.save_csv()
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)
 
