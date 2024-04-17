@@ -159,7 +159,7 @@ if __name__ == "__main__":
             print("Not generating a Sparkle report, stopping execution!")
             sys.exit(-1)
 
-        print("Generating report ...")
+        print("Generating report for selection...")
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(sgh.ReportType.ALGORITHM_SELECTION)
         status_info.save()

@@ -213,7 +213,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     return actual_selector_penalty
 
 
-def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
+def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path) -> str:
     """Create a LaTeX plot comparing the selector and the SBS.
 
     The plot compares the performance on each instance of the portfolio selector created
@@ -238,7 +238,6 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                  actual_portfolio_selector_penalty[instance]]
         points.append(point)
 
-    latex_directory_path = "Components/Sparkle-latex-generator/"
     figure_filename = (
         "figure_portfolio_selector_sparkle_vs_sbs")
 
@@ -258,11 +257,11 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             output_dir=latex_directory_path)
+                             output_dir=output_dir)
     return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
 
 
-def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
+def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path) -> str:
     """Create a LaTeX plot comparing the selector and the VBS.
 
     The plot compares the performance on each instance of the portfolio selector created
@@ -287,7 +286,6 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                  actual_portfolio_selector_penalty[instance]]
         points.append(point)
 
-    latex_directory_path = "Components/Sparkle-latex-generator/"
     figure_filename = (
         "figure_portfolio_selector_sparkle_vs_vbs")
     penalty = sgh.settings.get_general_penalty_multiplier()
@@ -301,7 +299,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             output_dir=latex_directory_path)
+                             output_dir=output_dir)
 
     return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
 
@@ -350,7 +348,8 @@ def get_test_actual_par(test_case_directory: str) -> str:
     return str(sparkle_penalty_time)
 
 
-def selection_report_variables(test_case_directory: str = None) -> dict[str, str]:
+def selection_report_variables(target_dir: Path,
+                               test_case_directory: str = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
@@ -379,9 +378,9 @@ def selection_report_variables(test_case_directory: str = None) -> dict[str, str
     latex_dict["actualPAR"] = get_actual_par()
     latex_dict["penalty"] = str(sgh.settings.get_general_penalty_multiplier())
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
-        get_figure_portfolio_selector_sparkle_vs_sbs()
+        get_figure_portfolio_selector_sparkle_vs_sbs(target_dir)
     latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
-        get_figure_portfolio_selector_sparkle_vs_vbs()
+        get_figure_portfolio_selector_sparkle_vs_vbs(target_dir)
     latex_dict["testBool"] = r"\testfalse"
 
     # Train and test
@@ -415,37 +414,6 @@ def fill_template_tex(template_tex: str, variables: dict) -> str:
     return template_tex
 
 
-def generate_report_selection(test_case_directory: str = None) -> None:
-    """Generate a report for algorithm selection.
-
-    Args:
-        test_case_directory: Path to the test case directory. Defaults to None.
-    """
-    # Include results on the test set if a test case directory is given
-    if test_case_directory is not None:
-        if not Path(test_case_directory).exists():
-            print("ERROR: The given directory", test_case_directory, "does not exist!")
-            sys.exit(-1)
-
-        if test_case_directory[-1] != "/":
-            test_case_directory += "/"
-
-        latex_report_filename = Path("Sparkle_Report_for_Test")
-    # Only look at the training instance set(s)
-    else:
-        latex_report_filename = Path("Sparkle_Report")
-
-    dict_variable_to_value = selection_report_variables(test_case_directory)
-    target_path = Path()
-
-    generate_report(Path("Components/Sparkle-latex-generator/"),
-                    "template-Sparkle.tex",
-                    target_path,
-                    latex_report_filename,
-                    dict_variable_to_value)
-    sl.add_output(str(target_path), "Sparkle portfolio selector report")
-
-
 def generate_report(latex_source_path: Path,
                     latex_template_name: str,
                     target_path: Path,
@@ -465,6 +433,7 @@ def generate_report(latex_source_path: Path,
     report_content = latex_template_filepath.open("r").read()
     report_content = fill_template_tex(report_content, variable_dict)
 
+    target_path.mkdir(parents=True, exist_ok=True)
     latex_report_filepath = target_path / report_name
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
     Path(latex_report_filepath).open("w+").write(report_content)
@@ -638,3 +607,35 @@ def generate_comparison_plot(points: list,
     generate_gnuplot(output_gnuplot_script, output_dir)
     generate_pdf(output_eps_file, output_dir)
     sfh.rmfiles(output_gnuplot_script)
+
+
+def generate_report_selection(test_case_directory: str = None) -> None:
+    """Generate a report for algorithm selection.
+
+    Args:
+        test_case_directory: Path to the test case directory. Defaults to None.
+    """
+    # Include results on the test set if a test case directory is given
+    if test_case_directory is not None:
+        if not Path(test_case_directory).exists():
+            print("ERROR: The given directory", test_case_directory, "does not exist!")
+            sys.exit(-1)
+
+        if test_case_directory[-1] != "/":
+            test_case_directory += "/"
+
+        latex_report_filename = Path("Sparkle_Report_for_Test")
+    # Only look at the training instance set(s)
+    else:
+        latex_report_filename = Path("Sparkle_Report")
+    target_path = sgh.selection_output_analysis
+    target_path.mkdir(parents=True, exist_ok=True)
+    dict_variable_to_value = selection_report_variables(target_path,
+                                                        test_case_directory)
+
+    generate_report(sgh.sparkle_latex_dir,
+                    "template-Sparkle.tex",
+                    target_path,
+                    latex_report_filename,
+                    dict_variable_to_value)
+    sl.add_output(str(target_path), "Sparkle portfolio selector report")

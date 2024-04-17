@@ -8,6 +8,7 @@ import sys
 import shutil
 from pathlib import Path
 
+from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -230,7 +231,7 @@ def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
 
 def get_figure_configure_vs_default(configured_results_dir: str,
                                     default_results_dir: str,
-                                    configuration_reports_directory: str,
+                                    target_directory: Path,
                                     figure_filename: str,
                                     smac_each_run_cutoff_time: float) -> str:
     """Create a figure comparing the configured and default solver.
@@ -241,15 +242,13 @@ def get_figure_configure_vs_default(configured_results_dir: str,
     Args:
         configured_results_dir: Directory of results for configured solver
         default_results_dir: Directory of results for default solver
-        configuration_reports_directory: Directory for the configuration reports
+        target_directory: Directory for the configuration reports
         figure_filename: Filename for the figure
         smac_each_run_cutoff_time: Cutoff time
 
     Returns:
         A string containing the latex command to include the figure
     """
-    latex_directory_path =\
-        configuration_reports_directory + "Sparkle-latex-generator-for-configuration/"
     points = get_data_for_plot(configured_results_dir, default_results_dir,
                                smac_each_run_cutoff_time)
 
@@ -257,12 +256,12 @@ def get_figure_configure_vs_default(configured_results_dir: str,
 
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
-                   "output_dir": latex_directory_path,
                    "scale": "linear",
                    "limit_min": 1.5,
                    "limit_max": 1.5,
                    "limit": "relative",
                    "replace_zeros": False,
+                   "output_dir": target_directory
                    }
     if performance_measure[0:3] == "PAR":
         plot_params["scale"] = "log"
@@ -276,14 +275,12 @@ def get_figure_configure_vs_default(configured_results_dir: str,
                              figure_filename,
                              **plot_params)
 
-    str_value = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
-
-    return str_value
+    return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
 def get_figure_configured_vs_default_on_test_instance_set(
-        solver_name: str, instance_set_train_name: str, instance_set_test_name: str,
-        smac_each_run_cutoff_time: float) -> str:
+        target_dir: Path, solver_name: str, instance_set_train_name: str,
+        instance_set_test_name: str, smac_each_run_cutoff_time: float) -> str:
     """Create a figure comparing the configured and default solver on the training set.
 
     Manages the creation of a comparison plot of the instances in a test set for the
@@ -307,22 +304,18 @@ def get_figure_configured_vs_default_on_test_instance_set(
                               f"_test_configured/{configured_results_file}")
     default_results_dir = (f"{scen_dir}/outdir_{instance_set_test_name}"
                            f"_test_default/{default_results_file}")
-
-    configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
-                                       f"{instance_set_train_name}_"
-                                       f"{instance_set_test_name}/")
     data_plot_configured_vs_default_on_test_instance_set_filename = (
         f"data_{solver_name}_configured_vs_default_on_{instance_set_test_name}_test")
 
     return get_figure_configure_vs_default(
-        configured_results_dir, default_results_dir, configuration_reports_directory,
+        configured_results_dir, default_results_dir, target_dir,
         data_plot_configured_vs_default_on_test_instance_set_filename,
         smac_each_run_cutoff_time)
 
 
 def get_figure_configured_vs_default_on_train_instance_set(
         solver_name: str, instance_set_train_name: str,
-        configuration_reports_directory: str, smac_each_run_cutoff_time: float) -> str:
+        target_directory: Path, smac_each_run_cutoff_time: float) -> str:
     """Create a figure comparing the configured and default solver on the training set.
 
     Manages the creation of a comparison plot of the instances in the train instance set
@@ -352,7 +345,7 @@ def get_figure_configured_vs_default_on_train_instance_set(
     data_plot_configured_vs_default_on_train_instance_set_filename = (
         f"data_{solver_name}_configured_vs_default_on_{instance_set_train_name}_train")
     return get_figure_configure_vs_default(
-        configured_results_dir, default_res_dir, configuration_reports_directory,
+        configured_results_dir, default_res_dir, target_directory,
         data_plot_configured_vs_default_on_train_instance_set_filename,
         smac_each_run_cutoff_time)
 
@@ -501,7 +494,8 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
     return table_string
 
 
-def configuration_report_variables(solver_name: str, instance_set_train_name: str,
+def configuration_report_variables(target_dir: Path, solver_name: str,
+                                   instance_set_train_name: str,
                                    instance_set_test_name: str = None,
                                    ablation: bool = True) -> dict:
     """Return a dict matching LaTeX variables and their values.
@@ -516,20 +510,15 @@ def configuration_report_variables(solver_name: str, instance_set_train_name: st
         A dictionary containing the variables and values
     """
     has_test = instance_set_test_name is not None
-    if has_test:
-        configuration_reports_directory = (
-            f"Configuration_Reports/{solver_name}_{instance_set_train_name}_"
-            f"{instance_set_test_name}/")
-    else:
-        configuration_reports_directory = (
-            f"Configuration_Reports/{solver_name}_{instance_set_train_name}/")
 
-    full_dict = get_dict_variable_to_value_common(solver_name, instance_set_train_name,
+    full_dict = get_dict_variable_to_value_common(solver_name,
+                                                  instance_set_train_name,
                                                   instance_set_test_name,
-                                                  configuration_reports_directory)
+                                                  target_dir)
 
     if has_test:
-        test_dict = get_dict_variable_to_value_test(solver_name, instance_set_train_name,
+        test_dict = get_dict_variable_to_value_test(target_dir, solver_name,
+                                                    instance_set_train_name,
                                                     instance_set_test_name)
         full_dict.update(test_dict)
     full_dict["testBool"] = f"\\test{str(has_test).lower()}"
@@ -548,14 +537,14 @@ def configuration_report_variables(solver_name: str, instance_set_train_name: st
 
 def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name: str,
                                       instance_set_test_name: str,
-                                      configuration_reports_directory: str) -> dict:
+                                      target_directory: Path) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
 
     Args:
         solver_name: Name of the solver
         instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing
-        configuration_reports_directory: Path to directory with configuration reports
+        target_directory: Path to directory with configuration reports
 
     Returns:
         A dictionary containing the variables and values
@@ -604,7 +593,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     latex_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
 
     str_value = get_figure_configured_vs_default_on_train_instance_set(
-        solver_name, instance_set_train_name, configuration_reports_directory,
+        solver_name, instance_set_train_name, target_directory,
         float(smac_each_run_cutoff_time))
     latex_dict["figure-configured-vs-default-train"] = str_value
 
@@ -621,7 +610,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     if ablation_validation_name is None:
         ablation_validation_name = instance_set_train_name
     latex_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
-                                                    ablation_validation_name)
+                                                   ablation_validation_name)
     latex_dict["ablationPath"] = get_ablation_table(
         solver_name, instance_set_train_name, ablation_validation_name)
     latex_dict["featuresBool"] = get_features_bool(solver_name, instance_set_train_name)
@@ -629,7 +618,8 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     return latex_dict
 
 
-def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: str,
+def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
+                                    instance_set_train_name: str,
                                     instance_set_test_name: str) -> dict:
     """Return a dict matching test set specific latex variables with their values.
 
@@ -641,10 +631,7 @@ def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: s
     Returns:
         A dictionary containting the variables and their values
     """
-    test_dict = {}
-
-    test_dict["instanceSetTest"] = instance_set_test_name
-
+    test_dict = {"instanceSetTest": instance_set_test_name}
     test_dict["numInstanceInTestingInstanceSet"] =\
         get_num_instance_for_configurator(instance_set_test_name)
 
@@ -655,21 +642,20 @@ def get_dict_variable_to_value_test(solver_name: str, instance_set_train_name: s
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     configured_results_test_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
                                    f"_test_configured/{configured_results_test_file}")
-    str_value = get_par_performance(configured_results_test_dir,
-                                    smac_each_run_cutoff_time)
-    test_dict["optimisedConfigurationTestingPerformancePAR"] = str(str_value)
+    test_dict["optimisedConfigurationTestingPerformancePAR"] =\
+        str(get_par_performance(configured_results_test_dir, smac_each_run_cutoff_time))
 
     default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_test_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
                                 f"_test_default/{default_results_test_file}")
-    str_value = get_par_performance(default_results_test_dir,
-                                    smac_each_run_cutoff_time)
-    test_dict["defaultConfigurationTestingPerformancePAR"] = str(str_value)
 
-    str_value = get_figure_configured_vs_default_on_test_instance_set(
-        solver_name, instance_set_train_name, instance_set_test_name,
+    test_dict["defaultConfigurationTestingPerformancePAR"] =\
+        str(get_par_performance(default_results_test_dir, smac_each_run_cutoff_time))
+
+    test_dict["figure-configured-vs-default-test"] =\
+        get_figure_configured_vs_default_on_test_instance_set(
+        target_dir, solver_name, instance_set_train_name, instance_set_test_name,
         float(smac_each_run_cutoff_time))
-    test_dict["figure-configured-vs-default-test"] = str_value
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = (
@@ -789,19 +775,6 @@ def get_most_recent_test_run() -> tuple[str, str, bool, bool]:
             flag_instance_set_test)
 
 
-def generate_report_for_configuration_prep(configuration_reports_directory: str) -> None:
-    """Prepare for the generation of an algorithm configuration report.
-
-    Args:
-        configuration_reports_directory: Directory for the configuration reports
-    """
-    print("Generating report for configuration ...")
-    full_conf_reports_dir = Path(configuration_reports_directory
-                                 + "/Sparkle-latex-generator-for-configuration")
-    template_latex_path = Path("Components/Sparkle-latex-generator-for-configuration")
-    shutil.copytree(template_latex_path, full_conf_reports_dir, dirs_exist_ok=True)
-
-
 def generate_report_for_configuration(solver_name: str, instance_set_train_name: str,
                                       instance_set_test_name: str = None,
                                       ablation: bool = True) -> None:
@@ -813,22 +786,14 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
         instance_set_test_name: Name of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
-    latex_dir = Path("Components/Sparkle-latex-generator")
-    if instance_set_test_name is None:
-        configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
-                                           f"{instance_set_train_name}/")
-    else:
-        configuration_reports_directory = (f"Configuration_Reports/{solver_name}_"
-                                           f"{instance_set_train_name}_"
-                                           f"{instance_set_test_name}/")
-    generate_report_for_configuration_prep(configuration_reports_directory)
-    dict_variable_to_value = (
-        configuration_report_variables(solver_name, instance_set_train_name,
-                                       instance_set_test_name, ablation=ablation))
-    target_path = Path(configuration_reports_directory) /\
-        "Sparkle-latex-generator-for-configuration"
-    sgrh.generate_report(latex_dir,
+    target_path = sgh.configuration_output_analysis
+    target_path.mkdir(parents=True, exist_ok=True)
+    variables_dict = configuration_report_variables(
+        target_path, solver_name, instance_set_train_name, instance_set_test_name,
+        ablation)
+    sgrh.generate_report(sgh.sparkle_latex_dir,
                          "template-Sparkle-for-configuration.tex",
                          target_path,
                          "Sparkle_Report_for_Configuration",
-                         dict_variable_to_value)
+                         variables_dict)
+    sl.add_output(str(target_path), "Sparkle parallel portfolio report")

@@ -468,15 +468,12 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         parallel_portfolio_path: Parallel portfolio path.
         instances: List of instances.
     """
-    latex_directory_path = Path(
-        "Components/Sparkle-latex-generator/")
-    target_path = Path("Output/Sparkle_Report_Parallel_Portfolio/")
+    target_path = sgh.selection_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = parallel_report_variables(
-        target_path,
-        parallel_portfolio_path,instances)
+        target_path, parallel_portfolio_path, instances)
 
-    sgrh.generate_report(latex_directory_path,
+    sgrh.generate_report(sgh.sparkle_latex_dir,
                          "template-Sparkle-for-parallel-portfolio.tex",
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",
