@@ -274,6 +274,8 @@ class ReportingScenario:
         """Return the path to the testing set that was used for algorithm selection."""
         try:
             path = self.__scenario["selection"]["test_case_directory"]
+            if Path(path) == Path("."):
+                path = None
         except KeyError:
             path = None
         return path

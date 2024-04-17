@@ -60,11 +60,11 @@ def get_num_instance_classes() -> str:
     Returns:
         The number of instance sets as LaTeX str.
     """
-    return len(set([Path(instance_path).parent.name
-                    for instance_path in sgh.instance_list]))
+    return str(len(set([Path(instance_path).parent.name
+                    for instance_path in sgh.instance_list])))
 
 
-def get_instance_set_count_list(instance_list: list[str]) -> str:
+def get_instance_set_count_list(instance_list: list[str] = None) -> str:
     """Get the instance sets for use in a LaTeX document. Defaults to sgh.instance_list.
 
     Returns:
@@ -260,7 +260,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
                              output_dir=latex_directory_path)
-    return f"\\includegraphics[width=0.6\\textwidth]{ {figure_filename} }"
+    return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
 
 
 def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
@@ -304,7 +304,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              replace_zeros=True,
                              output_dir=latex_directory_path)
 
-    return f"\\includegraphics[width=0.6\\textwidth]{ {figure_filename} }"
+    return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
 
 
 def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
@@ -409,7 +409,7 @@ def fill_template_tex(template_tex: str, variables: dict) -> str:
     for variable_key, target_value in variables.items():
         variable = "@@" + variable_key + "@@"
         # We don't modify variable names in the Latex file
-        if re.match(".*{.*}.*", target_value) is None:
+        if "\includegraphics" not in target_value and "\label" not in target_value:
             # Rectify underscores in target_value
             target_value = target_value.replace("_", r"\textunderscore ")
         template_tex = template_tex.replace(variable, target_value)
