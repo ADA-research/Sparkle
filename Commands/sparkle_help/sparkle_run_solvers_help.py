@@ -120,10 +120,24 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
            "-w", runsolver_watch_data_path,
            "-v", runsolver_values_log,
            "-o", raw_result_path_option]
-    cmd += [x for x in (str(solver_path) + "/" + cmd_solver_call).split(" ") if x != ""]
+    cmd += (str(solver_path) + "/" + cmd_solver_call).split(" ", 1)
+    print('TEEEESSSTTT ---')
+    print(cmd_solver_call)
+    print('TEEEESSSTTT ---')
+    print(cmd)
 
     #Not sure if cwd=exec_path is the correct implementation
     process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
+    import time
+
+    start_time = time.time()
+    while time.time() - start_time < 10000:
+        elapsed_time = int(time.time() - start_time)
+        print(f"Elapsed Time: {elapsed_time} seconds")
+        time.sleep(1)
+        if(elapsed_time % 5 == 0):
+            print(process)
+            print(process.returncode)
     if process.returncode != 0:
         print("WARNING: Solver execution seems to have failed!")
         print(f"The used command was: {cmd}")
