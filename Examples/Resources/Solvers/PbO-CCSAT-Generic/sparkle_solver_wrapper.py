@@ -24,7 +24,8 @@ del args["specifics"]
 del args["run_length"]
 
 solver_name = "PbO-CCSAT"
-solver_cmd = [f"{solver_dir / solver_name}",
+solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + solver_name
+solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
 

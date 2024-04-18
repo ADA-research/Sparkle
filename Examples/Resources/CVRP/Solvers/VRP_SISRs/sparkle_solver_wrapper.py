@@ -23,12 +23,14 @@ def get_time_pid_random_string():
 args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
+solver_dir = Path(args["solver_dir"])
 instance = args["instance"]
 specifics = args["specifics"]
 cutoff_time = int(args["cutoff_time"])+1
 # run_length = args["run_length"]
 seed = args["seed"]
 
+del args["solver_dir"]
 del args["instance"]
 del args["cutoff_time"]
 del args["seed"]
@@ -43,7 +45,8 @@ for key in args:
         params.extend(["-" + str(key), str(args[key])])
 
 solver_binary = "VRP_SISRs"
-solver_cmd = ["./" + solver_binary,
+solver_exec = f"{solver_dir / solver_binary}" if solver_dir != Path(".") else "./" + solver_binary
+solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
 
