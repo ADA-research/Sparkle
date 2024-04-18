@@ -93,12 +93,12 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver_source = args.solver_path
+    solver_source = Path(args.solver_path)
 
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.ADD_SOLVER])
 
-    if not Path(solver_source).exists():
+    if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit(-1)
 
@@ -114,24 +114,21 @@ if __name__ == "__main__":
               "a postive integer must be used. Stopping execution.")
         sys.exit(-1)
 
-    configurator_wrapper_path = Path(solver_source,
-                                     sgh.sparkle_solver_wrapper)
+    configurator_wrapper_path = solver_source / sgh.sparkle_solver_wrapper
     if configurator_wrapper_path.is_file():
         sfh.check_file_is_executable(configurator_wrapper_path)
     else:
-        print("WARNING: The solver does not have a configurator wrapper. "
+        print(f"WARNING: Solver {solver_source.name} does not have a "
+              f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper})."
               "Therefore it cannot be automatically be configured.")
 
     # Start add solver
-    last_level_directory = ""
-    last_level_directory = sfh.get_last_level_directory_name(solver_source)
-
-    solver_directory = sash.get_solver_directory(last_level_directory)
+    solver_directory = sash.get_solver_directory(solver_source.name)
     if not Path(solver_directory).exists():
         Path(solver_directory).mkdir(parents=True, exist_ok=True)
     else:
-        print(f"Solver {last_level_directory} already exists!")
-        print(f"Do not add solver {last_level_directory}")
+        print(f"ERROR: Solver {solver_source.name} already exists! "
+              "Can not add new solver.")
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
@@ -156,8 +153,7 @@ if __name__ == "__main__":
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
         print("One pcs file detected, this is a configurable solver.")
 
-    print(f"Adding solver {sfh.get_last_level_directory_name(solver_directory)} "
-          "done!")
+    print(f"Adding solver {solver_source.name} done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(sgh.sparkle_algorithm_selector_path)

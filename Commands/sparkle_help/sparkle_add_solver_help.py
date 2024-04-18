@@ -4,6 +4,7 @@
 
 import os
 from pathlib import Path
+from Commands.sparkle_help import sparkle_global_help as sgh
 
 
 def get_solver_directory(solver_name: str) -> str:
@@ -15,7 +16,7 @@ def get_solver_directory(solver_name: str) -> str:
     Returns:
         A str of the path to the solver.
     """
-    return f"Solvers/{solver_name}"
+    return str(sgh.solver_dir / solver_name)
 
 
 def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:

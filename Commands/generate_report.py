@@ -10,7 +10,6 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_generate_report_help as sgrh
 from Commands.sparkle_help import \
     sparkle_generate_report_for_configuration_help as sgrfch
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.structures.sparkle_objective import PerformanceMeasure
@@ -186,7 +185,7 @@ if __name__ == "__main__":
         status_info.set_report_type(sgh.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
         # Reporting for algorithm configuration
-        solver_name = sfh.get_last_level_directory_name(solver)
+        solver_name = Path(solver).name
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
         # validate_configured_vs_default
