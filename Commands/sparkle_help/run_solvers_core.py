@@ -44,6 +44,8 @@ if __name__ == "__main__":
 
     # Process command line arguments
     # Turn multiple instance files into a space separated string
+    # NOTE: I am not sure who made this ``change'' for multiple instance_paths
+    # But in all code hereafter, it seems to be treated as a single instance.
     instance_path = " ".join(args.instance)
     instance_name = Path(instance_path).name
     if Path(instance_path).is_file():

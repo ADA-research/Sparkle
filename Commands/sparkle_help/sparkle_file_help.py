@@ -24,9 +24,7 @@ def create_new_empty_file(filepath: str) -> None:
     Args:
       filepath: Path to file.
     """
-    fo = Path(filepath).open("w+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.close()
+    Path(filepath).write_text("")
 
 
 def get_last_level_directory_name(filepath: str) -> str:

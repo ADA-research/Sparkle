@@ -30,7 +30,9 @@ del args["run_length"]
 
 # TODO: Change solver name
 solver_bin = "SOME_SOLVER_NAME"
-solver_exec = f"{solver_dir / solver_bin}" if solver_dir != Path(".") else "./" + solver_bin
+solver_exec = f"{solver_dir / solver_bin}"
+if solver_dir == Path("."):
+    solver_exec = f"./{solver_bin}"
 
 
 tmp_directory = Path("tmp/")

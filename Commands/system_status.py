@@ -4,8 +4,8 @@
 import sys
 import argparse
 
-from Commands.sparkle_help import sparkle_global_help
-from Commands.sparkle_help import sparkle_system_status_help
+from Commands.sparkle_help import sparkle_global_help as sgh
+from Commands.sparkle_help import sparkle_system_status_help as sssh
 from Commands.sparkle_help import sparkle_logging as sl
 
 
@@ -32,13 +32,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Reporting current system status of Sparkle ...")
-    sparkle_system_status_help.print_solver_list(args.verbose)
-    sparkle_system_status_help.print_extractor_list(args.verbose)
-    sparkle_system_status_help.print_instance_list(args.verbose)
-    sparkle_system_status_help.print_list_remaining_feature_computation_job(
-        sparkle_global_help.feature_data_csv_path, args.verbose
+    sssh.print_sparkle_list(sgh.solver_list, "Solver", args.verbose)
+    sssh.print_sparkle_list(sgh.extractor_list, "Extractor", args.verbose)
+    sssh.print_sparkle_list(sgh.instance_list, "Instance", args.verbose)
+    sssh.print_list_remaining_feature_computation_job(
+        sgh.feature_data_csv_path, args.verbose
     )
-    sparkle_system_status_help.print_list_remaining_performance_computation_job(
-        sparkle_global_help.performance_data_csv_path, args.verbose
+    sssh.print_list_remaining_performance_computation_job(
+        sgh.performance_data_csv_path, args.verbose
     )
     print("Current system status of Sparkle reported!")

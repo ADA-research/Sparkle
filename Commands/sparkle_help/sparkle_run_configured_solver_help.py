@@ -9,7 +9,6 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_run_solvers_help as srsh
 from Commands.sparkle_help.sparkle_command_help import CommandName
@@ -134,20 +133,18 @@ def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
         Tuple(str, str): A tuple containing the solver name and its configuration string.
     """
     # Get latest configured solver + instance set
-    solver_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario().get_config_solver()))
-    instance_set_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario().get_config_instance_set_train()))
+    solver = sgh.latest_scenario().get_config_solver()
+    instance_set = sgh.latest_scenario().get_config_instance_set_train()
 
-    if solver_name is None or instance_set_name is None:
+    if solver is None or instance_set is None:
         # Print error and stop execution
         print("ERROR: No configured solver found! Stopping execution.")
         sys.exit(-1)
 
     # Get optimised configuration
-    config_str = scsh.get_optimised_configuration_params(solver_name, instance_set_name)
+    config_str = scsh.get_optimised_configuration_params(solver.name, instance_set.name)
 
-    return solver_name, config_str
+    return solver.name, config_str
 
 
 def run_configured_solver(instance_path_list: list[Path]) -> None:

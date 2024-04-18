@@ -165,8 +165,8 @@ def run_solver_on_instance_and_process_results(
     # TODO: Fix result path for multi-file instances (only a single file is part of the
     # result path)
     raw_result_path = (f"{sgh.sparkle_tmp_path}"
-                       f"{sfh.get_last_level_directory_name(solver_path)}_"
-                       f"{sfh.get_last_level_directory_name(instance_path)}_"
+                       f"{Path(solver_path).name}_"
+                       f"{Path(instance_path).name}_"
                        f"{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
     solver_wrapper_path = Path(solver_path) / sgh.sparkle_run_default_wrapper
@@ -192,14 +192,14 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     """
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+    performance_data = PerformanceDataFrame(performance_data_csv_path)
 
     if rerun:
         list_performance_computation_job = (
-            performance_data_csv.get_list_recompute_performance_computation_job())
+            performance_data.get_list_recompute_performance_computation_job())
     else:
         list_performance_computation_job = (
-            performance_data_csv.get_list_remaining_performance_computation_job())
+            performance_data.get_list_remaining_performance_computation_job())
 
     print("The cutoff time per algorithm run to solve an instance is set to "
           f"{cutoff_time_str} seconds")
@@ -251,12 +251,12 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             if perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
                perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
                 # TODO: Handle the multi-objective case for quality
-                performance_data_csv.set_value(quality[0], solver_path, instance_path)
+                performance_data.set_value(quality[0], solver_path, instance_path)
                 print(f"Running Result: Status: {status}, Quality{penalised_str}: "
                       f"{str(quality[0])}")
             else:
-                performance_data_csv.set_value(cpu_time_penalised, solver_path,
-                                               instance_path)
+                performance_data.set_value(cpu_time_penalised, solver_path,
+                                           instance_path)
                 print(f"Running Result: Status {status}, Runtime{penalised_str}: "
                       f"{str(cpu_time_penalised)}")
 
@@ -264,10 +264,8 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
                   f"{str(total_job_num)}")
             current_job_num += 1
 
-    performance_data_csv.save_csv()
+    performance_data.save_csv()
     print(f"Performance data file {performance_data_csv_path} has been updated!")
-
-    return
 
 
 def handle_timeouts(runtime: float, status: str,
@@ -475,8 +473,7 @@ def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> st
     if status != "SAT" and status != "UNSAT" and status != "WRONG":
         status = "UNKNOWN"
         print("Warning: Verification result was UNKNOWN for solver "
-              f"{sfh.get_last_level_directory_name(solver_path)} on instance "
-              f"{sfh.get_last_level_directory_name(instance_path)}!")
+              f"{Path(solver_path).name} on instance {Path(instance_path).name}!")
 
     # TODO: Make removal conditional on a success status (SAT or UNSAT)
     # sfh.rmfiles(raw_result_path)
@@ -531,14 +528,13 @@ def sat_get_verify_string(tmp_verify_result_path: str) -> str:
 
 def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -> str:
     """Run a SAT verifier to determine correctness of a result."""
-    sat_verifier_path = sgh.sat_verifier_path
     tmp_verify_result_path = (
-        f"Tmp/{sfh.get_last_level_directory_name(sat_verifier_path)}_"
-        f"{sfh.get_last_level_directory_name(raw_result_path)}_"
+        f"Tmp/{Path(sgh.sat_verifier_path).name}_"
+        f"{Path(raw_result_path).name}_"
         f"{sbh.get_time_pid_random_string()}.vryres")
     # TODO: Log output file
     print("Run SAT verifier")
-    subprocess.run([sat_verifier_path, instance_path, raw_result_path],
+    subprocess.run([sgh.sat_verifier_path, instance_path, raw_result_path],
                    stdout=Path(tmp_verify_result_path).open("w+"))
     print("SAT verifier done")
 
