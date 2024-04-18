@@ -9,7 +9,7 @@ from pathlib import Path
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.structures import sparkle_performance_dataframe as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_instances_help as sih
 from Commands.sparkle_help import sparkle_command_help as sch
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     list_instances = sfh.get_instance_list_from_reference(instances_path)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-    performance_data_csv = spdcsv.PerformanceDataFrame(
+    performance_data_csv = PerformanceDataFrame(
         sgh.performance_data_csv_path
     )
 
