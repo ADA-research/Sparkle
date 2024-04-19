@@ -133,7 +133,6 @@ class TestMarginalContribution(TestCase):
         # TODO: This method is currently not touched by the .sh test. Think of a test.
         pass
 
-
     @patch("Commands.sparkle_help.sparkle_compute_marginal_contribution_help."
            "compute_actual_selector_performance")
     def test_compute_actual_selector_marginal_contribution(self: TestCase,
