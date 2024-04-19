@@ -4,6 +4,7 @@
 import os
 import subprocess
 import sys
+import ast
 import shutil
 import fcntl
 from pathlib import Path
@@ -140,22 +141,20 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
 
 def check_solver_output_for_errors(raw_result_path: Path) -> None:
-    """Check solver output for known errors."""
-    error_lines = [ \
-        # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found:
-        "libstdc++.so.6: version `GLIBCXX",
-        # For e.g. invalid solver path:
-        "No such file or directory"]
+    """Check solver output for known errors.
 
-    # Find lines containing an error
-    with raw_result_path.open("r") as infile:
-        for current_line in infile:
-            for error in error_lines:
-                if error in current_line:
-                    print(f"WARNING: Possible error detected in {raw_result_path} "
-                          f"involving {error}")
-
-    return
+    Args:
+        raw_result_path: Path to the file to verify.
+    """
+    # Check if we can decode the output dictionary
+    raw_output_str = raw_result_path.open("r").read()
+    try:
+        raw_output_dict_str =\
+            raw_output_str[raw_output_str.find("{"), raw_output_str.find("}")]
+        ast.literal_eval(raw_output_dict_str)
+    except Exception as ex:
+        print(f"WARNING: Possible error detected in {raw_result_path}. "
+              f"Decoding the output dictionary threw exception: {ex}")                
 
 
 def run_solver_on_instance_and_process_results(
