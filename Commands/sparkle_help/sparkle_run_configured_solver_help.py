@@ -199,14 +199,13 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     try:
         raw_wrapper_out = raw_result_path.open("r").read()
         solver_wrapper_output_dict = ast.literal_eval(
-            raw_wrapper_out[raw_wrapper_out.index('{'):raw_wrapper_out.index('}')+1])
+            raw_wrapper_out[raw_wrapper_out.index("{"):raw_wrapper_out.index("}") + 1])
         status = solver_wrapper_output_dict["status"]
     except Exception as ex:
-        print(f"ERROR: Results in {raw_result_path} appear to be faulty. "
-                "Whilst decoding the output dictionary, found the following exception: "
-                f"{ex}")
+        print(f"ERROR: Results in {raw_result_path} appear to be faulty. Whilst decoding"
+              f" the output dictionary, found the following exception: {ex}")
         sys.exit(-1)
-    
+
     cputime, wc_time = srsh.get_runtime_from_runsolver(str(runsolver_values_path))
     if cputime == -1.0 and wc_time == -1.0:
         print(f"WARNING: Undecodable Runsolver's runtime in {runsolver_values_path}")
