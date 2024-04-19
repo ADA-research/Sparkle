@@ -104,16 +104,16 @@ def compute_perfect_selector_marginal_contribution(
     print("Computing done!")
 
     for solver in performance_data_csv.dataframe.columns:
+        solver_name = Path(solver).name
         print("Computing virtual best performance for portfolio selector excluding "
-              f"solver {sfh.get_last_level_directory_name(solver)} ...")
+              f"solver {solver_name} ...")
         tmp_performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
         tmp_performance_data_csv.remove_solver(solver)
         tmp_virt_best_perf = (
             tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
                 aggregation_function, minimise, capvalue_list))
         print("Virtual best performance for portfolio selector excluding solver "
-              f"{sfh.get_last_level_directory_name(solver)} is "
-              f"{str(tmp_virt_best_perf)}")
+              f"{solver_name} is {tmp_virt_best_perf}")
         print("Computing done!")
         if minimise and tmp_virt_best_perf > virtual_best_performance or\
            not minimise and tmp_virt_best_perf < virtual_best_performance:
@@ -124,8 +124,7 @@ def compute_perfect_selector_marginal_contribution(
         solver_tuple = (solver, marginal_contribution)
         rank_list.append(solver_tuple)
         print("Marginal contribution (to Perfect Selector) for solver "
-              f"{sfh.get_last_level_directory_name(solver)} is "
-              f"{str(marginal_contribution)}")
+              f"{solver_name} is {marginal_contribution}")
 
     rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1],
                    reverse=True)

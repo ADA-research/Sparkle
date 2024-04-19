@@ -9,7 +9,7 @@ from Commands.structures.status_info import ConstructPortfolioSelectorStatusInfo
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.structures import sparkle_performance_dataframe as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from Commands.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from Commands.sparkle_help import sparkle_job_help as sjh
@@ -62,7 +62,7 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
     if total_job_num > 0:
         return True
 
-    performance_data_csv = spdcsv.PerformanceDataFrame(performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
     performance_computation_jobs =\
         performance_data_csv.get_list_remaining_performance_computation_job()
     total_job_num = sjh.get_num_of_total_job_from_list(performance_computation_jobs)

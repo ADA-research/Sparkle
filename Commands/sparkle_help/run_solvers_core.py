@@ -44,29 +44,34 @@ if __name__ == "__main__":
 
     # Process command line arguments
     # Turn multiple instance files into a space separated string
+    # NOTE: I am not sure who made this ``change'' for multiple instance_paths
+    # But in all code hereafter, it seems to be treated as a single instance.
     instance_path = " ".join(args.instance)
+    instance_name = Path(instance_path).name
+    if Path(instance_path).is_file():
+        instance_name = Path(instance_path).parent.name
     solver_path = Path(args.solver)
     if args.seed is not None:
         # Creating a new directory for the solver to facilitate running several
         # solver_instances in parallel.
         new_solver_directory_path = Path(
-            f"{sgh.sparkle_tmp_path}{sfh.get_last_level_directory_name(solver_path)}_"
-            f"seed_{args.seed}_{Path(instance_path).parent.name}")
+            f"{sgh.sparkle_tmp_path}{solver_path.name}_"
+            f"seed_{args.seed}_{instance_name}")
         subtarget = new_solver_directory_path / solver_path.name
         shutil.copytree(solver_path, subtarget, dirs_exist_ok=True)
         solver_path = subtarget
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     run_status_path = args.run_status_path
-    key_str = (f"{sfh.get_last_level_directory_name(solver_path)}_"
-               f"{sfh.get_last_level_directory_name(instance_path)}_"
+    key_str = (f"{solver_path.name}_"
+               f"{instance_name}_"
                f"{sbh.get_time_pid_random_string()}")
     raw_result_path = f"Tmp/{key_str}.rawres"
     start_time = time.time()
     # create statusinfo file
     status_info = SolverRunStatusInfo()
-    status_info.set_solver(sfh.get_last_level_directory_name(solver_path))
-    status_info.set_instance(sfh.get_last_level_directory_name(instance_path))
+    status_info.set_solver(solver_path.name)
+    status_info.set_instance(instance_name)
     cutoff_str = str(sgh.settings.get_general_target_cutoff_time())
     status_info.set_cutoff_time(f"{cutoff_str}"
                                 f" second(s)")
@@ -76,8 +81,8 @@ if __name__ == "__main__":
         srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
                                                        args.seed))
 
-    description_str = (f"[Solver: {sfh.get_last_level_directory_name(solver_path)}, "
-                       f"Instance: {sfh.get_last_level_directory_name(instance_path)}]")
+    description_str = (f"[Solver: {solver_path.name}, "
+                       f"Instance: {instance_name}]")
     start_time_str = (
         f"[Start Time: {time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time))}]")
     end_time_str = ("[End Time (after completing run time + processing time): "

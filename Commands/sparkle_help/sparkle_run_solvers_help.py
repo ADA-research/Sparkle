@@ -4,6 +4,7 @@
 import os
 import subprocess
 import sys
+import ast
 import shutil
 import fcntl
 from pathlib import Path
@@ -15,6 +16,7 @@ from Commands.structures.sparkle_performance_dataframe import PerformanceDataFra
 from Commands.sparkle_help import sparkle_job_help as sjh
 from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SolutionVerifier
+from Commands.sparkle_help import sparkle_sat_solver_help as sssh
 
 import functools
 print = functools.partial(print, flush=True)
@@ -92,13 +94,13 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     runsolver_values_log = f"{rs_prefix}{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
     raw_result_path_option = f"{rs_prefix}{raw_result_path}"
-
+    cmd_solver_name, cmd_solver_args = cmd_solver_call.split(" ", 1)
     cmd = [runsolver_path, "--timestamp", "--use-pty",
            "--cpu-limit", str(custom_cutoff),
            "-w", runsolver_watch_data_path,
            "-v", runsolver_values_log,
-           "-o", raw_result_path_option]
-    cmd += [x for x in (str(solver_path) + "/" + cmd_solver_call).split(" ") if x != ""]
+           "-o", raw_result_path_option,
+           f"{solver_path}/{cmd_solver_name}", cmd_solver_args]
 
     process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
     if process.returncode != 0:
@@ -114,8 +116,8 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
             raw_result_solver_path = str(raw_result_path).replace(".rawres",
                                                                   ".rawres_solver")
 
-            # Only one result should exist
-            if len(tmp_paths) < 1:
+            # The result should exist
+            if len(tmp_paths) == 0:
                 print(f"WARNING: Raw result not found in {tmp_raw_res}, assuming "
                       "timeout...")
                 sfh.create_new_empty_file(raw_result_solver_path)
@@ -139,22 +141,20 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
 
 def check_solver_output_for_errors(raw_result_path: Path) -> None:
-    """Check solver output for known errors."""
-    error_lines = [ \
-        # /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found:
-        "libstdc++.so.6: version `GLIBCXX",
-        # For e.g. invalid solver path:
-        "No such file or directory"]
+    """Check solver output for known errors.
 
-    # Find lines containing an error
-    with raw_result_path.open("r") as infile:
-        for current_line in infile:
-            for error in error_lines:
-                if error in current_line:
-                    print(f"WARNING: Possible error detected in {raw_result_path} "
-                          f"involving {error}")
-
-    return
+    Args:
+        raw_result_path: Path to the file to verify.
+    """
+    # Check if we can decode the output dictionary
+    raw_output_str = raw_result_path.open("r").read()
+    try:
+        raw_output_dict_str =\
+            raw_output_str[raw_output_str.find("{"), raw_output_str.find("}")]
+        ast.literal_eval(raw_output_dict_str)
+    except Exception as ex:
+        print(f"WARNING: Possible error detected in {raw_result_path}. "
+              f"Decoding the output dictionary threw exception: {ex}")
 
 
 def run_solver_on_instance_and_process_results(
@@ -165,8 +165,8 @@ def run_solver_on_instance_and_process_results(
     # TODO: Fix result path for multi-file instances (only a single file is part of the
     # result path)
     raw_result_path = (f"{sgh.sparkle_tmp_path}"
-                       f"{sfh.get_last_level_directory_name(solver_path)}_"
-                       f"{sfh.get_last_level_directory_name(instance_path)}_"
+                       f"{Path(solver_path).name}_"
+                       f"{Path(instance_path).name}_"
                        f"{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
     solver_wrapper_path = Path(solver_path) / sgh.sparkle_run_default_wrapper
@@ -192,14 +192,14 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
     """
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+    performance_data = PerformanceDataFrame(performance_data_csv_path)
 
     if rerun:
         list_performance_computation_job = (
-            performance_data_csv.get_list_recompute_performance_computation_job())
+            performance_data.get_list_recompute_performance_computation_job())
     else:
         list_performance_computation_job = (
-            performance_data_csv.get_list_remaining_performance_computation_job())
+            performance_data.get_list_remaining_performance_computation_job())
 
     print("The cutoff time per algorithm run to solve an instance is set to "
           f"{cutoff_time_str} seconds")
@@ -251,12 +251,12 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             if perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
                perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
                 # TODO: Handle the multi-objective case for quality
-                performance_data_csv.set_value(quality[0], solver_path, instance_path)
+                performance_data.set_value(quality[0], solver_path, instance_path)
                 print(f"Running Result: Status: {status}, Quality{penalised_str}: "
                       f"{str(quality[0])}")
             else:
-                performance_data_csv.set_value(cpu_time_penalised, solver_path,
-                                               instance_path)
+                performance_data.set_value(cpu_time_penalised, solver_path,
+                                           instance_path)
                 print(f"Running Result: Status {status}, Runtime{penalised_str}: "
                       f"{str(cpu_time_penalised)}")
 
@@ -264,10 +264,8 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
                   f"{str(total_job_num)}")
             current_job_num += 1
 
-    performance_data_csv.save_csv()
+    performance_data.save_csv()
     print(f"Performance data file {performance_data_csv_path} has been updated!")
-
-    return
 
 
 def handle_timeouts(runtime: float, status: str,
@@ -295,7 +293,7 @@ def verify(instance_path: str, raw_result_path: str, solver_path: str, status: s
 
     # Use verifier if one is given and the solver did not time out
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
-        status = sat_verify(instance_path, raw_result_path, solver_path)
+        status = sssh.sat_verify(instance_path, raw_result_path, solver_path)
 
     return status
 
@@ -328,7 +326,7 @@ def process_results(
         if first_line_parts[2].lower() == "sat":
             quality = []  # Not defined for SAT
             # TODO: Handle wc_time when user can choose which to use
-            status = sparkle_sat_parser(raw_result_path, cpu_time)
+            status = sssh.sparkle_sat_parser(raw_result_path, cpu_time)
         else:
             parser_list = "SAT"
             print(f'ERROR: Wrapper at "{solver_wrapper_path}" requested Sparkle to use '
@@ -357,7 +355,7 @@ def process_results(
             elif parts[0].lower() == "status":
                 status = get_status_from_wrapper(parts[1])
             elif parts[0].lower() == "runtime":
-                cpu_time = get_runtime_from_wrapper(parts[1])
+                cpu_time = float(parts[1])
                 wc_time = cpu_time
             # TODO: Handle unknown keywords?
 
@@ -377,6 +375,7 @@ def get_quality_from_wrapper(result_list: list[str]) -> list[float]:
     return quality
 
 
+# NOTE: This should be an ENUM, but its hard coded in many places of Sparkle
 def get_status_from_wrapper(result: str) -> str:
     """Return the status reported by the wrapper as standardised str."""
     status_list = "<SUCCESS/TIMEOUT/CRASHED/SAT/UNSAT/WRONG/UNKNOWN>"
@@ -404,13 +403,7 @@ def get_status_from_wrapper(result: str) -> str:
     return status
 
 
-def get_runtime_from_wrapper(result: str) -> float:
-    """Return the runtime str reported by the wrapper as float."""
-    runtime = float(result)
-
-    return runtime
-
-
+# NOTE: This method is actually usefull, but not coded very neatly
 def get_runtime_from_runsolver(runsolver_values_path: str) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver."""
     cpu_time = -1.0
@@ -428,19 +421,6 @@ def get_runtime_from_runsolver(runsolver_values_path: str) -> tuple[float, float
                     # Order is fixed, CPU is the last thing we want to read, so break
                     break
     return cpu_time, wc_time
-
-
-def sparkle_sat_parser(raw_result_path: str, runtime: float) -> str:
-    """Parse SAT results with Sparkle's internal parser.
-
-    NOTE: This parser probably does not work for all SAT solvers.
-    """
-    if runtime > sgh.settings.get_general_target_cutoff_time():
-        status = "TIMEOUT"
-    else:
-        status = sat_get_result_status(raw_result_path)
-
-    return status
 
 
 def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
@@ -466,87 +446,6 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
 
     print(f"Solver {solver_name} is a wrong solver")
     print(f"Solver {solver_name} running on instance {instance_name} ignored!")
-
-
-def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:
-    """Run a SAT verifier and return its status."""
-    status = sat_judge_correctness_raw_result(instance_path, raw_result_path)
-
-    if status != "SAT" and status != "UNSAT" and status != "WRONG":
-        status = "UNKNOWN"
-        print("Warning: Verification result was UNKNOWN for solver "
-              f"{sfh.get_last_level_directory_name(solver_path)} on instance "
-              f"{sfh.get_last_level_directory_name(instance_path)}!")
-
-    # TODO: Make removal conditional on a success status (SAT or UNSAT)
-    # sfh.rmfiles(raw_result_path)
-    return status
-
-
-def sat_get_result_status(raw_result_path: str) -> str:
-    """Return the result status reported by a SAT solver."""
-    # If no result is reported in the result file something went wrong or the solver
-    # timed out
-    status = "UNKNOWN"
-
-    with Path(raw_result_path).open("r+") as infile:
-        fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip().split() for line in infile.readlines()]
-        for words in lines:
-            if len(words) == 3 and words[1] == "s":
-                if words[2] == "SATISFIABLE":
-                    status = "SAT"
-                elif words[2] == "UNSATISFIABLE":
-                    status = "UNSAT"
-                else:
-                    # Something is wrong or the solver timed out
-                    print(f'Warning: Unknown SAT result "{words[2]}"')
-                    status = "UNKNOWN"
-                break
-
-    return status
-
-
-def sat_get_verify_string(tmp_verify_result_path: str) -> str:
-    """Return the status of the SAT verifier.
-
-    Four statuses are possible: "SAT", "UNSAT", "WRONG", "UNKNOWN"
-    """
-    lines = []
-    with Path(tmp_verify_result_path).open("r+") as fin:
-        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-        lines = [line.strip() for line in fin.readlines()]
-    for index, line in enumerate(lines):
-        if line == "Solution verified.":
-            if lines[index + 2] == "11":
-                return "SAT"
-        elif line == "Solver reported unsatisfiable. I guess it must be right!":
-            if lines[index + 2] == "10":
-                return "UNSAT"
-        elif line == "Wrong solution.":
-            if lines[index + 2] == "0":
-                return "WRONG"
-    return "UNKNOWN"
-
-
-def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -> str:
-    """Run a SAT verifier to determine correctness of a result."""
-    sat_verifier_path = sgh.sat_verifier_path
-    tmp_verify_result_path = (
-        f"Tmp/{sfh.get_last_level_directory_name(sat_verifier_path)}_"
-        f"{sfh.get_last_level_directory_name(raw_result_path)}_"
-        f"{sbh.get_time_pid_random_string()}.vryres")
-    # TODO: Log output file
-    print("Run SAT verifier")
-    subprocess.run([sat_verifier_path, instance_path, raw_result_path],
-                   stdout=Path(tmp_verify_result_path).open("w+"))
-    print("SAT verifier done")
-
-    ret = sat_get_verify_string(tmp_verify_result_path)
-
-    # TODO: Log output file removal
-    sfh.rmfiles(tmp_verify_result_path)
-    return ret
 
 
 def update_performance_data_id() -> None:

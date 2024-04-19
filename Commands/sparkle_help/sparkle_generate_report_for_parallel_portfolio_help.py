@@ -213,8 +213,8 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
         for instances in results_on_instances:
             str_value += (r"\item \textbf{" + sgrh.underscore_for_latex(instances)
                           + "}, was scored by: " + r"\textbf{"
-                          + sgrh.underscore_for_latex(sfh.get_last_level_directory_name(
-                              results_on_instances[instances][0]))
+                          + sgrh.underscore_for_latex(Path(
+                              results_on_instances[instances][0]).name)
                           + "} with a score of "
                           + str(results_on_instances[instances][1]))
     else:
@@ -448,7 +448,7 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
     table_string += "\\begin{tabular}{rrrrr}"
 
     for i, line in enumerate(results):
-        solver_name = sfh.get_last_level_directory_name(line)
+        solver_name = Path(line).name
 
         if i == 0:
             table_string += (

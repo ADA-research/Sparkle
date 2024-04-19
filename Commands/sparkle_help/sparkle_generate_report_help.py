@@ -443,10 +443,8 @@ def get_test_instance_class(test_case_directory: str) -> str:
     Returns:
         The name of the test instance set.
     """
-    str_value = sfh.get_last_level_directory_name(test_case_directory)
-    str_value = r"\textbf{" + str_value + r"}"
-
-    return str_value
+    str_value = Path(test_case_directory).name
+    return r"\textbf{" + str_value + r"}"
 
 
 def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:

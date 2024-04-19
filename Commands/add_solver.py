@@ -12,7 +12,7 @@ from runrunner.base import Runner
 
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.structures import sparkle_performance_dataframe as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from Commands.sparkle_help import sparkle_add_solver_help as sash
@@ -93,12 +93,12 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver_source = args.solver_path
+    solver_source = Path(args.solver_path)
 
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.ADD_SOLVER])
 
-    if not Path(solver_source).exists():
+    if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit(-1)
 
@@ -114,24 +114,21 @@ if __name__ == "__main__":
               "a postive integer must be used. Stopping execution.")
         sys.exit(-1)
 
-    configurator_wrapper_path = Path(solver_source,
-                                     sgh.sparkle_solver_wrapper)
+    configurator_wrapper_path = solver_source / sgh.sparkle_solver_wrapper
     if configurator_wrapper_path.is_file():
         sfh.check_file_is_executable(configurator_wrapper_path)
     else:
-        print("WARNING: The solver does not have a configurator wrapper. "
+        print(f"WARNING: Solver {solver_source.name} does not have a "
+              f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper})."
               "Therefore it cannot be automatically be configured.")
 
     # Start add solver
-    last_level_directory = ""
-    last_level_directory = sfh.get_last_level_directory_name(solver_source)
-
-    solver_directory = sash.get_solver_directory(last_level_directory)
+    solver_directory = sash.get_solver_directory(solver_source.name)
     if not Path(solver_directory).exists():
         Path(solver_directory).mkdir(parents=True, exist_ok=True)
     else:
-        print(f"Solver {last_level_directory} already exists!")
-        print(f"Do not add solver {last_level_directory}")
+        print(f"ERROR: Solver {solver_source.name} already exists! "
+              "Can not add new solver.")
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
@@ -145,9 +142,7 @@ if __name__ == "__main__":
     shutil.copyfile(runsolver_path, runsolver_target)
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
-    performance_data_csv = spdcsv.PerformanceDataFrame(
-        sgh.performance_data_csv_path
-    )
+    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     performance_data_csv.add_solver(solver_directory)
     performance_data_csv.save_csv()
     sfh.add_remove_platform_item(
@@ -156,8 +151,7 @@ if __name__ == "__main__":
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
         print("One pcs file detected, this is a configurable solver.")
 
-    print(f"Adding solver {sfh.get_last_level_directory_name(solver_directory)} "
-          "done!")
+    print(f"Adding solver {solver_source.name} done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(sgh.sparkle_algorithm_selector_path)
