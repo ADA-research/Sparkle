@@ -154,7 +154,7 @@ def check_solver_output_for_errors(raw_result_path: Path) -> None:
         ast.literal_eval(raw_output_dict_str)
     except Exception as ex:
         print(f"WARNING: Possible error detected in {raw_result_path}. "
-              f"Decoding the output dictionary threw exception: {ex}")                
+              f"Decoding the output dictionary threw exception: {ex}")
 
 
 def run_solver_on_instance_and_process_results(
