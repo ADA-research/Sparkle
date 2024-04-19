@@ -116,8 +116,8 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
             raw_result_solver_path = str(raw_result_path).replace(".rawres",
                                                                   ".rawres_solver")
 
-            # Only one result should exist
-            if len(tmp_paths) < 1:
+            # The result should exist
+            if len(tmp_paths) == 0:
                 print(f"WARNING: Raw result not found in {tmp_raw_res}, assuming "
                       "timeout...")
                 sfh.create_new_empty_file(raw_result_solver_path)
