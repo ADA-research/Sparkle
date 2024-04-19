@@ -92,13 +92,13 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     runsolver_values_log = f"{rs_prefix}{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
     raw_result_path_option = f"{rs_prefix}{raw_result_path}"
-
+    cmd_solver_name, cmd_solver_args = cmd_solver_call.split(" ", 1)
     cmd = [runsolver_path, "--timestamp", "--use-pty",
            "--cpu-limit", str(custom_cutoff),
            "-w", runsolver_watch_data_path,
            "-v", runsolver_values_log,
-           "-o", raw_result_path_option]
-    cmd += [x for x in (str(solver_path) + "/" + cmd_solver_call).split(" ") if x != ""]
+           "-o", raw_result_path_option,
+           f"{solver_path}/{cmd_solver_name}", cmd_solver_args]
 
     process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
     if process.returncode != 0:
