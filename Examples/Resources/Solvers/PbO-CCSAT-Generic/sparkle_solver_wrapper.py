@@ -49,8 +49,11 @@ try:
     solver_call = subprocess.run(solver_cmd + params,
                                  capture_output=True)
 except Exception as ex:
-    with raw_result_path.open('w') as outfile:
-        outfile.write(f"Solver call failed with except:\n{ex}")
+    if specifics == 'rawres':
+        with raw_result_path.open('w') as outfile:
+            outfile.write(f"Solver call failed with exception:\n{ex}")
+    else:
+        print(f"Solver call failed with exception:\n{ex}")
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()

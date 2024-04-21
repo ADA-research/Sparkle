@@ -14,8 +14,8 @@ from pathlib import Path
 args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
-instance = args["instance"]
+solver_dir = Path(args["solver_dir"])  # The path to solver executable dir
+instance = args["instance"]  # The path to the instance to be solved
 specifics = args["specifics"]
 cutoff_time = int(args["cutoff_time"]) + 1
 run_length = args["run_length"]
@@ -34,9 +34,15 @@ solver_exec = f"{solver_dir / solver_bin}"
 if solver_dir == Path("."):
     solver_exec = f"./{solver_bin}"
 
+if specifics == "rawres":
+    # Create a raw output path of the solver
+    tmp_directory = Path("tmp/")
+    tmp_directory.mkdir(exist_ok=True)
+    rawres_file_name = "SOME UNIQUE NAME"
+    raw_result_path = tmp_directory / rawres_file_name
 
-tmp_directory = Path("tmp/")
-tmp_directory.mkdir(exist_ok=True)
+    with raw_result_path.open("w") as outfile:
+        outfile.write(f"Logging raw output of solver {solver_bin}")
 
 instance_name = Path(instance).name
 solver_name = Path(solver_exec).name
