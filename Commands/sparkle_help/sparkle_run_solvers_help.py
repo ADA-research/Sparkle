@@ -104,43 +104,27 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
 
     process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
     if process.returncode != 0:
-        print("WARNING: Solver execution seems to have failed!")
-        print(f"The used command was: {cmd}")
+        print("WARNING: Solver execution seems to have failed!\n"
+              f"The used command was: {cmd}")
     else:
         # Clean up on success
         if is_configured:
-            # Move .rawres file from tmp/ directory in the execution directory
-            # to raw_result_path + '_solver'
             tmp_raw_res = f"{exec_path}tmp/"
             tmp_paths = list(Path(tmp_raw_res).glob("*.rawres"))
-            raw_result_solver_path = str(raw_result_path).replace(".rawres",
-                                                                  ".rawres_solver")
 
             # The result should exist
             if len(tmp_paths) == 0:
-                print(f"WARNING: Raw result not found in {tmp_raw_res}, assuming "
-                      "timeout...")
-                sfh.create_new_empty_file(raw_result_solver_path)
-            else:
-                raw_result_solver_src_path, *rest = tmp_paths
-                raw_result_solver_src_path.rename(Path(raw_result_solver_path))
-            # Remove execution directory (should contain nothing of interest on succes
-            # after moving the .rawres file)
-            shutil.rmtree(Path(exec_path))
-            # Check .rawres_solver output
-            check_solver_output_for_errors(Path(raw_result_solver_path))
+                print(f"WARNING: Raw result not found in {tmp_raw_res}. Writing from "
+                      "subprocess...")
+                Path(raw_result_path).open("w").write(process.stdout.decode())
 
-        sfh.rmfiles(runsolver_watch_data_path)
+            if check_solver_output_for_errors(Path(raw_result_path)):
+                sfh.rmfiles(runsolver_watch_data_path)
 
-    # Check for known errors/issues
-    check_solver_output_for_errors(raw_result_path)
-
-    if is_configured:
-        return raw_result_solver_path
     return raw_result_path
 
 
-def check_solver_output_for_errors(raw_result_path: Path) -> None:
+def check_solver_output_for_errors(raw_result_path: Path) -> bool:
     """Check solver output for known errors.
 
     Args:
@@ -155,6 +139,8 @@ def check_solver_output_for_errors(raw_result_path: Path) -> None:
     except Exception as ex:
         print(f"WARNING: Possible error detected in {raw_result_path}. "
               f"Decoding the output dictionary threw exception: {ex}")
+        return False
+    return True
 
 
 def run_solver_on_instance_and_process_results(
