@@ -20,7 +20,7 @@ def compile_pdf(latex_files_path: Path, latex_report_filename: Path) -> Path:
     """Compile the given latex files to a PDF.
 
     Args:
-        latex_files_path: Path to the directory wiht source files
+        latex_files_path: Path to the directory with source files
             where the report will be generated.
         latex_report_filename: Name of the output files.
 

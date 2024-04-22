@@ -64,12 +64,8 @@ def get_par_performance(results_file: str, cutoff: int) -> float:
     """
     list_instance_and_par = get_instance_performance_from_csv(results_file,
                                                               float(cutoff))
-    sum_par = 0.0
     num_instances = len(list_instance_and_par)
-
-    for item in list_instance_and_par:
-        sum_par += float(item[1])
-
+    sum_par = sum(float(item[1]) for item in list_instance_and_par)
     return float(sum_par / num_instances)
 
 

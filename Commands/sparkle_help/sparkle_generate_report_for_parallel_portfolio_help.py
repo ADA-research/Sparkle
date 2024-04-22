@@ -273,7 +273,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     data_filename = "data_parallel_portfolio_sparkle_vs_sbs.dat"
     data_filepath = target_directory / data_filename
 
-    with data_filepath.open("w+") as outfile:
+    with data_filepath.open("w") as outfile:
         for instance in dict_sbs_penalty_time_on_each_instance:
             sbs_penalty_time = dict_sbs_penalty_time_on_each_instance[instance]
             sparkle_penalty_time = (
@@ -283,9 +283,9 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     penalised_time_str = str(sgh.settings.get_penalised_time())
     performance_metric_str = sgh.settings.get_performance_metric_for_report()
 
-    generate_image(target_directory, data_filename, penalised_time_str,
-                   f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
-                   "Parallel-Portfolio", figure_filename, performance_metric_str)
+    generate_figure(target_directory, data_filename, penalised_time_str,
+                    f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
+                    "Parallel-Portfolio", figure_filename, performance_metric_str)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
     return (latex_include, dict_all_solvers,
             dict_actual_parallel_portfolio_penalty_time_on_each_instance)
@@ -412,7 +412,7 @@ def parallel_report_variables(target_directory: Path,
     return variables_dict
 
 
-def generate_image(
+def generate_figure(
         target_directory: Path, data_parallel_portfolio_sparkle_vs_sbs_filename: str,
         penalty_time: float, sbs_name: str, parallel_portfolio_sparkle_name: str,
         figure_parallel_portfolio_sparkle_vs_sbs_filename: str,
