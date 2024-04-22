@@ -2,6 +2,17 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8] - 2024/??
+
+### Added
+- 
+
+### Changed
+- 
+
+### Fixed
+-
+
 ## [0.7] - 2024/04/05
 
 ### Added
