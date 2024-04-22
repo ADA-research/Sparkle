@@ -486,8 +486,7 @@ def handle_waiting_and_removal_process(
 
     if finished_instances_dict == {}:
         for instance in instances:
-            instance = sfh.get_last_level_directory_name(instance)
-            finished_instances_dict[instance] = ["UNSOLVED", 0]
+            finished_instances_dict[Path(instance).name] = ["UNSOLVED", 0]
 
     perf_data_tmp_path = sgh.pap_performance_data_tmp_path
 

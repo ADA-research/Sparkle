@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import sys
+import ast
 from pathlib import Path
 
 import runrunner as rrr
 from runrunner.base import Runner
 
-from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_run_solvers_help as srsh
 from Commands.sparkle_help.sparkle_command_help import CommandName
@@ -102,7 +102,7 @@ def call_configured_solver_parallel(
     perf_name = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
     cmd_list = [f"{sgh.python_executable} "
                 f"Commands/sparkle_help/run_configured_solver_core.py "
-                f"--instance {instance}"
+                f"--instance {instance} "
                 f"--performance-measure {perf_name}" for instance in instances_list]
 
     sbatch_options = ssh.get_slurm_options_list()
@@ -134,20 +134,17 @@ def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
         Tuple(str, str): A tuple containing the solver name and its configuration string.
     """
     # Get latest configured solver + instance set
-    solver_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario().get_config_solver()))
-    instance_set_name = sfh.get_last_level_directory_name(
-        str(sgh.latest_scenario().get_config_instance_set_train()))
+    solver = sgh.latest_scenario().get_config_solver()
+    instance_set = sgh.latest_scenario().get_config_instance_set_train()
 
-    if solver_name is None or instance_set_name is None:
+    if solver is None or instance_set is None:
         # Print error and stop execution
         print("ERROR: No configured solver found! Stopping execution.")
         sys.exit(-1)
 
     # Get optimised configuration
-    config_str = scsh.get_optimised_configuration_params(solver_name, instance_set_name)
-
-    return solver_name, config_str
+    config_str = scsh.get_optimised_configuration_params(solver.name, instance_set.name)
+    return solver.name, config_str
 
 
 def run_configured_solver(instance_path_list: list[Path]) -> None:
@@ -159,24 +156,32 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     """
     # Get latest configured solver and the corresponding optimised configuration
     solver_name, config_str = get_latest_configured_solver_and_configuration()
-    # a) Create cmd_solver_call that could call sparkle_smac_wrapper
+    # a) Create cmd_solver_call that could call sparkle_solver_wrapper
+    # NOTE: There is currently no implementation for solver wrappers to handle multiple
+    # instances in any of the examples so this construct feels misleading
     instance_path_str = " ".join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
     # write a '.rawres' file with raw solver output in the tmp/ subdirectory of the
     # execution directory:
-    solver_params = {"instance": instance_path_str,
+    solver_params = {"solver_dir": ".",
+                     "instance": instance_path_str,
                      "specifics": "rawres",
-                     "cutoff_time_str": sgh.settings.get_general_target_cutoff_time(),
+                     "cutoff_time": sgh.settings.get_general_target_cutoff_time(),
                      "run_length": "2147483647",  # Arbitrary, not used by SMAC wrapper
                      "seed": sgh.get_seed()}
-    config_list = config_str.split(" ")
-    for i in range(len(config_list)):
-        if i + 1 >= len(config_list):
-            break
-        solver_params[config_list[i]] = config_list[i + 1]
+    # Deconstruct the solver parameters and add them to the parameters dictionary
+    config_list = config_str.strip().split("-")
+    for param in config_list:
+        if " " not in param:
+            continue
+        param_name, param_value = param.strip().split(" ", 1)
+        # Our parameters are already strings, no quotes needed
+        param_value = param_value.strip("'")
+        solver_params[param_name] = param_value
+
     cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
     # Prepare paths
-    solver_path = Path(f"Solvers/{solver_name}")
+    solver_path = sgh.solver_dir / solver_name
     instance_name = "_".join([path.name for path in instance_path_list])
     raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
                            f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
@@ -188,47 +193,29 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
                                                          runsolver_values_path,
                                                          is_configured=True)
 
-    # Process 'Result for SMAC' line from raw_result_path
-    with Path(raw_result_path).open("r") as infile:
-        results_good = False
+    # Try to process the results from the rawoutput
+    # Justification for this try-except structure is that the user write the wrapper
+    # And thus we cannot make too many assumptions about the errors we may find
+    try:
+        raw_wrapper_out = raw_result_path.open("r").read()
+        solver_wrapper_output_dict = ast.literal_eval(
+            raw_wrapper_out[raw_wrapper_out.index("{"):raw_wrapper_out.index("}") + 1])
+        status = solver_wrapper_output_dict["status"]
+    except Exception as ex:
+        print(f"ERROR: Results in {raw_result_path} appear to be faulty. Whilst decoding"
+              f" the output dictionary, found the following exception: {ex}")
+        sys.exit(-1)
 
-        for line in infile:
-            if "Result for SMAC:" in line:
-                results_good = True
-                words = line.strip().split()
-
-                # Check the result line has the correct number of words
-                if len(words) != 9:
-                    print('ERROR: Invalid number of words in "result for SMAC" line.')
-                    results_good = False
-                    break
-
-                # Skip runsolver time measurement and the words 'Result for SMAC:'
-                # Retrieve result information
-                status = words[4].strip(",")
-                runtime = words[5].strip(",")
-                # Unused parts of the result string:
-                # runlength = words[6].strip(',')
-                # quality = words[7].strip(',')
-                # seed = words[8]
-                break
-            elif "EOF" in line:
-                # Handle the timeout case
-                results_good = True
-                status = "TIMEOUT"
-                _, wc_time = srsh.get_runtime_from_runsolver(str(runsolver_values_path))
-                runtime = wc_time
-
-        if not results_good:
-            print(f"ERROR: Results in {str(raw_result_path)} appear to be faulty. "
-                  "Stopping execution!")
-            sys.exit(0)
+    cputime, wc_time = srsh.get_runtime_from_runsolver(str(runsolver_values_path))
+    if cputime == -1.0 and wc_time == -1.0:
+        print(f"WARNING: Undecodable Runsolver's runtime in {runsolver_values_path}")
+        runtime = -1.0
+    elif wc_time == -1.0:
+        print(f"WARNING: Undecodable Runsolver's cpu time in {runsolver_values_path}")
+        runtime = wc_time
+    else:
+        runtime = cputime
 
     # Output results to user, including path to rawres_solver (e.g. SAT solution)
     print(f"Execution on instance {instance_name} completed with status {status}"
-          f" in {runtime} seconds.")
-
-    if status == "SUCCESS":
-        print(f"Solver output of the results can be found at: {str(rawres_solver)}")
-
-    return
+          f" in {runtime} seconds. Raw output can be found at: {rawres_solver}.")

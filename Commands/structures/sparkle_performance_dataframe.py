@@ -89,7 +89,9 @@ class PerformanceDataFrame():
                 midx = pd.MultiIndex.from_product(
                     [self.objective_names, instances, self.run_ids],
                     names=self.multi_dim_names)
-                self.dataframe = pd.DataFrame(None, index=midx, columns=solvers, )
+                self.dataframe = pd.DataFrame(sgh.sparkle_missing_value,
+                                              index=midx,
+                                              columns=solvers)
                 self.save_csv()
 
     def verify_objective(self: PerformanceDataFrame,
@@ -182,11 +184,17 @@ class PerformanceDataFrame():
                 print(f"WARNING: Tried adding already existing solver {instance_name} "
                       f"to Performance DataFrame: {self.csv_filepath}")
                 return
-            # Create a missing value for every possible combination
-            # (This should be doable with pandas functions I think)
-            for obj in self.objective_names:
-                for run in self.run_ids:
-                    self.dataframe[(obj, instance_name, run)] = sgh.sparkle_missing_value
+            # Create the missing indices
+            levels = [self.dataframe.levels[0].tolist(),
+                      [instance_name],
+                      self.dataframe.levels[2].tolist()]
+            emidx = pd.MultiIndex(levels, names=self.multi_dim_names)
+            # Create the missing column values
+            edf = pd.DataFrame(sgh.sparkle_missing_value,
+                               index=emidx,
+                               columns=self.dataframe.columns)
+            # Concatenate the original and new dataframe together
+            self.dataframe = pd.concat([self.dataframe, edf])
         return
 
     # Can we make this handle a sequence of inputs instead of just 1?

@@ -440,6 +440,8 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
     optimised_configuration_performance = -1
     optimised_configuration_seed = -1
     configurator = sgh.settings.get_general_sparkle_configurator()
+    if configurator.scenario is None:
+        configurator.set_scenario_dirs(solver_name, instance_set_name)
     scen_results_dir = configurator.scenario.result_directory
     target_alg = configurator.configurator_target.name
     line_key_prefix = "Estimated mean quality of final incumbent config"
@@ -462,7 +464,7 @@ def get_optimised_configuration_from_file(solver_name: str, instance_set_name: s
         # TODO: General implementation of configurator output verification
         # Check whether the smac_output is empty
         if len(smac_output_line) == 0:
-            print("Error: Configurator output file has unexpected format")
+            print(f"Error: Configurator output file {result_file} has unexpected format")
             # Find matching error file
             error_files = [file for file in configurator.tmp_path.iterdir()
                            if file.name.startswith(f"{solver_name}_{instance_set_name}")
