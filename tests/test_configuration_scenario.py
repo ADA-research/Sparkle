@@ -35,10 +35,9 @@ class TestConfigurationScenario(TestCase):
         self.instance_file_directory = Path("tests/test_files/test_configurator"
                                             "/scenarios/instances/Test-Instance-Set")
         self.instance_file_directory.mkdir(parents=True, exist_ok=True)
-
-        self.time_budget = sgh.settings.get_config_budget_per_run()
-        self.cutoff_time = sgh.settings.get_general_target_cutoff_time()
-        self.cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+        self.time_budget = 600
+        self.cutoff_time = 60
+        self.cutoff_length = "max"
         self.sparkle_objective =\
             sgh.settings.get_general_sparkle_objectives()[0]
 

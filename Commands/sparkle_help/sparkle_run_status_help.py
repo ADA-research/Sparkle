@@ -83,8 +83,7 @@ def print_running_configuration_jobs() -> None:
             print("Running configuration jobs:")
             for statusinfo_filename in statusinfo_files:
                 statusinfo_filepath = Path(
-                    tmp_directory
-                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                    tmp_directory + Path(statusinfo_filename).parent)
                 status_info = ConfigureSolverStatusInfo.from_file(statusinfo_filepath)
                 print(f"Start Time: {status_info.get_start_time()}")
                 print(f"Solver: {status_info.get_solver()}")
@@ -110,7 +109,7 @@ def print_running_parallel_portfolio_construction_jobs() -> None:
             for statusinfo_filename in statusinfo_files:
                 statusinfo_filepath = Path(
                     tmp_directory
-                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                    + Path(statusinfo_filename).parent)
                 status_info = (ConstructParallelPortfolioStatusInfo
                                .from_file(statusinfo_filepath))
                 print(f"Start Time: {status_info.get_start_time()}")
@@ -136,7 +135,7 @@ def print_running_portfolio_selector_construction_jobs() -> None:
             for statusinfo_filename in statusinfo_files:
                 statusinfo_filepath = Path(
                     tmp_directory
-                    + sfh.get_last_level_directory_name(statusinfo_filename))
+                    + Path(statusinfo_filename).parent)
                 status_info = (ConstructPortfolioSelectorStatusInfo
                                .from_file(statusinfo_filepath))
                 print(f"Start Time: {status_info.get_start_time()}")
@@ -160,7 +159,7 @@ def print_running_generate_report_jobs() -> None:
         for statusinfo_filename in statusinfo_files:
             statusinfo_filepath = Path(
                 tmp_directory
-                + sfh.get_last_level_directory_name(statusinfo_filename))
+                + Path(statusinfo_filename).parent)
             status_info = (GenerateReportStatusInfo
                            .from_file(statusinfo_filepath))
             print(f"Start Time: {status_info.get_start_time()}")

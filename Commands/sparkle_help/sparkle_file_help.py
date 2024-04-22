@@ -24,23 +24,7 @@ def create_new_empty_file(filepath: str) -> None:
     Args:
       filepath: Path to file.
     """
-    fo = Path(filepath).open("w+")
-    fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-    fo.close()
-
-
-def get_last_level_directory_name(filepath: str) -> str:
-    """Return the final path component for a given file path.
-
-    Args:
-      filepath: Path to file.
-
-    Returns:
-      String representation of the last path component.
-    """
-    if Path(filepath).is_file():
-        return Path(filepath).parent.name
-    return Path(filepath).name
+    Path(filepath).write_text("")
 
 
 def get_instance_list_from_reference(instances_path: Path) -> list[str]:
@@ -72,7 +56,7 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
       List of solvers.
     """
     portfolio_solver_list = []
-    solvers_path_str = "Solvers/"
+    solvers_path_str = str(sgh.solver_dir)
 
     # Read the included solvers (or solver instances) from file
     with (portfolio_path / "solvers.txt").open("r") as infile:
@@ -106,7 +90,7 @@ def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
       List of result files.
     """
     if not suffix.startswith("."):
-        suffix = "." + suffix
+        suffix = f".{suffix}"
     if not filepath.exists():
         return []
     return [str(x) for x in Path.iterdir(filepath) if x.suffix == suffix]
@@ -216,8 +200,8 @@ def check_file_is_executable(file_name: Path) -> None:
       file_name: Path object representing the file.
     """
     if not os.access(file_name, os.X_OK):
-        print(f"Error: The configurator wrapper file {file_name} is not executable.\n"
-              "Add execution permissions to the file to run the configurator.")
+        print(f"Error: The file {file_name} is not executable.\n"
+              "Add execution permissions to allow Sparkle to run it.")
         sys.exit(-1)
 
 

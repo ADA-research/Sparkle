@@ -14,8 +14,8 @@ from pathlib import Path
 args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
-solver_dir = Path(args["solver_dir"])
-instance = args["instance"]
+solver_dir = Path(args["solver_dir"])  # The path to solver executable dir
+instance = args["instance"]  # The path to the instance to be solved
 specifics = args["specifics"]
 cutoff_time = int(args["cutoff_time"]) + 1
 run_length = args["run_length"]
@@ -30,13 +30,22 @@ del args["run_length"]
 
 # TODO: Change solver name
 solver_bin = "SOME_SOLVER_NAME"
-solver_exec_path = f"{solver_dir / solver_bin}"
+solver_exec = f"{solver_dir / solver_bin}"
+if solver_dir == Path("."):
+    solver_exec = f"./{solver_bin}"
 
-tmp_directory = Path("tmp/")
-tmp_directory.mkdir(exist_ok=True)
+if specifics == "rawres":
+    # Create a raw output path of the solver
+    tmp_directory = Path("tmp/")
+    tmp_directory.mkdir(exist_ok=True)
+    rawres_file_name = "SOME UNIQUE NAME"
+    raw_result_path = tmp_directory / rawres_file_name
+
+    with raw_result_path.open("w") as outfile:
+        outfile.write(f"Logging raw output of solver {solver_bin}")
 
 instance_name = Path(instance).name
-solver_name = Path(solver_exec_path).name
+solver_name = Path(solver_exec).name
 # Create a unique name for your runsolver log file, for example:
 runsolver_watch_data_path = tmp_directory \
     / f"{solver_name}_{instance_name}_{random.randint()}.log"
@@ -48,7 +57,7 @@ for key in args:
     if args[key] is not None:
         params.extend(["-" + str(key), str(args[key])])
 # TODO: Change call to solver (Solver_binary)
-runsolver_call = [solver_exec_path,
+runsolver_call = [solver_exec,
                   "-inst", instance,
                   "-seed", str(seed)]
 

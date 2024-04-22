@@ -337,7 +337,7 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
     table_string += "\\begin{tabular}{rrrrr}"
 
     for i, line in enumerate(results):
-        solver_name = sfh.get_last_level_directory_name(line)
+        solver_name = Path(line).name
 
         if i == 0:
             table_string += (

@@ -6,7 +6,6 @@ dependencies:
   - python=3.9
   - swig=3.0
   - gnuplot
-  - numpy=1.26.4
   - pip
   - pip:
     - --editable .  # self install !
@@ -37,6 +36,7 @@ dependencies:
     - locket==0.2.1
     - mccabe==0.7.0
     - msgpack==1.0.2
+    - numpy==1.26.4
     - packaging==21.0
     - pandas==2.1.0
     - partd==1.2.0

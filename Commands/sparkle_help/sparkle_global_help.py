@@ -6,7 +6,7 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
-import numpy as np
+import math
 
 from sparkle import about
 from Commands.structures.solver import Solver
@@ -36,7 +36,7 @@ sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
 
-sparkle_missing_value = np.nan
+sparkle_missing_value = math.nan
 
 sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 
