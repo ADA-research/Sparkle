@@ -5,13 +5,24 @@ Notable changes to Sparkle will be documented in this file.
 ## [0.8] - 2024/??
 
 ### Added
-- 
+- Awaiting Sparkle Jobs is now done using RunRunner's objects and .JSON files instead of direct calls to Slurm
+- Performance data now is restructured into Performance DataFrame which supports two new dimensions: Objective and Run.
 
 ### Changed
-- 
+- Runsolver is now automatically provided for newly added Solvers to the Sparkle Platform
+- Output directories for report generation are now compliant with the explanation in the documentation
+- Configurator object is now used as source in many cases when accessing Configurator directories instead of hard-coded
+- Refactored many redundant methods out of the codebase
 
 ### Fixed
--
+- latest_scenario now uses a getter
+- QUALITY was removed from PerformanceMeasure enum
+- Reports now use one bibliograpghy file instead of multiple
+- Java SMAC is no longer called through each_smac_run_core but adressed directly by Sparkle
+- Fixed bugs for running configured solver
+
+## [Known issues]
+- [CHECK BEFORE PUBLISHING] Running configured solver in parallel now tends to lead to empty raw output files from the solver. This will be either solved in this version or the next
 
 ## [0.7] - 2024/04/05
 
