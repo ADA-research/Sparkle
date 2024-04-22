@@ -109,24 +109,18 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     else:
         # Clean up on success
         if is_configured:
-            # Move .rawres file from tmp/ directory in the execution directory
-            # to raw_result_path + '_solver'
             tmp_raw_res = f"{exec_path}tmp/"
             tmp_paths = list(Path(tmp_raw_res).glob("*.rawres"))
-            #raw_result_solver_path = str(raw_result_path).replace(".rawres",
-            #                                                      ".rawres_solver")
 
             # The result should exist
             if len(tmp_paths) == 0:
                 print(f"WARNING: Raw result not found in {tmp_raw_res}. Writing from "
                       "subprocess...")
                 Path(raw_result_path).open("w").write(process.stdout.decode())
-                
+
             if check_solver_output_for_errors(Path(raw_result_path)):
                 sfh.rmfiles(runsolver_watch_data_path)
 
-    if is_configured:
-        return raw_result_path
     return raw_result_path
 
 
