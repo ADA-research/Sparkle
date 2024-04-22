@@ -54,8 +54,15 @@ if __name__ == "__main__":
               f"{run_solver.returncode}:\n {run_solver.stderr}")
         print(f"Result for SMAC: CRASHED, {run_time}, 0, 0, {args['seed']}")
         sys.exit()
-
-    outdict = ast.literal_eval(run_solver.stdout.decode())
+    try:
+        outdict = ast.literal_eval(run_solver.stdout.decode())
+    except Exception as ex:
+        print("ERROR: Could not decode Solver Wrapper output:\n"
+              f"Return code: {run_solver.returncode}"
+              f"stdout: {run_solver.stdout}\n "
+              f"stderr: {run_solver.stderr}\n "
+              f"Exception whilst decoding dictionary: {ex}")
+        sys.exit(-1)
 
     # Overwrite the CPU runtime with runsolver log value
     # TODO: Runsolver also registers WALL time, add as a settings option in Sparkle

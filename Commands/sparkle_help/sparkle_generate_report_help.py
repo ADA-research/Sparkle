@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from shutil import which
 from pathlib import Path
+from collections import Counter
 import subprocess
 
 from Commands.sparkle_help import sparkle_global_help as sgh
@@ -27,74 +28,19 @@ def underscore_for_latex(string: str) -> str:
     Returns:
         The corresponding str with underscores escaped.
     """
-    updated_string = string.replace("_", "\\_")
-
-    return updated_string
+    return string.replace("_", "\\_")
 
 
-def get_custom_commands() -> str:
-    """Return an empty str.
-
-    NOTE: Re-evaluate the need for this.
-    """
-    str_value = ""
-    return str_value
-
-
-def get_sparkle() -> str:
-    """Return Sparkle as LaTeX str.
-
-    NOTE: Consider deprecating, could easily be in the LaTeX tempalte itself.
-    """
-    str_value = r"\emph{Sparkle}"
-    return str_value
-
-
-def get_num_solvers() -> str:
-    """Get the number of solvers.
-
-    Returns:
-        The number of solvers in solver_list as a string value.
-    """
-    num_solvers = len(sgh.solver_list)
-    str_value = str(num_solvers)
-
-    if int(str_value) < 1:
-        print("ERROR: No solvers found, report generation failed!")
-        sys.exit(-1)
-
-    return str_value
-
-
-def get_solver_list() -> str:
-    """Get the list of solvers for use in a LaTeX document.
+def get_solver_list_latex(solver_list: list[str] = None) -> str:
+    """Get the list of solvers for use in a LaTeX document. Defaults to sgh.solver_list.
 
     Returns:
         The list of solver names as LaTeX str.
     """
-    str_value = ""
-    solver_list = sgh.solver_list
-    for solver_path in solver_list:
-        solver_name = Path(solver_path).name
-        str_value += f"\\item \\textbf{{{solver_name}}}\n"
-
-    return str_value
-
-
-def get_num_feature_extractors() -> str:
-    """Get the number of feature extractors.
-
-    Returns:
-        The number of feature extractors.
-    """
-    num_feature_extractors = len(sgh.extractor_list)
-    str_value = str(num_feature_extractors)
-
-    if int(str_value) < 1:
-        print("ERROR: No feature extractors found, report generation failed!")
-        sys.exit(-1)
-
-    return str_value
+    if solver_list is None:
+        solver_list = sgh.solver_list
+    return "".join(f"\\item \\textbf{{{Path(solver_path).name}}}\n"
+                   for solver_path in solver_list)
 
 
 def get_feature_extractor_list() -> str:
@@ -103,11 +49,8 @@ def get_feature_extractor_list() -> str:
     Returns:
         The list of feature extractors as LaTeX str.
     """
-    str_value = ""
-    extractor_list = sgh.extractor_list
-    for extractor_path in extractor_list:
-        str_value += f"\\item \\textbf{{{Path(extractor_path).name}}}\n"
-    return str_value
+    return "".join(f"\\item \\textbf{{{Path(extractor_path).name}}}\n"
+                   for extractor_path in sgh.extractor_list)
 
 
 def get_num_instance_classes() -> str:
@@ -116,68 +59,23 @@ def get_num_instance_classes() -> str:
     Returns:
         The number of instance sets as LaTeX str.
     """
-    list_instance_class = []
-    instance_list = sgh.instance_list
-
-    for instance_path in instance_list:
-        instance_class = Path(instance_path).parent.name
-
-        if instance_class not in list_instance_class:
-            list_instance_class.append(instance_class)
-
-    str_value = str(len(list_instance_class))
-
-    if int(str_value) < 1:
-        print("ERROR: No instance sets found, report generation failed!")
-        sys.exit(-1)
-
-    return str_value
+    return str(len(set([Path(instance_path).parent.name
+                        for instance_path in sgh.instance_list])))
 
 
-def get_instance_class_list() -> str:
-    """Get the instance sets for use in a LaTeX document.
+def get_instance_set_count_list(instance_list: list[str] = None) -> str:
+    """Get the instance sets for use in a LaTeX document. Defaults to sgh.instance_list.
 
     Returns:
         The list of instance sets as LaTeX str.
     """
-    str_value = ""
-    list_instance_class = []
-    dict_number_of_instances_in_instance_class = {}
-    instance_list = sgh.instance_list
-
-    for instance_path in instance_list:
-        instance_class = Path(instance_path).parent.name
-
-        if instance_class not in list_instance_class:
-            list_instance_class.append(instance_class)
-            dict_number_of_instances_in_instance_class[instance_class] = 1
-        else:
-            dict_number_of_instances_in_instance_class[instance_class] += 1
-
-    for instance_class in list_instance_class:
-        str_value += (r"\item \textbf{" + instance_class + r"}, consisting of "
-                      + str(dict_number_of_instances_in_instance_class[instance_class])
-                      + " instances\n")
-
-    return str_value
-
-
-def get_feature_computation_cutoff_time() -> str:
-    """Get the cutoff time used for feature computation.
-
-    Returns:
-        The feature computation cutoff time as str.
-    """
-    return str(sgh.settings.get_general_extractor_cutoff_time())
-
-
-def get_performance_computation_cutoff_time() -> str:
-    """Get the cutoff time used for performance computation.
-
-    Returns:
-        The performance computation cutoff time as str.
-    """
-    return str(sgh.settings.get_general_target_cutoff_time())
+    if instance_list is None:
+        instance_list = sgh.instance_list
+    instance_list = [Path(instance_path).parent.name
+                     for instance_path in instance_list]
+    count = Counter(instance_list)
+    return "".join(f"\\item \\textbf{ {inst_key} }, consisting of {count[inst_key]} "
+                   "instances\n" for inst_key in count)
 
 
 def get_solver_perfect_ranking_list() -> str:
@@ -189,13 +87,8 @@ def get_solver_perfect_ranking_list() -> str:
     """
     # TODO: This method call is missing arguments?
     rank_list = scmch.compute_perfect_selector_marginal_contribution()
-    str_value = ""
-
-    for rank in rank_list:
-        solver = Path(rank[0]).name
-        str_value += (r"\item \textbf{" + solver + r"}, marginal contribution: "
-                      + f"{rank[1]}\n")
-    return str_value
+    return "".join(f"\\item \\textbf{ {Path(solver).name} }, marginal contribution: "
+                   f"{value}\n" for solver, value in rank_list)
 
 
 def get_solver_actual_ranking_list() -> str:
@@ -207,13 +100,8 @@ def get_solver_actual_ranking_list() -> str:
     """
     # TODO: This method call is missing arguments?
     rank_list = scmch.compute_actual_selector_marginal_contribution()
-    str_value = ""
-
-    for rank in rank_list:
-        solver = Path(rank[0]).name
-        str_value += (r"\item \textbf{" + solver + r"}, marginal contribution: "
-                      + f"{rank[1]}\n")
-    return str_value
+    return "".join(f"\\item \\textbf{ {Path(solver).name} }, marginal contribution: "
+                   f"{value}\n" for solver, value in rank_list)
 
 
 def get_par_ranking_list() -> str:
@@ -222,19 +110,14 @@ def get_par_ranking_list() -> str:
     Returns:
         The list of solvers ranked by PAR as LaTeX str.
     """
-    str_value = ""
     performance_data_csv = (
         PerformanceDataFrame(sgh.performance_data_csv_path))
 
-    solver_penalty_time_ranking_list = (
-        performance_data_csv.get_solver_penalty_time_ranking_list())
-
-    for solver, this_penalty_time in solver_penalty_time_ranking_list:
-        solver = Path(solver).name
-        penalty = sgh.settings.get_general_penalty_multiplier()
-        str_value += f"\\item \\textbf{{{solver}}}, PAR{penalty}: {this_penalty_time}\n"
-
-    return str_value
+    solver_penalty_ranking =\
+        performance_data_csv.get_solver_penalty_time_ranking_list()
+    penalty = sgh.settings.get_general_penalty_multiplier()
+    return "".join(f"\\item \\textbf{{{solver}}}, PAR{penalty}: {solver_penalty}\n"
+                   for solver, solver_penalty in solver_penalty_ranking)
 
 
 def get_vbs_par() -> str:
@@ -244,13 +127,8 @@ def get_vbs_par() -> str:
         The PAR (Penalised Average Runtime) of the VBS (virtual best solver) over a set
         of instances.
     """
-    str_value = ""
     performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
-    vbs_penalty_time = performance_data_csv.calc_vbs_penalty_time()
-
-    str_value = str(vbs_penalty_time)
-
-    return str_value
+    return str(performance_data_csv.calc_vbs_penalty_time())
 
 
 def get_actual_par() -> str:
@@ -262,17 +140,16 @@ def get_actual_par() -> str:
     """
     performance_dict = get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
     mean_performance = sum(performance_dict.values()) / len(performance_dict)
-
     return str(mean_performance)
 
 
 def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
-    """Returns a dictionary with the penalised performance of the SBS on each instance.
+    """Returns a dictionary with the penalised performance of the Single Best Solver.
 
     Returns:
         A dict that maps instance name str to their penalised performance int.
     """
-    mydict = {}
+    sbs_dict = {}
     performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
 
@@ -284,11 +161,11 @@ def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
         this_run_time = performance_data_csv.get_value(sbs_solver, instance)
 
         if this_run_time <= cutoff_time:
-            mydict[instance] = this_run_time
+            sbs_dict[instance] = this_run_time
         else:
-            mydict[instance] = sgh.settings.get_penalised_time()
+            sbs_dict[instance] = sgh.settings.get_penalised_time()
 
-    return mydict
+    return sbs_dict
 
 
 def get_dict_vbs_penalty_time_on_each_instance() -> dict[str, int]:
@@ -307,7 +184,7 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     Returns:
         A dict that maps instance name str to their penalised performance int.
     """
-    mydict = {}
+    actual_selector_penalty = {}
     performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
     actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
     minimise = True
@@ -325,14 +202,14 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
                 performance_data_csv, minimise, performance_measure, capvalue)
 
         if flag_successfully_solving:
-            mydict[instance] = used_time_for_this_instance
+            actual_selector_penalty[instance] = used_time_for_this_instance
         else:
-            mydict[instance] = sgh.settings.get_penalised_time()
+            actual_selector_penalty[instance] = sgh.settings.get_penalised_time()
 
-    return mydict
+    return actual_selector_penalty
 
 
-def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
+def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path) -> str:
     """Create a LaTeX plot comparing the selector and the SBS.
 
     The plot compares the performance on each instance of the portfolio selector created
@@ -341,24 +218,23 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
     Returns:
         LaTeX str to include the comparison plot in a LaTeX report.
     """
-    dict_sbs_penalty_time_on_each_instance = get_dict_sbs_penalty_time_on_each_instance()
-    dict_actual_portfolio_selector_penalty_time_on_each_instance = (
+    sbs_penalty_time = get_dict_sbs_penalty_time_on_each_instance()
+    actual_portfolio_selector_penalty = (
         get_dict_actual_portfolio_selector_penalty_time_on_each_instance())
 
-    instances = (dict_sbs_penalty_time_on_each_instance.keys()
-                 & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
-    if (len(dict_sbs_penalty_time_on_each_instance) != len(instances)):
+    instances = (sbs_penalty_time.keys()
+                 & actual_portfolio_selector_penalty.keys())
+    if (len(sbs_penalty_time) != len(instances)):
         print("ERROR: Number of penalty times for the single best solver does not match "
               "the number of instances")
         sys.exit(-1)
     points = []
     for instance in instances:
-        point = [dict_sbs_penalty_time_on_each_instance[instance],
-                 dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]]
+        point = [sbs_penalty_time[instance],
+                 actual_portfolio_selector_penalty[instance]]
         points.append(point)
 
-    latex_directory_path = "Components/Sparkle-latex-generator/"
-    figure_portfolio_selector_sparkle_vs_sbs_filename = (
+    figure_filename = (
         "figure_portfolio_selector_sparkle_vs_sbs")
 
     performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
@@ -368,7 +244,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
     penalty = sgh.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
-                             figure_portfolio_selector_sparkle_vs_sbs_filename,
+                             figure_filename,
                              xlabel=f"SBS ({sbs_solver}) [PAR{penalty}]",
                              ylabel=f"Sparkle Selector [PAR{penalty}]",
                              limit="magnitude",
@@ -376,16 +252,11 @@ def get_figure_portfolio_selector_sparkle_vs_sbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             output_dir=latex_directory_path)
-    str_value = (
-        "\\includegraphics[width=0.6\\textwidth]"
-        f"{{{figure_portfolio_selector_sparkle_vs_sbs_filename}}}"
-    )
-
-    return str_value
+                             output_dir=output_dir)
+    return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
 
 
-def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
+def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path) -> str:
     """Create a LaTeX plot comparing the selector and the VBS.
 
     The plot compares the performance on each instance of the portfolio selector created
@@ -394,29 +265,28 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
     Returns:
         LaTeX str to include the comparison plot in a LaTeX report.
     """
-    dict_vbs_penalty_time_on_each_instance = get_dict_vbs_penalty_time_on_each_instance()
-    dict_actual_portfolio_selector_penalty_time_on_each_instance = (
+    vbs_penalty_time = get_dict_vbs_penalty_time_on_each_instance()
+    actual_portfolio_selector_penalty = (
         get_dict_actual_portfolio_selector_penalty_time_on_each_instance())
 
-    instances = (dict_vbs_penalty_time_on_each_instance.keys()
-                 & dict_actual_portfolio_selector_penalty_time_on_each_instance.keys())
-    if (len(dict_vbs_penalty_time_on_each_instance) != len(instances)):
+    instances = (vbs_penalty_time.keys()
+                 & actual_portfolio_selector_penalty.keys())
+    if (len(vbs_penalty_time) != len(instances)):
         print("ERROR: Number of penalty times for the virtual best solver does not"
               "match the number of instances")
         sys.exit(-1)
     points = []
     for instance in instances:
-        point = [dict_vbs_penalty_time_on_each_instance[instance],
-                 dict_actual_portfolio_selector_penalty_time_on_each_instance[instance]]
+        point = [vbs_penalty_time[instance],
+                 actual_portfolio_selector_penalty[instance]]
         points.append(point)
 
-    latex_directory_path = "Components/Sparkle-latex-generator/"
-    figure_portfolio_selector_sparkle_vs_vbs_filename = (
+    figure_filename = (
         "figure_portfolio_selector_sparkle_vs_vbs")
     penalty = sgh.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
-                             figure_portfolio_selector_sparkle_vs_vbs_filename,
+                             figure_filename,
                              xlabel=f"VBS [PAR{penalty}]",
                              ylabel=f"Sparkle Selector [PAR{penalty}]",
                              limit="magnitude",
@@ -424,27 +294,9 @@ def get_figure_portfolio_selector_sparkle_vs_vbs() -> str:
                              limit_max=0.25,
                              penalty_time=sgh.settings.get_penalised_time(),
                              replace_zeros=True,
-                             output_dir=latex_directory_path)
+                             output_dir=output_dir)
 
-    str_value = (
-        "\\includegraphics[width=0.6\\textwidth]"
-        f"{{{figure_portfolio_selector_sparkle_vs_vbs_filename}}}"
-    )
-
-    return str_value
-
-
-def get_test_instance_class(test_case_directory: str) -> str:
-    """Get the name of the test instance set.
-
-    Args:
-        test_case_directory: Path to the test case directory.
-
-    Returns:
-        The name of the test instance set.
-    """
-    str_value = Path(test_case_directory).name
-    return r"\textbf{" + str_value + r"}"
+    return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
 
 
 def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
@@ -470,7 +322,6 @@ def get_test_actual_par(test_case_directory: str) -> str:
     Returns:
         PAR score (Penalised Average Runtime) as string.
     """
-    str_value = ""
     performance_data_csv =\
         PerformanceDataFrame(f"{test_case_directory}sparkle_performance_data.csv")
     # Why is it selecting the first solver?
@@ -489,12 +340,11 @@ def get_test_actual_par(test_case_directory: str) -> str:
         else:
             sparkle_penalty_time += sgh.settings.get_penalised_time()
 
-    sparkle_penalty_time = sparkle_penalty_time / sparkle_penalty_time_count
-    str_value = str(sparkle_penalty_time)
-    return str_value
+    return str(sparkle_penalty_time / sparkle_penalty_time_count)
 
 
-def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str]:
+def selection_report_variables(target_dir: Path,
+                               test_case_directory: str = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
@@ -503,20 +353,19 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
     Returns:
         A dict matching str variables in the LaTeX template with their value str.
     """
-    latex_dict = {}
-
-    latex_dict["customCommands"] = get_custom_commands()
-    latex_dict["sparkle"] = get_sparkle()
+    latex_dict = {"bibliographypath":
+                  str(sgh.sparkle_report_bibliography_path.absolute())}
     latex_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
-    latex_dict["numSolvers"] = get_num_solvers()
-    latex_dict["solverList"] = get_solver_list()
-    latex_dict["numFeatureExtractors"] = get_num_feature_extractors()
+    latex_dict["numSolvers"] = str(len(sgh.solver_list))
+    latex_dict["solverList"] = get_solver_list_latex()
+    latex_dict["numFeatureExtractors"] = str(len(sgh.extractor_list))
     latex_dict["featureExtractorList"] = get_feature_extractor_list()
     latex_dict["numInstanceClasses"] = get_num_instance_classes()
-    latex_dict["instanceClassList"] = get_instance_class_list()
-    latex_dict["featureComputationCutoffTime"] = get_feature_computation_cutoff_time()
+    latex_dict["instanceClassList"] = get_instance_set_count_list()
+    latex_dict["featureComputationCutoffTime"] =\
+        str(sgh.settings.get_general_extractor_cutoff_time())
     latex_dict["performanceComputationCutoffTime"] =\
-        get_performance_computation_cutoff_time()
+        str(sgh.settings.get_general_target_cutoff_time())
     latex_dict["solverPerfectRankingList"] = get_solver_perfect_ranking_list()
     latex_dict["solverActualRankingList"] = get_solver_actual_ranking_list()
     latex_dict["PARRankingList"] = get_par_ranking_list()
@@ -524,14 +373,14 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
     latex_dict["actualPAR"] = get_actual_par()
     latex_dict["penalty"] = str(sgh.settings.get_general_penalty_multiplier())
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
-        get_figure_portfolio_selector_sparkle_vs_sbs()
+        get_figure_portfolio_selector_sparkle_vs_sbs(target_dir)
     latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
-        get_figure_portfolio_selector_sparkle_vs_vbs()
+        get_figure_portfolio_selector_sparkle_vs_vbs(target_dir)
     latex_dict["testBool"] = r"\testfalse"
 
     # Train and test
     if test_case_directory is not None:
-        latex_dict["testInstanceClass"] = get_test_instance_class(test_case_directory)
+        latex_dict["testInstanceClass"] = f"\\textbf{ {Path(test_case_directory).name} }"
         latex_dict["numInstanceInTestInstanceClass"] =\
             get_num_instance_in_test_instance_class(test_case_directory)
         latex_dict["testActualPAR"] = get_test_actual_par(test_case_directory)
@@ -540,51 +389,81 @@ def get_dict_variable_to_value(test_case_directory: str = None) -> dict[str, str
     return latex_dict
 
 
-def generate_report(test_case_directory: str = None) -> None:
-    """Generate a report for algorithm selection.
+def fill_template_tex(template_tex: str, variables: dict) -> str:
+    """Given a latex template, replaces all the @@ variables using the dict.
 
     Args:
-        test_case_directory: Path to the test case directory. Defaults to None.
+        template_tex: The template to be populated
+        variables: Variable names (key) with their target (value)
+
+    Returns:
+        The populated latex string.
     """
-    # Include results on the test set if a test case directory is given
-    if test_case_directory is not None:
-        if not Path(test_case_directory).exists():
-            print("ERROR: The given directory", test_case_directory, "does not exist!")
-            sys.exit(-1)
+    for variable_key, target_value in variables.items():
+        variable = "@@" + variable_key + "@@"
+        # We don't modify variable names in the Latex file
+        if "\\includegraphics" not in target_value and "\\label" not in target_value:
+            # Rectify underscores in target_value
+            target_value = target_value.replace("_", r"\textunderscore ")
+        template_tex = template_tex.replace(variable, target_value)
+    return template_tex
 
-        if test_case_directory[-1] != "/":
-            test_case_directory += "/"
 
-        latex_report_filename = Path("Sparkle_Report_for_Test")
-        dict_variable_to_value = get_dict_variable_to_value(test_case_directory)
-    # Only look at the training instance set(s)
-    else:
-        latex_report_filename = Path("Sparkle_Report")
-        dict_variable_to_value = get_dict_variable_to_value()
+def generate_report(latex_source_path: Path,
+                    latex_template_name: str,
+                    target_path: Path,
+                    report_name: str,
+                    variable_dict: dict) -> None:
+    """General steps to generate a report.
 
-    latex_directory_path = Path("Components/Sparkle-latex-generator/")
+    Args:
+        latex_source_path: The path to the template
+        latex_template_name: The template name
+        target_path: The directory where the result should be placed
+        report_name: The name of the pdf (without suffix)
+        variable_dict: TBD
+    """
+    latex_template_filepath = latex_source_path / latex_template_name
 
-    latex_template_filepath = latex_directory_path / "template-Sparkle.tex"
-    report_content = Path(latex_template_filepath).open("r").read()
+    report_content = latex_template_filepath.open("r").read()
+    report_content = fill_template_tex(report_content, variable_dict)
 
-    for variable_key, str_value in dict_variable_to_value.items():
-        variable = r"@@" + variable_key + r"@@"
-        if (variable_key != "figure-portfolio-selector-sparkle-vs-sbs"
-           and variable_key != "figure-portfolio-selector-sparkle-vs-vbs"):
-            str_value = str_value.replace("_", r"\textunderscore ")
-        report_content = report_content.replace(variable, str_value)
-
-    latex_report_filepath = Path(latex_directory_path / latex_report_filename)
+    target_path.mkdir(parents=True, exist_ok=True)
+    latex_report_filepath = target_path / report_name
     latex_report_filepath = latex_report_filepath.with_suffix(".tex")
-
     Path(latex_report_filepath).open("w+").write(report_content)
 
-    stex.check_tex_commands_exist(latex_directory_path)
-
-    report_path = stex.compile_pdf(latex_directory_path, latex_report_filename)
+    stex.check_tex_commands_exist(target_path)
+    report_path = stex.compile_pdf(target_path, report_name)
 
     print(f"Report is placed at: {report_path}")
-    sl.add_output(str(report_path), "Sparkle portfolio selector report")
+
+
+def generate_gnuplot(output_gnuplot_script: str,
+                     output_dir: Path = None) -> None:
+    """Generates plot from script using GNU plot."""
+    subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
+                                     capture_output=True,
+                                     cwd=output_dir)
+
+    if subprocess_plot.returncode != 0:
+        print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:\n"
+              f"{subprocess_plot.stderr.decode()}\n")
+
+
+def generate_pdf(eps_file: str,
+                 output_dir: Path = None) -> None:
+    """Generate PDF using epstopdf."""
+    # Some systems are missing epstopdf so a copy is included
+    epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"
+    epstopdf = which("epstopdf") or epsbackup
+    subprocess_epstopdf = subprocess.run([epstopdf, eps_file],
+                                         capture_output=True,
+                                         cwd=output_dir)
+
+    if subprocess_epstopdf.returncode != 0:
+        print(f"(Eps To PDF) Error whilst converting Eps to PDF {eps_file}"
+              f"{subprocess_epstopdf.stderr.decode()}")
 
 
 def generate_comparison_plot(points: list,
@@ -636,11 +515,10 @@ def generate_comparison_plot(points: list,
     points = np.array(points)
     if replace_zeros:
         zero_runtime = 0.000001  # Microsecond
-        check_zeros = np.count_nonzero(points <= 0)
-        if check_zeros != 0:
+        if np.any(points <= 0):
             print("WARNING: Zero or negative valued performance values detected. Setting"
                   f" these values to {zero_runtime}.")
-        points[points == 0] = zero_runtime
+        points[points <= 0] = zero_runtime
 
     # process labels
     # LaTeX safe formatting
@@ -679,7 +557,6 @@ def generate_comparison_plot(points: list,
     with (output_dir / output_data_file).open("w") as fout:
         for point in points:
             fout.write(" ".join([str(c) for c in point]) + "\n")
-        fout.close()
 
     # Generate plot script
     with (output_dir / output_gnuplot_script).open("w") as fout:
@@ -722,23 +599,38 @@ def generate_comparison_plot(points: list,
                    "set style line 1 pt 2 ps 1.5 lc rgb 'royalblue' \n"
                    f"plot '{output_data_file}' ls 1\n")
 
-    subprocess_plot = subprocess.run(["gnuplot", output_gnuplot_script],
-                                     capture_output=True,
-                                     cwd=output_dir)
-
-    if subprocess_plot.returncode != 0:
-        print(f"(GnuPlot) Error whilst plotting {output_gnuplot_script}:\n"
-              f"{subprocess_plot.stderr.decode()}\n")
-
-    # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"
-    epstopdf = which("epstopdf") or epsbackup
-    subprocess_epstopdf = subprocess.run([epstopdf, output_eps_file],
-                                         capture_output=True,
-                                         cwd=output_dir)
-
-    if subprocess_epstopdf.returncode != 0:
-        print(f"(Eps To PDF) Error whilst converting Eps to PDF {output_eps_file}"
-              f"{subprocess_epstopdf.stderr.decode()}")
-
+    generate_gnuplot(output_gnuplot_script, output_dir)
+    generate_pdf(output_eps_file, output_dir)
     sfh.rmfiles(output_gnuplot_script)
+
+
+def generate_report_selection(test_case_directory: str = None) -> None:
+    """Generate a report for algorithm selection.
+
+    Args:
+        test_case_directory: Path to the test case directory. Defaults to None.
+    """
+    # Include results on the test set if a test case directory is given
+    if test_case_directory is not None:
+        if not Path(test_case_directory).exists():
+            print("ERROR: The given directory", test_case_directory, "does not exist!")
+            sys.exit(-1)
+
+        if test_case_directory[-1] != "/":
+            test_case_directory += "/"
+
+        latex_report_filename = Path("Sparkle_Report_for_Test")
+    # Only look at the training instance set(s)
+    else:
+        latex_report_filename = Path("Sparkle_Report")
+    target_path = sgh.selection_output_analysis
+    target_path.mkdir(parents=True, exist_ok=True)
+    dict_variable_to_value = selection_report_variables(target_path,
+                                                        test_case_directory)
+
+    generate_report(sgh.sparkle_latex_dir,
+                    "template-Sparkle.tex",
+                    target_path,
+                    latex_report_filename,
+                    dict_variable_to_value)
+    sl.add_output(str(target_path), "Sparkle portfolio selector report")
