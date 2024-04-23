@@ -51,9 +51,6 @@ def parser_function() -> argparse.ArgumentParser:
         choices=[Runner.LOCAL, Runner.SLURM],
         help=("On which computer or cluster environment to execute the calculation.")
     )
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
     return parser
 
 

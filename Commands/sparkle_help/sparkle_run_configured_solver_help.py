@@ -165,9 +165,6 @@ def run_configured_solver(instance_path_list: list[Path], solver_name: str,
         solver_name: Name of the solver to be used.
         config_str: Configuration to be used.
     """
-    # Get latest configured solver and the corresponding optimised configuration
-    if solver_name is None or config_str is None:
-        solver_name, config_str = get_latest_configured_solver_and_configuration()
     # a) Create cmd_solver_call that could call sparkle_solver_wrapper
     # NOTE: There is currently no implementation for solver wrappers to handle multiple
     # instances in any of the examples so this construct feels misleading
@@ -198,11 +195,6 @@ def run_configured_solver(instance_path_list: list[Path], solver_name: str,
     raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
                            f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
-
-    solver_params["solver_dir"] = './'
-    for i in range((len(config_list) - 1)):
-        solver_params[config_list[i]] = config_list[i + 1]
-    cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
 
     # b) Run the solver
     rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
