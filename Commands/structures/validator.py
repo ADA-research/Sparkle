@@ -7,6 +7,7 @@ import sys
 from pathlib import Path, PurePath
 import csv
 import glob
+import re
 import runrunner as rrr
 from runrunner import Runner
 
@@ -40,31 +41,10 @@ class Validator():
         csv_file: Path to csv file where the validation results can be found
         '''
         csv_file = f"Output/validation/{solver}_{instance_set.name}/validation.csv"
-        solver_name = solver.name
-        solver_wrapper_path = solver/sgh.sparkle_solver_wrapper
-        for instance in instance_set:
-            instance_name = instance.name
-            raw_results = glob.glob(f"Tmp/{solver_name}_{instance_name}*")
-            if not raw_results:
-                print(f"Error: No validation results found for {solver} and "
-                      f"{instance}.")
-            else:
-                tuple_list = []
-                for res in raw_results:
-                    cpu_time, wc_time, quality, status = \
-                        srsh.process_results(res, solver_wrapper_path, 
-                                            res.replace(".rawres", ".val"))
-                    tuple_list.append((quality, cpu_time))
-                with open(csv_file, 'wb') as out:        
-                    csv_out=csv.writer(out)
-                    for row in tuple_list:
-                        csv_out.writerow((solver_name, config, instance_set.name)
-                                         + (instance_name,) + row)
-
         return csv_file
 
     def validate(self: Validator, solvers: list[Path], config_str_list: list[str] | str,
-                 instance_sets: list[Path], run_on: Runner=Runner.SLURM):
+                 instance_sets: list[Path], run_on: Runner=Runner.LOCAL):
         """
         Validate a list of solvers (with corresponding configurations) on a set
         of instances.
@@ -101,6 +81,20 @@ class Validator():
                     srcsh.run_configured_solver(instance_path_list=instance_path_list,
                                                 solver_name=solver_name,
                                                 config_str=config_str)
+                    raw_res_files = glob.glob(f"Tmp/*.rawres")
+                    for res in raw_res_files:
+                        first_underscore_index = res.find('_')
+                        second_underscore_index = res.find('_', first_underscore_index + 1)
+                        solver_name = solver.name
+                        instance_name = res[first_underscore_index+1:second_underscore_index]
+                        solver_wrapper_path = solver/sgh.sparkle_solver_wrapper
+                        cpu_time, wc_time, quality, status = \
+                            srsh.process_results(res, solver_wrapper_path, 
+                                                res.replace(".rawres", ".val"))
+                        self.write_csv(solver=solver, config_str=config_str, 
+                                    instance_set=instance_set, instance=instance_name,
+                                        quality=quality, runtime=cpu_time)
+                    # Clean up .rawres files from this loop iteration
 
             # run a non-configured solver
             else:
@@ -123,3 +117,10 @@ class Validator():
             print("Waiting for the local calculations to finish.")
             run.wait()
     
+    def write_csv(self: Validator, solver, config_str, instance_set, instance,
+                  quality, runtime):
+        csv_file = f"Output/validation/{solver}_{instance_set}/validation.csv"
+        with open(csv_file, "w+") as out:
+            writer = csv.writer(out)
+            writer.writerow((solver, config_str, instance_set, instance,
+                             quality, runtime))
