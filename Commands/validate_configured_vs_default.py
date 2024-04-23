@@ -24,6 +24,7 @@ from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.initialise import check_for_initialise
+from Commands.structures.validator import Validator
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -155,6 +156,14 @@ if __name__ == "__main__":
     # Create solver execution directories, and copy necessary files there
     scsh.prepare_smac_execution_directories_validation(instance_set_test_name)
     configurator = sgh.settings.get_general_sparkle_configurator()
+
+    validator = Validator()
+    all_validation_instances = [instance_set_train]
+    if instance_set_test_name is not None:
+        all_validation_instances.append(instance_set_test)
+    scsh.get_optimised_configuration_params(solver, instance_set_train)
+    validator.validate(solvers=[solver], config_str_list=[], instance_sets=all_validation_instances)
+
     # Set up scenarios
     # 1. Set up the validation scenario for the training set
     cmd_base = "./smac-validate --use-scenario-outdir true --num-run 1 --cli-cores 8"

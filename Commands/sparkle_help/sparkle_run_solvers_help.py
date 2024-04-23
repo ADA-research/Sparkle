@@ -18,8 +18,8 @@ from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help.sparkle_settings import SolutionVerifier
 from Commands.sparkle_help import sparkle_sat_solver_help as sssh
 
-import functools
-print = functools.partial(print, flush=True)
+#import functools
+#print = functools.partial(print, flush=True)
 
 
 def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
@@ -142,16 +142,10 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     else:
         # TODO: Clean up on success
         if is_configured:
-            tmp_raw_res = f"{exec_path}tmp/"
-            tmp_paths = list(Path(tmp_raw_res).glob("*.rawres"))
-
-            # The result should exist
-            if len(tmp_paths) == 0:
-                print(f"WARNING: Raw result not found in {tmp_raw_res}. Writing from "
-                      "subprocess...")
-                Path(raw_result_path).open("w").write(process.stdout.decode())
-
-            if check_solver_output_for_errors(Path(raw_result_path)):
+            if not Path(raw_result_path).exists() or Path(raw_result_path).stat().st_size == 0:
+                # Runsolver cutoff solver wrapper before it showed its output
+                Path(raw_result_path).open("w").write(r"{'status': 'TIMEOUT', 'quality': 'nan'}")
+            elif check_solver_output_for_errors(Path(raw_result_path)):
                 sfh.rmfiles(runsolver_watch_data_path)
 
     return raw_result_path
@@ -167,7 +161,7 @@ def check_solver_output_for_errors(raw_result_path: Path) -> bool:
     raw_output_str = raw_result_path.open("r").read()
     try:
         raw_output_dict_str =\
-            raw_output_str[raw_output_str.find("{"), raw_output_str.find("}")]
+            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
         ast.literal_eval(raw_output_dict_str)
     except Exception as ex:
         print(f"WARNING: Possible error detected in {raw_result_path}. "

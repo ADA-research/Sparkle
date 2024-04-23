@@ -7,8 +7,6 @@ from pathlib import Path
 
 from runrunner.base import Runner
 
-from runrunner.base import Runner
-
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
@@ -18,7 +16,6 @@ from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
 from sparkle_help import sparkle_command_help as sch
-from Commands.initialise import check_for_initialise
 from Commands.initialise import check_for_initialise
 
 
