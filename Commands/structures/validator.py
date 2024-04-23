@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path, PurePath
+import ast
 import csv
 import glob
 import re
@@ -67,60 +68,56 @@ class Validator():
         # gather slurm information for the non-configured solvers which are run
         #   directly via runrunner
         num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
-        # TODO: determine number of CPU cores we should use
         srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
         sbatch_options = ssh.get_slurm_options_list()
         perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
 
         for solver, config_str in zip(solvers, config_str_list):
             # run a configured solver
-            if config_str is not None:
-                for instance_set in instance_sets:
-                    instance_path_list = list(instance_set.iterdir())
-                    _, solver_name = os.path.split(solver)
-                    srcsh.run_configured_solver(instance_path_list=instance_path_list,
-                                                solver_name=solver_name,
-                                                config_str=config_str)
-                    raw_res_files = glob.glob(f"Tmp/*.rawres")
-                    for res in raw_res_files:
-                        first_underscore_index = res.find('_')
-                        second_underscore_index = res.find('_', first_underscore_index + 1)
-                        solver_name = solver.name
-                        instance_name = res[first_underscore_index+1:second_underscore_index]
-                        solver_wrapper_path = solver/sgh.sparkle_solver_wrapper
-                        cpu_time, wc_time, quality, status = \
-                            srsh.process_results(res, solver_wrapper_path, 
-                                                res.replace(".rawres", ".val"))
-                        self.write_csv(solver=solver, config_str=config_str, 
-                                    instance_set=instance_set, instance=instance_name,
-                                        quality=quality, runtime=cpu_time)
+            if config_str is None:
+                config_str = ""
+            for instance_set in instance_sets:
+                instance_path_list = list(p.absolute() for p in instance_set.iterdir())
+                _, solver_name = os.path.split(solver)
+                srcsh.run_configured_solver(instance_path_list=instance_path_list,
+                                            solver_name=solver_name,
+                                            config_str=config_str)
+                raw_res_files = glob.glob(f"{sgh.sparkle_tmp_path }/*.rawres")
+                for res in raw_res_files:
+                    first_underscore_index = res.find('_')
+                    second_underscore_index = res.find('_', first_underscore_index + 1)
+                    solver_name = solver.name
+                    instance_name = res[first_underscore_index+1:second_underscore_index]
+                    try:
+                        raw_output_str = Path(res).open("r").read()
+                        raw_output_str =\
+                            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
+                        out_dict = ast.literal_eval(raw_output_str)
+                        if not isinstance(out_dict, dict):
+                            continue
+                    except Exception:
+                        continue
+                    runtime, wc_time = srsh.get_runtime_from_runsolver(res.replace(".rawres", ".val"))
+                    if runtime == -1.0:
+                        runtime = wc_time
+                    status, quality = out_dict["status"], out_dict["quality"]
+                    self.write_csv(solver=solver, config_str=config_str, 
+                                instance_set=instance_set, instance=instance_name,
+                                    quality=quality, runtime=runtime)
                     # Clean up .rawres files from this loop iteration
-
-            # run a non-configured solver
-            else:
-                cmd_base = "Commands/sparkle_help/run_solvers_core.py"
-                for instance_set in instance_sets:
-                    cmd_list = [f"{cmd_base} --instance {instance} --solver {solver} "
-                                f"--performance-measure {perf_m.name}" for instance in instance_set.iterdir()]
-                    
-                    run = rrr.add_to_queue(
-                        runner=run_on,
-                        cmd=cmd_list,
-                        parallel_jobs=num_job_in_parallel,
-                        name=CommandName.RUN_SOLVERS,
-                        base_dir=sgh.sparkle_tmp_path,
-                        sbatch_options=sbatch_options,
-                        srun_options=srun_options)
                     
 
-        if run_on == Runner.LOCAL:
-            print("Waiting for the local calculations to finish.")
-            run.wait()
+        #if run_on == Runner.LOCAL:
+        #    print("Waiting for the local calculations to finish.")
+        #    run.wait()
     
     def write_csv(self: Validator, solver, config_str, instance_set, instance,
                   quality, runtime):
-        csv_file = f"Output/validation/{solver}_{instance_set}/validation.csv"
-        with open(csv_file, "w+") as out:
+        out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
+        if not out_dir.exists():
+            out_dir.mkdir(parents=True)
+        csv_file = out_dir / "validation.csv"
+        with csv_file.open("a") as out:
             writer = csv.writer(out)
             writer.writerow((solver, config_str, instance_set, instance,
                              quality, runtime))
