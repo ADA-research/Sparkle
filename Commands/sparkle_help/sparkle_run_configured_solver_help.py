@@ -166,14 +166,10 @@ def run_configured_solver(instance_path_list: list[Path], solver_name: str,
         config_str: Configuration to be used.
     """
     # a) Create cmd_solver_call that could call sparkle_solver_wrapper
-    # NOTE: There is currently no implementation for solver wrappers to handle multiple
-    # instances in any of the examples so this construct feels misleading
-    instance_path_str = " ".join([str(path) for path in instance_path_list])
     # Set specifics to the unique string 'rawres' to request sparkle_smac_wrapper to
     # write a '.rawres' file with raw solver output in the tmp/ subdirectory of the
     # execution directory:
     solver_params = {"solver_dir": ".",
-                     "instance": instance_path_str,
                      "specifics": "rawres",
                      "cutoff_time": sgh.settings.get_general_target_cutoff_time(),
                      "run_length": "2147483647",  # Arbitrary, not used by SMAC wrapper
@@ -188,19 +184,23 @@ def run_configured_solver(instance_path_list: list[Path], solver_name: str,
         param_value = param_value.strip("'")
         solver_params[param_name] = param_value
 
-    cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
-    # Prepare paths
-    solver_path = sgh.solver_dir / solver_name
-    instance_name = "_".join([path.name for path in instance_path_list])
-    raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
-                           f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
-    runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
+    #All instance related parameters are configured in this loop
+    for instance_path in instance_path_list:
+        solver_params["instance"] = str(instance_path)
+        cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
 
-    # b) Run the solver
-    rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
-                                                         raw_result_path,
-                                                         runsolver_values_path,
-                                                         is_configured=True)
+        # Prepare paths
+        solver_path = sgh.solver_dir / solver_name
+        instance_name = instance_path.name
+        raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
+                            f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
+        runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
+
+        # b) Run the solver
+        rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
+                                                            raw_result_path,
+                                                            runsolver_values_path,
+                                                            is_configured=True)
 
     # Try to process the results from the rawoutput
     # Justification for this try-except structure is that the user write the wrapper

@@ -105,9 +105,9 @@ class Validator():
             # run a non-configured solver
             else:
                 cmd_base = "Commands/sparkle_help/run_solvers_core.py"
-                for instance_set in instance_sets.iterdir():
+                for instance_set in instance_sets:
                     cmd_list = [f"{cmd_base} --instance {instance} --solver {solver} "
-                                f"--performance-measure {perf_m.name}" for instance in instance_set]
+                                f"--performance-measure {perf_m.name}" for instance in instance_set.iterdir()]
                     
                     run = rrr.add_to_queue(
                         runner=run_on,
