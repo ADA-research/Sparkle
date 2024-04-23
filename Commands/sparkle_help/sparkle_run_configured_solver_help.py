@@ -199,11 +199,6 @@ def run_configured_solver(instance_path_list: list[Path], solver_name: str,
                            f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
 
-    solver_params["solver_dir"] = './'
-    for i in range((len(config_list) - 1)):
-        solver_params[config_list[i]] = config_list[i + 1]
-    cmd_solver_call = f"{sgh.sparkle_solver_wrapper} {solver_params}"
-
     # b) Run the solver
     rawres_solver = srsh.run_solver_on_instance_with_cmd(solver_path, cmd_solver_call,
                                                          raw_result_path,

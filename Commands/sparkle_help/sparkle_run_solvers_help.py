@@ -167,7 +167,7 @@ def check_solver_output_for_errors(raw_result_path: Path) -> bool:
     raw_output_str = raw_result_path.open("r").read()
     try:
         raw_output_dict_str =\
-            raw_output_str[raw_output_str.find("{"), raw_output_str.find("}")]
+            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
         ast.literal_eval(raw_output_dict_str)
     except Exception as ex:
         print(f"WARNING: Possible error detected in {raw_result_path}. "
