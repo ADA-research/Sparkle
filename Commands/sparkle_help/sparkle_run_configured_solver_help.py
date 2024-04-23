@@ -156,8 +156,8 @@ def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
     return solver.name, config_str
 
 
-def run_configured_solver(instance_path_list: list[Path], solver_name: str = None, 
-                          config_str: str ) -> None:
+def run_configured_solver(instance_path_list: list[Path], solver_name: str, 
+                          config_str: str) -> None:
     """Runs a specified solver with configuration on instances.
 
     Args:
