@@ -161,9 +161,11 @@ if __name__ == "__main__":
     all_validation_instances = [instance_set_train]
     if instance_set_test_name is not None:
         all_validation_instances.append(instance_set_test)
-    scsh.get_optimised_configuration_params(solver, instance_set_train)
-    validator.validate(solvers=[solver], config_str_list=[], instance_sets=all_validation_instances)
+    config_str = scsh.get_optimised_configuration_params(solver, instance_set_train)
+    validator.validate(solvers=[solver]*2, config_str_list=[None, config_str],
+                       instance_sets=all_validation_instances)
 
+    '''
     # Set up scenarios
     # 1. Set up the validation scenario for the training set
     cmd_base = "./smac-validate --use-scenario-outdir true --num-run 1 --cli-cores 8"
@@ -260,6 +262,7 @@ if __name__ == "__main__":
               f"{run.run_id}")
     else:
         run.wait()
+    '''
 
     # Write most recent run to file
     last_test_file_path =\
