@@ -159,6 +159,17 @@ def check_solver_output_for_errors(raw_result_path: Path) -> bool:
         return False
     return True
 
+def get_solver_output_dict(raw_result_path: Path) -> dict:
+    try:
+        raw_output_str = raw_result_path.open("r").read()
+        raw_output_dict_str =\
+            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
+        output_dict = ast.literal_eval(raw_output_dict_str)
+        if isinstance(output_dict, dict):
+            return output_dict
+    except:
+        return None
+    return None
 
 def run_solver_on_instance_and_process_results(
         solver_path: str, instance_path: str, seed_str: str = None,

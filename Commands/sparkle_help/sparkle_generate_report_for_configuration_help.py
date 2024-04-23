@@ -291,6 +291,9 @@ def get_figure_configured_vs_default_on_test_instance_set(
     Returns:
         A string containing the latex command to include the figure
     """
+    #1.construct the path to the CSV file
+    #2.Seperate entries based on configuration
+    #3. give the results to get_figure_configure_vs_default and make sure it can handle it
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
@@ -326,6 +329,9 @@ def get_figure_configured_vs_default_on_train_instance_set(
     Returns:
         A string containing the latex comand to include the figure
     """
+    #1.construct the path to the CSV file
+    #2.Seperate entries based on configuration
+    #3. give the results to get_figure_configure_vs_default and make sure it can handle it
     _, _, optimised_configuration_seed = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
     configured_results_file = ("validationObjectiveMatrix-traj-run-"
@@ -355,6 +361,12 @@ def get_timeouts_test(instance_set_test_name: str, cutoff: int) -> tuple[int, in
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
+    #1. retrieve solver name -> Scenario's solver?
+    #2. Retrieve correct CSV
+    #3. Split those with configuration str and those with configuration str None
+    #4. Place them in a dictionary of dict{instance_name: value}
+    #5. If RUNTIME performance with value = cutoff * penalty_factor if value > cutoff
+    #6. pass it to get_timeouts
     # Retrieve instances and PAR values
     configured_results_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
@@ -385,6 +397,11 @@ def get_timeouts_train(solver_name: str, instance_set_name: str,
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
+    #1. retrieve the csv using solver name and instance_set_name
+    #2. split based on configuration string
+    #3. place them in dicts of format with {instance_name: value}
+    #4. If RUNTIME performance with value = cutoff * penalty_factor if value > cutoff
+    #5. give dict to get_timeouts
     (optimised_configuration_str, optimised_configuration_performance_par,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_name)
@@ -571,6 +588,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     (optimised_configuration_str, _,
      optimised_configuration_seed) = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
+    #What do we do here? 
     configured_results_train_file = "validationObjectiveMatrix-traj-run-" + str(
         optimised_configuration_seed) + "-walltime.csv"
     configured_results_train_dir = (f"{scen_path}/outdir_train_configuration/"
@@ -579,7 +597,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     str_value = get_par_performance(configured_results_train_dir,
                                     smac_each_run_cutoff_time)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
-
+    #And here?
     default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_train_dir = (f"{scen_path}/outdir_train_default/"
                                  f"{default_results_train_file}")
@@ -632,14 +650,14 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
 
     (_, _, smac_each_run_cutoff_time, _, _, _) = scsh.get_smac_settings()
     scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-
+    #And here?
     configured_results_test_file = (
         "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
     configured_results_test_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
                                    f"_test_configured/{configured_results_test_file}")
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
         str(get_par_performance(configured_results_test_dir, smac_each_run_cutoff_time))
-
+    #And here lastly!
     default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
     default_results_test_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
                                 f"_test_default/{default_results_test_file}")

@@ -42,6 +42,9 @@ class Validator():
         csv_file: Path to csv file where the validation results can be found
         '''
         csv_file = f"Output/validation/{solver}_{instance_set.name}/validation.csv"
+        # Read csv file into a list[list]
+        # if config is not None, select by config column
+        # return list of lists
         return csv_file
 
     def validate(self: Validator, solvers: list[Path], config_str_list: list[str] | str,
@@ -65,13 +68,6 @@ class Validator():
             print("Error: Number of solvers and configurations does not match!")
             sys.exit(-1)
 
-        # gather slurm information for the non-configured solvers which are run
-        #   directly via runrunner
-        num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
-        srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
-        sbatch_options = ssh.get_slurm_options_list()
-        perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-
         for solver, config_str in zip(solvers, config_str_list):
             # run a configured solver
             if config_str is None:
@@ -88,36 +84,33 @@ class Validator():
                     second_underscore_index = res.find('_', first_underscore_index + 1)
                     solver_name = solver.name
                     instance_name = res[first_underscore_index+1:second_underscore_index]
-                    try:
-                        raw_output_str = Path(res).open("r").read()
-                        raw_output_str =\
-                            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
-                        out_dict = ast.literal_eval(raw_output_str)
-                        if not isinstance(out_dict, dict):
-                            continue
-                    except Exception:
+                    out_dict = srsh.get_solver_output_dict(Path(res))
+                    if out_dict is None:
+                        # Wrong file
                         continue
                     runtime, wc_time = srsh.get_runtime_from_runsolver(res.replace(".rawres", ".val"))
                     if runtime == -1.0:
                         runtime = wc_time
                     status, quality = out_dict["status"], out_dict["quality"]
-                    self.write_csv(solver=solver, config_str=config_str, 
-                                instance_set=instance_set, instance=instance_name,
-                                    quality=quality, runtime=runtime)
+                    self.write_csv(solver, config_str, instance_set, instance_name,
+                                    status, quality, runtime)
                     # Clean up .rawres files from this loop iteration
-                    
-
-        #if run_on == Runner.LOCAL:
-        #    print("Waiting for the local calculations to finish.")
-        #    run.wait()
     
-    def write_csv(self: Validator, solver, config_str, instance_set, instance,
-                  quality, runtime):
+    def write_csv(self: Validator,
+                  solver: str,
+                  config_str: str,
+                  instance_set: str,
+                  instance: str, status: str, quality: str, runtime: str):
         out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
         if not out_dir.exists():
             out_dir.mkdir(parents=True)
         csv_file = out_dir / "validation.csv"
+        if not csv_file.exists():
+           # Write header
+           with csv_file.open("w") as out:
+               csv.writer(out).write(("Solver", "Configuration", "InstanceSet", "Instance", "Status", "Quality", "Runtime"))
+
         with csv_file.open("a") as out:
             writer = csv.writer(out)
-            writer.writerow((solver, config_str, instance_set, instance,
+            writer.writerow((solver, config_str, instance_set, instance, status,
                              quality, runtime))
