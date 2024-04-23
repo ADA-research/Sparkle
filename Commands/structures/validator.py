@@ -5,7 +5,8 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path, PurePath
-import json
+import csv
+import glob
 import runrunner as rrr
 from runrunner import Runner
 
@@ -15,6 +16,7 @@ from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help.sparkle_command_help import CommandName
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
+from Commands.sparkle_help import sparkle_run_solvers_help as srsh
 
 
 class Validator():
@@ -23,31 +25,49 @@ class Validator():
         pass
 
     def get_validation_results(self, solver, instance_set, config=None):
-        # get raw results and put them in csv format
-        # one csv for each solver/instance_set combination
-        # Output/validation/solver_instanceset/validation.csv
-        #   within that file, we store both the configured and non-configured
-        #   runs. For non-configured, the corresponding row has None in the 
-        #   config column.
+        '''
+        Query the results of the validation of solver on instance_set.
 
-        # go over all instances in the instance_set. For each such instance,
-        # pair it with the solver and try to find the corresponding result
-        # with the help of glob
+        Parameters
+        ----------
+        solver: Path to the validated solver
+        instance_set: Path to validation set
+        config: Path to the configuration if the solver was configured, None
+                otherwise
 
-        # sparkle_tmp_path = "Tmp/"
-
-        # how would we even differentiate between configured and non-configured result?
-        # the raw_result_path is created with solver+instance+PID
-
+        Returns
+        -------
+        csv_file: Path to csv file where the validation results can be found
+        '''
+        csv_file = f"Output/validation/{solver}_{instance_set.name}/validation.csv"
+        solver_name = solver.name
+        solver_wrapper_path = solver/sgh.sparkle_solver_wrapper
         for instance in instance_set:
-            pass
-        
-        return self._validation_results
+            instance_name = instance.name
+            raw_results = glob.glob(f"Tmp/{solver_name}_{instance_name}*")
+            if not raw_results:
+                print(f"Error: No validation results found for {solver} and "
+                      f"{instance}.")
+            else:
+                tuple_list = []
+                for res in raw_results:
+                    cpu_time, wc_time, quality, status = \
+                        srsh.process_results(res, solver_wrapper_path, 
+                                            res.replace(".rawres", ".val"))
+                    tuple_list.append((quality, cpu_time))
+                with open(csv_file, 'wb') as out:        
+                    csv_out=csv.writer(out)
+                    for row in tuple_list:
+                        csv_out.writerow((solver_name, config, instance_set.name)
+                                         + (instance_name,) + row)
+
+        return csv_file
 
     def validate(self: Validator, solvers: list[Path], config_str_list: list[str] | str,
                  instance_sets: list[Path], run_on: Runner=Runner.SLURM):
         """
-        TODO description
+        Validate a list of solvers (with corresponding configurations) on a set
+        of instances.
 
         Parameters
         ----------
@@ -85,7 +105,7 @@ class Validator():
             # run a non-configured solver
             else:
                 cmd_base = "Commands/sparkle_help/run_solvers_core.py"
-                for instance_set in instance_sets:
+                for instance_set in instance_sets.iterdir():
                     cmd_list = [f"{cmd_base} --instance {instance} --solver {solver} "
                                 f"--performance-measure {perf_m.name}" for instance in instance_set]
                     
