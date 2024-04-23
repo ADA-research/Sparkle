@@ -16,11 +16,12 @@ def check_tex_commands_exist(latex_directory_path: Path) -> None:
                         "local machine to generate the report.")
 
 
-def compile_pdf(latex_directory_path: Path, latex_report_filename: Path) -> Path:
+def compile_pdf(latex_files_path: Path, latex_report_filename: Path) -> Path:
     """Compile the given latex files to a PDF.
 
     Args:
-        latex_directory_path: Path to the directory where the report will be generated.
+        latex_files_path: Path to the directory with source files
+            where the report will be generated.
         latex_report_filename: Name of the output files.
 
     Returns:
@@ -28,14 +29,14 @@ def compile_pdf(latex_directory_path: Path, latex_report_filename: Path) -> Path
     """
     pdf_process = subprocess.run(["pdflatex", "-interaction=nonstopmode",
                                  f"{latex_report_filename}.tex"],
-                                 cwd=latex_directory_path, capture_output=True)
+                                 cwd=latex_files_path, capture_output=True)
 
     if pdf_process.returncode != 0:
         print(f"[{pdf_process.returncode}] ERROR generating with PDFLatex command:\n"
               f"{pdf_process.stdout.decode()}\n {pdf_process.stderr.decode()}\n")
 
     bibtex_process = subprocess.run(["bibtex", f"{latex_report_filename}.aux"],
-                                    cwd=latex_directory_path, capture_output=True)
+                                    cwd=latex_files_path, capture_output=True)
 
     if bibtex_process.returncode != 0:
         print("ERROR whilst generating with Bibtex command:"
@@ -47,7 +48,6 @@ def compile_pdf(latex_directory_path: Path, latex_report_filename: Path) -> Path
     # But Bibtex cannot function without .aux file produced by pdflatex. Hence run twice.
     pdf_process = subprocess.run(["pdflatex", "-interaction=nonstopmode",
                                  f"{latex_report_filename}.tex"],
-                                 cwd=latex_directory_path, capture_output=True)
+                                 cwd=latex_files_path, capture_output=True)
 
-    report_path = Path(latex_directory_path / latex_report_filename).with_suffix(".pdf")
-    return report_path
+    return Path(latex_files_path / latex_report_filename).with_suffix(".pdf")

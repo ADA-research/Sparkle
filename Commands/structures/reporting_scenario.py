@@ -270,14 +270,15 @@ class ReportingScenario:
         name = "test_case_directory"
         self.path_setter(section, name, value)
 
-    def get_selection_test_case_directory(self: ReportingScenario) -> Path:
+    def get_selection_test_case_directory(self: ReportingScenario) -> str:
         """Return the path to the testing set that was used for algorithm selection."""
         try:
             path = self.__scenario["selection"]["test_case_directory"]
+            if Path(path) == Path("."):
+                path = None
         except KeyError:
-            path = ""
-
-        return self.none_if_empty_path(Path(path))
+            path = None
+        return path
 
     # Parallel portfolio settings ###
 
