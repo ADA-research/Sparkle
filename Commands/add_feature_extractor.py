@@ -87,8 +87,8 @@ if __name__ == "__main__":
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.ADD_FEATURE_EXTRACTOR])
 
-    extractor_source = args.extractor_path
-    if not Path(extractor_source).exists():
+    extractor_source = Path(args.extractor_path)
+    if not extractor_source.exists():
         print(f'Feature extractor path "{extractor_source}" does not exist!')
         sys.exit(-1)
 
@@ -96,60 +96,56 @@ if __name__ == "__main__":
 
     # Start add feature extractor
     last_level_directory = ""
-    last_level_directory = sfh.get_last_level_directory_name(extractor_source)
+    extractor_name = Path(extractor_source)
 
-    extractor_directory = "Extractors/" + last_level_directory
+    extractor_target_path = sgh.extractor_dir / extractor_source.name
 
-    if not Path(extractor_directory).exists():
-        Path(extractor_directory).mkdir()
-    else:
-        ex_dir_name = sfh.get_last_level_directory_name(extractor_directory)
-        print(f"Feature extractor {ex_dir_name} already exists!")
-        print(f"Do not add feature extractor {ex_dir_name}")
+    if extractor_target_path.exists():
+        print(f"Feature extractor {extractor_source.name} already exists! "
+              "Can not add feature extractor.")
         sys.exit(-1)
-
-    shutil.copytree(Path(extractor_source), extractor_directory, dirs_exist_ok=True)
-    sfh.add_remove_platform_item(extractor_directory, sgh.extractor_list_path)
+    extractor_target_path.mkdir()
+    shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
+    sfh.add_remove_platform_item(str(extractor_target_path), sgh.extractor_list_path)
 
     # pre-run the feature extractor on a testing instance, to obtain the feature names
-    if _check_existence_of_test_instance_list_file(extractor_directory):
+    if _check_existence_of_test_instance_list_file(extractor_target_path):
         test_instance_list_file_name = "sparkle_test_instance_list.txt"
-        extractor_path = Path(extractor_directory)
-        test_instance_list_file_path = (extractor_path
+        test_instance_list_file_path = (extractor_target_path
                                         / test_instance_list_file_name)
-        with Path(test_instance_list_file_path).open("r") as infile:
+        with test_instance_list_file_path.open("r") as infile:
             model_file, constraint_file = infile.readline().strip().split()
 
         result_path = (
             "Tmp/"
-            + extractor_path.name
+            + test_instance_list_file_path.name
             + "_"
             + Path(model_file).name
             + "_"
             + sparkle_basic_help.get_time_pid_random_string()
             + ".rawres"
         )
-        command_line = [extractor_path / sgh.sparkle_run_default_wrapper,
-                        f"{extractor_directory}/",
-                        extractor_path / model_file,
-                        extractor_path / constraint_file,
+        command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,
+                        f"{extractor_target_path}/",
+                        extractor_target_path / model_file,
+                        extractor_target_path / constraint_file,
                         result_path]
         subprocess.run(command_line)
     else:
-        instance_path = Path(extractor_directory) / "sparkle_test_instance.cnf"
+        instance_path = extractor_target_path / "sparkle_test_instance.cnf"
         if not instance_path.is_file():
-            instance_path = Path(extractor_directory) / "sparkle_test_instance.txt"
+            instance_path = extractor_target_path / "sparkle_test_instance.txt"
         result_path = (
             "Tmp/"
-            + sfh.get_last_level_directory_name(extractor_directory)
+            + extractor_target_path.name
             + "_"
-            + sfh.get_last_level_directory_name(str(instance_path))
+            + instance_path.name
             + "_"
             + sparkle_basic_help.get_time_pid_random_string()
             + ".rawres"
         )
-        command_line = [extractor_directory + "/" + sgh.sparkle_run_default_wrapper,
-                        f"{extractor_directory}/",
+        command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,
+                        f"{extractor_target_path}/",
                         str(instance_path),
                         result_path]
         subprocess.run(command_line)
@@ -161,15 +157,15 @@ if __name__ == "__main__":
     for column_name in list_columns:
         feature_data_csv.add_column(column_name)
 
-    feature_data_csv.update_csv()
+    feature_data_csv.save_csv()
     sfh.add_remove_platform_item(len(list_columns),
                                  sgh.extractor_feature_vector_size_list_path,
-                                 key=extractor_directory)
+                                 key=str(extractor_target_path))
 
     sfh.rmfiles(Path(result_path))
 
     print("Adding feature extractor "
-          f"{sfh.get_last_level_directory_name(extractor_directory)} done!")
+          f"{extractor_target_path.name} done!")
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(Path(sgh.sparkle_algorithm_selector_path))
@@ -181,7 +177,7 @@ if __name__ == "__main__":
         print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
     if nickname_str is not None:
-        sfh.add_remove_platform_item(extractor_directory,
+        sfh.add_remove_platform_item(str(extractor_target_path),
                                      sgh.extractor_nickname_list_path, key=nickname_str)
 
     if args.run_extractor_now:

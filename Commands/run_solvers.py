@@ -9,7 +9,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_slurm_help as ssh
 from Commands.sparkle_help import sparkle_run_solvers_parallel_help as srsph
 from Commands.sparkle_help import sparkle_logging as sl
@@ -93,7 +93,7 @@ def run_solvers_on_instances(
         If True, the selector will be constructed and a report will be produced.
     """
     if recompute:
-        spdcsv.SparklePerformanceDataCSV(sgh.performance_data_csv_path).clean_csv()
+        PerformanceDataFrame(sgh.performance_data_csv_path).clean_csv()
     num_job_in_parallel = 1
     if parallel:
         num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
@@ -178,8 +178,6 @@ if __name__ == "__main__":
     if args.target_cutoff_time:
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
-
-    print("Start running solvers ...")
 
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])

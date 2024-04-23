@@ -6,6 +6,7 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
+import math
 
 from sparkle import about
 from Commands.structures.solver import Solver
@@ -31,13 +32,11 @@ def latest_scenario() -> ReportingScenario:
 
 sparkle_version = str(about.about_info["version"])
 
-sparkle_maximum_int = 2147483647
-sparkle_missing_value = -(sparkle_maximum_int - 1)
-sparkle_minimum_int = -(sparkle_maximum_int - 2)
-
 sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
+
+sparkle_missing_value = math.nan
 
 sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 
@@ -92,8 +91,26 @@ sparkle_marginal_contribution_actual_path = (
 sparkle_last_test_file_name = "last_test_configured_default.txt"
 
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
-sparkle_report_bibliography_path =\
-    Path("Components/Sparkle-latex-generator/SparkleReport.bib")
+sparkle_latex_dir = Path("Components/Sparkle-latex-generator")
+sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
+
+# Directories for CLI commands
+configuration_output_general = output_dir / "Configuration"
+parallel_portfolio_output_general = output_dir / "Parallel_Portfolio"
+selection_output_general = output_dir / "Selection"
+
+# Raw output
+rawdata_dir_name = Path("Raw_Data")
+configuration_output_raw = configuration_output_general / rawdata_dir_name
+parallel_portfolio_output_raw = parallel_portfolio_output_general / rawdata_dir_name
+selection_output_raw = selection_output_general / rawdata_dir_name
+
+# Analysis directories
+analysis_dir_name = Path("Analysis")
+configuration_output_analysis = configuration_output_general / analysis_dir_name
+parallel_portfolio_output_analysis =\
+    parallel_portfolio_output_general / analysis_dir_name
+selection_output_analysis = selection_output_general / analysis_dir_name
 
 runsolver_path = "Components/runsolver/src/runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"

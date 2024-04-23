@@ -34,7 +34,7 @@ def get_slurm_options_list(path_modifier: str = None) -> list[str]:
 
 
 def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str]:
-    """Check if the given srun_option_string is compatible with the Slurm cluster.
+    """Check if the given srun_option_string is compatible with the cluster partition.
 
     Args:
       srun_option_string: Specific run option string.
@@ -60,8 +60,6 @@ def check_slurm_option_compatibility(srun_option_string: str) -> tuple[bool, str
             kwargs[arg] = args[i + 1]
 
     if not ("--partition" in kwargs.keys() or "-p" in kwargs.keys()):
-        print("###Could not check slurm compatibility because no partition was "
-              "specified; continuing###")
         return True, "Could not Check"
 
     partition = kwargs.get("--partition", kwargs.get("-p", None))

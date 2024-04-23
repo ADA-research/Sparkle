@@ -10,7 +10,7 @@ from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_settings
 
 from unittest.mock import patch
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 global settings
 sgh.settings = sparkle_settings.Settings()
@@ -133,13 +133,20 @@ class TestMarginalContribution(TestCase):
         # TODO: This method is currently not touched by the .sh test. Think of a test.
         pass
 
-    def test_compute_actual_selector_marginal_contribution(self: TestCase) -> None:
+    @patch("Commands.sparkle_help.sparkle_compute_marginal_contribution_help."
+           "compute_actual_selector_performance")
+    def test_compute_actual_selector_marginal_contribution(self: TestCase,
+                                                           mock_actual_performance: Mock
+                                                           ) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
         # Test does not work on Mac
         perf_path = "Commands/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "Commands/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
+        mock_actual_performance.side_effect = [526.805294,
+                                               526.805294,
+                                               732.0]
 
         result = [("Solvers/CSCCSat", 1.3895076764357648), ("Solvers/MiniSAT", 0.0)]
 
@@ -151,6 +158,7 @@ class TestMarginalContribution(TestCase):
             feature_data_csv_path=feature_csv_path,
             flag_recompute=True
         )
+
         self.assertEqual(output, result)
 
     def test_print_rank_list(self: TestCase) -> None:

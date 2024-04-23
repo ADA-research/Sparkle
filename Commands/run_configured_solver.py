@@ -7,14 +7,18 @@ from pathlib import Path
 
 from runrunner.base import Runner
 
+from runrunner.base import Runner
+
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_settings
 from Commands.sparkle_help import sparkle_configure_solver_help as scsh
 from Commands.sparkle_help.sparkle_settings import SettingState
 from Commands.structures.sparkle_objective import PerformanceMeasure
+from Commands.structures.sparkle_objective import PerformanceMeasure
 from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
 from sparkle_help import sparkle_command_help as sch
+from Commands.initialise import check_for_initialise
 from Commands.initialise import check_for_initialise
 
 
@@ -47,6 +51,9 @@ def parser_function() -> argparse.ArgumentParser:
         choices=[Runner.LOCAL, Runner.SLURM],
         help=("On which computer or cluster environment to execute the calculation.")
     )
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
+    )
     return parser
 
 
@@ -66,6 +73,8 @@ if __name__ == "__main__":
     instance_path = args.instance_path
     run_on = args.run_on
 
+    check_for_initialise(sys.argv,
+                         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
 

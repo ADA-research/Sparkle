@@ -144,7 +144,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                 print(f"****** Run solver Output:\n{runsolver.stderr}")
                 Path(result_path).unlink(missing_ok=True)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
-                    feature_data_csv, Path(instance_path), Path(extractor_path),
+                    feature_data_csv, instance_path, extractor_path,
                     Path(result_path))
 
             feature_data_csv.combine(tmp_fdcsv)
@@ -158,11 +158,11 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                   f"{str(total_job_num)}")
             current_job_num += 1
 
-            feature_data_csv.update_csv()
+            feature_data_csv.save_csv()
 
-            print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)}"
+            print(f"Extractor {extractor_path.name}"
                   " computation of feature vector of instance "
-                  f"{sfh.get_last_level_directory_name(instance_path)} done!\n")
+                  f"{instance_path.name} done!\n")
 
 
 def computing_features_parallel(feature_data_csv_path: Path,

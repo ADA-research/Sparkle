@@ -16,7 +16,7 @@ from Commands.sparkle_help import sparkle_basic_help
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
 from Commands.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_run_solvers_help as srs
 from Commands.structures.reporting_scenario import Scenario
 from Commands.sparkle_help import sparkle_instances_help as sih
@@ -132,13 +132,12 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
     if performance_data_csv_path is not None:
         solver_name = "Sparkle_Portfolio_Selector"
         check_selector_status(solver_name)
-        fo = Path(performance_data_csv_path).open("r+")
-        fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-            performance_data_csv_path)
-        performance_data_csv.set_value(instance_path, solver_name, cpu_time_penalised)
-        performance_data_csv.dataframe.to_csv(performance_data_csv_path)
-        fo.close()
+        with Path(performance_data_csv_path).open("r+") as fo:
+            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+            performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+            performance_data_csv.set_value(cpu_time_penalised,
+                                           solver_name, instance_path)
+            performance_data_csv.save_csv()
     else:
         if flag_solved:
             print("instance solved by solver " + solver_path)
@@ -164,7 +163,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     instance_file_list = []
 
     for instance in instance_path_list:
-        instance_file_list.append(sfh.get_last_level_directory_name(instance))
+        instance_file_list.append(Path(instance).name)
 
     instance_files_str = " ".join(instance_file_list)
     instance_files_str_ = "_".join(instance_file_list)
@@ -185,18 +184,18 @@ def call_sparkle_portfolio_selector_solve_instance(
         sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
 
     for extractor_path in sgh.extractor_list:
-        print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)} computing "
+        extractor_name = Path(extractor_path).name
+        print(f"Extractor {extractor_name} computing "
               f"features of instance {instance_files_str} ...")
-        result_path = (f"Tmp/{sfh.get_last_level_directory_name(extractor_path)}_"
-                       f"{instance_files_str_}_"
+        result_path = (f"Tmp/{extractor_name}_{instance_files_str_}_"
                        f"{sparkle_basic_help.get_time_pid_random_string()}.rawres")
 
         list_feature_vector = list_feature_vector + get_list_feature_vector(
             extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
-        print(f"Extractor {sfh.get_last_level_directory_name(extractor_path)} computing "
+        print(f"Extractor {extractor_name} computing "
               f"features of instance {instance_files_str} done!")
 
-    print("Sparkle computing features of instance " + instance_files_str + " done!")
+    print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = ("Tmp/predict_schedule_"
                                     f"{sparkle_basic_help.get_time_pid_random_string()}"
@@ -224,12 +223,12 @@ def call_sparkle_portfolio_selector_solve_instance(
     for pred in list_predict_schedule:
         solver_path = pred[0]
         cutoff_time = pred[1]
-        print(f"Calling solver {sfh.get_last_level_directory_name(solver_path)} with "
+        print(f"Calling solver {Path(solver_path).name} with "
               f"time budget {str(cutoff_time)} for solving ...")
         sys.stdout.flush()
         flag_solved = call_solver_solve_instance_within_cutoff(
             solver_path, instance_path, cutoff_time, performance_data_csv_path)
-        print(f"Calling solver {sfh.get_last_level_directory_name(solver_path)} done!")
+        print(f"Calling solver {Path(solver_path).name} done!")
 
         if flag_solved:
             break
@@ -248,57 +247,47 @@ def call_sparkle_portfolio_selector_solve_directory(
         instance_directory_path: The path to the directory of instances.
         run_on: Whether to run with Slurm or Local.
     """
-    if instance_directory_path[-1] != "/":
-        instance_directory_path += "/"
+    instance_directory_path = Path(instance_directory_path)
+    instance_directory_name = instance_directory_path.name
 
-    instance_directory_path_last_level = sfh.get_last_level_directory_name(
-        instance_directory_path)
-
-    if instance_directory_path_last_level[-1] != "/":
-        instance_directory_path_last_level += "/"
-
-    test_case_directory_path = "Test_Cases/" + instance_directory_path_last_level
+    test_case_path = Path("Test_Cases") / instance_directory_name
 
     # Update latest scenario
     sgh.latest_scenario().set_selection_test_case_directory(
-        Path(test_case_directory_path))
+        test_case_path)
     sgh.latest_scenario().set_latest_scenario(Scenario.SELECTION)
     # Write used scenario to file
     sgh.latest_scenario().write_scenario_ini()
+    test_case_tmp_path = test_case_path / "Tmp"
+    test_case_tmp_path.mkdir(parents=True, exist_ok=True)
 
-    Path(test_case_directory_path + "Tmp/").mkdir(parents=True, exist_ok=True)
-
-    test_performance_data_csv_name = "sparkle_performance_data.csv"
-    test_performance_data_csv_path = (
-        test_case_directory_path + test_performance_data_csv_name)
-    spdcsv.SparklePerformanceDataCSV.create_empty_csv(test_performance_data_csv_path)
-    test_performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-        test_performance_data_csv_path)
+    test_performance_data_path = test_case_path / "sparkle_performance_data.csv"
+    test_performance_data_csv = PerformanceDataFrame(test_performance_data_path)
 
     total_job_list = []
 
-    list_all_filename = sih.get_instance_list_from_path(Path(instance_directory_path))
+    list_all_filename = sih.get_instance_list_from_path(instance_directory_path)
 
     for filename in list_all_filename:
-        test_performance_data_csv.add_row(str(filename))
+        test_performance_data_csv.add_instance(str(filename))
         total_job_list.append([str(filename)])
 
     solver_name = "Sparkle_Portfolio_Selector"
     check_selector_status(solver_name)
-    test_performance_data_csv.add_column(solver_name)
+    test_performance_data_csv.add_solver(solver_name)
 
-    test_performance_data_csv.update_csv()
+    test_performance_data_csv.save_csv()
 
     n_jobs = len(total_job_list)
     target_call = "python Commands/sparkle_help/run_sparkle_portfolio_core.py" +\
-                  f" --performance-data-csv {test_performance_data_csv_path}"
+                  f" --performance-data-csv {test_performance_data_path}"
     cmd_list = [f"{target_call} --instance {job_instance[0]}"
                 for job_instance in total_job_list]
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
-        base_dir=f"{test_case_directory_path}/Tmp",
+        base_dir=str(test_case_tmp_path),
         parallel_jobs=n_jobs,
         sbatch_options=ssh.get_slurm_options_list(),
         srun_options=["-N1", "-n1", "--exclusive"])

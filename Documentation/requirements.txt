@@ -4,4 +4,4 @@ Sphinx
 sphinxcontrib-jsmath
 sphinxcontrib-autoprogram
 pandas # Also in environment.yml but needed for readthedocs
-RunRunner==0.1.2
+RunRunner==0.1.3

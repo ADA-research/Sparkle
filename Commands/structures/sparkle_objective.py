@@ -8,7 +8,6 @@ class PerformanceMeasure(Enum):
     ERR = -1
     RUNTIME = 0
     QUALITY_ABSOLUTE = 1
-    QUALITY = 1
     QUALITY_ABSOLUTE_MINIMISATION = 1
     QUALITY_ABSOLUTE_MAXIMISATION = 2
 

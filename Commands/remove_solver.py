@@ -8,7 +8,7 @@ from pathlib import Path
 
 from Commands.sparkle_help import sparkle_file_help as sfh
 from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_performance_data_csv_help as spdcsv
+from Commands.structures.sparkle_performance_dataframe import PerformanceDataFrame
 from Commands.sparkle_help import sparkle_logging as sl
 from Commands.sparkle_help import sparkle_command_help as sch
 from Commands.initialise import check_for_initialise
@@ -18,10 +18,10 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "solver_path",
-        metavar="solver-path",
+        "solver",
+        metavar="solver",
         type=str,
-        help="path to or nickname of the solver",
+        help="name, path to or nickname of the solver",
     )
     parser.add_argument(
         "--nickname",
@@ -40,43 +40,40 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver_path = args.solver_path
+    solver_path = Path(args.solver)
 
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.REMOVE_SOLVER])
 
     if args.nickname:
-        solver_path = sgh.solver_nickname_mapping[args.nickname]
-    if not Path(solver_path).exists():
-        print(f'Solver path "{solver_path}" does not exist!')
+        solver_path = Path(sgh.solver_nickname_mapping[args.nickname])
+    if not solver_path.parent == sgh.solver_dir:
+        # Allow user to only specify solvers in Sparkle solver dir
+        solver_path = sgh.solver_dir / solver_path
+    if not solver_path.exists():
+        print(f'Sparkle Solver path "{solver_path}" does not exist!')
         sys.exit(-1)
 
-    if solver_path[-1] == "/":
-        solver_path = solver_path[:-1]
-
-    print(f"Start removing solver {sfh.get_last_level_directory_name(solver_path)} ...")
+    print(f"Start removing solver {solver_path.name} ...")
 
     if len(sgh.solver_list) > 0:
-        sfh.add_remove_platform_item(solver_path,
+        sfh.add_remove_platform_item(str(solver_path),
                                      sgh.solver_list_path)
 
     solver_nickname_mapping = sgh.solver_nickname_mapping
     if len(solver_nickname_mapping):
         for key in solver_nickname_mapping:
-            if solver_nickname_mapping[key] == solver_path:
+            if solver_nickname_mapping[key] == str(solver_path):
                 output = solver_nickname_mapping.pop(key)
                 break
         sgh.write_data_to_file(sgh.solver_nickname_list_path,
                                sgh.solver_nickname_mapping)
 
     if Path(sgh.performance_data_csv_path).exists():
-        performance_data_csv = spdcsv.SparklePerformanceDataCSV(
-            sgh.performance_data_csv_path
-        )
-        for column_name in performance_data_csv.list_columns():
-            if solver_path == column_name:
-                performance_data_csv.delete_column(column_name)
-        performance_data_csv.update_csv()
+        performance_data = PerformanceDataFrame(sgh.performance_data_csv_path)
+        if solver_path.name in performance_data.dataframe.columns:
+            performance_data.remove_solver(solver_path.name)
+        performance_data.save_csv()
 
     shutil.rmtree(solver_path)
 
@@ -89,4 +86,4 @@ if __name__ == "__main__":
         shutil.rmtree(sgh.sparkle_report_path)
         print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
 
-    print(f"Removing solver {sfh.get_last_level_directory_name(solver_path)} done!")
+    print(f"Removing solver {solver_path.name} done!")
