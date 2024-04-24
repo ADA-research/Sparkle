@@ -7,7 +7,6 @@ import subprocess
 import argparse
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_basic_help
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
@@ -122,7 +121,7 @@ if __name__ == "__main__":
             + "_"
             + Path(model_file).name
             + "_"
-            + sparkle_basic_help.get_time_pid_random_string()
+            + sgh.get_time_pid_random_string()
             + ".rawres"
         )
         command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,
@@ -141,7 +140,7 @@ if __name__ == "__main__":
             + "_"
             + instance_path.name
             + "_"
-            + sparkle_basic_help.get_time_pid_random_string()
+            + sgh.get_time_pid_random_string()
             + ".rawres"
         )
         command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,

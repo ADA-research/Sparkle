@@ -155,7 +155,7 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
     feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
 
     pred_sched_file = ("predict_schedule_"
-                       f"{sbh.get_time_pid_random_string()}.predres")
+                       f"{sgh.get_time_pid_random_string()}.predres")
     log_file = "predict_schedule_autofolio.out"
     err_file = "predict_schedule_autofolio.err"
     predict_schedule_result_file = str(sl.caller_log_dir) + "/" + pred_sched_file
@@ -374,7 +374,7 @@ def compute_actual_selector_marginal_contribution(
         # 1. Create a temporary df file name
         tmp_performance_df_file = (
             f"tmp_performance_data_csv_without_{solver_name}_"
-            f"{sbh.get_time_pid_random_string()}.csv")
+            f"{CLI.sparkle_help.sparkle_global_help.get_time_pid_random_string()}.csv")
         # 2. Create the path using the log dir and the file name
         tmp_performance_df_path = sl.caller_log_dir / tmp_performance_df_file
 
