@@ -12,7 +12,7 @@ from CLI.sparkle_help import sparkle_settings
 from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     check_for_initialise(
         sys.argv,
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
+        ch.COMMAND_DEPENDENCIES[ch.CommandName.COMPUTE_MARGINAL_CONTRIBUTION]
     )
 
     print("[Deprecated] command, functionality is called automatically by other commands"

@@ -13,7 +13,7 @@ from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help.sparkle_settings import SettingState
 from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_CONFIGURED_SOLVER])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file

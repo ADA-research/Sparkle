@@ -14,7 +14,7 @@ from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     check_for_initialise(
         sys.argv,
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
+        ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "settings_file"):

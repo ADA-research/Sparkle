@@ -12,7 +12,7 @@ from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_instances_help as sih
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     instances_path = args.instances_path
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.REMOVE_INSTANCES])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_INSTANCES])
 
     if args.nickname:
         instances_path = "Instances/" + args.nickname
