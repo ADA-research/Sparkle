@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 from pathlib import Path
 
 from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
-from CLI.sparkle_help import sparkle_settings
+from sparkle.platform import settings
 from CLI.sparkle_help import sparkle_global_help as sgh
 
 global settings

@@ -14,15 +14,14 @@ from CLI.support import configure_solver_help as scsh
 from sparkle.instance import instances_help as sih
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.sparkle_help import sparkle_settings
 from sparkle.types.objective import PerformanceMeasure
-from CLI.sparkle_help.sparkle_settings import SettingState
+from sparkle.platform.settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
-from sparkle.platform import file_help as sfh
+from sparkle.platform import file_help as sfh, settings
 from CLI.initialise import check_for_initialise
 
 

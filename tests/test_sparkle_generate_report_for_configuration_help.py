@@ -7,7 +7,7 @@ from pytest_mock import MockFixture
 
 from sparkle.sparkle.platform import generate_report_for_configuration as sgrch
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_settings
+from sparkle.platform import settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 

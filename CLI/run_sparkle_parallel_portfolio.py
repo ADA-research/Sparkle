@@ -10,9 +10,9 @@ from pathlib import Path
 from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.sparkle_help import sparkle_settings
+from sparkle.platform import settings
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
+from sparkle.platform.settings import SettingState, ProcessMonitoring
 from CLI.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help import command_help as sch

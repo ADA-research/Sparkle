@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 from CLI.support import configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_settings
+from sparkle.platform import settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 
