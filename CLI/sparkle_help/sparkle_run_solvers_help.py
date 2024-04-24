@@ -16,7 +16,7 @@ from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_job_help as sjh
 from sparkle.types.sparkle_objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SolutionVerifier
-from CLI.sparkle_help import sparkle_sat_solver_help as sssh
+from sparkle.solver import SAT_help as sssh
 
 import functools
 print = functools.partial(print, flush=True)

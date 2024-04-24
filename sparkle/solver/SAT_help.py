@@ -1,5 +1,5 @@
 """Methods related to SAT specific runs."""
-#Team1
+
 from pathlib import Path
 import subprocess
 import fcntl
