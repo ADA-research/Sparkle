@@ -62,7 +62,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_count_instances = mocker.patch("sparkle.instance.instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("sparkle.instance.instances_help."
+    mock_list_filename = mocker.patch("sparkle.platform.file_help."
                                       "get_list_all_filename_recursive",
                                       return_value=[Path("instance-1"),
                                                     Path("instance-2")])
@@ -86,8 +86,7 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     """
     results_file = "example_file"
     cutoff = 42
-    mock_get_list = mocker.patch("CLI.generate_"
-                                 "report_for_configuration_help."
+    mock_get_list = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                  "get_instance_performance_from_csv",
                                  return_value=[("one", 10), ("two", 5)])
 
