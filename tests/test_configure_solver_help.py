@@ -13,7 +13,6 @@ global settings
 sgh.settings = settings_help.Settings()
 
 
-
 @patch("pathlib.Path.is_dir")
 def test_check_configuration_exists_true(mock_is_dir: Mock) -> None:
     """Test whether True is returned when the configuration directory exists."""

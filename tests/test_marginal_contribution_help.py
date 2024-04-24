@@ -16,7 +16,6 @@ global settings
 sgh.settings = settings_help.Settings()
 
 
-
 class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
     def test_read_marginal_contribution_csv(self: TestCase) -> None:
