@@ -21,8 +21,7 @@ from CLI.help.status_info import SolverRunStatusInfo
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    settings_dir = Path("Settings")
-    file_path_latest = PurePath(settings_dir / "latest.ini")
+    file_path_latest = Path("Settings/latest.ini")
     sgh.settings = sparkle_settings.Settings(file_path_latest)
     perf_measure = sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
