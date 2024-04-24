@@ -11,6 +11,7 @@ import runrunner as rrr
 
 import global_variables as sgh
 from CLI.support import configure_solver_help as scsh
+from sparkle.solver import pcs
 from sparkle.instance import instances_help as sih
 from sparkle.platform import slurm_help as ssh
 import sparkle_logging as sl
@@ -138,8 +139,8 @@ if __name__ == "__main__":
     optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
         solver.name, instance_set_test.name)
     scsh.write_configuration_str(optimised_configuration_str)
-    scsh.write_configuration_pcs(solver.name, optimised_configuration_str,
-                                 Path(sgh.sparkle_tmp_path))
+    pcs.write_configuration_pcs(solver.name, optimised_configuration_str,
+                                Path(sgh.sparkle_tmp_path))
 
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name
