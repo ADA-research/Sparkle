@@ -12,12 +12,12 @@
 #SBATCH --nodes=1
 
 # Initialise
-Commands/initialise.py > /dev/null
+CLI/initialise.py > /dev/null
 
 # Save snapshot
 output_true_partA="Snapshot file Snapshots/My_Snapshot"
 output_true_partB=".zip saved successfully!"
-output="$(Commands/save_snapshot.py | tail -1)"
+output="$(CLI/save_snapshot.py | tail -1)"
 
 if [[ $output =~ $output_true_partA[a-z0-9:._-]+$output_true_partB ]];
 then
