@@ -69,10 +69,10 @@ mkdir -p $instances_config_dir_test
 cp $config_scenario_test $config_scenario_path
 
 # Test generate report for configuration with both train and test sets
-output_true="Generating report for configuration done!"
+output_true="Report is placed at:"
 output=$(CLI/generate_report.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path | tail -1)
 
-if [[ $output == $output_true ]];
+if [[ $output == $output_true* ]];
 then
 	echo "[success] generate_report_for_configuration with both train and test sets test succeeded"
 else              
@@ -83,7 +83,7 @@ fi
 # Test generate report for configuration with just training set
 output=$(CLI/generate_report.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path | tail -1)
 
-if [[ $output == $output_true ]];
+if [[ $output == $output_true* ]];
 then
 	echo "[success] generate_report_for_configuration with just training set test succeeded"
 else
