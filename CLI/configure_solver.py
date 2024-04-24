@@ -155,7 +155,7 @@ def run_after(solver: Path,
     if command == CommandName.RUN_ABLATION:
         cmd_file = "run_ablation.py"
 
-    command_line = f"./Commands/{cmd_file} --settings-file Settings/latest.ini "\
+    command_line = f"./CLI/{cmd_file} --settings-file Settings/latest.ini "\
                    f"--solver {solver.name} --instance-set-train {instance_set_train}"\
                    f" --run-on {run_on}"
     if instance_set_test is not None:
