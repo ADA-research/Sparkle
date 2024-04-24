@@ -11,12 +11,12 @@ from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
-from CLI.support import sparkle_compute_marginal_contribution_help as scmch
+from CLI.support import compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_job_help as sjh
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
-from CLI.sparkle_help import argparse_custom as ac
+from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise

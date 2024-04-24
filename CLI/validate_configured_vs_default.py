@@ -16,7 +16,7 @@ from sparkle.platform import slurm_help as ssh
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
-from CLI.sparkle_help import argparse_custom as ac
+from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from CLI.help.command_help import CommandName
