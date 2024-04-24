@@ -114,8 +114,8 @@ def run_solvers_on_instances(
     # Update performance data csv after the last job is done
     runs.append(rrr.add_to_queue(
         runner=run_on,
-        cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-        name=CommandName.SPARKLE_CSV_MERGE,
+        cmd="sparkle/structures/csv_merge.py",
+        name=CommandName.CSV_MERGE,
         dependencies=runs[-1],
         base_dir=sgh.sparkle_tmp_path,
         sbatch_options=sbatch_user_options))

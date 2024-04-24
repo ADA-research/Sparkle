@@ -71,8 +71,8 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
     # Update performance data csv after the last job is done
     runs.append(rrr.add_to_queue(
         runner=run_on,
-        cmd="Commands/sparkle_help/sparkle_csv_merge_help.py",
-        name=CommandName.SPARKLE_CSV_MERGE,
+        cmd="sparkle/structures/csv_merge.py",
+        name=CommandName.CSV_MERGE,
         dependencies=runs[-1],
         base_dir=sgh.sparkle_tmp_path,
         sbatch_options=ssh.get_slurm_options_list()))
