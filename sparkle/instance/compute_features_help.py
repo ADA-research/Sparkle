@@ -8,7 +8,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.platform import slurm_help as ssh
 from CLI.sparkle_help import sparkle_job_help as sjh
@@ -49,8 +49,8 @@ def generate_missing_value_csv_like_feature_data_csv(
     # Add missing values based on the number of features this extractor computes.
     # WARNING: This currently does not correctly handle which columns should be set in
     # case of multiple feature extractors.
-    length = int(sgh.extractor_feature_vector_size_mapping[str(extractor_path)])
-    value_list = [sgh.sparkle_missing_value] * length
+    length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
+    value_list = [gv.sparkle_missing_value] * length
 
     zero_value_csv.add_row(instance_path, value_list)
 
@@ -69,13 +69,13 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
     list_feature_computation_job = get_feature_computation_job_list(
         feature_data_csv, recompute)
 
-    runsolver_path = sgh.runsolver_path
+    runsolver_path = gv.runsolver_path
 
-    if len(sgh.extractor_list) == 0:
-        cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
+    if len(gv.extractor_list) == 0:
+        cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
     else:
         cutoff_time_each_extractor_run = (
-            sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
+            gv.settings.get_general_extractor_cutoff_time() / len(gv.extractor_list))
 
     cutoff_time_each_run_option = f"--cpu-limit {str(cutoff_time_each_extractor_run)}"
     print("Cutoff time for each run on computing features is set to "
@@ -102,10 +102,10 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
 
         for extractor_str in extractor_list:
             extractor_path = Path(extractor_str)
-            basic_part = (f"{sgh.sparkle_tmp_path}/"
+            basic_part = (f"{gv.sparkle_tmp_path}/"
                           f"{extractor_path.name}_"
                           f"{instance_path.name}_"
-                          f"{sgh.get_time_pid_random_string()}")
+                          f"{gv.get_time_pid_random_string()}")
             result_path = f"{basic_part}.rawres"
             err_path = f"{basic_part}.err"
             runsolver_watch_data_path = f"{basic_part}.log"
@@ -116,7 +116,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
                             f"{runsolver_watch_data_path_option} "
                             f"{runsolver_value_data_path_option} {extractor_path}/"
-                            f"{sgh.sparkle_run_default_wrapper} {extractor_path}/ "
+                            f"{gv.sparkle_run_default_wrapper} {extractor_path}/ "
                             f"{instance_path} {result_path} 2> {err_path}")
 
             print(f"Extractor {extractor_path.name} computing feature vector of instance"
@@ -208,7 +208,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
         print("Running the solvers through Slurm")
 
     # Generate the sbatch script
-    parallel_jobs = min(n_jobs, sgh.settings.get_slurm_number_of_runs_in_parallel())
+    parallel_jobs = min(n_jobs, gv.settings.get_slurm_number_of_runs_in_parallel())
     cmd_list = [f"CLI/core/compute_features.py --instance {inst_path} "
                 f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
                 for inst_path, ex_path in total_job_list]
@@ -219,7 +219,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
         cmd=cmd_list,
         name=CommandName.COMPUTE_FEATURES,
         parallel_jobs=parallel_jobs,
-        base_dir=sgh.sparkle_tmp_path,
+        base_dir=gv.sparkle_tmp_path,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
@@ -258,7 +258,7 @@ def update_feature_data_id() -> None:
     # Get the incremented fd_id
     fd_id = get_feature_data_id() + 1
     # Write it
-    with Path(sgh.feature_data_id_path).open("w") as fd_id_file:
+    with Path(gv.feature_data_id_path).open("w") as fd_id_file:
         fd_id_file.write(str(fd_id))
 
 
@@ -268,7 +268,7 @@ def get_feature_data_id() -> int:
     Returns:
         An int containing the current feature data ID.
     """
-    fd_id_path = Path(sgh.feature_data_id_path)
+    fd_id_path = Path(gv.feature_data_id_path)
     if not fd_id_path.exists():
         return 0
     return int(Path(fd_id_path).open("r").readline())

@@ -35,10 +35,10 @@ def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> N
 
     Check that number of instances is retrieved from reference list when it exists.
     """
-    mock_check_existence = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
+    mock_check_existence = mocker.patch("sparkle.instance.instances_help."
                                         "check_existence_of_reference_instance_list",
                                         return_value=True)
-    mock_count_instances = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
+    mock_count_instances = mocker.patch("sparkle.instance.instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
     instance_set_name = "test-instance"
@@ -56,13 +56,13 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     Check that number of instances is retrieved by counting all files in instance
     directory when no reference list exists.
     """
-    mock_check_existence = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
+    mock_check_existence = mocker.patch("sparkle.instance.instances_help."
                                         "check_existence_of_reference_instance_list",
                                         return_value=False)
-    mock_count_instances = mocker.patch("Commands.sparkle_help.sparkle_instances_help."
+    mock_count_instances = mocker.patch("sparkle.instance.instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("Commands.sparkle_help.sparkle_file_help."
+    mock_list_filename = mocker.patch("sparkle.instance.instances_help."
                                       "get_list_all_filename_recursive",
                                       return_value=[Path("instance-1"),
                                                     Path("instance-2")])
