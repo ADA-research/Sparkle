@@ -4,7 +4,7 @@
 import sys
 import argparse
 
-from CLI.sparkle_help import sparkle_run_status_help
+from sparkle.sparkle.platform import run_status_help
 from CLI.sparkle_help import sparkle_logging as sl
 
 
@@ -35,9 +35,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Reporting current running status of Sparkle ...")
-    sparkle_run_status_help.print_running_solver_jobs()
-    sparkle_run_status_help.print_running_configuration_jobs()
-    sparkle_run_status_help.print_running_parallel_portfolio_construction_jobs()
-    sparkle_run_status_help.print_running_portfolio_selector_construction_jobs()
-    sparkle_run_status_help.print_running_generate_report_jobs()
+    run_status_help.print_running_solver_jobs()
+    run_status_help.print_running_configuration_jobs()
+    run_status_help.print_running_parallel_portfolio_construction_jobs()
+    run_status_help.print_running_portfolio_selector_construction_jobs()
+    run_status_help.print_running_generate_report_jobs()
     print("Current running status of Sparkle reported!")
