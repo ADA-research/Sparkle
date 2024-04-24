@@ -15,7 +15,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import sparkle_job_help as sjh
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
-from sparkle.sparkle.solver import sat_help as sssh
+from sparkle.solver import sat_help as sssh
 
 
 def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
