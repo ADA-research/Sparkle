@@ -6,7 +6,7 @@ import shutil
 
 from unittest import TestCase
 from pathlib import Path
-from Commands.structures.solver import Solver
+from sparkle.solver.solver import Solver
 from unittest.mock import patch
 from unittest.mock import Mock
 

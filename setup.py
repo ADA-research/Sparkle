@@ -1,8 +1,10 @@
 """Setup file for Sparkle."""
 from setuptools import setup, find_packages
 
-from Commands.sparkle_help.sparkle_global_help import sparkle_version
+from global_variables import sparkle_version
 
 setup(name="sparkle",
       version=sparkle_version,
-      packages=find_packages())
+      packages=find_packages(),
+      entry_points={"console_scripts": ["sparkle=sparkle.cli:main"], },
+      )
