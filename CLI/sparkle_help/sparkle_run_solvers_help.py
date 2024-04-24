@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to run solvers."""
-#Team2
 import os
 import subprocess
 import sys
@@ -12,14 +11,14 @@ from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
-from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_job_help as sjh
-from sparkle.types.sparkle_objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
 from sparkle.solver import SAT_help as sssh
 
-import functools
-print = functools.partial(print, flush=True)
+#import functools
+#print = functools.partial(print, flush=True)
 
 
 def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
@@ -28,7 +27,6 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
     if seed_str is None:
         seed_str = str(sgh.get_seed())
 
-    cmd_solver_call = ""
     cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
     cmd_get_solver_call = (f'{solver_wrapper_path} --print-command "{instance_path}"'
                            f" --seed {seed_str} --cutoff-time {cutoff_time_str}")
@@ -36,14 +34,12 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
     solver_call_result = solver_call_rawresult.readlines()[0].strip()
 
     if len(solver_call_result) > 0:
-        cmd_solver_call = solver_call_result
+        return solver_call_result
     else:
         # TODO: Add instructions for the user that might fix the issue?
-        print('ERROR: Failed to get valid solver call command from wrapper at "'
-              f'{solver_wrapper_path}" stopping execution!')
+        print("ERROR: Failed to get valid solver call command from wrapper at "
+              f'"{solver_wrapper_path}" stopping execution!')
         sys.exit(-1)
-
-    return cmd_solver_call
 
 
 def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
@@ -63,8 +59,6 @@ def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
     run_solver_on_instance_with_cmd(Path(solver_path), cmd_solver_call,
                                     Path(raw_result_path),
                                     Path(runsolver_values_path), custom_cutoff)
-
-    return
 
 
 def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
@@ -105,7 +99,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
     if process.returncode != 0:
         print("WARNING: Solver execution seems to have failed!\n"
-              f"The used command was: {cmd}")
+              f"The used command was: {cmd}", flush = True)
     else:
         # Clean up on success
         if is_configured:
@@ -188,11 +182,11 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
             performance_data.get_list_remaining_performance_computation_job())
 
     print("The cutoff time per algorithm run to solve an instance is set to "
-          f"{cutoff_time_str} seconds")
+          f"{cutoff_time_str} seconds", flush = True)
 
     total_job_num = sjh.get_num_of_total_job_from_list(list_performance_computation_job)
     current_job_num = 1
-    print("The total number of jobs to run is: " + str(total_job_num))
+    print("The total number of jobs to run is: " + str(total_job_num), flush = True)
 
     # If there are no jobs, stop
     if total_job_num < 1:
@@ -239,19 +233,19 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
                 # TODO: Handle the multi-objective case for quality
                 performance_data.set_value(quality[0], solver_path, instance_path)
                 print(f"Running Result: Status: {status}, Quality{penalised_str}: "
-                      f"{str(quality[0])}")
+                      f"{str(quality[0])}", flush = True)
             else:
                 performance_data.set_value(cpu_time_penalised, solver_path,
                                            instance_path)
                 print(f"Running Result: Status {status}, Runtime{penalised_str}: "
-                      f"{str(cpu_time_penalised)}")
+                      f"{str(cpu_time_penalised)}", flush = True)
 
             print(f"Executing Progress: {str(current_job_num)} out of "
-                  f"{str(total_job_num)}")
+                  f"{str(total_job_num)}", flush = True)
             current_job_num += 1
 
     performance_data.save_csv()
-    print(f"Performance data file {performance_data_csv_path} has been updated!")
+    print(f"Performance data file {performance_data_csv_path} has been updated!", flush = True)
 
 
 def handle_timeouts(runtime: float, status: str,
@@ -276,11 +270,9 @@ def verify(instance_path: str, raw_result_path: str, solver_path: str, status: s
         -> str:
     """Run a solution verifier on the solution and update the status if needed."""
     verifier = sgh.settings.get_general_solution_verifier()
-
     # Use verifier if one is given and the solver did not time out
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
-        status = sssh.sat_verify(instance_path, raw_result_path, solver_path)
-
+        return sssh.sat_verify(instance_path, raw_result_path, solver_path)
     return status
 
 
@@ -300,7 +292,7 @@ def process_results(
     if len(result_lines) <= 0:
         # TODO: Add instructions for the user that might fix the issue?
         print(f'ERROR: Failed to get output from wrapper at "{solver_wrapper_path}" '
-              "stopping execution!")
+              "stopping execution!", flush = True)
         sys.exit(-1)
 
     # Check if Sparkle should use it's own parser
@@ -320,7 +312,7 @@ def process_results(
             print(f"Possible internal parsers: {parser_list}")
             print("If your problem domain is not in the list, please parse the output in"
                   " the wrapper.")
-            print("Stopping execution!")
+            print("Stopping execution!", flush = True)
             sys.exit(-1)
     else:
         # Read output
@@ -335,7 +327,7 @@ def process_results(
             if len(parts) <= 1:
                 print(f'Warning: The line "{line.strip()}" contains no result '
                       "information or is not formatted correctly: "
-                      "<quality/status/runtime> VALUE")
+                      "<quality/status/runtime> VALUE", flush = True)
             if parts[0].lower() == "quality":
                 quality = get_quality_from_wrapper(parts)
             elif parts[0].lower() == "status":
@@ -352,13 +344,8 @@ def process_results(
 # quality objectives are used, optional otherwise]
 def get_quality_from_wrapper(result_list: list[str]) -> list[float]:
     """Return a list based on the quality performances returned from by the wrapper."""
-    quality = []
-    start_index = 1  # 0 is the keyword 'quality'
-
-    for i in range(start_index, len(result_list)):
-        quality.append(float(result_list[i]))
-
-    return quality
+    # 0 is the keyword 'quality'
+    return [float(result_list[i]) for i in range(1, len(result_list))]
 
 
 # NOTE: This should be an ENUM, but its hard coded in many places of Sparkle
@@ -383,7 +370,7 @@ def get_status_from_wrapper(result: str) -> str:
         status = "UNKNOWN"
     else:
         print(f'ERROR: Invalid status "{result}" given, possible statuses are: '
-              f"{status_list}\nStopping execution!")
+              f"{status_list}\nStopping execution!", flush = True)
         sys.exit(-1)
 
     return status
@@ -418,7 +405,7 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     instance_name = Path(instance_path).name
     print(f"Warning: Solver {solver_name} reports the wrong answer "
           f"on instance {instance_name}!\n"
-          f"Warning: Solver {solver_name} will be removed!")
+          f"Warning: Solver {solver_name} will be removed!", flush = True)
 
     # TODO: Fix solver removal from performanc data CSV file
     # performance_data_csv.remove_solver(solver_path)
@@ -430,8 +417,8 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
                                  key=solver_path,
                                  remove=True)
 
-    print(f"Solver {solver_name} is a wrong solver")
-    print(f"Solver {solver_name} running on instance {instance_name} ignored!")
+    print(f"Solver {solver_name} is a wrong solver, running on instance {instance_name} "
+          " ignored!", flush = True)
 
 
 def update_performance_data_id() -> None:
