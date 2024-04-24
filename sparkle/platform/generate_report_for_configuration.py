@@ -9,9 +9,9 @@ from pathlib import Path
 
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.support import sparkle_configure_solver_help as scsh
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_instances_help as sih
+from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from CLI.sparkle_help import sparkle_run_ablation_help as sah
 from sparkle.platform.generate_report_help import generate_comparison_plot

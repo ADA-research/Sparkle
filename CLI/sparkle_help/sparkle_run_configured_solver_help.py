@@ -16,7 +16,7 @@ from CLI.sparkle_help import sparkle_run_solvers_help as srsh
 from CLI.help.command_help import CommandName
 from CLI.support import sparkle_configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_slurm_help as ssh
-from CLI.sparkle_help import sparkle_instances_help as sih
+from sparkle.instance import instances_help as sih
 
 
 def call_configured_solver(instance_path_list: list[Path],

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for file manipulation."""
-#Team1
+
 from __future__ import annotations
 
 import os
@@ -231,7 +231,7 @@ def remove_temporary_files() -> None:
     shutil.rmtree(sgh.pap_performance_data_tmp_path, ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)
 
-    for filename in Path(".").glob("slurm-*"):
+    for filename in Path("../../CLI/sparkle_help").glob("slurm-*"):
         shutil.rmtree(filename)
 
     shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),

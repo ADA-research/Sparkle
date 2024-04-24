@@ -7,15 +7,15 @@ from pathlib import Path
 import shutil
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_file_help as sfh
-from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.platform import file_help as sfh
+from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.sparkle.instance import compute_features_help as scf
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from CLI.sparkle_help import sparkle_instances_help as sih
+from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 

@@ -7,9 +7,8 @@ import sys
 from pathlib import Path
 import zipfile
 
-from CLI.sparkle_help import sparkle_basic_help as sbh
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 
 snapshot_log_file_path = sgh.sparkle_err_path
 

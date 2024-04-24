@@ -10,7 +10,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio construction."""
-#Team2
 import shutil
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 
 
 def add_solvers(sparkle_parallel_portfolio_path: Path, solver_list: list[str]) -> bool:

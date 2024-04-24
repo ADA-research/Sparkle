@@ -6,7 +6,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_logging as sl

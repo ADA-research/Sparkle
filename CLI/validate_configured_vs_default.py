@@ -11,7 +11,7 @@ import runrunner as rrr
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.support import sparkle_configure_solver_help as scsh
-from CLI.sparkle_help import sparkle_instances_help as sih
+from sparkle.instance import instances_help as sih
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
@@ -22,7 +22,7 @@ from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.initialise import check_for_initialise
 
 

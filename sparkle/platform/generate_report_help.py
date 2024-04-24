@@ -11,9 +11,9 @@ from collections import Counter
 import subprocess
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.support import sparkle_compute_marginal_contribution_help as scmch
+from CLI.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_tex_help as stex
 from sparkle.types.objective import PerformanceMeasure

@@ -8,8 +8,7 @@ import shutil
 from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_basic_help as sbh
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help import sparkle_settings

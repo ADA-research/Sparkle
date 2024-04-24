@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Callable
 from statistics import mean
 
-from sparkle.platform import file_help as sfh
+from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame

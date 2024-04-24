@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.support import sparkle_compute_marginal_contribution_help as scmch
+from CLI.support import compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
 from sparkle.types.objective import PerformanceMeasure

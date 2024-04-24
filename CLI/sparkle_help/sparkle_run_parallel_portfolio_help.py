@@ -17,7 +17,7 @@ from pathlib import PurePath
 import runrunner as rrr
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_slurm_help as ssh

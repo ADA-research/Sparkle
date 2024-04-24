@@ -5,8 +5,7 @@ import subprocess
 import fcntl
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_file_help as sfh
-from CLI.sparkle_help import sparkle_basic_help as sbh
+from sparkle.platform import file_help as sfh
 
 
 def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:
