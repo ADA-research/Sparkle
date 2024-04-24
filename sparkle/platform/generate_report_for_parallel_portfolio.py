@@ -5,9 +5,9 @@ from pathlib import Path
 
 import global_variables as sgh
 from sparkle.platform import file_help as sfh
-from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.sparkle.platform import generate_report_help as sgrh
-from sparkle.types.sparkle_objective import PerformanceMeasure
+import sparkle_logging as sl
+from sparkle.platform import generate_report_help as sgrh
+from sparkle.types.objective import PerformanceMeasure
 
 
 def get_solver_list_latex(solver_list: list[str]) -> str:

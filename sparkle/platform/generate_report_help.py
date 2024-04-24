@@ -13,7 +13,7 @@ import global_variables as sgh
 from sparkle.platform import file_help as sfh, tex_help as stex
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 
 

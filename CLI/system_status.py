@@ -6,7 +6,7 @@ import argparse
 
 import global_variables as sgh
 from sparkle.platform import system_status as sssh
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 
 
 def parser_function() -> argparse.ArgumentParser:

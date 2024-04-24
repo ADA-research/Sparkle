@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     """Return the name of the PCS file in a solver directory.

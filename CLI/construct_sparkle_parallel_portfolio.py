@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 
 from CLI.help.status_info import ConstructParallelPortfolioStatusInfo
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 import global_variables as sgh
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState

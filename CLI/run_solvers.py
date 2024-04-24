@@ -12,7 +12,7 @@ import global_variables as sgh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.platform import slurm_help as ssh
 from CLI.support import run_solvers_parallel_help as srsph
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier

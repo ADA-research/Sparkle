@@ -13,7 +13,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.instance import compute_features_help as scf
 from CLI.support import run_solvers_help as srs
 from CLI.support import run_solvers_parallel_help as srsp
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise

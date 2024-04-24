@@ -13,7 +13,7 @@ import global_variables as sgh
 from CLI.support import configure_solver_help as scsh
 from sparkle.instance import instances_help as sih
 from sparkle.platform import slurm_help as ssh
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac

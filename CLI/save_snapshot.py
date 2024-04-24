@@ -5,7 +5,7 @@ import sys
 import argparse
 
 from sparkle.platform import snapshot_help
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 
 
 def parser_function() -> argparse.ArgumentParser:

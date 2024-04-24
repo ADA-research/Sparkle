@@ -6,7 +6,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from CLI.support import configure_solver_help as scsh
 from sparkle.platform import file_help as sfh
 import global_variables as sgh

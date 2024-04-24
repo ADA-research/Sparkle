@@ -10,7 +10,7 @@ import runrunner as rrr
 
 import global_variables as sgh
 from sparkle.instance import compute_features_help as scf
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac

@@ -13,7 +13,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_job_help as sjh
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac

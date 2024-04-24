@@ -8,7 +8,7 @@ from pathlib import Path
 from runrunner.base import Runner
 
 import global_variables as sgh
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
 from sparkle.types.objective import PerformanceMeasure

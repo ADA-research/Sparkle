@@ -12,7 +12,7 @@ import random
 import fcntl
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 import global_variables as sgh
 from sparkle.platform import snapshot_help as snh
 from sparkle.structures import csv_help as scsv

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.platform import settings_help
 import global_variables as sgh
 from sparkle.platform.settings_help import SettingState, ProcessMonitoring

@@ -13,7 +13,7 @@ import runrunner as rrr
 
 from CLI.help.status_info import ConfigureSolverStatusInfo
 import global_variables as sgh
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.configurator import ablation as sah
 from sparkle.types.objective import PerformanceMeasure

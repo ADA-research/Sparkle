@@ -9,7 +9,7 @@ from typing import Callable
 import builtins
 import statistics
 
-from CLI.sparkle_help import sparkle_logging as slog
+import sparkle_logging as slog
 import global_variables as sgh
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator

@@ -16,7 +16,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 from CLI.support import run_solvers_parallel_help as srsp
 from sparkle.solver import add as sash
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from CLI.help.command_help import CommandName
 from CLI.sparkle_help import sparkle_command_help as sch
 from sparkle.platform import slurm_help as ssh

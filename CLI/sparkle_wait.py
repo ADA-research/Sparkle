@@ -4,7 +4,7 @@
 import sys
 import argparse
 
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_job_help as sjh
 from CLI.help.command_help import CommandName
 

@@ -2,7 +2,7 @@
 
 from pathlib import Path, PurePath
 
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 import global_variables as sgh
 
 

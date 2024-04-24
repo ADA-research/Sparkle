@@ -8,7 +8,7 @@ import shutil
 from enum import Enum
 
 import global_variables as sgh
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.solver.solver import Solver
 from sparkle.solver import pcs

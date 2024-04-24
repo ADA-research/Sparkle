@@ -16,7 +16,7 @@ from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import run_portfolio_selector_help as srps
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 

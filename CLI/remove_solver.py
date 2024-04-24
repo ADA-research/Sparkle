@@ -9,7 +9,7 @@ from pathlib import Path
 from sparkle.platform import file_help as sfh
 import global_variables as sgh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.sparkle_help import sparkle_logging as sl
+import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
