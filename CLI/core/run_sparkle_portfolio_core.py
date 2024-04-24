@@ -8,7 +8,7 @@ from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
-from CLI.sparkle_help import sparkle_run_portfolio_selector_help as srpsh
+from CLI.support import run_portfolio_selector_help as srpsh
 
 
 if __name__ == "__main__":
