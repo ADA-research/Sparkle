@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for portfolio selector construction."""
-#Team2
 import subprocess
 import sys
 import shutil
@@ -9,12 +8,12 @@ from pathlib import Path, PurePath
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
-from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle import sparkle_performance_dataframe as spfcsv
 from CLI.sparkle_help import sparkle_run_solvers_help as srsh
-from sparkle.sparkle.instance import compute_features_help as scfh
+from sparkle.instance import compute_features_help as scfh
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.types.sparkle_objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
@@ -26,17 +25,13 @@ def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:
     Returns:
         True if neither performance data id and feature data id remain the same.
     """
-    unchanged = False
     pd_id = srsh.get_performance_data_id()
     fd_id = scfh.get_feature_data_id()
     selector_dir = sparkle_portfolio_selector_path.parent
     selector_pd_id = get_selector_pd_id(selector_dir)
     selector_fd_id = get_selector_fd_id(selector_dir)
 
-    if pd_id == selector_pd_id and fd_id == selector_fd_id:
-        unchanged = True
-
-    return unchanged
+    return pd_id == selector_pd_id and fd_id == selector_fd_id
 
 
 def write_selector_pd_id(sparkle_portfolio_selector_path: Path) -> None:
@@ -68,7 +63,6 @@ def get_selector_pd_id(selector_dir: PurePath) -> int:
     Returns:
         Selector performance data ID, -1 if no file with a saved ID is found.
     """
-    pd_id = -1
     pd_id_path = Path(selector_dir / "pd.id")
 
     try:
@@ -109,7 +103,6 @@ def get_selector_fd_id(selector_dir: PurePath) -> int:
     Returns:
         Selector feature data ID, -1 if no file with a saved ID is found.
     """
-    fd_id = -1
     fd_id_path = Path(selector_dir / "fd.id")
 
     try:
@@ -119,11 +112,6 @@ def get_selector_fd_id(selector_dir: PurePath) -> int:
         fd_id = -1
 
     return fd_id
-
-
-def selector_exists(sparkle_portfolio_selector_path: Path) -> bool:
-    """Return whether a Sparkle portfolio selector exists or not."""
-    return sparkle_portfolio_selector_path.is_file()
 
 
 def construct_sparkle_portfolio_selector(selector_path: Path,
@@ -144,8 +132,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     """
     # If the selector exists and the data didn't change, do nothing;
     # unless the recompute flag is set
-    if (selector_exists(selector_path) and data_unchanged(selector_path)
-       and not flag_recompute):
+    if selector_path.exists() and data_unchanged(selector_path) and not flag_recompute:
         print("Portfolio selector already exists for the current feature and performance"
               " data.")
 

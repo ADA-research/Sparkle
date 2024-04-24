@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a configured solver."""
-#Team2
 from __future__ import annotations
 
 import sys
@@ -14,8 +13,8 @@ from runrunner.base import Runner
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_run_solvers_help as srsh
 from CLI.help.command_help import CommandName
-from CLI.support import sparkle_configure_solver_help as scsh
-from sparkle.sparkle.platform import slurm_help as ssh
+from CLI.support import configure_solver_help as scsh
+from CLI.sparkle_help import sparkle_slurm_help as ssh
 from sparkle.instance import instances_help as sih
 
 
