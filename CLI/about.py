@@ -14,6 +14,7 @@ if __name__ == "__main__":
         f"Sparkle ({sparkle.about.description})",
         f"Version: {sparkle.about.version}",
         f"Licence: {sparkle.about.licence}",
-        f'Written by {", ".join(sparkle.about.authors[:-1])}, and {sparkle.about.authors[-1]}',
+        f'Written by {", ".join(sparkle.about.authors[:-1])},\
+            and {sparkle.about.authors[-1]}',
         f"Contact: {sparkle.about.contact}",
         "For more details see README.md"]))

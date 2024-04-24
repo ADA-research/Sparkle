@@ -89,7 +89,6 @@ if __name__ == "__main__":
     global settings
     sgh.settings = settings_help.Settings()
 
-
     # Log command call
     sl.log_command(sys.argv)
 
@@ -139,7 +138,8 @@ if __name__ == "__main__":
     optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
         solver.name, instance_set_test.name)
     scsh.write_configuration_str(optimised_configuration_str)
-    scsh.write_configuration_pcs(solver.name, optimised_configuration_str, Path(sgh.sparkle_tmp_path))
+    scsh.write_configuration_pcs(solver.name, optimised_configuration_str,
+                                 Path(sgh.sparkle_tmp_path))
 
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name

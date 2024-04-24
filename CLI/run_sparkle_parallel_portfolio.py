@@ -93,7 +93,6 @@ if __name__ == "__main__":
     # Initialise settings
     sgh.settings = settings_help.Settings()
 
-
     # Log command call
     sl.log_command(sys.argv)
 
