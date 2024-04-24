@@ -9,7 +9,7 @@ import sys
 import runrunner as rrr
 from runrunner import Runner
 
-from CLI.structures.configuration_scenario import ConfigurationScenario
+from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help.sparkle_command_help import CommandName

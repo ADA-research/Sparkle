@@ -22,8 +22,8 @@ from CLI.structures.reporting_scenario import Scenario
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help import sparkle_command_help as sch
-from CLI.structures.configurator import Configurator
-from CLI.structures.configuration_scenario import ConfigurationScenario
+from sparkle.configurator.configurator import Configurator
+from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.structures.solver import Solver
 from CLI.sparkle_help.sparkle_command_help import CommandName
 from CLI.initialise import check_for_initialise

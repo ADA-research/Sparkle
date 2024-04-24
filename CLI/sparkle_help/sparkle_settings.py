@@ -12,7 +12,7 @@ import statistics
 from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.structures.sparkle_objective import SparkleObjective
-from CLI.structures.configurator import Configurator
+from sparkle.configurator.configurator import Configurator
 
 
 class SolutionVerifier(Enum):

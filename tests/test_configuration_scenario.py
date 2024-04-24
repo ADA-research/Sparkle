@@ -9,7 +9,7 @@ from unittest.mock import patch
 from unittest.mock import Mock
 from pathlib import Path
 
-from CLI.structures.configuration_scenario import ConfigurationScenario
+from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.structures.solver import Solver
 from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help import sparkle_global_help as sgh
