@@ -14,7 +14,6 @@ global settings
 sgh.settings = settings_help.Settings()
 
 
-
 class TestPerformanceData(TestCase):
     """Class for testing performance data object."""
 
