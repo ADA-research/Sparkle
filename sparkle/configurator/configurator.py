@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Configurator class to use different configurators like SMAC."""
-#MOVE TO sparkle.configurator
+
 from __future__ import annotations
 from pathlib import Path
 import sys
