@@ -1,5 +1,5 @@
 """Classes and Enums to control settings."""
-#Team1
+
 from __future__ import annotations
 import configparser
 from enum import Enum
@@ -11,7 +11,7 @@ import statistics
 
 from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.types.sparkle_objective import SparkleObjective
+from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 
 
@@ -314,7 +314,8 @@ class Settings:
 
         return
 
-    def __check_setting_state(self: Settings, current_state: SettingState,
+    @staticmethod
+    def __check_setting_state(current_state: SettingState,
                               new_state: SettingState, name: str) -> bool:
         change_setting_ok = True
 
@@ -337,7 +338,7 @@ class Settings:
     # General settings ###
     def set_general_sparkle_objectives(
             self: Settings,
-            value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective],
+            value: list[SparkleObjective] = [DEFAULT_general_sparkle_objective, ],
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the sparkle objective."""
         section = "general"

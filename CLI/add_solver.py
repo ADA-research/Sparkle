@@ -10,14 +10,13 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from sparkle.platform import file_help as sfh
+from sparkle.platform import file_help as sfh, settings_help
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.support import run_solvers_parallel_help as srsp
 from sparkle.solver import add as sash
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help.sparkle_command_help import CommandName
 from CLI.sparkle_help import sparkle_command_help as sch
 from sparkle.sparkle.platform import slurm_help as ssh

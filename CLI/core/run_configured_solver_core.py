@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_settings
+from sparkle.platform import settings_help
 from CLI.support import run_configured_solver_help as srcsh
 from sparkle.types.objective import PerformanceMeasure
 

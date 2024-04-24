@@ -9,8 +9,8 @@ from pathlib import Path
 from CLI.help.status_info import ConstructParallelPortfolioStatusInfo
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_settings
-from CLI.sparkle_help.sparkle_settings import SettingState
+from sparkle.platform import settings_help
+from sparkle.platform.settings_help import SettingState
 from CLI.support import construct_parallel_portfolio_help as scpp
 from CLI.help.reporting_scenario import Scenario
 from CLI.help import command_help as ch

@@ -9,8 +9,8 @@ from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.sparkle_help import sparkle_settings
-from CLI.sparkle_help.sparkle_settings import SettingState
+from sparkle.platform import settings_help
+from sparkle.platform.settings_help import SettingState
 from sparkle.types.objective import PerformanceMeasure
 from CLI.support import run_configured_solver_help as srcsh
 from CLI.help import command_help as ch

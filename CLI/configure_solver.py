@@ -14,10 +14,10 @@ import runrunner as rrr
 from CLI.help.status_info import ConfigureSolverStatusInfo
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.sparkle_help import sparkle_settings
+from sparkle.platform import settings_help
 from sparkle.configurator import ablation as sah
 from sparkle.types.objective import PerformanceMeasure
-from CLI.sparkle_help.sparkle_settings import SettingState
+from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.sparkle.platform import slurm_help as ssh
