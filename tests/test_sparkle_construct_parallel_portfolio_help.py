@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 import shutil
 
-from CLI.support import sparkle_construct_parallel_portfolio_help as scpph
+from CLI.support import construct_parallel_portfolio_help as scpph
 
 
 class Test(TestCase):
