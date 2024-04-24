@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Run a solver on an instance, only for internal calls from Sparkle."""
-#Team2
 import time
 import fcntl
 import argparse
