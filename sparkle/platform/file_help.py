@@ -14,8 +14,8 @@ from pathlib import Path
 
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.sparkle.platform import snapshot_help as snh
-from sparkle.sparkle.structures import csv_help as scsv
+from sparkle.platform import snapshot_help as snh
+from sparkle.structures import csv_help as scsv
 
 
 def create_new_empty_file(filepath: str) -> None:
