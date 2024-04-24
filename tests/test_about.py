@@ -11,5 +11,5 @@ class TestAbout(TestCase):
         """Tests about_str() returns the correct type."""
         # Simple test, mostly for example purpose
         self.assertIsInstance(about.about_str, str)
-        self.assertIsInstance(about.about_info["name"], str)
-        self.assertIsInstance(about.about_info["version"], float)
+        self.assertIsInstance(about.name, str)
+        self.assertIsInstance(about.version, float)
