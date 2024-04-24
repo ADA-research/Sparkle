@@ -7,11 +7,11 @@ from pytest_mock import MockerFixture
 
 from pathlib import Path
 
-from Commands.structures.solver import Solver
-from Commands.structures.configuration_scenario import ConfigurationScenario
-from Commands.structures.configurator import Configurator
-from Commands.sparkle_help import sparkle_settings
-from Commands.sparkle_help import sparkle_global_help as sgh
+from CLI.structures.solver import Solver
+from CLI.structures.configuration_scenario import ConfigurationScenario
+from CLI.structures.configurator import Configurator
+from CLI.sparkle_help import sparkle_settings
+from CLI.sparkle_help import sparkle_global_help as sgh
 
 global settings
 sgh.settings = sparkle_settings.Settings()

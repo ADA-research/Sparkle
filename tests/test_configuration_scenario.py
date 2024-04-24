@@ -9,10 +9,10 @@ from unittest.mock import patch
 from unittest.mock import Mock
 from pathlib import Path
 
-from Commands.structures.configuration_scenario import ConfigurationScenario
-from Commands.structures.solver import Solver
-from Commands.sparkle_help import sparkle_settings
-from Commands.sparkle_help import sparkle_global_help as sgh
+from CLI.structures.configuration_scenario import ConfigurationScenario
+from CLI.structures.solver import Solver
+from CLI.sparkle_help import sparkle_settings
+from CLI.sparkle_help import sparkle_global_help as sgh
 
 global settings
 sgh.settings = sparkle_settings.Settings()

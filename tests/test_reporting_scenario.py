@@ -1,5 +1,5 @@
 """Tests for the reporting_scenario module."""
-from Commands.structures import reporting_scenario as rs
+from CLI.structures import reporting_scenario as rs
 
 
 def test_none_if_empty_path() -> None:

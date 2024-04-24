@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from unittest.mock import mock_open
 from pathlib import Path
 
-from Commands.sparkle_help import sparkle_instances_help as sih
+from CLI.sparkle_help import sparkle_instances_help as sih
 
 test_instance_set_name = "instance_set"
 test_file = Path("file.txt")
