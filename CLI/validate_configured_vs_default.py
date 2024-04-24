@@ -12,7 +12,7 @@ import runrunner as rrr
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.support import configure_solver_help as scsh
 from sparkle.instance import instances_help as sih
-from CLI.sparkle_help import sparkle_slurm_help as ssh
+from sparkle.sparkle.platform import slurm_help as ssh
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState

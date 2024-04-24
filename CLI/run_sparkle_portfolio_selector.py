@@ -8,7 +8,7 @@ from pathlib import Path
 from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_run_portfolio_selector_help as srpsh
+from CLI.support import run_portfolio_selector_help as srpsh
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState

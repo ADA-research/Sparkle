@@ -20,7 +20,7 @@ from runrunner.base import Runner
 from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as slog
-from CLI.sparkle_help import sparkle_slurm_help as ssh
+from sparkle.platform import slurm_help as ssh
 from sparkle.platform.settings_help import ProcessMonitoring
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help.command_help import CommandName
@@ -450,9 +450,9 @@ def handle_waiting_and_removal_process(
         solver_instance_list: list[str],
         sbatch_script_path: Path,
         portfolio_size: int,
-        remaining_job_dict: dict[str, list[str]] = None,
-        finished_instances_dict: dict[str, list[str, int]] = None,
-        pending_job_with_new_cutoff: dict[str, int] = None,
+        remaining_job_dict: dict[str, list[str]] = dict(),
+        finished_instances_dict: dict[str, list[str, int]] = dict(),
+        pending_job_with_new_cutoff: dict[str, int] = dict(),
         started: bool = False) -> bool:
     """Wait for solvers to finish running, and clean up after them.
 
@@ -473,19 +473,10 @@ def handle_waiting_and_removal_process(
     Returns:
         True on success, may stop program execution early for failure.
     """
-    if remaining_job_dict is None:
-        remaining_job_dict = dict()
-
-    if finished_instances_dict is None:
-        finished_instances_dict = {}
-
-    if pending_job_with_new_cutoff is None:
-        pending_job_with_new_cutoff = {}
-
     if len(remaining_job_dict) > 0:
         print(f"A job has ended, remaining jobs = {str(len(remaining_job_dict))}")
 
-    if finished_instances_dict == {}:
+    if not finished_instances_dict:
         for instance in instances:
             finished_instances_dict[Path(instance).name] = ["UNSOLVED", 0]
 
