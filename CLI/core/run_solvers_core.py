@@ -9,7 +9,7 @@ from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh, settings_help
-from CLI.support import sparkle_run_solvers_help as srs
+from CLI.support import run_solvers_help as srs
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help.status_info import SolverRunStatusInfo
 
