@@ -12,88 +12,88 @@
 #SBATCH --nodes=1
 
 # Test about
-Commands/test/about.sh
+CLI/test/about.sh
 
 # Test system status
-Commands/test/system_status.sh
+CLI/test/system_status.sh
 
 # Test run status
-Commands/test/run_status.sh
+CLI/test/run_status.sh
 
 # Test initialise
-Commands/test/initialise.sh
+CLI/test/initialise.sh
 
 # Test add feature extractor
-Commands/test/add_feature_extractor.sh
+CLI/test/add_feature_extractor.sh
 
 # Test add instances
-Commands/test/add_instances.sh
+CLI/test/add_instances.sh
 
 # Test add solver
-Commands/test/add_solver.sh
+CLI/test/add_solver.sh
 
 # Test run solvers
-Commands/test/run_solvers.sh
+CLI/test/run_solvers.sh
 
 # Test cleanup temporary files
-Commands/test/cleanup_temporary_files.sh
+CLI/test/cleanup_temporary_files.sh
 
 # Test compute features
-Commands/test/compute_features.sh
+CLI/test/compute_features.sh
 
 # Test compute marginal contribution
-Commands/test/compute_marginal_contribution.sh
+CLI/test/compute_marginal_contribution.sh
 
 # Test configure solver
-Commands/test/configure_solver.sh
+CLI/test/configure_solver.sh
 
 # Test configure solver with validate option
-Commands/test/configure_solver_validate.sh
+CLI/test/configure_solver_validate.sh
 
 # Test construct sparkle portfolio selector
-Commands/test/construct_sparkle_portfolio_selector.sh
+CLI/test/construct_sparkle_portfolio_selector.sh
 
 # Test run sparkle portfolio selector
-Commands/test/run_sparkle_portfolio_selector.sh
+CLI/test/run_sparkle_portfolio_selector.sh
 
 # Test generate report (selection)
-Commands/test/generate_report.sh
+CLI/test/generate_report.sh
 
 # Test generate report (selection) for test set
-Commands/test/generate_report_for_test.sh
+CLI/test/generate_report_for_test.sh
 
 # Test generate report for configuration
-Commands/test/generate_report_for_configuration.sh
+CLI/test/generate_report_for_configuration.sh
 
 # Test save snapshot
-Commands/test/save_snapshot.sh
+CLI/test/save_snapshot.sh
 
 # Test load snapshot
-Commands/test/load_snapshot.sh
+CLI/test/load_snapshot.sh
 
 # Test remove feature extractor
-Commands/test/remove_feature_extractor.sh
+CLI/test/remove_feature_extractor.sh
 
 # Test remove instances
-Commands/test/remove_instances.sh
+CLI/test/remove_instances.sh
 
 # Test remove solver
-Commands/test/remove_solver.sh
+CLI/test/remove_solver.sh
 
 # Test validate configured vs default
-Commands/test/validate_configured_vs_default.sh
+CLI/test/validate_configured_vs_default.sh
 
 # Test ablation run configured vs default
-Commands/test/run_ablation.sh
+CLI/test/run_ablation.sh
 
 # Test run configured solver
-Commands/test/run_configured_solver.sh
+CLI/test/run_configured_solver.sh
 
 # Test construct parallel portfolio
-Commands/test/construct_sparkle_parallel_portfolio.sh
+CLI/test/construct_sparkle_parallel_portfolio.sh
 
 # Test run parallel portfolio
-Commands/test/run_sparkle_parallel_portfolio.sh
+CLI/test/run_sparkle_parallel_portfolio.sh
 
 # Test generate report for parallel portfolio
-Commands/test/generate_report_parallel_portfolio.sh
+CLI/test/generate_report_parallel_portfolio.sh

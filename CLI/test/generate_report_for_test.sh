@@ -14,21 +14,21 @@
 
 ## Data
 feature_data_path="Feature_Data/sparkle_feature_data.csv"
-feature_data_tmp="Commands/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
-feature_data_test="Commands/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
+feature_data_tmp="CLI/test/test_files/Feature_Data/sparkle_feature_data.csv.tmp"
+feature_data_test="CLI/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv"
 
 performance_data_path="Performance_Data/sparkle_performance_data.csv"
-performance_data_tmp="Commands/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
-performance_data_test="Commands/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
+performance_data_tmp="CLI/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
+performance_data_test="CLI/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
 
 selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
-selector_tmp="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
-selector_test="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
+selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
+selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
 
 test_results_dir="Test_Cases/PTN2/"
 test_results_path="Test_Cases/PTN2/sparkle_performance_data.csv"
 test_results_tmp="Test_Cases/PTN2/sparkle_performance_data.tmp"
-test_results_test="Commands/test/test_files/Test_Cases/"
+test_results_test="CLI/test/test_files/Test_Cases/"
 
 # Save user data if any
 mv $feature_data_path $feature_data_tmp 2> /dev/null
@@ -44,13 +44,13 @@ extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revis
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_feature_extractor.py $extractor_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverA_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_path > /dev/null
+CLI/add_feature_extractor.py $extractor_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers, construct_sparkle_portfolio_selector and run_sparkle_portfolio_selector commands
 cp $feature_data_test $feature_data_path
@@ -60,7 +60,7 @@ cp -r $test_results_test ./
 
 # Run generate report for tetst
 output_true="Report for test generated ..."
-output=$(Commands/generate_report.py --test-case-directory $test_results_dir | tail -1)
+output=$(CLI/generate_report.py --test-case-directory $test_results_dir | tail -1)
 # --settings-file $sparkle_test_settings_path
 
 if [[ $output == $output_true ]];

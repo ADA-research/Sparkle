@@ -19,19 +19,19 @@ solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 solverC_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverA_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverC_path > /dev/null
-Commands/construct_sparkle_parallel_portfolio.py > /dev/null
-Commands/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverC_path > /dev/null
+CLI/construct_sparkle_parallel_portfolio.py > /dev/null
+CLI/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path > /dev/null
 
 # Generate report for parallel portfolio on a single instance
 output_true="Parallel portfolio report generated ..."
-output=$(Commands/generate_report.py --settings-file $sparkle_test_settings_path | tail -1)
+output=$(CLI/generate_report.py --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

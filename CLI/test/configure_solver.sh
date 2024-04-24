@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. Commands/test/utils.sh
+. CLI/test/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -20,11 +20,11 @@ slurm_available=$(detect_slurm)
 # Settings
 slurm_settings_path="Settings/sparkle_slurm_settings.txt"
 slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="Commands/test/test_files/sparkle_slurm_settings.txt"
+slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
 mv $slurm_settings_path $slurm_settings_tmp # Save user settings
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
 examples_path="Examples/Resources/"
@@ -33,9 +33,9 @@ solver_path="Solvers/PbO-CCSAT-Generic/"
 instances_src_path="${examples_path}${instances_path}"
 solver_src_path="${examples_path}${solver_path}"
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_src_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_src_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
 # Set up output conditions
 output_true="Running configuration finished!"
@@ -45,7 +45,7 @@ then
 fi
 
 # Configure solver
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -67,7 +67,7 @@ fi
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with performance measure option RUNTIME
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --performance-measure RUNTIME --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -91,7 +91,7 @@ sleep 1 # Sleep to avoid interference from previous test
 # TODO: Add test: Configure solver with performance measure option QUALITY (needs a quality configuration solver+instances)
 
 # Configure solver with cutoff time option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --target-cutoff-time 3 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --target-cutoff-time 3 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -113,7 +113,7 @@ fi
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with budget per run option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -135,7 +135,7 @@ fi
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with number of runs option
-output=$(Commands/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --number-of-runs 5 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then

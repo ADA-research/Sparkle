@@ -18,15 +18,15 @@ solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 solverC_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverA_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverC_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverC_path > /dev/null
 
 # Construct sparkle parallel portfolio
 output_true="Sparkle parallel portfolio construction done!"
-output=$(Commands/construct_sparkle_parallel_portfolio.py | tail -1)
+output=$(CLI/construct_sparkle_parallel_portfolio.py | tail -1)
 
 if [[ $output == $output_true ]];
 then

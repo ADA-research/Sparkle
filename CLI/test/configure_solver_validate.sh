@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. Commands/test/utils.sh
+. CLI/test/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -15,7 +15,7 @@
 #SBATCH --nodes=1
 
 # Settings
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
@@ -26,9 +26,9 @@ solver_path="Solvers/PbO-CCSAT-Generic/"
 instances_src_path="${examples_path}${instances_path}"
 solver_src_path="${examples_path}${solver_path}"
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_src_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_src_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
 # Set up output validation
 output_true="Running configuration finished!"
@@ -38,7 +38,7 @@ then
 fi
 
 # Configure solver
-output=$(Commands/configure_solver.py --validate --ablation --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/configure_solver.py --validate --ablation --solver $solver_path --instance-set-train $instances_path --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]]; then
 	echo "[success] ($slurm_available) configure_solver_validation test succeeded"

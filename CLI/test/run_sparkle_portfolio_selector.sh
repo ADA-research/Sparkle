@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. Commands/test/utils.sh
+. CLI/test/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -17,8 +17,8 @@
 
 ## Data
 selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
-selector_tmp="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
-selector_test="Commands/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
+selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
+selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
 
 # Save user data if any
 mv $selector_path $selector_tmp 2> /dev/null
@@ -31,15 +31,15 @@ extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revis
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_feature_extractor.py $extractor_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverA_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_path > /dev/null
+CLI/add_feature_extractor.py $extractor_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $selector_test $selector_path
