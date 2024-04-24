@@ -154,7 +154,7 @@ def run_solver_on_instance_and_process_results(
     raw_result_path = (f"{sgh.sparkle_tmp_path}"
                        f"{Path(solver_path).name}_"
                        f"{Path(instance_path).name}_"
-                       f"{sbh.get_time_pid_random_string()}.rawres")
+                       f"{sgh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
     solver_wrapper_path = Path(solver_path) / sgh.sparkle_run_default_wrapper
 

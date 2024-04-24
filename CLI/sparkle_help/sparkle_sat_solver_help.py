@@ -87,7 +87,7 @@ def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -
     tmp_verify_result_path = (
         f"Tmp/{Path(sgh.sat_verifier_path).name}_"
         f"{Path(raw_result_path).name}_"
-        f"{sbh.get_time_pid_random_string()}.vryres")
+        f"{sgh.get_time_pid_random_string()}.vryres")
     # TODO: Log output file
     print("Run SAT verifier")
     subprocess.run([sgh.sat_verifier_path, instance_path, raw_result_path],

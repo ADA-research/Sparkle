@@ -185,7 +185,7 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     solver_path = sgh.solver_dir / solver_name
     instance_name = "_".join([path.name for path in instance_path_list])
     raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
-                           f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
+                           f"{instance_name}_{sgh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
 
     # b) Run the solver

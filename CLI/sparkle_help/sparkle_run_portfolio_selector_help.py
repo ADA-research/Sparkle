@@ -189,7 +189,7 @@ def call_sparkle_portfolio_selector_solve_instance(
         print(f"Extractor {extractor_name} computing "
               f"features of instance {instance_files_str} ...")
         result_path = (f"Tmp/{extractor_name}_{instance_files_str_}_"
-                       f"{sparkle_basic_help.get_time_pid_random_string()}.rawres")
+                       f"{sgh.get_time_pid_random_string()}.rawres")
 
         list_feature_vector = list_feature_vector + get_list_feature_vector(
             extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
@@ -199,7 +199,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = ("Tmp/predict_schedule_"
-                                    f"{sparkle_basic_help.get_time_pid_random_string()}"
+                                    f"{sgh.get_time_pid_random_string()}"
                                     ".predres")
     print("Sparkle portfolio selector predicting ...")
     cmd_list = [sgh.python_executable, sgh.autofolio_path, "--load",
