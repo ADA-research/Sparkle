@@ -787,16 +787,14 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
         "test-1": "3",
         "test-2": "4"
     }
-    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                               "configuration_help."
+    mock_common = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
-    mock_test = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_test = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
-    mock_extractor_list = mocker.patch("Commands.sparkle_help.sparkle_generate_report_"
-                                       "help.get_feature_extractor_list",
+    mock_extractor_list = mocker.patch("sparkle.platform.generate_report_help."
+                                       "get_feature_extractor_list",
                                        return_value="43")
 
     full_dict = sgrch.configuration_report_variables(
