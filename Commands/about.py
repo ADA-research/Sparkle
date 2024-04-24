@@ -2,50 +2,18 @@
 """Sparkle command to show information about Sparkle."""
 
 import sys
-import argparse
 from Commands.sparkle_help import sparkle_logging as sl
-from Commands.sparkle_help.sparkle_global_help import sparkle_version
 
-__description__ = "Platform for evaluating empirical algorithms/solvers"
-__version__ = sparkle_version
-__licence__ = "MIT"
-__authors__ = [
-    # Alphabetical order on family name first
-    "Koen van der Blom",
-    "Jeremie Gobeil",
-    "Holger H. Hoos",
-    "Chuan Luo",
-    "Richard Middelkoop",
-    "Jeroen Rook",
-    "Thijs Snelleman"]
-
-__contact__ = "snelleman@aim.rwth-aachen.de"
-
-
-def parser_function() -> argparse.ArgumentParser:
-    """Define the command line arguments.
-
-    Returns:
-      The argument parser.
-    """
-    parser = argparse.ArgumentParser()
-    return parser
-
+import sparkle
 
 if __name__ == "__main__":
     # Log command call
     sl.log_command(sys.argv)
 
-    # Define command line arguments
-    parser = parser_function()
-
-    # Process command line arguments
-    args = parser.parse_args()
-
     print("\n".join([
-        f"Sparkle ({__description__})",
-        f"Version: {__version__}",
-        f"Licence: {__licence__}",
-        f'Written by {", ".join(__authors__[:-1])}, and {__authors__[-1]}',
-        f"Contact: {__contact__}",
+        f"Sparkle ({sparkle.about.description})",
+        f"Version: {sparkle.about.version}",
+        f"Licence: {sparkle.about.licence}",
+        f'Written by {", ".join(sparkle.about.authors[:-1])}, and {sparkle.about.authors[-1]}',
+        f"Contact: {sparkle.about.contact}",
         "For more details see README.md"]))

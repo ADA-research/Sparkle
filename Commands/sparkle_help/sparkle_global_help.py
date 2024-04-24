@@ -30,7 +30,7 @@ def latest_scenario() -> ReportingScenario:
     return _latest_scenario
 
 
-sparkle_version = str(about.about_info["version"])
+sparkle_version = str(about.version)
 
 sparkle_special_string = "__@@SPARKLE@@__"
 
