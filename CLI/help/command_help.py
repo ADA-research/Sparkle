@@ -39,7 +39,7 @@ class CommandName(str, Enum):
     RUN_CONFIGURED_SOLVER = "run_configured_solver"
     CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO = "construct_sparkle_parallel_portfolio"
     RUN_SPARKLE_PARALLEL_PORTFOLIO = "run_sparkle_parallel_portfolio"
-    SPARKLE_CSV_MERGE = "sparkle_csv_merge"
+    CSV_MERGE = "csv_merge"
 
     @staticmethod
     def from_str(command_name: str) -> CommandName:
