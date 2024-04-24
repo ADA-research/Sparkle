@@ -89,7 +89,8 @@ def print_log_paths() -> None:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = sparkle_settings.Settings()
+    sgh.settings = settings_help.Settings()
+
 
     # Log command call
     sl.log_command(sys.argv)

@@ -15,7 +15,8 @@ from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import settings_help
 
 global settings
-sgh.settings = sparkle_settings.Settings()
+sgh.settings = settings_help.Settings()
+
 
 
 class PerformanceDataFrame():

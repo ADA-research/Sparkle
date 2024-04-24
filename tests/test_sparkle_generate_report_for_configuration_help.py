@@ -12,7 +12,8 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 
 global settings
-sgh.settings = sparkle_settings.Settings()
+sgh.settings = settings_help.Settings()
+
 configurator = sgh.settings.get_general_sparkle_configurator()
 configurator_path = configurator.configurator_path
 solver_name = "test-solver"

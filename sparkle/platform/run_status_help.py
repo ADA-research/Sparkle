@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to communicate run statuses of various commands."""
-#Team1
 from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh

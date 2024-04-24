@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for ablation analysis."""
-#Team1
 import re
 import shutil
 import subprocess

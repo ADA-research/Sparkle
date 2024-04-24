@@ -10,7 +10,6 @@ from runrunner.base import Runner
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.support import run_portfolio_selector_help as srpsh
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
@@ -53,7 +52,8 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = sparkle_settings.Settings()
+    sgh.settings = settings_help.Settings()
+
 
     # Log command call
     sl.log_command(sys.argv)

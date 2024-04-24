@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for interaction with Slurm."""
-#Team1
 from __future__ import annotations
 
 import shlex

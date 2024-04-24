@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for LaTeX and bibTeX."""
-#Team1
 from shutil import which
 from pathlib import Path
 import subprocess

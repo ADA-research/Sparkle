@@ -22,7 +22,8 @@ from CLI.initialise import check_for_initialise
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    sgh.settings = sparkle_settings.Settings()
+    sgh.settings = settings_help.Settings()
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--recompute",
@@ -88,7 +89,8 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = sparkle_settings.Settings()
+    sgh.settings = settings_help.Settings()
+
 
     # Log command call
     sl.log_command(sys.argv)

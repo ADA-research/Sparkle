@@ -15,7 +15,8 @@ from sparkle.platform import settings_help
 from CLI.sparkle_help import sparkle_global_help as sgh
 
 global settings
-sgh.settings = sparkle_settings.Settings()
+sgh.settings = settings_help.Settings()
+
 
 
 class TestConfigurationScenario(TestCase):
