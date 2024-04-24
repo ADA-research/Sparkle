@@ -6,7 +6,7 @@ import argparse
 
 from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
-from sparkle.sparkle.platform import snapshot_help as srh
+from sparkle.platform import snapshot_help as srh
 
 
 def parser_function() -> argparse.ArgumentParser:

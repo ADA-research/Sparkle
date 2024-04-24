@@ -9,13 +9,13 @@ from runrunner.base import Runner
 import runrunner as rrr
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.sparkle.instance import compute_features_help as scf
+from sparkle.instance import compute_features_help as scf
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help import command_help as ch
-from sparkle.sparkle.platform import slurm_help as ssh
+from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 
