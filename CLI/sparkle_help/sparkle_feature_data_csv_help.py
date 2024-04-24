@@ -7,7 +7,7 @@ import sys
 import numpy as np
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_csv_help as scsv
+from sparkle.sparkle.structures import csv_help as scsv
 
 
 class SparkleFeatureDataCSV(scsv.SparkleCSV):
