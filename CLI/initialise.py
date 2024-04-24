@@ -4,7 +4,7 @@
 import sys
 import argparse
 
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
 from CLI.sparkle_help import sparkle_snapshot_help as srh
 

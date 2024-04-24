@@ -13,8 +13,7 @@ import ast
 import runrunner as rrr
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_basic_help
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame

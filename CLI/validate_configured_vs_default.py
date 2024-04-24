@@ -22,7 +22,7 @@ from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
-from CLI.sparkle_help import sparkle_file_help as sfh
+from sparkle.platform import file_help as sfh
 from CLI.initialise import check_for_initialise
 
 
