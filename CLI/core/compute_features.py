@@ -11,7 +11,7 @@ from pathlib import PurePath
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
-from CLI.sparkle_help import sparkle_compute_features_help as scf
+from sparkle.sparkle.instance import compute_features_help as scf
 from CLI.sparkle_help import sparkle_settings
 
 

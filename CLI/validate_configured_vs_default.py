@@ -136,8 +136,10 @@ if __name__ == "__main__":
     scsh.check_validation_prerequisites()
 
     # Record optimised configuration
-    scsh.write_optimised_configuration_str(solver.name, instance_set_train.name)
-    scsh.write_optimised_configuration_pcs(solver.name, instance_set_train.name)
+    optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
+        solver.name, instance_set_test.name)
+    scsh.write_configuration_str(optimised_configuration_str)
+    scsh.write_configuration_pcs(solver.name, optimised_configuration_str, Path(sgh.sparkle_tmp_path))
 
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name

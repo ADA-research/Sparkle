@@ -16,6 +16,7 @@ from CLI.sparkle_help import sparkle_configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
+from sparkle.solver import pcs
 
 
 def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
@@ -109,7 +110,7 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
                    "seed = 1234\n")
         # Get PCS file name from solver directory
         solver_directory = Path("Solvers/", solver_name)
-        pcs_file_name = scsh.get_pcs_file_from_solver_directory(solver_directory)
+        pcs_file_name = pcs.get_pcs_file_from_solver_directory(solver_directory)
         pcs_file_path = "./solver/" + str(pcs_file_name)
         fout.write(f"paramfile = {pcs_file_path}\n"
                    "instance_file = instances_train.txt\n"
