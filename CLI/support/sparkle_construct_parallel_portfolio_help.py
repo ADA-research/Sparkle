@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio construction."""
-#Team2
 import shutil
 from pathlib import Path
 
