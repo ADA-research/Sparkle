@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Class to handle all activities around configuration scenarios."""
-#MOVE TO sparkle.configurator
+
 
 from __future__ import annotations
 import shutil
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from sparkle.types.sparkle_objective import SparkleObjective, PerformanceMeasure
+from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.solver.solver import Solver
 
 

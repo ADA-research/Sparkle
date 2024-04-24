@@ -4,6 +4,7 @@ from pathlib import Path
 
 import sparkle_logging as sl
 
+
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     """Return the name of the PCS file in a solver directory.
 
@@ -24,18 +25,18 @@ def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     return ""
 
 
-def write_configuration_pcs(solver_name: str, configuration_str: str, tmp_path: Path) -> None:
+def write_configuration_pcs(solver_name: str, config_str: str, tmp_path: Path) -> None:
     """Write configuration to a new PCS file.
 
     Args:
         solver_name: Name of the solver
-        configuration_str: Configuration to write
+        config_str: Configuration to write
         tmp_path: Path to leave the latest configuration pcs
     """
     # Read optimised configuration and convert to dict
-    
-    configuration_str += " -arena '12345'"
-    optimised_configuration_list = configuration_str.split()
+
+    config_str += " -arena '12345'"
+    optimised_configuration_list = config_str.split()
 
     # Create dictionary
     config_dict = {}

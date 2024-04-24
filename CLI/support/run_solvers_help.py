@@ -12,7 +12,7 @@ from pathlib import Path
 import global_variables as sgh
 from sparkle.platform import file_help as sfh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.sparkle_help import sparkle_job_help as sjh
+from CLI.support import sparkle_job_help as sjh
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
 from sparkle.sparkle.solver import sat_help as sssh
