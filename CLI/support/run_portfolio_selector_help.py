@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a portfolio selector."""
-#Team2
 
 import pathlib
 import subprocess
@@ -15,13 +14,13 @@ from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.help.reporting_scenario import Scenario
 from sparkle.instance import instances_help as sih
 from CLI.help.command_help import CommandName
-from sparkle.sparkle.platform import slurm_help as ssh
+from sparkle.platform import slurm_help as ssh
 
 
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
@@ -81,18 +80,14 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
 
 def print_predict_schedule(predict_schedule_result_path: str) -> None:
     """Print the predicted algorithm schedule."""
-    fin = Path(predict_schedule_result_path).open("r+")
-    fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-    myline = fin.readline().strip()
-    print(myline)
-    fin.close()
-
-    return
+    with Path(predict_schedule_result_path).open("r+") as fin:
+        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
+        line = fin.readline().strip()
+        print(line)
 
 
 def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> list:
     """Return the predicted algorithm schedule as a list."""
-    list_predict_schedule = []
     prefix_string = "Selected Schedule [(algorithm, budget)]: "
     predict_schedule = ""
     with Path(predict_schedule_result_path).open("r+") as fin:
@@ -111,9 +106,7 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
 
     predict_schedule_string = predict_schedule[len(prefix_string):]
     # eval insecure, so use ast.literal_eval instead
-    list_predict_schedule = ast.literal_eval(predict_schedule_string)
-
-    return list_predict_schedule
+    return ast.literal_eval(predict_schedule_string)
 
 
 def call_solver_solve_instance_within_cutoff(solver_path: str,
@@ -140,9 +133,9 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
             performance_data_csv.save_csv()
     else:
         if flag_solved:
-            print("instance solved by solver " + solver_path)
+            print(f"Instance solved by solver {solver_path}")
         else:
-            print(f"solver {solver_path} failed to solve the instance with status "
+            print(f"Solver {solver_path} failed to solve the instance with status "
                   f"{status}")
 
     sfh.rmfiles(raw_result_path)
