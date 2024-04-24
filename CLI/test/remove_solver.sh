@@ -12,17 +12,17 @@
 #SBATCH --nodes=1
 
 # Initialise
-Commands/initialise.py > /dev/null
+CLI/initialise.py > /dev/null
 
 # Add solver
 solver_name="PbO-CCSAT-Generic"
 solver_source="Examples/Resources/Solvers/$solver_name"
-Commands/add_solver.py --deterministic 0 $solver_source > /dev/null
+CLI/add_solver.py --deterministic 0 $solver_source > /dev/null
 
 # Remove solver
 solver_path="Solvers/$solver_name"
 output_true="Removing solver $solver_name done!"
-output=$(Commands/remove_solver.py $solver_path | tail -1)
+output=$(CLI/remove_solver.py $solver_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

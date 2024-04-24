@@ -3,7 +3,7 @@
 # Execute this script from the Sparkle directory
 
 # Import utils
-. Commands/test/utils.sh
+. CLI/test/utils.sh
 
 #SBATCH --job-name=test/run_sparkle_parallel_portfolio.sh
 #SBATCH --output=Tmp/run_sparkle_parallel_portfolio.sh.txt
@@ -22,20 +22,20 @@ solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 solverC_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverA_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverB_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solverC_path > /dev/null
-Commands/construct_sparkle_parallel_portfolio.py > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solverC_path > /dev/null
+CLI/construct_sparkle_parallel_portfolio.py > /dev/null
 
 # Run sparkle parallel portfolio on a single instance
 output_true="Running Sparkle parallel portfolio is done!"
-output=$(Commands/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path --run-on $slurm_available | tail -1)
+output=$(CLI/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path --run-on $slurm_available | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -46,7 +46,7 @@ else
 fi
 
 # Run sparkle parallel portfolio on a set of instances
-output=$(Commands/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instances_path --run-on $slurm_available | tail -1)
+output=$(CLI/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instances_path --run-on $slurm_available | tail -1)
 
 if [[ $output == $output_true ]];
 then

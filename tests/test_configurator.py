@@ -17,7 +17,6 @@ global settings
 sgh.settings = settings_help.Settings()
 
 
-
 class TestConfigurator():
     """Class bundling all tests regarding Configurator."""
 

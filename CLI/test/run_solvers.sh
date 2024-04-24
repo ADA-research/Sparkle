@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. Commands/test/utils.sh
+. CLI/test/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -15,19 +15,19 @@
 #SBATCH --nodes=1
 
 # Settings
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
 instances_path="Examples/Resources/Instances/PTN"
 solver_path="Examples/Resources/Solvers/CSCCSat/"
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_solver.py --deterministic 0 $solver_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_path > /dev/null
+CLI/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run solvers
 output_true="Running solvers done!"
-output=$(Commands/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
+output=$(CLI/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -39,7 +39,7 @@ fi
 
 # Run solvers recompute and parallel
 output_true="Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-output=$(Commands/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
+output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -53,7 +53,7 @@ else
 fi
 
 # Run solvers with verifier
-output=$(Commands/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
+output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then

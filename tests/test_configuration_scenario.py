@@ -18,7 +18,6 @@ global settings
 sgh.settings = settings_help.Settings()
 
 
-
 class TestConfigurationScenario(TestCase):
     """Class bundling all tests regarding ConfigurationScenario."""
     def setUp(self: TestConfigurationScenario) -> None:

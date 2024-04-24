@@ -13,7 +13,7 @@
 
 # Initialise
 output_true="New Sparkle platform initialised!"
-output=$(Commands/initialise.py | tail -1)
+output=$(CLI/initialise.py | tail -1)
 
 if [[ $output == $output_true ]];
 then

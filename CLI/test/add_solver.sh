@@ -12,13 +12,13 @@
 #SBATCH --nodes=1
 
 # Initialise
-Commands/initialise.py > /dev/null
+CLI/initialise.py > /dev/null
 
 # Add solver
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic"
 output_true="Adding solver PbO-CCSAT-Generic done!"
 output_true_b="Removing Sparkle report Components/Sparkle-latex-generator/Sparkle_Report.pdf done!"
-output=$(Commands/add_solver.py --deterministic 0 $solver_path | tail -1)
+output=$(CLI/add_solver.py --deterministic 0 $solver_path | tail -1)
 
 if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];
 then

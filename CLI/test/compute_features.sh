@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import utils
-. Commands/test/utils.sh
+. CLI/test/utils.sh
 
 # Execute this script from the Sparkle directory
 
@@ -14,7 +14,7 @@
 #SBATCH --nodes=1
 
 # Settings
-sparkle_test_settings_path="Commands/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
@@ -22,13 +22,13 @@ slurm_available=$(detect_slurm)
 instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 
-Commands/initialise.py > /dev/null
-Commands/add_instances.py $instances_path > /dev/null
-Commands/add_feature_extractor.py $extractor_path > /dev/null
+CLI/initialise.py > /dev/null
+CLI/add_instances.py $instances_path > /dev/null
+CLI/add_feature_extractor.py $extractor_path > /dev/null
 
 # Compute features
 output_true="Computing features done!"
-output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path | tail -1)
+output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -45,7 +45,7 @@ then
 	output_true="Computing Features in parallel done!"
 fi
 
-output=$(Commands/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute --run-on $slurm_available | tail -1)
+output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
