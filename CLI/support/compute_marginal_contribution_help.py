@@ -11,7 +11,7 @@ from typing import Callable
 from statistics import mean
 
 from CLI.sparkle_help import sparkle_file_help as sfh
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps

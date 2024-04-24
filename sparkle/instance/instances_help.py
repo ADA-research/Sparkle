@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Union
 
 from sparkle.platform import file_help as sfh
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 
 
 __sparkle_instance_list_file = "sparkle_instance_list.txt"

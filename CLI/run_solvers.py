@@ -8,7 +8,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.platform import slurm_help as ssh
 from CLI.support import run_solvers_parallel_help as srsph

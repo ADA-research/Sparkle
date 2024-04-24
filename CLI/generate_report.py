@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from CLI.help.status_info import GenerateReportStatusInfo
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.platform import generate_report_help as sgrh
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch

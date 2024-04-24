@@ -7,7 +7,7 @@ import time
 import subprocess
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from CLI.support import run_solvers_help as srsh
 
 

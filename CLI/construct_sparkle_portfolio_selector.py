@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame

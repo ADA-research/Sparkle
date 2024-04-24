@@ -9,7 +9,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.instance import instances_help as sih
 from CLI.support import configure_solver_help as scsh
 from sparkle.platform import slurm_help as ssh

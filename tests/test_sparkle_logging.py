@@ -3,7 +3,7 @@
 from pathlib import Path, PurePath
 
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 
 
 def test__update_caller() -> None:

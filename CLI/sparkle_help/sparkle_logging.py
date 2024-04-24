@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from pathlib import PurePath
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 
 
 # Keep track of which command called Sparkle

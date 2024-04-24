@@ -9,7 +9,7 @@ import shutil
 import fcntl
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.platform import file_help as sfh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_job_help as sjh

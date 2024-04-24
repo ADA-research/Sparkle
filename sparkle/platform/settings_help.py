@@ -10,7 +10,7 @@ import builtins
 import statistics
 
 from CLI.sparkle_help import sparkle_logging as slog
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 

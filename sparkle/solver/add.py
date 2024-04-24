@@ -3,7 +3,7 @@
 """Helper functions for adding solvers."""
 import os
 from pathlib import Path
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 
 
 def get_solver_directory(solver_name: str) -> str:

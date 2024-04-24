@@ -8,7 +8,7 @@ from pathlib import Path
 from runrunner.base import Runner
 import runrunner as rrr
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.instance import compute_features_help as scf
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.platform import settings_help

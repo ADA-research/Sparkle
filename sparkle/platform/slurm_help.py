@@ -7,7 +7,7 @@ import shlex
 import subprocess
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 
 
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:

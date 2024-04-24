@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import fcntl
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.platform import file_help as sfh
 
 

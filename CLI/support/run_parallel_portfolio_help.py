@@ -16,7 +16,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from CLI.sparkle_help import sparkle_logging as slog
 from sparkle.platform import slurm_help as ssh
 from sparkle.platform.settings_help import ProcessMonitoring

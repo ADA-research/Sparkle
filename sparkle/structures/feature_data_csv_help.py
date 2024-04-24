@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 import numpy as np
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.sparkle.structures import csv_help as scsv
 
 

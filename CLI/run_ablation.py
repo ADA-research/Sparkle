@@ -9,7 +9,7 @@ from pathlib import Path
 from runrunner.base import Runner
 
 from sparkle.configurator import ablation as sah
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure

@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 from enum import Enum
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.solver.solver import Solver

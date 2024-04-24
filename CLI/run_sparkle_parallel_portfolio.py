@@ -11,7 +11,7 @@ from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.platform import settings_help
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.platform.settings_help import SettingState, ProcessMonitoring
 from CLI.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
 from sparkle.types.objective import PerformanceMeasure

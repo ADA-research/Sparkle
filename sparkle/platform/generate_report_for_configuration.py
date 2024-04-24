@@ -9,7 +9,7 @@ from pathlib import Path
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.support import configure_solver_help as scsh
 from sparkle.platform import file_help as sfh
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from sparkle.configurator import ablation as sah

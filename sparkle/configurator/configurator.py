@@ -10,7 +10,7 @@ import runrunner as rrr
 from runrunner import Runner
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver

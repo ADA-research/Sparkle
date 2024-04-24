@@ -7,7 +7,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 from sparkle.platform import file_help as sfh, settings_help
 from CLI.support import run_solvers_help as srs
 from sparkle.types.objective import PerformanceMeasure

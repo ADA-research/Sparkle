@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Type
 from abc import ABC, abstractmethod
 
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 
 
 class StatusInfoType(str, Enum):

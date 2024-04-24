@@ -12,7 +12,7 @@ from pathlib import Path
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 from sparkle.platform import settings_help
-from CLI.sparkle_help import sparkle_global_help as sgh
+import global_variables as sgh
 
 global settings
 sgh.settings = settings_help.Settings()
