@@ -26,33 +26,6 @@ class Validator():
         """Construct the validator"""
         pass
 
-    def get_validation_results(self, solver, instance_set, config: str = None):
-        '''
-        Query the results of the validation of solver on instance_set.
-
-        Parameters
-        ----------
-        solver: Path to the validated solver
-        instance_set: Path to validation set
-        config: Path to the configuration if the solver was configured, None
-                otherwise
-
-        Returns
-        -------
-        csv_file: Path to csv file where the validation results can be found
-        '''
-        out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
-        csv_file = out_dir / "validation.csv"
-        csv_data = [line for line in csv.reader(csv_file.open("r"))]
-        if config is not None:
-            # We filter on the config string, but are flexible with:
-            # - Surrounding white space
-            # - Singular quotes, double qoutes
-            config = config.strip().replace("'", "").replace('"', "")
-            csv_data = [line for line in csv_data if
-                        csv_data[1].strip().replace("'", "") == config]
-        return csv_data
-
     def validate(self: Validator, solvers: list[Path], config_str_list: list[str] | str,
                  instance_sets: list[Path], run_on: Runner=Runner.LOCAL):
         """
@@ -102,6 +75,33 @@ class Validator():
                                         instance_set.name, instance_name,
                                         status, quality, runtime)
                     # Clean up .rawres files from this loop iteration?
+
+    def get_validation_results(solver, instance_set, config: str = None):
+        '''
+        Query the results of the validation of solver on instance_set.
+
+        Parameters
+        ----------
+        solver: Path to the validated solver
+        instance_set: Path to validation set
+        config: Path to the configuration if the solver was configured, None
+                otherwise
+
+        Returns
+        -------
+        csv_file: Path to csv file where the validation results can be found
+        '''
+        out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
+        csv_file = out_dir / "validation.csv"
+        csv_data = [line for line in csv.reader(csv_file.open("r"))]
+        if config is not None:
+            # We filter on the config string, but are flexible with:
+            # - Surrounding white space
+            # - Singular quotes, double qoutes
+            config = config.strip().replace("'", "").replace('"', "")
+            csv_data = [line for line in csv_data if
+                        csv_data[1].strip().replace("'", "") == config]
+        return csv_data
     
     def append_entry_to_csv(solver: str,
                             config_str: str,
