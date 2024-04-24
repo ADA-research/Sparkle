@@ -162,9 +162,9 @@ def check_for_ablation(solver_name: str, instance_train_name: str,
     return True
 
 
-def get_ablation_table(solver_name: str, instance_train_name: str,
-                       instance_test_name: str) -> list[list[str]]:
-    """Run a solver on an instance, only for internal calls from Sparkle."""
+def read_ablation_table(solver_name: str, instance_train_name: str,
+                        instance_test_name: str) -> list[list[str]]:
+    """Read from ablation table of a scenario."""
     if not check_for_ablation(solver_name, instance_train_name, instance_test_name):
         # No ablation table exists for this solver-instance pair
         return []

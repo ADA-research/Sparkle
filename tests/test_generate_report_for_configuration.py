@@ -354,16 +354,13 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
                    "limit": "relative",
                    "replace_zeros": False,
                    }
-    mock_data = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_data = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_data_for_plot",
                              return_value=points)
-    mock_performance = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                                    "configuration_help."
+    mock_performance = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                     "get_performance_measure",
                                     return_value=performance_measure)
-    mock_plot = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_plot = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "generate_comparison_plot")
 
     figure_string = sgrch.get_figure_configure_vs_default(configured_dir,
@@ -402,18 +399,15 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
                    "replace_zeros": True,
                    "output_dir": reports_dir
                    }
-    mock_data = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_data = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_data_for_plot",
                              return_value=points)
-    mock_performance = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                                    "configuration_help."
+    mock_performance = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                     "get_performance_measure",
                                     return_value=performance_measure)
-    mock_plot = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_plot = mocker.patch("sparkle.platform.generate_report_help."
                              "generate_comparison_plot")
-    mock_penalised = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
+    mock_penalised = mocker.patch("sparkle.platform.settings_help."
                                   "get_penalised_time",
                                   return_value=10)
 
@@ -442,8 +436,7 @@ def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixtu
     train_instance = "train-instance"
     test_instance = "test-instance"
     cutoff = 0
-    mock_get_figure = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                                   "configuration_help."
+    mock_get_figure = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                    "get_figure_configure_vs_default",
                                    return_value="includegraphics")
 
@@ -485,11 +478,10 @@ def test_get_figure_configured_vs_default_on_train_instance_set(mocker: MockFixt
     train_instance = "train-instance"
     configuration_reports_directory = "reports/"
     cutoff = 0
-    mock_config = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_config = mocker.patch("CLI.support.configure_solver_help."
                                "get_optimised_configuration",
                                return_value=("", "", seed))
-    mock_get_figure = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                                   "configuration_help."
+    mock_get_figure = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                    "get_figure_configure_vs_default",
                                    return_value="includegraphics")
 
@@ -535,12 +527,10 @@ def test_get_timeouts_test(mocker: MockFixture) -> None:
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
-    mock_timeouts = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                                 "configuration_help."
+    mock_timeouts = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                  "get_timeouts",
                                  return_value=(0, 1, 2))
 
@@ -577,15 +567,13 @@ def test_get_timeouts_train(mocker: MockFixture) -> None:
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_config = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_config = mocker.patch("CLI.support.configure_solver_help."
                                "get_optimised_configuration",
                                return_value=("", "", optimised_configuration_seed))
-    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
-    mock_timeouts = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                                 "configuration_help."
+    mock_timeouts = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                  "get_timeouts",
                                  return_value=(0, 1, 2))
 
@@ -628,7 +616,7 @@ def test_get_timeouts(mocker: MockFixture) -> None:
     }
     cutoff = 10
 
-    mock_multiplier = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
+    mock_multiplier = mocker.patch("sparkle.platform.settings_help."
                                    "get_general_penalty_multiplier",
                                    return_value=10)
 
@@ -648,7 +636,7 @@ def test_get_ablation_table(mocker: MockFixture) -> None:
          ["0", "-source-", "N/A", "N/A", "76.53275"],
          ["1", "sel_var_div", "3", "6", "68.41392"],
          ["2", "-target-", "N/A", "N/A", "92.06944"]])
-    mock_table = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
+    mock_table = mocker.patch("sparkle.configurator.ablation."
                               "get_ablation_table",
                               return_value=sah_ablation_table)
 
@@ -685,12 +673,10 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
         "test-1": "3",
         "test-2": "4"
     }
-    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                               "configuration_help."
+    mock_common = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
-    mock_test = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_test = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
 
@@ -724,8 +710,7 @@ def test_configuration_report_variables_without_test(mocker: MockFixture) -> Non
         "common-2": "2",
         "featuresBool": r"\featuresfalse"
     }
-    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                               "configuration_help."
+    mock_common = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
 
@@ -761,12 +746,10 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
         "test-1": "3",
         "test-2": "4"
     }
-    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                               "configuration_help."
+    mock_common = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
-    mock_test = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_test = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
 
