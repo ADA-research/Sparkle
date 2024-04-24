@@ -13,7 +13,7 @@ from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
-from CLI.sparkle_help import sparkle_run_ablation_help as sah
+from sparkle.configurator import ablation as sah
 from sparkle.platform.generate_report_help import generate_comparison_plot
 
 

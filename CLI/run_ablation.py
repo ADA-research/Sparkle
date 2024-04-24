@@ -8,7 +8,7 @@ from pathlib import Path
 
 from runrunner.base import Runner
 
-from CLI.sparkle_help import sparkle_run_ablation_help as sah
+from sparkle.configurator import ablation as sah
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
