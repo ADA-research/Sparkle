@@ -10,8 +10,9 @@ from enum import Enum
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.types.sparkle_objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure
 from sparkle.solver.solver import Solver
+from sparkle.solver import pcs
 
 
 class InstanceType(Enum):
@@ -97,7 +98,7 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = get_smac_settings()
 
-    paramfile = get_pcs_file_from_solver_directory(
+    paramfile = pcs.get_pcs_file_from_solver_directory(
         configurator.scenario.solver.directory)
     if isinstance(paramfile, Path):
         paramfile = str(paramfile.absolute())
@@ -135,26 +136,6 @@ def create_file_scenario_validate(solver_name: str, instance_set_train_name: str
     sl.add_output(str(smac_file_scenario), log_str)
 
     return scenario_file_name
-
-
-def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
-    """Return the name of the PCS file in a solver directory.
-
-    If not found, return an empty str.
-
-    Args:
-        solver_directory: Directory of solver
-
-    Returns:
-        Returns string containing the name of pcs file if found
-    """
-    for file_path in Path(solver_directory).iterdir():
-        file_extension = "".join(file_path.suffixes)
-
-        if file_extension == ".pcs":
-            return file_path.name
-
-    return ""
 
 
 def remove_validation_directories_execution_or_output(instance_set_test_name: str,
@@ -324,7 +305,7 @@ def write_optimised_configuration_pcs(solver_name: str, instance_set_name: str) 
 
     # Read existing PCS file and create output content
     solver_directory = Path("Solvers", solver_name)
-    pcs_file = solver_directory / get_pcs_file_from_solver_directory(
+    pcs_file = solver_directory / pcs.get_pcs_file_from_solver_directory(
         solver_directory)
     pcs_file_out = []
 
