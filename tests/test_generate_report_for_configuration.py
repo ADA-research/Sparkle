@@ -616,7 +616,7 @@ def test_get_timeouts(mocker: MockFixture) -> None:
     cutoff = 10
 
     mock_multiplier = mocker.patch("sparkle.platform.settings_help."
-                                   "get_general_penalty_multiplier",
+                                   "Settings.get_general_penalty_multiplier",
                                    return_value=10)
 
     configured, default, overlap = sgrch.get_timeouts(conf_dict, default_dict, cutoff)
@@ -636,7 +636,7 @@ def test_get_ablation_table(mocker: MockFixture) -> None:
          ["1", "sel_var_div", "3", "6", "68.41392"],
          ["2", "-target-", "N/A", "N/A", "92.06944"]])
     mock_table = mocker.patch("sparkle.configurator.ablation."
-                              "get_ablation_table",
+                              "read_ablation_table",
                               return_value=sah_ablation_table)
 
     table_string = sgrch.get_ablation_table(solver_name, train_instance, test_instance)
