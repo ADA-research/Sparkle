@@ -9,8 +9,8 @@ from pathlib import Path, PurePath
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle import sparkle_performance_dataframe as spfcsv
-from CLI.sparkle_help import sparkle_run_solvers_help as srsh
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from CLI.support import run_solvers_help as srsh
 from sparkle.instance import compute_features_help as scfh
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
@@ -191,7 +191,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     err_file = selector_path.parent.name + "_autofolio.err"
     log_path_str = str(Path(sl.caller_log_dir / log_file))
     err_path_str = str(Path(sl.caller_log_dir / err_file))
-    performance_data = spfcsv.PerformanceDataFrame(performance_data_csv_path)
+    performance_data = PerformanceDataFrame(performance_data_csv_path)
     pf_data_autofolio_path = performance_data.to_autofolio()
     cmd_list = [python_executable, sgh.autofolio_path, "--performance_csv",
                 str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
