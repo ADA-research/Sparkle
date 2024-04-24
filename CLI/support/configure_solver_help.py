@@ -267,8 +267,7 @@ def write_configuration_str(configuration_str: str) -> None:
     """Write the latest optimised configuration parameter string to file.
 
     Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set
+        configuration_str: Optimised configuration parameter string
     """
     latest_configuration_str_path = sgh.sparkle_tmp_path + "latest_configuration.txt"
 

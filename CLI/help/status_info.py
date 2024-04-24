@@ -1,5 +1,4 @@
 """File containing the Status Info class."""
-#KEEP in CLI.help
 from __future__ import annotations
 
 import time
