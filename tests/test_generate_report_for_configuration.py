@@ -1113,13 +1113,12 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
         "bibliographypath": str(sgh.sparkle_report_bibliography_path.absolute())
     }
 
-    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("Commands.sparkle_help.sparkle_generate_report"
+    mock_generate_report = mocker.patch("sparkle.platform.generate_report"
                                         "_help.generate_report", return_value=None)
-    mock_log = mocker.patch("Commands.sparkle_help.sparkle_logging.add_output",
+    mock_log = mocker.patch("sparkle_logging.add_output",
                             return_value=None)
 
     sgrch.generate_report_for_configuration(solver_name, train_instance, ablation=True)
@@ -1145,13 +1144,12 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
         "key-2": "value-2"
     }
 
-    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("Commands.sparkle_help.sparkle_generate_report"
+    mock_generate_report = mocker.patch("sparkle.platform.generate_report"
                                         "_help.generate_report", return_value=None)
-    mock_log = mocker.patch("Commands.sparkle_help.sparkle_logging.add_output",
+    mock_log = mocker.patch("sparkle_logging.add_output",
                             return_value=None)
 
     sgrch.generate_report_for_configuration(solver_name, train_instance,
