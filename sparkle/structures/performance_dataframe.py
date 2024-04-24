@@ -25,7 +25,7 @@ class PerformanceDataFrame():
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
                  solvers: list[str] = [],
-                 objectives: list[str | sparkle_settings.SparkleObjective] = None,
+                 objectives: list[str | settings_help.SparkleObjective] = None,
                  instances: list[str] = [],
                  n_runs: int = 1,
                  init_df: bool = True) -> None:
@@ -58,7 +58,7 @@ class PerformanceDataFrame():
         if objectives is None:
             objectives = sgh.settings.get_general_sparkle_objectives()
         self.objective_names =\
-            [o.name if isinstance(o, sparkle_settings.SparkleObjective) else o
+            [o.name if isinstance(o, settings_help.SparkleObjective) else o
              for o in objectives]
         self.multi_objective = len(self.objective_names) > 1
         # Runs is a ``static'' dimension

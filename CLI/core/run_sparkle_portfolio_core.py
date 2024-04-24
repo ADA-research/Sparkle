@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # Initialise settings
     global settings
     file_path_latest = Path("Settings/latest.ini")
-    sgh.settings = sparkle_settings.Settings(file_path_latest)
+    sgh.settings = settings_help.Settings(file_path_latest)
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
