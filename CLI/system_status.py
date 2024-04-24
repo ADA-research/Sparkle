@@ -5,7 +5,7 @@ import sys
 import argparse
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_system_status_help as sssh
+from sparkle.sparkle.platform import system_status as sssh
 from CLI.sparkle_help import sparkle_logging as sl
 
 
