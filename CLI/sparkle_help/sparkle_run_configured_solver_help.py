@@ -102,7 +102,7 @@ def call_configured_solver_parallel(
 
     perf_name = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
     cmd_list = [f"{sgh.python_executable} "
-                f"Commands/sparkle_help/run_configured_solver_core.py "
+                f"CLI/help/run_configured_solver_core.py "
                 f"--instance {instance} "
                 f"--performance-measure {perf_name}" for instance in instances_list]
 
