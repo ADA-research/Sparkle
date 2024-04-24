@@ -8,7 +8,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help.sparkle_command_help import CommandName
@@ -66,7 +66,7 @@ def running_solvers_parallel(
 
     srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
     sbatch_options = ssh.get_slurm_options_list()
-    cmd_base = "Commands/sparkle_help/run_solvers_core.py"
+    cmd_base = "CLI/core/run_solvers_core.py"
     perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     cmd_list = [f"{cmd_base} --instance {inst_p} --solver {solver_p} "
                 f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]

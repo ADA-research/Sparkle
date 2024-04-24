@@ -22,7 +22,7 @@ from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help.sparkle_settings import ProcessMonitoring
-from sparkle.types.sparkle_objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_command_help import CommandName
 
 import functools
@@ -651,7 +651,7 @@ def run_parallel_portfolio(instances: list[str],
     parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
     sbatch_options_list = ssh.get_slurm_options_list()
     # Create cmd list
-    base_cmd_str = ("Commands/sparkle_help/run_solvers_core.py --run-status-path "
+    base_cmd_str = ("CLI/core/run_solvers_core.py --run-status-path "
                     f"{str(sgh.pap_sbatch_tmp_path)}")
     cmd_list = [f"{base_cmd_str} {params}" for params in parameters]
 
