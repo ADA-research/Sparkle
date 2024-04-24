@@ -62,7 +62,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_count_instances = mocker.patch("sparkle.instance.instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("sparkle.instance.instances_help."
+    mock_list_filename = mocker.patch("sparkle.platform.file_help."
                                       "get_list_all_filename_recursive",
                                       return_value=[Path("instance-1"),
                                                     Path("instance-2")])
@@ -86,8 +86,7 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     """
     results_file = "example_file"
     cutoff = 42
-    mock_get_list = mocker.patch("CLI.generate_"
-                                 "report_for_configuration_help."
+    mock_get_list = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                  "get_instance_performance_from_csv",
                                  return_value=[("one", 10), ("two", 5)])
 
@@ -833,34 +832,43 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     mock_config = mocker.patch("CLI.support.configure_solver_help."
                                "get_optimised_configuration",
                                return_value=("123", "", seed))
-    mock_perf = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_perf = mocker.patch("sparkle.platform.generate_"
+                             "report_for_configuration."
                              "get_performance_measure",
                              return_value="PERF")
-    mock_runtime = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_runtime = mocker.patch("sparkle.platform.generate_"
+                                "report_for_configuration."
                                 "get_runtime_bool",
                                 return_value="runtimetrue")
-    mocker.patch("global_variables.sparkle_global_help."
+    mocker.patch("global_variables."
                  "sparkle_version", "0.7")
-    mock_instance_num = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_instance_num = mocker.patch("sparkle.platform.generate_"
+                                     "report_for_configuration."
                                      "get_num_instance_for_configurator",
                                      return_value="4")
-    mock_par_perf = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_par_perf = mocker.patch("sparkle.platform.generate_"
+                                 "report_for_configuration."
                                  "get_par_performance",
                                  side_effect=[42.1, 42.2])
-    mock_figure = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_figure = mocker.patch("sparkle.platform.generate_"
+                               "report_for_configuration."
                                "get_figure_configured_vs_default_on_train_"
                                "instance_set",
                                return_value="figure-string")
-    mock_timeouts = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_timeouts = mocker.patch("sparkle.platform.generate_"
+                                 "report_for_configuration."
                                  "get_timeouts_train",
                                  return_value=(2, 3, 1))
-    mock_ablation_bool = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_ablation_bool = mocker.patch("sparkle.platform.generate_"
+                                      "report_for_configuration."
                                       "get_ablation_bool",
                                       return_value="ablationtrue")
-    mock_ablation_table = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_ablation_table = mocker.patch("sparkle.platform.generate_"
+                                       "report_for_configuration."
                                        "get_ablation_table",
                                        return_value="ablation/path")
-    mock_features = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_features = mocker.patch("sparkle.platform.generate_"
+                                 "report_for_configuration."
                                  "get_features_bool",
                                  return_value="featurestrue")
 
@@ -931,26 +939,32 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     test_instance = "test-instance"
     cutoff = "10"
 
-    mock_instance_num = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_instance_num = mocker.patch("sparkle.platform.generate_"
+                                     "report_for_configuration."
                                      "get_num_instance_for_configurator",
                                      return_value="4")
-    mock_settings = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("OBJ", 100, cutoff, "", 11, ""))
-    mock_par_perf = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_par_perf = mocker.patch("sparkle.platform.generate_"
+                                 "report_for_configuration."
                                  "get_par_performance",
                                  side_effect=[42.1, 42.2])
-    mock_figure = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_figure = mocker.patch("sparkle.platform.generate_"
+                               "report_for_configuration."
                                "get_figure_configured_vs_default_on_test_"
                                "instance_set",
                                return_value="figure-string")
-    mock_timeouts = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_timeouts = mocker.patch("sparkle.platform.generate_"
+                                 "report_for_configuration."
                                  "get_timeouts_test",
                                  return_value=(2, 3, 1))
-    mock_ablation_bool = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_ablation_bool = mocker.patch("sparkle.platform.generate_"
+                                       "report_for_configuration."
                                       "get_ablation_bool",
                                       return_value="ablationtrue")
-    mock_ablation_table = mocker.patch("sparkle.platform.generate_report_for_configuration."
+    mock_ablation_table = mocker.patch("sparkle.platform.generate_"
+                                       "report_for_configuration."
                                        "get_ablation_table",
                                        return_value="ablation/path")
 
