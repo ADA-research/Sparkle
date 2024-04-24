@@ -19,7 +19,7 @@ from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
     check_for_initialise(
         sys.argv,
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
+        ch.COMMAND_DEPENDENCIES[ch.CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR]
     )
 
     if ac.set_by_user(args, "performance_measure"):

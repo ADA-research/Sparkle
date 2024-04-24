@@ -17,8 +17,8 @@ from CLI.sparkle_help import sparkle_settings
 from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SolutionVerifier
 from CLI.sparkle_help.sparkle_settings import SettingState
-from CLI.help.sparkle_command_help import CommandName
-from CLI.help import sparkle_command_help as sch
+from CLI.help.command_help import CommandName
+from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 
 import functools

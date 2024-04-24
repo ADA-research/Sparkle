@@ -13,7 +13,7 @@ from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_compute_features_help as scf
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.ADD_FEATURE_EXTRACTOR])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_FEATURE_EXTRACTOR])
 
     extractor_source = Path(args.extractor_path)
     if not extractor_source.exists():
