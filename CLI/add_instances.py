@@ -8,7 +8,7 @@ import shutil
 
 import global_variables as sgh
 from sparkle.platform import file_help as sfh, settings_help
-from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.instance import compute_features_help as scf
 from CLI.support import run_solvers_help as srs
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         sih._copy_instance_list_to_reference(Path(instances_source))
         list_instance = sih._get_list_instance(instances_source)
 
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+        feature_data_csv = SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
 
         print(f"Number of instances to be added: {len(list_instance)}")
@@ -129,7 +129,7 @@ if __name__ == "__main__":
         list_source_all_filename = sfh.get_list_all_filename_recursive(instances_source)
         target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
 
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+        feature_data_csv = SparkleFeatureDataCSV(sgh.feature_data_csv_path)
         performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
 
         num_inst = len(list_source_all_filename)

@@ -123,7 +123,7 @@ def run_solvers_on_instances(
     if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
             runner=run_on,
-            cmd="Commands/construct_sparkle_portfolio_selector.py",
+            cmd="CLI/construct_sparkle_portfolio_selector.py",
             name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
             dependencies=runs[-1],
             base_dir=sgh.sparkle_tmp_path,
@@ -131,7 +131,7 @@ def run_solvers_on_instances(
 
         runs.append(rrr.add_to_queue(
             runner=run_on,
-            cmd="Commands/generate_report.py",
+            cmd="CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=runs[-1],
             base_dir=sgh.sparkle_tmp_path,

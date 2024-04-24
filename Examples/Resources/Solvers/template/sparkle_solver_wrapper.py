@@ -10,7 +10,7 @@ from pathlib import Path
 
 # TODO: Add imports required by your changes
 
-# Process arguments given by "*_target_algorithm.py"
+# Process arguments given by "*_target_algorithm"
 args = ast.literal_eval(sys.argv[1])
 
 # Extract and delete data that needs specific formatting
@@ -90,7 +90,7 @@ outdir = {"status": status,
           "quality": 0,
           "solver_call": runsolver_call + params}
 
-# Write raw solver output to file for Sparkle when calling run_configured_solver.py
+# Write raw solver output to file for Sparkle when calling run_configured_solver
 if specifics == "rawres":
     raw_result_path = Path(runsolver_watch_data_path.replace(".log", ".rawres"))
 

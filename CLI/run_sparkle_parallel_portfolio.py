@@ -13,7 +13,7 @@ import sparkle_logging as sl
 from sparkle.platform import settings_help
 import global_variables as sgh
 from sparkle.platform.settings_help import SettingState, ProcessMonitoring
-from CLI.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
+from CLI.support import run_parallel_portfolio_help as srpp
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise

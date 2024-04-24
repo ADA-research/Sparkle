@@ -90,7 +90,7 @@ class TestPerformanceData(TestCase):
         result = self.pd_nan.get_best_performance_per_instance()
         assert result == max_perf
 
-    @patch("Commands.sparkle_help.sparkle_global_help."
+    @patch("global_variables."
            "settings.get_general_penalty_multiplier")
     def test_calc_portfolio_vbs_instance(self: TestPerformanceData,
                                          mock_penalty: Mock)\
@@ -125,7 +125,7 @@ class TestPerformanceData(TestCase):
         )
         assert result == vbs_portfolio
 
-    @patch("Commands.sparkle_help.sparkle_global_help."
+    @patch("global_variables."
            "settings.get_penalised_time")
     def test_get_dict_vbs_penalty_time_on_each_instance(self: TestPerformanceData,
                                                         mock_penalty: Mock)\
@@ -138,9 +138,9 @@ class TestPerformanceData(TestCase):
         print(result)
         assert result == penalty_time_dict
 
-    @patch("Commands.sparkle_help.sparkle_global_help."
+    @patch("global_variables."
            "settings.get_general_target_cutoff_time")
-    @patch("Commands.sparkle_help.sparkle_global_help."
+    @patch("global_variables."
            "settings.get_general_penalty_multiplier")
     def test_calc_vbs_penalty_time(self: TestPerformanceData,
                                    mock_cutoff: Mock,
@@ -152,9 +152,9 @@ class TestPerformanceData(TestCase):
         result = self.pd.calc_vbs_penalty_time()
         assert result == vbs_penalized
 
-    @patch("Commands.sparkle_help.sparkle_global_help."
+    @patch("global_variables."
            "settings.get_general_target_cutoff_time")
-    @patch("Commands.sparkle_help.sparkle_global_help."
+    @patch("global_variables."
            "settings.get_general_penalty_multiplier")
     def test_get_solver_penalty_time_ranking_list(self: TestPerformanceData,
                                                   mock_cutoff: Mock,

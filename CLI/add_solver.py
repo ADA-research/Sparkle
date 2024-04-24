@@ -18,7 +18,7 @@ from CLI.support import run_solvers_parallel_help as srsp
 from sparkle.solver import add as sash
 import sparkle_logging as sl
 from CLI.help.command_help import CommandName
-from CLI.sparkle_help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from sparkle.platform import slurm_help as ssh
 from CLI.initialise import check_for_initialise
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     solver_source = Path(args.solver_path)
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.ADD_SOLVER])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_SOLVER])
 
     if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
@@ -182,7 +182,7 @@ if __name__ == "__main__":
             sbatch_options = ssh.get_slurm_options_list()
             srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
             run_construct_portfolio_selector = rrr.add_to_queue(
-                cmd="Commands/construct_sparkle_portfolio_selector.py",
+                cmd="CLI/construct_sparkle_portfolio_selector.py",
                 name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
                 dependencies=dependency_run_list,
                 base_dir=sgh.sparkle_tmp_path,
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             dependency_run_list.append(run_construct_portfolio_selector)
 
             run_generate_report = rrr.add_to_queue(
-                cmd="Commands/generate_report.py",
+                cmd="CLI/generate_report.py",
                 name=CommandName.GENERATE_REPORT,
                 dependencies=dependency_run_list,
                 base_dir=sgh.sparkle_tmp_path,

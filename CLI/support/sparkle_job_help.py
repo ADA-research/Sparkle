@@ -24,7 +24,7 @@ def get_num_of_total_job_from_list(list_jobs: list) -> int:
     Returns:
       The total number of jobs.
     """
-    return sum([job[1] for job in list_jobs])
+    return sum([len(job[1]) for job in list_jobs])
 
 
 def expand_total_job_from_list(list_jobs: list) -> list:

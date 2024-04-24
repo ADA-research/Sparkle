@@ -13,7 +13,7 @@
 
 # System status
 output_true="Current running status of Sparkle reported!"
-output=$(Commands/run_status.py | tail -1)
+output=$(CLI/run_status.py | tail -1)
 
 if [[ $output == $output_true ]];
 then

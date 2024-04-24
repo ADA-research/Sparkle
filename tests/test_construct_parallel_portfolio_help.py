@@ -14,11 +14,11 @@ class Test(TestCase):
 
     def setUp(self: TestCase) -> None:
         """Set up for each test case."""
-        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)  # noqa
+        subprocess.run("./CLI/initialise.py > /dev/null", shell=True)  # noqa
 
     def tearDown(self: TestCase) -> None:
         """Tear down for each test case."""
-        subprocess.run("./Commands/initialise.py > /dev/null", shell=True)  # noqa
+        subprocess.run("./CLI/initialise.py > /dev/null", shell=True)  # noqa
 
     def test_add_solvers_to_portfolio(self: TestCase) -> None:
         """Test whether solvers are added to a parallel portfolio correctly."""
