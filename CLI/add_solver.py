@@ -182,7 +182,7 @@ if __name__ == "__main__":
             sbatch_options = ssh.get_slurm_options_list()
             srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
             run_construct_portfolio_selector = rrr.add_to_queue(
-                cmd="Commands/construct_sparkle_portfolio_selector.py",
+                cmd="CLI/construct_sparkle_portfolio_selector.py",
                 name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
                 dependencies=dependency_run_list,
                 base_dir=sgh.sparkle_tmp_path,
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             dependency_run_list.append(run_construct_portfolio_selector)
 
             run_generate_report = rrr.add_to_queue(
-                cmd="Commands/generate_report.py",
+                cmd="CLI/generate_report.py",
                 name=CommandName.GENERATE_REPORT,
                 dependencies=dependency_run_list,
                 base_dir=sgh.sparkle_tmp_path,

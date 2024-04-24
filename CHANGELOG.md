@@ -151,7 +151,7 @@ Notable changes to Sparkle will be documented in this file.
 - Remove Yahsp solver and Depots instances (unclear redistribution permissions)
 
 ### Fixed
-- Converted `Commands/*.py` to the new coding style
+- Converted `CLI/*.py` to the new coding style
 - Change LaTeX build to non-interactive to prevent hanging
 - get\_solver\_directory function and pcs check before configuration
 - Make pcs file check only return true iff one pcs file is found
