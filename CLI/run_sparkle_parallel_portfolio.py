@@ -14,8 +14,8 @@ from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help.sparkle_settings import SettingState, ProcessMonitoring
 from CLI.sparkle_help import sparkle_run_parallel_portfolio_help as srpp
-from sparkle.types.sparkle_objective import PerformanceMeasure
-from CLI.sparkle_help import sparkle_command_help as sch
+from sparkle.types.objective import PerformanceMeasure
+from CLI.help import sparkle_command_help as sch
 from CLI.initialise import check_for_initialise
 
 

@@ -12,13 +12,13 @@ from CLI.sparkle_help import \
     sparkle_generate_report_for_configuration_help as sgrfch
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from sparkle.types.sparkle_objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from CLI.sparkle_help import \
     sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
-from CLI.sparkle_help import sparkle_command_help as sch
+from CLI.help import sparkle_command_help as sch
 from CLI.initialise import check_for_initialise
 
 
