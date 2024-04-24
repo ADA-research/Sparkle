@@ -29,8 +29,7 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    instance_path = args.instance
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
 
     # Run configured solver
-    srcsh.call_configured_solver_sequential([instance_path])
+    srcsh.call_configured_solver_sequential([args.instance])
