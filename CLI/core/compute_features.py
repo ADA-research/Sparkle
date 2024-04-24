@@ -9,7 +9,7 @@ from pathlib import Path
 from pathlib import PurePath
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.platform import file_help as sfh, settings
+from sparkle.platform import file_help as sfh, settings_help
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.sparkle.instance import compute_features_help as scf
 

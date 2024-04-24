@@ -8,9 +8,9 @@ from pathlib import Path
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.support import compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.platform import settings
+from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings import SettingState
+from sparkle.platform.settings_help import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise

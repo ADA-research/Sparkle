@@ -21,7 +21,7 @@ from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_slurm_help as ssh
-from sparkle.platform.settings import ProcessMonitoring
+from sparkle.platform.settings_help import ProcessMonitoring
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help.command_help import CommandName
 

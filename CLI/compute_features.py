@@ -11,8 +11,8 @@ import runrunner as rrr
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.sparkle.instance import compute_features_help as scf
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.platform import settings
-from sparkle.platform.settings import SettingState
+from sparkle.platform import settings_help
+from sparkle.platform.settings_help import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.sparkle_help import sparkle_slurm_help as ssh

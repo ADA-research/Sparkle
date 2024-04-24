@@ -7,7 +7,7 @@ from pathlib import Path
 from CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.platform import settings
+from sparkle.platform import settings_help
 
 from unittest.mock import patch
 from unittest.mock import MagicMock, Mock

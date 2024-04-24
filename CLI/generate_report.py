@@ -11,9 +11,9 @@ from sparkle.sparkle.platform import generate_report_help as sgrh
 from sparkle.sparkle.platform import \
     generate_report_for_configuration as sgrfch
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.platform import settings
+from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings import SettingState
+from sparkle.platform.settings_help import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.sparkle.platform import \

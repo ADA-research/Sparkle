@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.platform import settings
+from sparkle.platform import settings_help
 from CLI.sparkle_help import sparkle_run_portfolio_selector_help as srpsh
 
 

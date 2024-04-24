@@ -3,7 +3,7 @@
 from __future__ import annotations
 import argparse
 
-from sparkle.platform.settings import SettingState
+from sparkle.platform.settings_help import SettingState
 
 
 class SetByUser(argparse.Action):

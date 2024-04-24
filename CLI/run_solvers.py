@@ -13,10 +13,10 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help import sparkle_run_solvers_parallel_help as srsph
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.platform import settings
+from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings import SolutionVerifier
-from sparkle.platform.settings import SettingState
+from sparkle.platform.settings_help import SolutionVerifier
+from sparkle.platform.settings_help import SettingState
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
