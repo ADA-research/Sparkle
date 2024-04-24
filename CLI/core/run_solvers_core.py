@@ -7,7 +7,6 @@ import fcntl
 import argparse
 import shutil
 from pathlib import Path
-from pathlib import PurePath
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_basic_help as sbh
