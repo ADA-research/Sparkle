@@ -11,7 +11,7 @@ from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
-from sparkle.sparkle.platform import slurm_help as ssh
+from sparkle.platform import slurm_help as ssh
 from CLI.sparkle_help import sparkle_job_help as sjh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_job_help
