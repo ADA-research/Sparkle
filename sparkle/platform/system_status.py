@@ -3,9 +3,9 @@
 """Helper functions to inform about Sparkle's system status."""
 from pathlib import Path
 
-from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.sparkle_help import sparkle_job_help
+from CLI.support import sparkle_job_help
 
 
 def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> None:

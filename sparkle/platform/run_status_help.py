@@ -4,13 +4,14 @@
 from pathlib import Path
 
 import global_variables as sgh
-from CLI.sparkle_help import sparkle_job_help as sjh
+from CLI.support import sparkle_job_help as sjh
 from sparkle.platform import file_help as sfh
-from CLI.help.status_info import (SolverRunStatusInfo, StatusInfoType,
-                                             ConfigureSolverStatusInfo,
-                                             ConstructParallelPortfolioStatusInfo,
-                                             ConstructPortfolioSelectorStatusInfo,
-                                             GenerateReportStatusInfo)
+from CLI.help.status_info import (SolverRunStatusInfo,
+                                  StatusInfoType,
+                                  ConfigureSolverStatusInfo,
+                                  ConstructParallelPortfolioStatusInfo,
+                                  ConstructPortfolioSelectorStatusInfo,
+                                  GenerateReportStatusInfo)
 from CLI.help.command_help import CommandName
 
 
