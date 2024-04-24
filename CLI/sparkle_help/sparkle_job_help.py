@@ -24,10 +24,7 @@ def get_num_of_total_job_from_list(list_jobs: list) -> int:
     Returns:
       The total number of jobs.
     """
-    num = 0
-    for job in list_jobs:
-        num += len(job[1])
-    return num
+    return sum([job[1] for job in list_jobs])
 
 
 def expand_total_job_from_list(list_jobs: list) -> list:
@@ -64,7 +61,7 @@ def check_job_is_done(job_id: str) -> bool:
             if j.status == Status.COMPLETED:
                 return True
             return False
-    # Should this not be an error? Job not found
+    print(f"WARNING: Could not find job with id {job_id}")
     return False
 
 
