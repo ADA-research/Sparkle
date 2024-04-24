@@ -7,7 +7,7 @@ from pathlib import Path
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_logging as sl
-from sparkle.sparkle.plattform import generate_report_help as sgrh
+from sparkle.sparkle.platform import generate_report_help as sgrh
 from sparkle.types.sparkle_objective import PerformanceMeasure
 
 

@@ -7,8 +7,8 @@ from pathlib import Path
 
 from CLI.help.status_info import GenerateReportStatusInfo
 from CLI.sparkle_help import sparkle_global_help as sgh
-from sparkle.sparkle.plattform import generate_report_help as sgrh
-from sparkle.sparkle.plattform import \
+from sparkle.sparkle.platform import generate_report_help as sgrh
+from sparkle.sparkle.platform import \
     generate_report_for_configuration as sgrfch
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
@@ -16,7 +16,7 @@ from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
-from sparkle.sparkle.plattform import \
+from sparkle.sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
