@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to run solvers."""
-#Team2
 import os
 import subprocess
 import sys
