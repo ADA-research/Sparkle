@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Execute Sparkle portfolio, only for internal calls from Sparkle."""
-#Team2
-
 import argparse
 from pathlib import Path
 
