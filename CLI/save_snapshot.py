@@ -4,7 +4,7 @@
 import sys
 import argparse
 
-from CLI.sparkle_help import sparkle_snapshot_help
+from sparkle.sparkle.platform import snapshot_help
 from CLI.sparkle_help import sparkle_logging as sl
 
 
@@ -24,4 +24,4 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
-    sparkle_snapshot_help.save_current_sparkle_platform()
+    snapshot_help.save_current_sparkle_platform()
