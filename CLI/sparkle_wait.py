@@ -6,7 +6,7 @@ import argparse
 
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_job_help as sjh
-from CLI.sparkle_help.sparkle_command_help import CommandName
+from CLI.help.sparkle_command_help import CommandName
 
 
 def parser_function() -> argparse.ArgumentParser:

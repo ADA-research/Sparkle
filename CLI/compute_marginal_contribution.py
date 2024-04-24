@@ -9,10 +9,10 @@ from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from sparkle.types.sparkle_objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
-from CLI.sparkle_help import sparkle_command_help as sch
+from CLI.help import sparkle_command_help as sch
 from CLI.initialise import check_for_initialise
 
 

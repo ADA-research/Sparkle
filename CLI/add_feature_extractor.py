@@ -13,7 +13,7 @@ from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_compute_features_help as scf
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from CLI.sparkle_help import sparkle_command_help as sch
+from CLI.help import sparkle_command_help as sch
 from CLI.initialise import check_for_initialise
 
 

@@ -13,7 +13,7 @@ from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_run_solvers_help as srsh
-from CLI.sparkle_help.sparkle_command_help import CommandName
+from CLI.help.sparkle_command_help import CommandName
 from CLI.sparkle_help import sparkle_configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_basic_help as sbh
 from CLI.sparkle_help import sparkle_slurm_help as ssh

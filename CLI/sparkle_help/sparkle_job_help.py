@@ -9,8 +9,8 @@ import time
 from runrunner import SlurmRun
 from runrunner.base import Status
 
-from CLI.sparkle_help.sparkle_command_help import CommandName
-from CLI.sparkle_help.sparkle_command_help import COMMAND_DEPENDENCIES
+from CLI.help.sparkle_command_help import CommandName
+from CLI.help.sparkle_command_help import COMMAND_DEPENDENCIES
 from CLI.sparkle_help import sparkle_global_help as sgh
 
 

@@ -14,7 +14,7 @@ from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_instances_help as sih
 from CLI.sparkle_help import sparkle_configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_slurm_help as ssh
-from CLI.sparkle_help.sparkle_command_help import CommandName
+from CLI.help.sparkle_command_help import CommandName
 from sparkle.solver.solver import Solver
 
 

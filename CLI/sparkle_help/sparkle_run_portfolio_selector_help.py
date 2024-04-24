@@ -21,7 +21,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.help.reporting_scenario import Scenario
 from CLI.sparkle_help import sparkle_instances_help as sih
-from CLI.sparkle_help.sparkle_command_help import CommandName
+from CLI.help.sparkle_command_help import CommandName
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 
 

@@ -23,7 +23,7 @@ from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help.sparkle_settings import ProcessMonitoring
 from sparkle.types.objective import PerformanceMeasure
-from CLI.sparkle_help.sparkle_command_help import CommandName
+from CLI.help.sparkle_command_help import CommandName
 
 import functools
 print = functools.partial(print, flush=True)
