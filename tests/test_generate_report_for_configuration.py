@@ -404,8 +404,8 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     mock_performance = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                     "get_performance_measure",
                                     return_value=performance_measure)
-    # mock_plot = mocker.patch(
-    # "sparkle.platform.generate_report_help.generate_comparison_plot")
+    mock_plot = mocker.patch("sparkle.platform.generate_report_for_configuration."
+                             "generate_comparison_plot")
 
     mock_penalised = mocker.patch("sparkle.platform.settings_help.Settings."
                                   "get_penalised_time",
@@ -419,7 +419,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
 
     mock_data.assert_called_once_with(configured_dir, default_dir, cutoff)
     mock_performance.assert_called_once_with()
-    # mock_plot.assert_called_once_with(points, filename, **plot_params)
+    mock_plot.assert_called_once_with(points, filename, **plot_params)
     mock_penalised.assert_called_once_with()
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
 
@@ -961,7 +961,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                  "get_timeouts_test",
                                  return_value=(2, 3, 1))
     mock_ablation_bool = mocker.patch("sparkle.platform.generate_"
-                                       "report_for_configuration."
+                                      "report_for_configuration."
                                       "get_ablation_bool",
                                       return_value="ablationtrue")
     mock_ablation_table = mocker.patch("sparkle.platform.generate_"
