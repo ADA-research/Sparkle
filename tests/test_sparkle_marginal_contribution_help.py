@@ -5,7 +5,7 @@ from unittest import TestCase
 from pathlib import Path
 
 from CLI.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
-from CLI.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
 

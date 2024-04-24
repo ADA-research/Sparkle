@@ -14,7 +14,7 @@ from CLI.sparkle_help import sparkle_basic_help
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help import sparkle_job_help as sjh
-from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_job_help
 from CLI.help.sparkle_command_help import CommandName
 

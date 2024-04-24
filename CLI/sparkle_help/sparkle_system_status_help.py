@@ -4,7 +4,7 @@
 #Team1
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_job_help
 
