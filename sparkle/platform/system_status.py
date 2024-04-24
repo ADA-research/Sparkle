@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to inform about Sparkle's system status."""
-#Team1
 from pathlib import Path
 
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv

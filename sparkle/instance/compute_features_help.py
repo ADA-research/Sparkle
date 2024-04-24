@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for feature data computation."""
-#Team1
 import subprocess
 import sys
 from pathlib import Path

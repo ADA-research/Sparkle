@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Module to manage feature data CSV files and common operation son them."""
-#Team1
 from __future__ import annotations
 import sys
 import numpy as np
