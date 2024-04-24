@@ -99,7 +99,7 @@ class TestMarginalContribution(TestCase):
             output = scmch.get_list_predict_schedule(pth, featurecsv, instance)
             assert output == result
 
-    @patch("CLI.sparkle_help.sparkle_compute_marginal_contribution_help."
+    @patch("CLI.support.compute_marginal_contribution_help."
            "compute_actual_performance_for_instance")
     def test_compute_actual_selector_performance(
             self: TestCase, patch_perf_for_instance: MagicMock) -> None:
@@ -133,7 +133,7 @@ class TestMarginalContribution(TestCase):
         # TODO: This method is currently not touched by the .sh test. Think of a test.
         pass
 
-    @patch("CLI.sparkle_help.sparkle_compute_marginal_contribution_help."
+    @patch("CLI.support.compute_marginal_contribution_help."
            "compute_actual_selector_performance")
     def test_compute_actual_selector_marginal_contribution(self: TestCase,
                                                            mock_actual_performance: Mock
