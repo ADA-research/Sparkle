@@ -10,8 +10,8 @@ from enum import Enum
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.structures.sparkle_objective import PerformanceMeasure
-from CLI.structures.solver import Solver
+from sparkle.types.sparkle_objective import PerformanceMeasure
+from sparkle.solver.solver import Solver
 
 
 class InstanceType(Enum):

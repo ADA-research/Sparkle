@@ -12,11 +12,11 @@ from CLI.sparkle_help import sparkle_basic_help
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from CLI.structures import sparkle_performance_dataframe as spfcsv
+from sparkle import sparkle_performance_dataframe as spfcsv
 from CLI.sparkle_help import sparkle_run_solvers_help as srsh
 from CLI.sparkle_help import sparkle_compute_features_help as scfh
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 
 
 def data_unchanged(sparkle_portfolio_selector_path: Path) -> bool:

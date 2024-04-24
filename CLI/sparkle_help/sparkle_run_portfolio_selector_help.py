@@ -17,9 +17,9 @@ from CLI.sparkle_help import sparkle_basic_help
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
-from CLI.structures.reporting_scenario import Scenario
+from CLI.help.reporting_scenario import Scenario
 from CLI.sparkle_help import sparkle_instances_help as sih
 from CLI.sparkle_help.sparkle_command_help import CommandName
 from CLI.sparkle_help import sparkle_slurm_help as ssh

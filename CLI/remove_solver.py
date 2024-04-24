@@ -8,7 +8,7 @@ from pathlib import Path
 
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_command_help as sch
 from CLI.initialise import check_for_initialise

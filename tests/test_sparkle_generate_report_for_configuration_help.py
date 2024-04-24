@@ -9,7 +9,7 @@ from CLI.sparkle_help import sparkle_generate_report_for_configuration_help as s
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from CLI.structures.solver import Solver
+from sparkle.solver.solver import Solver
 
 global settings
 sgh.settings = sparkle_settings.Settings()

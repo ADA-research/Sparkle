@@ -8,7 +8,7 @@ from pathlib import Path
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 
 
 def feature_data_csv_merge() -> None:

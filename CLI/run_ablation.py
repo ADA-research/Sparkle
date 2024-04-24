@@ -12,7 +12,7 @@ from CLI.sparkle_help import sparkle_run_ablation_help as sah
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.sparkle_help import sparkle_command_help as sch

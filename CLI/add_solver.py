@@ -12,7 +12,7 @@ from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.sparkle_help import sparkle_run_solvers_parallel_help as srsp
 from CLI.sparkle_help import sparkle_add_solver_help as sash

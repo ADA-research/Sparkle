@@ -8,7 +8,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help.sparkle_command_help import CommandName

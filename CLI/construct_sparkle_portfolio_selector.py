@@ -5,20 +5,20 @@ import sys
 import argparse
 from pathlib import Path
 
-from CLI.structures.status_info import ConstructPortfolioSelectorStatusInfo
+from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from CLI.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_job_help as sjh
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
-from CLI.structures.reporting_scenario import Scenario
+from CLI.help.reporting_scenario import Scenario
 from CLI.sparkle_help import sparkle_command_help as sch
 from CLI.initialise import check_for_initialise
 

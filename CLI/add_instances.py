@@ -9,7 +9,7 @@ import shutil
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_compute_features_help as scf
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.sparkle_help import sparkle_run_solvers_parallel_help as srsp

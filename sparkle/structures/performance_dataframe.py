@@ -11,9 +11,8 @@ import sys
 
 from statistics import mean
 import pandas as pd
-CLI
 from CLI.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_settings
+from CLI.sparkle_help import sparkle_settings
 
 global settings
 sgh.settings = sparkle_settings.Settings()

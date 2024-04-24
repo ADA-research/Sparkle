@@ -6,13 +6,13 @@ import sys
 import argparse
 from pathlib import Path
 
-from CLI.structures.status_info import ConstructParallelPortfolioStatusInfo
+from CLI.help.status_info import ConstructParallelPortfolioStatusInfo
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import sparkle_construct_parallel_portfolio_help as scpp
-from CLI.structures.reporting_scenario import Scenario
+from CLI.help.reporting_scenario import Scenario
 from CLI.sparkle_help import sparkle_command_help as sch
 from CLI.initialise import check_for_initialise
 

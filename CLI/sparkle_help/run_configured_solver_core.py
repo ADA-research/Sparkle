@@ -10,7 +10,7 @@ from pathlib import PurePath
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 
 
 if __name__ == "__main__":

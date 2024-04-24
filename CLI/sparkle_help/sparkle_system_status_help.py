@@ -5,7 +5,7 @@
 from pathlib import Path
 
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_job_help
 
 

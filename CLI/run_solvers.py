@@ -9,12 +9,12 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help import sparkle_run_solvers_parallel_help as srsph
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SolutionVerifier
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help.sparkle_command_help import CommandName

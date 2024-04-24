@@ -22,7 +22,7 @@ from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help.sparkle_settings import ProcessMonitoring
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_command_help import CommandName
 
 import functools

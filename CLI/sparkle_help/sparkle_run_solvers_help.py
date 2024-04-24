@@ -13,9 +13,9 @@ from pathlib import Path
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_basic_help as sbh
 from CLI.sparkle_help import sparkle_file_help as sfh
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_job_help as sjh
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SolutionVerifier
 from CLI.sparkle_help import sparkle_sat_solver_help as sssh
 

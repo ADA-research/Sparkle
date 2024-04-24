@@ -9,8 +9,8 @@ from enum import Enum
 import math
 
 from sparkle import about
-from CLI.structures.solver import Solver
-from CLI.structures.reporting_scenario import ReportingScenario
+from sparkle.solver.solver import Solver
+from CLI.help.reporting_scenario import ReportingScenario
 
 
 # TODO: Handle different seed requirements; for the moment this is a dummy function

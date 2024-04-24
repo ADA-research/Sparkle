@@ -12,11 +12,11 @@ import subprocess
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_file_help as sfh
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_tex_help as stex
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 
 
 def underscore_for_latex(string: str) -> str:

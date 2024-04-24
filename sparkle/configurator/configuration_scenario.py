@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from CLI.structures.sparkle_objective import SparkleObjective, PerformanceMeasure
-from CLI.structures.solver import Solver
+from sparkle.types.sparkle_objective import SparkleObjective, PerformanceMeasure
+from sparkle.solver.solver import Solver
 
 
 class ConfigurationScenario:

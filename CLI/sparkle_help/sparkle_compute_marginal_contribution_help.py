@@ -15,11 +15,11 @@ from CLI.sparkle_help import sparkle_basic_help as sbh
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from CLI.structures.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from CLI.sparkle_help import sparkle_run_portfolio_selector_help as srps
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
 
 

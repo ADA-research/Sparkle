@@ -8,7 +8,7 @@ from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_generate_report_help as sgrh
-from CLI.structures.sparkle_objective import PerformanceMeasure
+from sparkle.types.sparkle_objective import PerformanceMeasure
 
 
 def get_solver_list_latex(solver_list: list[str]) -> str:

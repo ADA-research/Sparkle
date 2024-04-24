@@ -11,7 +11,7 @@ import statistics
 
 from CLI.sparkle_help import sparkle_logging as slog
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.structures.sparkle_objective import SparkleObjective
+from sparkle.types.sparkle_objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 
 
