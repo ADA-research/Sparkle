@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Run a solver on an instance, only for internal calls from Sparkle."""
-#Team2
 import time
 import fcntl
 import argparse
 import shutil
 from pathlib import Path
-from pathlib import PurePath
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_basic_help as sbh
@@ -21,8 +19,7 @@ from CLI.help.status_info import SolverRunStatusInfo
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    settings_dir = Path("Settings")
-    file_path_latest = PurePath(settings_dir / "latest.ini")
+    file_path_latest = Path("Settings/latest.ini")
     sgh.settings = sparkle_settings.Settings(file_path_latest)
     perf_measure = sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
