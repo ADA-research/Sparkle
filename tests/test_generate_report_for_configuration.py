@@ -86,7 +86,7 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     """
     results_file = "example_file"
     cutoff = 42
-    mock_get_list = mocker.patch("Commands.sparkle_help.sparkle_generate_"
+    mock_get_list = mocker.patch("CLI.generate_"
                                  "report_for_configuration_help."
                                  "get_instance_performance_from_csv",
                                  return_value=[("one", 10), ("two", 5)])
@@ -105,7 +105,7 @@ def test_get_instance_performance_from_csv(mocker: MockFixture) -> None:
                          '"../../instances/instances/instance-2.cnf","null","1.0"\n'
                          '"../../instances/instances/instance-3.cnf","null","15"\n')
     mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
-    mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help.get_smac_settings",
+    mocker.patch("CLI.support.configure_solver_help.get_smac_settings",
                  return_value=("RUNTIME", "", "", "", "", ""))
 
     result_file = ""
@@ -121,8 +121,8 @@ def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     instance_list = [("instance-1.cnf", 0.01001),
                      ("instance-2.cnf", 1.0),
                      ("instance-3.cnf", 100)]
-    mock_construct = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                                  "configuration_help."
+    mock_construct = mocker.patch("sparkle.platform.generate_report_"
+                                  "for_configuration."
                                   "get_instance_performance_from_csv",
                                   return_value=instance_list)
 
@@ -143,10 +143,10 @@ def test_get_performance_measure_par10(mocker: MockFixture) -> None:
 
     Return `PAR10` for RUNTIME with default penalty multiplier of 10.
     """
-    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
-    mock_multiplier = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
+    mock_multiplier = mocker.patch("sparkle.platform.settings_help."
                                    "get_general_penalty_multiplier",
                                    return_value=10)
 
@@ -162,10 +162,10 @@ def test_get_performance_measure_par5(mocker: MockFixture) -> None:
 
     Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
     """
-    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
-    mock_multiplier = mocker.patch("Commands.sparkle_help.sparkle_global_help.settings."
+    mock_multiplier = mocker.patch("sparkle.platform.settings_help."
                                    "get_general_penalty_multiplier",
                                    return_value=5)
 
@@ -178,7 +178,7 @@ def test_get_performance_measure_par5(mocker: MockFixture) -> None:
 
 def test_get_performance_measure_performance(mocker: MockFixture) -> None:
     """Test get_performance_measure returns correct measure for QUALITY."""
-    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("QUALITY", "", "", "", "", ""))
 
@@ -190,7 +190,7 @@ def test_get_performance_measure_performance(mocker: MockFixture) -> None:
 
 def test_get_runtime_bool(mocker: MockFixture) -> None:
     """Test get_runtime_bool returns correct string for objective RUNTIME."""
-    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("RUNTIME", "", "", "", "", ""))
 
@@ -200,7 +200,7 @@ def test_get_runtime_bool(mocker: MockFixture) -> None:
     assert runtime_bool == r"\runtimetrue"
 
     # Quality
-    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("QUALITY", "", "", "", "", ""))
 
@@ -210,7 +210,7 @@ def test_get_runtime_bool(mocker: MockFixture) -> None:
     assert runtime_bool == r"\runtimefalse"
 
     # Other
-    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("ERROR", "", "", "", "", ""))
 
@@ -222,7 +222,7 @@ def test_get_runtime_bool(mocker: MockFixture) -> None:
 
 def test_get_ablation_bool_true(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is True."""
-    mock_check = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
+    mock_check = mocker.patch("sparkle.configurator.ablation."
                               "check_for_ablation",
                               return_value=True)
 
@@ -238,7 +238,7 @@ def test_get_ablation_bool_true(mocker: MockFixture) -> None:
 
 def test_get_ablation_bool_false(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is False."""
-    mock_check = mocker.patch("Commands.sparkle_help.sparkle_run_ablation_help."
+    mock_check = mocker.patch("sparkle.configurator.ablation."
                               "check_for_ablation",
                               return_value=False)
 
@@ -291,8 +291,7 @@ def test_get_data_for_plot_same_instance(mocker: MockFixture) -> None:
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
 
@@ -317,8 +316,7 @@ def test_get_data_for_plot_instance_error(mocker: MockFixture) -> None:
     dict_default = {
         "instance-1.cnf": 0.01
     }
-    mock_dict = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
 
