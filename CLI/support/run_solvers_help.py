@@ -158,7 +158,7 @@ def get_solver_output_dict(raw_result_path: Path) -> dict:
         output_dict = ast.literal_eval(raw_output_dict_str)
         if isinstance(output_dict, dict):
             return output_dict
-    except:
+    except Exception:
         return None
     return None
 
