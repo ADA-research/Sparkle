@@ -47,7 +47,7 @@ http://www.cpan.org/modules/by-module/Compress/
 
 A Python interface to zlib written by A.M. Kuchling <amk@amk.ca> is
 available in Python 1.5 and later versions, see
-http://www.python.org/doc/lib/module-zlib.html
+http://wwwthon.org/doc/lib/module-zlib.html
 
 A zlib binding for TCL written by Andreas Kupries <a.kupries@westend.com> is
 availlable at http://www.oche.de/~akupries/soft/trf/trf_zip.html

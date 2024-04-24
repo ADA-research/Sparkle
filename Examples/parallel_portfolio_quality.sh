@@ -5,25 +5,25 @@
 
 #### Initialise the Sparkle platform
 
-CLI/initialise.py
+sparkle initialise
 
 #### Add instances 
 
 # Add instances (in this case for the portfolio) in a given directory, without running solvers or feature extractors
 # Note that you should use the full path to the directory containing the instance(s)
 
-CLI/add_instances.py Examples/Resources/CCAG/Instances/CCAG/
+sparkle add_instances Examples/Resources/CCAG/Instances/CCAG/
 
 #### Add solvers
 
 # Add a solver without running the solver yet
-# The path used should be the full path to the solver directory and should contain the solver executable and the `sparkle_smac_wrapper.py` wrapper
+# The path used should be the full path to the solver directory and should contain the solver executable and the `sparkle_smac_wrapper` wrapper
 
 # If needed solvers can also include additional files or scripts in their directory, but try to keep additional files to a minimum as it speeds up copying.
 # Use the --solver-variations option to set the default number of solver variations of a solver which will be used when a portfolio is constructed. E.g. '--solver-variations 5'
 
-CLI/add_solver.py --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/
-CLI/add_solver.py --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/
+sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/
+sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/
 
 #### Construct the portfolio
 
@@ -40,7 +40,7 @@ CLI/add_solver.py --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/
 # For example --solver Solvers/FastCA,4 wich will create a portfolio containing four variations of FastCA
 # If this is not used only a single variation of the solver will be added.
 
-CLI/construct_sparkle_parallel_portfolio.py --nickname quality_experiment
+sparkle construct_sparkle_parallel_portfolio --nickname quality_experiment
 
 #### Run the portfolio 
 
@@ -51,11 +51,11 @@ CLI/construct_sparkle_parallel_portfolio.py --nickname quality_experiment
 # The --instance-paths option must be followed by a space seperated list of paths to an instance or an instance set.
 # For example --instance-paths Instances/Instance_Set_Name/Single_Instance Instances/Other_Instance_Set_Name
 
-CLI/run_sparkle_parallel_portfolio.py --instance-paths Instances/CCAG/ --performance-measure QUALITY_ABSOLUTE --portfolio-name quality_experiment
+sparkle run_sparkle_parallel_portfolio --instance-paths Instances/CCAG/ --performance-measure QUALITY_ABSOLUTE --portfolio-name quality_experiment
 
 #### Generate the report
 
 # The report details the experimental procedure and performance information. 
 # This will be located at Components/Sparkle-latex-generator-for-parallel-portfolio/Sparkle_Report.pdf
 
-CLI/generate_report.py
+sparkle generate_report
