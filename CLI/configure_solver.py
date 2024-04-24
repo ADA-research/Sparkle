@@ -19,7 +19,7 @@ from CLI.sparkle_help import sparkle_run_ablation_help as sah
 from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.help.reporting_scenario import Scenario
-from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator

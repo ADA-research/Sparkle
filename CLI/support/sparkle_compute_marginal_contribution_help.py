@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for marginal contribution computation."""
-#Team2
 from __future__ import annotations
 
 import subprocess
@@ -13,13 +12,13 @@ from statistics import mean
 
 from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_construct_portfolio_selector_help as scps
 from CLI.sparkle_help import sparkle_run_portfolio_selector_help as srps
 from CLI.sparkle_help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
-from CLI.sparkle_help.sparkle_feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 
 
 def read_marginal_contribution_csv(path: Path) -> list[tuple[str, float]]:
@@ -373,7 +372,7 @@ def compute_actual_selector_marginal_contribution(
         # 1. Create a temporary df file name
         tmp_performance_df_file = (
             f"tmp_performance_data_csv_without_{solver_name}_"
-            f"{CLI.sparkle_help.sparkle_global_help.get_time_pid_random_string()}.csv")
+            f"{sgh.get_time_pid_random_string()}.csv")
         # 2. Create the path using the log dir and the file name
         tmp_performance_df_path = sl.caller_log_dir / tmp_performance_df_file
 

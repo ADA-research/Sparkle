@@ -8,10 +8,10 @@ from pathlib import Path
 from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
-from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_construct_portfolio_selector_help as scps
-from CLI.sparkle_help import sparkle_compute_marginal_contribution_help as scmch
+from CLI.support import sparkle_compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_job_help as sjh
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
