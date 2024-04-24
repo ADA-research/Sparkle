@@ -93,6 +93,6 @@ def write_configuration_pcs(solver_name: str, config_str: str, tmp_path: Path) -
         for element in pcs_file_out:
             outfile.write(str(element))
     # Log output
-    sl.add_output(latest_configuration_pcs_path, "PCS file with configured algorithm "
-                  "parameters of the most recent configuration process as default "
-                  "values")
+    sl.add_output(str(latest_configuration_pcs_path), "PCS file with configured "
+                  "algorithm parameters of the most recent configuration process "
+                  "as default values")
