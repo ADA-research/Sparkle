@@ -12,7 +12,7 @@ from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.instance import instances_help as sih
-from CLI.support import sparkle_configure_solver_help as scsh
+from CLI.support import configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
