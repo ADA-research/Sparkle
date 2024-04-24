@@ -12,9 +12,9 @@ from CLI.sparkle_help import sparkle_configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_instances_help as sih
-from CLI.sparkle_help import sparkle_generate_report_help as sgrh
+from sparkle.sparkle.plattform import generate_report_help as sgrh
 from CLI.sparkle_help import sparkle_run_ablation_help as sah
-from CLI.sparkle_help.sparkle_generate_report_help import generate_comparison_plot
+from sparkle.sparkle.plattform.generate_report_help import generate_comparison_plot
 
 
 def get_num_instance_for_configurator(instance_set_name: str) -> str:
