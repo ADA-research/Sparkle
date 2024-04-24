@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Class to handle a solver and its directories."""
+#Move to sparkle.solver
 
 from __future__ import annotations
 import sys

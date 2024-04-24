@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Module to manage performance data CSV files and common operations on them."""
+#MOVE TO sparkle.structures / remove sparkle from filename
 
 from __future__ import annotations
 from typing import Callable

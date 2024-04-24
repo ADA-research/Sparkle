@@ -1,7 +1,7 @@
 """Class for Sparkle Objective and Performance."""
 from __future__ import annotations
 from enum import Enum
-
+# Move to sparkle.types rename to objective
 
 class PerformanceMeasure(Enum):
     """Possible performance measures."""
