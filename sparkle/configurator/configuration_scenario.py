@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from sparkle.types.sparkle_objective import SparkleObjective, PerformanceMeasure
+from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.solver.solver import Solver
 
 
