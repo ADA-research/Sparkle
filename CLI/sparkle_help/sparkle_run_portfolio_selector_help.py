@@ -17,7 +17,7 @@ from CLI.sparkle_help import sparkle_basic_help
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_feature_data_csv_help as sfdcsv
-from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.help.reporting_scenario import Scenario
 from CLI.sparkle_help import sparkle_instances_help as sih
@@ -280,7 +280,7 @@ def call_sparkle_portfolio_selector_solve_directory(
     test_performance_data_csv.save_csv()
 
     n_jobs = len(total_job_list)
-    target_call = "python Commands/sparkle_help/run_sparkle_portfolio_core.py" +\
+    target_call = "python CLI/core/run_sparkle_portfolio_core.py" +\
                   f" --performance-data-csv {test_performance_data_path}"
     cmd_list = [f"{target_call} --instance {job_instance[0]}"
                 for job_instance in total_job_list]
