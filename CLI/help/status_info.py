@@ -11,7 +11,6 @@ from typing import Type
 from abc import ABC, abstractmethod
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_basic_help as sbh
 
 
 class StatusInfoType(str, Enum):
@@ -310,4 +309,4 @@ class GenerateReportStatusInfo(StatusInfo):
 
     def get_key_string(self: GenerateReportStatusInfo) -> str:
         """Create key string."""
-        return f"{self.get_report_type()}_{CLI.sparkle_help.sparkle_global_help.get_time_pid_random_string()}"
+        return f"{self.get_report_type()}_{sgh.get_time_pid_random_string()}"
