@@ -451,7 +451,7 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
     Returns:
         A string containing the LaTeX table code of the ablation path
     """
-    results = sah.get_ablation_table(solver_name, instance_set_train_name,
+    results = sah.read_ablation_table(solver_name, instance_set_train_name,
                                      instance_set_test_name)
     table_string = r"\begin{tabular}{rp{0.25\linewidth}rrr}"
     # "Round", "Flipped parameter", "Source value", "Target value", "Validation result"
