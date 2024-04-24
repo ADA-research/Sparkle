@@ -787,12 +787,10 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
         "test-1": "3",
         "test-2": "4"
     }
-    mock_common = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                               "configuration_help."
+    mock_common = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                "get_dict_variable_to_value_common",
                                return_value=common_dict)
-    mock_test = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_test = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
     mock_extractor_list = mocker.patch("Commands.sparkle_help.sparkle_generate_report_"
@@ -829,14 +827,13 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     report_dir = "reports/directory"
     seed = 13
     cutoff = "10"
-    mock_settings = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_settings = mocker.patch("CLI.support.configure_solver_help."
                                  "get_smac_settings",
                                  return_value=("OBJ", 100, cutoff, "", 11, ""))
-    mock_config = mocker.patch("Commands.sparkle_help.sparkle_configure_solver_help."
+    mock_config = mocker.patch("CLI.support.configure_solver_help."
                                "get_optimised_configuration",
                                return_value=("123", "", seed))
-    mock_perf = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
-                             "configuration_help."
+    mock_perf = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_performance_measure",
                              return_value="PERF")
     mock_runtime = mocker.patch("Commands.sparkle_help.sparkle_generate_report_for_"
