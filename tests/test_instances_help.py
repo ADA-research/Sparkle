@@ -11,7 +11,7 @@ test_instance_set_name = "instance_set"
 test_file = Path("file.txt")
 
 
-@patch("Commands.sparkle_help.sparkle_instances_help.Path")
+@patch("sparkle.instance.instances_help.Path")
 def test_check_existence_of_reference_instance_list(path_mock: MagicMock) -> None:
     """Test whether return value is correct when the file does (not) exist."""
     mock_path = MagicMock()
@@ -35,7 +35,7 @@ def test_check_existence_of_reference_instance_list(path_mock: MagicMock) -> Non
     mock_path.is_file.assert_called_once()
 
 
-@patch("Commands.sparkle_help.sparkle_instances_help.Path.open")
+@patch("sparkle.instance.instances_help.Path.open")
 def test_count_instances_in_reference_list(path_open_mock: mock_open) -> None:
     """Test whether the number of instances is counted correctly."""
     # Empty lines should not be counted
