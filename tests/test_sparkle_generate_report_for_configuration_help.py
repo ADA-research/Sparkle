@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pytest_mock import MockFixture
 
-from CLI.sparkle_help import sparkle_generate_report_for_configuration_help as sgrch
+from sparkle.sparkle.plattform import generate_report_for_configuration as sgrch
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
