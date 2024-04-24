@@ -91,7 +91,8 @@ def parser_function() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     # Initialise settings
-    sgh.settings = sparkle_settings.Settings()
+    sgh.settings = settings_help.Settings()
+
 
     # Log command call
     sl.log_command(sys.argv)

@@ -151,7 +151,8 @@ def run_solvers_on_instances(
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = sparkle_settings.Settings()
+    sgh.settings = settings_help.Settings()
+
 
     # Log command call
     sl.log_command(sys.argv)

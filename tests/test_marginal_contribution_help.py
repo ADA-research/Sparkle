@@ -13,7 +13,8 @@ from unittest.mock import patch
 from unittest.mock import MagicMock, Mock
 
 global settings
-sgh.settings = sparkle_settings.Settings()
+sgh.settings = settings_help.Settings()
+
 
 
 class TestMarginalContribution(TestCase):

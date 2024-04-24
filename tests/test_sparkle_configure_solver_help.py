@@ -10,7 +10,8 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 
 global settings
-sgh.settings = sparkle_settings.Settings()
+sgh.settings = settings_help.Settings()
+
 
 
 @patch("pathlib.Path.is_dir")
