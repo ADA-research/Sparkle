@@ -7,6 +7,6 @@ setup(name="sparkle",
       version=sparkle_version,
       packages=find_packages(),
       entry_points={
-          'console_scripts': ['sparkle=sparkle.cli:main'],
+          "console_scripts": ["sparkle=sparkle.cli:main"],
       },
       )
