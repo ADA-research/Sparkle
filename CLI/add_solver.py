@@ -18,7 +18,7 @@ from CLI.support import run_solvers_parallel_help as srsp
 from sparkle.solver import add as sash
 import sparkle_logging as sl
 from CLI.help.command_help import CommandName
-from CLI.sparkle_help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from sparkle.platform import slurm_help as ssh
 from CLI.initialise import check_for_initialise
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     solver_source = Path(args.solver_path)
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.ADD_SOLVER])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_SOLVER])
 
     if not solver_source.exists():
         print(f'Solver path "{solver_source}" does not exist!')
