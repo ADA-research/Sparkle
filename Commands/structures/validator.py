@@ -26,7 +26,7 @@ class Validator():
         """Construct the validator"""
         pass
 
-    def get_validation_results(self, solver, instance_set, config=None):
+    def get_validation_results(self, solver, instance_set, config: str = None):
         '''
         Query the results of the validation of solver on instance_set.
 
@@ -41,11 +41,17 @@ class Validator():
         -------
         csv_file: Path to csv file where the validation results can be found
         '''
-        csv_file = f"Output/validation/{solver}_{instance_set.name}/validation.csv"
-        # Read csv file into a list[list]
-        # if config is not None, select by config column
-        # return list of lists
-        return csv_file
+        out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
+        csv_file = out_dir / "validation.csv"
+        csv_data = [line for line in csv.reader(csv_file.open("r"))]
+        if config is not None:
+            # We filter on the config string, but are flexible with:
+            # - Surrounding white space
+            # - Singular quotes, double qoutes
+            config = config.strip().replace("'", "").replace('"', "")
+            csv_data = [line for line in csv_data if
+                        csv_data[1].strip().replace("'", "") == config]
+        return csv_data
 
     def validate(self: Validator, solvers: list[Path], config_str_list: list[str] | str,
                  instance_sets: list[Path], run_on: Runner=Runner.LOCAL):
@@ -92,15 +98,19 @@ class Validator():
                     if runtime == -1.0:
                         runtime = wc_time
                     status, quality = out_dict["status"], out_dict["quality"]
-                    self.write_csv(solver, config_str, instance_set, instance_name,
-                                    status, quality, runtime)
-                    # Clean up .rawres files from this loop iteration
+                    Validator.write_csv(solver.name, config_str,
+                                        instance_set.name, instance_name,
+                                        status, quality, runtime)
+                    # Clean up .rawres files from this loop iteration?
     
-    def write_csv(self: Validator,
-                  solver: str,
-                  config_str: str,
-                  instance_set: str,
-                  instance: str, status: str, quality: str, runtime: str):
+    def append_entry_to_csv(solver: str,
+                            config_str: str,
+                            instance_set: str,
+                            instance: str,
+                            status: str,
+                            quality: str,
+                            runtime: str):
+        """Append a validation result to a CSV file."""
         out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
         if not out_dir.exists():
             out_dir.mkdir(parents=True)
@@ -108,8 +118,8 @@ class Validator():
         if not csv_file.exists():
            # Write header
            with csv_file.open("w") as out:
-               csv.writer(out).write(("Solver", "Configuration", "InstanceSet", "Instance", "Status", "Quality", "Runtime"))
-
+               csv.writer(out).write(("Solver", "Configuration", "InstanceSet",
+                                      "Instance", "Status", "Quality", "Runtime"))
         with csv_file.open("a") as out:
             writer = csv.writer(out)
             writer.writerow((solver, config_str, instance_set, instance, status,
