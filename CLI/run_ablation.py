@@ -15,7 +15,7 @@ from CLI.sparkle_help import sparkle_settings
 from sparkle.types.objective import PerformanceMeasure
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_ABLATION])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_ABLATION])
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file

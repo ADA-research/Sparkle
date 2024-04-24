@@ -16,7 +16,7 @@ from CLI.sparkle_help import sparkle_slurm_help as ssh
 from CLI.sparkle_help import sparkle_job_help as sjh
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_job_help
-from CLI.help.sparkle_command_help import CommandName
+from CLI.help.command_help import CommandName
 
 
 def generate_missing_value_csv_like_feature_data_csv(
@@ -107,7 +107,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             basic_part = (f"{sgh.sparkle_tmp_path}/"
                           f"{extractor_path.name}_"
                           f"{instance_path.name}_"
-                          f"{sparkle_basic_help.get_time_pid_random_string()}")
+                          f"{sgh.get_time_pid_random_string()}")
             result_path = f"{basic_part}.rawres"
             err_path = f"{basic_part}.err"
             runsolver_watch_data_path = f"{basic_part}.log"

@@ -21,11 +21,11 @@ from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_slurm_help as ssh
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
-from CLI.help.sparkle_command_help import CommandName
+from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 
 
@@ -203,7 +203,7 @@ if __name__ == "__main__":
             origin=SettingState.CMD_LINE)
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.CONFIGURE_SOLVER])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:

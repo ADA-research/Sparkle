@@ -7,14 +7,13 @@ import subprocess
 import argparse
 from pathlib import Path
 
-from CLI.sparkle_help import sparkle_basic_help
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_compute_features_help as scf
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -85,7 +84,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.ADD_FEATURE_EXTRACTOR])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_FEATURE_EXTRACTOR])
 
     extractor_source = Path(args.extractor_path)
     if not extractor_source.exists():
@@ -122,7 +121,7 @@ if __name__ == "__main__":
             + "_"
             + Path(model_file).name
             + "_"
-            + sparkle_basic_help.get_time_pid_random_string()
+            + sgh.get_time_pid_random_string()
             + ".rawres"
         )
         command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,
@@ -141,7 +140,7 @@ if __name__ == "__main__":
             + "_"
             + instance_path.name
             + "_"
-            + sparkle_basic_help.get_time_pid_random_string()
+            + sgh.get_time_pid_random_string()
             + ".rawres"
         )
         command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,

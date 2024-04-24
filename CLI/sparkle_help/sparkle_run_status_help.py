@@ -12,7 +12,7 @@ from CLI.help.status_info import (SolverRunStatusInfo, StatusInfoType,
                                              ConstructParallelPortfolioStatusInfo,
                                              ConstructPortfolioSelectorStatusInfo,
                                              GenerateReportStatusInfo)
-from CLI.help.sparkle_command_help import CommandName
+from CLI.help.command_help import CommandName
 
 
 def get_jobs_for_command(jobs: list[dict[str, str, str]], command: CommandName) \

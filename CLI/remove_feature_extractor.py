@@ -10,7 +10,7 @@ from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     check_for_initialise(
         sys.argv,
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.REMOVE_FEATURE_EXTRACTOR]
+        ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_FEATURE_EXTRACTOR]
     )
 
     if args.nickname:

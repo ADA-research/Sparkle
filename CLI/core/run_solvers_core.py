@@ -62,7 +62,7 @@ if __name__ == "__main__":
     run_status_path = args.run_status_path
     key_str = (f"{solver_path.name}_"
                f"{instance_name}_"
-               f"{sbh.get_time_pid_random_string()}")
+               f"{sgh.get_time_pid_random_string()}")
     raw_result_path = f"Tmp/{key_str}.rawres"
     start_time = time.time()
     # create statusinfo file

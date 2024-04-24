@@ -20,8 +20,8 @@ from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
-from CLI.help.sparkle_command_help import CommandName
-from CLI.help import sparkle_command_help as sch
+from CLI.help.command_help import CommandName
+from CLI.help import command_help as ch
 from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.initialise import check_for_initialise
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     check_for_initialise(
         sys.argv,
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
+        ch.COMMAND_DEPENDENCIES[ch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
     )
 
     if ac.set_by_user(args, "settings_file"):

@@ -10,7 +10,7 @@ from CLI.sparkle_help import sparkle_file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_logging as sl
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     solver_path = Path(args.solver)
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.REMOVE_SOLVER])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_SOLVER])
 
     if args.nickname:
         solver_path = Path(sgh.solver_nickname_mapping[args.nickname])

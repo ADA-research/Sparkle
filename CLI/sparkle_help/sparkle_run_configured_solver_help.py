@@ -13,7 +13,7 @@ from runrunner.base import Runner
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_run_solvers_help as srsh
-from CLI.help.sparkle_command_help import CommandName
+from CLI.help.command_help import CommandName
 from CLI.sparkle_help import sparkle_configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_basic_help as sbh
 from CLI.sparkle_help import sparkle_slurm_help as ssh
@@ -185,7 +185,7 @@ def run_configured_solver(instance_path_list: list[Path]) -> None:
     solver_path = sgh.solver_dir / solver_name
     instance_name = "_".join([path.name for path in instance_path_list])
     raw_result_path = Path(f"{sgh.sparkle_tmp_path}{solver_path.name}_"
-                           f"{instance_name}_{sbh.get_time_pid_random_string()}.rawres")
+                           f"{instance_name}_{sgh.get_time_pid_random_string()}.rawres")
     runsolver_values_path = Path(str(raw_result_path).replace(".rawres", ".val"))
 
     # b) Run the solver

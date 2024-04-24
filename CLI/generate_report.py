@@ -18,7 +18,7 @@ from CLI.sparkle_help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from CLI.sparkle_help import \
     sparkle_generate_report_for_parallel_portfolio_help as sgrfpph
-from CLI.help import sparkle_command_help as sch
+from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
 
     check_for_initialise(sys.argv,
-                         sch.COMMAND_DEPENDENCIES[sch.CommandName.GENERATE_REPORT])
+                         ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])
 
     # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "settings_file"):

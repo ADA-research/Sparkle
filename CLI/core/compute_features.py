@@ -9,7 +9,6 @@ from pathlib import Path
 from pathlib import PurePath
 
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_basic_help
 from CLI.sparkle_help import sparkle_file_help as sfh
 from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.sparkle_help import sparkle_compute_features_help as scf
@@ -53,7 +52,7 @@ if __name__ == "__main__":
     # TODO: Handle multi-file instances
     key_str = (f"{extractor_path.name}_"
                f"{instance_path.name}_"
-               f"{sparkle_basic_help.get_time_pid_random_string()}")
+               f"{sgh.get_time_pid_random_string()}")
     result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
     basic_part = "Tmp/" + key_str
     err_path = basic_part + ".err"
