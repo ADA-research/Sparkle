@@ -14,7 +14,7 @@ from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
 from CLI.sparkle_help import sparkle_run_solvers_help as srs
-from CLI.sparkle_help import sparkle_run_solvers_parallel_help as srsp
+from CLI.support import run_solvers_parallel_help as srsp
 from sparkle.solver import add as sash
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
