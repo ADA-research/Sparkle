@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for adding solvers."""
-
+#Team1
 import os
 from pathlib import Path
 from Commands.sparkle_help import sparkle_global_help as sgh

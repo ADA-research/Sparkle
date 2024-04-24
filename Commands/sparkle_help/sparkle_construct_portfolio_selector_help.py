@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for portfolio selector construction."""
-
+#Team2
 import subprocess
 import sys
 import shutil

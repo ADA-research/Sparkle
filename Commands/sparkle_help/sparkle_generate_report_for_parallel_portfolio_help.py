@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for parallel portfolio report generation."""
-
+#Team1
 from pathlib import Path
 
 from Commands.sparkle_help import sparkle_global_help as sgh

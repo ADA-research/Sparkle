@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a portfolio selector."""
+#Team2
 
 import pathlib
 import subprocess

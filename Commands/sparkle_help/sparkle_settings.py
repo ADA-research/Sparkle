@@ -1,5 +1,5 @@
 """Classes and Enums to control settings."""
-
+#Team1
 from __future__ import annotations
 import configparser
 from enum import Enum

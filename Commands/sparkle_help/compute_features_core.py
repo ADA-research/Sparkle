@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Compute features for an instance, only for internal calls from Sparkle."""
-# Jeroen/Brain
+# Jeroen/Brian
 import subprocess
 import time
 import argparse
