@@ -165,7 +165,7 @@ Executing commands in Sparkle is as simple as running them in the top
 directory of Sparkle, for example:
 
 ```
-Commands/initialise.py
+CLI/initialise.py
 ```
 
 Do note that when running on a cluster additional arguments may be
@@ -173,7 +173,7 @@ needed, for instance under the Slurm workload manager the above command would ch
 something like:
 
 ```
-srun -N1 -n1 -c1 Commands/initialise.py
+srun -N1 -n1 -c1 CLI/initialise.py
 ```
 
 In the `Examples/` directory a number of common command sequences are
@@ -685,7 +685,7 @@ of your call to a Sparkle command. Take for instance the following
 command:
 
 ```
-srun -N1 -n1 -p graceTST Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
+srun -N1 -n1 -p graceTST CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
 ```
 
 This call restricts itself to the `graceTST` partition (the

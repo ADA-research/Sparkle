@@ -7,8 +7,8 @@ import time
 import subprocess
 from pathlib import Path
 
-from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_run_solvers_help as srsh
+import global_variables as sgh
+from CLI.support import run_solvers_help as srsh
 
 
 if __name__ == "__main__":

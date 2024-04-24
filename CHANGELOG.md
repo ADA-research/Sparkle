@@ -7,8 +7,10 @@ Notable changes to Sparkle will be documented in this file.
 ### Added
 - Awaiting Sparkle Jobs is now done using RunRunner's objects and .JSON files instead of direct calls to Slurm
 - Performance data now is restructured into Performance DataFrame which supports two new dimensions: Objective and Run.
+- Sparkle commands are now registered directly as command line operators by prefix ``sparkle'', see updated examples.
 
 ### Changed
+- ! New file structure for code was implemented, Commands are now in CLI folder and library objects and methods are in sparkle directory.
 - Runsolver is now automatically provided for newly added Solvers to the Sparkle Platform
 - Output directories for report generation are now compliant with the explanation in the documentation
 - Configurator object is now used as source in many cases when accessing Configurator directories instead of hard-coded
@@ -151,7 +153,7 @@ Notable changes to Sparkle will be documented in this file.
 - Remove Yahsp solver and Depots instances (unclear redistribution permissions)
 
 ### Fixed
-- Converted `Commands/*.py` to the new coding style
+- Converted `CLI/*.py` to the new coding style
 - Change LaTeX build to non-interactive to prevent hanging
 - get\_solver\_directory function and pcs check before configuration
 - Make pcs file check only return true iff one pcs file is found
