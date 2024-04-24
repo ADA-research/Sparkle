@@ -1,5 +1,3 @@
-"""Custom helper class and functions to process CLI arguments with argparse."""
-#KEEP in CLI.help
 from __future__ import annotations
 import argparse
 
