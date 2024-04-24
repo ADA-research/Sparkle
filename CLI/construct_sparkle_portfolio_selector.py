@@ -10,7 +10,7 @@ from CLI.sparkle_help import sparkle_global_help as sgh
 from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.sparkle_help import sparkle_construct_portfolio_selector_help as scps
+from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import sparkle_compute_marginal_contribution_help as scmch
 from CLI.sparkle_help import sparkle_job_help as sjh
 from CLI.sparkle_help import sparkle_logging as sl

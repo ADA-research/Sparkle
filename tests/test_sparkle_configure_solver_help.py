@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 from unittest.mock import Mock
 
-from CLI.support import sparkle_configure_solver_help as scsh
+from CLI.support import configure_solver_help as scsh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario

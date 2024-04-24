@@ -11,7 +11,7 @@ from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help.sparkle_settings import SettingState
-from CLI.support import sparkle_construct_parallel_portfolio_help as scpp
+from CLI.support import construct_parallel_portfolio_help as scpp
 from CLI.help.reporting_scenario import Scenario
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
