@@ -14,7 +14,7 @@ from pathlib import Path
 
 from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_global_help as sgh
-from CLI.sparkle_help import sparkle_snapshot_help as snh
+from sparkle.sparkle.platform import snapshot_help as snh
 from sparkle.sparkle.structures import csv_help as scsv
 
 
