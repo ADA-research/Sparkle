@@ -15,7 +15,7 @@ from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help.sparkle_settings import SettingState
 from CLI.sparkle_help import argparse_custom as ac
 from CLI.help import command_help as ch
-from CLI.sparkle_help import sparkle_slurm_help as ssh
+from sparkle.sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 

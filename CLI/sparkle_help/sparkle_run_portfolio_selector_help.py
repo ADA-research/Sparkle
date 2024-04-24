@@ -21,7 +21,7 @@ from CLI.sparkle_help import sparkle_run_solvers_help as srs
 from CLI.help.reporting_scenario import Scenario
 from sparkle.instance import instances_help as sih
 from CLI.help.command_help import CommandName
-from CLI.sparkle_help import sparkle_slurm_help as ssh
+from sparkle.sparkle.platform import slurm_help as ssh
 
 
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,

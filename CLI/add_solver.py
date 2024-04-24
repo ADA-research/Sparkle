@@ -20,7 +20,7 @@ from CLI.sparkle_help import sparkle_logging as sl
 from CLI.sparkle_help import sparkle_settings
 from CLI.sparkle_help.sparkle_command_help import CommandName
 from CLI.sparkle_help import sparkle_command_help as sch
-from CLI.sparkle_help import sparkle_slurm_help as ssh
+from sparkle.sparkle.platform import slurm_help as ssh
 from CLI.initialise import check_for_initialise
 
 

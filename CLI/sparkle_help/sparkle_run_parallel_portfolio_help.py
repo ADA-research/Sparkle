@@ -20,7 +20,7 @@ from runrunner.base import Runner
 from sparkle.platform import file_help as sfh
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_logging as slog
-from CLI.sparkle_help import sparkle_slurm_help as ssh
+from sparkle.sparkle.platform import slurm_help as ssh
 from CLI.sparkle_help.sparkle_settings import ProcessMonitoring
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help.command_help import CommandName
