@@ -5,7 +5,6 @@
 
 import argparse
 from pathlib import Path
-from pathlib import PurePath
 
 from CLI.sparkle_help import sparkle_global_help as sgh
 from CLI.sparkle_help import sparkle_settings
@@ -15,8 +14,7 @@ from CLI.sparkle_help import sparkle_run_portfolio_selector_help as srpsh
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    settings_dir = Path("Settings")
-    file_path_latest = PurePath(settings_dir / "latest.ini")
+    file_path_latest = Path("Settings/latest.ini")
     sgh.settings = sparkle_settings.Settings(file_path_latest)
 
     # Define command line arguments
@@ -29,6 +27,7 @@ if __name__ == "__main__":
 
     # Process command line arguments
     # Turn multiple instance files into a space separated string
+    # NOTE: Not sure if this is actually supported
     instance_path = " ".join(args.instance)
     performance_data_csv_path = args.performance_data_csv
 
