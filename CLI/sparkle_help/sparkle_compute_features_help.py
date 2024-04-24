@@ -211,7 +211,7 @@ def computing_features_parallel(feature_data_csv_path: Path,
 
     # Generate the sbatch script
     parallel_jobs = min(n_jobs, sgh.settings.get_slurm_number_of_runs_in_parallel())
-    cmd_list = [f"Commands/sparkle_help/compute_features_core.py --instance {inst_path} "
+    cmd_list = [f"CLI/core/compute_features.py --instance {inst_path} "
                 f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
                 for inst_path, ex_path in total_job_list]
     sbatch_options = ssh.get_slurm_options_list()
