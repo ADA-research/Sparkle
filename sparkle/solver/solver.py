@@ -10,7 +10,7 @@ import shlex
 import ast
 from pathlib import Path
 import subprocess
-from tools.runsolver_parsing import get_solver_output
+from tools import runsolver_parsing
 
 class Solver:
     """Class to handle a solver and its directories."""
@@ -157,9 +157,9 @@ class Solver:
             return {"status": "ERROR", }
         # Resolving solver output
         if runsolver_configuration is not None:
-            solver_output = get_solver_output(runsolver_configuration,
-                                              process.stdout.decode())
-        else:
-            # Ran without runsolver, can read solver output directly
-            solver_output = ast.literal_eval(process.stdout.decode())
-        return solver_output
+            return runsolver_parsing.get_solver_output(runsolver_configuration,
+                                                       process.stdout.decode())
+
+        # Ran without runsolver, can read solver output directly
+        return ast.literal_eval(process.stdout.decode())
+        

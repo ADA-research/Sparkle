@@ -2,6 +2,8 @@
 
 from pathlib import Path
 import fcntl
+import ast
+import re
 
 def get_runtime_from_runsolver(runsolver_values_path: Path) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver."""
@@ -21,8 +23,35 @@ def get_runtime_from_runsolver(runsolver_values_path: Path) -> tuple[float, floa
                     break
     return cpu_time, wc_time
 
-def get_solver_output(runsolver_configuration: str,
+def get_solver_output(runsolver_configuration: list[str],
                       process_output: str) -> dict[str, str]:
     """Decode solver output dictionary when called with runsolver."""
-    
-    return {}
+    output_dict = {}
+    solver_output = ""
+    watcher_data_file = None
+    for conf in runsolver_configuration:
+        if "-o" in conf or "--solver-data" in conf:
+            # solver output was redirected
+            solver_data_file = Path(conf.split(" ", 1)[1])
+            solver_output = solver_data_file.open("r").read()
+            print(solver_output)
+            
+        if "-w" in conf or "--watcher-data" in conf:
+            watcher_data_file = Path(conf.split(" ", 1)[1])
+    if solver_output == "":
+        # Still empty, try to read from subprocess
+        solver_output = process_output
+    # Format output to only the brackets (dict)
+    # NOTE: It should have only one match, do we want some error logging here?
+    solver_output = re.findall("\{.*\}", solver_output)[0]
+    if watcher_data_file is not None:
+        cpu_time, wc_time = get_runtime_from_runsolver(watcher_data_file)
+        print(cpu_time, wc_time)
+        output_dict["cpu_time"] = cpu_time
+        output_dict["wc_time"] = wc_time
+        output_dict["runtime"] = cpu_time
+        if cpu_time == -1.0:
+            # If we don't have cpu time, try to fall back on wc
+            output_dict["runtime"] = wc_time
+
+    return output_dict
