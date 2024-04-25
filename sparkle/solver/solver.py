@@ -81,43 +81,6 @@ class Solver:
 
         return deterministic
 
-    @staticmethod
-    def get_solver_by_name(name: str) -> Solver:
-        """Attempt to resolve the solver object by name.
-
-        Args:
-            name: The name of the solver
-
-        Returns:
-            A Solver object if found, None otherwise
-        """
-        if (Solver.solver_dir / name).exists():
-            return Solver(Solver.solver_dir / name)
-        return None
-
-    @staticmethod
-    def get_solver_list() -> list[str]:
-        """Get solver list from file."""
-        if Solver.solver_list_path.exists():
-            with Solver.solver_list_path.open("r+") as fo:
-                fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-                return ast.literal_eval(fo.read())
-        return []
-
-    @staticmethod
-    def config_str_to_dict(configuration: str) -> dict[str, str]:
-        """Parse a configuration string to a dictionary."""
-        # First we filter the configuration of unwanted characters
-        configuration = configuration.strip().replace("-", "")
-        # Then we split the string by spaces, but conserve substrings
-        config_list = shlex.split(configuration)
-        config = {}
-        for index in range(0, len(config_list), 2):
-            # As the value will already be a string object, no quotes are allowed in it
-            value = config[config_list[index + 1]].strip('"').strip("'")
-            config[config_list[index]] = value
-        return config
-
 
     def build_solver_cmd(self, instance: str, configuration: dict = None,
                          runsolver_configuration: list[str] = None) -> list[str]:
@@ -163,3 +126,39 @@ class Solver:
         # Ran without runsolver, can read solver output directly
         return ast.literal_eval(process.stdout.decode())
         
+    @staticmethod
+    def config_str_to_dict(configuration: str) -> dict[str, str]:
+        """Parse a configuration string to a dictionary."""
+        # First we filter the configuration of unwanted characters
+        configuration = configuration.strip().replace("-", "")
+        # Then we split the string by spaces, but conserve substrings
+        config_list = shlex.split(configuration)
+        config = {}
+        for index in range(0, len(config_list), 2):
+            # As the value will already be a string object, no quotes are allowed in it
+            value = config[config_list[index + 1]].strip('"').strip("'")
+            config[config_list[index]] = value
+        return config
+
+    @staticmethod
+    def get_solver_by_name(name: str) -> Solver:
+        """Attempt to resolve the solver object by name.
+
+        Args:
+            name: The name of the solver
+
+        Returns:
+            A Solver object if found, None otherwise
+        """
+        if (Solver.solver_dir / name).exists():
+            return Solver(Solver.solver_dir / name)
+        return None
+
+    @staticmethod
+    def get_solver_list() -> list[str]:
+        """Get solver list from file."""
+        if Solver.solver_list_path.exists():
+            with Solver.solver_list_path.open("r+") as fo:
+                fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
+                return ast.literal_eval(fo.read())
+        return []
