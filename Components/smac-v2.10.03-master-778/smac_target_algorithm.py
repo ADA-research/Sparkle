@@ -72,8 +72,14 @@ if __name__ == "__main__":
     # TODO: Runsolver also registers WALL time, add as a settings option in Sparkle
     runsolver_runtime, run_wtime = get_runtime(runsolver_watch_data_path)
     if runsolver_runtime != -1.0:  # Valid value found
-        runtime = runsolver_runtime
-    runsolver_watch_data_path.unlink(missing_ok=True)
+        run_time = runsolver_runtime
+    elif run_wtime != -10:
+        run_time = run_wtime
+    else:
+        print("WARNING: Was not able to deduce runtime from Runsolver. Using "
+              " Python timer instead for runtime.")
+
+    #runsolver_watch_data_path.unlink(missing_ok=True)
 
     # 5. Return values to SMAC
     # We need to check how the "quality" in the output directory must be formatted
