@@ -67,7 +67,7 @@ class Validator():
                     if out_dict is None:
                         # Wrong file
                         continue
-                    runtime, wc_time = srsh.get_runtime_from_runsolver(res.replace(".rawres", ".val"))
+                    runtime, wc_time = get_runtime(res.replace(".rawres", ".val"))
                     if runtime == -1.0:
                         runtime = wc_time
                     status, quality = out_dict["status"], out_dict["quality"]

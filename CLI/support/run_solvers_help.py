@@ -6,7 +6,7 @@ import subprocess
 import sys
 import ast
 import shutil
-from tools.runsolver_parsing import get_runtime_from_runsolver
+from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
 import global_variables as sgh

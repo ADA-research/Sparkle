@@ -5,7 +5,7 @@ import fcntl
 import ast
 import re
 
-def get_runtime_from_runsolver(runsolver_values_path: Path) -> tuple[float, float]:
+def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver."""
     cpu_time = -1.0
     wc_time = -1.0
@@ -51,7 +51,7 @@ def get_solver_output(runsolver_configuration: list[str],
         output_dict = {}
 
     if watcher_data_file is not None:
-        cpu_time, wc_time = get_runtime_from_runsolver(watcher_data_file)
+        cpu_time, wc_time = get_runtime(watcher_data_file)
         print(cpu_time, wc_time)
         output_dict["cpu_time"] = cpu_time
         output_dict["wc_time"] = wc_time
