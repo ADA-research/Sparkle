@@ -83,13 +83,9 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver: 
         # Use original path for output string
         instance_path_str = " ".join([str(path) for path in instance_path_list])
 
-        # Extend paths to work from execution directory under Tmp/
-        #instance_path_list = ["../../" / instance for instance in instance_path_list]
-
         # Run the configured solver
-        print(f"c Start running the latest configured solver to solve instance "
+        print(f"Start running the latest configured solver to solve instance "
               f"{instance_path_str} ...")
-        #run_configured_solver(instance_path_list, solver_name, config_str)
         
         for instance_path in instance_path_list:
             raw_result_path = Path(f"{solver.name}_{Path(instance_path).name}"
@@ -98,15 +94,17 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver: 
             runsolver_values_path = raw_result_path.with_suffix(".val")
             
             runsolver_args = ["--timestamp", "--use-pty",
-                            "--cpu-limit", str(custom_cutoff),
-                            "-w", runsolver_watch_data_path,
-                            "-v", runsolver_values_path,
-                            "-o", raw_result_path]
-            solver.run_solver(instance_path.absolute(),
-                              configuration=solver_params,
-                              runsolver_configuration=runsolver_args)
-
-    return
+                              "--cpu-limit", str(custom_cutoff),
+                              "-w", runsolver_watch_data_path,
+                              "-v", runsolver_values_path,
+                              "-o", raw_result_path]
+            solver_output = solver.run_solver(instance_path.absolute(),
+                                              configuration=solver_params,
+                                              runsolver_configuration=runsolver_args)
+            # Output results to user, including path to rawres_solver (e.g. SAT solution)
+            print(f"Execution on instance {Path(instance_path).name} completed with status {solver_output['status']}"
+                  f" in {solver_output['runtime']} seconds.")
+            print(f"Raw output can be found at: {solver.raw_output_directory / raw_result_path}.\n")
 
 
 def call_configured_solver_parallel(

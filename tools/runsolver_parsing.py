@@ -45,13 +45,13 @@ def get_solver_output(runsolver_configuration: list[str],
         solver_output = process_output
     # Format output to only the brackets (dict)
     # NOTE: It should have only one match, do we want some error logging here?
-    solver_regex_filter = re.findall("\{.*\}", solver_output)[0]
     try:
+        solver_regex_filter = re.findall("\{.*\}", solver_output)[0]
         output_dict = ast.literal_eval(solver_regex_filter)
     except Exception as ex:
-        print(f"ERROR: Solver output decoding failed with exception {ex}:\n"
-              f"{solver_output}")
-        output_dict = {}
+        print(f"WARNING: Solver output decoding failed with exception: [{ex}]. "
+              f"Assuming TIMEOUT.")
+        output_dict = {"status": "TIMEOUT"}
 
     if value_data_file is not None:
         cpu_time, wc_time = get_runtime(log_dir / value_data_file)
