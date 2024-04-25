@@ -307,7 +307,7 @@ def process_results(
         runsolver_values_path: str) -> tuple[float, float, list[float], str]:
     """Process results from raw output, the wrapper, and runsolver."""
     # By default runtime comes from runsolver, may be overwritten by user wrapper
-    cpu_time, wc_time = get_runtime_from_runsolver(Path(runsolver_values_path))
+    cpu_time, wc_time = get_runtime(Path(runsolver_values_path))
 
     # Get results from the wrapper
     cmd_get_results_from_wrapper = (
