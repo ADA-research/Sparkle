@@ -4,6 +4,7 @@ from pathlib import Path
 import fcntl
 import ast
 import re
+import math
 
 def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver."""
@@ -40,6 +41,7 @@ def get_solver_output(runsolver_configuration: list[str],
             
         if "-v" in conf or "--var" in conf:
             value_data_file = Path(runsolver_configuration[idx + 1])
+
     if solver_output == "":
         # Still empty, try to read from subprocess
         solver_output = process_output
@@ -51,7 +53,7 @@ def get_solver_output(runsolver_configuration: list[str],
     except Exception as ex:
         print(f"WARNING: Solver output decoding failed with exception: [{ex}]. "
               f"Assuming TIMEOUT.")
-        output_dict = {"status": "TIMEOUT"}
+        output_dict = {"status": "TIMEOUT", "quality": math.nan}
 
     if value_data_file is not None:
         cpu_time, wc_time = get_runtime(log_dir / value_data_file)
@@ -61,5 +63,7 @@ def get_solver_output(runsolver_configuration: list[str],
         if cpu_time == -1.0:
             # If we don't have cpu time, try to fall back on wc
             output_dict["runtime"] = wc_time
+    else:
+        output_dict["runtime"] = math.nan
 
     return output_dict

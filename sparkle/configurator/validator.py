@@ -2,23 +2,12 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
-#import ast
 import csv
-import glob
-#import re
-#import runrunner as rrr
 from runrunner import Runner
 
 import global_variables as sgh
-#from CLI.help import basic_help as sbh
-#from CLI.help import slurm_help as ssh
-#from CLI.help import CommandName
-#from CLI.help import sparkle_file_help as sfh
-#from CLI.help import sparkle_run_configured_solver_help as srcsh
-#from CLI.help import sparkle_run_solvers_help as srsh
 from sparkle.solver.solver import Solver
 from CLI.support import run_configured_solver_help as rcsh
 from tools.runsolver_parsing import get_solver_output
@@ -81,7 +70,7 @@ class Validator():
                                         status, quality, runtime)"""
                     # Clean up .rawres files from this loop iteration?
 
-    def get_validation_results(solver: Solver | str, instance_set: str, config: str = None):
+    def get_validation_results(solver: Solver | str, instance_set: str, config: str = None) -> list[list[str]]:
         '''
         Query the results of the validation of solver on instance_set.
 
@@ -100,26 +89,29 @@ class Validator():
             solver = Solver.get_solver_by_name(solver)
         # Check if we still have to collect results for this combination
         if any(x.suffix == ".rawres" for x in solver.raw_output_directory.iterdir()):
+            relevant_instances = [p.name for p in (sgh.instance_dir / instance_set).iterdir()]
             for res in solver.raw_output_directory.iterdir():
                 if res.suffix != ".rawres":
                     continue
-                first_underscore_index = res.find('_')
-                second_underscore_index = res.find('_', first_underscore_index + 1)
-                instance_name = res[first_underscore_index+1:second_underscore_index]
-                # TODO: Check if instance_name is in instance set
-                out_dict = get_solver_output(f"-o {res.with_suffix('.log')} "
-                                             f"-v {res.with_suffix('.var')}", "",
-                                             solver.raw_output_directory)
+                res_str = str(res)
+                first_underscore_index = res_str.find('_')
+                second_underscore_index = res_str.find('_', first_underscore_index + 1)
+                instance_name = res_str[first_underscore_index+1:second_underscore_index]
+                if instance_name in relevant_instances:
+                    out_dict = get_solver_output(["-o", res.name, "-v", res.with_suffix('.val').name],
+                                                 "", solver.raw_output_directory)
+                    Validator.append_entry_to_csv(solver.name,
+                                                  config,
+                                                  instance_set,
+                                                  instance_name,
+                                                  out_dict["status"],
+                                                  out_dict["quality"],
+                                                  out_dict["runtime"])
+                    res.unlink()
+                    res.with_suffix(".val").unlink()
+                    res.with_suffix(".log").unlink()
 
-                Validator.append_entry_to_csv(solver.name,
-                                              config,
-                                              instance_set,
-                                              instance_name,
-                                              out_dict["status"],
-                                              out_dict["quality"],
-                                              out_dict["runtime"])
-
-        out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
+        out_dir = sgh.validation_output_general / f"{solver.name}_{instance_set}"
         csv_file = out_dir / "validation.csv"
         csv_data = [line for line in csv.reader(csv_file.open("r"))]
         if config is not None:
@@ -146,7 +138,7 @@ class Validator():
         if not csv_file.exists():
            # Write header
            with csv_file.open("w") as out:
-               csv.writer(out).write(("Solver", "Configuration", "InstanceSet",
+               csv.writer(out).writerow(("Solver", "Configuration", "InstanceSet",
                                       "Instance", "Status", "Quality", "Runtime"))
         with csv_file.open("a") as out:
             writer = csv.writer(out)
