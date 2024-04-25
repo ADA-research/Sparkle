@@ -53,8 +53,13 @@ if __name__ == "__main__":
               f"{run_solver.returncode}:\n {run_solver.stderr}")
         print(f"Result for SMAC: CRASHED, {run_time}, 0, 0, {args['seed']}")
         sys.exit()
+
     try:
-        outdict = ast.literal_eval(run_solver.stdout.decode())
+        if run_solver.stdout.decode() == "":
+            # Runsolver cutoff solver wrapper, default values
+            outdict = {"status": "TIMEOUT"}
+        else:
+            outdict = ast.literal_eval(run_solver.stdout.decode())
     except Exception as ex:
         print("ERROR: Could not decode Solver Wrapper output:\n"
               f"Return code: {run_solver.returncode}"
