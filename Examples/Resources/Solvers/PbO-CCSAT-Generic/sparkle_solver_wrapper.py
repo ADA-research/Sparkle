@@ -7,8 +7,9 @@ import ast
 import subprocess
 from pathlib import Path
 
-# Convert the argument of the target_algorithm script to dictionary
-args = ast.literal_eval(sys.argv[1])
+# Convert the argument of the target_algorithm script to dictionairy
+# Join the argv to ensure we can work with broken up arguments
+args = ast.literal_eval(" ".join(sys.argv[1:]))
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
@@ -56,10 +57,13 @@ for line in output_str.splitlines():
 
 if specifics == 'rawres':
     tmp_directory = Path("tmp/")
-    tmp_directory.mkdir(exist_ok=True)
-    rawres_file_name = f"{solver_name}_{instance.name}_"\
-                       f"{time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))}.rawres"
-    raw_result_path = tmp_directory / rawres_file_name
+    rawres_file_name = Path(f"{solver_name}_{instance.name}_"\
+                       f"{time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))}.rawres")
+    if Path.cwd().name != tmp_directory.name:
+        tmp_directory.mkdir(exist_ok=True)
+        raw_result_path = tmp_directory / rawres_file_name
+    else:
+        raw_result_path = rawres_file_name
     with raw_result_path.open('w') as outfile:
         outfile.write(output_str)
 
