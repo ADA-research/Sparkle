@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-    runsolver_watch_data_path = Path(f"{str(Path.cwd())}_{log_timestamp}.log")
+    runsolver_watch_data_path = Path(f"{str(Path.cwd())}/runsolver_{log_timestamp}.log")
 
     runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),
@@ -73,13 +73,14 @@ if __name__ == "__main__":
     runsolver_runtime, run_wtime = get_runtime(runsolver_watch_data_path)
     if runsolver_runtime != -1.0:  # Valid value found
         run_time = runsolver_runtime
-    elif run_wtime != -10:
+        runsolver_watch_data_path.unlink(missing_ok=True)
+    elif run_wtime != -1.0:
         run_time = run_wtime
+        print("WARNING: CPU time not found in Runsolver log. "
+              "Using Runsolver Wall Time instead.")
     else:
-        print("WARNING: Was not able to deduce runtime from Runsolver. Using "
-              " Python timer instead for runtime.")
-
-    #runsolver_watch_data_path.unlink(missing_ok=True)
+        print("WARNING: Was not able to deduce runtime from Runsolver. Using Python "
+              f"timer instead for runtime. See {runsolver_watch_data_path}")
 
     # 5. Return values to SMAC
     # We need to check how the "quality" in the output directory must be formatted
