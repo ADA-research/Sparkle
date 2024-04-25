@@ -16,7 +16,8 @@ from CLI.help.command_help import CommandName
 from CLI.support import configure_solver_help as scsh
 from sparkle.platform import slurm_help as ssh
 from sparkle.instance import instances_help as sih
-
+from sparkle.solver.solver import Solver
+from tools.runsolver_parsing import get_runtime
 
 def call_configured_solver(instance_path_list: list[Path],
                            solver_name: str,
@@ -50,18 +51,18 @@ def call_configured_solver(instance_path_list: list[Path],
     # Else single instance turn it into list[list[Path]]
     else:
         instances_list = [instance_path_list]
-
+    solver = Solver.get_solver_by_name(solver_name)
     # If parallel, pass instances list to parallel function
     if parallel:
         job_id_str = call_configured_solver_parallel(instances_list, solver_name, config_str, run_on=run_on)
     # Else, pass instances list to sequential function
     else:
-        call_configured_solver_sequential(instances_list, solver_name, config_str)
+        call_configured_solver_sequential(instances_list, solver, config_str)
 
     return job_id_str
 
 
-def call_configured_solver_sequential(instances_list: list[list[Path]], solver_name: str, 
+def call_configured_solver_sequential(instances_list: list[list[Path]], solver: Solver, 
                                       config_str: str) -> None:
     """Prepare to run and run the configured solver sequentially on instances.
 
@@ -70,6 +71,15 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver_n
         solver_name: Name of the solver to be used.
         config_str: Configuration to be used.
     """
+    # Prepare runsolver call
+    custom_cutoff = sgh.settings.get_general_target_cutoff_time()
+    solver_params = Solver.config_str_to_dict(config_str)
+    solver_params["solver_dir"] = "."
+    solver_params["specifics"] = "rawres"
+    solver_params["cutoff_time"] = custom_cutoff
+    solver_params["run_length"] = "2147483647"  # Arbitrary, not used by SMAC wrapper
+    solver_params["seed"] = sgh.get_seed()
+
     for instance_path_list in instances_list:
         # Use original path for output string
         instance_path_str = " ".join([str(path) for path in instance_path_list])
@@ -80,7 +90,22 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver_n
         # Run the configured solver
         print(f"c Start running the latest configured solver to solve instance "
               f"{instance_path_str} ...")
-        run_configured_solver(instance_path_list, solver_name, config_str)
+        #run_configured_solver(instance_path_list, solver_name, config_str)
+        
+        for instance_path in instance_path_list:
+            raw_result_path = Path(f"{solver.name}_{Path(instance_path).name}"
+                                   f"_{sgh.get_time_pid_random_string()}.rawres")
+            runsolver_watch_data_path = raw_result_path.with_suffix(".log")
+            runsolver_values_path = raw_result_path.with_suffix(".val")
+            
+            runsolver_args = ["--timestamp", "--use-pty",
+                            "--cpu-limit", str(custom_cutoff),
+                            "-w", runsolver_watch_data_path,
+                            "-v", runsolver_values_path,
+                            "-o", raw_result_path]
+            solver.run_solver(instance_path,
+                              configuration=solver_params,
+                              runsolver_configuration=runsolver_args)
 
     return
 
@@ -214,7 +239,7 @@ def run_configured_solver(instance_path_list: list[Path], solver_name: str,
               f" the output dictionary, found the following exception: {ex}")
         sys.exit(-1)
 
-    cputime, wc_time = srsh.get_runtime_from_runsolver(str(runsolver_values_path))
+    cputime, wc_time = get_runtime(runsolver_values_path)
     if cputime == -1.0 and wc_time == -1.0:
         print(f"WARNING: Undecodable Runsolver's runtime in {runsolver_values_path}")
         runtime = -1.0

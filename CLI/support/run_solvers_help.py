@@ -6,7 +6,7 @@ import subprocess
 import sys
 import ast
 import shutil
-import fcntl
+from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
 import global_variables as sgh
@@ -307,7 +307,7 @@ def process_results(
         runsolver_values_path: str) -> tuple[float, float, list[float], str]:
     """Process results from raw output, the wrapper, and runsolver."""
     # By default runtime comes from runsolver, may be overwritten by user wrapper
-    cpu_time, wc_time = get_runtime_from_runsolver(runsolver_values_path)
+    cpu_time, wc_time = get_runtime(Path(runsolver_values_path))
 
     # Get results from the wrapper
     cmd_get_results_from_wrapper = (
@@ -400,27 +400,6 @@ def get_status_from_wrapper(result: str) -> str:
         sys.exit(-1)
 
     return status
-
-
-# NOTE: This method is actually usefull, but not coded very neatly
-def get_runtime_from_runsolver(runsolver_values_path: str) -> tuple[float, float]:
-    """Return the CPU and wallclock time reported by runsolver."""
-    cpu_time = -1.0
-    wc_time = -1.0
-    if Path(runsolver_values_path).exists():
-        with Path(runsolver_values_path).open("r+") as infile:
-            fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-            lines = [line.strip().split("=") for line in infile.readlines()
-                     if len(line.split("=")) == 2]
-            for keyword, value in lines:
-                if keyword == "WCTIME":
-                    wc_time = float(value)
-                elif keyword == "CPUTIME":
-                    cpu_time = float(value)
-                    # Order is fixed, CPU is the last thing we want to read, so break
-                    break
-    return cpu_time, wc_time
-
 
 def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     """Remove a faulty solver from Sparkle.

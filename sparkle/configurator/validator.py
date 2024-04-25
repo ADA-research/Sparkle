@@ -12,14 +12,14 @@ import re
 import runrunner as rrr
 from runrunner import Runner
 
-from Commands.sparkle_help import sparkle_global_help as sgh
-from Commands.sparkle_help import sparkle_basic_help as sbh
-from Commands.sparkle_help import sparkle_slurm_help as ssh
-from Commands.sparkle_help.sparkle_command_help import CommandName
-from Commands.sparkle_help import sparkle_file_help as sfh
-from Commands.sparkle_help import sparkle_run_configured_solver_help as srcsh
-from Commands.sparkle_help import sparkle_run_solvers_help as srsh
-
+import global_variables as sgh
+from CLI.help import basic_help as sbh
+from CLI.help import slurm_help as ssh
+from CLI.help import CommandName
+from CLI.help import sparkle_file_help as sfh
+from CLI.help import sparkle_run_configured_solver_help as srcsh
+from CLI.help import sparkle_run_solvers_help as srsh
+from tools.runsolver_parsing import get_runtime
 
 class Validator():
     def __init__(self: Validator) -> None:

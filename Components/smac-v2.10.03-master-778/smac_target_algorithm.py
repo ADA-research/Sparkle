@@ -8,7 +8,7 @@ import subprocess
 from pathlib import Path
 
 import global_variables as sgh
-from CLI.support import run_solvers_help as srsh
+from tools.runsolver_parsing import get_runtime
 
 
 if __name__ == "__main__":
@@ -31,8 +31,7 @@ if __name__ == "__main__":
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-    runsolver_watch_data_path = f"{str(Path.cwd())}_"\
-                                f"{log_timestamp}.log"
+    runsolver_watch_data_path = Path(f"{str(Path.cwd())}_{log_timestamp}.log")
 
     runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),
@@ -66,10 +65,10 @@ if __name__ == "__main__":
 
     # Overwrite the CPU runtime with runsolver log value
     # TODO: Runsolver also registers WALL time, add as a settings option in Sparkle
-    runsolver_runtime, run_wtime = srsh.get_runtime_from_runsolver(runsolver_watch_data_path)
+    runsolver_runtime, run_wtime = get_runtime(runsolver_watch_data_path)
     if runsolver_runtime != -1.0:  # Valid value found
         runtime = runsolver_runtime
-    Path(runsolver_watch_data_path).unlink(missing_ok=True)
+    runsolver_watch_data_path.unlink(missing_ok=True)
 
     # 5. Return values to SMAC
     # We need to check how the "quality" in the output directory must be formatted
