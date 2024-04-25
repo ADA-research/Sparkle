@@ -74,7 +74,6 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver: 
     # Prepare runsolver call
     custom_cutoff = sgh.settings.get_general_target_cutoff_time()
     solver_params = Solver.config_str_to_dict(config_str)
-    solver_params["solver_dir"] = "."
     solver_params["specifics"] = "rawres"
     solver_params["cutoff_time"] = custom_cutoff
     solver_params["run_length"] = "2147483647"  # Arbitrary, not used by SMAC wrapper
@@ -85,7 +84,7 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver: 
         instance_path_str = " ".join([str(path) for path in instance_path_list])
 
         # Extend paths to work from execution directory under Tmp/
-        instance_path_list = ["../../" / instance for instance in instance_path_list]
+        #instance_path_list = ["../../" / instance for instance in instance_path_list]
 
         # Run the configured solver
         print(f"c Start running the latest configured solver to solve instance "
@@ -103,7 +102,7 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver: 
                             "-w", runsolver_watch_data_path,
                             "-v", runsolver_values_path,
                             "-o", raw_result_path]
-            solver.run_solver(instance_path,
+            solver.run_solver(instance_path.absolute(),
                               configuration=solver_params,
                               runsolver_configuration=runsolver_args)
 

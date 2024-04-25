@@ -24,19 +24,22 @@ def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     return cpu_time, wc_time
 
 def get_solver_output(runsolver_configuration: list[str],
-                      process_output: str) -> dict[str, str]:
+                      process_output: str,
+                      log_dir: Path) -> dict[str, str]:
     """Decode solver output dictionary when called with runsolver."""
     solver_output = ""
-    watcher_data_file = None
-    for conf in runsolver_configuration:
+    value_data_file = None
+    for idx, conf in enumerate(runsolver_configuration):
+        if not isinstance(conf, str):
+            # Looking for arg names
+            continue
         if "-o" in conf or "--solver-data" in conf:
             # solver output was redirected
-            solver_data_file = Path(conf.split(" ", 1)[1])
-            solver_output = solver_data_file.open("r").read()
-            print(solver_output)
+            solver_data_file = Path(runsolver_configuration[idx + 1])
+            solver_output = (log_dir / solver_data_file).open("r").read()
             
-        if "-w" in conf or "--watcher-data" in conf:
-            watcher_data_file = Path(conf.split(" ", 1)[1])
+        if "-v" in conf or "--var" in conf:
+            value_data_file = Path(runsolver_configuration[idx + 1])
     if solver_output == "":
         # Still empty, try to read from subprocess
         solver_output = process_output
@@ -50,9 +53,8 @@ def get_solver_output(runsolver_configuration: list[str],
               f"{solver_output}")
         output_dict = {}
 
-    if watcher_data_file is not None:
-        cpu_time, wc_time = get_runtime(watcher_data_file)
-        print(cpu_time, wc_time)
+    if value_data_file is not None:
+        cpu_time, wc_time = get_runtime(log_dir / value_data_file)
         output_dict["cpu_time"] = cpu_time
         output_dict["wc_time"] = wc_time
         output_dict["runtime"] = cpu_time
