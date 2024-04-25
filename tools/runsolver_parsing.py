@@ -26,7 +26,6 @@ def get_runtime_from_runsolver(runsolver_values_path: Path) -> tuple[float, floa
 def get_solver_output(runsolver_configuration: list[str],
                       process_output: str) -> dict[str, str]:
     """Decode solver output dictionary when called with runsolver."""
-    output_dict = {}
     solver_output = ""
     watcher_data_file = None
     for conf in runsolver_configuration:
@@ -43,7 +42,14 @@ def get_solver_output(runsolver_configuration: list[str],
         solver_output = process_output
     # Format output to only the brackets (dict)
     # NOTE: It should have only one match, do we want some error logging here?
-    solver_output = re.findall("\{.*\}", solver_output)[0]
+    solver_regex_filter = re.findall("\{.*\}", solver_output)[0]
+    try:
+        output_dict = ast.literal_eval(solver_regex_filter)
+    except Exception as ex:
+        print(f"ERROR: Solver output decoding failed with exception {ex}:\n"
+              f"{solver_output}")
+        output_dict = {}
+
     if watcher_data_file is not None:
         cpu_time, wc_time = get_runtime_from_runsolver(watcher_data_file)
         print(cpu_time, wc_time)
