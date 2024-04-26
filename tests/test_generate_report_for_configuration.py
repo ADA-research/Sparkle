@@ -633,7 +633,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                return_value="figure-string")
     mock_timeouts = mocker.patch("sparkle.platform.generate_"
                                  "report_for_configuration."
-                                 "get_timeouts_train",
+                                 "get_timeouts_instanceset",
                                  return_value=(2, 3, 1))
     mock_ablation_bool = mocker.patch("sparkle.platform.generate_"
                                       "report_for_configuration."
@@ -647,21 +647,12 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  "report_for_configuration."
                                  "get_features_bool",
                                  return_value="featurestrue")
+    mocker.patch("sparkle.configurator.validator.Validator.get_validation_results",
+                 return_value=[])
 
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
                                                           test_instance, report_dir)
-
-    smac_solver_dir = (
-        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
-    configured_results_train_file = ("validationObjectiveMatrix-traj-run-" + str(seed)
-                                     + "-walltime.csv")
-    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
-                                    f"{solver_name}_{train_instance}_scenario/"
-                                    f"{configured_results_train_file}")
-
-    default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_train_dir = (
-        smac_solver_dir + "outdir_train_default/" + default_results_train_file)
+    
 
     mock_settings.assert_called_once_with()
     mock_config.assert_called_with(solver_name, train_instance)
@@ -669,10 +660,10 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     mock_runtime.assert_called_once_with()
     mock_instance_num.assert_called_once_with(train_instance)
     mock_par_perf.assert_has_calls([
-        mocker.call(configured_results_train_dir, cutoff),
-        mocker.call(default_results_train_dir, cutoff)
+        mocker.call([], cutoff),
+        mocker.call([], cutoff)
     ])
-    mock_figure.assert_called_once_with(solver_name, train_instance, report_dir,
+    mock_figure.assert_called_once_with(solver_name, train_instance, [], [], report_dir,
                                         float(cutoff))
     mock_timeouts.assert_called_once_with(solver_name, train_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver_name, train_instance,
@@ -733,7 +724,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                return_value="figure-string")
     mock_timeouts = mocker.patch("sparkle.platform.generate_"
                                  "report_for_configuration."
-                                 "get_timeouts_test",
+                                 "get_timeouts_instanceset",
                                  return_value=(2, 3, 1))
     mock_ablation_bool = mocker.patch("sparkle.platform.generate_"
                                       "report_for_configuration."
@@ -743,34 +734,26 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                        "report_for_configuration."
                                        "get_ablation_table",
                                        return_value="ablation/path")
+    mocker.patch("sparkle.configurator.validator.Validator.get_validation_results",
+                 return_value=[])
+    mocker.patch("CLI.support.configure_solver_help.get_optimised_configuration_from_file",
+                 return_value=["1", "2", "3"])
 
     test_dict = sgrch.get_dict_variable_to_value_test(sgh.configuration_output_analysis,
                                                       solver_name,
                                                       train_instance,
                                                       test_instance)
 
-    smac_solver_dir = (
-        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
-
-    configured_results_test_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    configured_results_test_dir = (f"{smac_solver_dir}outdir_{test_instance}"
-                                   f"_test_configured/{configured_results_test_file}")
-
-    default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_test_dir = (f"{smac_solver_dir}outdir_{test_instance}"
-                                f"_test_default/{default_results_test_file}")
-
     mock_instance_num.assert_called_once_with(test_instance)
     mock_settings.assert_called_once_with()
     mock_par_perf.assert_has_calls([
-        mocker.call(configured_results_test_dir, cutoff),
-        mocker.call(default_results_test_dir, cutoff)
+        mocker.call([], cutoff),
+        mocker.call([], cutoff)
     ])
-    mock_figure.assert_called_once_with(sgh.configuration_output_analysis,
-                                        solver_name, train_instance, test_instance,
-                                        float(cutoff))
-    mock_timeouts.assert_called_once_with(test_instance, float(cutoff))
+    mock_figure.assert_called_once_with(solver_name, test_instance,
+                                        [], [], sgh.configuration_output_analysis,
+                                        float(cutoff), data_type="test")
+    mock_timeouts.assert_called_once_with(solver_name, test_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver_name, train_instance,
                                                test_instance)
     mock_ablation_table.assert_called_once_with(solver_name, train_instance,
