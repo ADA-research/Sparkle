@@ -11,7 +11,6 @@ import ast
 from pathlib import Path
 import subprocess
 from tools import runsolver_parsing
-import global_variables as gv
 
 
 class Solver:
@@ -41,6 +40,8 @@ class Solver:
         self.runsolver_exec = runsolver_exec
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
+        # Can not extract from gv due to circular imports
+        self.solver_wrapper = "sparkle_solver_wrapper.py"
 
     def get_pcs_file(self: Solver) -> Path:
         """Get path of the parameter file.
@@ -98,7 +99,7 @@ class Solver:
         if runsolver_configuration is not None:
             # We wrap the solver call in the runsolver executable, by placing it in front
             solver_cmd += [self.runsolver_exec.absolute()] + runsolver_configuration
-        solver_cmd += [(self.directory / gv.sparkle_solver_wrapper).absolute(),
+        solver_cmd += [(self.directory / self.solver_wrapper).absolute(),
                        str(configuration)]
         return solver_cmd
 
