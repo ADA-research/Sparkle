@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+import math
 
 import sparkle_logging as sl
 from CLI.support import configure_solver_help as scsh
@@ -13,6 +14,7 @@ import global_variables as sgh
 from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from sparkle.configurator import ablation as sah
+from sparkle.configurator.validator import Validator
 from sparkle.platform.generate_report_help import generate_comparison_plot
 
 
@@ -51,7 +53,7 @@ def get_num_instance_for_configurator(instance_set_name: str) -> str:
     return str_value
 
 
-def get_par_performance(results_file: str, cutoff: int) -> float:
+def get_par_performance(results: list[list[str]], cutoff: int) -> float:
     """Return the PAR score for a given results file and cutoff time.
 
     Args:
@@ -61,10 +63,10 @@ def get_par_performance(results_file: str, cutoff: int) -> float:
     Returns:
         PAR performance value
     """
-    list_instance_and_par = get_instance_performance_from_csv(results_file,
-                                                              float(cutoff))
-    num_instances = len(list_instance_and_par)
-    sum_par = sum(float(item[1]) for item in list_instance_and_par)
+    instance_per_dict = get_dict_instance_to_performance(results,
+                                                         float(cutoff))
+    num_instances = len(instance_per_dict.keys())
+    sum_par = sum(float(instance_per_dict[instance]) for instance in instance_per_dict)
     return float(sum_par / num_instances)
 
 
@@ -103,7 +105,7 @@ def get_instance_performance_from_csv(result_file: str,
     return list_instance_and_performance
 
 
-def get_dict_instance_to_performance(results_file: str, cutoff: int) -> dict[str, float]:
+def get_dict_instance_to_performance(results: list[list[str]], cutoff: int) -> dict[str, float]:
     """Return a dictionary of instance names and their performance.
 
     Args:
@@ -113,11 +115,19 @@ def get_dict_instance_to_performance(results_file: str, cutoff: int) -> dict[str
     Returns:
         A dictionary containing the performance for each instance
     """
-    instance_performance = get_instance_performance_from_csv(
-        results_file, float(cutoff))
-
-    return {Path(instance).name: performance
-            for instance, performance in instance_performance}
+    value_column = -1  # Last column is runtime
+    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    if smac_run_obj != "RUNTIME":
+        # Quality column
+        value_column = -2
+    penalty = sgh.settings.get_general_penalty_multiplier()
+    out_dict = {}
+    for row in results:
+        value = float(row[value_column])
+        if value > cutoff or math.isnan(value):
+            value = cutoff * penalty
+        out_dict[Path(row[4]).name] = float(value)
+    return out_dict
 
 
 def get_performance_measure() -> str:
@@ -188,7 +198,7 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
     return "\\featuresfalse"
 
 
-def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
+def get_data_for_plot(configured_results: list[list[str]], default_results: list[list[str]],
                       smac_each_run_cutoff_time: float) -> list:
     """Return the required data to plot.
 
@@ -204,9 +214,9 @@ def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
         A list of lists containing data points
     """
     dict_instance_to_par_default = get_dict_instance_to_performance(
-        default_results_dir, smac_each_run_cutoff_time)
+        default_results, smac_each_run_cutoff_time)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
-        configured_results_dir, smac_each_run_cutoff_time)
+        configured_results, smac_each_run_cutoff_time)
 
     instances = (dict_instance_to_par_default.keys()
                  & dict_instance_to_par_configured.keys())
@@ -223,8 +233,8 @@ def get_data_for_plot(configured_results_dir: str, default_results_dir: str,
     return points
 
 
-def get_figure_configure_vs_default(configured_results_dir: str,
-                                    default_results_dir: str,
+def get_figure_configure_vs_default(configured_results: list[list[str]],
+                                    default_results: list[list[str]],
                                     target_directory: Path,
                                     figure_filename: str,
                                     smac_each_run_cutoff_time: float) -> str:
@@ -243,7 +253,7 @@ def get_figure_configure_vs_default(configured_results_dir: str,
     Returns:
         A string containing the latex command to include the figure
     """
-    points = get_data_for_plot(configured_results_dir, default_results_dir,
+    points = get_data_for_plot(configured_results, default_results,
                                smac_each_run_cutoff_time)
 
     performance_measure = get_performance_measure()
@@ -272,47 +282,9 @@ def get_figure_configure_vs_default(configured_results_dir: str,
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
-def get_figure_configured_vs_default_on_test_instance_set(
-        target_dir: Path, solver_name: str, instance_set_train_name: str,
-        instance_set_test_name: str, smac_each_run_cutoff_time: float) -> str:
-    """Create a figure comparing the configured and default solver on the training set.
-
-    Manages the creation of a comparison plot of the instances in a test set for the
-    report by gathering the proper files and choosing the plotting parameters based on
-    the performance measure.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of the instance set for training
-        instance_set_test_name: Name of the instance set for testing
-        smac_each_run_cutoff_time: Cutoff time
-
-    Returns:
-        A string containing the latex command to include the figure
-    """
-    #1.construct the path to the CSV file
-    #2.Seperate entries based on configuration
-    #3. give the results to get_figure_configure_vs_default and make sure it can handle it
-    configured_results_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    scen_dir = sgh.settings.get_general_sparkle_configurator().scenario.directory
-    configured_results_dir = (f"{scen_dir}/outdir_{instance_set_test_name}"
-                              f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{scen_dir}/outdir_{instance_set_test_name}"
-                           f"_test_default/{default_results_file}")
-    data_plot_configured_vs_default_on_test_instance_set_filename = (
-        f"data_{solver_name}_configured_vs_default_on_{instance_set_test_name}_test")
-
-    return get_figure_configure_vs_default(
-        configured_results_dir, default_results_dir, target_dir,
-        data_plot_configured_vs_default_on_test_instance_set_filename,
-        smac_each_run_cutoff_time)
-
-
-def get_figure_configured_vs_default_on_train_instance_set(
-        solver_name: str, instance_set_train_name: str,
-        target_directory: Path, smac_each_run_cutoff_time: float) -> str:
+def get_figure_configured_vs_default_on_instance_set( solver_name: str, instance_set_name: str,
+        res_default: list[list[str]], res_conf: list[list[str]],
+        target_directory: Path, smac_each_run_cutoff_time: float, data_type: str = "train") -> str:
     """Create a figure comparing the configured and default solver on the training set.
 
     Manages the creation of a comparison plot of the instances in the train instance set
@@ -328,29 +300,15 @@ def get_figure_configured_vs_default_on_train_instance_set(
     Returns:
         A string containing the latex comand to include the figure
     """
-    #1.construct the path to the CSV file
-    #2.Seperate entries based on configuration
-    #3. give the results to get_figure_configure_vs_default and make sure it can handle it
-    _, _, optimised_configuration_seed = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
-    configured_results_file = ("validationObjectiveMatrix-traj-run-"
-                               f"{optimised_configuration_seed}-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-    configured_results_dir = (f"{scen_path}/outdir_train_configuration/"
-                              f"{solver_name}_{instance_set_train_name}_scenario/"
-                              f"{configured_results_file}")
-    default_res_dir = f"{scen_path}/outdir_train_default/{default_results_file}"
-
-    data_plot_configured_vs_default_on_train_instance_set_filename = (
-        f"data_{solver_name}_configured_vs_default_on_{instance_set_train_name}_train")
+    data_plot_configured_vs_default_on_instance_set_filename = (
+        f"data_{solver_name}_configured_vs_default_on_{instance_set_name}_{data_type}")
     return get_figure_configure_vs_default(
-        configured_results_dir, default_res_dir, target_directory,
-        data_plot_configured_vs_default_on_train_instance_set_filename,
+        res_conf, res_default, target_directory,
+        data_plot_configured_vs_default_on_instance_set_filename,
         smac_each_run_cutoff_time)
 
 
-def get_timeouts_test(instance_set_test_name: str, cutoff: int) -> tuple[int, int, int]:
+def get_timeouts_instanceset(solver_name: str, instance_set_name: str, cutoff: int) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
     Args:
@@ -360,63 +318,19 @@ def get_timeouts_test(instance_set_test_name: str, cutoff: int) -> tuple[int, in
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
-    #1. retrieve solver name -> Scenario's solver?
-    #2. Retrieve correct CSV
-    #3. Split those with configuration str and those with configuration str None
-    #4. Place them in a dictionary of dict{instance_name: value}
-    #5. If RUNTIME performance with value = cutoff * penalty_factor if value > cutoff
-    #6. pass it to get_timeouts
-    # Retrieve instances and PAR values
-    configured_results_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-    configured_results_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
-                              f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
-                           f"_test_default/{default_results_file}")
-    dict_instance_to_par_configured = get_dict_instance_to_performance(
-        configured_results_dir, cutoff)
-    dict_instance_to_par_default = get_dict_instance_to_performance(
-        default_results_dir, cutoff)
-
-    return get_timeouts(dict_instance_to_par_configured,
-                        dict_instance_to_par_default, cutoff)
-
-
-def get_timeouts_train(solver_name: str, instance_set_name: str,
-                       cutoff: int) -> tuple[int, int, int]:
-    """Return the number timeouts by configured, default and both on the training set.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_name: Name of the instance set for testing
-        cutoff: Cutoff value
-
-    Returns:
-        A tuple containing the number of timeouts for the different configurations
-    """
-    #1. retrieve the csv using solver name and instance_set_name
-    #2. split based on configuration string
-    #3. place them in dicts of format with {instance_name: value}
-    #4. If RUNTIME performance with value = cutoff * penalty_factor if value > cutoff
-    #5. give dict to get_timeouts
-    (optimised_configuration_str, optimised_configuration_performance_par,
-     optimised_configuration_seed) = scsh.get_optimised_configuration(
+    config, _, _  = scsh.get_optimised_configuration(
         solver_name, instance_set_name)
-    configured_results_file = ("validationObjectiveMatrix-traj-run-"
-                               f"{optimised_configuration_seed}-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-
-    configured_results_dir = (f"{scen_path}/outdir_train_configuration/"
-                              f"{solver_name}_{instance_set_name}_scenario/"
-                              f"{configured_results_file}")
-    default_results_dir = f"{scen_path}/outdir_train_default/{default_results_file}"
+    res_default = Validator.get_validation_results(solver_name,
+                                                   instance_set_name,
+                                                   config = "")
+    res_conf = Validator.get_validation_results(solver_name,
+                                                instance_set_name,
+                                                config = config)
+    
     dict_instance_to_par_configured = get_dict_instance_to_performance(
-        configured_results_dir, cutoff)
+        res_conf, cutoff)
     dict_instance_to_par_default = get_dict_instance_to_performance(
-        default_results_dir, cutoff)
+        res_default, cutoff)
 
     return get_timeouts(dict_instance_to_par_configured,
                         dict_instance_to_par_default, cutoff)
@@ -560,6 +474,15 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     Returns:
         A dictionary containing the variables and values
     """
+    config, _, _  = scsh.get_optimised_configuration(
+        solver_name, instance_set_train_name)
+    res_default = Validator.get_validation_results(solver_name,
+                                                   instance_set_train_name,
+                                                   config = "")
+    res_conf = Validator.get_validation_results(solver_name,
+                                                instance_set_train_name,
+                                                config = config)
+
     latex_dict = {"bibliographypath":
                   str(sgh.sparkle_report_bibliography_path.absolute())}
     latex_dict["performanceMeasure"] = get_performance_measure()
@@ -583,36 +506,21 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
         solver_name, instance_set_train_name)
 
     latex_dict["optimisedConfiguration"] = str(optimised_configuration_str)
-    scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-    (optimised_configuration_str, _,
-     optimised_configuration_seed) = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
-    #What do we do here? 
-    configured_results_train_file = "validationObjectiveMatrix-traj-run-" + str(
-        optimised_configuration_seed) + "-walltime.csv"
-    configured_results_train_dir = (f"{scen_path}/outdir_train_configuration/"
-                                    f"{solver_name}_{instance_set_train_name}_scenario/"
-                                    f"{configured_results_train_file}")
-    str_value = get_par_performance(configured_results_train_dir,
-                                    smac_each_run_cutoff_time)
+    str_value = get_par_performance(res_conf, smac_each_run_cutoff_time)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
-    #And here?
-    default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_train_dir = (f"{scen_path}/outdir_train_default/"
-                                 f"{default_results_train_file}")
-    str_value = get_par_performance(default_results_train_dir,
+    str_value = get_par_performance(res_default,
                                     smac_each_run_cutoff_time)
     latex_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
 
-    str_value = get_figure_configured_vs_default_on_train_instance_set(
-        solver_name, instance_set_train_name, target_directory,
+    str_value = get_figure_configured_vs_default_on_instance_set(
+        solver_name, instance_set_train_name, res_default, res_conf, target_directory,
         float(smac_each_run_cutoff_time))
     latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = (
-        get_timeouts_train(solver_name, instance_set_train_name,
-                           float(smac_each_run_cutoff_time)))
+        get_timeouts_instanceset(solver_name, instance_set_train_name,
+                                 float(smac_each_run_cutoff_time)))
 
     latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
     latex_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
@@ -643,35 +551,34 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
     Returns:
         A dictionary containting the variables and their values
     """
+    config, _, _  = scsh.get_optimised_configuration(
+        solver_name, instance_set_train_name)
+    res_default = Validator.get_validation_results(solver_name,
+                                                   instance_set_test_name,
+                                                   config = "")
+    res_conf = Validator.get_validation_results(solver_name,
+                                                instance_set_test_name,
+                                                config = config)
     test_dict = {"instanceSetTest": instance_set_test_name}
     test_dict["numInstanceInTestingInstanceSet"] =\
         get_num_instance_for_configurator(instance_set_test_name)
 
     (_, _, smac_each_run_cutoff_time, _, _, _) = scsh.get_smac_settings()
-    scen_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-    #And here?
-    configured_results_test_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    configured_results_test_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
-                                   f"_test_configured/{configured_results_test_file}")
+    
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
-        str(get_par_performance(configured_results_test_dir, smac_each_run_cutoff_time))
-    #And here lastly!
-    default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_test_dir = (f"{scen_path}/outdir_{instance_set_test_name}"
-                                f"_test_default/{default_results_test_file}")
+        str(get_par_performance(res_conf, smac_each_run_cutoff_time))
 
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
-        str(get_par_performance(default_results_test_dir, smac_each_run_cutoff_time))
+        str(get_par_performance(res_default, smac_each_run_cutoff_time))
 
     test_dict["figure-configured-vs-default-test"] =\
-        get_figure_configured_vs_default_on_test_instance_set(
-        target_dir, solver_name, instance_set_train_name, instance_set_test_name,
-        float(smac_each_run_cutoff_time))
+        get_figure_configured_vs_default_on_instance_set(
+        solver_name, instance_set_test_name, res_default, res_conf, target_dir,
+        float(smac_each_run_cutoff_time), data_type="test")
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = (
-        get_timeouts_test(instance_set_test_name, float(smac_each_run_cutoff_time)))
+        get_timeouts_instanceset(solver_name, instance_set_test_name, float(smac_each_run_cutoff_time)))
 
     test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
     test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
@@ -692,66 +599,15 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
         instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing. Defaults to None.
     """
-    all_good = True
-    err_str = ""
-    configurator = sgh.settings.get_general_sparkle_configurator()
-    scen_path = configurator.scenario.directory
-    inst_path = configurator.instances_path
-    # Check train instance dir exists
-    instance_train_dir = str(
-        inst_path / instance_set_train_name)
-
-    if not Path(instance_train_dir).exists():
-        all_good = False
-        err_str += (" training set not found in configuration directory "
-                    f"{instance_train_dir};")
-
-    # Check train results exist: configured+default
-    configured_results_train_dir = (f"{scen_path}/outdir_train_configuration/"
-                                    f"{solver_name}_{instance_set_train_name}_scenario/")
-    default_results_train_dir = f"{scen_path}/outdir_train_default/"
-
-    if not Path(configured_results_train_dir).exists():
-        err_str += (" configured parameter results on the training set not found in "
-                    f"{configured_results_train_dir};")
-        all_good = False
-    if not Path(default_results_train_dir).exists():
-        err_str += (" default parameter results on the training set not found in "
-                    f"{default_results_train_dir};")
-        all_good = False
-
-    if instance_set_test_name is not None:
-        # Check test instance dir exists
-        instance_test_dir = str(
-            inst_path / instance_set_test_name)
-        if not Path(instance_test_dir).exists():
-            all_good = False
-            err_str += (" testing set not found in configuration directory "
-                        f"{instance_test_dir};")
-
-        # Check test results exist: configured+default
-        configured_results_test_dir = (
-            str(scen_path) + "/outdir_" + instance_set_test_name + "_test_configured/")
-        default_results_test_dir = (
-            str(scen_path) + "/outdir_" + instance_set_test_name + "_test_default/")
-
-        if not Path(configured_results_test_dir).exists():
-            err_str += (" configured parameter results on the testing set not found in "
-                        f"{configured_results_test_dir};")
-            all_good = False
-        if not Path(default_results_test_dir).exists():
-            err_str += (" default parameter results on the testing set not found in "
-                        f"{default_results_test_dir};")
-            all_good = False
-
-    if not all_good:
+    train_res = Validator.get_validation_results(solver_name,
+                                                 instance_set_train_name)
+    test_res = Validator.get_validation_results(solver_name,
+                                                instance_set_test_name)
+    if len(train_res) <=1 or len(test_res) <= 1:
         print("Error: Results not found for the given solver and instance set(s) "
               'combination. Make sure the "configure_solver" and '
-              '"validate_configured_vs_default" commands were correctly executed. '
-              f"\nDetected errors:\n{err_str}")
+              '"validate_configured_vs_default" commands were correctly executed. ')
         sys.exit(-1)
-
-    return
 
 
 def get_most_recent_test_run() -> tuple[str, str, bool, bool]:

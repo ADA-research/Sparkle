@@ -139,6 +139,8 @@ class Solver:
         """Parse a configuration string to a dictionary."""
         # First we filter the configuration of unwanted characters
         config_str = config_str.strip().replace("-", "")
+        if config_str == "" or config_str == r"{}":
+            return {}
         # Then we split the string by spaces, but conserve substrings
         config_list = shlex.split(config_str)
         config_dict = {}

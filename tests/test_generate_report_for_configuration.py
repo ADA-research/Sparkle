@@ -424,48 +424,6 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
 
 
-def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixture)\
-        -> None:
-    """Test get_figure_configured_vs_default_on_test_instance_set returns correct string.
-
-    This should call `get_figure_configure_vs_default()` with correct values and return
-    its return value.
-    """
-    setup_conf()
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
-    cutoff = 0
-    mock_get_figure = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                                   "get_figure_configure_vs_default",
-                                   return_value="includegraphics")
-
-    figure_string = sgrch.get_figure_configured_vs_default_on_test_instance_set(
-        sgh.configuration_output_analysis,
-        solver_name,
-        train_instance,
-        test_instance,
-        cutoff)
-
-    smac_solver_dir = configurator.scenarios_path / (f"{solver_name}_{train_instance}")
-
-    configured_results_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    configured_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
-                              f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
-                           f"_test_default/{default_results_file}")
-    data_plot_filename = (f"data_{solver_name}_configured_vs_default_on_"
-                          f"{test_instance}_test")
-    mock_get_figure.assert_called_once_with(configured_results_dir,
-                                            default_results_dir,
-                                            sgh.configuration_output_analysis,
-                                            data_plot_filename,
-                                            cutoff)
-    assert figure_string == "includegraphics"
-
-
 def test_get_figure_configured_vs_default_on_train_instance_set(mocker: MockFixture)\
         -> None:
     """Test get_figure_configured_vs_default_on_train_instance_set return correct string.
