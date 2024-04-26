@@ -117,7 +117,6 @@ def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
         "Ptn-7824-b21.cnf": 100.5,
         "bce7824.cnf": 100.5,
     }
-    
 
 
 def test_get_performance_measure_par10(mocker: MockFixture) -> None:

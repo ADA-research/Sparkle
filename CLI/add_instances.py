@@ -137,7 +137,7 @@ if __name__ == "__main__":
         print(f"Number of instances to be added: {num_inst}")
         for i, intended_filename in enumerate(list_source_all_filename):
             print(f"Adding {intended_filename.name} ... "
-                  f"({i + 1} out of {num_inst})", end='\r')
+                  f"({i + 1} out of {num_inst})", end="\r")
 
             if intended_filename in target_all_filename:
                 print(f"Instance {intended_filename.name} already exists in Directory "

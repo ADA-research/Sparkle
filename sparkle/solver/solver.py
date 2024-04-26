@@ -13,13 +13,14 @@ import subprocess
 from tools import runsolver_parsing
 import global_variables as gv
 
+
 class Solver:
     """Class to handle a solver and its directories."""
     solver_dir = Path("Solvers/")
     solver_list_path = Path("Reference_Lists/") / "sparkle_solver_list.txt"
 
     def __init__(self: Solver,
-                 solver_directory: Path, 
+                 solver_directory: Path,
                  raw_output_directory: Path = None,
                  runsolver_exec: Path = None) -> None:
         """Initialize solver.
@@ -40,7 +41,6 @@ class Solver:
         self.runsolver_exec = runsolver_exec
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
-        
 
     def get_pcs_file(self: Solver) -> Path:
         """Get path of the parameter file.
@@ -82,8 +82,7 @@ class Solver:
 
         return deterministic
 
-
-    def build_solver_cmd(self, instance: str, configuration: dict = None,
+    def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
                          runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a certain configuration."""
         if isinstance(configuration, str):
@@ -99,10 +98,11 @@ class Solver:
         if runsolver_configuration is not None:
             # We wrap the solver call in the runsolver executable, by placing it in front
             solver_cmd += [self.runsolver_exec.absolute()] + runsolver_configuration
-        solver_cmd += [(self.directory / gv.sparkle_solver_wrapper).absolute() , str(configuration)]
+        solver_cmd += [(self.directory / gv.sparkle_solver_wrapper).absolute(),
+                       str(configuration)]
         return solver_cmd
 
-    def run_solver(self, instance: str, configuration: dict = None,
+    def run_solver(self: Solver, instance: str, configuration: dict = None,
                    runsolver_configuration: list[str] = None) -> dict[str, str]:
         """Run the solver on an instance with a certain configuration.
 
@@ -115,12 +115,11 @@ class Solver:
             Solver output dict possibly with runsolver values.
         """
         solver_cmd = self.build_solver_cmd(instance,
-                                           configuration=configuration,
-                                           runsolver_configuration=runsolver_configuration)
+                                           configuration,
+                                           runsolver_configuration)
         process = subprocess.run(solver_cmd,
                                  cwd=self.raw_output_directory,
                                  capture_output=True)
-        
         if process.returncode != 0:
             print(f"WARNING: Solver {self.solver_name} execution seems to have failed!\n"
                   f"The used command was: {solver_cmd}", flush=True)
@@ -133,7 +132,7 @@ class Solver:
 
         # Ran without runsolver, can read solver output directly
         return ast.literal_eval(process.stdout.decode())
-        
+
     @staticmethod
     def config_str_to_dict(config_str: str) -> dict[str, str]:
         """Parse a configuration string to a dictionary."""

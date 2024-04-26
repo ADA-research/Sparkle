@@ -8,6 +8,7 @@ import math
 
 import global_variables as ga
 
+
 def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver."""
     cpu_time = -1.0
@@ -26,12 +27,15 @@ def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
                     break
     return cpu_time, wc_time
 
+
 def get_solver_args(runsolver_log_path: Path) -> dict:
+    """Retrieves solver arguments dict from runsolver log."""
     if runsolver_log_path.exists():
         for line in runsolver_log_path.open("r").readlines():
             if line.startswith("command line:"):
                 return line.split(ga.sparkle_solver_wrapper, 1)[1]
     return ""
+
 
 def get_solver_output(runsolver_configuration: list[str],
                       process_output: str,
@@ -47,7 +51,6 @@ def get_solver_output(runsolver_configuration: list[str],
             # solver output was redirected
             solver_data_file = Path(runsolver_configuration[idx + 1])
             solver_output = (log_dir / solver_data_file).open("r").read()
-            
         if "-v" in conf or "--var" in conf:
             value_data_file = Path(runsolver_configuration[idx + 1])
 
@@ -57,7 +60,7 @@ def get_solver_output(runsolver_configuration: list[str],
     # Format output to only the brackets (dict)
     # NOTE: It should have only one match, do we want some error logging here?
     try:
-        solver_regex_filter = re.findall("\{.*\}", solver_output)[0]
+        solver_regex_filter = re.findall("{.*}", solver_output)[0]
         output_dict = ast.literal_eval(solver_regex_filter)
     except Exception as ex:
         print(f"WARNING: Solver output decoding failed with exception: [{ex}]. "

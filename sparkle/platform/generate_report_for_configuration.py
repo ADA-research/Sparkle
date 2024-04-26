@@ -70,7 +70,8 @@ def get_par_performance(results: list[list[str]], cutoff: int) -> float:
     return float(sum_par / num_instances)
 
 
-def get_dict_instance_to_performance(results: list[list[str]], cutoff: int) -> dict[str, float]:
+def get_dict_instance_to_performance(results: list[list[str]],
+                                     cutoff: int) -> dict[str, float]:
     """Return a dictionary of instance names and their performance.
 
     Args:
@@ -163,7 +164,8 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
     return "\\featuresfalse"
 
 
-def get_data_for_plot(configured_results: list[list[str]], default_results: list[list[str]],
+def get_data_for_plot(configured_results: list[list[str]],
+                      default_results: list[list[str]],
                       smac_each_run_cutoff_time: float) -> list:
     """Return the required data to plot.
 
@@ -247,9 +249,13 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
-def get_figure_configured_vs_default_on_instance_set( solver_name: str, instance_set_name: str,
-        res_default: list[list[str]], res_conf: list[list[str]],
-        target_directory: Path, smac_each_run_cutoff_time: float, data_type: str = "train") -> str:
+def get_figure_configured_vs_default_on_instance_set(solver_name: str,
+                                                     instance_set_name: str,
+                                                     res_default: list[list[str]],
+                                                     res_conf: list[list[str]],
+                                                     target_directory: Path,
+                                                     smac_each_run_cutoff_time: float,
+                                                     data_type: str = "train") -> str:
     """Create a figure comparing the configured and default solver on the training set.
 
     Manages the creation of a comparison plot of the instances in the train instance set
@@ -273,7 +279,9 @@ def get_figure_configured_vs_default_on_instance_set( solver_name: str, instance
         smac_each_run_cutoff_time)
 
 
-def get_timeouts_instanceset(solver_name: str, instance_set_name: str, cutoff: int) -> tuple[int, int, int]:
+def get_timeouts_instanceset(solver_name: str,
+                             instance_set_name: str,
+                             cutoff: int) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
     Args:
@@ -283,15 +291,14 @@ def get_timeouts_instanceset(solver_name: str, instance_set_name: str, cutoff: i
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
-    config, _, _  = scsh.get_optimised_configuration(
+    config, _, _ = scsh.get_optimised_configuration(
         solver_name, instance_set_name)
     res_default = Validator.get_validation_results(solver_name,
                                                    instance_set_name,
-                                                   config = "")
+                                                   config="")
     res_conf = Validator.get_validation_results(solver_name,
                                                 instance_set_name,
-                                                config = config)
-    
+                                                config=config)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
         res_conf, cutoff)
     dict_instance_to_par_default = get_dict_instance_to_performance(
@@ -439,14 +446,14 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     Returns:
         A dictionary containing the variables and values
     """
-    config, _, _  = scsh.get_optimised_configuration(
+    config, _, _ = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
     res_default = Validator.get_validation_results(solver_name,
                                                    instance_set_train_name,
-                                                   config = "")
+                                                   config="")
     res_conf = Validator.get_validation_results(solver_name,
                                                 instance_set_train_name,
-                                                config = config)
+                                                config=config)
 
     latex_dict = {"bibliographypath":
                   str(sgh.sparkle_report_bibliography_path.absolute())}
@@ -516,34 +523,33 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
     Returns:
         A dictionary containting the variables and their values
     """
-    config, _, _  = scsh.get_optimised_configuration(
+    config, _, _ = scsh.get_optimised_configuration(
         solver_name, instance_set_train_name)
     res_default = Validator.get_validation_results(solver_name,
                                                    instance_set_test_name,
-                                                   config = "")
+                                                   config="")
     res_conf = Validator.get_validation_results(solver_name,
                                                 instance_set_test_name,
-                                                config = config)
+                                                config=config)
     test_dict = {"instanceSetTest": instance_set_test_name}
     test_dict["numInstanceInTestingInstanceSet"] =\
         get_num_instance_for_configurator(instance_set_test_name)
 
     (_, _, smac_each_run_cutoff_time, _, _, _) = scsh.get_smac_settings()
-    
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
         str(get_par_performance(res_conf, smac_each_run_cutoff_time))
-
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
         str(get_par_performance(res_default, smac_each_run_cutoff_time))
-
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
         solver_name, instance_set_test_name, res_default, res_conf, target_dir,
         float(smac_each_run_cutoff_time), data_type="test")
 
     # Retrieve timeout numbers for the testing instances
-    configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test = (
-        get_timeouts_instanceset(solver_name, instance_set_test_name, float(smac_each_run_cutoff_time)))
+    configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test =\
+        get_timeouts_instanceset(solver_name,
+                                 instance_set_test_name,
+                                 float(smac_each_run_cutoff_time))
 
     test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
     test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
@@ -568,7 +574,7 @@ def check_results_exist(solver_name: str, instance_set_train_name: str,
                                                  instance_set_train_name)
     test_res = Validator.get_validation_results(solver_name,
                                                 instance_set_test_name)
-    if len(train_res) <=1 or len(test_res) <= 1:
+    if len(train_res) == 0 or len(test_res) == 0:
         print("Error: Results not found for the given solver and instance set(s) "
               'combination. Make sure the "configure_solver" and '
               '"validate_configured_vs_default" commands were correctly executed. ')

@@ -161,7 +161,7 @@ if __name__ == "__main__":
     if instance_set_test_name is not None:
         all_validation_instances.append(instance_set_test)
     config_str = scsh.get_optimised_configuration_params(solver, instance_set_train)
-    validator.validate(solvers=[solver]*2, config_str_list=[None, config_str],
+    validator.validate(solvers=[solver] * 2, config_str_list=[None, config_str],
                        instance_sets=all_validation_instances)
 
     # Write most recent run to file

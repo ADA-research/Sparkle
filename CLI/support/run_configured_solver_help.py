@@ -16,6 +16,7 @@ from sparkle.platform import slurm_help as ssh
 from sparkle.instance import instances_help as sih
 from sparkle.solver.solver import Solver
 
+
 def call_configured_solver(instance_path_list: list[Path],
                            solver_name: str,
                            config_str: str,
@@ -51,7 +52,10 @@ def call_configured_solver(instance_path_list: list[Path],
     solver = Solver.get_solver_by_name(solver_name)
     # If parallel, pass instances list to parallel function
     if parallel:
-        job_id_str = call_configured_solver_parallel(instances_list, solver, config_str, run_on=run_on)
+        job_id_str = call_configured_solver_parallel(instances_list,
+                                                     solver,
+                                                     config_str,
+                                                     run_on=run_on)
     # Else, pass instances list to sequential function
     else:
         call_configured_solver_sequential(instances_list, solver, config_str)
@@ -59,13 +63,14 @@ def call_configured_solver(instance_path_list: list[Path],
     return job_id_str
 
 
-def call_configured_solver_sequential(instances_list: list[list[Path]], solver: Solver, 
+def call_configured_solver_sequential(instances_list: list[list[Path]],
+                                      solver: Solver,
                                       config_str: str) -> None:
     """Prepare to run and run the configured solver sequentially on instances.
 
     Args:
         instances_list: The paths to all the instances
-        solver_name: Name of the solver to be used.
+        solver: Solver to be called.
         config_str: Configuration to be used.
     """
     # Prepare runsolver call
@@ -83,13 +88,13 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver: 
         # Run the configured solver
         print(f"Start running the latest configured solver to solve instance "
               f"{instance_path_str} ...")
-        
+
         for instance_path in instance_path_list:
             raw_result_path = Path(f"{solver.name}_{Path(instance_path).name}"
                                    f"_{sgh.get_time_pid_random_string()}.rawres")
             runsolver_watch_data_path = raw_result_path.with_suffix(".log")
             runsolver_values_path = raw_result_path.with_suffix(".val")
-            
+
             runsolver_args = ["--timestamp", "--use-pty",
                               "--cpu-limit", str(custom_cutoff),
                               "-w", runsolver_watch_data_path,
@@ -99,9 +104,11 @@ def call_configured_solver_sequential(instances_list: list[list[Path]], solver: 
                                               configuration=solver_params,
                                               runsolver_configuration=runsolver_args)
             # Output results to user, including path to rawres_solver (e.g. SAT solution)
-            print(f"Execution on instance {Path(instance_path).name} completed with status {solver_output['status']}"
+            print(f"Execution on instance {Path(instance_path).name} completed with "
+                  f"status {solver_output['status']}"
                   f" in {solver_output['runtime']} seconds.")
-            print(f"Raw output can be found at: {solver.raw_output_directory / raw_result_path}.\n")
+            print("Raw output can be found at:"
+                  f"{solver.raw_output_directory / raw_result_path}.\n")
 
 
 def call_configured_solver_parallel(
@@ -123,29 +130,28 @@ def call_configured_solver_parallel(
             instances_list[index] = " ".join([str(path) for path in value])
 
     num_jobs = len(instances_list)
-    
     custom_cutoff = sgh.settings.get_general_target_cutoff_time()
-    
     cmd_list = []
     for instance_path in instances_list:
         instance_path = Path(instance_path)
         raw_result_path = Path(f"{solver.name}_{instance_path.name}"
-                                f"_{sgh.get_time_pid_random_string()}.rawres")
+                               f"_{sgh.get_time_pid_random_string()}.rawres")
         runsolver_watch_data_path = raw_result_path.with_suffix(".log")
         runsolver_values_path = raw_result_path.with_suffix(".val")
-        
+
         runsolver_args = ["--timestamp", "--use-pty",
-                            "--cpu-limit", str(custom_cutoff),
-                            "-w", runsolver_watch_data_path,
-                            "-v", runsolver_values_path,
-                            "-o", raw_result_path]
+                          "--cpu-limit", str(custom_cutoff),
+                          "-w", runsolver_watch_data_path,
+                          "-v", runsolver_values_path,
+                          "-o", raw_result_path]
         solver_params = solver.config_str_to_dict(config_str)
         solver_params["specifics"] = "rawres"
         solver_params["cutoff_time"] = custom_cutoff
         solver_params["run_length"] = "2147483647"  # Arbitrary, not used by SMAC wrapper
         solver_params["seed"] = sgh.get_seed()
         solver_cmd = [str(item) for item in
-                      solver.build_solver_cmd(instance_path.absolute(), solver_params, runsolver_args)]
+                      solver.build_solver_cmd(instance_path.absolute(),
+                                              solver_params, runsolver_args)]
         # Replace dictionary quotes so RunRunner can handle it
         solver_cmd[-1] = solver_cmd[-1].replace("'", '"')
         cmd_list.append(" ".join(solver_cmd))

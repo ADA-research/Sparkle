@@ -115,17 +115,16 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
            "-o", raw_result_path_option,
            f"{solver_path}/{cmd_solver_name}", cmd_solver_args]
 
-    #Not sure if cwd=exec_path is the correct implementation
     process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
     if process.returncode != 0:
         print("WARNING: Solver execution seems to have failed!\n"
               f"The used command was: {cmd}", flush=True)
     else:
-        # TODO: Clean up on success
         if is_configured:
-            if not Path(raw_result_path).exists() or Path(raw_result_path).stat().st_size == 0:
+            if not raw_result_path.exists() or raw_result_path.stat().st_size == 0:
                 # Runsolver cutoff solver wrapper before it showed its output
-                Path(raw_result_path).open("w").write(r"{'status': 'TIMEOUT', 'quality': 'nan'}")
+                Path(raw_result_path).open("w").write(
+                    r"{'status': 'TIMEOUT', 'quality': 'nan'}")
             elif check_solver_output_for_errors(Path(raw_result_path)):
                 sfh.rmfiles(runsolver_watch_data_path)
 
@@ -149,6 +148,7 @@ def check_solver_output_for_errors(raw_result_path: Path) -> bool:
               f"Decoding the output dictionary threw exception: {ex}")
         return False
     return True
+
 
 def run_solver_on_instance_and_process_results(
         solver_path: str, instance_path: str, seed_str: str = None,
@@ -388,6 +388,7 @@ def get_status_from_wrapper(result: str) -> str:
         sys.exit(-1)
 
     return status
+
 
 def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     """Remove a faulty solver from Sparkle.

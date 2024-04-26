@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
+"""Template for users to create Solver wrappers with."""
 
 import time
 import sys
@@ -25,7 +26,10 @@ del args["specifics"]
 del args["run_length"]
 
 solver_name = "PbO-CCSAT"
-solver_exec = f"{solver_dir / solver_name}" if solver_dir != Path(".") else "./" + solver_name
+if solver_dir != Path("."):
+    solver_exec = f"{solver_dir / solver_name}"
+else:
+    f"./{solver_name}"
 solver_cmd = [solver_exec,
               "-inst", str(instance),
               "-seed", str(seed)]
@@ -45,26 +49,26 @@ except Exception as ex:
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
 
-status = r'CRASHED'
+status = r"CRASHED"
 for line in output_str.splitlines():
     line = line.strip()
-    if (line == r's SATISFIABLE') or (line == r's UNSATISFIABLE'):
-        status = r'SUCCESS'
+    if (line == r"s SATISFIABLE") or (line == r"s UNSATISFIABLE"):
+        status = r"SUCCESS"
         break
-    elif line == r's UNKNOWN':
-        status = r'TIMEOUT'
+    elif line == r"s UNKNOWN":
+        status = r"TIMEOUT"
         break
 
-if specifics == 'rawres':
+if specifics == "rawres":
     tmp_directory = Path("tmp/")
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_"\
-                       f"{time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))}.rawres_solver")
+    timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
+    rawres_file_name = Path(f"{solver_name}_{instance.name}_{timestamp}.rawres_solver")
     if tmp_directory not in Path.cwd():
         tmp_directory.mkdir(exist_ok=True)
         raw_result_path = tmp_directory / rawres_file_name
     else:
         raw_result_path = rawres_file_name
-    with raw_result_path.open('w') as outfile:
+    with raw_result_path.open("w") as outfile:
         outfile.write(output_str)
 
 outdir = {"status": status,
