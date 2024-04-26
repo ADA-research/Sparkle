@@ -778,8 +778,9 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     If none of the tested paths exist, test that a SystemExit is raised.
     Also, test that the correct error string is printed, explaining each missing path.
     """
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
     mock_print = mocker.patch("builtins.print")
+    mocker.patch("sparkle.configurator.validator.Validator.get_validation_results",
+                 return_value=[])
 
     with pytest.raises(SystemExit):
         sgrch.check_results_exist(solver_name, train_instance, test_instance)
@@ -788,8 +789,6 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
         "Error: Results not found for the given solver and instance set(s) combination. "
         'Make sure the "configure_solver" and "validate_configured_vs_default" commands '
         "were correctly executed. ")
-
-    mock_exists.assert_called()
 
 
 def test_get_most_recent_test_run_full(mocker: MockFixture) -> None:
