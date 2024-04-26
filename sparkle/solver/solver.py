@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Class to handle a solver and its directories."""
+"""File to handle a solver and its directories."""
 
 
 from __future__ import annotations
