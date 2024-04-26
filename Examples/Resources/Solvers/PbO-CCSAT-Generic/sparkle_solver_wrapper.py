@@ -7,7 +7,7 @@ import ast
 import subprocess
 from pathlib import Path
 
-# Convert the argument of the target_algorithm script to dictionairy
+# Convert the argument of the target_algorithm script to dictionary
 # Join the argv to ensure we can work with broken up arguments
 args = ast.literal_eval(" ".join(sys.argv[1:]))
 

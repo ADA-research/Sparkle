@@ -14,7 +14,7 @@ import global_variables as sgh
 from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from sparkle.configurator import ablation as sah
-from sparkle.configurator.validator import Validator
+from sparkle.solver.validator import Validator
 from sparkle.platform.generate_report_help import generate_comparison_plot
 
 
@@ -561,20 +561,20 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
     return test_dict
 
 
-def check_results_exist(solver_name: str, instance_set_train_name: str,
-                        instance_set_test_name: str = None) -> None:
+def check_results_exist(solver_name: str, instance_set_train: str,
+                        instance_set_test: str = None) -> None:
     """Check whether configuration results exist.
 
     Args:
         solver_name: Name of the solver
-        instance_set_train_name: Name of the instance set for training
-        instance_set_test_name: Name of the instance set for testing. Defaults to None.
+        instance_set_train: Name of the instance set for training
+        instance_set_test: Name of the instance set for testing. Defaults to None.
     """
     train_res = Validator.get_validation_results(solver_name,
-                                                 instance_set_train_name)
+                                                 instance_set_train)
     test_res = Validator.get_validation_results(solver_name,
-                                                instance_set_test_name)
-    if len(train_res) == 0 or len(test_res) == 0:
+                                                instance_set_test)
+    if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
         print("Error: Results not found for the given solver and instance set(s) "
               'combination. Make sure the "configure_solver" and '
               '"validate_configured_vs_default" commands were correctly executed. ')

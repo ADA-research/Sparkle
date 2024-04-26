@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Template for users to create Solver wrappers with."""
+"""Template for users to create Solver wrappers."""
 
 import time
 import sys

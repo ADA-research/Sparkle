@@ -16,7 +16,7 @@ from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
-from sparkle.configurator.validator import Validator
+from sparkle.solver.validator import Validator
 from CLI.help import command_help as ch
 from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise

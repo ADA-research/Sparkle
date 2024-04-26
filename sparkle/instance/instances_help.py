@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for instance (set) management."""
-import sys
 import shutil
 from pathlib import Path
 from typing import Union
 
 from sparkle.platform import file_help as sfh
-import global_variables as sgh
+import global_variables as gv
 
 
 __sparkle_instance_list_file = "sparkle_instance_list.txt"
@@ -68,8 +67,8 @@ def get_instance_list_from_path(path: Path) -> list[str]:
 def _copy_instance_list_to_reference(instances_source: Path) -> None:
     """Copy an instance list to the reference list directory."""
     instance_list_path = Path(instances_source / Path(__sparkle_instance_list_file))
-    target_path = Path(sgh.reference_list_dir
-                       / Path(instances_source.name + sgh.instance_list_postfix))
+    target_path = Path(gv.reference_list_dir
+                       / Path(instances_source.name + gv.instance_list_postfix))
     shutil.copy(instance_list_path, target_path)
     return
 
@@ -84,8 +83,8 @@ def count_instances_in_reference_list(instance_set_name: str) -> int:
         An integer indicating the number of instances in this set.
     """
     count = 0
-    instance_list_path = Path(sgh.reference_list_dir
-                              / Path(instance_set_name + sgh.instance_list_postfix))
+    instance_list_path = Path(gv.reference_list_dir
+                              / Path(instance_set_name + gv.instance_list_postfix))
 
     # Count instances in instance list file
     with instance_list_path.open("r") as infile:
@@ -106,15 +105,15 @@ def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
     Returns:
         A bool indicating whether a reference list of the instances in this set exists.
     """
-    instance_list_path = Path(sgh.reference_list_dir
-                              / Path(instance_set_name + sgh.instance_list_postfix))
+    instance_list_path = Path(gv.reference_list_dir
+                              / Path(instance_set_name + gv.instance_list_postfix))
     return instance_list_path.is_file()
 
 
 def remove_reference_instance_list(instance_set_name: str) -> None:
     """Remove a file with a list of instances."""
-    instance_list_path = Path(sgh.reference_list_dir
-                              / Path(instance_set_name + sgh.instance_list_postfix))
+    instance_list_path = Path(gv.reference_list_dir
+                              / Path(instance_set_name + gv.instance_list_postfix))
 
     sfh.rmfiles(instance_list_path)
 
@@ -124,8 +123,8 @@ def remove_reference_instance_list(instance_set_name: str) -> None:
 def copy_reference_instance_list(target_file: Path, instance_set_name: str,
                                  path_modifier: str) -> None:
     """Copy a file with a list of instances."""
-    instance_list_path = Path(sgh.reference_list_dir
-                              / Path(instance_set_name + sgh.instance_list_postfix))
+    instance_list_path = Path(gv.reference_list_dir
+                              / Path(instance_set_name + gv.instance_list_postfix))
     outlines = []
 
     # Add quotes around instances in instance list file
@@ -144,79 +143,5 @@ def copy_reference_instance_list(target_file: Path, instance_set_name: str,
     with target_file.open("w") as outfile:
         for line in outlines:
             outfile.write(line)
-
-    return
-
-
-def _copy_reference_instance_list_to_smac(smac_instance_file: Path,
-                                          instance_set_name: str) -> None:
-    """Copy a file with a list of instances to the SMAC directory."""
-    path_modifier = "../../instances/" + instance_set_name + "/"
-    copy_reference_instance_list(smac_instance_file, instance_set_name, path_modifier)
-
-    return
-
-
-def copy_instances_to_smac(list_instance_path: list[Path], instance_dir_prefix: Path,
-                           smac_instance_dir_prefix: Path, train_or_test: str) -> None:
-    """Copy problem instances to be used for configuration to the SMAC directory.
-
-    Args:
-        list_instance_path: List of paths to the instances to be copied
-        instance_dir_prefix: Path to the instances directory
-        smac_instance_dir_prefix: Path to the scenario instances in the configurator
-        train_or_test: Specifies if the instances are for training or testing
-    """
-    instance_set_name = Path(instance_dir_prefix).name
-
-    # TODO: Check wheter this is necessary. Throughout the whole project the function
-    # isn't used for train data
-    file_suffix = ""
-    if train_or_test == "train":
-        file_suffix = "_train.txt"
-    elif train_or_test == "test":
-        file_suffix = "_test.txt"
-    else:
-        print('Invalid function call of "copy_instances_to_smac"; aborting execution')
-        sys.exit(-1)
-
-    # Concatenating a path with a partial filename to create the full name
-    smac_instance_file = (smac_instance_dir_prefix.parent
-                          / (smac_instance_dir_prefix.name + file_suffix))
-    smac_instance_dir = smac_instance_dir_prefix.parent
-
-    # Remove the directory (of this specific instance set) to make sure it is empty
-    # and remove the SMAC instance list file to make sure it is empty
-    shutil.rmtree(smac_instance_dir_prefix, ignore_errors=True)
-    smac_instance_file.unlink(missing_ok=True)
-
-    # (Re)create the path to the SMAC instance directory for this instance set
-    if not smac_instance_dir.is_dir():
-        smac_instance_dir.mkdir(parents=True, exist_ok=True)
-
-    fout = smac_instance_file.open("w+")
-
-    for ori_instance_path in list_instance_path:
-        target_instance_path = smac_instance_dir_prefix / ori_instance_path.name
-        target_instance_dir = target_instance_path.parent
-
-        if not Path(target_instance_dir).exists():
-            target_instance_dir.mkdir(parents=True)
-
-        shutil.copy(ori_instance_path, target_instance_path)
-
-        # Only do this when no instance_list file exists for this instance set
-        if not check_existence_of_reference_instance_list(instance_set_name):
-            # Write instance to SMAC instance file
-            # ori_instance_path.parts[-2] returns the lowest level directory name
-            fout.write(f"../../instances/{ori_instance_path.parts[-2]}/"
-                       f"{ori_instance_path.name}\n")
-
-    fout.close()
-
-    # If and instance_list file exists for this instance set: Write a version where every
-    # line is in double quotes to the SMAC instance file
-    if check_existence_of_reference_instance_list(instance_set_name):
-        _copy_reference_instance_list_to_smac(smac_instance_file, instance_set_name)
 
     return

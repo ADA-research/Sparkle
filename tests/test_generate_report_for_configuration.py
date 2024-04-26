@@ -648,7 +648,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  "report_for_configuration."
                                  "get_features_bool",
                                  return_value="featurestrue")
-    mocker.patch("sparkle.configurator.validator.Validator.get_validation_results",
+    mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
 
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
@@ -734,7 +734,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                        "report_for_configuration."
                                        "get_ablation_table",
                                        return_value="ablation/path")
-    mocker.patch("sparkle.configurator.validator.Validator.get_validation_results",
+    mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
     mocker.patch("CLI.support.configure_solver_help."
                  "get_optimised_configuration_from_file",
@@ -780,7 +780,7 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     Also, test that the correct error string is printed, explaining each missing path.
     """
     mock_print = mocker.patch("builtins.print")
-    mocker.patch("sparkle.configurator.validator.Validator.get_validation_results",
+    mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
 
     with pytest.raises(SystemExit):
