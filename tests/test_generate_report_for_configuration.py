@@ -652,7 +652,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                  return_value=[])
 
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
-                                                          test_instance, report_dir)    
+                                                          test_instance, report_dir)
 
     mock_settings.assert_called_once_with()
     mock_config.assert_called_with(solver_name, train_instance)
