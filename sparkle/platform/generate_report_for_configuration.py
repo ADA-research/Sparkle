@@ -70,41 +70,6 @@ def get_par_performance(results: list[list[str]], cutoff: int) -> float:
     return float(sum_par / num_instances)
 
 
-# Retrieve instances and corresponding performance values from smac validation objective
-# matrix
-def get_instance_performance_from_csv(result_file: str,
-                                      cutoff: float) -> list[tuple[str | float]]:
-    """Extracts a list of [instance, performance] pairs from a result file.
-
-    Args:
-        results_file: Name of the result file
-        cutoff: Cutoff value
-
-    Returns:
-        A list containing the performance for each instance
-    """
-    list_instance_and_performance = []
-    # If the objective is runtime, compute the PAR score; otherwise don't modify
-    # the value
-    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
-    penalty = sgh.settings.get_general_penalty_multiplier()
-
-    # Read CSV, skip column titles
-    for csv_line in Path(result_file).open("r").readlines()[1:]:
-        values = csv_line.strip().split(",")
-        instance = Path(values[0].strip('"')).name
-        performance = float(values[2].strip('"'))
-
-        if smac_run_obj == "RUNTIME":
-            if performance < 0.0:
-                performance = 0.0
-            elif performance >= cutoff:
-                performance = cutoff * penalty
-
-        list_instance_and_performance.append((instance, performance))
-    return list_instance_and_performance
-
-
 def get_dict_instance_to_performance(results: list[list[str]], cutoff: int) -> dict[str, float]:
     """Return a dictionary of instance names and their performance.
 
@@ -126,7 +91,7 @@ def get_dict_instance_to_performance(results: list[list[str]], cutoff: int) -> d
         value = float(row[value_column])
         if value > cutoff or math.isnan(value):
             value = cutoff * penalty
-        out_dict[Path(row[4]).name] = float(value)
+        out_dict[Path(row[3]).name] = float(value)
     return out_dict
 
 

@@ -10,6 +10,7 @@ import global_variables as sgh
 from sparkle.platform import settings_help
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
+import csv
 
 global settings
 sgh.settings = settings_help.Settings()
@@ -87,7 +88,7 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     results_file = "example_file"
     cutoff = 42
     mock_get_list = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                                 "get_instance_performance_from_csv",
+                                 "get_dict_instance_to_performance",
                                  return_value=[("one", 10), ("two", 5)])
 
     par = sgrch.get_par_performance(results_file, cutoff)
@@ -96,45 +97,27 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     assert par == 7.5
 
 
-def test_get_instance_performance_from_csv(mocker: MockFixture) -> None:
-    """Test get_instance_performance_from_csv creates list from file content."""
-    file_content_mock = ('"Problem Instance","Seed",'
-                         '"Objective of validation config #1"\n'
-                         '"../../instances/instances/instance-1.cnf","null","0.001"\n'
-                         '"../../instances/instances/instance-2.cnf","null","1.0"\n'
-                         '"../../instances/instances/instance-3.cnf","null","15"\n')
-    mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
-    mocker.patch("CLI.support.configure_solver_help.get_smac_settings",
-                 return_value=("RUNTIME", "", "", "", "", ""))
-
-    result_file = ""
-    cutoff = 10.0
-    list = sgrch.get_instance_performance_from_csv(result_file, cutoff)
-    assert list == [("instance-1.cnf", 0.001),
-                    ("instance-2.cnf", 1.0),
-                    ("instance-3.cnf", 100.0)]
-
-
 def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     """Test get_dict_instance_to_performance creates dict from performance list."""
-    instance_list = [("instance-1.cnf", 0.01001),
-                     ("instance-2.cnf", 1.0),
-                     ("instance-3.cnf", 100)]
-    mock_construct = mocker.patch("sparkle.platform.generate_report_"
-                                  "for_configuration."
-                                  "get_instance_performance_from_csv",
-                                  return_value=instance_list)
-
-    result_file = "results.file"
-    cutoff = 10
-    instance_dict = sgrch.get_dict_instance_to_performance(result_file, cutoff)
-
-    mock_construct.assert_called_once_with(result_file, cutoff)
+    validation_file = Path("tests/test_files/Validator/validation.csv")
+    csv_data = [line for line in csv.reader(validation_file.open("r"))][1:]
+    cutoff = 10.05
+    instance_dict = sgrch.get_dict_instance_to_performance(csv_data, cutoff)
     assert instance_dict == {
-        "instance-1.cnf": 0.01001,
-        "instance-2.cnf": 1.0,
-        "instance-3.cnf": 100
+        "Ptn-7824-b01.cnf": 100.5,
+        "Ptn-7824-b03.cnf": 100.5,
+        "Ptn-7824-b05.cnf": 100.5,
+        "Ptn-7824-b07.cnf": 100.5,
+        "Ptn-7824-b09.cnf": 100.5,
+        "Ptn-7824-b11.cnf": 100.5,
+        "Ptn-7824-b13.cnf": 100.5,
+        "Ptn-7824-b15.cnf": 100.5,
+        "Ptn-7824-b17.cnf": 0.993013,
+        "Ptn-7824-b19.cnf": 100.5,
+        "Ptn-7824-b21.cnf": 100.5,
+        "bce7824.cnf": 100.5,
     }
+    
 
 
 def test_get_performance_measure_par10(mocker: MockFixture) -> None:
