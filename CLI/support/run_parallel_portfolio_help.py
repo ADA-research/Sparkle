@@ -95,24 +95,6 @@ def log_computation_time(log_file: str, job_nr: str, job_duration: str) -> None:
         outfile.write(f"{job_nr}:{job_duration}\n")
 
 
-def check_sbatch_for_errors(sbatch_script_path: Path) -> None:
-    """Check sbatch files for errors. If found, stop execution.
-
-    Args:
-        sbatch_script_path: Path to the sbatch script.
-    """
-    sbatch_script_path.with_suffix(".txt")
-
-    # Find lines containing an error
-    with sbatch_script_path.open("r") as infile:
-        error_lines = [line for line in infile.read() if "ERROR: " in line]
-        if any(error_lines):
-            print(f"ERROR detected in {sbatch_script_path.name} in lines:\n"
-                  f"{error_lines}\n"
-                  "Stopping execution!")
-            sys.exit(-1)
-
-
 def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
                                          sbatch_script_path: Path,
                                          temp_solvers: list[str]) -> None:
@@ -128,9 +110,6 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
     # Removes statusinfo files
     for solver_instance in solver_instance_list:
         shutil.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}", ignore_errors=True)
-
-    # Validate no known errors occurred in the sbatch
-    check_sbatch_for_errors(sbatch_script_path)
 
     # Removes the generated sbatch files
     sbatch_script_path.unlink()

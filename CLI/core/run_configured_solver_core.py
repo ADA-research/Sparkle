@@ -21,6 +21,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance", required=True, type=Path, nargs="+",
                         help="path to instance to run on")
+    parser.add_argument("--solver", required=True, type=str,
+                        help="solver to run instances on")
+    parser.add_argument("--config", required=True, type=Path,
+                        help="configuration to use")
     parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
                         default=perf_measure,
                         help="the performance measure, e.g. runtime")

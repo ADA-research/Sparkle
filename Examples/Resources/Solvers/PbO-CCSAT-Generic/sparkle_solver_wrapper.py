@@ -8,7 +8,8 @@ import subprocess
 from pathlib import Path
 
 # Convert the argument of the target_algorithm script to dictionary
-args = ast.literal_eval(sys.argv[1])
+# Join the argv to ensure we can work with broken up arguments
+args = ast.literal_eval(" ".join(sys.argv[1:]))
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
@@ -35,25 +36,11 @@ for key in args:
     if args[key] is not None:
         params.extend(["-" + str(key), str(args[key])])
 
-if specifics == 'rawres':
-    tmp_directory = Path("tmp/")
-    tmp_directory.mkdir(exist_ok=True)
-    rawres_file_name = f"{solver_name}_{instance.name}_"\
-                       f"{time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))}.rawres"
-    raw_result_path = tmp_directory / rawres_file_name
-    
-    with raw_result_path.open('w') as outfile:
-        outfile.write(f"Logging raw output of solver {solver_name}")
-
 try:
     solver_call = subprocess.run(solver_cmd + params,
                                  capture_output=True)
 except Exception as ex:
-    if specifics == 'rawres':
-        with raw_result_path.open('w') as outfile:
-            outfile.write(f"Solver call failed with exception:\n{ex}")
-    else:
-        print(f"Solver call failed with exception:\n{ex}")
+    print(f"Solver call failed with exception:\n{ex}")
 
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
@@ -69,6 +56,14 @@ for line in output_str.splitlines():
         break
 
 if specifics == 'rawres':
+    tmp_directory = Path("tmp/")
+    rawres_file_name = Path(f"{solver_name}_{instance.name}_"\
+                       f"{time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))}.rawres_solver")
+    if Path.cwd().name != tmp_directory.name:
+        tmp_directory.mkdir(exist_ok=True)
+        raw_result_path = tmp_directory / rawres_file_name
+    else:
+        raw_result_path = rawres_file_name
     with raw_result_path.open('w') as outfile:
         outfile.write(output_str)
 

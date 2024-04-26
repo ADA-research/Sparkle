@@ -10,6 +10,7 @@ import global_variables as sgh
 from sparkle.platform import settings_help
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
+import csv
 
 global settings
 sgh.settings = settings_help.Settings()
@@ -26,7 +27,8 @@ def setup_conf() -> None:
     configurator = sgh.settings.get_general_sparkle_configurator()
     configurator_path = configurator.configurator_path
     configurator.scenario =\
-        ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
+        ConfigurationScenario(Solver(Path(solver_name), raw_output_directory=Path("")),
+                              Path(train_instance))
     configurator.scenario._set_paths(configurator_path)
 
 
@@ -84,56 +86,36 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     A performance list should be retrieved from results file.
     The mean of the performance values should be computed and returned.
     """
-    results_file = "example_file"
     cutoff = 42
     mock_get_list = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                                 "get_instance_performance_from_csv",
-                                 return_value=[("one", 10), ("two", 5)])
+                                 "get_dict_instance_to_performance",
+                                 return_value={"one": 10, "two": 5})
 
-    par = sgrch.get_par_performance(results_file, cutoff)
+    par = sgrch.get_par_performance([], cutoff)
 
-    mock_get_list.assert_called_once_with(results_file, cutoff)
+    mock_get_list.assert_called_once_with([], cutoff)
     assert par == 7.5
-
-
-def test_get_instance_performance_from_csv(mocker: MockFixture) -> None:
-    """Test get_instance_performance_from_csv creates list from file content."""
-    file_content_mock = ('"Problem Instance","Seed",'
-                         '"Objective of validation config #1"\n'
-                         '"../../instances/instances/instance-1.cnf","null","0.001"\n'
-                         '"../../instances/instances/instance-2.cnf","null","1.0"\n'
-                         '"../../instances/instances/instance-3.cnf","null","15"\n')
-    mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
-    mocker.patch("CLI.support.configure_solver_help.get_smac_settings",
-                 return_value=("RUNTIME", "", "", "", "", ""))
-
-    result_file = ""
-    cutoff = 10.0
-    list = sgrch.get_instance_performance_from_csv(result_file, cutoff)
-    assert list == [("instance-1.cnf", 0.001),
-                    ("instance-2.cnf", 1.0),
-                    ("instance-3.cnf", 100.0)]
 
 
 def test_get_dict_instance_to_performance(mocker: MockFixture) -> None:
     """Test get_dict_instance_to_performance creates dict from performance list."""
-    instance_list = [("instance-1.cnf", 0.01001),
-                     ("instance-2.cnf", 1.0),
-                     ("instance-3.cnf", 100)]
-    mock_construct = mocker.patch("sparkle.platform.generate_report_"
-                                  "for_configuration."
-                                  "get_instance_performance_from_csv",
-                                  return_value=instance_list)
-
-    result_file = "results.file"
-    cutoff = 10
-    instance_dict = sgrch.get_dict_instance_to_performance(result_file, cutoff)
-
-    mock_construct.assert_called_once_with(result_file, cutoff)
+    validation_file = Path("tests/test_files/Validator/validation.csv")
+    csv_data = [line for line in csv.reader(validation_file.open("r"))][1:]
+    cutoff = 10.05
+    instance_dict = sgrch.get_dict_instance_to_performance(csv_data, cutoff)
     assert instance_dict == {
-        "instance-1.cnf": 0.01001,
-        "instance-2.cnf": 1.0,
-        "instance-3.cnf": 100
+        "Ptn-7824-b01.cnf": 100.5,
+        "Ptn-7824-b03.cnf": 100.5,
+        "Ptn-7824-b05.cnf": 100.5,
+        "Ptn-7824-b07.cnf": 100.5,
+        "Ptn-7824-b09.cnf": 100.5,
+        "Ptn-7824-b11.cnf": 100.5,
+        "Ptn-7824-b13.cnf": 100.5,
+        "Ptn-7824-b15.cnf": 100.5,
+        "Ptn-7824-b17.cnf": 0.993013,
+        "Ptn-7824-b19.cnf": 100.5,
+        "Ptn-7824-b21.cnf": 100.5,
+        "bce7824.cnf": 100.5,
     }
 
 
@@ -249,37 +231,6 @@ def test_get_ablation_bool_false(mocker: MockFixture) -> None:
                                        "train-instance",
                                        "test-instance")
     assert ablation_bool == r"\ablationfalse"
-
-
-def test_get_features_bool_false(mocker: MockFixture) -> None:
-    """Test get_features_bool returns correct string if no feature file is given.
-
-    The function should check the scenario file for a link to the feature file.
-    """
-    setup_conf()
-    file_content_mock = ""
-    mock_open = mocker.patch("pathlib.Path.open",
-                             mocker.mock_open(read_data=file_content_mock))
-
-    features_bool = sgrch.get_features_bool(solver_name, train_instance)
-
-    mock_open.assert_called_once_with("r")
-    assert features_bool == r"\featuresfalse"
-
-
-def test_get_features_bool_true(mocker: MockFixture) -> None:
-    """Test get_features_bool returns correct string if feature file is given.
-
-    The function should check the scenario file for a link to the feature file.
-    """
-    file_content_mock = "feature_file = some/file"
-    mock_open = mocker.patch("pathlib.Path.open",
-                             mocker.mock_open(read_data=file_content_mock))
-
-    features_bool = sgrch.get_features_bool(solver_name, train_instance)
-
-    mock_open.assert_called_once_with("r")
-    assert features_bool == r"\featurestrue"
 
 
 def test_get_data_for_plot_same_instance(mocker: MockFixture) -> None:
@@ -422,182 +373,6 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     mock_plot.assert_called_once_with(points, filename, **plot_params)
     mock_penalised.assert_called_once_with()
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
-
-
-def test_get_figure_configured_vs_default_on_test_instance_set(mocker: MockFixture)\
-        -> None:
-    """Test get_figure_configured_vs_default_on_test_instance_set returns correct string.
-
-    This should call `get_figure_configure_vs_default()` with correct values and return
-    its return value.
-    """
-    setup_conf()
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
-    cutoff = 0
-    mock_get_figure = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                                   "get_figure_configure_vs_default",
-                                   return_value="includegraphics")
-
-    figure_string = sgrch.get_figure_configured_vs_default_on_test_instance_set(
-        sgh.configuration_output_analysis,
-        solver_name,
-        train_instance,
-        test_instance,
-        cutoff)
-
-    smac_solver_dir = configurator.scenarios_path / (f"{solver_name}_{train_instance}")
-
-    configured_results_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    configured_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
-                              f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{smac_solver_dir}/outdir_{test_instance}"
-                           f"_test_default/{default_results_file}")
-    data_plot_filename = (f"data_{solver_name}_configured_vs_default_on_"
-                          f"{test_instance}_test")
-    mock_get_figure.assert_called_once_with(configured_results_dir,
-                                            default_results_dir,
-                                            sgh.configuration_output_analysis,
-                                            data_plot_filename,
-                                            cutoff)
-    assert figure_string == "includegraphics"
-
-
-def test_get_figure_configured_vs_default_on_train_instance_set(mocker: MockFixture)\
-        -> None:
-    """Test get_figure_configured_vs_default_on_train_instance_set return correct string.
-
-    This should call `get_figure_configure_vs_default()` with correct values and return
-    its return value.
-    """
-    seed = 3
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    configuration_reports_directory = "reports/"
-    cutoff = 0
-    mock_config = mocker.patch("CLI.support.configure_solver_help."
-                               "get_optimised_configuration",
-                               return_value=("", "", seed))
-    mock_get_figure = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                                   "get_figure_configure_vs_default",
-                                   return_value="includegraphics")
-
-    figure_string = sgrch.get_figure_configured_vs_default_on_train_instance_set(
-        solver_name,
-        train_instance,
-        configuration_reports_directory,
-        cutoff)
-
-    mock_config.assert_called_once_with(solver_name, train_instance)
-
-    configured_results_file = ("validationObjectiveMatrix-traj-run-"
-                               f"{seed}-walltime.csv")
-    smac_solver_dir = (
-        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
-    configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
-                              f"{solver_name}_{train_instance}_scenario/"
-                              f"{configured_results_file}")
-
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_dir = f"{smac_solver_dir}outdir_train_default/{default_results_file}"
-
-    data_plot_filename = (
-        f"data_{solver_name}_configured_vs_default_on_{train_instance}_train")
-
-    mock_get_figure.assert_called_once_with(configured_results_dir,
-                                            default_results_dir,
-                                            configuration_reports_directory,
-                                            data_plot_filename,
-                                            cutoff)
-    assert figure_string == "includegraphics"
-
-
-def test_get_timeouts_test(mocker: MockFixture) -> None:
-    """Test get_timeouts_test returns correct number of timeouts from test set."""
-    solver_name = "test-solver"
-    train_instance = "train-instance"
-    test_instance = "test-instance"
-    cutoff = 3
-    dict_configured = {
-        "instance-2.cnf": 1.0
-    }
-    dict_default = {
-        "instance-1.cnf": 0.01
-    }
-    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                             "get_dict_instance_to_performance",
-                             side_effect=[dict_configured, dict_default])
-    mock_timeouts = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                                 "get_timeouts",
-                                 return_value=(0, 1, 2))
-
-    configured, default, overlapping = sgrch.get_timeouts_test(test_instance,
-                                                               cutoff)
-
-    configured_results_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    smac_solver_dir = (
-        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
-    configured_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
-                              f"_test_configured/{configured_results_file}")
-    default_results_dir = (f"{smac_solver_dir}outdir_{test_instance}"
-                           f"_test_default/{default_results_file}")
-
-    mock_dict.assert_any_call(configured_results_dir, cutoff)
-    mock_dict.assert_any_call(default_results_dir, cutoff)
-    mock_timeouts.assert_called_once_with(dict_configured, dict_default, cutoff)
-    assert configured == 0
-    assert default == 1
-    assert overlapping == 2
-
-
-def test_get_timeouts_train(mocker: MockFixture) -> None:
-    """Test get_timeouts_test returns correct number of timeouts from train set."""
-    optimised_configuration_seed = "3"
-    solver_name = "test-solver"
-    instance_set = "train-instance"
-    cutoff = 3
-    dict_configured = {
-        "instance-2.cnf": 1.0
-    }
-    dict_default = {
-        "instance-1.cnf": 0.01
-    }
-    mock_config = mocker.patch("CLI.support.configure_solver_help."
-                               "get_optimised_configuration",
-                               return_value=("", "", optimised_configuration_seed))
-    mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                             "get_dict_instance_to_performance",
-                             side_effect=[dict_configured, dict_default])
-    mock_timeouts = mocker.patch("sparkle.platform.generate_report_for_configuration."
-                                 "get_timeouts",
-                                 return_value=(0, 1, 2))
-
-    configured, default, overlapping = sgrch.get_timeouts_train(solver_name,
-                                                                instance_set,
-                                                                cutoff)
-
-    configured_results_file = ("validationObjectiveMatrix-traj-run-"
-                               f"{optimised_configuration_seed}-walltime.csv")
-    default_results_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    smac_solver_dir = (
-        f"{configurator_path}/scenarios/{solver_name}_{instance_set}/")
-    configured_results_dir = (f"{smac_solver_dir}outdir_train_configuration/"
-                              f"{solver_name}_{instance_set}_scenario/"
-                              f"{configured_results_file}")
-    default_results_dir = f"{smac_solver_dir}outdir_train_default/{default_results_file}"
-
-    mock_config.assert_called_once_with(solver_name, instance_set)
-    mock_dict.assert_any_call(configured_results_dir, cutoff)
-    mock_dict.assert_any_call(default_results_dir, cutoff)
-    mock_timeouts.assert_called_once_with(dict_configured, dict_default, cutoff)
-    assert configured == 0
-    assert default == 1
-    assert overlapping == 2
 
 
 def test_get_timeouts(mocker: MockFixture) -> None:
@@ -796,6 +571,7 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     mock_extractor_list = mocker.patch("sparkle.platform.generate_report_help."
                                        "get_feature_extractor_list",
                                        return_value="43")
+    mocker.patch("pathlib.Path.mkdir", return_value=None)
 
     full_dict = sgrch.configuration_report_variables(
         sgh.configuration_output_analysis, solver_name, train_instance,
@@ -853,12 +629,12 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  side_effect=[42.1, 42.2])
     mock_figure = mocker.patch("sparkle.platform.generate_"
                                "report_for_configuration."
-                               "get_figure_configured_vs_default_on_train_"
+                               "get_figure_configured_vs_default_on_"
                                "instance_set",
                                return_value="figure-string")
     mock_timeouts = mocker.patch("sparkle.platform.generate_"
                                  "report_for_configuration."
-                                 "get_timeouts_train",
+                                 "get_timeouts_instanceset",
                                  return_value=(2, 3, 1))
     mock_ablation_bool = mocker.patch("sparkle.platform.generate_"
                                       "report_for_configuration."
@@ -872,21 +648,11 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  "report_for_configuration."
                                  "get_features_bool",
                                  return_value="featurestrue")
+    mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
+                 return_value=[])
 
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
                                                           test_instance, report_dir)
-
-    smac_solver_dir = (
-        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
-    configured_results_train_file = ("validationObjectiveMatrix-traj-run-" + str(seed)
-                                     + "-walltime.csv")
-    configured_results_train_dir = (f"{smac_solver_dir}outdir_train_configuration/"
-                                    f"{solver_name}_{train_instance}_scenario/"
-                                    f"{configured_results_train_file}")
-
-    default_results_train_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_train_dir = (
-        smac_solver_dir + "outdir_train_default/" + default_results_train_file)
 
     mock_settings.assert_called_once_with()
     mock_config.assert_called_with(solver_name, train_instance)
@@ -894,10 +660,10 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     mock_runtime.assert_called_once_with()
     mock_instance_num.assert_called_once_with(train_instance)
     mock_par_perf.assert_has_calls([
-        mocker.call(configured_results_train_dir, cutoff),
-        mocker.call(default_results_train_dir, cutoff)
+        mocker.call([], cutoff),
+        mocker.call([], cutoff)
     ])
-    mock_figure.assert_called_once_with(solver_name, train_instance, report_dir,
+    mock_figure.assert_called_once_with(solver_name, train_instance, [], [], report_dir,
                                         float(cutoff))
     mock_timeouts.assert_called_once_with(solver_name, train_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver_name, train_instance,
@@ -953,12 +719,12 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                  side_effect=[42.1, 42.2])
     mock_figure = mocker.patch("sparkle.platform.generate_"
                                "report_for_configuration."
-                               "get_figure_configured_vs_default_on_test_"
+                               "get_figure_configured_vs_default_on_"
                                "instance_set",
                                return_value="figure-string")
     mock_timeouts = mocker.patch("sparkle.platform.generate_"
                                  "report_for_configuration."
-                                 "get_timeouts_test",
+                                 "get_timeouts_instanceset",
                                  return_value=(2, 3, 1))
     mock_ablation_bool = mocker.patch("sparkle.platform.generate_"
                                       "report_for_configuration."
@@ -968,34 +734,27 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                        "report_for_configuration."
                                        "get_ablation_table",
                                        return_value="ablation/path")
+    mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
+                 return_value=[])
+    mocker.patch("CLI.support.configure_solver_help."
+                 "get_optimised_configuration_from_file",
+                 return_value=["1", "2", "3"])
 
     test_dict = sgrch.get_dict_variable_to_value_test(sgh.configuration_output_analysis,
                                                       solver_name,
                                                       train_instance,
                                                       test_instance)
 
-    smac_solver_dir = (
-        f"{configurator_path}/scenarios/{solver_name}_{train_instance}/")
-
-    configured_results_test_file = (
-        "validationObjectiveMatrix-configuration_for_validation-walltime.csv")
-    configured_results_test_dir = (f"{smac_solver_dir}outdir_{test_instance}"
-                                   f"_test_configured/{configured_results_test_file}")
-
-    default_results_test_file = "validationObjectiveMatrix-cli-1-walltime.csv"
-    default_results_test_dir = (f"{smac_solver_dir}outdir_{test_instance}"
-                                f"_test_default/{default_results_test_file}")
-
     mock_instance_num.assert_called_once_with(test_instance)
     mock_settings.assert_called_once_with()
     mock_par_perf.assert_has_calls([
-        mocker.call(configured_results_test_dir, cutoff),
-        mocker.call(default_results_test_dir, cutoff)
+        mocker.call([], cutoff),
+        mocker.call([], cutoff)
     ])
-    mock_figure.assert_called_once_with(sgh.configuration_output_analysis,
-                                        solver_name, train_instance, test_instance,
-                                        float(cutoff))
-    mock_timeouts.assert_called_once_with(test_instance, float(cutoff))
+    mock_figure.assert_called_once_with(solver_name, test_instance,
+                                        [], [], sgh.configuration_output_analysis,
+                                        float(cutoff), data_type="test")
+    mock_timeouts.assert_called_once_with(solver_name, test_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver_name, train_instance,
                                                test_instance)
     mock_ablation_table.assert_called_once_with(solver_name, train_instance,
@@ -1014,23 +773,15 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     }
 
 
-def test_check_results_exist_all_good(mocker: MockFixture) -> None:
-    """Test check_results_exist does not produce an error if all paths exist."""
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=True)
-
-    sgrch.check_results_exist(solver_name, train_instance, test_instance)
-
-    mock_exists.assert_called()
-
-
 def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     """Test check_results_exist produces the correct error if no path exists.
 
     If none of the tested paths exist, test that a SystemExit is raised.
     Also, test that the correct error string is printed, explaining each missing path.
     """
-    mock_exists = mocker.patch("pathlib.Path.exists", return_value=False)
     mock_print = mocker.patch("builtins.print")
+    mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
+                 return_value=[])
 
     with pytest.raises(SystemExit):
         sgrch.check_results_exist(solver_name, train_instance, test_instance)
@@ -1038,22 +789,7 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     mock_print.assert_called_once_with(
         "Error: Results not found for the given solver and instance set(s) combination. "
         'Make sure the "configure_solver" and "validate_configured_vs_default" commands '
-        "were correctly executed. \nDetected errors:\n training set not found in "
-        "configuration directory Components/smac-v2.10.03-master-778/scenarios/"
-        "instances/train-instance; configured parameter results on the training set not "
-        "found in Components/smac-v2.10.03-master-778/scenarios/test-solver_train-"
-        "instance/outdir_train_configuration/test-solver_train-instance_scenario/; "
-        "default parameter results on the training set not found in Components/"
-        "smac-v2.10.03-master-778/scenarios/test-solver_train-instance/"
-        "outdir_train_default/; testing set not found in configuration directory "
-        "Components/smac-v2.10.03-master-778/scenarios/instances/test-instance; "
-        "configured parameter results on the testing set not found in Components/"
-        "smac-v2.10.03-master-778/scenarios/test-solver_train-instance/outdir_test-"
-        "instance_test_configured/; default parameter results on the testing set not "
-        "found in Components/smac-v2.10.03-master-778/scenarios/test-solver_train-"
-        "instance/outdir_test-instance_test_default/;")
-
-    mock_exists.assert_called()
+        "were correctly executed. ")
 
 
 def test_get_most_recent_test_run_full(mocker: MockFixture) -> None:

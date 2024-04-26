@@ -32,9 +32,9 @@ Perform configuration on the solver to obtain a target configuration. For the VR
 
 ## Validate the configuration
 
-To make sure configuration is completed before running validation you can use the `sparkle_wait` command
+To make sure configuration is completed before running validation you can use the `sparkle wait` command
 
-`sparkle sparkle_wait`
+`sparkle wait`
 
 Validate the performance of the best found parameter configuration. The test set is optional. We again set the performance measure to absolute quality.
 
@@ -44,7 +44,7 @@ Validate the performance of the best found parameter configuration. The test set
 
 Wait for validation to be completed
 
-`sparkle sparkle_wait`
+`sparkle wait`
 
 Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `VRP_SISRs_X-1-10_X-11-20/Sparkle-latex-generator-for-configuration/`. We again set the performance measure to absolute quality.
 

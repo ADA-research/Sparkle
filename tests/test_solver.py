@@ -24,7 +24,8 @@ class TestSolver(TestCase):
 
     def test_init_variables(self: TestSolver) -> None:
         """Test if all variables that are set in the init are correct."""
-        solver = Solver(Path("test/directory/solver_executable"))
+        solver = Solver(Path("test/directory/solver_executable"),
+                        raw_output_directory=Path(""))
 
         self.assertEqual(solver.directory, Path("test/directory/solver_executable"))
         self.assertEqual(solver.name, "solver_executable")

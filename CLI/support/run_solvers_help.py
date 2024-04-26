@@ -6,7 +6,7 @@ import subprocess
 import sys
 import ast
 import shutil
-import fcntl
+from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
 import global_variables as sgh
@@ -62,7 +62,29 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
                                     raw_result_path: Path, runsolver_values_path: Path,
                                     custom_cutoff: int = None,
                                     is_configured: bool = False) -> Path:
-    """Run the solver on the given instance, with a given command line call."""
+    """Run the solver on the given instance, with a given command line call.
+
+    Parameters
+    ----------
+    solver_path: Path
+        The path to the solver
+    cmd_solver_call: str
+        The cmd wrapper containing relevant information
+    raw_result_path: Path
+        Path to the .rawres file for storing results (?)
+    runsolver_values_path: Path
+        Path to the .val file for storing values (?)
+    custom_cutoff: int
+        A custom cpu time limit
+    is_configured: bool
+        Whether the solver is configured (config is contained
+        in the wrapper)
+
+    Returns
+    -------
+    raw_result_path:
+        Path to the solver output
+    """
     if custom_cutoff is None:
         custom_cutoff = sgh.settings.get_general_target_cutoff_time()
 
@@ -98,18 +120,12 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         print("WARNING: Solver execution seems to have failed!\n"
               f"The used command was: {cmd}", flush=True)
     else:
-        # Clean up on success
         if is_configured:
-            tmp_raw_res = f"{exec_path}tmp/"
-            tmp_paths = list(Path(tmp_raw_res).glob("*.rawres"))
-
-            # The result should exist
-            if len(tmp_paths) == 0:
-                print(f"WARNING: Raw result not found in {tmp_raw_res}. Writing from "
-                      "subprocess...")
-                Path(raw_result_path).open("w").write(process.stdout.decode())
-
-            if check_solver_output_for_errors(Path(raw_result_path)):
+            if not raw_result_path.exists() or raw_result_path.stat().st_size == 0:
+                # Runsolver cutoff solver wrapper before it showed its output
+                Path(raw_result_path).open("w").write(
+                    r"{'status': 'TIMEOUT', 'quality': 'nan'}")
+            elif check_solver_output_for_errors(Path(raw_result_path)):
                 sfh.rmfiles(runsolver_watch_data_path)
 
     return raw_result_path
@@ -125,7 +141,7 @@ def check_solver_output_for_errors(raw_result_path: Path) -> bool:
     raw_output_str = raw_result_path.open("r").read()
     try:
         raw_output_dict_str =\
-            raw_output_str[raw_output_str.find("{"), raw_output_str.find("}")]
+            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
         ast.literal_eval(raw_output_dict_str)
     except Exception as ex:
         print(f"WARNING: Possible error detected in {raw_result_path}. "
@@ -279,7 +295,7 @@ def process_results(
         runsolver_values_path: str) -> tuple[float, float, list[float], str]:
     """Process results from raw output, the wrapper, and runsolver."""
     # By default runtime comes from runsolver, may be overwritten by user wrapper
-    cpu_time, wc_time = get_runtime_from_runsolver(runsolver_values_path)
+    cpu_time, wc_time = get_runtime(Path(runsolver_values_path))
 
     # Get results from the wrapper
     cmd_get_results_from_wrapper = (
@@ -372,26 +388,6 @@ def get_status_from_wrapper(result: str) -> str:
         sys.exit(-1)
 
     return status
-
-
-# NOTE: This method is actually usefull, but not coded very neatly
-def get_runtime_from_runsolver(runsolver_values_path: str) -> tuple[float, float]:
-    """Return the CPU and wallclock time reported by runsolver."""
-    cpu_time = -1.0
-    wc_time = -1.0
-    if Path(runsolver_values_path).exists():
-        with Path(runsolver_values_path).open("r+") as infile:
-            fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
-            lines = [line.strip().split("=") for line in infile.readlines()
-                     if len(line.split("=")) == 2]
-            for keyword, value in lines:
-                if keyword == "WCTIME":
-                    wc_time = float(value)
-                elif keyword == "CPUTIME":
-                    cpu_time = float(value)
-                    # Order is fixed, CPU is the last thing we want to read, so break
-                    break
-    return cpu_time, wc_time
 
 
 def remove_faulty_solver(solver_path: str, instance_path: str) -> None:

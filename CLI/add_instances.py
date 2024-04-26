@@ -133,12 +133,11 @@ if __name__ == "__main__":
         performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
 
         num_inst = len(list_source_all_filename)
-
-        print(f"Number of instances to be added: {str(num_inst)}")
+        added = 0
+        print(f"Number of instances to be added: {num_inst}")
         for i, intended_filename in enumerate(list_source_all_filename):
-            print("")
             print(f"Adding {intended_filename.name} ... "
-                  f"({str(i + 1)} out of {str(num_inst)})")
+                  f"({i + 1} out of {num_inst})", end="\r")
 
             if intended_filename in target_all_filename:
                 print(f"Instance {intended_filename.name} already exists in Directory "
@@ -149,7 +148,11 @@ if __name__ == "__main__":
                 feature_data_csv.add_row(intended_filename)
                 performance_data_csv.add_instance(intended_filename)
                 shutil.copy(intended_filename, instances_directory)
-                print(f"Instance {intended_filename.name} has been added!")
+                added += 1
+        if added == num_inst:
+            print(f"All instances of {instances_source} have been added!")
+        else:
+            print(f"{added}/{num_inst} instances of {instances_source} have been added!")
 
         feature_data_csv.save_csv()
         performance_data_csv.save_csv()

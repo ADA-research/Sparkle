@@ -31,9 +31,9 @@ sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-trai
 
 #### Validate the configuration
 
-# To make sure configuration is completed before running validation you can use the sparkle_wait command
+# To make sure configuration is completed before running validation you can use the wait command
 
-sparkle sparkle_wait
+sparkle wait
 
 # Validate the performance of the best found parameter configuration. The test set is optional.
 
@@ -43,7 +43,7 @@ sparkle validate_configured_vs_default --solver Solvers/PbO-CCSAT-Generic/ --ins
 
 # Wait for validation to be completed
 
-sparkle sparkle_wait
+sparkle wait
 
 # Generate a report detailing the results on the training (and optionally testing) set. This includes the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
 
@@ -63,7 +63,7 @@ sparkle run_ablation --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train In
 
 # Wait for ablation to be completed
 
-sparkle sparkle_wait
+sparkle wait
 
 # Generate a report including ablation, and as before the results on the train (and optionally test) set, the experimental procedure and performance information; this will be located in a `Configuration_Reports/` subdirectory for the solver, training set, and optionally test set like `PbO-CCSAT-Generic_PTN/Sparkle-latex-generator-for-configuration/`
 
@@ -85,9 +85,11 @@ sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-trai
 
 # Wait for the previous example to be completed
 
-sparkle sparkle_wait
+sparkle wait
 
 sparkle configure_solver --solver Solvers/PbO-CCSAT-Generic/ --instance-set-train Instances/PTN/ --instance-set-test Instances/PTN2/ --ablation --validate
+
+sparkle wait
 
 ### Running a configured solver
 

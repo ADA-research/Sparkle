@@ -102,6 +102,7 @@ sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
 configuration_output_general = output_dir / "Configuration"
 parallel_portfolio_output_general = output_dir / "Parallel_Portfolio"
 selection_output_general = output_dir / "Selection"
+validation_output_general = output_dir / "Validation"
 
 # Raw output
 rawdata_dir_name = Path("Raw_Data")

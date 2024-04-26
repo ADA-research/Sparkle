@@ -4,14 +4,11 @@
 import os
 import sys
 from pathlib import Path
-import shutil
 from enum import Enum
 
 import global_variables as sgh
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.solver.solver import Solver
-from sparkle.solver import pcs
 
 
 class InstanceType(Enum):
@@ -58,134 +55,6 @@ def get_smac_settings() -> tuple[str]:
 
     return (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
             smac_each_run_cutoff_length, num_of_smac_run, num_of_smac_run_in_parallel)
-
-
-def create_file_scenario_validate(solver_name: str, instance_set_train_name: str,
-                                  instance_set_val_name: str,
-                                  instance_type: InstanceType, default: bool) -> str:
-    """Create a file with the configuration scenario to be used for SMAC validation.
-
-    This will be located in the solver directory.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of training instance set
-        instance_set_val_name: Name of the validation instance set
-        instance_type: Instance type (train or test)
-        default: Whether the configured or default settings should be used
-
-    Returns:
-        String containing the name of the scenario file
-    """
-    if instance_type is InstanceType.TRAIN:
-        inst_type = "train"
-    else:
-        inst_type = "test"
-
-    if default:
-        config_type = "default"
-    else:
-        config_type = "configured"
-
-    configurator = sgh.settings.get_general_sparkle_configurator()
-    scenario_path = configurator.scenario.directory
-    instances_path = configurator.instances_path
-    scenario_file_name = (
-        f"{instance_set_val_name}_{inst_type}_{config_type}_scenario.txt")
-    smac_file_scenario = scenario_path / scenario_file_name
-
-    (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
-     smac_each_run_cutoff_length, _, _) = get_smac_settings()
-
-    paramfile = pcs.get_pcs_file_from_solver_directory(
-        configurator.scenario.solver.directory)
-    if isinstance(paramfile, Path):
-        paramfile = str(paramfile.absolute())
-
-    if instance_type == InstanceType.TRAIN:
-        outdir = (f"{scenario_path.absolute()}/"
-                  f"outdir_{inst_type}_{config_type}/")
-        instance_file = (f"{instances_path.absolute()}/"
-                         f"{instance_set_train_name}/"
-                         f"{instance_set_train_name}_{inst_type}.txt")
-    else:
-        outdir = (f"{scenario_path.absolute()}/"
-                  f"outdir_{instance_set_val_name}_{inst_type}_{config_type}/")
-        instance_file = (f"{instances_path.absolute()}/{instance_set_val_name}/"
-                         f"{instance_set_val_name}_{inst_type}.txt")
-    test_instance_file = instance_file
-
-    solver = Solver.get_solver_by_name(solver_name)
-    with smac_file_scenario.open("w+") as fout:
-        fout.write(f"algo = {configurator.configurator_target.absolute()} "
-                   f"{solver.directory.absolute()}\n"
-                   f"execdir = {scenario_path.absolute()}/\n"
-                   f"deterministic = {solver.is_deterministic()}\n"
-                   f"run_obj = {smac_run_obj}\n"
-                   f"wallclock-limit = {smac_whole_time_budget}\n"
-                   f"cutoffTime = {smac_each_run_cutoff_time}\n"
-                   f"cutoff_length = {smac_each_run_cutoff_length}\n"
-                   f"paramfile = {paramfile}\n"
-                   f"outdir = {outdir}\n"
-                   f"instance_file = {instance_file}\n"
-                   f"test_instance_file = {test_instance_file}\n")
-
-    log_str = (f"Scenario file for the validation of the {config_type} solver "
-               f"{solver_name} on the {inst_type}ing set")
-    sl.add_output(str(smac_file_scenario), log_str)
-
-    return scenario_file_name
-
-
-def remove_validation_directories_execution_or_output(instance_set_test_name: str,
-                                                      exec_or_out: str) -> None:
-    """Remove execution or output directories for validation.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of instance set for training
-        instance_set_test_name: Name of instance set for testing
-        exec_or_out: Postfix describing if execution or output directory is used
-    """
-    solver_path = sgh.settings.get_general_sparkle_configurator().scenario.directory
-    train_default_dir = solver_path / (exec_or_out + "_train_default/")
-    shutil.rmtree(train_default_dir, ignore_errors=True)
-
-    if instance_set_test_name is not None:
-        test_default_dir = solver_path / \
-            f"{exec_or_out}_{instance_set_test_name}_test_default/"
-        shutil.rmtree(test_default_dir, ignore_errors=True)
-        test_configured_dir = solver_path / \
-            f"{exec_or_out}_{instance_set_test_name}_test_configured/"
-        shutil.rmtree(test_configured_dir, ignore_errors=True)
-
-
-def remove_validation_directories(instance_set_test_name: str) -> None:
-    """Remove validation directories for a solver and instance set(s) combination.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of the instance set for training
-        instance_set_test_name: Name of the instance set for testing
-    """
-    remove_validation_directories_execution_or_output(
-        instance_set_test_name, "validate")
-    remove_validation_directories_execution_or_output(
-        instance_set_test_name, "output")
-
-
-def prepare_smac_execution_directories_validation(instance_set_test_name: str) -> None:
-    """Create and copy required directories and files for validation with SMAC.
-
-    Remove old directories and files as needed.
-
-    Args:
-        solver_name: Name of the solver
-        instance_set_train_name: Name of the instance set for training
-        instance_set_test_name: Name of the instance set for testing
-    """
-    # Make sure no old files remain that could interfere
-    remove_validation_directories(instance_set_test_name)
 
 
 def check_configuration_exists() -> bool:
