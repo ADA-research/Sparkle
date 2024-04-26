@@ -6,8 +6,6 @@ import ast
 import re
 import math
 
-import global_variables as ga
-
 
 def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver."""
@@ -33,7 +31,8 @@ def get_solver_args(runsolver_log_path: Path) -> dict:
     if runsolver_log_path.exists():
         for line in runsolver_log_path.open("r").readlines():
             if line.startswith("command line:"):
-                return line.split(ga.sparkle_solver_wrapper, 1)[1]
+                # Can't take string from GV due to circular imports
+                return line.split("sparkle_solver_wrapper.py", 1)[1]
     return ""
 
 
