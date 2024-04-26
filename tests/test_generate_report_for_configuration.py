@@ -85,15 +85,14 @@ def test_get_par_performance(mocker: MockFixture) -> None:
     A performance list should be retrieved from results file.
     The mean of the performance values should be computed and returned.
     """
-    results_file = "example_file"
     cutoff = 42
     mock_get_list = mocker.patch("sparkle.platform.generate_report_for_configuration."
                                  "get_dict_instance_to_performance",
-                                 return_value=[("one", 10), ("two", 5)])
+                                 return_value={"one": 10, "two": 5})
 
-    par = sgrch.get_par_performance(results_file, cutoff)
+    par = sgrch.get_par_performance([], cutoff)
 
-    mock_get_list.assert_called_once_with(results_file, cutoff)
+    mock_get_list.assert_called_once_with([], cutoff)
     assert par == 7.5
 
 
