@@ -185,9 +185,9 @@ class PerformanceDataFrame():
                       f"to Performance DataFrame: {self.csv_filepath}")
                 return
             # Create the missing indices
-            levels = [self.dataframe.levels[0].tolist(),
+            levels = [self.dataframe.index.levels[0].tolist(),
                       [instance_name],
-                      self.dataframe.levels[2].tolist()]
+                      self.dataframe.index.levels[2].tolist()]
             emidx = pd.MultiIndex(levels, names=self.multi_dim_names)
             # Create the missing column values
             edf = pd.DataFrame(sgh.sparkle_missing_value,
