@@ -98,7 +98,6 @@ if __name__ == "__main__":
     instance_set_test = args.instance_set_test
     run_on = args.run_on
 
-    
     check_for_initialise(
         sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.VALIDATE_CONFIGURED_VS_DEFAULT]
@@ -123,7 +122,6 @@ if __name__ == "__main__":
             args.target_cutoff_time, SettingState.CMD_LINE
         )
 
-
     # Make sure configuration results exist before trying to work with them
     configurator = sgh.settings.get_general_sparkle_configurator()
     configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
@@ -131,7 +129,7 @@ if __name__ == "__main__":
 
     # Record optimised configuration
     optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
-        solver.name, instance_set_test.name)
+        solver.name, instance_set_train.name)
     scsh.write_configuration_str(optimised_configuration_str)
     pcs.write_configuration_pcs(solver.name, optimised_configuration_str,
                                 Path(sgh.sparkle_tmp_path))
