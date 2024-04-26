@@ -3,7 +3,6 @@
 """Helper functions for the execution of a configured solver."""
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import runrunner as rrr
@@ -11,7 +10,6 @@ from runrunner.base import Runner
 
 import global_variables as sgh
 from CLI.help.command_help import CommandName
-from CLI.support import configure_solver_help as scsh
 from sparkle.platform import slurm_help as ssh
 from sparkle.instance import instances_help as sih
 from sparkle.solver.solver import Solver
@@ -177,23 +175,3 @@ def call_configured_solver_parallel(
         print(f"Configured solver added to {run_on} queue.")
 
     return run
-
-
-def get_latest_configured_solver_and_configuration() -> tuple[str, str]:
-    """Return the name and parameter string of the latest configured solver.
-
-    Returns:
-        Tuple(str, str): A tuple containing the solver name and its configuration string.
-    """
-    # Get latest configured solver + instance set
-    solver = sgh.latest_scenario().get_config_solver()
-    instance_set = sgh.latest_scenario().get_config_instance_set_train()
-
-    if solver is None or instance_set is None:
-        # Print error and stop execution
-        print("ERROR: No configured solver found! Stopping execution.")
-        sys.exit(-1)
-
-    # Get optimised configuration
-    config_str = scsh.get_optimised_configuration_params(solver.name, instance_set.name)
-    return solver.name, config_str
