@@ -27,7 +27,7 @@ def setup_conf() -> None:
     configurator = sgh.settings.get_general_sparkle_configurator()
     configurator_path = configurator.configurator_path
     configurator.scenario =\
-        ConfigurationScenario(Solver(Path(solver_name)), Path(train_instance))
+        ConfigurationScenario(Solver(Path(solver_name), raw_output_directory=Path("")), Path(train_instance))
     configurator.scenario._set_paths(configurator_path)
 
 
