@@ -27,7 +27,8 @@ def setup_conf() -> None:
     configurator = sgh.settings.get_general_sparkle_configurator()
     configurator_path = configurator.configurator_path
     configurator.scenario =\
-        ConfigurationScenario(Solver(Path(solver_name), raw_output_directory=Path("")), Path(train_instance))
+        ConfigurationScenario(Solver(Path(solver_name), raw_output_directory=Path("")),
+                              Path(train_instance))
     configurator.scenario._set_paths(configurator_path)
 
 
@@ -651,8 +652,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                  return_value=[])
 
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
-                                                          test_instance, report_dir)
-    
+                                                          test_instance, report_dir)    
 
     mock_settings.assert_called_once_with()
     mock_config.assert_called_with(solver_name, train_instance)
@@ -736,7 +736,8 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                        return_value="ablation/path")
     mocker.patch("sparkle.configurator.validator.Validator.get_validation_results",
                  return_value=[])
-    mocker.patch("CLI.support.configure_solver_help.get_optimised_configuration_from_file",
+    mocker.patch("CLI.support.configure_solver_help."
+                 "get_optimised_configuration_from_file",
                  return_value=["1", "2", "3"])
 
     test_dict = sgrch.get_dict_variable_to_value_test(sgh.configuration_output_analysis,
