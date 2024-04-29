@@ -1,10 +1,10 @@
 """Setup file for Sparkle."""
 import os
 from setuptools import setup, find_packages
-from global_variables import sparkle_version
+from sparkle.about import version
 
 setup(name="SparkleAI",
-      version=sparkle_version,
+      version=version,
       url="https://github.com/thijssnelleman/Sparkle",
       author="Thijs Snelleman",
       author_email="fkt_sparkle@aim.rwth-aachen.de",
