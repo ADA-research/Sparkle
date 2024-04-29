@@ -27,7 +27,4 @@ def user_set_state(args: argparse.Namespace, arg_name: str) -> SettingState:
 
 def set_by_user(args: argparse.Namespace, arg_name: str) -> bool:
     """Return whether an argument was set through the CLI by the user or not."""
-    if hasattr(args, arg_name + "_nondefault"):
-        return True
-    else:
-        return False
+    return hasattr(args, arg_name + "_nondefault")

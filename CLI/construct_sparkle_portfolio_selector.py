@@ -66,16 +66,12 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
         performance_data_csv.get_list_remaining_performance_computation_job()
     total_job_num = sjh.get_num_of_total_job_from_list(performance_computation_jobs)
 
-    if total_job_num > 0:
-        return True
-
-    return False
+    return total_job_num > 0
 
 
 def delete_log_files() -> None:
     """Remove the log files."""
     sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path])
-    return
 
 
 def print_log_paths() -> None:
@@ -83,7 +79,6 @@ def print_log_paths() -> None:
     print("Consider investigating the log files:")
     print(f"stdout: {sgh.sparkle_log_path}")
     print(f"stderr: {sgh.sparkle_err_path}")
-    return
 
 
 if __name__ == "__main__":
