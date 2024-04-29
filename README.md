@@ -17,8 +17,6 @@ To get a copy of Sparkle you can clone the repository using `git`.
   $ git clone https://github.com/ADA-research/Sparkle
 ```
 
-You can also download the stable version here:
-
 
 ### Install dependencies
 
