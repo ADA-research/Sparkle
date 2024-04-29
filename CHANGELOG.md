@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.8] - 2024/??
+## [0.8] - 2024/04/29
 
 ### Added
 - Awaiting Sparkle Jobs is now done using RunRunner's objects and .JSON files instead of direct calls to Slurm
@@ -16,6 +16,7 @@ Notable changes to Sparkle will be documented in this file.
 - Configurator object is now used as source in many cases when accessing Configurator directories instead of hard-coded
 - Refactored many redundant methods out of the codebase
 - Removed development environment and merged into sparkle environment
+- Moved package to Github instead of Bitbucket
 
 ### Fixed
 - latest_scenario now uses a getter

@@ -14,15 +14,15 @@ The installation process use the `conda` package manager (to install https://doc
 ### Get a copy of Sparkle
 To get a copy of Sparkle you can clone the repository using `git`.
 ``` bash
-  $ git clone https://bitbucket.org/sparkle-ai/sparkle.git
+  $ git clone
 ```
 
-You can also download the stable version here: https://bitbucket.org/sparkle-ai/sparkle/get/main.zip
+You can also download the stable version here:
 
 
 ### Install dependencies
 
-Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. LaTeX is used to create the reports, if you want to use this functionality you will need to instal it manually.
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. LaTeX is used to create the reports, if you want to use this functionality you will need to install it manually.
 
 The rest of the dependencies can installed and activated with
 

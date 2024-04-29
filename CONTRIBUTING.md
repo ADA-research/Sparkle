@@ -43,7 +43,7 @@ To make changes to Sparkle, please create a branch from `development` and add yo
 When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
-1. Prior to creating a pull request, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid burning through our build minutes on Bitbucket, this is easily tested locally by running "flake8" or "pytest" in the main sparkle directory in your branch.
+1. Prior to creating a pull request, **the author(s) of the changes are expected to ensure the general, code style and testing conditions below are satisfied**. To avoid burning through our build minutes on Github, this is easily tested locally by running "flake8" or "pytest" in the main sparkle directory in your branch.
 2. Pull requests should be reviewed by at least one member of the Sparkle development team.
 3. Once all reviewers have approved the pull request it can be merged. Make sure issue branches are deleted upon merger to avoid excessively many dormant branches. In principle the last reviewer to approve should do the merge immediately. However, if this does not work because, e.g., a final (minor) change is requested, or they forget, someone else can take over the responsibility.
 

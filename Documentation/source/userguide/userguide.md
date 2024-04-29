@@ -27,10 +27,10 @@ To get a copy of Sparkle you can clone the repository.
 If `git` is available on your system, this will clone the Sparkle repository and create a subdirectory named `sparkle` :
 
 ```shell
-$ git clone https://bitbucket.org/sparkle-ai/sparkle.git
+$ git clone 
 ```
 
-You can also download the stable version here: <https://bitbucket.org/sparkle-ai/sparkle/get/main.zip>
+You can also download the stable version here: 
 
 ### Install dependencies
 

@@ -78,7 +78,7 @@ class TestMarginalContribution(TestCase):
 
     def test_get_list_predict_schedule(self: TestCase) -> None:
         """Test for method get_list_predict_schedule."""
-        # Does not work on bitbucket.
+        # Does not work on server.
         # TODO: Fix with mocker commands. There is a ticket for this.
         return
         pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
