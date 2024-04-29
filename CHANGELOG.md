@@ -2,6 +2,32 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.8] - 2024/04/29
+
+### Added
+- Awaiting Sparkle Jobs is now done using RunRunner's objects and .JSON files instead of direct calls to Slurm
+- Performance data now is restructured into Performance DataFrame which supports two new dimensions: Objective and Run.
+- Sparkle commands are now registered directly as command line operators by prefix ``sparkle'', see updated examples.
+
+### Changed
+- ! New file structure for code was implemented, Commands are now in CLI folder and library objects and methods are in sparkle directory.
+- Runsolver is now automatically provided for newly added Solvers to the Sparkle Platform
+- Output directories for report generation are now compliant with the explanation in the documentation
+- Configurator object is now used as source in many cases when accessing Configurator directories instead of hard-coded
+- Refactored many redundant methods out of the codebase
+- Removed development environment and merged into sparkle environment
+- Moved package to Github instead of Bitbucket
+
+### Fixed
+- latest_scenario now uses a getter
+- QUALITY was removed from PerformanceMeasure enum
+- Reports now use one bibliograpghy file instead of multiple
+- Java SMAC is no longer called through each_smac_run_core but adressed directly by Sparkle
+- Fixed bugs for running configured solver
+
+## [Known issues]
+- [CHECK BEFORE PUBLISHING TO MAIN] Running configured solver in parallel now tends to lead to empty raw output files from the solver. This will be either solved in this version or the next
+
 ## [0.7] - 2024/04/05
 
 ### Added
@@ -48,7 +74,7 @@ Notable changes to Sparkle will be documented in this file.
 - Include linting for security issues with `flake8-bandit` and make the code comply.
 - Changed author list in `README.md` to updated list of maintainers and contributors.
 - Update contact email in `README.md`.
-- The `sparkle_wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
+- The `wait.py` command now fails nicely with an error message when called before any jobs exist to wait for (instead of a hard crash).
 
 ### Fixed
 - Fixed calls to Slurm's `squeue` command to request an exact output format to ensure robustness against different Slurm configurations.
@@ -128,7 +154,7 @@ Notable changes to Sparkle will be documented in this file.
 - Remove Yahsp solver and Depots instances (unclear redistribution permissions)
 
 ### Fixed
-- Converted `Commands/*.py` to the new coding style
+- Converted `CLI/*.py` to the new coding style
 - Change LaTeX build to non-interactive to prevent hanging
 - get\_solver\_directory function and pcs check before configuration
 - Make pcs file check only return true iff one pcs file is found

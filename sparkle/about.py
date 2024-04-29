@@ -1,11 +1,20 @@
 """Helper module for information about Sparkle."""
 
-about_info = {
-    "name": "Sparkle",
-    "version": 0.7
-}
+name = "Sparkle"
+version = 0.8
+description = "Platform for evaluating empirical algorithms/solvers"
+licence = "MIT"
+authors = ["Koen van der Blom",
+           "Jeremie Gobeil",
+           "Holger H. Hoos",
+           "Chuan Luo",
+           "Richard Middelkoop",
+           "Jeroen Rook",
+           "Thijs Snelleman",
+           ]
+contact = "snelleman@aim.rwth-aachen.de"
 
-about_str = f"{about_info['name']}-{about_info['version']}"
+about_str = f"{name}-{version}"
 
 
 def print_about() -> None:

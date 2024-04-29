@@ -3,7 +3,7 @@
 ## Quick start
 
 ```{note}
-Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), and does not work without it.
+Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), but in some cases works locally as well.
 ```
 
 Follow these steps:
@@ -27,10 +27,10 @@ To get a copy of Sparkle you can clone the repository.
 If `git` is available on your system, this will clone the Sparkle repository and create a subdirectory named `sparkle` :
 
 ```shell
-$ git clone https://bitbucket.org/sparkle-ai/sparkle.git
+$ git clone 
 ```
 
-You can also download the stable version here: <https://bitbucket.org/sparkle-ai/sparkle/get/main.zip>
+You can also download the stable version here: 
 
 ### Install dependencies
 
@@ -88,7 +88,6 @@ algorithm (for an example of a solver directory see {numref}`dir-solvers`):
 - A working solver executable
 - An algorithm wrapper called `sprakle_smac_wrapper.py`
 - A PCS (parameter configuration space) file
-- The runsolver binary (e.g. from `Examples/Resources/Solvers/PbO-CCSAT-Generic/`)
 
 Further, training and testing instance sets are needed (for an example
 of an instances directory see {numref}`dir-instances`). For
@@ -166,7 +165,7 @@ Executing commands in Sparkle is as simple as running them in the top
 directory of Sparkle, for example:
 
 ```
-Commands/initialise.py
+CLI/initialise.py
 ```
 
 Do note that when running on a cluster additional arguments may be
@@ -174,7 +173,7 @@ needed, for instance under the Slurm workload manager the above command would ch
 something like:
 
 ```
-srun -N1 -n1 -c1 Commands/initialise.py
+srun -N1 -n1 -c1 CLI/initialise.py
 ```
 
 In the `Examples/` directory a number of common command sequences are
@@ -232,20 +231,15 @@ Solver/
     solver
     sparkle_smac_wrapper.py
     parameters.pcs
-    runsolver
 ```
 
 Here `solver` is a binary executable of the solver that is to be
 configured. The `sprakle_smac_wrapper.py` is a wrapper that Sparkle
 should call to run the solver with specific settings, and then returns a
 result for the configurator. In `parameters.pcs` the configurable
-parameters are described in the PCS format. Finally, `runsolver` is a
-binary executable of the runsolver tool. This allows Sparkle to make
-fair time measurements for all configuration experiments.
-
-```{note}
-Currently the runsolver binary has to be in every solver directory, it can be found in the `Examples/Resources/Solvers/PbO-CCSAT-Generic/` directory.
-```
+parameters are described in the PCS format. Finally, when importing your
+Solver into Sparkle, a binary executable of the runsolver tool `runsolver` is added.
+This allows Sparkle to make fair time measurements for all configuration experiments.
 
 (dir-solvers-selection)=
 
@@ -691,7 +685,7 @@ of your call to a Sparkle command. Take for instance the following
 command:
 
 ```
-srun -N1 -n1 -p graceTST Commands/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
+srun -N1 -n1 -p graceTST CLI/configure_solver.py --solver Solvers/PbO-CCSAT-Generic --instances-train Instances/PTN/
 ```
 
 This call restricts itself to the `graceTST` partition (the
