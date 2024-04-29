@@ -3,7 +3,7 @@ import os
 from setuptools import setup, find_packages
 from global_variables import sparkle_version
 
-setup(name="Sparkle",
+setup(name="SparkleAI",
       version=sparkle_version,
       url="https://github.com/thijssnelleman/Sparkle",
       author="Thijs Snelleman",
