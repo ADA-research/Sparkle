@@ -25,10 +25,7 @@ def _check_existence_of_test_instance_list_file(extractor_directory: str) -> boo
     test_instance_list_file_path = (Path(extractor_directory)
                                     / test_instance_list_file_name)
 
-    if Path(test_instance_list_file_path).is_file():
-        return True
-    else:
-        return False
+    return Path(test_instance_list_file_path).is_file()
 
 
 def parser_function() -> argparse.ArgumentParser:
