@@ -48,7 +48,7 @@ def get_smac_settings() -> tuple[str]:
     """
     smac_each_run_cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     smac_run_obj = get_smac_run_obj()
-    smac_whole_time_budget = sgh.settings.get_config_budget_per_run()
+    smac_whole_time_budget = sgh.settings.get_config_wallclock_time()
     smac_each_run_cutoff_time = sgh.settings.get_general_target_cutoff_time()
     num_of_smac_run = sgh.settings.get_config_number_of_runs()
     num_of_smac_run_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()

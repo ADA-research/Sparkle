@@ -574,12 +574,26 @@ number_of_runs_in_parallel = 25
 
 **\[configuration\]**
 
-`budget_per_run`
+`wallclock_time`
 > aliases: `smac_whole_time_budget`
 >
 > values: integer
 >
 > description: The wallclock time one configuration run is allowed to use for finding configurations.
+
+`cpu_time`
+> aliases: `TODO`
+>
+> values: integer
+>
+> description: The cpu time one configuration run is allowed to use for finding configurations.
+
+`solver_calls`
+> aliases: `TODO`
+>
+> values: integer
+>
+> description: The number of solver calls one configuration run is allowed to use for finding configurations.
 
 `number_of_runs`
 > aliases: `num_of_smac_runs`
