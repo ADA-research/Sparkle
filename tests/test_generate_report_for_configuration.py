@@ -648,6 +648,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  "report_for_configuration."
                                  "get_features_bool",
                                  return_value="featurestrue")
+    mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
 
@@ -734,6 +735,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                        "report_for_configuration."
                                        "get_ablation_table",
                                        return_value="ablation/path")
+    mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
     mocker.patch("CLI.support.configure_solver_help."
@@ -780,6 +782,7 @@ def test_check_results_exist_all_error(mocker: MockFixture) -> None:
     Also, test that the correct error string is printed, explaining each missing path.
     """
     mock_print = mocker.patch("builtins.print")
+    mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
 
