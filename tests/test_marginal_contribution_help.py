@@ -139,8 +139,6 @@ class TestMarginalContribution(TestCase):
                                                            mock_actual_performance: Mock
                                                            ) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
-        # Check github fix
-        return
         # Test does not work on Mac
         perf_path = "CLI/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
