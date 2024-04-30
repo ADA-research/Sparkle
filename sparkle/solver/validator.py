@@ -8,7 +8,6 @@ import csv
 import ast
 from runrunner import Runner
 
-import global_variables as gv
 from sparkle.solver.solver import Solver
 from CLI.support import run_configured_solver_help as rcsh
 from tools.runsolver_parsing import get_solver_output, get_solver_args
@@ -16,9 +15,9 @@ from tools.runsolver_parsing import get_solver_output, get_solver_args
 
 class Validator():
     """Class to handle the validation of solvers on instance sets."""
-    def __init__(self: Validator) -> None:
+    def __init__(self: Validator, out_dir: Path = Path()) -> None:
         """Construct the validator."""
-        pass
+        self.out_dir = out_dir
 
     def validate(self: Validator, solvers: list[Path], config_str_list: list[str] | str,
                  instance_sets: list[Path], run_on: Runner = Runner.SLURM) -> None:
@@ -50,8 +49,10 @@ class Validator():
                                                      config_str,
                                                      run_on=run_on)
 
-    @staticmethod
-    def retrieve_raw_results(solver: Solver, instance_set: str) -> None:
+
+    def retrieve_raw_results(self: Validator,
+                             solver: Solver,
+                             instance_set: list[str]) -> None:
         """Checks the raw results of a given solver for a specific instance_set.
 
         Writes the raw results to a unified CSV file for the resolve/instance_set
@@ -59,10 +60,8 @@ class Validator():
 
         Args:
             solver: The solver for which to check the raw result path
-            instance_set: The set for which to retrieve the results
+            instance_set: The set of instances for which to retrieve the results
         """
-        relevant_instances = [p.name for p in
-                              (gv.instance_dir / instance_set).iterdir()]
         for res in solver.raw_output_directory.iterdir():
             if res.suffix != ".rawres":
                 continue
@@ -78,30 +77,31 @@ class Validator():
                 if def_arg in solver_args:
                     del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")
-            if instance_name in relevant_instances:
+            if instance_name in instance_set:
                 out_dict = get_solver_output(
                     ["-o", res.name, "-v", res.with_suffix(".val").name],
                     "", solver.raw_output_directory)
-                Validator.append_entry_to_csv(solver.name,
-                                              solver_args,
-                                              instance_set,
-                                              instance_name,
-                                              out_dict["status"],
-                                              out_dict["quality"],
-                                              out_dict["runtime"])
+                self.append_entry_to_csv(solver.name,
+                                         solver_args,
+                                         instance_set,
+                                         instance_name,
+                                         out_dict["status"],
+                                         out_dict["quality"],
+                                         out_dict["runtime"])
                 res.unlink()
                 res.with_suffix(".val").unlink()
                 res.with_suffix(".log").unlink()
 
-    @staticmethod
-    def get_validation_results(solver: Solver | str,
-                               instance_set: str,
+
+    def get_validation_results(self: Validator,
+                               solver: Solver | str,
+                               instance_set: list[str] | str,
                                config: str = None) -> list[list[str]]:
         """Query the results of the validation of solver on instance_set.
 
         Args:
             solver: Path to the validated solver
-            instance_set: Path to validation set
+            instance_set: (List of) instance names in the instance set
             config: Path to the configuration if the solver was configured, None
                     otherwise
 
@@ -110,11 +110,13 @@ class Validator():
         """
         if isinstance(solver, str):
             solver = Solver.get_solver_by_name(solver)
+        if isinstance(instance_set, str):
+            instance_set = [instance_set]
         # Check if we still have to collect results for this combination
         if any(x.suffix == ".rawres" for x in solver.raw_output_directory.iterdir()):
             Validator.retrieve_raw_results(solver, instance_set)
 
-        out_dir = gv.validation_output_general / f"{solver.name}_{instance_set}"
+        out_dir = self.out_dir / f"{solver.name}_{instance_set}"
         csv_file = out_dir / "validation.csv"
         # We skip the header when returning results
         csv_data = [line for line in csv.reader(csv_file.open("r"))][1:]
@@ -126,8 +128,9 @@ class Validator():
                         config_dict.items() == ast.literal_eval(line[1]).items()]
         return csv_data
 
-    @staticmethod
-    def append_entry_to_csv(solver: str,
+
+    def append_entry_to_csv(self: Validator,
+                            solver: str,
                             config_str: str,
                             instance_set: str,
                             instance: str,
@@ -135,7 +138,7 @@ class Validator():
                             quality: str,
                             runtime: str) -> None:
         """Append a validation result as a row to a CSV file."""
-        out_dir = gv.validation_output_general / f"{solver}_{instance_set}"
+        out_dir = self.out_dir / f"{solver}_{instance_set}"
         if not out_dir.exists():
             out_dir.mkdir(parents=True)
         csv_file = out_dir / "validation.csv"

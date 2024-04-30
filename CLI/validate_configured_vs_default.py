@@ -134,7 +134,7 @@ if __name__ == "__main__":
     pcs.write_configuration_pcs(solver.name, optimised_configuration_str,
                                 Path(sgh.sparkle_tmp_path))
 
-    validator = Validator()
+    validator = Validator(sgh.validation_output_general)
     all_validation_instances = [instance_set_train]
     if instance_set_test is not None:
         all_validation_instances.append(instance_set_test)
