@@ -110,9 +110,9 @@ class Configurator:
             srun_options=["-N1", "-n1"])
 
         if validate_after:
-            validator = Validator()
-            validation_run = validator.validate([],
-                                                [],
+            validator = Validator(out_dir=self.result_path)
+            validation_run = validator.validate([scenario.solver],
+                                                [], #We need to extract the configurations once config run is done
                                                 scenario.instance_directory.name,
                                                 run_on=run_on)
         elif run_on == Runner.LOCAL:

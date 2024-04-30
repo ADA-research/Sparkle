@@ -7,6 +7,7 @@ from pathlib import Path
 import csv
 import ast
 from runrunner import Runner
+from runrunner import SlurmRun, LocalRun
 
 from sparkle.solver.solver import Solver
 from CLI.support import run_configured_solver_help as rcsh
@@ -19,8 +20,11 @@ class Validator():
         """Construct the validator."""
         self.out_dir = out_dir
 
-    def validate(self: Validator, solvers: list[Path], config_str_list: list[str] | str,
-                 instance_sets: list[Path], run_on: Runner = Runner.SLURM) -> None:
+    def validate(self: Validator,
+                 solvers: list[Path] | list[Solver],
+                 config_str_list: list[str] | str,
+                 instance_sets: list[Path],
+                 run_on: Runner = Runner.SLURM) -> list[SlurmRun | LocalRun]:
         """Validate a list of solvers (with configurations) on a set of instances.
 
         Args:
@@ -36,7 +40,7 @@ class Validator():
         elif len(config_str_list) != len(solvers):
             print("Error: Number of solvers and configurations does not match!")
             sys.exit(-1)
-
+        jobs = []
         for solver_path, config_str in zip(solvers, config_str_list):
             # run a configured solver
             if config_str is None:
@@ -44,10 +48,12 @@ class Validator():
             for instance_set in instance_sets:
                 instance_path_list = list(p.absolute() for p in instance_set.iterdir())
                 solver = Solver.get_solver_by_name(solver_path.name)
-                rcsh.call_configured_solver_parallel(instance_path_list,
-                                                     solver,
-                                                     config_str,
-                                                     run_on=run_on)
+                run = rcsh.call_configured_solver_parallel(instance_path_list,
+                                                           solver,
+                                                           config_str,
+                                                           run_on=run_on)
+                jobs.append(run)
+        return jobs
 
 
     def retrieve_raw_results(self: Validator,
