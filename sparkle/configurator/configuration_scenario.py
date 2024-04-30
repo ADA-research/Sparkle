@@ -130,7 +130,8 @@ class ConfigurationScenario:
                        f"test_instance_file = {self.instance_file_path.absolute()}\n")
             if self.use_features:
                 file.write(f"feature_file = {self.feature_file_path}\n")
-            file.write("validation = true" + "\n")
+            # We don't let SMAC do the validation
+            file.write("validation = false" + "\n")
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
         """Create instance list file."""

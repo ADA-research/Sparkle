@@ -10,10 +10,11 @@ import runrunner as rrr
 from runrunner import Runner
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
+from sparkle.solver.validator import Validator
 
 
 class Configurator:
@@ -55,7 +56,7 @@ class Configurator:
         self.sbatch_filename = ""
         (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
-        self.objectives = sgh.settings.get_general_sparkle_objectives()
+        self.objectives = gv.settings.get_general_sparkle_objectives()
         if len(self.objectives) > 1 and not self.multiobjective:
             print("Warning: Multiple objectives specified but current configurator "
                   f"{self.configurator_path.name} only supports single objective. "
@@ -63,11 +64,13 @@ class Configurator:
 
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
+                  validate_after: bool = True,
                   run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
         """Start configuration job.
 
         Args:
             scenario: ConfigurationScenario object
+            validate_after: Whether the Validator will be called after the configuration
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:
@@ -91,25 +94,31 @@ class Configurator:
                   f"_seed_{seed}_smac.txt"
                   for seed in range(1, self.scenario.number_of_runs + 1)]
 
-        parallel_jobs = max(sgh.settings.get_slurm_number_of_runs_in_parallel(),
+        parallel_jobs = max(gv.settings.get_slurm_number_of_runs_in_parallel(),
                             self.scenario.number_of_runs)
         sbatch_options = ssh.get_slurm_options_list()
 
-        run = rrr.add_to_queue(
+        configuration_run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
             name=CommandName.CONFIGURE_SOLVER,
-            base_dir=sgh.sparkle_tmp_path,
+            base_dir=gv.sparkle_tmp_path,
             output_path=output,
             path=self.configurator_path,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
 
-        if run_on == Runner.LOCAL:
-            run.wait()
+        if validate_after:
+            validator = Validator()
+            validation_run = validator.validate([],
+                                                [],
+                                                scenario.instance_directory.name,
+                                                run_on=run_on)
+        elif run_on == Runner.LOCAL:
+            configuration_run.wait()
 
-        return run
+        return configuration_run
 
     def configuration_callback(self: Configurator,
                                dependency_job: rrr.SlurmRun | rrr.LocalRun,
@@ -125,7 +134,7 @@ class Configurator:
         run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
-            base_dir=sgh.sparkle_tmp_path,
+            base_dir=gv.sparkle_tmp_path,
             name=CommandName.CONFIGURE_SOLVER_CALLBACK,
             dependencies=dependency_job,
             sbatch_options=ssh.get_slurm_options_list())

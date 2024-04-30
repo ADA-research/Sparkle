@@ -8,7 +8,7 @@ import csv
 import ast
 from runrunner import Runner
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.solver.solver import Solver
 from CLI.support import run_configured_solver_help as rcsh
 from tools.runsolver_parsing import get_solver_output, get_solver_args
@@ -62,7 +62,7 @@ class Validator():
             instance_set: The set for which to retrieve the results
         """
         relevant_instances = [p.name for p in
-                              (sgh.instance_dir / instance_set).iterdir()]
+                              (gv.instance_dir / instance_set).iterdir()]
         for res in solver.raw_output_directory.iterdir():
             if res.suffix != ".rawres":
                 continue
@@ -114,7 +114,7 @@ class Validator():
         if any(x.suffix == ".rawres" for x in solver.raw_output_directory.iterdir()):
             Validator.retrieve_raw_results(solver, instance_set)
 
-        out_dir = sgh.validation_output_general / f"{solver.name}_{instance_set}"
+        out_dir = gv.validation_output_general / f"{solver.name}_{instance_set}"
         csv_file = out_dir / "validation.csv"
         # We skip the header when returning results
         csv_data = [line for line in csv.reader(csv_file.open("r"))][1:]
@@ -135,7 +135,7 @@ class Validator():
                             quality: str,
                             runtime: str) -> None:
         """Append a validation result as a row to a CSV file."""
-        out_dir = sgh.validation_output_general / f"{solver}_{instance_set}"
+        out_dir = gv.validation_output_general / f"{solver}_{instance_set}"
         if not out_dir.exists():
             out_dir.mkdir(parents=True)
         csv_file = out_dir / "validation.csv"
