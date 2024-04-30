@@ -9,4 +9,4 @@ paramfile = scenarios/Test-Solver_Test-Instance-Set/Test-Solver.pcs
 outdir = scenarios/Test-Solver_Test-Instance-Set/outdir_train_configuration
 instance_file = tests/test_files/test_configurator/scenarios/instances/Test-Instance-Set/Test-Instance-Set_train.txt
 test_instance_file = tests/test_files/test_configurator/scenarios/instances/Test-Instance-Set/Test-Instance-Set_train.txt
-validation = true
+validation = false
