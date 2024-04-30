@@ -50,14 +50,14 @@ def scenario_fixture(solver_fixture: MockerFixture) -> ConfigurationScenario:
     """Scenario fixture for tests."""
     instance_set_train = Path("Instances", "Test-Instance-Set")
     number_of_runs = 2
-    time_budget = sgh.settings.get_config_wallclock_time()
+    wallclock_time = sgh.settings.get_config_wallclock_time()
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
         sgh.settings.get_general_sparkle_objectives()[0]
     use_features = False
     return ConfigurationScenario(solver_fixture, instance_set_train, number_of_runs,
-                                 time_budget, cutoff_time, cutoff_length,
+                                 wallclock_time, cutoff_time, cutoff_length,
                                  sparkle_objective, use_features,
                                  sgh.smac_target_algorithm)
 

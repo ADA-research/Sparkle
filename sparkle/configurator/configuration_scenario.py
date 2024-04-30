@@ -32,7 +32,8 @@ class ConfigurationScenario:
             solver_calls: The number of times the solver is called for each
                 configuration run
             cpu_time: The time budget allocated for each configuration run. (cpu)
-            wallclock_time: The time budget allocated for each configuration run. (wallclock)
+            wallclock_time: The time budget allocated for each configuration run.
+                (wallclock)
             cutoff_time: The maximum time allowed for each individual run during
                 configuration.
             cutoff_length: The maximum number of iterations allowed for each

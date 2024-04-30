@@ -275,7 +275,7 @@ if __name__ == "__main__":
         sgh.settings.get_general_sparkle_objectives()[0]
     configurator = sgh.settings.get_general_sparkle_configurator()
     config_scenario = ConfigurationScenario(
-        solver, instance_set_train, number_of_runs, solver_calls, cpu_time, 
+        solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
         wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 

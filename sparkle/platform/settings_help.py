@@ -8,7 +8,6 @@ from pathlib import PurePath
 from typing import Callable
 import builtins
 import statistics
-import sys
 
 import sparkle_logging as slog
 import global_variables as sgh
@@ -78,7 +77,7 @@ class Settings:
 
     DEFAULT_config_wallclock_time = 2147483647
     DEFAULT_config_cpu_time = 2147483647
-    DEFAULT_config_solver_calls = sys.maxint
+    DEFAULT_config_solver_calls = 9223372036854775807
     DEFAULT_config_number_of_runs = 25
 
     DEFAULT_slurm_number_of_runs_in_parallel = 25
