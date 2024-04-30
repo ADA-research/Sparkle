@@ -12,4 +12,4 @@ class TestAbout(TestCase):
         # Simple test, mostly for example purpose
         self.assertIsInstance(about.about_str, str)
         self.assertIsInstance(about.name, str)
-        self.assertIsInstance(about.version, float)
+        self.assertIsInstance(about.version, str)

@@ -14,10 +14,8 @@ The installation process use the `conda` package manager (to install https://doc
 ### Get a copy of Sparkle
 To get a copy of Sparkle you can clone the repository using `git`.
 ``` bash
-  $ git clone
+  $ git clone https://github.com/ADA-research/Sparkle
 ```
-
-You can also download the stable version here:
 
 
 ### Install dependencies
