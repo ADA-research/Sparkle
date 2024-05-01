@@ -1,14 +1,18 @@
+version 3.4.1 2023-07-04
+
+- fixed a bug : some kernels (4.18 at least) may report a tid of 0 in /proc/xx/task.  In such a case, the main process is counted twice. It seems to happen for solvers which create a lot of temporary threads.
+
 version 3.4.0 2017-08-12
 
 - use (and require) prctl(PR_SET_CHILD_SUBREAPER,...) (available since Linux 3.4)
 - fixed incorrect parsing of SwapFree/SwapTotal
-	
+
 version 3.3.7   2016-
 
 - introduction of a new memory limit (-R, --rss-swap-limit) to cope with programs that map a lot of virtual memory but actually use only a portion of it (such as Java). This limit is set on the sum of RSS (Resident Set Size, or in other words, amount of RAM used) and swap.
 
 - renaming of (-M, --mem-limit) as (-V, --vsize-limit). (-M, --mem-limit) becomes deprecated because its name is ambiguous. It will be removed in a future release.
-	
+
 version 3.3.6	2016-
 
 - introduction of the --sig option to select which signal to send to the solver

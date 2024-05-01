@@ -423,7 +423,7 @@ public:
   
     sched_getaffinity(pid,sizeof(cpu_set_t),&mask);
 
-#warning "don't watse time converting to a vector, just keep the cpu_set_t"
+#warning "don't waste time converting to a vector, just keep the cpu_set_t"
     for(int i=0;i<CPU_SETSIZE;++i)
       if(CPU_ISSET(i,&mask))
 	allocatedCores.push_back(i);
