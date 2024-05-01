@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-    runsolver_watch_data_path = Path(f"{str(Path.cwd())}/runsolver_{log_timestamp}.log")
+    runsolver_watch_data_path = Path(f"runsolver_{log_timestamp}.log")
 
     runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     # 5. Return values to SMAC
     # We need to check how the "quality" in the output directory must be formatted
-    quality = '\0'
+    quality = "0"
     if "quality" in outdict.keys():
         quality = outdict["quality"]
         if isinstance(quality, dict):

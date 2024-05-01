@@ -12,8 +12,8 @@ def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     cpu_time = -1.0
     wc_time = -1.0
     if runsolver_values_path.exists():
-        with runsolver_values_path.open("r+") as infile:
-            fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
+        with runsolver_values_path.open("r") as infile:
+            #fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
             lines = [line.strip().split("=") for line in infile.readlines()
                      if len(line.split("=")) == 2]
             for keyword, value in lines:
