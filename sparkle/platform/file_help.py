@@ -10,6 +10,7 @@ import time
 import shutil
 import random
 import fcntl
+import subprocess
 from pathlib import Path
 
 import sparkle_logging as sl
@@ -267,5 +268,21 @@ def initialise_sparkle(argv: list[str]) -> None:
     scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
     sgh.pap_performance_data_tmp_path.mkdir(exist_ok=True)
+
+    # Check that Runsolver is compiled, otherwise, compile
+    if not Path(sgh.runsolver_path).exists():
+        print("Runsolver does not exist, trying to compile...")
+        if not Path(sgh.runsolver_dir + "Makefile").exists():
+            print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
+                  f" Please verify the contents of the directory: {sgh.runsolver_dir}")
+        else:
+            compile_runsolver = subprocess.run(["make"],
+                                               cwd=sgh.runsolver_dir,
+                                               capture_output=True)
+            if compile_runsolver.returncode != 0:
+                print("WARNING: Compilation of Runsolver failed with the folowing msg:"
+                      f"[{compile_runsolver.returncode}] {compile_runsolver.stderr}")
+            else:
+                print("Runsolver compiled successfully!")
 
     print("New Sparkle platform initialised!")
