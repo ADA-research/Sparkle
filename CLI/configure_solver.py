@@ -12,7 +12,7 @@ from runrunner.base import Runner
 import runrunner as rrr
 
 from CLI.help.status_info import ConfigureSolverStatusInfo
-import global_variables as sgh
+import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.configurator import ablation as sah
@@ -24,6 +24,7 @@ from sparkle.platform import slurm_help as ssh
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
+from CLI.help.nicknames import resolve_object_name
 from sparkle.solver.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
@@ -117,18 +118,18 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
         args: Arguments object created by ArgumentParser.
     """
     if args.settings_file is not None:
-        sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
-        sgh.settings.set_general_target_cutoff_time(
+        gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
     if args.budget_per_run is not None:
-        sgh.settings.set_config_budget_per_run(
+        gv.settings.set_config_budget_per_run(
             args.budget_per_run, SettingState.CMD_LINE)
     if args.number_of_runs is not None:
-        sgh.settings.set_config_number_of_runs(
+        gv.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
 
 
@@ -165,7 +166,7 @@ def run_after(solver: Path,
                            cmd=command_line,
                            name=command,
                            dependencies=dependency,
-                           base_dir=sgh.sparkle_tmp_path,
+                           base_dir=gv.sparkle_tmp_path,
                            srun_options=["-N1", "-n1"],
                            sbatch_options=ssh.get_slurm_options_list())
 
@@ -178,7 +179,7 @@ def run_after(solver: Path,
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -192,22 +193,26 @@ if __name__ == "__main__":
 
     validate = args.validate
     ablation = args.ablation
-    solver_path = args.solver
-    instance_set_train = args.instance_set_train
+    solver_path = resolve_object_name(args.solver, gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train, target_dir=gv.instance_dir)
     instance_set_test = args.instance_set_test
+    instance_set_test = Path(instance_set_test) if instance_set_test is not None else None
     use_features = args.use_features
     run_on = args.run_on
     if args.configurator is not None:
-        sgh.settings.set_general_sparkle_configurator(
+        gv.settings.set_general_sparkle_configurator(
             value=getattr(Configurator, args.configurator),
             origin=SettingState.CMD_LINE)
+
+    # Check if Solver and instance sets were resolved
+    
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
             print("Given training set path is not an existing directory")
@@ -249,13 +254,13 @@ if __name__ == "__main__":
     status_info.set_instance_set_test(str(instance_set_test))
     status_info.save()
 
-    number_of_runs = sgh.settings.get_config_number_of_runs()
-    time_budget = sgh.settings.get_config_budget_per_run()
-    cutoff_time = sgh.settings.get_general_target_cutoff_time()
-    cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+    number_of_runs = gv.settings.get_config_number_of_runs()
+    time_budget = gv.settings.get_config_budget_per_run()
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
+    cutoff_length = gv.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
-        sgh.settings.get_general_sparkle_objectives()[0]
-    configurator = sgh.settings.get_general_sparkle_configurator()
+        gv.settings.get_general_sparkle_objectives()[0]
+    configurator = gv.settings.get_general_sparkle_configurator()
     config_scenario = ConfigurationScenario(
         solver, instance_set_train, number_of_runs, time_budget, cutoff_time,
         cutoff_length, sparkle_objective, use_features,
@@ -264,15 +269,15 @@ if __name__ == "__main__":
     configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
-    sgh.latest_scenario().set_config_solver(solver.directory)
-    sgh.latest_scenario().set_config_instance_set_train(instance_set_train)
-    sgh.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
+    gv.latest_scenario().set_config_solver(solver.directory)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
+    gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        sgh.latest_scenario().set_config_instance_set_test(instance_set_test)
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
     else:
         # Set to default to overwrite possible old path
-        sgh.latest_scenario().set_config_instance_set_test()
+        gv.latest_scenario().set_config_instance_set_test()
 
     dependency_job_list = [configure_job]
     callback_job = configurator.configuration_callback(configure_job, run_on=run_on)
@@ -301,6 +306,6 @@ if __name__ == "__main__":
 
     status_info.delete()
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()
     # Write used scenario to file
-    sgh.latest_scenario().write_scenario_ini()
+    gv.latest_scenario().write_scenario_ini()
