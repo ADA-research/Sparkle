@@ -224,7 +224,7 @@ class PerformanceDataFrame():
 
     def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:
         """Drop an instance from the Dataframe."""
-        self.dataframe.drop(instance_name, axis=0, level="Instance")
+        self.dataframe.drop(instance_name, axis=0, level="Instance", inplace=True)
 
     def reset_value(self: PerformanceDataFrame,
                     solver: str,

@@ -31,7 +31,7 @@ def get_instance_list_from_reference(instances_path: Path) -> list[str]:
     """Return a list of instances read from a file.
 
     Args:
-      instances_path: Path object pointing to the directory wehre the instances
+      instances_path: Path object pointing to the directory where the instances
         are stored.
 
     Returns:

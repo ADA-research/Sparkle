@@ -87,13 +87,11 @@ if __name__ == "__main__":
 
     print(f"Start adding all instances in directory {instances_source} ...")
 
-    last_level_directory = ""
     if nickname_str is not None:
-        last_level_directory = nickname_str
+        instances_directory = sgh.instance_dir / nickname_str
     else:
-        last_level_directory = Path(instances_source).name
+        instances_directory = sgh.instance_dir / Path(instances_source).name
 
-    instances_directory = sgh.instance_dir / last_level_directory
     if not instances_directory.exists():
         instances_directory.mkdir(parents=True, exist_ok=True)
 
@@ -135,19 +133,20 @@ if __name__ == "__main__":
         num_inst = len(list_source_all_filename)
         added = 0
         print(f"Number of instances to be added: {num_inst}")
-        for i, intended_filename in enumerate(list_source_all_filename):
-            print(f"Adding {intended_filename.name} ... "
+        for i, intended_filepath in enumerate(list_source_all_filename):
+            intended_filename = intended_filepath.name
+            print(f"Adding {intended_filename} ... "
                   f"({i + 1} out of {num_inst})", end="\r")
 
             if intended_filename in target_all_filename:
-                print(f"Instance {intended_filename.name} already exists in Directory "
+                print(f"Instance {intended_filename} already exists in Directory "
                       f"{instances_directory}")
-                print(f"Ignore adding file {intended_filename.name}")
+                print(f"Ignore adding file {intended_filename}")
             else:
                 sfh.add_remove_platform_item(intended_filename, sgh.instance_list_path)
                 feature_data_csv.add_row(intended_filename)
                 performance_data_csv.add_instance(intended_filename)
-                shutil.copy(intended_filename, instances_directory)
+                shutil.copy(intended_filepath, instances_directory)
                 added += 1
         if added == num_inst:
             print(f"All instances of {instances_source} have been added!")
