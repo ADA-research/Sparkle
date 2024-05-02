@@ -1,8 +1,8 @@
-VERSION=3.4.0
+VERSION=3.4.1
 #SVNVERSION=`svnversion .`
-SVNVERSION=$(word 2,$$Rev: 3018 $$)
-DEBUG=-g
-#DEBUG=-O3 -g
+SVNVERSION=$(word 2,$$Rev: 4412 $$)
+#DEBUG=-g
+DEBUG=-O3 -g
 
 STATIC=
 #STATIC=-static 
@@ -10,13 +10,14 @@ STATIC=
 WSIZE:=$(shell if [ `uname -m` = 'x86_64' ] ; then echo 64; else echo 32; fi )
 
 CFLAGS=-std=c++11 -DWITH_NUMA -Dtmpdebug -Wall -DVERSION=\"$(VERSION)\" -DSVNVERSION=\"$(SVNVERSION)\" -DWSIZE=$(WSIZE)
-LDFLAGS= $(STATIC) -Wl,--build-id
+LDFLAGS= $(STATIC) -L${LDPATH} -Wl,--build-id
 LIBS=-lnuma
 
-ifneq ($(findstring alineos.net,$(HOSTNAME)),)
-# if needed, path to the dynamic library we use
-LDFLAGS+=-Wl,-rpath,$(HOME)/tools-centos7/lib64
-endif
+# local adaptation
+# ifneq ($(findstring alineos.net,$(HOSTNAME)),)
+# # if needed, path to the dynamic library we use
+# LDFLAGS+=-Wl,-rpath,$(HOME)/tools-centos7/lib64
+# endif
 
 SRC=runsolver.cc SignalNames.cc
 OBJ=$(SRC:.cc=.o)
@@ -29,6 +30,7 @@ install: runsolver
 include $(SRC:.cc=.d)
 
 .cc.o:
+	@if [ ! -e /usr/include/numa.h ] ; then echo "WARNING: NUMA headers not found. Compilation may fail. In such a case, install numactl-devel" ; fi
 	g++ $(CFLAGS) $(DEBUG) -c $*.cc
 
 runsolver: $(OBJ)
@@ -47,7 +49,7 @@ archive: /tmp/runsolver-$(VERSION).tar.bz2
 
 /tmp/runsolver-$(VERSION).tar.bz2: realclean $(SRC) Makefile
 	sed -i -e 's/^Version:.*/Version:\t'$(VERSION)'/' runsolver.spec
-	tar cvjf /tmp/runsolver-$(VERSION).tar.bz2 -C ../.. runsolver/src --exclude .svn
+	tar cvjf /tmp/runsolver-$(VERSION).tar.bz2 -C ../.. --exclude .svn --exclude server runsolver/src
 
 rpm: /tmp/runsolver-$(VERSION).tar.bz2
 	rpmbuild -tb /tmp/runsolver-$(VERSION).tar.bz2

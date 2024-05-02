@@ -2,10 +2,15 @@ name: sparkle
 channels:
   - conda-forge
   - defaults
+variables: # runsolver compilation
+  CPATH: "'$CONDA_PREFIX/include:$CPATH'"
+  LDPATH: "'$CONDA_PREFIX/lib'"
 dependencies:
   - python=3.9
   - swig=3.0
   - gnuplot
+  - libnuma # runsolver compilation
+  - numactl # runsolver compilation
   - pip
   - pip:
     - --editable .  # self install !
