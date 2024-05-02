@@ -153,9 +153,3 @@ class Configurator:
         solver = Solver.get_solver_by_name(solver)
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.configurator_path)
-
-@staticmethod    
-def resolve_configurator(configurator_name: str) -> Configurator:
-    """Returns the Configurator subclass by name."""
-    import implementations
-    return getattr(implementations, configurator_name)()
