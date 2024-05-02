@@ -1,0 +1,1 @@
+"""This package provides specific Configurator class implementations for Sparkle."""
