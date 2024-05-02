@@ -10,7 +10,7 @@ STATIC=
 WSIZE:=$(shell if [ `uname -m` = 'x86_64' ] ; then echo 64; else echo 32; fi )
 
 CFLAGS=-std=c++11 -DWITH_NUMA -Dtmpdebug -Wall -DVERSION=\"$(VERSION)\" -DSVNVERSION=\"$(SVNVERSION)\" -DWSIZE=$(WSIZE)
-LDFLAGS= $(STATIC) -Wl,--build-id
+LDFLAGS= $(STATIC) -L${LDPATH} -Wl,--build-id
 LIBS=-lnuma
 
 # local adaptation
