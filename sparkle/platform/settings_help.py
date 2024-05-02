@@ -149,7 +149,7 @@ class Settings:
             option_names = ("configurator",)
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = getattr(Configurator, file_settings.get(section, option))
+                    value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
@@ -373,7 +373,7 @@ class Settings:
                 self.__general_sparkle_configurator_set, origin, name):
             self.__init_section(section)
             self.__general_sparkle_configurator_set = origin
-            self.__settings[section][name] = value.__name__
+            self.__settings[section][name] = value
 
         return
 
@@ -382,8 +382,14 @@ class Settings:
         if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
             self.set_general_sparkle_configurator()
         if self.__general_sparkle_configurator is None:
-            self.__general_sparkle_configurator =\
-                cim.resolve_configurator(self.__settings["general"]["configurator"])()
+            configurator_subclass =\
+                cim.resolve_configurator(self.__settings["general"]["configurator"])
+            if configurator_subclass is not None:
+                self.__general_sparkle_configurator = configurator_subclass()
+            else:
+                print("WARNING: Configurator class name not recognised:"
+                      f'{self.__settings["general"]["configurator"]}. '
+                      "Configurator not set.")
         return self.__general_sparkle_configurator
 
     def get_performance_metric_for_report(self: Settings) -> str:
