@@ -595,7 +595,7 @@ protected:
 	continue;
 
       tid=atoi(dirEntry->d_name);
-      if (tid==pid)
+      if (tid==pid || tid==0) // kernel 4.18 (at least) may show an entry with tid=0 which leads to counting the main process twice
 	continue;
 
       //cout << "task " << dirEntry->d_name 

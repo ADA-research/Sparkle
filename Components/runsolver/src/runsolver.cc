@@ -17,9 +17,6 @@
  * along with runsolver.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _GNU_SOURCE
-
-
 // if TIMESTAMPSEPARATESTDOUTANDERR is defined, when time stamping the
 // solver output, stdout and stderr are transmitted separately to
 // runsolver. This lets us print whether the line comes from stdout or
@@ -1006,7 +1003,8 @@ void numaInfo()
     return;
   
   int nbNodes=numa_num_configured_nodes();
-  long mem,memFree;
+  long long mem;
+  long memFree;
   
   cout << "NUMA information:\n";
   cout << "  number of nodes: " << nbNodes << endl;
