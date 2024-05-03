@@ -50,10 +50,10 @@ def call_configured_solver(instance_path_list: list[Path],
     solver = Solver.get_solver_by_name(solver_name)
     # If parallel, pass instances list to parallel function
     if parallel:
-        job_id_str = call_configured_solver_parallel(instances_list,
-                                                     solver,
-                                                     config_str,
-                                                     run_on=run_on)
+        job_id_str = call_solver_parallel(instances_list,
+                                          solver,
+                                          config_str,
+                                          run_on=run_on)
     # Else, pass instances list to sequential function
     else:
         call_configured_solver_sequential(instances_list, solver, config_str)
@@ -109,15 +109,22 @@ def call_configured_solver_sequential(instances_list: list[list[Path]],
                   f"{solver.raw_output_directory / raw_result_path}.\n")
 
 
-def call_configured_solver_parallel(
-        instances_list: list[list[Path]], solver: Solver, config_str: str,
+def call_solver_parallel(
+        instances_list: list[list[Path]],
+        solver: Solver,
+        config: str | Path,
+        seed: int = None,
+        dependency: list[rrr.SlurmRun] = None,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
-    """Run the configured solver in parallel on all given instances.
+    """Run a solver in parallel on all given instances.
 
     Args:
         instance_list: A list of all paths in a directory of instances.
         run_on: Whether the command is run with Slurm or not.
-
+        config: The configuration with which to run. Can be direct configuration string,
+            or file from which to read. If specific line from file is needed, seed
+            should be specified.
+        dependency: The jobs it depends on to finish before starting.
     Returns:
         str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
     """
@@ -142,11 +149,17 @@ def call_configured_solver_parallel(
                           "-w", runsolver_watch_data_path,
                           "-v", runsolver_values_path,
                           "-o", raw_result_path]
-        solver_params = solver.config_str_to_dict(config_str)
+        if isinstance(config, str):
+            solver_params = solver.config_str_to_dict(config)
+        else:
+            solver_params = {"config_path": config}
         solver_params["specifics"] = "rawres"
         solver_params["cutoff_time"] = custom_cutoff
         solver_params["run_length"] = "2147483647"  # Arbitrary, not used by SMAC wrapper
-        solver_params["seed"] = sgh.get_seed()
+        if seed is None:
+            solver_params["seed"] = sgh.get_seed()
+        else:
+            solver_params["seed"] = seed
         solver_cmd = [str(item) for item in
                       solver.build_solver_cmd(instance_path.absolute(),
                                               solver_params, runsolver_args)]
@@ -166,6 +179,7 @@ def call_configured_solver_parallel(
         parallel_jobs=num_jobs,
         base_dir=sgh.sparkle_tmp_path,
         path=solver.raw_output_directory,
+        dependencies=dependency,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 

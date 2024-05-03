@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 from pathlib import Path
+import fcntl
 
 import runrunner as rrr
 from runrunner import Runner
@@ -54,14 +55,16 @@ class SMACv2(Configurator):
         result_directory = self.result_path / self.scenario.name
         exec_dir_conf = self.configurator_path /\
             Path("scenarios", self.scenario.name, "tmp")
-        cmds = [f"{self.executable_path.absolute()} "
+        config_class_output_path = gv.configuration_output_raw / "configuration.csv"
+        output = [f"{(result_directory / self.scenario.name).absolute()}"
+                  f"_seed_{seed}_smac.txt"
+                  for seed in range(self.scenario.number_of_runs)]
+        cmds = [f"configurator_cli.py {output[seed]} {config_class_output_path}"
+                f"{self.executable_path.absolute()} "
                 f"--scenario-file {(self.configurator_path / scenario_file).absolute()} "
                 f"--seed {seed} "
                 f"--execdir {exec_dir_conf.absolute()}"
-                for seed in range(1, self.scenario.number_of_runs + 1)]
-        output = [f"{(result_directory / self.scenario.name).absolute()}"
-                  f"_seed_{seed}_smac.txt"
-                  for seed in range(1, self.scenario.number_of_runs + 1)]
+                for seed in range(self.scenario.number_of_runs)]
 
         parallel_jobs = max(gv.settings.get_slurm_number_of_runs_in_parallel(),
                             self.scenario.number_of_runs)
@@ -78,11 +81,12 @@ class SMACv2(Configurator):
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
 
-        if validate_after:
+        if validate_after and False:
             validator = Validator(out_dir=self.result_path)
             validation_run = validator.validate([scenario.solver],
-                                                [], #We need to extract the configurations once config run is done
+                                                config_class_output_path,
                                                 scenario.instance_directory.name,
+                                                dependency=configuration_run,
                                                 run_on=run_on)
         elif run_on == Runner.LOCAL:
             configuration_run.wait()
@@ -119,3 +123,18 @@ class SMACv2(Configurator):
         solver = Solver.get_solver_by_name(solver)
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.configurator_path)
+
+    def organise_output(self: SMACv2, output_source: Path, output_path: Path):
+        """Cleans up irrelevant SMAC files and collects output."""
+        call_key = self.configurator_target.name
+        for line in output_path.open("r").readlines():
+            if call_key in line:
+                call_str = line.split(call_key, maxsplit=1)[1].strip()
+                # The Configuration appears after the first 7 arguments
+                configuration = call_str.split(" ", 8)[-1]
+                with output_path.open("w") as fout:
+                    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+                    current_lines = fout.readlines()
+                    current_lines.append(configuration)
+                    fout.writelines(current_lines)
+                break

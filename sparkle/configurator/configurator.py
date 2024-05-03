@@ -11,8 +11,6 @@ from runrunner import Runner
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 import global_variables as gv
-from sparkle.platform import slurm_help as ssh
-from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
 from sparkle.solver.validator import Validator
 
@@ -64,62 +62,20 @@ class Configurator:
 
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
-                  validate_after: bool = True,
+                  validator: Validator = None,
                   run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
         """Start configuration job.
 
         Args:
-            scenario: ConfigurationScenario object
-            validate_after: Whether the Validator will be called after the configuration
+            scenario: ConfigurationScenario to execute.
+            validator: The validator to run validation with after. If none,
+                no validation is performed afterwards.
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:
             A RunRunner Run object.
         """
         raise NotImplementedError
-        self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=self.configurator_path)
-
-        scenario_file = Path(self.scenario.directory.parent.name,
-                             self.scenario.directory.name,
-                             self.scenario.scenario_file_name)
-        result_directory = self.result_path / self.scenario.name
-        exec_dir_conf = self.configurator_path /\
-            Path("scenarios", self.scenario.name, "tmp")
-        cmds = [f"{self.executable_path.absolute()} "
-                f"--scenario-file {(self.configurator_path / scenario_file).absolute()} "
-                f"--seed {seed} "
-                f"--execdir {exec_dir_conf.absolute()}"
-                for seed in range(1, self.scenario.number_of_runs + 1)]
-        output = [f"{(result_directory / self.scenario.name).absolute()}"
-                  f"_seed_{seed}_smac.txt"
-                  for seed in range(1, self.scenario.number_of_runs + 1)]
-
-        parallel_jobs = max(gv.settings.get_slurm_number_of_runs_in_parallel(),
-                            self.scenario.number_of_runs)
-        sbatch_options = ssh.get_slurm_options_list()
-
-        configuration_run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmds,
-            name=CommandName.CONFIGURE_SOLVER,
-            base_dir=gv.sparkle_tmp_path,
-            output_path=output,
-            path=self.configurator_path,
-            parallel_jobs=parallel_jobs,
-            sbatch_options=sbatch_options,
-            srun_options=["-N1", "-n1"])
-
-        if validate_after:
-            validator = Validator(out_dir=self.result_path)
-            validation_run = validator.validate([scenario.solver],
-                                                [], #We need to extract the configurations once config run is done
-                                                scenario.instance_directory.name,
-                                                run_on=run_on)
-        elif run_on == Runner.LOCAL:
-            configuration_run.wait()
-
-        return configuration_run
 
     def configuration_callback(self: Configurator,
                                dependency_job: rrr.SlurmRun | rrr.LocalRun,
@@ -131,25 +87,13 @@ class Configurator:
             rrr.SlurmRun | rrr.LocalRun: Run object of the callback
         """
         raise NotImplementedError
-        dir_list = self.scenario._clean_up_scenario_dirs(self.configurator_path)
-        cmd = "rm -rf " + " ".join([str(p) for p in dir_list])
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd,
-            base_dir=gv.sparkle_tmp_path,
-            name=CommandName.CONFIGURE_SOLVER_CALLBACK,
-            dependencies=dependency_job,
-            sbatch_options=ssh.get_slurm_options_list())
 
-        if run_on == Runner.LOCAL:
-            run.wait()
-
-        return run
+    def organise_output(output_source: Path, output_path: Path):
+        """Method to clean up after a single configurator call."""
+        raise NotImplementedError
 
     def set_scenario_dirs(self: Configurator,
-                          solver: str, instance_set_name: str) -> None:
+                          solver: str | Solver, instance_set_name: str) -> None:
         """Patching method to allow the rebuilding of configuration scenario."""
         raise NotImplementedError
-        solver = Solver.get_solver_by_name(solver)
-        self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
-        self.scenario._set_paths(self.configurator_path)
+    

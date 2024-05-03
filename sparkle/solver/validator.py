@@ -21,36 +21,41 @@ class Validator():
         self.out_dir = out_dir
 
     def validate(self: Validator,
-                 solvers: list[Path] | list[Solver],
-                 config_str_list: list[str] | str,
+                 solvers: list[Path] | list[Solver] | Solver | Path,
+                 configurations: list[str] | str,
                  instance_sets: list[Path],
+                 dependency: list[SlurmRun | LocalRun] | SlurmRun | LocalRun = None,
                  run_on: Runner = Runner.SLURM) -> list[SlurmRun | LocalRun]:
         """Validate a list of solvers (with configurations) on a set of instances.
 
         Args:
             solvers: list of solvers to validate
-            config_str_list: list of parameters for each solver we validate
+            configurations: list of configurations for each solver we validate
             instance_sets: set of instance sets on which we want to validate each solver
             run_on: whether to run on SLURM or local
         """
-        # If there is only one configuration, we cast it to a list of the same
-        # length as the solver list
-        if isinstance(config_str_list, str):
-            config_str_list = [config_str_list] * len(solvers)
-        elif len(config_str_list) != len(solvers):
+        if not isinstance(solvers, list) and isinstance(configurations, list):
+            # If we receive one solver but multiple configurations, we cas the
+            # Solvers to a list of the same length
+            solvers = [solvers] * len(configurations)
+        elif not isinstance(configurations, list) and isinstance(solvers, list):
+            # If there is only one configuration, we cast it to a list of the same
+            # length as the solver list
+            configurations = [configurations] * len(solvers)
+        if not isinstance(solvers, list) or len(configurations) != len(solvers):
             print("Error: Number of solvers and configurations does not match!")
             sys.exit(-1)
         jobs = []
-        for solver_path, config_str in zip(solvers, config_str_list):
+        for solver_path, config in zip(solvers, configurations):
             # run a configured solver
-            if config_str is None:
-                config_str = ""
+            if config is None:
+                config = ""
             for instance_set in instance_sets:
                 instance_path_list = list(p.absolute() for p in instance_set.iterdir())
                 solver = Solver.get_solver_by_name(solver_path.name)
                 run = rcsh.call_configured_solver_parallel(instance_path_list,
                                                            solver,
-                                                           config_str,
+                                                           config,
                                                            run_on=run_on)
                 jobs.append(run)
         return jobs

@@ -15,7 +15,7 @@ args = ast.literal_eval(" ".join(sys.argv[1:]))
 solver_dir = Path(args["solver_dir"])
 instance = Path(args["instance"])
 specifics = args["specifics"]
-seed = args["seed"]
+seed = int(args["seed"])
 
 del args["solver_dir"]
 del args["instance"]
@@ -31,10 +31,13 @@ solver_cmd = [solver_exec,
               "-seed", str(seed)]
 
 # Construct call from args dictionary
-params = []
-for key in args:
-    if args[key] is not None:
-        params.extend(["-" + str(key), str(args[key])])
+if "config_path" in args:
+    # The arguments were not directly given and must be parsed from a file
+    config_str = Path(args["config_path"]).open("r").readlines()[seed]
+    params = ["-" + arg for arg in config_str.split("-")]
+else:
+    # Construct from dictionary arguments
+    params = ["-" + str(key), str(args[key]) for key in args if args[key] is not None]
 
 try:
     solver_call = subprocess.run(solver_cmd + params,
