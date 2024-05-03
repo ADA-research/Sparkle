@@ -17,7 +17,7 @@ from sparkle.solver.validator import Validator
 
 class Configurator:
     """Abstact class to use different configurators like SMAC."""
-
+    configurator_cli_path = Path("sparkle/configurator/configurator_cli.py")
     def __init__(self: Configurator, configurator_path: Path, executable_path: Path,
                  settings_path: Path, result_path: Path, configurator_target: Path,
                  tmp_path: Path = None, multi_objective_support: bool = False) -> None:
@@ -89,7 +89,7 @@ class Configurator:
         raise NotImplementedError
 
     def organise_output(output_source: Path, output_path: Path):
-        """Method to clean up after a single configurator call."""
+        """Method to restructure and clean up after a single configurator call."""
         raise NotImplementedError
 
     def set_scenario_dirs(self: Configurator,

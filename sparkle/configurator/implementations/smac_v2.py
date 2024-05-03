@@ -20,7 +20,7 @@ from sparkle.solver.validator import Validator
 
 class SMACv2(Configurator):
     """Abstact class to use different configurators like SMAC."""
-
+    target_algorithm = "smac_target_algorithm.py"
     def __init__(self: SMACv2):
         """Returns the default configurator, Java SMAC V2.10.03."""
         smac_path = Path("Components/smac-v2.10.03-master-778/")
@@ -29,7 +29,7 @@ class SMACv2(Configurator):
             executable_path=smac_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             result_path=smac_path / "results",
-            configurator_target=smac_path / "smac_target_algorithm.py",
+            configurator_target=smac_path / SMACv2.target_algorithm,
             tmp_path=smac_path / "tmp")
 
     def configure(self: Configurator,
@@ -55,17 +55,20 @@ class SMACv2(Configurator):
         result_directory = self.result_path / self.scenario.name
         exec_dir_conf = self.configurator_path /\
             Path("scenarios", self.scenario.name, "tmp")
-        config_class_output_path = gv.configuration_output_raw / "configuration.csv"
+        config_class_output_path = gv.configuration_output_raw / SMACv2.__name__ / "configuration.csv"
+        if config_class_output_path.exists():
+            # Clear the outputfile
+            config_class_output_path.open("w")
         output = [f"{(result_directory / self.scenario.name).absolute()}"
                   f"_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
-        cmds = [f"configurator_cli.py {output[seed]} {config_class_output_path}"
+        cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
+                f"{SMACv2.__name__} {output[seed]} {config_class_output_path.absolute()} "
                 f"{self.executable_path.absolute()} "
                 f"--scenario-file {(self.configurator_path / scenario_file).absolute()} "
                 f"--seed {seed} "
                 f"--execdir {exec_dir_conf.absolute()}"
                 for seed in range(self.scenario.number_of_runs)]
-
         parallel_jobs = max(gv.settings.get_slurm_number_of_runs_in_parallel(),
                             self.scenario.number_of_runs)
         sbatch_options = ssh.get_slurm_options_list()
@@ -124,17 +127,16 @@ class SMACv2(Configurator):
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.configurator_path)
 
-    def organise_output(self: SMACv2, output_source: Path, output_path: Path):
-        """Cleans up irrelevant SMAC files and collects output."""
-        call_key = self.configurator_target.name
-        for line in output_path.open("r").readlines():
+    def organise_output(output_source: Path, output_target: Path):
+        """Cleans up irrelevant SMAC files and collects output."""        
+        call_key = SMACv2.target_algorithm
+        # Last line describing a call is the best found configuration
+        for line in reversed(output_source.open("r").readlines()):
             if call_key in line:
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
                 # The Configuration appears after the first 7 arguments
                 configuration = call_str.split(" ", 8)[-1]
-                with output_path.open("w") as fout:
-                    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-                    current_lines = fout.readlines()
-                    current_lines.append(configuration)
-                    fout.writelines(current_lines)
                 break
+        with output_target.open("a") as fout:
+            fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+            fout.write(configuration + "\n")
