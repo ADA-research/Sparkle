@@ -6,16 +6,16 @@ from pathlib import Path
 from pytest_mock import MockFixture
 
 from sparkle.platform import generate_report_for_configuration as sgrch
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import settings_help
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 import csv
 
 global settings
-sgh.settings = settings_help.Settings()
+gv.settings = settings_help.Settings()
 
-configurator = sgh.settings.get_general_sparkle_configurator()
+configurator = gv.settings.get_general_sparkle_configurator()
 configurator_path = configurator.configurator_path
 solver_name = "test-solver"
 train_instance = "train-instance"
@@ -24,7 +24,7 @@ test_instance = "test-instance"
 
 def setup_conf() -> None:
     """Set up the configurator for the tests."""
-    configurator = sgh.settings.get_general_sparkle_configurator()
+    configurator = gv.settings.get_general_sparkle_configurator()
     configurator_path = configurator.configurator_path
     configurator.scenario =\
         ConfigurationScenario(Solver(Path(solver_name), raw_output_directory=Path("")),
@@ -289,7 +289,7 @@ def test_get_figure_configure_vs_default(mocker: MockFixture) -> None:
     """
     configured_dir = "configured/directory/"
     default_dir = "default/directory/"
-    reports_dir = sgh.configuration_output_analysis
+    reports_dir = gv.configuration_output_analysis
     filename = "figure.jpg"
     cutoff = 0
 
@@ -333,7 +333,7 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
     """
     configured_dir = "configured/directory/"
     default_dir = "default/directory/"
-    reports_dir = sgh.configuration_output_analysis
+    reports_dir = gv.configuration_output_analysis
     filename = "figure.jpg"
     cutoff = 0
 
@@ -437,7 +437,7 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
-    output_dir = sgh.configuration_output_analysis
+    output_dir = gv.configuration_output_analysis
     ablation = False
     common_dict = {
         "common-1": "1",
@@ -456,7 +456,7 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
                              return_value=test_dict)
 
     full_dict = sgrch.configuration_report_variables(
-        sgh.configuration_output_analysis, solver_name, train_instance,
+        gv.configuration_output_analysis, solver_name, train_instance,
         test_instance, ablation)
 
     mock_common.assert_called_once_with(solver_name, train_instance,
@@ -478,7 +478,7 @@ def test_configuration_report_variables_without_test(mocker: MockFixture) -> Non
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = None
-    output_dir = sgh.configuration_output_analysis
+    output_dir = gv.configuration_output_analysis
     ablation = False
     common_dict = {
         "common-1": "1",
@@ -510,7 +510,7 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
-    output_dir = sgh.configuration_output_analysis
+    output_dir = gv.configuration_output_analysis
     ablation = True
     common_dict = {
         "common-1": "1",
@@ -529,7 +529,7 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
                              return_value=test_dict)
 
     full_dict = sgrch.configuration_report_variables(
-        sgh.configuration_output_analysis, solver_name, train_instance,
+        gv.configuration_output_analysis, solver_name, train_instance,
         test_instance, ablation)
 
     mock_common.assert_called_once_with(solver_name, train_instance,
@@ -551,7 +551,7 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     solver_name = "test-solver"
     train_instance = "train-instance"
     test_instance = "test-instance"
-    output_dir = sgh.configuration_output_analysis
+    output_dir = gv.configuration_output_analysis
     ablation = True
     common_dict = {
         "common-1": "1",
@@ -574,7 +574,7 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     mocker.patch("pathlib.Path.mkdir", return_value=None)
 
     full_dict = sgrch.configuration_report_variables(
-        sgh.configuration_output_analysis, solver_name, train_instance,
+        gv.configuration_output_analysis, solver_name, train_instance,
         test_instance, ablation)
 
     mock_common.assert_called_once_with(solver_name, train_instance,
@@ -692,7 +692,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "timeoutsTrainOverlap": "1",
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path",
-        "bibliographypath": str(sgh.sparkle_report_bibliography_path.absolute()),
+        "bibliographypath": str(gv.sparkle_report_bibliography_path.absolute()),
         "featuresBool": "featurestrue"
     }
 
@@ -742,7 +742,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                  "get_optimised_configuration_from_file",
                  return_value=["1", "2", "3"])
 
-    test_dict = sgrch.get_dict_variable_to_value_test(sgh.configuration_output_analysis,
+    test_dict = sgrch.get_dict_variable_to_value_test(gv.configuration_output_analysis,
                                                       solver_name,
                                                       train_instance,
                                                       test_instance)
@@ -754,7 +754,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
         mocker.call([], cutoff)
     ])
     mock_figure.assert_called_once_with(solver_name, test_instance,
-                                        [], [], sgh.configuration_output_analysis,
+                                        [], [], gv.configuration_output_analysis,
                                         float(cutoff), data_type="test")
     mock_timeouts.assert_called_once_with(solver_name, test_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver_name, train_instance,
@@ -847,7 +847,7 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     value_dict = {
         "key-1": "value-1",
         "key-2": "value-2",
-        "bibliographypath": str(sgh.sparkle_report_bibliography_path.absolute())
+        "bibliographypath": str(gv.sparkle_report_bibliography_path.absolute())
     }
 
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
@@ -859,7 +859,7 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
                             return_value=None)
 
     sgrch.generate_report_for_configuration(solver_name, train_instance, ablation=True)
-    mock_dict.assert_called_once_with(sgh.configuration_output_analysis, solver_name,
+    mock_dict.assert_called_once_with(gv.configuration_output_analysis, solver_name,
                                       train_instance, None, True)
     mock_generate_report.assert_called_once()
     mock_log.assert_called_once()
@@ -893,7 +893,7 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
                                             test_instance, ablation)
 
     mock_dict.assert_called_once_with(
-        sgh.configuration_output_analysis,
+        gv.configuration_output_analysis,
         solver_name, train_instance, test_instance, ablation)
     mock_generate_report.assert_called_once()
     mock_log.assert_called_once()
