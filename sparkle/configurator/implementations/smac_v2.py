@@ -86,11 +86,11 @@ class SMACv2(Configurator):
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
 
-        if validate_after and False:
+        if validate_after:
             validator = Validator(out_dir=self.result_path)
-            validator.validate(scenario.solver,
+            validator.validate([scenario.solver],
                                config_class_output_path,
-                               scenario.instance_directory.name,
+                               [scenario.instance_directory],
                                dependency=configuration_run,
                                run_on=run_on)
         elif run_on == Runner.LOCAL:

@@ -53,6 +53,7 @@ def call_configured_solver(instance_path_list: list[Path],
         job_id_str = call_solver_parallel(instances_list,
                                           solver,
                                           config_str,
+                                          commandname=CommandName.RUN_CONFIGURED_SOLVER,
                                           run_on=run_on)
     # Else, pass instances list to sequential function
     else:
@@ -114,6 +115,7 @@ def call_solver_parallel(
         solver: Solver,
         config: str | Path,
         seed: int = None,
+        commandname: CommandName = CommandName.RUN_SOLVERS,
         dependency: rrr.SlurmRun | list[rrr.SlurmRun] = None,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Run a solver in parallel on all given instances.
@@ -177,7 +179,7 @@ def call_solver_parallel(
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.RUN_CONFIGURED_SOLVER,
+        name=commandname,
         parallel_jobs=num_jobs,
         base_dir=sgh.sparkle_tmp_path,
         path=solver.raw_output_directory,

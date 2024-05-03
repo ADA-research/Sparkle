@@ -9,6 +9,7 @@ import ast
 from runrunner import Runner
 from runrunner import SlurmRun, LocalRun
 
+from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
 from CLI.support import run_configured_solver_help as rcsh
 from tools.runsolver_parsing import get_solver_output, get_solver_args
@@ -57,6 +58,7 @@ class Validator():
                 run = rcsh.call_solver_parallel(instance_path_list,
                                                 solver,
                                                 config,
+                                                commandname=CommandName.VALIDATION,
                                                 dependency=dependency,
                                                 run_on=run_on)
                 jobs.append(run)
