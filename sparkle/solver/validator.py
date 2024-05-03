@@ -53,10 +53,11 @@ class Validator():
             for instance_set in instance_sets:
                 instance_path_list = list(p.absolute() for p in instance_set.iterdir())
                 solver = Solver.get_solver_by_name(solver_path.name)
-                run = rcsh.call_configured_solver_parallel(instance_path_list,
-                                                           solver,
-                                                           config,
-                                                           run_on=run_on)
+                run = rcsh.call_solver_parallel(instance_path_list,
+                                                solver,
+                                                config,
+                                                dependency=dependency,
+                                                run_on=run_on)
                 jobs.append(run)
         return jobs
 

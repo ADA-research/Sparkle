@@ -114,7 +114,7 @@ def call_solver_parallel(
         solver: Solver,
         config: str | Path,
         seed: int = None,
-        dependency: list[rrr.SlurmRun] = None,
+        dependency: rrr.SlurmRun | list[rrr.SlurmRun] = None,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Run a solver in parallel on all given instances.
 
@@ -159,6 +159,7 @@ def call_solver_parallel(
         if seed is None:
             solver_params["seed"] = sgh.get_seed()
         else:
+            # Use the seed to determine the configuration line in the file
             solver_params["seed"] = seed
         solver_cmd = [str(item) for item in
                       solver.build_solver_cmd(instance_path.absolute(),
