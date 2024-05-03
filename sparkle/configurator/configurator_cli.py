@@ -21,4 +21,3 @@ if __name__ == "__main__":
     output_target.open("a").close()
     # 3b. Have the configurator implementation organise the output
     configurator.organise_output(output_source, output_target)
-    

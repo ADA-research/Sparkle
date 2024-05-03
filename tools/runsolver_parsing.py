@@ -1,7 +1,6 @@
 """Tools to parse runsolver I/O."""
 
 from pathlib import Path
-import fcntl
 import ast
 import re
 import math
@@ -13,7 +12,6 @@ def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     wc_time = -1.0
     if runsolver_values_path.exists():
         with runsolver_values_path.open("r") as infile:
-            #fcntl.flock(infile.fileno(), fcntl.LOCK_EX)
             lines = [line.strip().split("=") for line in infile.readlines()
                      if len(line.split("=")) == 2]
             for keyword, value in lines:

@@ -125,6 +125,7 @@ def call_solver_parallel(
             or file from which to read. If specific line from file is needed, seed
             should be specified.
         dependency: The jobs it depends on to finish before starting.
+
     Returns:
         str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
     """

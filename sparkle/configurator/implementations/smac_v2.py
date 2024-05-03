@@ -21,7 +21,8 @@ from sparkle.solver.validator import Validator
 class SMACv2(Configurator):
     """Abstact class to use different configurators like SMAC."""
     target_algorithm = "smac_target_algorithm.py"
-    def __init__(self: SMACv2):
+
+    def __init__(self: SMACv2) -> None:
         """Returns the default configurator, Java SMAC V2.10.03."""
         smac_path = Path("Components/smac-v2.10.03-master-778/")
         return super().__init__(
@@ -55,7 +56,8 @@ class SMACv2(Configurator):
         result_directory = self.result_path / self.scenario.name
         exec_dir_conf = self.configurator_path /\
             Path("scenarios", self.scenario.name, "tmp")
-        config_class_output_path = gv.configuration_output_raw / SMACv2.__name__ / "configuration.csv"
+        config_class_output_path = gv.configuration_output_raw /\
+            SMACv2.__name__ / "configuration.csv"
         if config_class_output_path.exists():
             # Clear the outputfile
             config_class_output_path.open("w")
@@ -63,8 +65,8 @@ class SMACv2(Configurator):
                   f"_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{SMACv2.__name__} {output[seed]} {config_class_output_path.absolute()} "
-                f"{self.executable_path.absolute()} "
+                f"{SMACv2.__name__} {output[seed]} {config_class_output_path.absolute()}"
+                f" {self.executable_path.absolute()} "
                 f"--scenario-file {(self.configurator_path / scenario_file).absolute()} "
                 f"--seed {seed} "
                 f"--execdir {exec_dir_conf.absolute()}"
@@ -86,11 +88,11 @@ class SMACv2(Configurator):
 
         if validate_after and False:
             validator = Validator(out_dir=self.result_path)
-            validation_run = validator.validate([scenario.solver],
-                                                config_class_output_path,
-                                                scenario.instance_directory.name,
-                                                dependency=configuration_run,
-                                                run_on=run_on)
+            validator.validate(scenario.solver,
+                               config_class_output_path,
+                               scenario.instance_directory.name,
+                               dependency=configuration_run,
+                               run_on=run_on)
         elif run_on == Runner.LOCAL:
             configuration_run.wait()
 
@@ -127,8 +129,9 @@ class SMACv2(Configurator):
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.configurator_path)
 
-    def organise_output(output_source: Path, output_target: Path):
-        """Cleans up irrelevant SMAC files and collects output."""        
+    @staticmethod
+    def organise_output(output_source: Path, output_target: Path) -> None:
+        """Cleans up irrelevant SMAC files and collects output."""
         call_key = SMACv2.target_algorithm
         # Last line describing a call is the best found configuration
         for line in reversed(output_source.open("r").readlines()):

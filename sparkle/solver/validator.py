@@ -32,6 +32,7 @@ class Validator():
             solvers: list of solvers to validate
             configurations: list of configurations for each solver we validate
             instance_sets: set of instance sets on which we want to validate each solver
+            dependency: Jobs to wait for before executing the validation.
             run_on: whether to run on SLURM or local
         """
         if not isinstance(solvers, list) and isinstance(configurations, list):
@@ -60,7 +61,6 @@ class Validator():
                                                 run_on=run_on)
                 jobs.append(run)
         return jobs
-
 
     def retrieve_raw_results(self: Validator,
                              solver: Solver,
@@ -104,7 +104,6 @@ class Validator():
                 res.with_suffix(".val").unlink()
                 res.with_suffix(".log").unlink()
 
-
     def get_validation_results(self: Validator,
                                solver: Solver | str,
                                instance_set: list[str] | str,
@@ -139,7 +138,6 @@ class Validator():
             csv_data = [line for line in csv_data if
                         config_dict.items() == ast.literal_eval(line[1]).items()]
         return csv_data
-
 
     def append_entry_to_csv(self: Validator,
                             solver: str,
