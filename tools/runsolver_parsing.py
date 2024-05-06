@@ -7,13 +7,13 @@ import math
 
 
 def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
-    """Return the CPU and wallclock time reported by runsolver."""
+    """Return the CPU and wallclock time reported by runsolver in values log."""
     cpu_time = -1.0
     wc_time = -1.0
     if runsolver_values_path.exists():
         with runsolver_values_path.open("r") as infile:
             lines = [line.strip().split("=") for line in infile.readlines()
-                     if len(line.split("=")) == 2]
+                     if line.count("=") == 1]
             for keyword, value in lines:
                 if keyword == "WCTIME":
                     wc_time = float(value)
@@ -24,7 +24,7 @@ def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     return cpu_time, wc_time
 
 
-def get_solver_args(runsolver_log_path: Path) -> dict:
+def get_solver_args(runsolver_log_path: Path) -> str:
     """Retrieves solver arguments dict from runsolver log."""
     if runsolver_log_path.exists():
         for line in runsolver_log_path.open("r").readlines():

@@ -5,6 +5,7 @@
 from __future__ import annotations
 from pathlib import Path
 import fcntl
+import shutil
 
 import runrunner as rrr
 from runrunner import Runner
@@ -58,9 +59,11 @@ class SMACv2(Configurator):
             Path("scenarios", self.scenario.name, "tmp")
         config_class_output_path = gv.configuration_output_raw /\
             SMACv2.__name__ / "configuration.csv"
-        if config_class_output_path.exists():
-            # Clear the outputfile
-            config_class_output_path.open("w")
+        if config_class_output_path.parent.exists():
+            # Clear the output dir
+            shutil.rmtree(config_class_output_path.parent)
+            #config_class_output_path.open("w")
+        config_class_output_path.parent.mkdir(parents=True)
         output = [f"{(result_directory / self.scenario.name).absolute()}"
                   f"_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
@@ -86,8 +89,8 @@ class SMACv2(Configurator):
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
 
-        if validate_after and False:
-            validator = Validator(out_dir=self.result_path)
+        if validate_after:
+            validator = Validator(out_dir=config_class_output_path.parent)
             validator.validate([scenario.solver],
                                config_class_output_path,
                                [scenario.instance_directory],

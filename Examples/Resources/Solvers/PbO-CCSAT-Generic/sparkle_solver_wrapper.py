@@ -31,14 +31,19 @@ solver_cmd = [solver_exec,
               "-seed", str(seed)]
 
 # Construct call from args dictionary
+params = []
 if "config_path" in args:
     # The arguments were not directly given and must be parsed from a file
     config_str = Path(args["config_path"]).open("r").readlines()[seed]
-    params = [f"-{arg.split(" ", maxsplit=1)[0]} {arg.split(" ", maxsplit=1)[1]}"
-              for arg in config_str.split("-")]
+    config_split = [arg.strip() for arg in config_str.split("-") if arg.strip() != ""]
+    for arg in config_split:
+        varname, value = arg.split(" ", maxsplit=1)
+        params.extend([f"-{varname}", value])
 else:
     # Construct from dictionary arguments
-    params = [f"-{key} {args[key]}" for key in args if args[key] is not None]
+    for key in args:
+        if args[key] is not None:
+            params.extend(["-" + str(key), str(args[key])])
 
 try:
     solver_call = subprocess.run(solver_cmd + params,

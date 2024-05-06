@@ -40,8 +40,7 @@ if __name__ == "__main__":
                       "-v", str(runsolver_var_data_path),
                       "--cpu-limit", str(cutoff_time),
                       str(solver_dir / sgh.sparkle_solver_wrapper),
-                      str(args)]
-
+                      '"' + str(args) + '"']
     # 3. Call Runsolver with the solver configurator wrapper and its arguments
     start_t = time.time()
     run_solver = subprocess.run(runsolver_call,

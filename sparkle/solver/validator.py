@@ -23,7 +23,7 @@ class Validator():
 
     def validate(self: Validator,
                  solvers: list[Path] | list[Solver] | Solver | Path,
-                 configurations: list[str] | str,
+                 configurations: list[str] | str | Path,
                  instance_sets: list[Path],
                  dependency: list[SlurmRun | LocalRun] | SlurmRun | LocalRun = None,
                  run_on: Runner = Runner.SLURM) -> list[SlurmRun | LocalRun]:
@@ -31,11 +31,14 @@ class Validator():
 
         Args:
             solvers: list of solvers to validate
-            configurations: list of configurations for each solver we validate
+            configurations: list of configurations for each solver we validate.
+                If a path is supplied, will use each line as a configuration.
             instance_sets: set of instance sets on which we want to validate each solver
             dependency: Jobs to wait for before executing the validation.
             run_on: whether to run on SLURM or local
         """
+        # Seed only relevant when reading from file (Used as line index)
+        use_seed = isinstance(configurations, Path)
         if not isinstance(solvers, list) and isinstance(configurations, list):
             # If we receive one solver but multiple configurations, we cas the
             # Solvers to a list of the same length
@@ -48,16 +51,19 @@ class Validator():
             print("Error: Number of solvers and configurations does not match!")
             sys.exit(-1)
         jobs = []
-        for solver_path, config in zip(solvers, configurations):
+        for index, (solver_path, config) in enumerate(zip(solvers, configurations)):
             # run a configured solver
             if config is None:
                 config = ""
+
             for instance_set in instance_sets:
                 instance_path_list = list(p.absolute() for p in instance_set.iterdir())
                 solver = Solver.get_solver_by_name(solver_path.name)
                 run = rcsh.call_solver_parallel(instance_path_list,
                                                 solver,
                                                 config,
+                                                seed=index if use_seed else None,
+                                                outdir=self.out_dir,
                                                 commandname=CommandName.VALIDATION,
                                                 dependency=dependency,
                                                 run_on=run_on)
@@ -66,7 +72,8 @@ class Validator():
 
     def retrieve_raw_results(self: Validator,
                              solver: Solver,
-                             instance_set: list[str]) -> None:
+                             instance_set: list[str],
+                             log_dir: Path = None,) -> None:
         """Checks the raw results of a given solver for a specific instance_set.
 
         Writes the raw results to a unified CSV file for the resolve/instance_set
@@ -76,7 +83,9 @@ class Validator():
             solver: The solver for which to check the raw result path
             instance_set: The set of instances for which to retrieve the results
         """
-        for res in solver.raw_output_directory.iterdir():
+        if log_dir is None:
+            log_dir = solver.raw_output_directory
+        for res in log_dir:
             if res.suffix != ".rawres":
                 continue
             res_str = str(res)

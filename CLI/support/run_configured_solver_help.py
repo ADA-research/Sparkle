@@ -115,6 +115,7 @@ def call_solver_parallel(
         solver: Solver,
         config: str | Path,
         seed: int = None,
+        outdir: Path = None,
         commandname: CommandName = CommandName.RUN_SOLVERS,
         dependency: rrr.SlurmRun | list[rrr.SlurmRun] = None,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
@@ -175,14 +176,16 @@ def call_solver_parallel(
     srun_options = ["-N1", "-n1"]
     srun_options.extend(ssh.get_slurm_options_list())
     # Make sure the executable dir exists
-    solver.raw_output_directory.mkdir(exist_ok=True)
+    if outdir is None:
+        outdir = solver.raw_output_directory
+    outdir.mkdir(exist_ok=True)
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=commandname,
         parallel_jobs=num_jobs,
         base_dir=sgh.sparkle_tmp_path,
-        path=solver.raw_output_directory,
+        path=outdir,
         dependencies=dependency,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
