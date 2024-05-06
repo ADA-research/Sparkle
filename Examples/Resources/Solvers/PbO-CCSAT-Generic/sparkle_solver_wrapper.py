@@ -34,7 +34,8 @@ solver_cmd = [solver_exec,
 if "config_path" in args:
     # The arguments were not directly given and must be parsed from a file
     config_str = Path(args["config_path"]).open("r").readlines()[seed]
-    params = ["-" + arg for arg in config_str.split("-")]
+    params = [f"-{arg.split(" ", maxsplit=1)[0]} {arg.split(" ", maxsplit=1)[1]}"
+              for arg in config_str.split("-")]
 else:
     # Construct from dictionary arguments
     params = [f"-{key} {args[key]}" for key in args if args[key] is not None]
@@ -67,8 +68,9 @@ if specifics == 'rawres':
         raw_result_path = tmp_directory / rawres_file_name
     else:
         raw_result_path = rawres_file_name
+    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
     with raw_result_path.open('w') as outfile:
-        outfile.write(output_str)
+        outfile.write(str(solver_cmd + params) + "\n" + output_str)
 
 outdir = {"status": status,
           "quality": 0,
