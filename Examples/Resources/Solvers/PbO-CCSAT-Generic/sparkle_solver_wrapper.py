@@ -37,7 +37,7 @@ if "config_path" in args:
     params = ["-" + arg for arg in config_str.split("-")]
 else:
     # Construct from dictionary arguments
-    params = ["-" + str(key), str(args[key]) for key in args if args[key] is not None]
+    params = [f"-{key} {args[key]}" for key in args if args[key] is not None]
 
 try:
     solver_call = subprocess.run(solver_cmd + params,

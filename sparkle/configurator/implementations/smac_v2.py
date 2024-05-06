@@ -23,7 +23,7 @@ class SMACv2(Configurator):
     target_algorithm = "smac_target_algorithm.py"
 
     def __init__(self: SMACv2) -> None:
-        """Returns the default configurator, Java SMAC V2.10.03."""
+        """Returns the SMAC configurator, Java SMAC V2.10.03."""
         smac_path = Path("Components/smac-v2.10.03-master-778/")
         return super().__init__(
             configurator_path=smac_path,

@@ -85,7 +85,7 @@ class Solver:
 
     def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
                          runsolver_configuration: list[str] = None) -> list[str]:
-        """Build the solver call on an instance with a certain configuration."""
+        """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):
             configuration = Solver.config_str_to_dict(configuration)
         if "instance" not in configuration:
@@ -99,7 +99,7 @@ class Solver:
         if runsolver_configuration is not None:
             # We wrap the solver call in the runsolver executable, by placing it in front
             solver_cmd += [self.runsolver_exec.absolute()] + runsolver_configuration
-        solver_cmd += [(self.directory / self.solver_wrapper).absolute(),
+        solver_cmd += [str((self.directory / self.solver_wrapper).absolute()),
                        str(configuration)]
         return solver_cmd
 

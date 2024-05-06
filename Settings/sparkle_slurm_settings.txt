@@ -1,1 +1,3 @@
 --mem-per-cpu=3000
+--partition=Test
+--time=25
