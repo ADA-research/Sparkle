@@ -17,7 +17,7 @@ if __name__ == "__main__":
     subprocess.run(configurator_call)
     # 3. Standardise the output for Sparkle
     # 3a. Make sure the output file exists
-    output_target.parent.mkdir(exist_ok=True, parents=True)
+    #output_target.parent.mkdir(exist_ok=True, parents=True)
     output_target.open("a").close()
     # 3b. Have the configurator implementation organise the output
     configurator.organise_output(output_source, output_target)

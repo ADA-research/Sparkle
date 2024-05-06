@@ -34,7 +34,6 @@ class SMACv2(Configurator):
             configurator_path=SMACv2.configurator_path,
             executable_path=SMACv2.configurator_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
-            result_path=SMACv2.configurator_path / "results",
             configurator_target=SMACv2.configurator_path / SMACv2.target_algorithm,
             tmp_path=SMACv2.configurator_path / "tmp")
 
@@ -58,17 +57,17 @@ class SMACv2(Configurator):
         self.config_class_output_path.mkdir(parents=True)
         self.scenario = scenario
         self.scenario.create_scenario(parent_directory=self.config_class_output_path)
-        exec_dir_conf = self.scenario.result_directory
-        config_class_output_csv = self.config_class_output_path / "configuration.csv"
+        output_csv = self.scenario.directory / "validation" / "validation.csv"
+        output_csv.parent.mkdir(exist_ok=True, parents=True)
         output = [f"{(self.scenario.result_directory).absolute()}"
                   f"_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{SMACv2.__name__} {output[seed]} {config_class_output_csv.absolute()}"
+                f"{SMACv2.__name__} {output[seed]} {output_csv.absolute()}"
                 f" {self.executable_path.absolute()} "
                 f"--scenario-file {(self.scenario.scenario_file_path).absolute()} "
                 f"--seed {seed} "
-                f"--execdir {exec_dir_conf.absolute()}"
+                f"--execdir {self.scenario.tmp.absolute()}"
                 for seed in range(self.scenario.number_of_runs)]
         parallel_jobs = max(gv.settings.get_slurm_number_of_runs_in_parallel(),
                             self.scenario.number_of_runs)
@@ -86,8 +85,9 @@ class SMACv2(Configurator):
             srun_options=["-N1", "-n1"])
         jobs = [configuration_run]
         if validate_after:
+            self.validator.out_dir = output_csv.parent
             validate_jobs = self.validator.validate([scenario.solver],
-                                                    config_class_output_csv,
+                                                    output_csv,
                                                     [scenario.instance_directory],
                                                     dependency=configuration_run,
                                                     run_on=run_on)

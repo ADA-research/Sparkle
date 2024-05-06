@@ -20,7 +20,7 @@ class Configurator:
     configurator_cli_path = Path("sparkle/configurator/configurator_cli.py")
 
     def __init__(self: Configurator, validator: Validator, configurator_path: Path, executable_path: Path,
-                 settings_path: Path, result_path: Path, configurator_target: Path,
+                 settings_path: Path, configurator_target: Path,
                  tmp_path: Path = None, multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
@@ -29,7 +29,6 @@ class Configurator:
             configurator_path: Path to the configurator directory
             executable_path: Executable of the configurator for Sparkle to call
             settings_path: Path to the settings file for the configurator
-            result_path: Path for the result files of the configurator
             configurator_target: The wrapper algorithm to standardize configurator
                 input/output towards solver wrappers.
             tmp_path: Path for the temporary files of the configurator, optional
@@ -40,7 +39,6 @@ class Configurator:
         self.configurator_path = configurator_path
         self.executable_path = executable_path
         self.settings_path = settings_path
-        self.result_path = result_path
         self.configurator_target = configurator_target
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
