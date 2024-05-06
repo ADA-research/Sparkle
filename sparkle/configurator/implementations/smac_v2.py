@@ -21,23 +21,27 @@ from sparkle.solver.validator import Validator
 
 class SMACv2(Configurator):
     """Abstact class to use different configurators like SMAC."""
+    configurator_path = Path("Components/smac-v2.10.03-master-778/")
     target_algorithm = "smac_target_algorithm.py"
 
     def __init__(self: SMACv2) -> None:
         """Returns the SMAC configurator, Java SMAC V2.10.03."""
-        smac_path = Path("Components/smac-v2.10.03-master-778/")
+        
+        self.config_class_output_path = gv.configuration_output_raw / SMACv2.__name__
+        validator = Validator(out_dir=self.config_class_output_path)
         return super().__init__(
-            configurator_path=smac_path,
-            executable_path=smac_path / "smac",
+            validator=validator,
+            configurator_path=SMACv2.configurator_path,
+            executable_path=SMACv2.configurator_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
-            result_path=smac_path / "results",
-            configurator_target=smac_path / SMACv2.target_algorithm,
-            tmp_path=smac_path / "tmp")
+            result_path=SMACv2.configurator_path / "results",
+            configurator_target=SMACv2.configurator_path / SMACv2.target_algorithm,
+            tmp_path=SMACv2.configurator_path / "tmp")
 
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
                   validate_after: bool = True,
-                  run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+                  run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun | rrr.LocalRun]:
         """Start configuration job.
 
         Args:
@@ -48,29 +52,21 @@ class SMACv2(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=self.configurator_path)
-
-        scenario_file = Path(self.scenario.directory.parent.name,
-                             self.scenario.directory.name,
-                             self.scenario.scenario_file_name)
-        result_directory = self.result_path / self.scenario.name
-        exec_dir_conf = self.configurator_path /\
-            Path("scenarios", self.scenario.name, "tmp")
-        config_class_output_path = gv.configuration_output_raw /\
-            SMACv2.__name__ / "configuration.csv"
-        if config_class_output_path.parent.exists():
+        if self.config_class_output_path.exists():
             # Clear the output dir
-            shutil.rmtree(config_class_output_path.parent)
-            #config_class_output_path.open("w")
-        config_class_output_path.parent.mkdir(parents=True)
-        output = [f"{(result_directory / self.scenario.name).absolute()}"
+            shutil.rmtree(self.config_class_output_path)
+        self.config_class_output_path.mkdir(parents=True)
+        self.scenario = scenario
+        self.scenario.create_scenario(parent_directory=self.config_class_output_path)
+        exec_dir_conf = self.scenario.result_directory
+        config_class_output_csv = self.config_class_output_path / "configuration.csv"
+        output = [f"{(self.scenario.result_directory).absolute()}"
                   f"_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{SMACv2.__name__} {output[seed]} {config_class_output_path.absolute()}"
+                f"{SMACv2.__name__} {output[seed]} {config_class_output_csv.absolute()}"
                 f" {self.executable_path.absolute()} "
-                f"--scenario-file {(self.configurator_path / scenario_file).absolute()} "
+                f"--scenario-file {(self.scenario.scenario_file_path).absolute()} "
                 f"--seed {seed} "
                 f"--execdir {exec_dir_conf.absolute()}"
                 for seed in range(self.scenario.number_of_runs)]
@@ -84,53 +80,29 @@ class SMACv2(Configurator):
             name=CommandName.CONFIGURE_SOLVER,
             base_dir=gv.sparkle_tmp_path,
             output_path=output,
-            path=self.configurator_path,
+            path=SMACv2.configurator_path,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
-
+        jobs = [configuration_run]
         if validate_after:
-            validator = Validator(out_dir=config_class_output_path.parent)
-            validator.validate([scenario.solver],
-                               config_class_output_path,
-                               [scenario.instance_directory],
-                               dependency=configuration_run,
-                               run_on=run_on)
-        elif run_on == Runner.LOCAL:
-            configuration_run.wait()
-
-        return configuration_run
-
-    def configuration_callback(self: Configurator,
-                               dependency_job: rrr.SlurmRun | rrr.LocalRun,
-                               run_on: Runner = Runner.SLURM)\
-            -> rrr.SlurmRun | rrr.LocalRun:
-        """Callback to clean up once configurator is done.
-
-        Returns:
-            rrr.SlurmRun | rrr.LocalRun: Run object of the callback
-        """
-        dir_list = self.scenario._clean_up_scenario_dirs(self.configurator_path)
-        cmd = "rm -rf " + " ".join([str(p) for p in dir_list])
-        run = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd,
-            base_dir=gv.sparkle_tmp_path,
-            name=CommandName.CONFIGURE_SOLVER_CALLBACK,
-            dependencies=dependency_job,
-            sbatch_options=ssh.get_slurm_options_list())
-
+            validate_jobs = self.validator.validate([scenario.solver],
+                                                    config_class_output_csv,
+                                                    [scenario.instance_directory],
+                                                    dependency=configuration_run,
+                                                    run_on=run_on)
+            jobs += validate_jobs
         if run_on == Runner.LOCAL:
-            run.wait()
-
-        return run
+            for job in jobs:
+                job.wait()
+        return jobs
 
     def set_scenario_dirs(self: Configurator,
                           solver: str, instance_set_name: str) -> None:
         """Patching method to allow the rebuilding of configuratio scenario."""
         solver = Solver.get_solver_by_name(solver)
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
-        self.scenario._set_paths(self.configurator_path)
+        self.scenario._set_paths(self.config_class_output_path)
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None:
@@ -146,3 +118,11 @@ class SMACv2(Configurator):
         with output_target.open("a") as fout:
             fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
             fout.write(configuration + "\n")
+        # Extract the solver, dataset and seed from output file name
+        solver, instanceset, _, seed, _ = output_source.split("_")
+        # Clean up the scenario files, reconstructed from the result file
+        #NOTE: This could be done in a cleaner way.
+        scenario = ConfigurationScenario(solver, Path(instanceset))
+        scenario._set_paths(gv.configuration_output_raw / SMACv2.__name__)
+        #for clean_path in scenario._clean_up_scenario_dirs(SMACv2.configurator_path):
+        #    shutil.rmtree(clean_path)

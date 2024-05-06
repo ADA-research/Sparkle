@@ -56,7 +56,7 @@ class ConfigurationScenario:
         self.parent_directory = Path()
         self.directory = Path()
         self.result_directory = Path()
-        self.scenario_file_name = ""
+        self.scenario_file_path = Path()
         self.feature_file_path = Path()
         self.instance_file_path = Path()
 
@@ -81,12 +81,9 @@ class ConfigurationScenario:
 
     def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
         self.parent_directory = parent_directory
-        self.directory = self.parent_directory / "scenarios" / self.name
-        self.result_directory = self.parent_directory / "results" / self.name
-        self.instance_file_path = (
-            Path(self.parent_directory / "scenarios"
-                 / "instances" / self.instance_directory.name)
-            / Path(str(self.instance_directory.name + "_train.txt")))
+        self.directory = self.directory / "scenarios" / self.name
+        self.result_directory = self.directory / "results"
+        self.instance_file_path = self.directory / (self.instance_directory.name + "_train.txt")
 
     def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
         """Delete old scenario dir, recreate it, create empty dirs inside."""
@@ -112,10 +109,9 @@ class ConfigurationScenario:
         solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
         config_output_directory = inner_directory / "outdir_train_configuration"
 
-        scenario_file_path = (self.directory
-                              / f"{self.name}_scenario.txt")
-        self.scenario_file_name = scenario_file_path.name
-        with scenario_file_path.open("w") as file:
+        self.scenario_file_path = (self.directory
+                                  / f"{self.name}_scenario.txt")
+        with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"
                        f"execdir = {inner_directory}/\n"
@@ -169,7 +165,7 @@ class ConfigurationScenario:
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
 
     def _clean_up_scenario_dirs(self: ConfigurationScenario,
-                                configurator_path: Path) -> list[Path]:
+                                configurator_path: Path,) -> list[Path]:
         """Yield directories to clean up after configuration scenario is done.
 
         Returns:
@@ -180,6 +176,6 @@ class ConfigurationScenario:
             / f"{self.solver.name}_{self.instance_directory.name}"
 
         for index in range(self.number_of_runs):
-            dir = configurator_solver_path / str(index + 1)
+            dir = configurator_solver_path / str(index)
             result.append(dir)
         return result

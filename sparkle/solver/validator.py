@@ -73,7 +73,7 @@ class Validator():
     def retrieve_raw_results(self: Validator,
                              solver: Solver,
                              instance_set: list[str],
-                             log_dir: Path = None,) -> None:
+                             log_dir: Path = None) -> None:
         """Checks the raw results of a given solver for a specific instance_set.
 
         Writes the raw results to a unified CSV file for the resolve/instance_set
@@ -82,6 +82,8 @@ class Validator():
         Args:
             solver: The solver for which to check the raw result path
             instance_set: The set of instances for which to retrieve the results
+            log_dir: The directory to search for log files. If none, defaults to
+                the log directory of the Solver.
         """
         if log_dir is None:
             log_dir = solver.raw_output_directory
@@ -118,6 +120,7 @@ class Validator():
     def get_validation_results(self: Validator,
                                solver: Solver | str,
                                instance_set: list[str] | str,
+                               log_dir: Path = None,
                                config: str = None) -> list[list[str]]:
         """Query the results of the validation of solver on instance_set.
 
@@ -135,8 +138,10 @@ class Validator():
         if isinstance(instance_set, str):
             instance_set = [instance_set]
         # Check if we still have to collect results for this combination
-        if any(x.suffix == ".rawres" for x in solver.raw_output_directory.iterdir()):
-            Validator.retrieve_raw_results(solver, instance_set)
+        if log_dir is None:
+            log_dir = solver.raw_output_directory
+        if any(x.suffix == ".rawres" for x in log_dir.iterdir()):
+            Validator.retrieve_raw_results(solver, instance_set, log_dir=log_dir)
 
         out_dir = self.out_dir / f"{solver.name}_{instance_set}"
         csv_file = out_dir / "validation.csv"

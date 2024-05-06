@@ -135,7 +135,7 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
 def run_after(solver: Path,
               instance_set_train: Path,
               instance_set_test: Path,
-              dependency: rrr.SlurmRun | rrr.LocalRun,
+              dependency: list[rrr.SlurmRun | rrr.LocalRun],
               command: CommandName,
               run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Add a command to run after configuration to RunRunner queue.
@@ -261,7 +261,7 @@ if __name__ == "__main__":
         cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
+    dependency_job_list = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
     sgh.latest_scenario().set_config_solver(solver.directory)
@@ -274,20 +274,19 @@ if __name__ == "__main__":
         # Set to default to overwrite possible old path
         sgh.latest_scenario().set_config_instance_set_test()
 
-    dependency_job_list = [configure_job]
-    callback_job = configurator.configuration_callback(configure_job, run_on=run_on)
+    #callback_job = configurator.configuration_callback(dependency_job_list, run_on=run_on)
 
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = run_after(
-            solver, instance_set_train, instance_set_test, configure_job,
+            solver, instance_set_train, instance_set_test, dependency_job_list,
             command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
         dependency_job_list.append(validate_jobid)
 
     if ablation:
         ablation_jobid = run_after(
-            solver, instance_set_train, instance_set_test, configure_job,
+            solver, instance_set_train, instance_set_test, dependency_job_list,
             command=CommandName.RUN_ABLATION, run_on=run_on
         )
         dependency_job_list.append(ablation_jobid)
