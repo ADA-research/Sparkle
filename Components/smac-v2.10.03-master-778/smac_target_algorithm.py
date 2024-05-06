@@ -4,6 +4,7 @@
 import sys
 import ast
 import time
+import random
 import subprocess
 from pathlib import Path
 
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-    runsolver_watch_data_path = Path(f"runsolver_{log_timestamp}.log")
+    runsolver_watch_data_path = Path(f"runsolver_{random.randint(0, 10000000000)}_{log_timestamp}.log")
 
     runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),

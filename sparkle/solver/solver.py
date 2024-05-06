@@ -97,8 +97,11 @@ class Solver:
         # Ensure stringifcation of cmd call will go correctly
         solver_cmd = []
         if runsolver_configuration is not None:
+            # Ensure stringification of runsolver configuration is done correctly
+            runsolver_configuration = [str(runsolver_config) for runsolver_config in
+                                       runsolver_configuration]
             # We wrap the solver call in the runsolver executable, by placing it in front
-            solver_cmd += [self.runsolver_exec.absolute()] + runsolver_configuration
+            solver_cmd += [str(self.runsolver_exec.absolute())] + runsolver_configuration
         solver_cmd += [str((self.directory / self.solver_wrapper).absolute()),
                        str(configuration)]
         return solver_cmd
