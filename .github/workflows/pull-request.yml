@@ -19,7 +19,7 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
-        conda env update --file environment-macos.yml --name base
+        conda env update --file environment.yml
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -52,7 +52,7 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
-        conda env update --file environment.yml --name base
+        conda env update --file environment-mac.yml
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
