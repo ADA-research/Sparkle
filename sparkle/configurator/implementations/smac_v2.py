@@ -5,6 +5,7 @@
 from __future__ import annotations
 from typing import Callable
 from pathlib import Path
+import ast
 from statistics import mean
 import operator
 import fcntl
@@ -141,13 +142,20 @@ class SMACv2(Configurator):
             print(f"[ERROR] Performance Measure {performance} not detected. "
                   "Can not determine optimal configuration.")
             return
+
         # Return optimal value
         min_index = 0
         current_optimal = config_scores[min_index]
         for i, score in enumerate(config_scores):
             if comparison(score, current_optimal):
                 min_index, current_optimal = i, score
-        return current_optimal, results[min_index][1]
+        config_str = results[min_index][1].strip(" ")
+
+        # Check if we need to convert the dict to a string
+        if config_str.startswith("{"):
+            config_dict = ast.literal_eval(config_str)
+            config_str = " ".join([f"-{key} {config_dict[key]}" for key in config_dict])
+        return current_optimal, config_str
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None:

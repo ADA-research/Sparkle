@@ -83,9 +83,8 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
                                                             instance_train_name,
                                                             instance_test_name)
     configurator = gv.settings.get_general_sparkle_configurator()
-    _, optimised_configuration_params = configurator.get_optimal_configuration(
+    _, opt_config_str = configurator.get_optimal_configuration(
         solver_name, instance_train_name)
-
     (smac_run_obj, _, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = scsh.get_smac_settings()
     concurrent_clis = gv.settings.get_slurm_clis_per_node()
@@ -115,7 +114,7 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
                    "instance_file = instances_train.txt\n"
                    "test_instance_file = instances_test.txt\n"
                    "sourceConfiguration=DEFAULT\n"
-                   f'targetConfiguration="{optimised_configuration_params}"')
+                   f'targetConfiguration="{opt_config_str}"')
     return
 
 
@@ -158,7 +157,6 @@ def check_for_ablation(solver_name: str, instance_train_name: str,
     with table_file.open("r") as fh:
         if fh.readline().strip() != "Ablation analysis validation complete.":
             return False
-
     return True
 
 
