@@ -87,6 +87,7 @@ class ConfigurationScenario:
             f"{self.instance_directory.name}_train.txt"
         self.outdir_train = self.directory / "outdir_train_configuration"
         self.tmp = self.directory / "tmp"
+        self.validation = self.directory / "validation"
 
     def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
         """Delete old scenario dir, recreate it, create empty dirs inside."""

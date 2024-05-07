@@ -12,6 +12,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 import global_variables as gv
 from sparkle.solver.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.types.objective import PerformanceMeasure
 
 
 class Configurator:
@@ -64,15 +65,11 @@ class Configurator:
         """
         raise NotImplementedError
 
-    def configuration_callback(self: Configurator,
-                               dependency_job: list[rrr.SlurmRun | rrr.LocalRun],
-                               run_on: Runner = Runner.SLURM)\
-            -> rrr.SlurmRun | rrr.LocalRun:
-        """Callback to clean up once configurator is done.
-
-        Returns:
-            rrr.SlurmRun | rrr.LocalRun: Run object of the callback
-        """
+    def get_optimal_configuration(self: Configurator,
+                                  solver: Solver,
+                                  instance_set: str,
+                                  performance: PerformanceMeasure = None) -> str:
+        """Returns the optimal configuration string for a solver of an instance set."""
         raise NotImplementedError
 
     @staticmethod

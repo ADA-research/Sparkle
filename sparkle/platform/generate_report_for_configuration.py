@@ -291,8 +291,10 @@ def get_timeouts_instanceset(solver_name: str,
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
-    config, _, _ = scsh.get_optimised_configuration(
-        solver_name, instance_set_name)
+    _, config = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_name)
+    #config, _, _ = scsh.get_optimised_configuration(
+    #    solver_name, instance_set_name)
     instances = [p.name for p in
                  (gv.instance_dir / instance_set_name).iterdir()]
     res_default = Validator.get_validation_results(solver_name,
@@ -448,8 +450,10 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     Returns:
         A dictionary containing the variables and values
     """
-    config, _, _ = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
+    _, config = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_train_name)
+    #config, _, _ = scsh.get_optimised_configuration(
+    #    solver_name, instance_set_train_name)
     train_instances = [p.name for p in
                        (gv.instance_dir / instance_set_train_name).iterdir()]
     res_default = Validator.get_validation_results(solver_name,
@@ -476,10 +480,10 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     latex_dict["smacObjective"] = str(smac_run_obj)
     latex_dict["smacWholeTimeBudget"] = str(smac_whole_time_budget)
     latex_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
-
-    (optimised_configuration_str, _,
-     optimised_configuration_seed) = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
+    _, optimised_configuration_str = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_train_name)
+    #(optimised_configuration_str, _, _) = scsh.get_optimised_configuration(
+    #    solver_name, instance_set_train_name)
 
     latex_dict["optimisedConfiguration"] = str(optimised_configuration_str)
     str_value = get_par_performance(res_conf, smac_each_run_cutoff_time)
@@ -527,8 +531,10 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
     Returns:
         A dictionary containting the variables and their values
     """
-    config, _, _ = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
+    _, config = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_train_name)
+    #config, _, _ = scsh.get_optimised_configuration(
+    #    solver_name, instance_set_train_name)
     test_instances = [p.name for p in
                       (gv.instance_dir / instance_set_test_name).iterdir()]
     res_default = Validator.get_validation_results(solver_name,

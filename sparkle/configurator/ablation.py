@@ -9,7 +9,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.instance import instances_help as sih
 from CLI.support import configure_solver_help as scsh
 from sparkle.platform import slurm_help as ssh
@@ -28,7 +28,7 @@ def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
     instance_test_name = (
         f"_{instance_test_name}" if instance_test_name is not None else "")
 
-    ablation_scenario_dir = "" if exec_path else sgh.ablation_dir
+    ablation_scenario_dir = "" if exec_path else gv.ablation_dir
     ablation_scenario_dir += (
         f"scenarios/{solver_name}_"
         f"{instance_train_name}{instance_test_name}/"
@@ -38,7 +38,7 @@ def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
 
 def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str) -> None:
     """Clean up ablation analysis directory."""
-    ablation_scenario_dir = Path(sgh.ablation_dir + "scenarios/")
+    ablation_scenario_dir = Path(gv.ablation_dir + "scenarios/")
     if ablation_scenario_dir.is_dir():
         for ablation_scenario in ablation_scenario_dir.glob(
                 f"{solver_name}_{instance_set_train_name}_*"):
@@ -62,7 +62,7 @@ def prepare_ablation_scenario(solver_name: str, instance_train_name: str,
 
 def print_ablation_help() -> None:
     """Print help information for ablation analysis."""
-    process = subprocess.run([f"./{sgh.ablation_dir}/ablationAnalysis", "-h"],
+    process = subprocess.run([f"./{gv.ablation_dir}/ablationAnalysis", "-h"],
                              capture_output=True)
     print(process.stdout)
 
@@ -82,15 +82,15 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
     ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
                                                             instance_train_name,
                                                             instance_test_name)
-
-    optimised_configuration_params = scsh.get_optimised_configuration_params(
+    configurator = gv.settings.get_general_sparkle_configurator()
+    _, optimised_configuration_params = configurator.get_optimal_configuration(
         solver_name, instance_train_name)
 
     (smac_run_obj, _, smac_each_run_cutoff_time,
      smac_each_run_cutoff_length, _, _) = scsh.get_smac_settings()
-    concurrent_clis = sgh.settings.get_slurm_clis_per_node()
-    ablation_racing = sgh.settings.get_ablation_racing_flag()
-    configurator = sgh.settings.get_general_sparkle_configurator()
+    concurrent_clis = gv.settings.get_slurm_clis_per_node()
+    ablation_racing = gv.settings.get_ablation_racing_flag()
+    configurator = gv.settings.get_general_sparkle_configurator()
 
     with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
         fout.write(f"algo = {configurator.configurator_target.absolute()}\n"
@@ -210,7 +210,7 @@ def submit_ablation(ablation_scenario_dir: str,
     # the Log/Ablation/.. folder.
 
     # 1. submit the ablation to the runrunner queue
-    clis = sgh.settings.get_slurm_clis_per_node()
+    clis = gv.settings.get_slurm_clis_per_node()
     cmd = "../../ablationAnalysis --optionFile ablation_config.txt"
     srun_options = ["-N1", "-n1", f"-c{clis}"]
     sbatch_options = [f"--cpus-per-task={clis}"] +\
@@ -220,7 +220,7 @@ def submit_ablation(ablation_scenario_dir: str,
         runner=run_on,
         cmd=cmd,
         name=CommandName.RUN_ABLATION,
-        base_dir=sgh.sparkle_tmp_path,
+        base_dir=gv.sparkle_tmp_path,
         path=ablation_scenario_dir,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
@@ -234,7 +234,7 @@ def submit_ablation(ablation_scenario_dir: str,
     # 2. Submit intermediate actions (copy path from log)
     log_source = "log/ablation-run1234.txt"
     ablation_path = "ablationPath.txt"
-    log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / run_ablation.name
+    log_path = Path(gv.sparkle_global_log_dir) / "Ablation" / run_ablation.name
     log_path.mkdir(parents=True, exist_ok=True)
 
     cmd_list = [f"cp {log_source} {ablation_path}", f"cp -r log/ {log_path.absolute()}"]
@@ -244,7 +244,7 @@ def submit_ablation(ablation_scenario_dir: str,
         cmd=cmd_list,
         name=CommandName.ABLATION_CALLBACK,
         path=ablation_scenario_dir,
-        base_dir=sgh.sparkle_tmp_path,
+        base_dir=gv.sparkle_tmp_path,
         dependencies=run_ablation,
         sbatch_options=sbatch_options,
         srun_options=srun_options_cb)
@@ -264,7 +264,7 @@ def submit_ablation(ablation_scenario_dir: str,
             cmd=cmd,
             name=CommandName.RUN_ABLATION_VALIDATION,
             path=ablation_scenario_dir,
-            base_dir=sgh.sparkle_tmp_path,
+            base_dir=gv.sparkle_tmp_path,
             dependencies=dependencies,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
@@ -277,7 +277,7 @@ def submit_ablation(ablation_scenario_dir: str,
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
         val_dir = run_ablation_validation.name + "_validation"
-        log_path = Path(sgh.sparkle_global_log_dir) / "Ablation" / val_dir
+        log_path = Path(gv.sparkle_global_log_dir) / "Ablation" / val_dir
         log_path.mkdir(parents=True, exist_ok=True)
         cmd_list = [f"cp {log_source} {ablation_path}",
                     f"cp -r log/ {log_path.absolute()}"]
@@ -287,7 +287,7 @@ def submit_ablation(ablation_scenario_dir: str,
             cmd=cmd_list,
             name=CommandName.ABLATION_VALIDATION_CALLBACK,
             path=ablation_scenario_dir,
-            base_dir=sgh.sparkle_tmp_path,
+            base_dir=gv.sparkle_tmp_path,
             dependencies=run_ablation_validation,
             sbatch_options=sbatch_options,
             srun_options=srun_options_cb)

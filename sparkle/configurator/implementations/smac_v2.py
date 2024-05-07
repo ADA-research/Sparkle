@@ -17,6 +17,7 @@ from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.types.objective import PerformanceMeasure
 
 
 class SMACv2(Configurator):
@@ -55,7 +56,7 @@ class SMACv2(Configurator):
         self.config_class_output_path.mkdir(parents=True)
         self.scenario = scenario
         self.scenario.create_scenario(parent_directory=self.config_class_output_path)
-        output_csv = self.scenario.directory / "validation" / "validation.csv"
+        output_csv = self.scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
         output = [f"{(self.scenario.result_directory).absolute()}"
                   f"_seed_{seed}_smac.txt"
@@ -95,12 +96,43 @@ class SMACv2(Configurator):
                 job.wait()
         return jobs
 
-    def set_scenario_dirs(self: Configurator,
-                          solver: str, instance_set_name: str) -> None:
-        """Patching method to allow the rebuilding of configuratio scenario."""
-        solver = Solver.get_solver_by_name(solver)
-        self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
-        self.scenario._set_paths(self.config_class_output_path)
+
+    def get_optimal_configuration(self: Configurator,
+                                  solver: Solver,
+                                  instance_set: str,
+                                  performance: PerformanceMeasure = None) -> tuple[float, str]:
+        """Returns the optimal configuration string for a solver of an instance set."""
+        if self.scenario is None:
+            self.set_scenario_dirs(solver, instance_set)
+        results = self.validator.get_validation_results(solver=solver,
+                                                        instance_set=instance_set,
+                                                        log_dir=self.scenario.validation)
+        if performance is None:
+            performance = self.objectives[0].PerformanceMeasure
+        if performance == PerformanceMeasure.RUNTIME:
+            # Return lowest runtime
+            min_index = 0
+            lowest_runtime = results[0][-1]
+            for i, row in enumerate(results):
+                if row[-1] < lowest_runtime:
+                    min_index, lowest_runtime = i, row[-1]
+            return lowest_runtime, results[min_index][1]
+        elif performance == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION or\
+             performance == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
+            # Return quality
+            opt_index = 0
+            opt_quality = results[0][-2]
+            for i, row in enumerate(results):
+                if PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION and\
+                    row[-2] < opt_quality or\
+                    PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION and\
+                    row[-2] > opt_quality:
+                    opt_index, opt_quality = i, row[-2]
+            return opt_quality, results[opt_index][1]
+        print(f"[ERROR] Performance Measure {performance} not detected. "
+              "Can not determine optimal configuration.")
+        return
+
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None:
@@ -124,3 +156,10 @@ class SMACv2(Configurator):
         scenario._set_paths(gv.configuration_output_raw / SMACv2.__name__)
         #for clean_path in scenario._clean_up_scenario_dirs(SMACv2.configurator_path):
         #    shutil.rmtree(clean_path)
+
+    def set_scenario_dirs(self: Configurator,
+                          solver: str, instance_set_name: str) -> None:
+        """Patching method to allow the rebuilding of configuratio scenario."""
+        solver = Solver.get_solver_by_name(solver)
+        self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
+        self.scenario._set_paths(self.config_class_output_path)
