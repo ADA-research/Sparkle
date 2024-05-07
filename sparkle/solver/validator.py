@@ -35,7 +35,8 @@ class Validator():
             configurations: list of configurations for each solver we validate.
                 If a path is supplied, will use each line as a configuration.
             instance_sets: set of instance sets on which we want to validate each solver
-            subdir:
+            subdir: The subdir where to place the output in the outputdir. If None,
+                a semi-unique combination of solver_instanceset is created.
             dependency: Jobs to wait for before executing the validation.
             run_on: whether to run on SLURM or local
         """
@@ -89,6 +90,7 @@ class Validator():
         Args:
             solver: The solver for which to check the raw result path
             instance_set: The set of instances for which to retrieve the results
+            subdir: Subdir where the CSV is to be placed, passed to the append method.
             log_dir: The directory to search for log files. If none, defaults to
                 the log directory of the Solver.
         """
@@ -96,11 +98,9 @@ class Validator():
             instance_set_names = [instance_set]
         elif isinstance(instance_set, Path):
             instance_set_names = [p.name for p in Path(instance_set).iterdir()]
-        print(instance_set, instance_set_names)
         if log_dir is None:
             log_dir = solver.raw_output_directory
         for res in log_dir.iterdir():
-            #print(res)
             if res.suffix != ".rawres":
                 continue
             res_str = res.name
@@ -118,7 +118,7 @@ class Validator():
                     config_path = log_dir / config_path
                 config_str = config_path.open("r").readlines()[row_idx]
                 solver_args = Solver.config_str_to_dict(config_str)
-            else:    
+            else:
                 for def_arg in ["instance", "solver_dir", "cutoff_time",
                                 "seed", "specifics", "run_length"]:
                     if def_arg in solver_args:

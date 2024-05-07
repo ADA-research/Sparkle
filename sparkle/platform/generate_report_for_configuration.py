@@ -37,7 +37,6 @@ def get_num_instance_for_configurator(instance_set_name: str) -> str:
         instance_dir = gv.instance_dir / instance_set_name
         list_instance = [x.name for x in
                          sfh.get_list_all_filename_recursive(instance_dir)]
-
         # If there is only an instance file and not the actual instances in the
         # directory, count number of lines in instance file
         if f"{instance_set_name}_train.txt" in list_instance:
@@ -292,8 +291,6 @@ def get_timeouts_instanceset(solver_name: str,
     """
     _, config = gv.settings.get_general_sparkle_configurator()\
         .get_optimal_configuration(solver_name, instance_set_name)
-    #config, _, _ = scsh.get_optimised_configuration(
-    #    solver_name, instance_set_name)
     validator = Validator(gv.validation_output_general)
     res_default = validator.get_validation_results(solver_name,
                                                    gv.instance_dir / instance_set_name,
@@ -450,12 +447,9 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     """
     _, config = gv.settings.get_general_sparkle_configurator()\
         .get_optimal_configuration(solver_name, instance_set_train_name)
-    #config, _, _ = scsh.get_optimised_configuration(
-    #    solver_name, instance_set_train_name)
     validator = Validator(gv.validation_output_general)
-    res_default = validator.get_validation_results(solver_name,
-                                                   gv.instance_dir / instance_set_train_name,
-                                                   config="")
+    res_default = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_train_name, config="")
     res_conf = validator.get_validation_results(
         solver_name, gv.instance_dir / instance_set_train_name, config=config)
 
@@ -478,9 +472,6 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     latex_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
     _, optimised_configuration_str = gv.settings.get_general_sparkle_configurator()\
         .get_optimal_configuration(solver_name, instance_set_train_name)
-    #(optimised_configuration_str, _, _) = scsh.get_optimised_configuration(
-    #    solver_name, instance_set_train_name)
-
     latex_dict["optimisedConfiguration"] = str(optimised_configuration_str)
     str_value = get_par_performance(res_conf, smac_each_run_cutoff_time)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
@@ -529,8 +520,6 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
     """
     _, config = gv.settings.get_general_sparkle_configurator()\
         .get_optimal_configuration(solver_name, instance_set_train_name)
-    #config, _, _ = scsh.get_optimised_configuration(
-    #    solver_name, instance_set_train_name)
     validator = Validator(gv.validation_output_general)
     res_default = validator.get_validation_results(
         solver_name, gv.instance_dir / instance_set_test_name, config="")
@@ -580,7 +569,7 @@ def check_results_exist(solver_name: str, instance_set_train: str,
         solver_name, gv.instance_dir / instance_set_train)
     if instance_set_test is not None:
         test_res = validator.get_validation_results(solver_name,
-                                                     gv.instance_dir / instance_set_test)
+                                                    gv.instance_dir / instance_set_test)
     if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
         print("Error: Results not found for the given solver and instance set(s) "
               'combination. Make sure the "configure_solver" and '

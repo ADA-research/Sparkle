@@ -100,12 +100,12 @@ class SMACv2(Configurator):
                 job.wait()
         return jobs
 
-
-    def get_optimal_configuration(self: Configurator,
-                                  solver: Solver,
-                                  instance_set: str,
-                                  performance: PerformanceMeasure = None,
-                                  aggregate_config: Callable = mean) -> tuple[float, str]:
+    def get_optimal_configuration(
+            self: Configurator,
+            solver: Solver,
+            instance_set: str,
+            performance: PerformanceMeasure = None,
+            aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns the optimal configuration string for a solver of an instance set."""
         if not isinstance(solver, Solver):
             solver = Solver.get_solver_by_name(solver)
@@ -121,7 +121,7 @@ class SMACv2(Configurator):
         # Group the results per configuration
         configs = set(row[1] for row in results)
         config_scores = []
-        column = -2 # Quality column
+        column = -2  # Quality column
         if performance == PerformanceMeasure.RUNTIME:
             column = -1
         for config in configs:
@@ -130,14 +130,14 @@ class SMACv2(Configurator):
         # Now determine which is the best based on the perf measure
         if performance is None:
             performance = self.objectives[0].PerformanceMeasure
-        if performance == PerformanceMeasure.RUNTIME or\
-            PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
+        if performance == PerformanceMeasure.RUNTIME or performance ==\
+                PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
             comparison = operator.lt
         elif performance == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
             comparison = operator.gt
         else:
             print(f"[ERROR] Performance Measure {performance} not detected. "
-              "Can not determine optimal configuration.")
+                  "Can not determine optimal configuration.")
             return
         # Return optimal value
         min_index = 0
@@ -146,7 +146,6 @@ class SMACv2(Configurator):
             if comparison(score, current_optimal):
                 min_index, current_optimal = i, score
         return current_optimal, results[min_index][1]
-
 
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None:
@@ -162,15 +161,6 @@ class SMACv2(Configurator):
                     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
                     fout.write(configuration + "\n")
                 break
-        # Extract the solver, dataset and seed from output file name
-        #solver_name, instanceset, _, seed, _ = output_source.name.split("_")
-        # Clean up the scenario files, reconstructed from the result file
-        #NOTE: This could be done in a cleaner way.
-        #solver = Solver.get_solver_by_name(solver_name)
-        #scenario = ConfigurationScenario(solver, Path(instanceset))
-        #scenario._set_paths(gv.configuration_output_raw / SMACv2.__name__)
-        #for clean_path in scenario._clean_up_scenario_dirs(SMACv2.configurator_path):
-        #    shutil.rmtree(clean_path)
 
     def set_scenario_dirs(self: Configurator,
                           solver: str, instance_set_name: str) -> None:

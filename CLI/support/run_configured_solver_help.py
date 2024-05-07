@@ -167,9 +167,6 @@ def call_solver_parallel(
             solver_params["seed"] = seed
         solver_cmd = solver.build_solver_cmd(instance_path.absolute(),
                                              solver_params, runsolver_args)
-        # Replace dictionary quotes so RunRunner can handle it, with backslash to prevent
-        # sys.argsv from eating the quotes.
-        #solver_cmd[-1] = solver_cmd[-1].replace("'", '\\"')
         cmd_list.append(" ".join(solver_cmd))
 
     sbatch_options = ssh.get_slurm_options_list()

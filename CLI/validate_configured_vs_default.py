@@ -126,18 +126,16 @@ if __name__ == "__main__":
     configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
 
     # Record optimised configuration
-    _, opt_configuration_str = configurator.get_optimal_configuration(
+    _, opt_config_str = configurator.get_optimal_configuration(
         solver, instance_set_train.name)
-    #optimised_configuration_str, _, _ = scsh.get_optimised_configuration(
-    #    solver.name, instance_set_train.name)
-    pcs.write_configuration_pcs(solver.name, opt_configuration_str,
+    pcs.write_configuration_pcs(solver.name, opt_config_str,
                                 Path(gv.sparkle_tmp_path))
 
     validator = Validator(gv.validation_output_general)
     all_validation_instances = [instance_set_train]
     if instance_set_test is not None:
         all_validation_instances.append(instance_set_test)
-    validator.validate(solvers=[solver] * 2, configurations=[None, opt_configuration_str],
+    validator.validate(solvers=[solver] * 2, configurations=[None, opt_config_str],
                        instance_sets=all_validation_instances)
 
     # Update latest scenario
