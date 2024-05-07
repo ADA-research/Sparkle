@@ -274,8 +274,6 @@ if __name__ == "__main__":
         # Set to default to overwrite possible old path
         sgh.latest_scenario().set_config_instance_set_test()
 
-    #callback_job = configurator.configuration_callback(dependency_job_list, run_on=run_on)
-
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = run_after(

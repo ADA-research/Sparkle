@@ -26,12 +26,10 @@ class SMACv2(Configurator):
 
     def __init__(self: SMACv2) -> None:
         """Returns the SMAC configurator, Java SMAC V2.10.03."""
-        
         self.config_class_output_path = gv.configuration_output_raw / SMACv2.__name__
         validator = Validator(out_dir=self.config_class_output_path)
         return super().__init__(
             validator=validator,
-            configurator_path=SMACv2.configurator_path,
             executable_path=SMACv2.configurator_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             configurator_target=SMACv2.configurator_path / SMACv2.target_algorithm,

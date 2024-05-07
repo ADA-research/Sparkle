@@ -166,7 +166,7 @@ def call_solver_parallel(
             # Use the seed to determine the configuration line in the file
             solver_params["seed"] = seed
         solver_cmd = solver.build_solver_cmd(instance_path.absolute(),
-                                              solver_params, runsolver_args)
+                                             solver_params, runsolver_args)
         # Replace dictionary quotes so RunRunner can handle it, with backslash to prevent
         # sys.argsv from eating the quotes.
         solver_cmd[-1] = solver_cmd[-1].replace("'", '\\"')

@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 from pathlib import Path
-import sys
 
 import runrunner as rrr
 from runrunner import Runner
@@ -19,14 +18,13 @@ class Configurator:
     """Abstact class to use different configurators like SMAC."""
     configurator_cli_path = Path("sparkle/configurator/configurator_cli.py")
 
-    def __init__(self: Configurator, validator: Validator, configurator_path: Path, executable_path: Path,
+    def __init__(self: Configurator, validator: Validator, executable_path: Path,
                  settings_path: Path, configurator_target: Path,
                  tmp_path: Path = None, multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
             validator: Validator object to validate configurations runs
-            configurator_path: Path to the configurator directory
             executable_path: Executable of the configurator for Sparkle to call
             settings_path: Path to the settings file for the configurator
             configurator_target: The wrapper algorithm to standardize configurator
@@ -36,24 +34,12 @@ class Configurator:
                 multi objective optimization for solvers.
         """
         self.validator = validator
-        self.configurator_path = configurator_path
         self.executable_path = executable_path
         self.settings_path = settings_path
         self.configurator_target = configurator_target
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
-
-        self.scenarios_path = self.configurator_path / "scenarios"
-        self.instances_path = self.scenarios_path / "instances"
-
-        if not self.configurator_path.is_dir():
-            print(f"The given configurator path '{self.configurator_path}' is not a "
-                  "valid directory. Abort")
-            sys.exit(-1)
-
         self.scenario = None
-        self.sbatch_filename = ""
-        (self.configurator_path / "tmp").mkdir(exist_ok=True)
 
         self.objectives = gv.settings.get_general_sparkle_objectives()
         if len(self.objectives) > 1 and not self.multiobjective:

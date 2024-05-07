@@ -83,7 +83,8 @@ class ConfigurationScenario:
         self.parent_directory = parent_directory
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.directory / "results"
-        self.instance_file_path = self.directory / (self.instance_directory.name + "_train.txt")
+        self.instance_file_path = self.directory /\
+            f"{self.instance_directory.name}_train.txt"
         self.outdir_train = self.directory / "outdir_train_configuration"
         self.tmp = self.directory / "tmp"
 
@@ -103,8 +104,7 @@ class ConfigurationScenario:
 
     def _create_scenario_file(self: ConfigurationScenario) -> None:
         """Create a file with the configuration scenario."""
-        self.scenario_file_path = (self.directory
-                                  / f"{self.name}_scenario.txt")
+        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"
