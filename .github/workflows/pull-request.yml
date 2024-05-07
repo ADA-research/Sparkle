@@ -13,12 +13,13 @@ jobs:
       with:
         submodules: true
     - name: Conda install
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         auto-update-conda: true
         python-version: 3.9
         environment-file: environment.yml
         activate-environment: sparkle
+        auto-activate-base: false
     - name: Lint with flake8
       run: |
         pip install flake8==5.0.4 flake8-quotes==3.3.1 flake8-bandit==4.1.1 pep8-naming==0.13.2 flake8-docstrings==1.6.0 flake8-use-fstring==1.4.0 flake8-use-pathlib==0.3.0 flake8-annotations==3.0.1
