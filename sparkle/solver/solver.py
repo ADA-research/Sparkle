@@ -163,6 +163,8 @@ class Solver:
         Returns:
             A Solver object if found, None otherwise
         """
+        if isinstance(name, Path):
+            name = name.name
         if (Solver.solver_dir / name).exists():
             return Solver(Solver.solver_dir / name)
         return None

@@ -125,12 +125,6 @@ if __name__ == "__main__":
     configurator = gv.settings.get_general_sparkle_configurator()
     configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
 
-    if not (configurator.scenario.validation / "validation.csv").exists():
-        print("ERROR: Configuration was ran without determining optimal configuration. "
-              "Can not compare configured versus default without optimal configuration. "
-              "Exiting.")
-        sys.exit(-1)
-
     # Record optimised configuration
     _, opt_configuration_str = configurator.get_optimal_configuration(
         solver, instance_set_train.name)
@@ -143,7 +137,7 @@ if __name__ == "__main__":
     all_validation_instances = [instance_set_train]
     if instance_set_test is not None:
         all_validation_instances.append(instance_set_test)
-    validator.validate(solvers=[solver] * 2, config_str_list=[None, opt_configuration_str],
+    validator.validate(solvers=[solver] * 2, configurations=[None, opt_configuration_str],
                        instance_sets=all_validation_instances)
 
     # Update latest scenario

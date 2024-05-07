@@ -3,7 +3,10 @@
 """Configurator class to use different configurators like SMAC."""
 
 from __future__ import annotations
+from typing import Callable
 from pathlib import Path
+from statistics import mean
+import operator
 import fcntl
 import shutil
 
@@ -58,8 +61,8 @@ class SMACv2(Configurator):
         self.scenario.create_scenario(parent_directory=self.config_class_output_path)
         output_csv = self.scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
-        output = [f"{(self.scenario.result_directory).absolute()}"
-                  f"_seed_{seed}_smac.txt"
+        output = [f"{(self.scenario.result_directory).absolute()}/"
+                  f"{self.scenario.name}_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
                 f"{SMACv2.__name__} {output[seed]} {output_csv.absolute()} "
@@ -86,7 +89,7 @@ class SMACv2(Configurator):
         if validate_after:
             self.validator.out_dir = output_csv.parent
             validate_jobs = self.validator.validate([scenario.solver],
-                                                    output_csv,
+                                                    Path(output_csv.name),
                                                     [scenario.instance_directory],
                                                     dependency=configuration_run,
                                                     run_on=run_on)
@@ -100,38 +103,48 @@ class SMACv2(Configurator):
     def get_optimal_configuration(self: Configurator,
                                   solver: Solver,
                                   instance_set: str,
-                                  performance: PerformanceMeasure = None) -> tuple[float, str]:
+                                  performance: PerformanceMeasure = None,
+                                  aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns the optimal configuration string for a solver of an instance set."""
+        if not isinstance(solver, Solver):
+            solver = Solver.get_solver_by_name(solver)
         if self.scenario is None:
             self.set_scenario_dirs(solver, instance_set)
-        results = self.validator.get_validation_results(solver=solver,
-                                                        instance_set=instance_set,
-                                                        log_dir=self.scenario.validation)
+        if not Path(instance_set).exists():
+            instance_set = gv.instance_dir / instance_set
+        results = self.validator.get_validation_results(
+            solver,
+            instance_set,
+            source_dir=self.scenario.validation,
+            subdir=self.scenario.validation.relative_to(self.validator.out_dir))
+        # Group the results per configuration
+        configs = set(row[1] for row in results)
+        config_scores = []
+        column = -2 # Quality column
+        if performance == PerformanceMeasure.RUNTIME:
+            column = -1
+        for config in configs:
+            values = [row[column] for row in results if row[1] == config]
+            config_scores.append(aggregate_config(values))
+        # Now determine which is the best based on the perf measure
         if performance is None:
             performance = self.objectives[0].PerformanceMeasure
-        if performance == PerformanceMeasure.RUNTIME:
-            # Return lowest runtime
-            min_index = 0
-            lowest_runtime = results[0][-1]
-            for i, row in enumerate(results):
-                if row[-1] < lowest_runtime:
-                    min_index, lowest_runtime = i, row[-1]
-            return lowest_runtime, results[min_index][1]
-        elif performance == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION or\
-             performance == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-            # Return quality
-            opt_index = 0
-            opt_quality = results[0][-2]
-            for i, row in enumerate(results):
-                if PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION and\
-                    row[-2] < opt_quality or\
-                    PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION and\
-                    row[-2] > opt_quality:
-                    opt_index, opt_quality = i, row[-2]
-            return opt_quality, results[opt_index][1]
-        print(f"[ERROR] Performance Measure {performance} not detected. "
+        if performance == PerformanceMeasure.RUNTIME or\
+            PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
+            comparison = operator.lt
+        elif performance == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
+            comparison = operator.gt
+        else:
+            print(f"[ERROR] Performance Measure {performance} not detected. "
               "Can not determine optimal configuration.")
-        return
+            return
+        # Return optimal value
+        min_index = 0
+        current_optimal = config_scores[min_index]
+        for i, score in enumerate(config_scores):
+            if comparison(score, current_optimal):
+                min_index, current_optimal = i, score
+        return current_optimal, results[min_index][1]
 
 
     @staticmethod
@@ -144,16 +157,17 @@ class SMACv2(Configurator):
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
                 # The Configuration appears after the first 7 arguments
                 configuration = call_str.split(" ", 8)[-1]
+                with output_target.open("a") as fout:
+                    fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
+                    fout.write(configuration + "\n")
                 break
-        with output_target.open("a") as fout:
-            fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-            fout.write(configuration + "\n")
         # Extract the solver, dataset and seed from output file name
-        solver, instanceset, _, seed, _ = output_source.split("_")
+        #solver_name, instanceset, _, seed, _ = output_source.name.split("_")
         # Clean up the scenario files, reconstructed from the result file
         #NOTE: This could be done in a cleaner way.
-        scenario = ConfigurationScenario(solver, Path(instanceset))
-        scenario._set_paths(gv.configuration_output_raw / SMACv2.__name__)
+        #solver = Solver.get_solver_by_name(solver_name)
+        #scenario = ConfigurationScenario(solver, Path(instanceset))
+        #scenario._set_paths(gv.configuration_output_raw / SMACv2.__name__)
         #for clean_path in scenario._clean_up_scenario_dirs(SMACv2.configurator_path):
         #    shutil.rmtree(clean_path)
 

@@ -35,9 +35,11 @@ params = []
 if "config_path" in args:
     # The arguments were not directly given and must be parsed from a file
     config_str = Path(args["config_path"]).open("r").readlines()[seed]
-    config_split = [arg.strip() for arg in config_str.split("-") if arg.strip() != ""]
+    # Extract the args without any quotes
+    config_split = [arg.strip().replace("'", "").replace('"', "")
+                    for arg in config_str.split("-") if arg.strip() != ""]
     for arg in config_split:
-        varname, value = arg.split(" ", maxsplit=1)
+        varname, value = arg.strip("'").strip('"').split(" ", maxsplit=1)
         params.extend([f"-{varname}", value])
 else:
     # Construct from dictionary arguments
