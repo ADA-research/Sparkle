@@ -178,7 +178,7 @@ def call_solver_parallel(
     # Make sure the executable dir exists
     if outdir is None:
         outdir = solver.raw_output_directory
-    outdir.mkdir(exist_ok=True)
+    outdir.mkdir(exist_ok=True, parents=True)
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,

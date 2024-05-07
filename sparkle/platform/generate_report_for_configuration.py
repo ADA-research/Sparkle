@@ -34,8 +34,7 @@ def get_num_instance_for_configurator(instance_set_name: str) -> str:
         str_value = str(instance_count)
     # For single-file instances just count the number of instance files
     else:
-        inst_path = gv.settings.get_general_sparkle_configurator().instances_path
-        instance_dir = inst_path / instance_set_name
+        instance_dir = gv.instance_dir / instance_set_name
         list_instance = [x.name for x in
                          sfh.get_list_all_filename_recursive(instance_dir)]
 
@@ -295,13 +294,12 @@ def get_timeouts_instanceset(solver_name: str,
         .get_optimal_configuration(solver_name, instance_set_name)
     #config, _, _ = scsh.get_optimised_configuration(
     #    solver_name, instance_set_name)
-    instances = [p.name for p in
-                 (gv.instance_dir / instance_set_name).iterdir()]
-    res_default = Validator.get_validation_results(solver_name,
-                                                   instances,
+    validator = Validator(gv.validation_output_general)
+    res_default = validator.get_validation_results(solver_name,
+                                                   gv.instance_dir / instance_set_name,
                                                    config="")
-    res_conf = Validator.get_validation_results(solver_name,
-                                                instances,
+    res_conf = validator.get_validation_results(solver_name,
+                                                gv.instance_dir / instance_set_name,
                                                 config=config)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
         res_conf, cutoff)
@@ -454,14 +452,12 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
         .get_optimal_configuration(solver_name, instance_set_train_name)
     #config, _, _ = scsh.get_optimised_configuration(
     #    solver_name, instance_set_train_name)
-    train_instances = [p.name for p in
-                       (gv.instance_dir / instance_set_train_name).iterdir()]
-    res_default = Validator.get_validation_results(solver_name,
-                                                   train_instances,
+    validator = Validator(gv.validation_output_general)
+    res_default = validator.get_validation_results(solver_name,
+                                                   gv.instance_dir / instance_set_train_name,
                                                    config="")
-    res_conf = Validator.get_validation_results(solver_name,
-                                                train_instances,
-                                                config=config)
+    res_conf = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_train_name, config=config)
 
     latex_dict = {"bibliographypath":
                   str(gv.sparkle_report_bibliography_path.absolute())}
@@ -535,14 +531,11 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
         .get_optimal_configuration(solver_name, instance_set_train_name)
     #config, _, _ = scsh.get_optimised_configuration(
     #    solver_name, instance_set_train_name)
-    test_instances = [p.name for p in
-                      (gv.instance_dir / instance_set_test_name).iterdir()]
-    res_default = Validator.get_validation_results(solver_name,
-                                                   test_instances,
-                                                   config="")
-    res_conf = Validator.get_validation_results(solver_name,
-                                                test_instances,
-                                                config=config)
+    validator = Validator(gv.validation_output_general)
+    res_default = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_test_name, config="")
+    res_conf = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_test_name, config=config)
     test_dict = {"instanceSetTest": instance_set_test_name}
     test_dict["numInstanceInTestingInstanceSet"] =\
         get_num_instance_for_configurator(instance_set_test_name)
@@ -582,15 +575,12 @@ def check_results_exist(solver_name: str, instance_set_train: str,
         instance_set_train: Name of the instance set for training
         instance_set_test: Name of the instance set for testing. Defaults to None.
     """
-    train_instances = [p.name for p in
-                       (gv.instance_dir / instance_set_train).iterdir()]
-    train_res = Validator.get_validation_results(solver_name,
-                                                 train_instances)
+    validator = Validator(gv.validation_output_general)
+    train_res = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_train)
     if instance_set_test is not None:
-        test_instances = [p.name for p in
-                          (gv.instance_dir / instance_set_test).iterdir()]
-        test_res = Validator.get_validation_results(solver_name,
-                                                    test_instances)
+        test_res = validator.get_validation_results(solver_name,
+                                                     gv.instance_dir / instance_set_test)
     if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
         print("Error: Results not found for the given solver and instance set(s) "
               'combination. Make sure the "configure_solver" and '

@@ -91,6 +91,7 @@ class SMACv2(Configurator):
             validate_jobs = self.validator.validate([scenario.solver],
                                                     Path(output_csv.name),
                                                     [scenario.instance_directory],
+                                                    subdir=Path(),
                                                     dependency=configuration_run,
                                                     run_on=run_on)
             jobs += validate_jobs
@@ -124,7 +125,7 @@ class SMACv2(Configurator):
         if performance == PerformanceMeasure.RUNTIME:
             column = -1
         for config in configs:
-            values = [row[column] for row in results if row[1] == config]
+            values = [float(row[column]) for row in results if row[1] == config]
             config_scores.append(aggregate_config(values))
         # Now determine which is the best based on the perf measure
         if performance is None:

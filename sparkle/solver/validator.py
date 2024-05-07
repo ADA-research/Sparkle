@@ -25,6 +25,7 @@ class Validator():
                  solvers: list[Path] | list[Solver] | Solver | Path,
                  configurations: list[str] | str | Path,
                  instance_sets: list[Path],
+                 subdir: Path = None,
                  dependency: list[SlurmRun | LocalRun] | SlurmRun | LocalRun = None,
                  run_on: Runner = Runner.SLURM) -> list[SlurmRun | LocalRun]:
         """Validate a list of solvers (with configurations) on a set of instances.
@@ -34,6 +35,7 @@ class Validator():
             configurations: list of configurations for each solver we validate.
                 If a path is supplied, will use each line as a configuration.
             instance_sets: set of instance sets on which we want to validate each solver
+            subdir:
             dependency: Jobs to wait for before executing the validation.
             run_on: whether to run on SLURM or local
         """
@@ -59,11 +61,15 @@ class Validator():
             for instance_set in instance_sets:
                 instance_path_list = list(p.absolute() for p in instance_set.iterdir())
                 solver = Solver.get_solver_by_name(solver_path.name)
+                if subdir is None:
+                    out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
+                else:
+                    out_path = self.out_dir / subdir
                 run = rcsh.call_solver_parallel(instance_path_list,
                                                 solver,
                                                 config,
                                                 seed=index if use_seed else None,
-                                                outdir=self.out_dir,
+                                                outdir=out_path,
                                                 commandname=CommandName.VALIDATION,
                                                 dependency=dependency,
                                                 run_on=run_on)
@@ -90,6 +96,7 @@ class Validator():
             instance_set_names = [instance_set]
         elif isinstance(instance_set, Path):
             instance_set_names = [p.name for p in Path(instance_set).iterdir()]
+        print(instance_set, instance_set_names)
         if log_dir is None:
             log_dir = solver.raw_output_directory
         for res in log_dir.iterdir():
@@ -153,15 +160,16 @@ class Validator():
         Returns
             A list of row lists with string values
         """
+        instance_set_name = Path(instance_set).name
         if isinstance(solver, str):
             solver = Solver.get_solver_by_name(solver)
         if source_dir is None:
-            source_dir = solver.raw_output_directory
+            source_dir = self.out_dir / f"{solver.name}_{instance_set_name}"
         if any(x.suffix == ".rawres" for x in source_dir.iterdir()):
             self.retrieve_raw_results(
                 solver, instance_set, subdir=subdir, log_dir=source_dir)
         if subdir is None:
-            subdir = Path(f"{solver.name}_{instance_set}")
+            subdir = Path(f"{solver.name}_{instance_set_name}")
         csv_file = self.out_dir / subdir / "validation.csv"
         # We skip the header when returning results
         csv_data = [line for line in csv.reader(csv_file.open("r"))][1:]
