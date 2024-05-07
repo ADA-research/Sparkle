@@ -108,14 +108,14 @@ class ConfigurationScenario:
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"
-                       f"execdir = {self.tmp}/\n"
+                       f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"wallclock-limit = {self.time_budget}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
                        f"paramfile = {self.solver.get_pcs_file()}\n"
-                       f"outdir = {self.outdir_train}\n"
+                       f"outdir = {self.outdir_train.absolute()}\n"
                        f"instance_file = {self.instance_file_path.absolute()}\n"
                        f"test_instance_file = {self.instance_file_path.absolute()}\n")
             if self.use_features:

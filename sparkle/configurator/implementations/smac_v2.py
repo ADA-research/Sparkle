@@ -61,8 +61,8 @@ class SMACv2(Configurator):
                   f"_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{SMACv2.__name__} {output[seed]} {output_csv.absolute()}"
-                f" {self.executable_path.absolute()} "
+                f"{SMACv2.__name__} {output[seed]} {output_csv.absolute()} "
+                f"{self.executable_path.absolute()} "
                 f"--scenario-file {(self.scenario.scenario_file_path).absolute()} "
                 f"--seed {seed} "
                 f"--execdir {self.scenario.tmp.absolute()}"
