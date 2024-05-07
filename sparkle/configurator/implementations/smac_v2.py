@@ -86,14 +86,16 @@ class SMACv2(Configurator):
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
         jobs = [configuration_run]
+
         if validate_after:
             self.validator.out_dir = output_csv.parent
-            validate_jobs = self.validator.validate([scenario.solver],
-                                                    Path(output_csv.name),
-                                                    [scenario.instance_directory],
-                                                    subdir=Path(),
-                                                    dependency=configuration_run,
-                                                    run_on=run_on)
+            validate_jobs = self.validator.validate(
+                [scenario.solver] * self.scenario.number_of_runs,
+                Path(output_csv.name),
+                [scenario.instance_directory],
+                subdir=Path(),
+                dependency=configuration_run,
+                run_on=run_on)
             jobs += validate_jobs
         if run_on == Runner.LOCAL:
             for job in jobs:
