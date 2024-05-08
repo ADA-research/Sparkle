@@ -124,9 +124,9 @@ def test_get_performance_measure_par10(mocker: MockFixture) -> None:
 
     Return `PAR10` for RUNTIME with default penalty multiplier of 10.
     """
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("RUNTIME", "", "", "", "", ""))
+    mock_settings = mocker.patch("CLI.support.smac_help."
+                                 "get_smac_run_obj",
+                                 return_value="RUNTIME")
     mock_multiplier = mocker.patch("sparkle.platform.settings_help.Settings."
                                    "get_general_penalty_multiplier",
                                    return_value=10)
@@ -143,9 +143,9 @@ def test_get_performance_measure_par5(mocker: MockFixture) -> None:
 
     Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
     """
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("RUNTIME", "", "", "", "", ""))
+    mock_settings = mocker.patch("CLI.support.smac_help."
+                                 "get_smac_run_obj",
+                                 return_value="RUNTIME")
     mock_multiplier = mocker.patch("sparkle.platform.settings_help.Settings."
                                    "get_general_penalty_multiplier",
                                    return_value=5)
@@ -159,9 +159,9 @@ def test_get_performance_measure_par5(mocker: MockFixture) -> None:
 
 def test_get_performance_measure_performance(mocker: MockFixture) -> None:
     """Test get_performance_measure returns correct measure for QUALITY."""
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("QUALITY", "", "", "", "", ""))
+    mock_settings = mocker.patch("CLI.support.smac_help."
+                                 "get_smac_run_obj",
+                                 return_value="QUALITY")
 
     measure = sgrch.get_performance_measure()
 
@@ -171,9 +171,9 @@ def test_get_performance_measure_performance(mocker: MockFixture) -> None:
 
 def test_get_runtime_bool(mocker: MockFixture) -> None:
     """Test get_runtime_bool returns correct string for objective RUNTIME."""
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("RUNTIME", "", "", "", "", ""))
+    mock_settings = mocker.patch("CLI.support.smac_help."
+                                 "get_smac_run_obj",
+                                 return_value="RUNTIME")
 
     runtime_bool = sgrch.get_runtime_bool()
 
@@ -181,9 +181,9 @@ def test_get_runtime_bool(mocker: MockFixture) -> None:
     assert runtime_bool == r"\runtimetrue"
 
     # Quality
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("QUALITY", "", "", "", "", ""))
+    mock_settings = mocker.patch("CLI.support.smac_help."
+                                 "get_smac_run_obj",
+                                 return_value="QUALITY")
 
     runtime_bool = sgrch.get_runtime_bool()
 
@@ -191,9 +191,9 @@ def test_get_runtime_bool(mocker: MockFixture) -> None:
     assert runtime_bool == r"\runtimefalse"
 
     # Other
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("ERROR", "", "", "", "", ""))
+    mock_settings = mocker.patch("CLI.support.smac_help."
+                                 "get_smac_run_obj",
+                                 return_value="ERROR")
 
     runtime_bool = sgrch.get_runtime_bool()
 
@@ -603,12 +603,12 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     report_dir = "reports/directory"
     seed = 13
     cutoff = "10"
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("OBJ", 100, cutoff, "", 11, ""))
-    mock_config = mocker.patch("CLI.support.configure_solver_help."
-                               "get_optimised_configuration",
-                               return_value=("123", "", seed))
+    #mock_settings = mocker.patch("CLI.support.smac_help."
+    #                             "get_smac_settings",
+    #                             return_value=("OBJ", 100, cutoff, "", 11, ""))
+    #mock_config = mocker.patch("CLI.support.configure_solver_help."
+    #                           "get_optimised_configuration",
+    #                           return_value=("123", "", seed))
     mock_perf = mocker.patch("sparkle.platform.generate_"
                              "report_for_configuration."
                              "get_performance_measure",
@@ -711,9 +711,9 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                      "report_for_configuration."
                                      "get_num_instance_for_configurator",
                                      return_value="4")
-    mock_settings = mocker.patch("CLI.support.configure_solver_help."
-                                 "get_smac_settings",
-                                 return_value=("OBJ", 100, cutoff, "", 11, ""))
+    #mock_settings = mocker.patch("CLI.support.configure_solver_help."
+    #                             "get_smac_settings",
+    #                             return_value=("OBJ", 100, cutoff, "", 11, ""))
     mock_par_perf = mocker.patch("sparkle.platform.generate_"
                                  "report_for_configuration."
                                  "get_par_performance",
@@ -738,9 +738,9 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
-    mocker.patch("CLI.support.configure_solver_help."
-                 "get_optimised_configuration_from_file",
-                 return_value=["1", "2", "3"])
+    #mocker.patch("CLI.support.configure_solver_help."
+    #             "get_optimised_configuration_from_file",
+    #             return_value=["1", "2", "3"])
 
     test_dict = sgrch.get_dict_variable_to_value_test(gv.configuration_output_analysis,
                                                       solver_name,

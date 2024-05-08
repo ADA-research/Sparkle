@@ -26,14 +26,14 @@ class TestConfigurator():
                   configurator_path: MockerFixture) -> None:
         """Test that Configurator initialization calls create_scenario() correctly."""
         mock_path = mocker.patch.object(Path, "mkdir")
+        exec_path = Path("dir/exec.exe")
+        configurator = Configurator(
+            validator=None,
+            executable_path=exec_path,
+            settings_path=None,
+            configurator_target=None)
 
-        configurator = Configurator(configurator_path=configurator_path,
-                                    executable_path=None,
-                                    settings_path=None,
-                                    result_path=None,
-                                    configurator_target=None)
-
-        assert configurator.configurator_path == configurator_path
+        assert configurator.executable_path == exec_path
 
         mock_path.assert_called_once()
 
