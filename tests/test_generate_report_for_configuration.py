@@ -598,14 +598,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     train_instance = "train-instance"
     test_instance = "test-instance"
     report_dir = "reports/directory"
-    #seed = 13
     cutoff = "60"
-    #mock_settings = mocker.patch("CLI.support.smac_help."
-    #                             "get_smac_settings",
-    #                             return_value=("OBJ", 100, cutoff, "", 11, ""))
-    #mock_config = mocker.patch("CLI.support.configure_solver_help."
-    #                           "get_optimised_configuration",
-    #                           return_value=("123", "", seed))
     mock_perf = mocker.patch("sparkle.platform.generate_"
                              "report_for_configuration."
                              "get_performance_measure",
@@ -653,8 +646,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
                                                           test_instance, report_dir)
 
-    #mock_settings.assert_called_once_with()
-    #mock_config.assert_called_with(solver_name, train_instance)
     mock_perf.assert_called_once_with()
     mock_runtime.assert_called_once_with()
     mock_instance_num.assert_called_once_with(train_instance)
