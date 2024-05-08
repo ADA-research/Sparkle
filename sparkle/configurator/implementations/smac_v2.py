@@ -153,8 +153,8 @@ class SMACv2(Configurator):
 
         # Check if we need to convert the dict to a string
         if config_str.startswith("{"):
-            config_dict = ast.literal_eval(config_str)
-            config_str = " ".join([f"-{key} '{config_dict[key]}'" for key in config_dict])
+            config = ast.literal_eval(config_str)
+            config_str = " ".join([f"-{key} '{config[key]}'" for key in config])
         return current_optimal, config_str
 
     @staticmethod
