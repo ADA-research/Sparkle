@@ -107,27 +107,31 @@ class TestConfigurationScenario(TestCase):
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(
         self: TestConfigurationScenario,
-        mock_abs: Mock,
+        mock_abs_path: Mock,
         mock_deterministic: Mock
     ) -> None:
         """Test if create_scenario() correctly creates the scenario file."""
         inst_list_path = Path("tests/test_files/test_configurator/scenarios/instances/"
                               "Test-Instance-Set/Test-Instance-Set_train.txt")
-        mock_abs.side_effect = [Path("tests/test_files/test_configurator"),
-                                Path("/configurator_dir/target_algorithm.py"),
-                                self.solver_path,
-                                inst_list_path,
-                                inst_list_path]
+        mock_abs_path.side_effect = [Path("tests/test_files/test_configurator"),
+                                     Path("/configurator_dir/target_algorithm.py"),
+                                     self.solver_path,
+                                     inst_list_path,
+                                     inst_list_path,
+                                     Path(),
+                                     Path()]
         mock_deterministic.return_value = "0"
         self.scenario.create_scenario(self.parent_directory)
 
-        scenario_file_path = self.scenario.directory / self.scenario.scenario_file_name
         reference_scenario_file = Path("tests", "test_files", "reference_files",
                                        "scenario_file.txt")
 
         # Use to show full diff of file
         self.maxDiff = None
-
-        self.assertTrue(scenario_file_path.is_file())
-        self.assertEqual(scenario_file_path.open().read(),
+        self.assertTrue(self.scenario.scenario_file_path.is_file())
+        output = self.scenario.scenario_file_path.open().read()
+        # Strip the output of the homedirs (Due to absolute paths)
+        output = output.replace(str(Path.home()), "")
+        print(output)
+        self.assertEqual(output,
                          reference_scenario_file.open().read())

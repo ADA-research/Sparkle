@@ -1,12 +1,12 @@
 algo = /configurator_dir/target_algorithm.py tests/test_files/Solvers/Test-Solver
-execdir = scenarios/Test-Solver_Test-Instance-Set/
+execdir = tests/test_files/test_configurator/scenarios/instances/Test-Instance-Set/Test-Instance-Set_train.txt/
 deterministic = 0
 run_obj = RUNTIME
 wallclock-limit = 600
 cutoffTime = 60
 cutoff_length = max
-paramfile = scenarios/Test-Solver_Test-Instance-Set/Test-Solver.pcs
-outdir = scenarios/Test-Solver_Test-Instance-Set/outdir_train_configuration
-instance_file = tests/test_files/test_configurator/scenarios/instances/Test-Instance-Set/Test-Instance-Set_train.txt
-test_instance_file = tests/test_files/test_configurator/scenarios/instances/Test-Instance-Set/Test-Instance-Set_train.txt
+paramfile = tests/test_files/Solvers/Test-Solver/Test-Solver.pcs
+outdir = tests/test_files/test_configurator/scenarios/instances/Test-Instance-Set/Test-Instance-Set_train.txt
+instance_file = .
+test_instance_file = .
 validation = false
