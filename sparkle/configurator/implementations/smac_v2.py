@@ -31,10 +31,11 @@ class SMACv2(Configurator):
 
     def __init__(self: SMACv2) -> None:
         """Returns the SMAC configurator, Java SMAC V2.10.03."""
-        self.config_class_output_path = gv.configuration_output_raw / SMACv2.__name__
-        validator = Validator(out_dir=self.config_class_output_path)
+        output_path = gv.configuration_output_raw / SMACv2.__name__
+        validator = Validator(out_dir=output_path)
         return super().__init__(
             validator=validator,
+            config_output_path=output_path,
             executable_path=SMACv2.configurator_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             configurator_target=SMACv2.configurator_path / SMACv2.target_algorithm,
@@ -54,12 +55,12 @@ class SMACv2(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        if self.config_class_output_path.exists():
+        if self.output_path.exists():
             # Clear the output dir
-            shutil.rmtree(self.config_class_output_path)
-        self.config_class_output_path.mkdir(parents=True)
+            shutil.rmtree(self.output_path)
+        self.output_path.mkdir(parents=True)
         self.scenario = scenario
-        self.scenario.create_scenario(parent_directory=self.config_class_output_path)
+        self.scenario.create_scenario(parent_directory=self.output_path)
         output_csv = self.scenario.validation / "configurations.csv"
         output_csv.parent.mkdir(exist_ok=True, parents=True)
         output = [f"{(self.scenario.result_directory).absolute()}/"
@@ -177,4 +178,4 @@ class SMACv2(Configurator):
         """Patching method to allow the rebuilding of configuratio scenario."""
         solver = Solver.get_solver_by_name(solver)
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
-        self.scenario._set_paths(self.config_class_output_path)
+        self.scenario._set_paths(self.output_path)

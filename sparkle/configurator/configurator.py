@@ -19,8 +19,8 @@ class Configurator:
     """Abstact class to use different configurators like SMAC."""
     configurator_cli_path = Path("sparkle/configurator/configurator_cli.py")
 
-    def __init__(self: Configurator, validator: Validator, executable_path: Path,
-                 settings_path: Path, configurator_target: Path,
+    def __init__(self: Configurator, validator: Validator, config_output_path: Path,
+                 executable_path: Path, settings_path: Path, configurator_target: Path,
                  tmp_path: Path = None, multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
@@ -35,6 +35,7 @@ class Configurator:
                 multi objective optimization for solvers.
         """
         self.validator = validator
+        self.config_output_path = config_output_path
         self.executable_path = executable_path
         self.settings_path = settings_path
         self.configurator_target = configurator_target
