@@ -11,10 +11,10 @@ from sparkle.solver.solver import Solver
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.platform import settings_help
-import global_variables as sgh
+import global_variables as gv
 
 global settings
-sgh.settings = settings_help.Settings()
+gv.settings = settings_help.Settings()
 
 
 class TestConfigurator():
@@ -28,6 +28,7 @@ class TestConfigurator():
         mock_path = mocker.patch.object(Path, "mkdir")
         exec_path = Path("dir/exec.exe")
         configurator = Configurator(
+            config_output_path=Path(),
             validator=None,
             executable_path=exec_path,
             settings_path=None,
@@ -50,16 +51,16 @@ def scenario_fixture(solver_fixture: MockerFixture) -> ConfigurationScenario:
     """Scenario fixture for tests."""
     instance_set_train = Path("Instances", "Test-Instance-Set")
     number_of_runs = 2
-    time_budget = sgh.settings.get_config_budget_per_run()
-    cutoff_time = sgh.settings.get_general_target_cutoff_time()
-    cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+    time_budget = gv.settings.get_config_budget_per_run()
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
+    cutoff_length = gv.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
-        sgh.settings.get_general_sparkle_objectives()[0]
+        gv.settings.get_general_sparkle_objectives()[0]
     use_features = False
     return ConfigurationScenario(solver_fixture, instance_set_train, number_of_runs,
                                  time_budget, cutoff_time, cutoff_length,
                                  sparkle_objective, use_features,
-                                 sgh.smac_target_algorithm)
+                                 gv.smac_target_algorithm)
 
 
 @pytest.fixture
