@@ -13,4 +13,4 @@ setup(name="SparkleAI",
       long_description_content_type="text/markdown",
       packages=find_packages(),
       entry_points={"console_scripts": ["sparkle=sparkle.cli:main"], },
-)
+      )
