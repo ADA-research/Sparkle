@@ -11,7 +11,7 @@ from runrunner.base import Runner
 
 import global_variables as gv
 from sparkle.instance import instances_help as sih
-from CLI.support import configure_solver_help as scsh
+from CLI.support import smac_help
 from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
@@ -87,7 +87,7 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
         solver_name, instance_train_name)
     if "-init_solution" not in opt_config_str:
         opt_config_str = "-init_solution '1' " + opt_config_str
-    smac_run_obj = scsh.get_smac_run_obj()
+    smac_run_obj = smac_help.get_smac_run_obj()
     smac_each_run_cutoff_length = gv.settings.get_smac_target_cutoff_length()
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     concurrent_clis = gv.settings.get_slurm_clis_per_node()
