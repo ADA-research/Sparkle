@@ -27,7 +27,7 @@ class TestConfigurator():
         """Test that Configurator initialization calls create_scenario() correctly."""
         exec_path = Path("dir/exec.exe")
         configurator = Configurator(
-            config_output_path=Path(),
+            output_path=Path(),
             validator=None,
             executable_path=exec_path,
             settings_path=None,
