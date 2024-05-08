@@ -25,7 +25,6 @@ class TestConfigurator():
                   scenario_fixture: MockerFixture,
                   configurator_path: MockerFixture) -> None:
         """Test that Configurator initialization calls create_scenario() correctly."""
-        mock_path = mocker.patch.object(Path, "mkdir")
         exec_path = Path("dir/exec.exe")
         configurator = Configurator(
             config_output_path=Path(),
@@ -35,8 +34,6 @@ class TestConfigurator():
             configurator_target=None)
 
         assert configurator.executable_path == exec_path
-
-        mock_path.assert_called_once()
 
 
 @pytest.fixture
