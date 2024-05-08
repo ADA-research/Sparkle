@@ -422,7 +422,7 @@ SolverRemoveArgument = \
                               "type": str,
                               "help": "name, path to or nickname of the solver"})
 
-SolverPathArgument = ArgumentContainer(names=["--solver.path"],
+SolverPathArgument = ArgumentContainer(names=["solver_path"],
                                        kwargs={"metavar": "solver-path",
                                                "type": str,
                                                "help": "path to the solver"})
