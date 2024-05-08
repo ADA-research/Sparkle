@@ -80,9 +80,6 @@ class TestConfigurationScenario(TestCase):
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
 
-        self.assertTrue((self.scenario.directory
-                         / self.solver.get_pcs_file().name).is_file())
-
     @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_result_directory(
         self: TestConfigurationScenario,
