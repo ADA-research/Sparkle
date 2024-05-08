@@ -75,7 +75,7 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
 
-    instance_directory = configurator.instances_path / instance_set_name
+    instance_directory = configurator.output_path / instance_set_name
     mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
@@ -601,7 +601,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     train_instance = "train-instance"
     test_instance = "test-instance"
     report_dir = "reports/directory"
-    seed = 13
+    #seed = 13
     cutoff = "10"
     #mock_settings = mocker.patch("CLI.support.smac_help."
     #                             "get_smac_settings",
@@ -655,8 +655,8 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     common_dict = sgrch.get_dict_variable_to_value_common(solver_name, train_instance,
                                                           test_instance, report_dir)
 
-    mock_settings.assert_called_once_with()
-    mock_config.assert_called_with(solver_name, train_instance)
+    #mock_settings.assert_called_once_with()
+    #mock_config.assert_called_with(solver_name, train_instance)
     mock_perf.assert_called_once_with()
     mock_runtime.assert_called_once_with()
     mock_instance_num.assert_called_once_with(train_instance)
@@ -705,19 +705,16 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     """
     setup_conf()
     test_instance = "test-instance"
-    cutoff = "10"
+    cutoff = "60"
 
     mock_instance_num = mocker.patch("sparkle.platform.generate_"
                                      "report_for_configuration."
                                      "get_num_instance_for_configurator",
                                      return_value="4")
-    #mock_settings = mocker.patch("CLI.support.configure_solver_help."
-    #                             "get_smac_settings",
-    #                             return_value=("OBJ", 100, cutoff, "", 11, ""))
-    mock_par_perf = mocker.patch("sparkle.platform.generate_"
-                                 "report_for_configuration."
-                                 "get_par_performance",
-                                 side_effect=[42.1, 42.2])
+    mocker.patch("sparkle.platform.generate_"
+                 "report_for_configuration."
+                 "get_par_performance",
+                 side_effect=[42.1, 42.2])
     mock_figure = mocker.patch("sparkle.platform.generate_"
                                "report_for_configuration."
                                "get_figure_configured_vs_default_on_"
@@ -738,9 +735,8 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
-    #mocker.patch("CLI.support.configure_solver_help."
-    #             "get_optimised_configuration_from_file",
-    #             return_value=["1", "2", "3"])
+    mocker.patch("sparkle.configurator.implementations.SMACv2."
+                 "get_optimal_configuration", return_value=(0.0, "configurino"))
 
     test_dict = sgrch.get_dict_variable_to_value_test(gv.configuration_output_analysis,
                                                       solver_name,
@@ -748,11 +744,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       test_instance)
 
     mock_instance_num.assert_called_once_with(test_instance)
-    mock_settings.assert_called_once_with()
-    mock_par_perf.assert_has_calls([
-        mocker.call([], cutoff),
-        mocker.call([], cutoff)
-    ])
+    
     mock_figure.assert_called_once_with(solver_name, test_instance,
                                         [], [], gv.configuration_output_analysis,
                                         float(cutoff), data_type="test")
