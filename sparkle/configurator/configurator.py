@@ -26,6 +26,7 @@ class Configurator:
 
         Args:
             validator: Validator object to validate configurations runs
+            config_output_path: Output directory of the Configurator.
             executable_path: Executable of the configurator for Sparkle to call
             settings_path: Path to the settings file for the configurator
             configurator_target: The wrapper algorithm to standardize configurator

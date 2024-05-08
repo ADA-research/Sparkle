@@ -638,7 +638,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  "get_features_bool",
                                  return_value="featurestrue")
     mocker.patch("sparkle.configurator.implementations.smac_v2."
-                 "SMACv2.get_optimal_configuration", return_value=(0,"123"))
+                 "SMACv2.get_optimal_configuration", return_value=(0, "123"))
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
@@ -729,7 +729,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       test_instance)
 
     mock_instance_num.assert_called_once_with(test_instance)
-    
     mock_figure.assert_called_once_with(solver_name, test_instance,
                                         [], [], gv.configuration_output_analysis,
                                         float(cutoff), data_type="test")
