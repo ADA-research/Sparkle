@@ -10,6 +10,7 @@ from pathlib import Path
 from sparkle.solver.solver import Solver
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
+from sparkle.configurator.implementations import SMACv2
 from sparkle.platform import settings_help
 import global_variables as gv
 
@@ -57,7 +58,7 @@ def scenario_fixture(solver_fixture: MockerFixture) -> ConfigurationScenario:
     return ConfigurationScenario(solver_fixture, instance_set_train, number_of_runs,
                                  time_budget, cutoff_time, cutoff_length,
                                  sparkle_objective, use_features,
-                                 gv.smac_target_algorithm)
+                                 SMACv2.target_algorithm)
 
 
 @pytest.fixture

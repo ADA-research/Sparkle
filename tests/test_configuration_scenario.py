@@ -12,10 +12,10 @@ from pathlib import Path
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 from sparkle.platform import settings_help
-import global_variables as sgh
+import global_variables as gv
 
 global settings
-sgh.settings = settings_help.Settings()
+gv.settings = settings_help.Settings()
 
 
 class TestConfigurationScenario(TestCase):
@@ -26,7 +26,6 @@ class TestConfigurationScenario(TestCase):
         self.solver = Solver(self.solver_path)
 
         self.instance_directory = Path("tests/test_files/Instances/Test-Instance-Set")
-
         self.run_number = 2
 
         self.parent_directory = Path("tests/test_files/test_configurator")
@@ -39,8 +38,8 @@ class TestConfigurationScenario(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective =\
-            sgh.settings.get_general_sparkle_objectives()[0]
-
+            gv.settings.get_general_sparkle_objectives()[0]
+        self.configurator = gv.settings.get_general_sparkle_configurator()
         self.scenario = ConfigurationScenario(
             solver=self.solver,
             instance_directory=self.instance_directory,
@@ -50,7 +49,7 @@ class TestConfigurationScenario(TestCase):
             cutoff_length=self.cutoff_length,
             sparkle_objective=self.sparkle_objective,
             use_features=False,
-            configurator_target=Path(sgh.smac_target_algorithm))
+            configurator_target=Path(self.configurator.target_algorithm))
 
     def tearDown(self: TestConfigurationScenario) -> None:
         """Cleanup executed after each test."""
