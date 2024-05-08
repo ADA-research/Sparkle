@@ -35,7 +35,7 @@ class SMACv2(Configurator):
         validator = Validator(out_dir=output_path)
         return super().__init__(
             validator=validator,
-            config_output_path=output_path,
+            output_path=output_path,
             executable_path=SMACv2.configurator_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             configurator_target=SMACv2.configurator_path / SMACv2.target_algorithm,
