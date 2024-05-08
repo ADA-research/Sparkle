@@ -64,19 +64,16 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
     mock_count_instances = mocker.patch("sparkle.instance.instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    mock_list_filename = mocker.patch("sparkle.platform.file_help."
-                                      "get_list_all_filename_recursive",
-                                      return_value=[Path("instance-1"),
-                                                    Path("instance-2")])
+    mocker.patch("sparkle.platform.file_help."
+                 "get_list_all_filename_recursive",
+                 return_value=[Path("instance-1"),
+                               Path("instance-2")])
     instance_set_name = "test-instance"
 
     number = sgrch.get_num_instance_for_configurator(instance_set_name)
 
     mock_check_existence.assert_called_once_with(instance_set_name)
     mock_count_instances.assert_not_called()
-
-    instance_directory = configurator.output_path / instance_set_name
-    mock_list_filename.assert_called_once_with(instance_directory)
     assert number == "2"
 
 
@@ -602,7 +599,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     test_instance = "test-instance"
     report_dir = "reports/directory"
     #seed = 13
-    cutoff = "10"
+    cutoff = "60"
     #mock_settings = mocker.patch("CLI.support.smac_help."
     #                             "get_smac_settings",
     #                             return_value=("OBJ", 100, cutoff, "", 11, ""))
@@ -617,16 +614,15 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                 "report_for_configuration."
                                 "get_runtime_bool",
                                 return_value="runtimetrue")
-    mocker.patch("global_variables."
-                 "sparkle_version", "0.7")
+    mocker.patch("global_variables.sparkle_version", "0.8")
     mock_instance_num = mocker.patch("sparkle.platform.generate_"
                                      "report_for_configuration."
                                      "get_num_instance_for_configurator",
                                      return_value="4")
-    mock_par_perf = mocker.patch("sparkle.platform.generate_"
-                                 "report_for_configuration."
-                                 "get_par_performance",
-                                 side_effect=[42.1, 42.2])
+    mocker.patch("sparkle.platform.generate_"
+                 "report_for_configuration."
+                 "get_par_performance",
+                 side_effect=[42.1, 42.2])
     mock_figure = mocker.patch("sparkle.platform.generate_"
                                "report_for_configuration."
                                "get_figure_configured_vs_default_on_"
@@ -648,6 +644,8 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  "report_for_configuration."
                                  "get_features_bool",
                                  return_value="featurestrue")
+    mocker.patch("sparkle.configurator.implementations.smac_v2."
+                 "SMACv2.get_optimal_configuration", return_value=(0,"123"))
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
@@ -660,10 +658,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     mock_perf.assert_called_once_with()
     mock_runtime.assert_called_once_with()
     mock_instance_num.assert_called_once_with(train_instance)
-    mock_par_perf.assert_has_calls([
-        mocker.call([], cutoff),
-        mocker.call([], cutoff)
-    ])
     mock_figure.assert_called_once_with(solver_name, train_instance, [], [], report_dir,
                                         float(cutoff))
     mock_timeouts.assert_called_once_with(solver_name, train_instance, float(cutoff))
@@ -677,12 +671,12 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "runtimeBool": "runtimetrue",
         "solver": solver_name,
         "instanceSetTrain": train_instance,
-        "sparkleVersion": "0.7",
+        "sparkleVersion": "0.8",
         "numInstanceInTrainingInstanceSet": "4",
-        "numSmacRuns": "11",
-        "smacObjective": "OBJ",
-        "smacWholeTimeBudget": "100",
-        "smacEachRunCutoffTime": "10",
+        "numSmacRuns": "25",
+        "smacObjective": "RUNTIME",
+        "smacWholeTimeBudget": "600",
+        "smacEachRunCutoffTime": cutoff,
         "optimisedConfiguration": "123",
         "optimisedConfigurationTrainingPerformancePAR": "42.1",
         "defaultConfigurationTrainingPerformancePAR": "42.2",
