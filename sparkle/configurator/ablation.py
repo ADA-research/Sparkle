@@ -87,8 +87,9 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
         solver_name, instance_train_name)
     if "-init_solution" not in opt_config_str:
         opt_config_str = "-init_solution '1' " + opt_config_str
-    (smac_run_obj, _, smac_each_run_cutoff_time,
-     smac_each_run_cutoff_length, _, _) = scsh.get_smac_settings()
+    smac_run_obj = scsh.get_smac_run_obj()
+    smac_each_run_cutoff_length = gv.settings.get_smac_target_cutoff_length()
+    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     concurrent_clis = gv.settings.get_slurm_clis_per_node()
     ablation_racing = gv.settings.get_ablation_racing_flag()
     configurator = gv.settings.get_general_sparkle_configurator()

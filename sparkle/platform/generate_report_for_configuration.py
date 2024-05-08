@@ -80,7 +80,7 @@ def get_dict_instance_to_performance(results: list[list[str]],
         A dictionary containing the performance for each instance
     """
     value_column = -1  # Last column is runtime
-    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    smac_run_obj = scsh.get_smac_run_obj()
     if smac_run_obj != "RUNTIME":
         # Quality column
         value_column = -2
@@ -100,7 +100,7 @@ def get_performance_measure() -> str:
     Returns:
         A string containing the performance measure
     """
-    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    smac_run_obj = scsh.get_smac_run_obj()
 
     if smac_run_obj == "RUNTIME":
         penalty = gv.settings.get_general_penalty_multiplier()
@@ -115,7 +115,7 @@ def get_runtime_bool() -> str:
     Returns:
         A string containing the runtime boolean
     """
-    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    smac_run_obj = scsh.get_smac_run_obj()
 
     if smac_run_obj == "RUNTIME":
         return "\\runtimetrue"
@@ -463,8 +463,10 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     latex_dict["numInstanceInTrainingInstanceSet"] = \
         get_num_instance_for_configurator(instance_set_train_name)
 
-    (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
-     _, num_of_smac_run_str, _) = scsh.get_smac_settings()
+    smac_run_obj = scsh.get_smac_run_obj()
+    smac_whole_time_budget = gv.settings.get_config_budget_per_run()
+    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
+    num_of_smac_run_str = gv.settings.get_config_number_of_runs()
 
     latex_dict["numSmacRuns"] = str(num_of_smac_run_str)
     latex_dict["smacObjective"] = str(smac_run_obj)
@@ -528,8 +530,7 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
     test_dict = {"instanceSetTest": instance_set_test_name}
     test_dict["numInstanceInTestingInstanceSet"] =\
         get_num_instance_for_configurator(instance_set_test_name)
-
-    (_, _, smac_each_run_cutoff_time, _, _, _) = scsh.get_smac_settings()
+    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
         str(get_par_performance(res_conf, smac_each_run_cutoff_time))
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
