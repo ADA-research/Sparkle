@@ -28,56 +28,22 @@ def parser_function() -> argparse.ArgumentParser:
         description=("Test the performance of the configured solver and the default "
                      "solver by doing validation experiments on the training and test "
                      "sets."))
-    parser.add_argument(
-        "--solver",
-        required=True,
-        type=Path,
-        help="path to solver"
-    )
-    parser.add_argument(
-        "--instance-set-train",
-        required=True,
-        type=Path,
-        help="path to training instance set",
-    )
-    parser.add_argument(
-        "--instance-set-test",
-        required=False,
-        type=Path,
-        help="path to testing instance set",
-    )
-    parser.add_argument(
-        "--configurator",
-        type=Path,
-        help="path to configurator"
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--target-cutoff-time",
-        type=int,
-        default=sgh.settings.DEFAULT_general_target_cutoff_time,
-        action=ac.SetByUser,
-        help="cutoff time per target algorithm run in seconds",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help="specify the settings file to use instead of the default",
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    parser.add_argument(*ac.SolverArgument.names,
+                        **ac.SolverArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainArgument.names,
+                        **ac.InstanceSetTrainArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTestArgument.names,
+                        **ac.InstanceSetTestArgument.kwargs)
+    parser.add_argument(*ac.ConfiguratorArgument.names,
+                        **ac.ConfiguratorArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeValidationArgument.names,
+                        **ac.TargetCutOffTimeValidationArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 

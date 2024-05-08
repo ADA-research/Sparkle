@@ -70,7 +70,7 @@ AblationSettingsHelpArgument = \
                               "help": "Prints a list of setting that can be used for "
                               + "the ablation analysis"})
 
-ActualArgument = ArgumentContainer(names=["--solver"],
+ActualArgument = ArgumentContainer(names=["--actual"],
                                    kwargs={"action": "store_true",
                                            "help": "compute the marginal contribution "
                                            + "for the actual selector"})
@@ -81,10 +81,11 @@ AlsoConstructSelectorAndReportArgument = \
                               "help": "after running the solvers also construct the "
                               + "selector and generate the report"})
 
-BudgetPerRunArgument = ArgumentContainer(names=["--budget-per-run"],
-                                         kwargs={"type": int,
-                                                 "help": "configuration budget per "
-                                                 + "configurator run in seconds"})
+BudgetPerRunConfigurationArgument = \
+    ArgumentContainer(names=["--budget-per-run"],
+                      kwargs={"type": int,
+                              "help": "configuration budget per configurator run in "
+                              + "seconds"})
 
 BudgetPerRunAblationArgument = \
     ArgumentContainer(names=["--budget-per-run"],
@@ -160,20 +161,9 @@ InstancePathsRunParallelPortfolioArgument = \
                               + "instances. For example --instance-paths "
                               + "Instances/PTN/Ptn-7824-b01.cnf Instances/PTN2/"})
 
-InstancesPathArgument = ArgumentContainer(names=["instances_path"],
-                                          kwargs={"metavar": "instances-path",
-                                                  "type": str,
-                                                  "help": "path to the instance set"})
-
-InstancesPathRemoveArgument = \
-    ArgumentContainer(names=["instances_path"],
-                      kwargs={"metavar": "instances-path",
-                              "type": str,
-                              "help": "path to or nickname of the instance set"})
-
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
-                      kwargs={"required": True,
+                      kwargs={"required": False,
                               "type": Path,
                               "help": "path to test instance set (only for validating)"})
 
@@ -209,11 +199,38 @@ InstanceSetTrainReportArgument = \
                               "help": "path to training instance set included in "
                               "Sparkle for an algorithm configuration report"})
 
+InstancesPathArgument = ArgumentContainer(names=["instances_path"],
+                                          kwargs={"metavar": "instances-path",
+                                                  "type": str,
+                                                  "help": "path to the instance set"})
+
+InstancesPathRemoveArgument = \
+    ArgumentContainer(names=["instances_path"],
+                      kwargs={"metavar": "instances-path",
+                              "type": str,
+                              "help": "path to or nickname of the instance set"})
+
 JobIdArgument = ArgumentContainer(names=["--job-id"],
                                   kwargs={"required": False,
                                           "type": str,
                                           "default": None,
                                           "help": "job ID to wait for"})
+
+NicknameFeatureExtractorArgument = ArgumentContainer(names=["--nickname"],
+                                                     kwargs={"type": str,
+                                                             "help": "set a nickname for"
+                                                             + " the feature extractor"})
+
+NicknameInstanceSetArgument = ArgumentContainer(names=["--nickname"],
+                                                kwargs={"type": str,
+                                                        "help": "set a nickname for"
+                                                        + " the instance set"})
+
+NicknamePortfolioArgument = \
+    ArgumentContainer(names=["--nickname"],
+                      kwargs={"type": Path,
+                              "help": "Give a nickname to the portfolio"
+                              + f" (default: {gv.sparkle_parallel_portfolio_name})"})
 
 NicknameRemoveExtractor = \
     ArgumentContainer(names=["--nickname"],
@@ -233,22 +250,6 @@ NicknameRemoveSolver = \
                               "help": "if set to True solver_path is used as a nickname "
                               + "for the solver"})
 
-NicknameFeatureExtractorArgument = ArgumentContainer(names=["--nickname"],
-                                                     kwargs={"type": str,
-                                                             "help": "set a nickname for"
-                                                             + " the feature extractor"})
-
-NicknameInstanceSetArgument = ArgumentContainer(names=["--nickname"],
-                                                kwargs={"type": str,
-                                                        "help": "set a nickname for"
-                                                        + " the instance set"})
-
-NicknamePortfolioArgument = \
-    ArgumentContainer(names=["--nickname"],
-                      kwargs={"type": Path,
-                              "help": "Give a nickname to the portfolio"
-                              + f" (default: {gv.sparkle_parallel_portfolio_name})"})
-
 NicknameSolverArgument = ArgumentContainer(names=["--nickname"],
                                            kwargs={"type": str,
                                                    "help": "set a nickname for the "
@@ -261,13 +262,13 @@ NoAblationReportArgument = ArgumentContainer(names=["--no-ablation"],
                                                      "const": False,
                                                      "nargs": "?",
                                                      "help": "turn off reporting on "
-                                                     "ablation for an algorithm "
-                                                     "configuration report"})
+                                                     + "ablation for an algorithm "
+                                                     + "configuration report"})
 
-NumberOfRunsArgument = ArgumentContainer(names=["--number-of-runs"],
-                                         kwargs={"required": True,
-                                                 "type": Path,
-                                                 "help": "path to solver"})
+NumberOfRunsConfigurationArgument = \
+    ArgumentContainer(names=["--number-of-runs"],
+                      kwargs={"type": int,
+                              "help": "number of configuration runs to execute"})
 
 NumberOfRunsAblationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
@@ -286,8 +287,7 @@ OverwriteArgument = \
 
 ParallelArgument = ArgumentContainer(names=["--parallel"],
                                      kwargs={"action": "store_true",
-                                             "help": "Run the feature extractor on "
-                                             + "multiple instances in parallel"})
+                                             "help": "Run the command in parallel"})
 
 PerfectArgument = ArgumentContainer(names=["--perfect"],
                                     kwargs={"action": "store_true",
@@ -328,11 +328,17 @@ RacingArgument = ArgumentContainer(names=["--racing"],
 RecomputeFeaturesArgument = \
     ArgumentContainer(names=["--recompute"],
                       kwargs={"action": "store_true",
-                              "help": "Re-run feature extractor for "
-                              + "instances with previously computed "
-                              + "features"})
+                              "help": "Re-run feature extractor for instances with "
+                              + "previously computed features"})
 
 RecomputeMarginalContributionArgument = \
+    ArgumentContainer(names=["--recompute"],
+                      kwargs={"action": "store_true",
+                              "help": "force marginal contribution to be recomputed even"
+                              + " when it already exists in file for the current "
+                              + "selector"})
+
+RecomputeMarginalContributionForSelectorArgument = \
     ArgumentContainer(names=["--recompute-marginal-contribution"],
                       kwargs={"action": "store_true",
                               "help": "force marginal contribution to be recomputed even"
@@ -448,18 +454,24 @@ SolverVariationsArgument = \
                               + " solver by using a different random seed for each "
                               + "varation."})
 
-TargetCutOffTimeArgument = \
-    ArgumentContainer(names=["--target-cutoff-time"],
-                      kwargs={"type": int,
-                              "help": "cutoff time per target algorithm "
-                              + "run in seconds"})
-
 TargetCutOffTimeAblationArgument = \
     ArgumentContainer(names=["--target-cutoff-time"],
                       kwargs={"type": int,
                               "default": gv.settings.DEFAULT_general_target_cutoff_time,
                               "action": SetByUser,
                               "help": "cutoff time per target algorithm run in seconds"})
+
+TargetCutOffTimeConfigurationArgument = \
+    ArgumentContainer(names=["--target-cutoff-time"],
+                      kwargs={"type": int,
+                              "help": "cutoff time per target algorithm "
+                              + "run in seconds"})
+
+TargetCutOffTimeRunSolversArgument = \
+    ArgumentContainer(names=["--target-cutoff-time"],
+                      kwargs={"type": int,
+                              "help": "cutoff time per target algorithm "
+                              + "run in seconds"})
 
 TargetCutOffTimeValidationArgument = \
     ArgumentContainer(names=["--target-cutoff-time"],

@@ -3,7 +3,6 @@
 
 import sys
 import argparse
-from pathlib import Path
 
 import runrunner as rrr
 from runrunner.base import Runner
@@ -14,12 +13,12 @@ from sparkle.platform import slurm_help as ssh
 from CLI.support import run_solvers_parallel_help as srsph
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
 from sparkle.platform.settings_help import SettingState
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as ac
 
 import functools
 print = functools.partial(print, flush=True)
@@ -29,42 +28,22 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--recompute",
-        action="store_true",
-        help="recompute the performance of all solvers on all instances")
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the solver on multiple instances in parallel")
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        help="the performance measure, e.g. runtime")
-    parser.add_argument(
-        "--target-cutoff-time",
-        type=int,
-        help="cutoff time per target algorithm run in seconds")
-    parser.add_argument(
-        "--also-construct-selector-and-report",
-        action="store_true",
-        help=("after running the solvers also construct the selector and generate"
-              " the report"))
-    parser.add_argument(
-        "--verifier",
-        choices=SolutionVerifier.__members__,
-        help=("problem specific verifier that should be used to verify solutions found"
-              " by a target algorithm"))
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation."))
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        help=("specify the settings file to use in case you want to use one other than"
-              " the default"))
+    parser.add_argument(*ac.RecomputeRunSolversArgument.names,
+                        **ac.RecomputeRunSolversArgument.kwargs)
+    parser.add_argument(*ac.ParallelArgument.names,
+                        **ac.ParallelArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
+                        **ac.TargetCutOffTimeRunSolversArgument.kwargs)
+    parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
+                        **ac.AlsoConstructSelectorAndReportArgument.kwargs)
+    parser.add_argument(*ac.VerifierArgument.names,
+                        **ac.VerifierArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
 
     return parser
 

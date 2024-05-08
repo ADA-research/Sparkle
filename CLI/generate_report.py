@@ -30,64 +30,24 @@ def parser_function() -> argparse.ArgumentParser:
         epilog=("Note that if a test instance set is given, the training instance set "
                 "must also be given."))
     # Configuration arguments
-    parser.add_argument(
-        "--solver",
-        required=False,
-        type=str,
-        default=None,
-        help="path to solver for an algorithm configuration report",
-    )
-    parser.add_argument(
-        "--instance-set-train",
-        required=False,
-        type=str,
-        help=("path to training instance set included in Sparkle for an algorithm"
-              " configuration report"),
-    )
-    parser.add_argument(
-        "--instance-set-test",
-        required=False,
-        type=str,
-        help=("path to testing instance set included in Sparkle for an algorithm"
-              " configuration report"),
-    )
-    parser.add_argument(
-        "--no-ablation",
-        required=False,
-        dest="flag_ablation",
-        default=True,
-        const=False,
-        nargs="?",
-        help="turn off reporting on ablation for an algorithm configuration report",
-    )
+    parser.add_argument(*ac.SolverReportArgument.names,
+                        **ac.SolverReportArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainReportArgument.names,
+                        **ac.InstanceSetTrainReportArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTestReportArgument.names,
+                        **ac.InstanceSetTestReportArgument.kwargs)
+    parser.add_argument(*ac.NoAblationReportArgument.names,
+                        **ac.NoAblationReportArgument.kwargs)
     # Selection arguments
-    parser.add_argument(
-        "--selection",
-        action="store_true",
-        help="set to generate a normal selection report",
-    )
-    parser.add_argument(
-        "--test-case-directory",
-        type=str,
-        default=None,
-        help="Path to test case directory of an instance set for a selection report",
-    )
+    parser.add_argument(*ac.SelectionReportArgument.names,
+                        **ac.SelectionReportArgument.kwargs)
+    parser.add_argument(*ac.TestCaseDirectoryArgument.names,
+                        **ac.TestCaseDirectoryArgument.kwargs)
     # Common arguments
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than"
-              " the default"),
-    )
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
     return parser
 
 

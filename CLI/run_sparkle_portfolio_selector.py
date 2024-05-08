@@ -21,31 +21,14 @@ from CLI.initialise import check_for_initialise
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "instance_path",
-        type=str,
-        nargs="+",
-        help="Path to instance or instance directory",
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation."))
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help="settings file to use instead of the default",
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
+    parser.add_argument(*ac.InstancePathRunPortfolioSelectorArgument.names,
+                        **ac.InstancePathRunPortfolioSelectorArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
 
     return parser
 

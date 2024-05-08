@@ -3,54 +3,32 @@
 
 import sys
 import argparse
-from pathlib import Path
 
 import global_variables as sgh
 from CLI.support import compute_marginal_contribution_help as scmch
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as apc
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "--perfect",
-        action="store_true",
-        help="compute the marginal contribution for the perfect selector",
-    )
-    group.add_argument(
-        "--actual",
-        action="store_true",
-        help="compute the marginal contribution for the actual selector",
-    )
-    parser.add_argument(
-        "--recompute",
-        action="store_true",
-        help=("force marginal contribution to be recomputed even when it already exists"
-              " in file for for the current selector"),
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help=("specify the settings file to use in case you want to use one other than"
-              " the default"),
-    )
+    group.add_argument(*apc.PerfectArgument.names,
+                       **apc.PerfectArgument.kwargs)
+    group.add_argument(*apc.ActualArgument.names,
+                       **apc.ActualArgument.kwargs)
+    parser.add_argument(*apc.RecomputeMarginalContributionArgument.names,
+                        **apc.RecomputeMarginalContributionArgument.kwargs)
+    parser.add_argument(*apc.PerformanceMeasureArgument.names,
+                        **apc.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*apc.SettingsFileArgument.names,
+                        **apc.SettingsFileArgument.kwargs)
 
     return parser
 

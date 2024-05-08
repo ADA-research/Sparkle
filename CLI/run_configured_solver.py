@@ -11,42 +11,26 @@ import global_variables as sgh
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
-from sparkle.types.objective import PerformanceMeasure
 from CLI.support import run_configured_solver_help as srcsh
 from CLI.support import configure_solver_help as scsh
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    perf_measure = sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
-    parser.add_argument(
-        "instance_path",
-        type=Path,
-        nargs="+",
-        help=("Path(s) to instance file(s) (when multiple files are given, it is assumed"
-              " this is a multi-file instance) or instance directory."))
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        help=("settings file to use instead of the default (default: "
-              f"{sgh.settings.DEFAULT_settings_path})"))
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        help=f"the performance measure, e.g. runtime (default: {perf_measure.name})")
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the solver on multiple instances in parallel")
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    parser.add_argument(*ac.InstancePathRunConfiguredSolverArgument.names,
+                        **ac.InstancePathRunConfiguredSolverArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.ParallelArgument.names,
+                        **ac.ParallelArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 

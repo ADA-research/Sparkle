@@ -1,1 +1,1 @@
---mem-per-cpu=3000
+--mem-per-cpu=3000 -p Test

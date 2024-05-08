@@ -12,11 +12,11 @@ from runrunner.base import Runner
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 import global_variables as sgh
-from sparkle.platform.settings_help import SettingState, ProcessMonitoring
+from sparkle.platform.settings_help import SettingState
 from CLI.support import run_parallel_portfolio_help as srpp
-from sparkle.types.objective import PerformanceMeasure
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -30,18 +30,8 @@ def parser_function() -> argparse.ArgumentParser:
     else:
         latest = sgh.latest_scenario().get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
-    performance_measure =\
-        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure.name
-    parser.add_argument(
-        "--instance-paths",
-        metavar="PATH",
-        nargs="+",
-        type=str,
-        required=True,
-        help="Specify the instance_path(s) on which the portfolio will run. This can be "
-             "a space-separated list of instances containing instance sets and/or "
-             " singular instances. For example --instance-paths "
-             "Instances/PTN/Ptn-7824-b01.cnf Instances/PTN2/")
+    parser.add_argument(*ac.InstancePathsRunParallelPortfolioArgument.names,
+                        **ac.InstancePathsRunParallelPortfolioArgument.kwargs)
     parser.add_argument(
         "--portfolio-name",
         type=Path,
@@ -49,43 +39,16 @@ def parser_function() -> argparse.ArgumentParser:
              " directory, use its full path, the default directory is "
              f"{sgh.sparkle_parallel_portfolio_dir}. (default: use the latest "
              f"constructed portfolio) (current latest: {latest})")
-    parser.add_argument(
-        "--process-monitoring",
-        choices=ProcessMonitoring.__members__,
-        type=ProcessMonitoring,
-        help="Specify whether the monitoring of the portfolio should cancel all solvers"
-             " within a portfolio once a solver finishes (REALISTIC). Or allow all "
-             "solvers within a portfolio to get an equal chance to have the shortest "
-             "running time on an instance (EXTENDED), e.g., when this information is "
-             "needed in an experiment."
-             f" (default: {sgh.settings.DEFAULT_paraport_process_monitoring})"
-             f" (current value: {sgh.settings.get_paraport_process_monitoring()})")
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        help="The performance measure, e.g., RUNTIME (for decision algorithms) or "
-             "QUALITY_ABSOLUTE (for optimisation algorithms) (default: "
-             f"{sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure.name})"
-             " (current value: "
-             f"{performance_measure})")
-    parser.add_argument(
-        "--cutoff-time",
-        type=int,
-        help="The duration the portfolio will run before the solvers "
-             "within the portfolio will be stopped (default: "
-             f"{sgh.settings.DEFAULT_general_target_cutoff_time})"
-             " (current value: "
-             f"{sgh.settings.get_general_target_cutoff_time()})")
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation."))
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        help="Specify the settings file to use instead of the default"
-             f" (default: {sgh.settings.DEFAULT_settings_path}")
+    parser.add_argument(*ac.ProcessMonitoringArgument.names,
+                        **ac.ProcessMonitoringArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.CutOffTimeArgument.names,
+                        **ac.CutOffTimeArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
     return parser
 
 
