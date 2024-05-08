@@ -75,7 +75,7 @@ class Settings:
     DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
 
-    DEFAULT_config_wallclock_time = 2147483647
+    DEFAULT_config_wallclock_time = 600
     DEFAULT_config_cpu_time = 2147483647
     DEFAULT_config_solver_calls = 9223372036854775807
     DEFAULT_config_number_of_runs = 25
