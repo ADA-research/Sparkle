@@ -90,8 +90,6 @@ if __name__ == "__main__":
     nickname_str = args.nickname
 
     # Start add feature extractor
-    last_level_directory = ""
-    extractor_name = Path(extractor_source)
 
     extractor_target_path = sgh.extractor_dir / extractor_source.name
 
