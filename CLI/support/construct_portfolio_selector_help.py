@@ -197,7 +197,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
                 str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
                 objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
-                "--save", str(selector_path), "--wallclock_limit", selector_timeout]
+                "--save", str(selector_path), "--wallclock_limit", str(selector_timeout)]
     # Write command line to log
     print("Running command below:\n", " ".join(cmd_list), file=open(log_path_str, "a+"))
     sl.add_output(log_path_str, "Command line used to construct portfolio through "
