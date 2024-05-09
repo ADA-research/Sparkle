@@ -202,6 +202,22 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
+            option_names = ("cpu_time", "to_be_removed")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_config_cpu_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "configuration"
+            option_names = ("solver_calls", "to_be_removed")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_config_solver_calls(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "configuration"
             option_names = ("number_of_runs", "num_of_smac_runs")
             for option in option_names:
                 if file_settings.has_option(section, option):

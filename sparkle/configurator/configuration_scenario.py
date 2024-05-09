@@ -141,7 +141,7 @@ class ConfigurationScenario:
             if self.cpu_time is not None:
                 file.write(f"cputime-limit = {self.cpu_time}\n")
             if self.solver_calls is not None:
-                file.write(f"runcount-limit = {self.solver_callsl}\n")
+                file.write(f"runcount-limit = {self.solver_calls}\n")
             file.write("validation = true" + "\n")
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
