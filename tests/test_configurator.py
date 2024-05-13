@@ -12,6 +12,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2
 from sparkle.platform import settings_help
+from sparkle.types.objective import SparkleObjective
 import global_variables as gv
 
 global settings
@@ -32,7 +33,8 @@ class TestConfigurator():
             validator=None,
             executable_path=exec_path,
             settings_path=None,
-            configurator_target=None)
+            configurator_target=None,
+            objectives=[SparkleObjective("RUNTIME:PAR10")])
 
         assert configurator.executable_path == exec_path
 
