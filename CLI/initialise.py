@@ -4,6 +4,7 @@
 import sys
 import subprocess
 import argparse
+import shutil
 from pathlib import Path
 
 
@@ -92,7 +93,11 @@ def initialise_sparkle(argv: list[str]) -> None:
                       f"[{compile_runsolver.returncode}] {compile_runsolver.stderr}")
             else:
                 print("Runsolver compiled successfully!")
-
+    # Check that java is available
+    if shutil.which("java") is None:
+        # NOTE: An automatic resolution of Java at this point would be good
+        # However, loading modules from Python has thusfar not been successfull.
+        print("Could not find Java as an executable!")
     print("New Sparkle platform initialised!")
 
 

@@ -209,8 +209,6 @@ def create_temporary_directories() -> None:
     if not tmp_path.exists():
         tmp_path.mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
-
-    Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
     Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
@@ -230,6 +228,3 @@ def remove_temporary_files() -> None:
 
     for filename in Path("../../CLI/sparkle_help").glob("slurm-*"):
         shutil.rmtree(filename)
-
-    shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
-                  ignore_errors=True)

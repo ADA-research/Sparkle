@@ -56,7 +56,7 @@ class ConfigurationScenario:
         self.parent_directory = Path()
         self.directory = Path()
         self.result_directory = Path()
-        self.scenario_file_name = ""
+        self.scenario_file_path = Path()
         self.feature_file_path = Path()
         self.instance_file_path = Path()
 
@@ -80,13 +80,15 @@ class ConfigurationScenario:
         self._create_scenario_file()
 
     def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
+        """Set the paths for the scenario based on the specified parent directory."""
         self.parent_directory = parent_directory
         self.directory = self.parent_directory / "scenarios" / self.name
-        self.result_directory = self.parent_directory / "results" / self.name
-        self.instance_file_path = (
-            Path(self.parent_directory / "scenarios"
-                 / "instances" / self.instance_directory.name)
-            / Path(str(self.instance_directory.name + "_train.txt")))
+        self.result_directory = self.directory / "results"
+        self.instance_file_path = self.directory /\
+            f"{self.instance_directory.name}_train.txt"
+        self.outdir_train = self.directory / "outdir_train_configuration"
+        self.tmp = self.directory / "tmp"
+        self.validation = self.directory / "validation"
 
     def _prepare_scenario_directory(self: ConfigurationScenario) -> None:
         """Delete old scenario dir, recreate it, create empty dirs inside."""
@@ -94,10 +96,8 @@ class ConfigurationScenario:
         self.directory.mkdir(parents=True)
 
         # Create empty directories as needed
-        (self.directory / "outdir_train_configuration").mkdir()
-        (self.directory / "tmp").mkdir()
-
-        shutil.copy(self.solver.get_pcs_file(), self.directory)
+        self.outdir_train.mkdir()
+        self.tmp.mkdir()
 
     def _prepare_result_directory(self: ConfigurationScenario) -> None:
         """Delete possible files in result directory."""
@@ -106,31 +106,24 @@ class ConfigurationScenario:
 
     def _create_scenario_file(self: ConfigurationScenario) -> None:
         """Create a file with the configuration scenario."""
-        inner_directory = Path("scenarios", self.name)
-
-        performance_measure = self._get_performance_measure()
-        solver_param_file_path = inner_directory / self.solver.get_pcs_file().name
-        config_output_directory = inner_directory / "outdir_train_configuration"
-
-        scenario_file_path = (self.directory
-                              / f"{self.name}_scenario.txt")
-        self.scenario_file_name = scenario_file_path.name
-        with scenario_file_path.open("w") as file:
+        self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
+        with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"
-                       f"execdir = {inner_directory}/\n"
+                       f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
-                       f"run_obj = {performance_measure}\n"
+                       f"run_obj = {self._get_performance_measure()}\n"
                        f"wallclock-limit = {self.time_budget}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
-                       f"paramfile = {solver_param_file_path}\n"
-                       f"outdir = {config_output_directory}\n"
+                       f"paramfile = {self.solver.get_pcs_file()}\n"
+                       f"outdir = {self.outdir_train.absolute()}\n"
                        f"instance_file = {self.instance_file_path.absolute()}\n"
                        f"test_instance_file = {self.instance_file_path.absolute()}\n")
             if self.use_features:
                 file.write(f"feature_file = {self.feature_file_path}\n")
-            file.write("validation = true" + "\n")
+            # We don't let SMAC do the validation
+            file.write("validation = false" + "\n")
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
         """Create instance list file."""
@@ -168,7 +161,7 @@ class ConfigurationScenario:
                                  / self.feature_file_path, index_label="INSTANCE_NAME")
 
     def _clean_up_scenario_dirs(self: ConfigurationScenario,
-                                configurator_path: Path) -> list[Path]:
+                                configurator_path: Path,) -> list[Path]:
         """Yield directories to clean up after configuration scenario is done.
 
         Returns:
@@ -179,6 +172,6 @@ class ConfigurationScenario:
             / f"{self.solver.name}_{self.instance_directory.name}"
 
         for index in range(self.number_of_runs):
-            dir = configurator_solver_path / str(index + 1)
+            dir = configurator_solver_path / str(index)
             result.append(dir)
         return result

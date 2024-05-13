@@ -12,10 +12,10 @@ from pathlib import Path
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 from sparkle.platform import settings_help
-import global_variables as sgh
+import global_variables as gv
 
 global settings
-sgh.settings = settings_help.Settings()
+gv.settings = settings_help.Settings()
 
 
 class TestConfigurationScenario(TestCase):
@@ -26,7 +26,6 @@ class TestConfigurationScenario(TestCase):
         self.solver = Solver(self.solver_path)
 
         self.instance_directory = Path("tests/test_files/Instances/Test-Instance-Set")
-
         self.run_number = 2
 
         self.parent_directory = Path("tests/test_files/test_configurator")
@@ -39,8 +38,8 @@ class TestConfigurationScenario(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective =\
-            sgh.settings.get_general_sparkle_objectives()[0]
-
+            gv.settings.get_general_sparkle_objectives()[0]
+        self.configurator = gv.settings.get_general_sparkle_configurator()
         self.scenario = ConfigurationScenario(
             solver=self.solver,
             instance_directory=self.instance_directory,
@@ -50,7 +49,7 @@ class TestConfigurationScenario(TestCase):
             cutoff_length=self.cutoff_length,
             sparkle_objective=self.sparkle_objective,
             use_features=False,
-            configurator_target=Path(sgh.smac_target_algorithm))
+            configurator_target=Path(self.configurator.target_algorithm))
 
     def tearDown(self: TestConfigurationScenario) -> None:
         """Cleanup executed after each test."""
@@ -80,9 +79,6 @@ class TestConfigurationScenario(TestCase):
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
 
-        self.assertTrue((self.scenario.directory
-                         / self.solver.get_pcs_file().name).is_file())
-
     @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_result_directory(
         self: TestConfigurationScenario,
@@ -107,27 +103,31 @@ class TestConfigurationScenario(TestCase):
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(
         self: TestConfigurationScenario,
-        mock_abs: Mock,
+        mock_abs_path: Mock,
         mock_deterministic: Mock
     ) -> None:
         """Test if create_scenario() correctly creates the scenario file."""
         inst_list_path = Path("tests/test_files/test_configurator/scenarios/instances/"
                               "Test-Instance-Set/Test-Instance-Set_train.txt")
-        mock_abs.side_effect = [Path("tests/test_files/test_configurator"),
-                                Path("/configurator_dir/target_algorithm.py"),
-                                self.solver_path,
-                                inst_list_path,
-                                inst_list_path]
+        mock_abs_path.side_effect = [Path("tests/test_files/test_configurator"),
+                                     Path("/configurator_dir/target_algorithm.py"),
+                                     self.solver_path,
+                                     inst_list_path,
+                                     inst_list_path,
+                                     Path(),
+                                     Path()]
         mock_deterministic.return_value = "0"
         self.scenario.create_scenario(self.parent_directory)
 
-        scenario_file_path = self.scenario.directory / self.scenario.scenario_file_name
         reference_scenario_file = Path("tests", "test_files", "reference_files",
                                        "scenario_file.txt")
 
         # Use to show full diff of file
         self.maxDiff = None
-
-        self.assertTrue(scenario_file_path.is_file())
-        self.assertEqual(scenario_file_path.open().read(),
+        self.assertTrue(self.scenario.scenario_file_path.is_file())
+        output = self.scenario.scenario_file_path.open().read()
+        # Strip the output of the homedirs (Due to absolute paths)
+        output = output.replace(str(Path.home()), "")
+        print(output)
+        self.assertEqual(output,
                          reference_scenario_file.open().read())

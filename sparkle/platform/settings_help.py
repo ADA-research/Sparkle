@@ -13,6 +13,7 @@ import sparkle_logging as slog
 import global_variables as sgh
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
+from sparkle.configurator import implementations as cim
 
 
 class SolutionVerifier(Enum):
@@ -69,7 +70,7 @@ class Settings:
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
-    DEFAULT_general_sparkle_configurator = Configurator.smac_v2
+    DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
@@ -148,7 +149,7 @@ class Settings:
             option_names = ("configurator",)
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = getattr(Configurator, file_settings.get(section, option))
+                    value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
@@ -363,7 +364,7 @@ class Settings:
 
     def set_general_sparkle_configurator(
             self: Settings,
-            value: Callable = DEFAULT_general_sparkle_configurator,
+            value: str = DEFAULT_general_sparkle_configurator,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the Sparkle configurator."""
         section = "general"
@@ -372,7 +373,7 @@ class Settings:
                 self.__general_sparkle_configurator_set, origin, name):
             self.__init_section(section)
             self.__general_sparkle_configurator_set = origin
-            self.__settings[section][name] = value.__name__
+            self.__settings[section][name] = value
 
         return
 
@@ -381,8 +382,14 @@ class Settings:
         if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
             self.set_general_sparkle_configurator()
         if self.__general_sparkle_configurator is None:
-            self.__general_sparkle_configurator =\
-                getattr(Configurator, self.__settings["general"]["configurator"])()
+            configurator_subclass =\
+                cim.resolve_configurator(self.__settings["general"]["configurator"])
+            if configurator_subclass is not None:
+                self.__general_sparkle_configurator = configurator_subclass()
+            else:
+                print("WARNING: Configurator class name not recognised:"
+                      f'{self.__settings["general"]["configurator"]}. '
+                      "Configurator not set.")
         return self.__general_sparkle_configurator
 
     def get_performance_metric_for_report(self: Settings) -> str:
