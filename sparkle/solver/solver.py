@@ -164,7 +164,7 @@ class Solver:
                                  cwd=self.raw_output_directory,
                                  capture_output=True)
         if process.returncode != 0:
-            print(f"WARNING: Solver {self.solver_name} execution seems to have failed!\n"
+            print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
                   f"The used command was: {solver_cmd}", flush=True)
             return {"status": "ERROR", }
         # Resolving solver output

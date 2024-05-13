@@ -166,8 +166,10 @@ if __name__ == "__main__":
             print("One pcs file detected, this is a configurable solver.")
             solver.read_pcs_file()
 
-
-
+        #Check if run results in crash
+        solver.run_solver(instance=".", configuration=dict())
+        # TODO results in error due missing seed, cutoff, runlength, specifics
+        # TODO when missing results are passed, wrapper evaluates to success, but should have crashed as it did not solve anything
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(sgh.sparkle_algorithm_selector_path)
