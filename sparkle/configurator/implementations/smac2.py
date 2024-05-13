@@ -33,13 +33,16 @@ class SMAC2(Configurator):
         """Returns the SMAC configurator, Java SMAC V2.10.03."""
         output_path = gv.configuration_output_raw / SMAC2.__name__
         validator = Validator(out_dir=output_path)
+        objectives = gv.settings.get_general_sparkle_objectives()
         return super().__init__(
             validator=validator,
             output_path=output_path,
             executable_path=SMAC2.configurator_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
             configurator_target=SMAC2.configurator_path / SMAC2.target_algorithm,
-            tmp_path=SMAC2.configurator_path / "tmp")
+            objectives=objectives,
+            tmp_path=SMAC2.configurator_path / "tmp",
+            multi_objective_support=False)
 
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,

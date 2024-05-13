@@ -10,10 +10,9 @@ import runrunner as rrr
 from runrunner import Runner
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-import global_variables as gv
 from sparkle.solver.solver import Solver
 from sparkle.solver.validator import Validator
-from sparkle.types.objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
 class Configurator:
@@ -22,7 +21,8 @@ class Configurator:
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
                  executable_path: Path, settings_path: Path, configurator_target: Path,
-                 tmp_path: Path = None, multi_objective_support: bool = False) -> None:
+                 objectives: list[SparkleObjective], tmp_path: Path = None,
+                 multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
         Args:
@@ -41,11 +41,10 @@ class Configurator:
         self.executable_path = executable_path
         self.settings_path = settings_path
         self.configurator_target = configurator_target
+        self.objectives = objectives
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
         self.scenario = None
-
-        self.objectives = gv.settings.get_general_sparkle_objectives()
         if len(self.objectives) > 1 and not self.multiobjective:
             print("Warning: Multiple objectives specified but current configurator "
                   f"{self.configurator_path.name} only supports single objective. "
