@@ -63,12 +63,18 @@ def parser_function() -> argparse.ArgumentParser:
         default=1,
         type=int,
         help=("Use this option to add multiple variations of the solver by using a "
-              "different random seed for each varation."))
+              "different random seed for each variation."))
     parser.add_argument(
         "solver_path",
         metavar="solver-path",
         type=str,
         help="path to the solver"
+    )
+    parser.add_argument(
+        "run_checks",
+        metavar="run-checks",
+        type=bool,
+        help="run checks on the solver by testing it on an instance and the pcs file, when applicable."
     )
     parser.add_argument(
         "--run-on",
@@ -119,7 +125,7 @@ if __name__ == "__main__":
     else:
         print(f"WARNING: Solver {solver_source.name} does not have a "
               f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper})."
-              "Therefore it cannot be automatically be configured.")
+              "Therefore it cannot be automatically configured.")
 
     # Start add solver
     solver_directory = sash.get_solver_directory(solver_source.name)
@@ -147,7 +153,7 @@ if __name__ == "__main__":
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)
 
-    if sash.check_adding_solver_contain_pcs_file(solver_directory):
+    if sash.check_adding_solver_contains_pcs_file(solver_directory):
         print("One pcs file detected, this is a configurable solver.")
 
     print(f"Adding solver {solver_source.name} done!")

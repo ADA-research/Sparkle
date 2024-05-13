@@ -18,7 +18,7 @@ def get_solver_directory(solver_name: str) -> str:
     return str(sgh.solver_dir / solver_name)
 
 
-def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
+def check_adding_solver_contains_pcs_file(solver_directory: str) -> bool:
     """Returns whether the directory of the solver being added contains a PCS file.
 
     Args:
