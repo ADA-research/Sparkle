@@ -32,6 +32,8 @@ class Configurator:
             settings_path: Path to the settings file for the configurator
             configurator_target: The wrapper algorithm to standardize configurator
                 input/output towards solver wrappers.
+            objectives: The list of Sparkle Objectives the configurator has to
+                optimize.
             tmp_path: Path for the temporary files of the configurator, optional
             multi_objective_support: Whether the configurator supports
                 multi objective optimization for solvers.
