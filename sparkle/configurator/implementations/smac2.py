@@ -24,22 +24,22 @@ from sparkle.solver.validator import Validator
 from sparkle.types.objective import PerformanceMeasure
 
 
-class SMACv2(Configurator):
-    """Abstact class to use different configurators like SMAC."""
+class SMAC2(Configurator):
+    """Class for SMAC2 (Java) configurator."""
     configurator_path = Path("Components/smac-v2.10.03-master-778/")
     target_algorithm = "smac_target_algorithm.py"
 
-    def __init__(self: SMACv2) -> None:
+    def __init__(self: SMAC2) -> None:
         """Returns the SMAC configurator, Java SMAC V2.10.03."""
-        output_path = gv.configuration_output_raw / SMACv2.__name__
+        output_path = gv.configuration_output_raw / SMAC2.__name__
         validator = Validator(out_dir=output_path)
         return super().__init__(
             validator=validator,
             output_path=output_path,
-            executable_path=SMACv2.configurator_path / "smac",
+            executable_path=SMAC2.configurator_path / "smac",
             settings_path=Path("Settings/sparkle_smac_settings.txt"),
-            configurator_target=SMACv2.configurator_path / SMACv2.target_algorithm,
-            tmp_path=SMACv2.configurator_path / "tmp")
+            configurator_target=SMAC2.configurator_path / SMAC2.target_algorithm,
+            tmp_path=SMAC2.configurator_path / "tmp")
 
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
@@ -67,7 +67,7 @@ class SMACv2(Configurator):
                   f"{self.scenario.name}_seed_{seed}_smac.txt"
                   for seed in range(self.scenario.number_of_runs)]
         cmds = [f"python3 {Configurator.configurator_cli_path.absolute()} "
-                f"{SMACv2.__name__} {output[seed]} {output_csv.absolute()} "
+                f"{SMAC2.__name__} {output[seed]} {output_csv.absolute()} "
                 f"{self.executable_path.absolute()} "
                 f"--scenario-file {(self.scenario.scenario_file_path).absolute()} "
                 f"--seed {seed} "
@@ -83,7 +83,7 @@ class SMACv2(Configurator):
             name=CommandName.CONFIGURE_SOLVER,
             base_dir=gv.sparkle_tmp_path,
             output_path=output,
-            path=SMACv2.configurator_path,
+            path=SMAC2.configurator_path,
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
@@ -161,7 +161,7 @@ class SMACv2(Configurator):
     @staticmethod
     def organise_output(output_source: Path, output_target: Path) -> None:
         """Cleans up irrelevant SMAC files and collects output."""
-        call_key = SMACv2.target_algorithm
+        call_key = SMAC2.target_algorithm
         # Last line describing a call is the best found configuration
         for line in reversed(output_source.open("r").readlines()):
             if call_key in line:

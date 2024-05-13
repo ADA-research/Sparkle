@@ -32,8 +32,8 @@ if __name__ == "__main__":
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-    runsolver_watch_data_path = Path(f"runsolver_{random.randint(0, 10000000000)}_{log_timestamp}.log")
-    runsolver_var_data_path = Path(f"runsolver_{random.randint(0, 10000000000)}_{log_timestamp}.var")
+    runsolver_watch_data_path = Path(f"runsolver_{int(random.getrandbits(32))}_{log_timestamp}.log")
+    runsolver_var_data_path = Path(f"runsolver_{int(random.getrandbits(32))}_{log_timestamp}.var")
 
     runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),

@@ -637,8 +637,8 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                  "report_for_configuration."
                                  "get_features_bool",
                                  return_value="featurestrue")
-    mocker.patch("sparkle.configurator.implementations.smac_v2."
-                 "SMACv2.get_optimal_configuration", return_value=(0, "123"))
+    mocker.patch("sparkle.configurator.implementations.smac2."
+                 "SMAC2.get_optimal_configuration", return_value=(0, "123"))
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
@@ -720,7 +720,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                  return_value=[])
-    mocker.patch("sparkle.configurator.implementations.SMACv2."
+    mocker.patch("sparkle.configurator.implementations.SMAC2."
                  "get_optimal_configuration", return_value=(0.0, "configurino"))
 
     test_dict = sgrch.get_dict_variable_to_value_test(gv.configuration_output_analysis,

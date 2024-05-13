@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Helper functions for SMACv2."""
+"""Helper functions for SMAC2."""
 import global_variables as gv
 from sparkle.types.objective import PerformanceMeasure
 

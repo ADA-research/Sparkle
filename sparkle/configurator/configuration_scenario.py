@@ -80,6 +80,7 @@ class ConfigurationScenario:
         self._create_scenario_file()
 
     def _set_paths(self: ConfigurationScenario, parent_directory: Path) -> None:
+        """Set the paths for the scenario based on the specified parent directory."""
         self.parent_directory = parent_directory
         self.directory = self.parent_directory / "scenarios" / self.name
         self.result_directory = self.directory / "results"

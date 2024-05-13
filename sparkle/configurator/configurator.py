@@ -3,6 +3,7 @@
 """Configurator class to use different configurators like SMAC."""
 
 from __future__ import annotations
+from abc import abstractmethod
 from pathlib import Path
 
 import runrunner as rrr
@@ -50,6 +51,7 @@ class Configurator:
                   f"{self.configurator_path.name} only supports single objective. "
                   f"Defaulted to first specified objective: {self.objectives[0].name}")
 
+    @abstractmethod
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
                   validator: Validator = None,
@@ -67,6 +69,7 @@ class Configurator:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def get_optimal_configuration(self: Configurator,
                                   solver: Solver,
                                   instance_set: str,
