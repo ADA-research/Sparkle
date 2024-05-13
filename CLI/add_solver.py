@@ -16,6 +16,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 from CLI.support import run_solvers_parallel_help as srsp
 from sparkle.solver import add as sash
+from sparkle.solver import Solver
 import sparkle_logging as sl
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
@@ -70,12 +71,14 @@ def parser_function() -> argparse.ArgumentParser:
         type=str,
         help="path to the solver"
     )
-    parser.add_argument(
-        "run_checks",
-        metavar="run-checks",
-        type=bool,
-        help="run checks on the solver by testing it on an instance and the pcs file, when applicable."
-    )
+    # parser.add_argument(
+    #     "--run_checks",
+    #     metavar="run-checks",
+    #     type=bool,
+    #     default=False,
+    #     action="store_true",
+    #     help="run checks on the solver by testing it on an instance and the pcs file, when applicable."
+    # )
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
@@ -153,10 +156,12 @@ if __name__ == "__main__":
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)
 
-    if sash.check_adding_solver_contains_pcs_file(solver_directory):
-        print("One pcs file detected, this is a configurable solver.")
+    solver = Solver(solver_source)
+    if solver.check_pcs_file():
+         print("One pcs file detected, this is a configurable solver.")
 
     print(f"Adding solver {solver_source.name} done!")
+
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(sgh.sparkle_algorithm_selector_path)

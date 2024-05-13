@@ -43,12 +43,12 @@ class Solver:
         # Can not extract from gv due to circular imports
         self.solver_wrapper = "sparkle_solver_wrapper.py"
 
-    def get_pcs_file(self: Solver) -> Path:
+    def _get_pcs_file(self: Solver) -> Path | bool:
         """Get path of the parameter file.
 
-        Returns:
-            Path to the parameter file.
-        """
+                Returns:
+                    Path to the parameter file.
+                """
         file_count = 0
         file_name = ""
         for file_path in self.directory.iterdir():
@@ -59,11 +59,27 @@ class Solver:
                 file_count += 1
 
         if file_count != 1:
+            return False
+
+        return self.directory / file_name
+
+    def check_pcs_file(self: Solver) -> bool:
+        return isinstance(self._get_pcs_file(), Path)
+
+    def get_pcs_file(self: Solver) -> Path:
+        """Get path of the parameter file.
+
+        Returns:
+            Path to the parameter file.
+        """
+        file_path = self._get_pcs_file()
+
+        if not file_path:
             print("None or multiple .pcs files found. Solver "
                   "is not valid for configuration.")
             sys.exit(-1)
 
-        return self.directory / file_name
+        return file_path
 
     # TODO: This information should be stored in the solver as an attribute too.
     # That will allow us to at least skip this method.
