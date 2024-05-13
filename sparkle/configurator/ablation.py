@@ -95,7 +95,10 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
     configurator = gv.settings.get_general_sparkle_configurator()
 
     with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
-        fout.write(f"algo = {configurator.configurator_target.absolute()}\n"
+        # We need to append the solver dir to the configurator call to avoid
+        # Issues with ablation's call to the wrapper
+        fout.write(f'algo = "{configurator.configurator_target.absolute()} '
+                   f'{Path(ablation_scenario_dir).absolute()}/solver"\n'
                    "execdir = ./solver/\n"
                    "experimentDir = ./\n")
         solver = Solver.get_solver_by_name(solver_name)

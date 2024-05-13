@@ -106,7 +106,7 @@ def call_configured_solver_sequential(instances_list: list[list[Path]],
             print(f"Execution on instance {Path(instance_path).name} completed with "
                   f"status {solver_output['status']}"
                   f" in {solver_output['runtime']} seconds.")
-            print("Raw output can be found at:"
+            print("Raw output can be found at: "
                   f"{solver.raw_output_directory / raw_result_path}.\n")
 
 
