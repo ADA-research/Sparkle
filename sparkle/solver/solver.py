@@ -11,6 +11,7 @@ import ast
 from pathlib import Path
 import subprocess
 from tools import runsolver_parsing
+import pcsparser
 
 
 class Solver:
@@ -47,7 +48,7 @@ class Solver:
         """Get path of the parameter file.
 
                 Returns:
-                    Path to the parameter file.
+                    Path to the parameter file and a False value if the parameter file does not exist.
                 """
         file_count = 0
         file_name = ""
@@ -63,7 +64,12 @@ class Solver:
 
         return self.directory / file_name
 
-    def check_pcs_file(self: Solver) -> bool:
+    def check_pcs_file_exists(self: Solver) -> bool:
+        """
+        Check if the parameter file exists.
+        Returns: Boolean if there is one pcs file in the solver directory.
+
+        """
         return isinstance(self._get_pcs_file(), Path)
 
     def get_pcs_file(self: Solver) -> Path:
@@ -72,14 +78,24 @@ class Solver:
         Returns:
             Path to the parameter file.
         """
-        file_path = self._get_pcs_file()
-
-        if not file_path:
+        if not (file_path := self._get_pcs_file()):
             print("None or multiple .pcs files found. Solver "
                   "is not valid for configuration.")
             sys.exit(-1)
 
         return file_path
+
+    def read_pcs_file(self) -> None:
+        """Read the pcs file """
+        pcs_file = self._get_pcs_file()
+        try:
+            parser = pcsparser.PCSParser()
+            # TODO add support for more pcs formats
+            parser.load(str(pcs_file), convention="smac")
+            print("Could read pcs file")
+        except SyntaxError:
+            print("Unable to read the pcs file.")
+
 
     # TODO: This information should be stored in the solver as an attribute too.
     # That will allow us to at least skip this method.
@@ -98,6 +114,16 @@ class Solver:
                 break
 
         return deterministic
+
+    # def check_solver(self: Solver, instance: str = None) -> bool:
+    #
+    #     # Get PCS file
+    #     pcs_file = self.get_pcs_file()
+    #     # Load PCS file
+    #
+    #     # Run on instance
+    #     if instance is not None:
+
 
     def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
                          runsolver_configuration: list[str] = None) -> list[str]:

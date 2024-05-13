@@ -64,21 +64,21 @@ def parser_function() -> argparse.ArgumentParser:
         default=1,
         type=int,
         help=("Use this option to add multiple variations of the solver by using a "
-              "different random seed for each variation."))
+              "different random seed for each variation.")
+    )
+    parser.add_argument(
+        "--skip-checks",
+        dest="run_checks",
+        default=True,
+        action="store_false",
+        help="Checks the solver's functionality by testing it on an instance and the pcs file, when applicable."
+    )
     parser.add_argument(
         "solver_path",
         metavar="solver-path",
         type=str,
         help="path to the solver"
     )
-    # parser.add_argument(
-    #     "--run_checks",
-    #     metavar="run-checks",
-    #     type=bool,
-    #     default=False,
-    #     action="store_true",
-    #     help="run checks on the solver by testing it on an instance and the pcs file, when applicable."
-    # )
     parser.add_argument(
         "--run-on",
         default=Runner.SLURM,
@@ -156,11 +156,17 @@ if __name__ == "__main__":
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)
 
-    solver = Solver(solver_source)
-    if solver.check_pcs_file():
-         print("One pcs file detected, this is a configurable solver.")
 
     print(f"Adding solver {solver_source.name} done!")
+
+    if args.run_checks:
+        print("Running checks...")
+        solver = Solver(Path(solver_directory))
+        if solver.check_pcs_file_exists():
+            print("One pcs file detected, this is a configurable solver.")
+            solver.read_pcs_file()
+
+
 
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
