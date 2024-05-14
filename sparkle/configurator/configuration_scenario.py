@@ -119,7 +119,7 @@ class ConfigurationScenario:
                        f"{self.solver.directory.absolute()}\n"
                        f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
-                       f"run_obj = {performance_measure}\n"
+                       f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
                        f"paramfile = {self.solver.get_pcs_file()}\n"
