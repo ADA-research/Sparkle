@@ -202,7 +202,7 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("cpu_time", "to_be_removed")
+            option_names = ("cpu_time", "smac_cpu_time_budget")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
@@ -210,7 +210,7 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("solver_calls", "to_be_removed")
+            option_names = ("solver_calls", "smac_solver_calls_budget")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)

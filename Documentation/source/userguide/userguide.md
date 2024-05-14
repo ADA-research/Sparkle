@@ -582,14 +582,14 @@ number_of_runs_in_parallel = 25
 > description: The wallclock time one configuration run is allowed to use for finding configurations.
 
 `cpu_time`
-> aliases: `TODO`
+> aliases: `smac_cpu_time_budget`
 >
 > values: integer
 >
 > description: The cpu time one configuration run is allowed to use for finding configurations.
 
 `solver_calls`
-> aliases: `TODO`
+> aliases: `smac_solver_calls_budget`
 >
 > values: integer
 >
