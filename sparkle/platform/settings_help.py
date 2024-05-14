@@ -618,7 +618,7 @@ class Settings:
         if self.__config_cpu_time_set == SettingState.NOT_SET:
             self.set_config_cpu_time()
             return None
-    
+
         return int(self.__settings["configuration"]["cpu_time"])
 
     def set_config_solver_calls(
