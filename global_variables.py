@@ -117,13 +117,13 @@ parallel_portfolio_output_analysis =\
     parallel_portfolio_output_general / analysis_dir_name
 selection_output_analysis = selection_output_general / analysis_dir_name
 
-runsolver_path = "Components/runsolver/src/runsolver"
+runsolver_dir = "Components/runsolver/src/"
+runsolver_path = runsolver_dir + "runsolver"
 sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
 autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 
-smac_target_algorithm = "smac_target_algorithm.py"
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 
 ablation_dir = "Components/ablationAnalysis-0.9.4/"

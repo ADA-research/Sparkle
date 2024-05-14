@@ -14,8 +14,6 @@ from pathlib import Path
 
 import sparkle_logging as sl
 import global_variables as sgh
-from sparkle.platform import snapshot_help as snh
-from sparkle.structures import csv_help as scsv
 
 
 def create_new_empty_file(filepath: str) -> None:
@@ -211,13 +209,10 @@ def create_temporary_directories() -> None:
     if not tmp_path.exists():
         tmp_path.mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
-
-    Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
     Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
-    return
 
 
 def remove_temporary_files() -> None:
@@ -233,39 +228,3 @@ def remove_temporary_files() -> None:
 
     for filename in Path("../../CLI/sparkle_help").glob("slurm-*"):
         shutil.rmtree(filename)
-
-    shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
-                  ignore_errors=True)
-    return
-
-
-def initialise_sparkle(argv: list[str]) -> None:
-    """Initialize a new Sparkle platform.
-
-    Args:
-        argv: The argument list for the log_command
-    """
-    print("Start initialising Sparkle platform ...")
-
-    sgh.snapshot_dir.mkdir(exist_ok=True)
-
-    if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
-        snh.save_current_sparkle_platform()
-        snh.remove_current_sparkle_platform()
-
-        print("Current Sparkle platform found!")
-        print("Current Sparkle platform recorded!")
-
-    # Log command call
-    sl.log_command(argv)
-
-    create_temporary_directories()
-    for working_dir in sgh.working_dirs:
-        working_dir.mkdir(exist_ok=True)
-
-    Path(f"{sgh.ablation_dir}scenarios/").mkdir(exist_ok=True)
-    scsv.SparkleCSV.create_empty_csv(sgh.feature_data_csv_path)
-    scsv.SparkleCSV.create_empty_csv(sgh.performance_data_csv_path)
-    sgh.pap_performance_data_tmp_path.mkdir(exist_ok=True)
-
-    print("New Sparkle platform initialised!")

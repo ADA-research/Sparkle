@@ -40,6 +40,7 @@ class CommandName(str, Enum):
     CONSTRUCT_SPARKLE_PARALLEL_PORTFOLIO = "construct_sparkle_parallel_portfolio"
     RUN_SPARKLE_PARALLEL_PORTFOLIO = "run_sparkle_parallel_portfolio"
     CSV_MERGE = "csv_merge"
+    VALIDATION = "validation"
 
     @staticmethod
     def from_str(command_name: str) -> CommandName:

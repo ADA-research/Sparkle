@@ -69,9 +69,19 @@ def parser_function() -> argparse.ArgumentParser:
         help="cutoff time per target algorithm run in seconds",
     )
     parser.add_argument(
-        "--budget-per-run",
+        "--wallclock-time",
         type=int,
-        help="configuration budget per configurator run in seconds",
+        help="configuration budget per configurator run in seconds (wallclock)",
+    )
+    parser.add_argument(
+        "--cpu-time",
+        type=int,
+        help="configuration budget per configurator run in seconds (cpu)",
+    )
+    parser.add_argument(
+        "--solver-calls",
+        type=int,
+        help="number of solver calls to execute",
     )
     parser.add_argument(
         "--number-of-runs",
@@ -124,9 +134,15 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.target_cutoff_time is not None:
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
-    if args.budget_per_run is not None:
-        sgh.settings.set_config_budget_per_run(
-            args.budget_per_run, SettingState.CMD_LINE)
+    if args.wallclock_time is not None:
+        sgh.settings.set_config_wallclock_time(
+            args.wallclock_time, SettingState.CMD_LINE)
+    if args.cpu_time is not None:
+        sgh.settings.set_config_cpu_time(
+            args.cpu_time, SettingState.CMD_LINE)
+    if args.solver_calls is not None:
+        sgh.settings.set_config_solver_calls(
+            args.solver_calls, SettingState.CMD_LINE)
     if args.number_of_runs is not None:
         sgh.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
@@ -135,7 +151,7 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
 def run_after(solver: Path,
               instance_set_train: Path,
               instance_set_test: Path,
-              dependency: rrr.SlurmRun | rrr.LocalRun,
+              dependency: list[rrr.SlurmRun | rrr.LocalRun],
               command: CommandName,
               run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Add a command to run after configuration to RunRunner queue.
@@ -250,18 +266,20 @@ if __name__ == "__main__":
     status_info.save()
 
     number_of_runs = sgh.settings.get_config_number_of_runs()
-    time_budget = sgh.settings.get_config_budget_per_run()
+    solver_calls = sgh.settings.get_config_solver_calls()
+    cpu_time = sgh.settings.get_config_cpu_time()
+    wallclock_time = sgh.settings.get_config_wallclock_time()
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
         sgh.settings.get_general_sparkle_objectives()[0]
     configurator = sgh.settings.get_general_sparkle_configurator()
     config_scenario = ConfigurationScenario(
-        solver, instance_set_train, number_of_runs, time_budget, cutoff_time,
-        cutoff_length, sparkle_objective, use_features,
+        solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
+        wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
+    dependency_job_list = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
     sgh.latest_scenario().set_config_solver(solver.directory)
@@ -274,20 +292,17 @@ if __name__ == "__main__":
         # Set to default to overwrite possible old path
         sgh.latest_scenario().set_config_instance_set_test()
 
-    dependency_job_list = [configure_job]
-    callback_job = configurator.configuration_callback(configure_job, run_on=run_on)
-
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = run_after(
-            solver, instance_set_train, instance_set_test, configure_job,
+            solver, instance_set_train, instance_set_test, dependency_job_list,
             command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
         dependency_job_list.append(validate_jobid)
 
     if ablation:
         ablation_jobid = run_after(
-            solver, instance_set_train, instance_set_test, configure_job,
+            solver, instance_set_train, instance_set_test, dependency_job_list,
             command=CommandName.RUN_ABLATION, run_on=run_on
         )
         dependency_job_list.append(ablation_jobid)

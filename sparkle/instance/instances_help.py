@@ -26,10 +26,7 @@ def _check_existence_of_instance_list_file(instances_source: str) -> bool:
 
     instance_list_file_path = Path(instances_source) / __sparkle_instance_list_file
 
-    if Path(instance_list_file_path).is_file():
-        return True
-    else:
-        return False
+    return Path(instance_list_file_path).is_file()
 
 
 def _get_list_instance(instances_source: str) -> list[str]:

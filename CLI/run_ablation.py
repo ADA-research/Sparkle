@@ -62,9 +62,9 @@ def parser_function() -> argparse.ArgumentParser:
         help="Cutoff time per target algorithm run in seconds",
     )
     parser.add_argument(
-        "--budget-per-run",
+        "--wallclock_time",
         type=int,
-        default=sgh.settings.DEFAULT_config_budget_per_run,
+        default=sgh.settings.DEFAULT_config_wallclock_time,
         action=ac.SetByUser,
         help="Configuration budget per configurator run in seconds",
     )
@@ -138,9 +138,9 @@ if __name__ == "__main__":
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "budget_per_run"):
-        sgh.settings.set_config_budget_per_run(
-            args.budget_per_run, SettingState.CMD_LINE
+    if ac.set_by_user(args, "wallclock_time"):
+        sgh.settings.set_config_wallclock_time(
+            args.wallclock_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "number_of_runs"):
         sgh.settings.set_config_number_of_runs(
