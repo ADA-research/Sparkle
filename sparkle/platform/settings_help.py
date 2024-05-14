@@ -77,8 +77,8 @@ class Settings:
     DEFAULT_general_extractor_cutoff_time = 60
 
     DEFAULT_config_wallclock_time = 600
-    DEFAULT_config_cpu_time = 660
-    DEFAULT_config_solver_calls = 9223372036854775807
+    DEFAULT_config_cpu_time = None
+    DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
 
     DEFAULT_slurm_number_of_runs_in_parallel = 25
@@ -613,11 +613,12 @@ class Settings:
 
         return
 
-    def get_config_cpu_time(self: Settings) -> int:
+    def get_config_cpu_time(self: Settings) -> int | None:
         """Return the budget per configuration run in seconds (cpu)."""
         if self.__config_cpu_time_set == SettingState.NOT_SET:
             self.set_config_cpu_time()
-
+            return None
+    
         return int(self.__settings["configuration"]["cpu_time"])
 
     def set_config_solver_calls(
@@ -635,10 +636,11 @@ class Settings:
 
         return
 
-    def get_config_solver_calls(self: Settings) -> int:
+    def get_config_solver_calls(self: Settings) -> int | None:
         """Return the number of solver calls."""
         if self.__config_solver_calls_set == SettingState.NOT_SET:
             self.set_config_solver_calls()
+            return None
 
         return int(self.__settings["configuration"]["solver_calls"])
 
