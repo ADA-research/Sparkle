@@ -12,5 +12,4 @@ setup(name="SparkleAI",
       long_description=open("README.MD", "r").read() if os.path.exists("README.MD") else "",
       long_description_content_type="text/markdown",
       packages=find_packages(),
-      entry_points={"console_scripts": ["sparkle=sparkle.cli:main"], },
-      )
+      entry_points={"console_scripts": ["sparkle=sparkle.cli:main"], },)

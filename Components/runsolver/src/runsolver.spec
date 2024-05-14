@@ -1,11 +1,12 @@
 Name:		runsolver
 Summary:	run a solver and tightly control the ressources it uses
-Version:	3.4.0
+Version:	3.4.1
 Release:	1
 License:	GPLv3
 Group: 		Applications/System
 Source0: 	%{name}-%{version}.tar.bz2
 BuildRoot:	%{_tmppath}/%{name}-root
+BuildRequires:  numactl-devel
 URL: 		http://www.cril.univ-artois.fr/~roussel/runsolver
 
 %description
@@ -49,5 +50,5 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/runsolver
 
 %changelog
-* Fri Nov 8 2009 roussel <roussel@cril.univ-artois.fr>
+* Sun Nov 08 2009 roussel <roussel@cril.univ-artois.fr>
 - Initial build.
