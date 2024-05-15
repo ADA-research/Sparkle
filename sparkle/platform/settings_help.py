@@ -76,7 +76,9 @@ class Settings:
     DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
 
-    DEFAULT_config_budget_per_run = 600
+    DEFAULT_config_wallclock_time = 600
+    DEFAULT_config_cpu_time = None
+    DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
 
     DEFAULT_slurm_number_of_runs_in_parallel = 25
@@ -104,7 +106,9 @@ class Settings:
         self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
 
-        self.__config_budget_per_run_set = SettingState.NOT_SET
+        self.__config_wallclock_time_set = SettingState.NOT_SET
+        self.__config_cpu_time_set = SettingState.NOT_SET
+        self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
 
         self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
@@ -191,11 +195,27 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("budget_per_run", "smac_whole_time_budget")
+            option_names = ("wallclock_time", "smac_whole_time_budget")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_budget_per_run(value, state)
+                    self.set_config_wallclock_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "configuration"
+            option_names = ("cpu_time", "smac_cpu_time_budget")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_config_cpu_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "configuration"
+            option_names = ("solver_calls", "smac_solver_calls_budget")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_config_solver_calls(value, state)
                     file_settings.remove_option(section, option)
 
             section = "configuration"
@@ -556,27 +576,73 @@ class Settings:
 
     # Configuration settings ###
 
-    def set_config_budget_per_run(
-            self: Settings, value: int = DEFAULT_config_budget_per_run,
+    def set_config_wallclock_time(
+            self: Settings, value: int = DEFAULT_config_wallclock_time,
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the budget per configuration run in seconds."""
+        """Set the budget per configuration run in seconds (wallclock)."""
         section = "configuration"
-        name = "budget_per_run"
+        name = "wallclock_time"
 
         if value is not None and self.__check_setting_state(
-                self.__config_budget_per_run_set, origin, name):
+                self.__config_wallclock_time_set, origin, name):
             self.__init_section(section)
-            self.__config_budget_per_run_set = origin
+            self.__config_wallclock_time_set = origin
             self.__settings[section][name] = str(value)
 
         return
 
-    def get_config_budget_per_run(self: Settings) -> int:
-        """Return the budget per configuration run in seconds."""
-        if self.__config_budget_per_run_set == SettingState.NOT_SET:
-            self.set_config_budget_per_run()
+    def get_config_wallclock_time(self: Settings) -> int:
+        """Return the budget per configuration run in seconds (wallclock)."""
+        if self.__config_wallclock_time_set == SettingState.NOT_SET:
+            self.set_config_wallclock_time()
 
-        return int(self.__settings["configuration"]["budget_per_run"])
+        return int(self.__settings["configuration"]["wallclock_time"])
+
+    def set_config_cpu_time(
+            self: Settings, value: int = DEFAULT_config_cpu_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the budget per configuration run in seconds (cpu)."""
+        section = "configuration"
+        name = "cpu_time"
+
+        if value is not None and self.__check_setting_state(
+                self.__config_cpu_time_set, origin, name):
+            self.__init_section(section)
+            self.__config_cpu_time_set = origin
+            self.__settings[section][name] = str(value)
+
+        return
+
+    def get_config_cpu_time(self: Settings) -> int | None:
+        """Return the budget per configuration run in seconds (cpu)."""
+        if self.__config_cpu_time_set == SettingState.NOT_SET:
+            self.set_config_cpu_time()
+            return None
+
+        return int(self.__settings["configuration"]["cpu_time"])
+
+    def set_config_solver_calls(
+            self: Settings, value: int = DEFAULT_config_solver_calls,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of solver calls."""
+        section = "configuration"
+        name = "solver_calls"
+
+        if value is not None and self.__check_setting_state(
+                self.__config_solver_calls_set, origin, name):
+            self.__init_section(section)
+            self.__config_solver_calls_set = origin
+            self.__settings[section][name] = str(value)
+
+        return
+
+    def get_config_solver_calls(self: Settings) -> int | None:
+        """Return the number of solver calls."""
+        if self.__config_solver_calls_set == SettingState.NOT_SET:
+            self.set_config_solver_calls()
+            return None
+
+        return int(self.__settings["configuration"]["solver_calls"])
 
     def set_config_number_of_runs(
             self: Settings, value: int = DEFAULT_config_number_of_runs,

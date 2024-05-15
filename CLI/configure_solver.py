@@ -62,6 +62,88 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.AblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
+    parser.add_argument(
+        "--configurator",
+        type=Path,
+        help="path to configurator"
+    )
+    parser.add_argument(
+        "--solver",
+        type=Path,
+        required=True,
+        help="path to solver"
+    )
+    parser.add_argument(
+        "--instance-set-train",
+        type=Path,
+        required=True,
+        help="path to training instance set",
+    )
+    parser.add_argument(
+        "--instance-set-test",
+        type=Path,
+        required=False,
+        help="path to testing instance set (only for validating)",
+    )
+    parser.add_argument(
+        "--performance-measure",
+        choices=PerformanceMeasure.__members__,
+        help="the performance measure, e.g. runtime",
+    )
+    parser.add_argument(
+        "--target-cutoff-time",
+        type=int,
+        help="cutoff time per target algorithm run in seconds",
+    )
+    parser.add_argument(
+        "--wallclock-time",
+        type=int,
+        help="configuration budget per configurator run in seconds (wallclock)",
+    )
+    parser.add_argument(
+        "--cpu-time",
+        type=int,
+        help="configuration budget per configurator run in seconds (cpu)",
+    )
+    parser.add_argument(
+        "--solver-calls",
+        type=int,
+        help="number of solver calls to execute",
+    )
+    parser.add_argument(
+        "--number-of-runs",
+        type=int,
+        help="number of configuration runs to execute",
+    )
+    parser.add_argument(
+        "--settings-file",
+        type=Path,
+        help="specify the settings file to use instead of the default",
+    )
+    parser.add_argument(
+        "--use-features",
+        required=False,
+        action="store_true",
+        help="use the training set's features for configuration",
+    )
+    parser.add_argument(
+        "--validate",
+        required=False,
+        action="store_true",
+        help="validate after configuration",
+    )
+    parser.add_argument(
+        "--ablation",
+        required=False,
+        action="store_true",
+        help="run ablation after configuration",
+    )
+    parser.add_argument(
+        "--run-on",
+        default=Runner.SLURM,
+        choices=[Runner.LOCAL, Runner.SLURM],
+        help=("On which computer or cluster environment to execute the calculation.")
+    )
     return parser
 
 
@@ -80,9 +162,15 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.target_cutoff_time is not None:
         sgh.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
-    if args.budget_per_run is not None:
-        sgh.settings.set_config_budget_per_run(
-            args.budget_per_run, SettingState.CMD_LINE)
+    if args.wallclock_time is not None:
+        sgh.settings.set_config_wallclock_time(
+            args.wallclock_time, SettingState.CMD_LINE)
+    if args.cpu_time is not None:
+        sgh.settings.set_config_cpu_time(
+            args.cpu_time, SettingState.CMD_LINE)
+    if args.solver_calls is not None:
+        sgh.settings.set_config_solver_calls(
+            args.solver_calls, SettingState.CMD_LINE)
     if args.number_of_runs is not None:
         sgh.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
@@ -206,15 +294,17 @@ if __name__ == "__main__":
     status_info.save()
 
     number_of_runs = sgh.settings.get_config_number_of_runs()
-    time_budget = sgh.settings.get_config_budget_per_run()
+    solver_calls = sgh.settings.get_config_solver_calls()
+    cpu_time = sgh.settings.get_config_cpu_time()
+    wallclock_time = sgh.settings.get_config_wallclock_time()
     cutoff_time = sgh.settings.get_general_target_cutoff_time()
     cutoff_length = sgh.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
         sgh.settings.get_general_sparkle_objectives()[0]
     configurator = sgh.settings.get_general_sparkle_configurator()
     config_scenario = ConfigurationScenario(
-        solver, instance_set_train, number_of_runs, time_budget, cutoff_time,
-        cutoff_length, sparkle_objective, use_features,
+        solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
+        wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
     dependency_job_list = configurator.configure(scenario=config_scenario, run_on=run_on)
