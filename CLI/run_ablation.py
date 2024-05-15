@@ -37,8 +37,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeAblationArgument.names,
                         **ac.TargetCutOffTimeAblationArgument.kwargs)
-    parser.add_argument(*ac.BudgetPerRunAblationArgument.names,
-                        **ac.BudgetPerRunAblationArgument.kwargs)
+    parser.add_argument(*ac.WallClockTimeArgument.names,
+                        **ac.WallClockTimeArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsAblationArgument.names,
                         **ac.NumberOfRunsAblationArgument.kwargs)
     parser.add_argument(*ac.RacingArgument.names,

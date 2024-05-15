@@ -82,20 +82,6 @@ AlsoConstructSelectorAndReportArgument = \
                               "help": "after running the solvers also construct the "
                               + "selector and generate the report"})
 
-BudgetPerRunConfigurationArgument = \
-    ArgumentContainer(names=["--budget-per-run"],
-                      kwargs={"type": int,
-                              "help": "configuration budget per configurator run in "
-                              + "seconds"})
-
-BudgetPerRunAblationArgument = \
-    ArgumentContainer(names=["--budget-per-run"],
-                      kwargs={"type": int,
-                              "default": Settings.DEFAULT_config_budget_per_run,
-                              "action": SetByUser,
-                              "help": "Configuration budget per configurator run in "
-                              + "seconds"})
-
 CommandArgument = \
     ArgumentContainer(names=["--command"],
                       kwargs={"required": False,
@@ -107,6 +93,12 @@ CommandArgument = \
 ConfiguratorArgument = ArgumentContainer(names=["--configurator"],
                                          kwargs={"type": Path,
                                                  "help": "path to configurator"})
+
+CPUTimeArgument = \
+    ArgumentContainer(names=["--cpu-time"],
+                      kwargs={"type": int,
+                              "help": "configuration budget per configurator run in "
+                              + "seconds (cpu)"})
 
 CutOffTimeArgument = \
     ArgumentContainer(names=["--cutoff-time"],
@@ -294,12 +286,12 @@ PerfectArgument = ArgumentContainer(names=["--perfect"],
                                             + "for the perfect selector"})
 
 PerformanceMeasureArgument = \
-        ArgumentContainer(names=["--performance-measure"],
-                          kwargs={"choices": PerformanceMeasure.__members__,
-                                  "default": Settings.
-                                  DEFAULT_general_sparkle_objective.PerformanceMeasure,
-                                  "action": SetByUser,
-                                  "help": "the performance measure, e.g. runtime",})
+    ArgumentContainer(names=["--performance-measure"],
+                      kwargs={"choices": PerformanceMeasure.__members__,
+                              "default": Settings.
+                              DEFAULT_general_sparkle_objective.PerformanceMeasure,
+                              "action": SetByUser,
+                              "help": "the performance measure, e.g. runtime"})
 
 PerformanceMeasureSimpleArgument = \
     ArgumentContainer(names=["--performance-measure"],
@@ -418,6 +410,11 @@ SolverArgument = ArgumentContainer(names=["--solver"],
                                            "type": Path,
                                            "help": "path to solver"})
 
+SolverCallsArgument = \
+    ArgumentContainer(names=["--solver-calls"],
+                      kwargs={"type": int,
+                              "help": "number of solver calls to execute"})
+
 SolverRemoveArgument = \
     ArgumentContainer(names=["solver"],
                       kwargs={"metavar": "solver",
@@ -509,3 +506,9 @@ VerifierArgument = \
                       kwargs={"choices": SolutionVerifier.__members__,
                               "help": "problem specific verifier that should be used to "
                               + "verify solutions found by a target algorithm"})
+
+WallClockTimeArgument = \
+    ArgumentContainer(names=["--wallclock-time"],
+                      kwargs={"type": int,
+                              "help": "configuration budget per configurator run in "
+                              + "seconds (wallclock)"})

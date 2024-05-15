@@ -5,12 +5,9 @@ import sys
 import argparse
 from pathlib import Path
 
-from runrunner.base import Runner
-
 import global_variables as gv
 from sparkle.solver import pcs
 import sparkle_logging as sl
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario

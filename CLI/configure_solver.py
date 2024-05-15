@@ -26,12 +26,11 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
-#from CLI.help import argparse_custom as apc
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    from CLI.help import argparse_custom as ac
     parser = argparse.ArgumentParser(
         description="Configure a solver in the Sparkle platform.",
         epilog=("Note that the test instance set is only used if the ``--ablation``"
@@ -48,8 +47,12 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
                         **ac.TargetCutOffTimeConfigurationArgument.kwargs)
-    parser.add_argument(*ac.BudgetPerRunConfigurationArgument.names,
-                        **ac.BudgetPerRunConfigurationArgument.kwargs)
+    parser.add_argument(*ac.WallClockTimeArgument.names,
+                        **ac.WallClockTimeArgument.kwargs)
+    parser.add_argument(*ac.CPUTimeArgument.names,
+                        **ac.CPUTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverCallsArgument.names,
+                        **ac.SolverCallsArgument.kwargs)
     parser.add_argument(*ac.NumberOfRunsConfigurationArgument.names,
                         **ac.NumberOfRunsConfigurationArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -62,88 +65,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.AblationArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
-    parser.add_argument(
-        "--configurator",
-        type=Path,
-        help="path to configurator"
-    )
-    parser.add_argument(
-        "--solver",
-        type=Path,
-        required=True,
-        help="path to solver"
-    )
-    parser.add_argument(
-        "--instance-set-train",
-        type=Path,
-        required=True,
-        help="path to training instance set",
-    )
-    parser.add_argument(
-        "--instance-set-test",
-        type=Path,
-        required=False,
-        help="path to testing instance set (only for validating)",
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--target-cutoff-time",
-        type=int,
-        help="cutoff time per target algorithm run in seconds",
-    )
-    parser.add_argument(
-        "--wallclock-time",
-        type=int,
-        help="configuration budget per configurator run in seconds (wallclock)",
-    )
-    parser.add_argument(
-        "--cpu-time",
-        type=int,
-        help="configuration budget per configurator run in seconds (cpu)",
-    )
-    parser.add_argument(
-        "--solver-calls",
-        type=int,
-        help="number of solver calls to execute",
-    )
-    parser.add_argument(
-        "--number-of-runs",
-        type=int,
-        help="number of configuration runs to execute",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        help="specify the settings file to use instead of the default",
-    )
-    parser.add_argument(
-        "--use-features",
-        required=False,
-        action="store_true",
-        help="use the training set's features for configuration",
-    )
-    parser.add_argument(
-        "--validate",
-        required=False,
-        action="store_true",
-        help="validate after configuration",
-    )
-    parser.add_argument(
-        "--ablation",
-        required=False,
-        action="store_true",
-        help="run ablation after configuration",
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
     return parser
 
 
