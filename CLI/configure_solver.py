@@ -26,41 +26,42 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
-from CLI.help import argparse_custom as apc
+#from CLI.help import argparse_custom as apc
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
+    from CLI.help import argparse_custom as ac
     parser = argparse.ArgumentParser(
         description="Configure a solver in the Sparkle platform.",
         epilog=("Note that the test instance set is only used if the ``--ablation``"
                 " or ``--validation`` flags are given"))
-    parser.add_argument(*apc.ConfiguratorArgument.names,
-                        **apc.ConfiguratorArgument.kwargs)
-    parser.add_argument(*apc.SolverArgument.names,
-                        **apc.SolverArgument.kwargs)
-    parser.add_argument(*apc.InstanceSetTrainArgument.names,
-                        **apc.InstanceSetTrainArgument.kwargs)
-    parser.add_argument(*apc.InstanceSetTestArgument.names,
-                        **apc.InstanceSetTestArgument.kwargs)
-    parser.add_argument(*apc.PerformanceMeasureArgument.names,
-                        **apc.PerformanceMeasureArgument.kwargs)
-    parser.add_argument(*apc.TargetCutOffTimeConfigurationArgument.names,
-                        **apc.TargetCutOffTimeConfigurationArgument.kwargs)
-    parser.add_argument(*apc.BudgetPerRunConfigurationArgument.names,
-                        **apc.BudgetPerRunConfigurationArgument.kwargs)
-    parser.add_argument(*apc.NumberOfRunsConfigurationArgument.names,
-                        **apc.NumberOfRunsConfigurationArgument.kwargs)
-    parser.add_argument(*apc.SettingsFileArgument.names,
-                        **apc.SettingsFileArgument.kwargs)
-    parser.add_argument(*apc.UseFeaturesArgument.names,
-                        **apc.UseFeaturesArgument.kwargs)
-    parser.add_argument(*apc.ValidateArgument.names,
-                        **apc.ValidateArgument.kwargs)
-    parser.add_argument(*apc.AblationArgument.names,
-                        **apc.AblationArgument.kwargs)
-    parser.add_argument(*apc.RunOnArgument.names,
-                        **apc.RunOnArgument.kwargs)
+    parser.add_argument(*ac.ConfiguratorArgument.names,
+                        **ac.ConfiguratorArgument.kwargs)
+    parser.add_argument(*ac.SolverArgument.names,
+                        **ac.SolverArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainArgument.names,
+                        **ac.InstanceSetTrainArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTestArgument.names,
+                        **ac.InstanceSetTestArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
+                        **ac.TargetCutOffTimeConfigurationArgument.kwargs)
+    parser.add_argument(*ac.BudgetPerRunConfigurationArgument.names,
+                        **ac.BudgetPerRunConfigurationArgument.kwargs)
+    parser.add_argument(*ac.NumberOfRunsConfigurationArgument.names,
+                        **ac.NumberOfRunsConfigurationArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.UseFeaturesArgument.names,
+                        **ac.UseFeaturesArgument.kwargs)
+    parser.add_argument(*ac.ValidateArgument.names,
+                        **ac.ValidateArgument.kwargs)
+    parser.add_argument(*ac.AblationArgument.names,
+                        **ac.AblationArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 
@@ -73,6 +74,7 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.settings_file is not None:
         sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
+        print(args.performance_measure)
         sgh.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:

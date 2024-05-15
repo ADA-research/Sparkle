@@ -32,8 +32,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RecomputeRunSolversArgument.kwargs)
     parser.add_argument(*ac.ParallelArgument.names,
                         **ac.ParallelArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
                         **ac.TargetCutOffTimeRunSolversArgument.kwargs)
     parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,

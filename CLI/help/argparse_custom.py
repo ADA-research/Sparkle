@@ -13,6 +13,7 @@ from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
 from sparkle.platform.settings_help import ProcessMonitoring
 from CLI.help.command_help import CommandName
+from sparkle.platform.settings_help import Settings
 
 
 class SetByUser(argparse.Action):
@@ -90,7 +91,7 @@ BudgetPerRunConfigurationArgument = \
 BudgetPerRunAblationArgument = \
     ArgumentContainer(names=["--budget-per-run"],
                       kwargs={"type": int,
-                              "default": gv.settings.DEFAULT_config_budget_per_run,
+                              "default": Settings.DEFAULT_config_budget_per_run,
                               "action": SetByUser,
                               "help": "Configuration budget per configurator run in "
                               + "seconds"})
@@ -112,9 +113,7 @@ CutOffTimeArgument = \
                       kwargs={"type": int,
                               "help": "The duration the portfolio will run before the "
                               + "solvers within the portfolio will be stopped (default: "
-                              + f"{gv.settings.DEFAULT_general_target_cutoff_time})"
-                              + " (current value: "
-                              + f"{gv.settings.get_general_target_cutoff_time()})"})
+                              + f"{Settings.DEFAULT_general_target_cutoff_time})"})
 
 DeterministicArgument = ArgumentContainer(names=["--deterministic"],
                                           kwargs={"required": True,
@@ -273,7 +272,7 @@ NumberOfRunsConfigurationArgument = \
 NumberOfRunsAblationArgument = \
     ArgumentContainer(names=["--number-of-runs"],
                       kwargs={"type": int,
-                              "default": gv.settings.DEFAULT_config_number_of_runs,
+                              "default": Settings.DEFAULT_config_number_of_runs,
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
@@ -283,7 +282,7 @@ OverwriteArgument = \
                               "help": "When set to True an existing parallel portfolio "
                               "with the same name will be overwritten, when False an "
                               "error will be thrown instead.  (default: "
-                              f"{gv.settings.DEFAULT_paraport_overwriting})"})
+                              f"{Settings.DEFAULT_paraport_overwriting})"})
 
 ParallelArgument = ArgumentContainer(names=["--parallel"],
                                      kwargs={"action": "store_true",
@@ -295,11 +294,16 @@ PerfectArgument = ArgumentContainer(names=["--perfect"],
                                             + "for the perfect selector"})
 
 PerformanceMeasureArgument = \
+        ArgumentContainer(names=["--performance-measure"],
+                          kwargs={"choices": PerformanceMeasure.__members__,
+                                  "default": Settings.
+                                  DEFAULT_general_sparkle_objective.PerformanceMeasure,
+                                  "action": SetByUser,
+                                  "help": "the performance measure, e.g. runtime",})
+
+PerformanceMeasureSimpleArgument = \
     ArgumentContainer(names=["--performance-measure"],
                       kwargs={"choices": PerformanceMeasure.__members__,
-                              "default": gv.settings.DEFAULT_general_sparkle_objective.
-                              PerformanceMeasure,
-                              "action": SetByUser,
                               "help": "the performance measure, e.g. runtime"})
 
 ProcessMonitoringArgument = \
@@ -313,13 +317,11 @@ ProcessMonitoringArgument = \
                               + "shortest running time on an instance (EXTENDED), e.g., "
                               + "when this information is needed in an experiment."
                               + " (default: "
-                              + f"{gv.settings.DEFAULT_paraport_process_monitoring})"
-                              + " (current value: "
-                              + f"{gv.settings.get_paraport_process_monitoring()})"})
+                              + f"{Settings.DEFAULT_paraport_process_monitoring})"})
 
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,
-                                           "default": gv.settings.
+                                           "default": Settings.
                                            DEFAULT_ablation_racing,
                                            "action": SetByUser,
                                            "help": "Performs abaltion analysis with "
@@ -401,7 +403,7 @@ SelectionReportArgument = \
 SettingsFileArgument = \
     ArgumentContainer(names=["--settings-file"],
                       kwargs={"type": Path,
-                              "default": gv.settings.DEFAULT_settings_path,
+                              "default": Settings.DEFAULT_settings_path,
                               "action": SetByUser,
                               "help": "Specify the settings file to use in case you want"
                               + " to use one other than the default"})
@@ -457,7 +459,7 @@ SolverVariationsArgument = \
 TargetCutOffTimeAblationArgument = \
     ArgumentContainer(names=["--target-cutoff-time"],
                       kwargs={"type": int,
-                              "default": gv.settings.DEFAULT_general_target_cutoff_time,
+                              "default": Settings.DEFAULT_general_target_cutoff_time,
                               "action": SetByUser,
                               "help": "cutoff time per target algorithm run in seconds"})
 
@@ -476,7 +478,7 @@ TargetCutOffTimeRunSolversArgument = \
 TargetCutOffTimeValidationArgument = \
     ArgumentContainer(names=["--target-cutoff-time"],
                       kwargs={"type": int,
-                              "default": gv.settings.DEFAULT_general_target_cutoff_time,
+                              "default": Settings.DEFAULT_general_target_cutoff_time,
                               "action": SetByUser,
                               "help": "cutoff time per target algorithm run in seconds"})
 

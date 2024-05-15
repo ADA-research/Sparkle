@@ -25,8 +25,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstancePathRunConfiguredSolverArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.ParallelArgument.names,
                         **ac.ParallelArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,

@@ -41,8 +41,8 @@ def parser_function() -> argparse.ArgumentParser:
              f"constructed portfolio) (current latest: {latest})")
     parser.add_argument(*ac.ProcessMonitoringArgument.names,
                         **ac.ProcessMonitoringArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,
                         **ac.CutOffTimeArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
