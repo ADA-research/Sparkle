@@ -3,15 +3,15 @@
 
 import sys
 import argparse
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from runrunner.base import Runner
 
-import global_variables as sgh
+import global_variables as gv
 from CLI.support import run_portfolio_selector_help as srpsh
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help import command_help as ch
@@ -36,7 +36,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -57,15 +57,19 @@ if __name__ == "__main__":
     )
 
     if ac.set_by_user(args, "settings_file"):
-        sgh.settings.read_settings_ini(
+        gv.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
-    if sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
+
+    if gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
             == PerformanceMeasure.QUALITY_ABSOLUTE:
         print(
             "ERROR: The run_sparkle_portfolio_selector command is not yet implemented"
@@ -89,4 +93,4 @@ if __name__ == "__main__":
         print("Input instance or instance directory error!")
 
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()

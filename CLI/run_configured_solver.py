@@ -3,14 +3,14 @@
 
 import sys
 import argparse
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from runrunner.base import Runner
 
 import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.support import run_configured_solver_help as srcsh
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
@@ -59,6 +59,10 @@ if __name__ == "__main__":
         gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
 
     # Validate input (is directory, or single instance (single-file or multi-file))
     if ((len(instance_path) == 1 and instance_path[0].is_dir())

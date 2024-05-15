@@ -4,15 +4,15 @@
 import argparse
 import sys
 import shutil
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from runrunner.base import Runner
 
 from sparkle.configurator import ablation as sah
-import global_variables as sgh
+import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
@@ -54,7 +54,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     sl.log_command(sys.argv)
 
@@ -78,34 +78,38 @@ if __name__ == "__main__":
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file
-        sgh.settings.read_settings_ini(
+        gv.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
-        sgh.settings.set_general_target_cutoff_time(
+        gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "wallclock_time"):
-        sgh.settings.set_config_wallclock_time(
+        gv.settings.set_config_wallclock_time(
             args.wallclock_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "number_of_runs"):
-        sgh.settings.set_config_number_of_runs(
+        gv.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "racing"):
-        sgh.settings.set_ablation_racing_flag(
+        gv.settings.set_ablation_racing_flag(
             args.number_of_runs, SettingState.CMD_LINE
         )
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
 
     solver_name = Path(solver).name
     instance_set_train_name = Path(instance_set_train).name
     instance_set_test_name = None
-    configurator = sgh.settings.get_general_sparkle_configurator()
+    configurator = gv.settings.get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver_name, instance_set_train_name)
     if instance_set_test is not None:
         instance_set_test_name = Path(instance_set_test).name
@@ -129,7 +133,7 @@ if __name__ == "__main__":
                               instance_set_test_name):
         print("Warning: found existing ablation scenario for this combination. "
               "This will be removed.")
-        shutil.rmtree(sgh.ablation_dir + ablation_scenario_dir)
+        shutil.rmtree(gv.ablation_dir + ablation_scenario_dir)
 
     # Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(

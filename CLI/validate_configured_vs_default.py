@@ -3,12 +3,12 @@
 
 import sys
 import argparse
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import global_variables as gv
 from sparkle.solver import pcs
 import sparkle_logging as sl
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
@@ -83,6 +83,10 @@ if __name__ == "__main__":
         gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings.get_general_sparkle_configurator()

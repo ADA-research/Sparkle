@@ -3,18 +3,19 @@
 
 import sys
 import argparse
+from pathlib import PurePath
 
 import runrunner as rrr
 from runrunner.base import Runner
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.platform import slurm_help as ssh
 from CLI.support import run_solvers_parallel_help as srsph
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SolutionVerifier
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
@@ -72,13 +73,13 @@ def run_solvers_on_instances(
         If True, the selector will be constructed and a report will be produced.
     """
     if recompute:
-        PerformanceDataFrame(sgh.performance_data_csv_path).clean_csv()
+        PerformanceDataFrame(gv.performance_data_csv_path).clean_csv()
     num_job_in_parallel = 1
     if parallel:
-        num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
+        num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
 
     runs = [srsph.running_solvers_parallel(
-        performance_data_csv_path=sgh.performance_data_csv_path,
+        performance_data_csv_path=gv.performance_data_csv_path,
         num_job_in_parallel=num_job_in_parallel,
         rerun=recompute,
         run_on=run_on)]
@@ -96,7 +97,7 @@ def run_solvers_on_instances(
         cmd="sparkle/structures/csv_merge.py",
         name=CommandName.CSV_MERGE,
         dependencies=runs[-1],
-        base_dir=sgh.sparkle_tmp_path,
+        base_dir=gv.sparkle_tmp_path,
         sbatch_options=sbatch_user_options))
 
     if also_construct_selector_and_report:
@@ -105,7 +106,7 @@ def run_solvers_on_instances(
             cmd="CLI/construct_sparkle_portfolio_selector.py",
             name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
             dependencies=runs[-1],
-            base_dir=sgh.sparkle_tmp_path,
+            base_dir=gv.sparkle_tmp_path,
             sbatch_options=sbatch_user_options))
 
         runs.append(rrr.add_to_queue(
@@ -113,7 +114,7 @@ def run_solvers_on_instances(
             cmd="CLI/generate_report.py",
             name=CommandName.GENERATE_REPORT,
             dependencies=runs[-1],
-            base_dir=sgh.sparkle_tmp_path,
+            base_dir=gv.sparkle_tmp_path,
             sbatch_options=sbatch_user_options))
 
     if run_on == Runner.LOCAL:
@@ -130,7 +131,7 @@ def run_solvers_on_instances(
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -143,28 +144,32 @@ if __name__ == "__main__":
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
-        sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
     if args.verifier is not None:
-        sgh.settings.set_general_solution_verifier(
+        gv.settings.set_general_solution_verifier(
             SolutionVerifier.from_str(args.verifier), SettingState.CMD_LINE)
 
     if args.target_cutoff_time:
-        sgh.settings.set_general_target_cutoff_time(
+        gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
 
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
 
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
+
     print("Start running solvers ...")
 
     # Write settings to file before starting, since they are used in callback scripts
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()
 
     run_solvers_on_instances(
         parallel=args.parallel,

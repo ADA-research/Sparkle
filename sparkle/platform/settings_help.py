@@ -310,6 +310,7 @@ class Settings:
 
         # Write to latest settings file
         file_path_latest = PurePath(self.__settings_dir / "latest.ini")
+        print(file_path_latest)
         self.write_settings_ini(Path(file_path_latest))
 
         return
@@ -832,3 +833,38 @@ class Settings:
 
         return ProcessMonitoring.from_str(
             self.__settings["parallel_portfolio"]["process_monitoring"])
+
+    @staticmethod
+    def check_settings_changes(cur_settings: Settings, prev_settings: Settings) -> bool:
+        """Check if there are changes between the previous and the current settings.
+
+        Returns true iff there are no changes.
+
+        Args:
+          cur_settings: The current settings
+          prev_settings: The previous settings
+        """
+        printed_warning = False
+
+        cur_dict = cur_settings.__settings._sections
+        prev_dict = prev_settings.__settings._sections
+
+        for section in cur_dict.keys():
+            printed_section = False
+            for name in cur_dict[section].keys():
+                if cur_dict[section][name] != prev_dict[section][name]:
+                    # do we have yet to print the initial warning?
+                    if not printed_warning:
+                        print("Warning: The following attributes/options have changed:")
+                        printed_warning = True
+
+                    # do we have yet to print the section?
+                    if not printed_section:
+                        print(f"In the section '{section}':")
+                        printed_section = True
+
+                    # print actual change
+                    print(f"  - '{name}' changed from '{prev_dict[section][name]}' "
+                          f"to '{cur_dict[section][name]}'")
+
+        return not printed_warning
