@@ -124,7 +124,6 @@ autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 
-smac_target_algorithm = "smac_target_algorithm.py"
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 
 ablation_dir = "Components/ablationAnalysis-0.9.4/"

@@ -7,12 +7,11 @@ from pathlib import Path
 
 from runrunner.base import Runner
 
-import global_variables as sgh
+import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
 from CLI.support import run_configured_solver_help as srcsh
-from CLI.support import configure_solver_help as scsh
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -37,7 +36,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -55,9 +54,9 @@ if __name__ == "__main__":
 
     if args.settings_file is not None:
         # Do first, so other command line options can override settings from the file
-        sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
@@ -65,17 +64,18 @@ if __name__ == "__main__":
     if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Get the name of the configured solver and the training set
-        solver_name = Path(sgh.latest_scenario().get_config_solver()).name
+        solver_name = Path(gv.latest_scenario().get_config_solver()).name
         instance_set_name = Path(
-            sgh.latest_scenario().get_config_instance_set_train()).name
+            gv.latest_scenario().get_config_instance_set_train()).name
         if solver_name is None or instance_set_name is None:
             # Print error and stop execution
             print("ERROR: No configured solver found! Stopping execution.")
             sys.exit(-1)
 
         # Get optimised configuration
-        config_str = scsh.get_optimised_configuration_params(solver_name,
-                                                             instance_set_name)
+        configurator = gv.settings.get_general_sparkle_configurator()
+        _, config_str = configurator.get_optimal_configuration(solver_name,
+                                                               instance_set_name)
 
         # Call the configured solver
         run = srcsh.call_configured_solver(args.instance_path,
@@ -95,4 +95,4 @@ if __name__ == "__main__":
         print("Running configured solver done!")
 
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()
