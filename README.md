@@ -9,7 +9,7 @@ Specifically, Sparkle facilitates the use of:
 
 ## Installation
 
-The installation process use the `conda` package manager (to install https://docs.conda.io/en/latest/miniconda.html`). 
+The installation process uses the `conda` package manager (to install https://docs.conda.io/en/latest/miniconda.html`). 
 
 ### Get a copy of Sparkle
 To get a copy of Sparkle you can clone the repository using `git`.
