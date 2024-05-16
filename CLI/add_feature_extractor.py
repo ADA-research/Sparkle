@@ -39,7 +39,7 @@ def parser_function() -> argparse.ArgumentParser:
     group_extractor_run.add_argument(*apc.RunExtractorNowArgument.names,
                                      **apc.RunExtractorNowArgument.kwargs)
     group_extractor_run.add_argument(*apc.RunExtractorLaterArgument.names,
-                                     **apc.RunExtractorLaterArgument)
+                                     **apc.RunExtractorLaterArgument.kwargs)
     parser.add_argument(*apc.NicknameFeatureExtractorArgument.names,
                         **apc.NicknameFeatureExtractorArgument.kwargs)
     parser.add_argument(*apc.ParallelArgument.names,
