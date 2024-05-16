@@ -1,4 +1,5 @@
 """Helper functions for CLI nicknames."""
+from __future__ import annotations
 from pathlib import Path
 
 
@@ -18,8 +19,8 @@ def resolve_object_name(name: str | Path,
     if Path(name).exists():
         return name
     # Second check if its a nickname registered in Sparkle
-    if name in nickname_dict:
-        return nickname_dict[name]
+    if str(name) in nickname_dict:
+        return Path(nickname_dict[str(name)])
     # Third check if we can create a valid path with the name
     if (target_dir / name).exists():
         return (target_dir / name)
