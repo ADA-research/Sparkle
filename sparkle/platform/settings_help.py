@@ -310,7 +310,6 @@ class Settings:
 
         # Write to latest settings file
         file_path_latest = PurePath(self.__settings_dir / "latest.ini")
-        print(file_path_latest)
         self.write_settings_ini(Path(file_path_latest))
 
         return

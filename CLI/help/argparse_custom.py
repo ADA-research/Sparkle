@@ -369,8 +369,9 @@ RunExtractorLaterArgument = \
                               + "on all the instances (default)"})
 
 RunOnArgument = ArgumentContainer(names=["--run-on"],
-                                  kwargs={"default": Runner.SLURM,
-                                          "choices": [Runner.LOCAL, Runner.SLURM],
+                                  kwargs={"default": Runner.SLURM.name,
+                                          "choices": [Runner.LOCAL.name,
+                                                      Runner.SLURM.name],
                                           "help": "On which computer or cluster "
                                           + "environment to execute the calculation."})
 
