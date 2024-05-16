@@ -8,9 +8,9 @@ from pathlib import Path
 import math
 
 import sparkle_logging as sl
-from CLI.support import configure_solver_help as scsh
+from CLI.support import smac_help
 from sparkle.platform import file_help as sfh
-import global_variables as sgh
+import global_variables as gv
 from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from sparkle.configurator import ablation as sah
@@ -34,11 +34,9 @@ def get_num_instance_for_configurator(instance_set_name: str) -> str:
         str_value = str(instance_count)
     # For single-file instances just count the number of instance files
     else:
-        inst_path = sgh.settings.get_general_sparkle_configurator().instances_path
-        instance_dir = inst_path / instance_set_name
+        instance_dir = gv.instance_dir / instance_set_name
         list_instance = [x.name for x in
                          sfh.get_list_all_filename_recursive(instance_dir)]
-
         # If there is only an instance file and not the actual instances in the
         # directory, count number of lines in instance file
         if f"{instance_set_name}_train.txt" in list_instance:
@@ -82,11 +80,11 @@ def get_dict_instance_to_performance(results: list[list[str]],
         A dictionary containing the performance for each instance
     """
     value_column = -1  # Last column is runtime
-    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    smac_run_obj = smac_help.get_smac_run_obj()
     if smac_run_obj != "RUNTIME":
         # Quality column
         value_column = -2
-    penalty = sgh.settings.get_general_penalty_multiplier()
+    penalty = gv.settings.get_general_penalty_multiplier()
     out_dict = {}
     for row in results:
         value = float(row[value_column])
@@ -102,10 +100,10 @@ def get_performance_measure() -> str:
     Returns:
         A string containing the performance measure
     """
-    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    smac_run_obj = smac_help.get_smac_run_obj()
 
     if smac_run_obj == "RUNTIME":
-        penalty = sgh.settings.get_general_penalty_multiplier()
+        penalty = gv.settings.get_general_penalty_multiplier()
         return f"PAR{penalty}"
     elif smac_run_obj == "QUALITY":
         return "performance"
@@ -117,7 +115,7 @@ def get_runtime_bool() -> str:
     Returns:
         A string containing the runtime boolean
     """
-    smac_run_obj, _, _, _, _, _ = scsh.get_smac_settings()
+    smac_run_obj = smac_help.get_smac_run_obj()
 
     if smac_run_obj == "RUNTIME":
         return "\\runtimetrue"
@@ -155,7 +153,7 @@ def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
     Returns:
         A string describing whether features are used
     """
-    scenario_file = sgh.settings.get_general_sparkle_configurator().scenario.directory \
+    scenario_file = gv.settings.get_general_sparkle_configurator().scenario.directory \
         / f"{solver_name}_{instance_set_train_name}_scenario.txt"
 
     for line in scenario_file.open("r").readlines():
@@ -239,7 +237,7 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         plot_params["limit_min"] = 0.25
         plot_params["limit_max"] = 0.25
         plot_params["limit"] = "magnitude"
-        plot_params["penalty_time"] = sgh.settings.get_penalised_time()
+        plot_params["penalty_time"] = gv.settings.get_penalised_time()
         plot_params["replace_zeros"] = True
 
     generate_comparison_plot(points,
@@ -291,13 +289,14 @@ def get_timeouts_instanceset(solver_name: str,
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
-    config, _, _ = scsh.get_optimised_configuration(
-        solver_name, instance_set_name)
-    res_default = Validator.get_validation_results(solver_name,
-                                                   instance_set_name,
+    _, config = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_name)
+    validator = Validator(gv.validation_output_general)
+    res_default = validator.get_validation_results(solver_name,
+                                                   gv.instance_dir / instance_set_name,
                                                    config="")
-    res_conf = Validator.get_validation_results(solver_name,
-                                                instance_set_name,
+    res_conf = validator.get_validation_results(solver_name,
+                                                gv.instance_dir / instance_set_name,
                                                 config=config)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
         res_conf, cutoff)
@@ -321,7 +320,7 @@ def get_timeouts(instance_to_par_configured: dict,
     Returns:
         A tuple containing timeout values
     """
-    penalty = sgh.settings.get_general_penalty_multiplier()
+    penalty = gv.settings.get_general_penalty_multiplier()
     timeout_value = cutoff * penalty
 
     configured_timeouts = 0
@@ -424,10 +423,10 @@ def configuration_report_variables(target_dir: Path, solver_name: str,
         full_dict["ablationBool"] = "\\ablationfalse"
 
     if full_dict["featuresBool"] == "\\featurestrue":
-        full_dict["numFeatureExtractors"] = str(len(sgh.extractor_list))
+        full_dict["numFeatureExtractors"] = str(len(gv.extractor_list))
         full_dict["featureExtractorList"] = sgrh.get_feature_extractor_list()
         full_dict["featureComputationCutoffTime"] =\
-            str(sgh.settings.get_general_extractor_cutoff_time())
+            str(gv.settings.get_general_extractor_cutoff_time())
 
     return full_dict
 
@@ -446,37 +445,35 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     Returns:
         A dictionary containing the variables and values
     """
-    config, _, _ = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
-    res_default = Validator.get_validation_results(solver_name,
-                                                   instance_set_train_name,
-                                                   config="")
-    res_conf = Validator.get_validation_results(solver_name,
-                                                instance_set_train_name,
-                                                config=config)
+    _, config = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_train_name)
+    validator = Validator(gv.validation_output_general)
+    res_default = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_train_name, config="")
+    res_conf = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_train_name, config=config)
 
     latex_dict = {"bibliographypath":
-                  str(sgh.sparkle_report_bibliography_path.absolute())}
+                  str(gv.sparkle_report_bibliography_path.absolute())}
     latex_dict["performanceMeasure"] = get_performance_measure()
     latex_dict["runtimeBool"] = get_runtime_bool()
     latex_dict["solver"] = solver_name
     latex_dict["instanceSetTrain"] = instance_set_train_name
-    latex_dict["sparkleVersion"] = sgh.sparkle_version
+    latex_dict["sparkleVersion"] = gv.sparkle_version
     latex_dict["numInstanceInTrainingInstanceSet"] = \
         get_num_instance_for_configurator(instance_set_train_name)
 
-    (smac_run_obj, smac_whole_time_budget, smac_each_run_cutoff_time,
-     _, num_of_smac_run_str, _) = scsh.get_smac_settings()
+    smac_run_obj = smac_help.get_smac_run_obj()
+    smac_whole_time_budget = gv.settings.get_config_wallclock_time()
+    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
+    num_of_smac_run_str = gv.settings.get_config_number_of_runs()
 
     latex_dict["numSmacRuns"] = str(num_of_smac_run_str)
     latex_dict["smacObjective"] = str(smac_run_obj)
     latex_dict["smacWholeTimeBudget"] = str(smac_whole_time_budget)
     latex_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
-
-    (optimised_configuration_str, _,
-     optimised_configuration_seed) = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
-
+    _, optimised_configuration_str = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_train_name)
     latex_dict["optimisedConfiguration"] = str(optimised_configuration_str)
     str_value = get_par_performance(res_conf, smac_each_run_cutoff_time)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
@@ -523,19 +520,17 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
     Returns:
         A dictionary containting the variables and their values
     """
-    config, _, _ = scsh.get_optimised_configuration(
-        solver_name, instance_set_train_name)
-    res_default = Validator.get_validation_results(solver_name,
-                                                   instance_set_test_name,
-                                                   config="")
-    res_conf = Validator.get_validation_results(solver_name,
-                                                instance_set_test_name,
-                                                config=config)
+    _, config = gv.settings.get_general_sparkle_configurator()\
+        .get_optimal_configuration(solver_name, instance_set_train_name)
+    validator = Validator(gv.validation_output_general)
+    res_default = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_test_name, config="")
+    res_conf = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_test_name, config=config)
     test_dict = {"instanceSetTest": instance_set_test_name}
     test_dict["numInstanceInTestingInstanceSet"] =\
         get_num_instance_for_configurator(instance_set_test_name)
-
-    (_, _, smac_each_run_cutoff_time, _, _, _) = scsh.get_smac_settings()
+    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
         str(get_par_performance(res_conf, smac_each_run_cutoff_time))
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
@@ -570,10 +565,12 @@ def check_results_exist(solver_name: str, instance_set_train: str,
         instance_set_train: Name of the instance set for training
         instance_set_test: Name of the instance set for testing. Defaults to None.
     """
-    train_res = Validator.get_validation_results(solver_name,
-                                                 instance_set_train)
-    test_res = Validator.get_validation_results(solver_name,
-                                                instance_set_test)
+    validator = Validator(gv.validation_output_general)
+    train_res = validator.get_validation_results(
+        solver_name, gv.instance_dir / instance_set_train)
+    if instance_set_test is not None:
+        test_res = validator.get_validation_results(solver_name,
+                                                    gv.instance_dir / instance_set_test)
     if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
         print("Error: Results not found for the given solver and instance set(s) "
               'combination. Make sure the "configure_solver" and '
@@ -597,7 +594,7 @@ def get_most_recent_test_run() -> tuple[str, str, bool, bool]:
 
     # Read most recent run from file
     last_test_file_path =\
-        sgh.settings.get_general_sparkle_configurator().scenario.directory
+        gv.settings.get_general_sparkle_configurator().scenario.directory
 
     test_file_lines = last_test_file_path.open("r").readlines()
     for line in test_file_lines:
@@ -625,12 +622,12 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
         instance_set_test_name: Name of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
-    target_path = sgh.configuration_output_analysis
+    target_path = gv.configuration_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
         target_path, solver_name, instance_set_train_name, instance_set_test_name,
         ablation)
-    sgrh.generate_report(sgh.sparkle_latex_dir,
+    sgrh.generate_report(gv.sparkle_latex_dir,
                          "template-Sparkle-for-configuration.tex",
                          target_path,
                          "Sparkle_Report_for_Configuration",

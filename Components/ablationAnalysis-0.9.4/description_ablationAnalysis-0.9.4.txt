@@ -1,0 +1,6 @@
+Source: http://www.cs.ubc.ca/labs/beta/Projects/Ablation/
+Version: 2020 Oct 22, v0.9.4
+Authors: Fawcett, Hoos
+Paper: Fawcett et al 2016 - Analysing differences between algorithm configurations through ablation
+License: AGPLv3
+License location: ablationAnalysis-0.9.4/LICENSE.txt

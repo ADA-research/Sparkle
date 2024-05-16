@@ -14,7 +14,6 @@ from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import compute_marginal_contribution_help as scmch
 from CLI.support import sparkle_job_help as sjh
 import sparkle_logging as sl
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
@@ -25,27 +24,12 @@ from CLI.initialise import check_for_initialise
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--recompute-portfolio-selector",
-        action="store_true",
-        help=("force the construction of a new portfolio selector even when it already "
-              "exists for the current feature and performance data. NOTE: This will "
-              "also result in the computation of the marginal contributions of solvers "
-              "to the new portfolio selector."),
-    )
-    parser.add_argument(
-        "--recompute-marginal-contribution",
-        action="store_true",
-        help=("force marginal contribution to be recomputed even when it already exists "
-              "in file for the current selector"),
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
+    parser.add_argument(*ac.RecomputePortfolioSelectorArgument.names,
+                        **ac.RecomputePortfolioSelectorArgument.kwargs)
+    parser.add_argument(*ac.RecomputeMarginalContributionForSelectorArgument.names,
+                        **ac.RecomputeMarginalContributionForSelectorArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        *ac.PerformanceMeasureArgument.kwargs)
 
     return parser
 

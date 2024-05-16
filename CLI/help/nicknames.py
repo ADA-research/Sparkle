@@ -1,5 +1,6 @@
-"""Helper functions for CLI nicknames"""
+"""Helper functions for CLI nicknames."""
 from pathlib import Path
+
 
 def resolve_object_name(name: str | Path,
                         nickname_dict: dict = {},

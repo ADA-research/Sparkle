@@ -12,23 +12,16 @@ from sparkle.structures import feature_data_csv_help as sfdcsv
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "extractor_path",
-        metavar="extractor-path",
-        type=str,
-        help="path to or nickname of the feature extractor",
-    )
-    parser.add_argument(
-        "--nickname",
-        action="store_true",
-        help=("if set to True extractor_path is used as a nickname for the feature "
-              "extractor"),
-    )
+    parser.add_argument(*ac.ExtractorPathRemoveArgument.names,
+                        **ac.ExtractorPathRemoveArgument.kwargs)
+    parser.add_argument(*ac.NicknameRemoveExtractor.names,
+                        **ac.NicknameRemoveExtractor.kwargs)
 
     return parser
 

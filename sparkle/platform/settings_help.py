@@ -13,6 +13,7 @@ import sparkle_logging as slog
 import global_variables as sgh
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
+from sparkle.configurator import implementations as cim
 
 
 class SolutionVerifier(Enum):
@@ -69,13 +70,15 @@ class Settings:
 
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
-    DEFAULT_general_sparkle_configurator = Configurator.smac_v2
+    DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
 
-    DEFAULT_config_budget_per_run = 600
+    DEFAULT_config_wallclock_time = 600
+    DEFAULT_config_cpu_time = None
+    DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
 
     DEFAULT_slurm_number_of_runs_in_parallel = 25
@@ -103,7 +106,9 @@ class Settings:
         self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
 
-        self.__config_budget_per_run_set = SettingState.NOT_SET
+        self.__config_wallclock_time_set = SettingState.NOT_SET
+        self.__config_cpu_time_set = SettingState.NOT_SET
+        self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
 
         self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
@@ -148,7 +153,7 @@ class Settings:
             option_names = ("configurator",)
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = getattr(Configurator, file_settings.get(section, option))
+                    value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
                     file_settings.remove_option(section, option)
 
@@ -190,11 +195,27 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "configuration"
-            option_names = ("budget_per_run", "smac_whole_time_budget")
+            option_names = ("wallclock_time", "smac_whole_time_budget")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_config_budget_per_run(value, state)
+                    self.set_config_wallclock_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "configuration"
+            option_names = ("cpu_time", "smac_cpu_time_budget")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_config_cpu_time(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "configuration"
+            option_names = ("solver_calls", "smac_solver_calls_budget")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_config_solver_calls(value, state)
                     file_settings.remove_option(section, option)
 
             section = "configuration"
@@ -363,7 +384,7 @@ class Settings:
 
     def set_general_sparkle_configurator(
             self: Settings,
-            value: Callable = DEFAULT_general_sparkle_configurator,
+            value: str = DEFAULT_general_sparkle_configurator,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the Sparkle configurator."""
         section = "general"
@@ -372,7 +393,7 @@ class Settings:
                 self.__general_sparkle_configurator_set, origin, name):
             self.__init_section(section)
             self.__general_sparkle_configurator_set = origin
-            self.__settings[section][name] = value.__name__
+            self.__settings[section][name] = value
 
         return
 
@@ -381,8 +402,14 @@ class Settings:
         if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
             self.set_general_sparkle_configurator()
         if self.__general_sparkle_configurator is None:
-            self.__general_sparkle_configurator =\
-                getattr(Configurator, self.__settings["general"]["configurator"])()
+            configurator_subclass =\
+                cim.resolve_configurator(self.__settings["general"]["configurator"])
+            if configurator_subclass is not None:
+                self.__general_sparkle_configurator = configurator_subclass()
+            else:
+                print("WARNING: Configurator class name not recognised:"
+                      f'{self.__settings["general"]["configurator"]}. '
+                      "Configurator not set.")
         return self.__general_sparkle_configurator
 
     def get_performance_metric_for_report(self: Settings) -> str:
@@ -549,27 +576,73 @@ class Settings:
 
     # Configuration settings ###
 
-    def set_config_budget_per_run(
-            self: Settings, value: int = DEFAULT_config_budget_per_run,
+    def set_config_wallclock_time(
+            self: Settings, value: int = DEFAULT_config_wallclock_time,
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the budget per configuration run in seconds."""
+        """Set the budget per configuration run in seconds (wallclock)."""
         section = "configuration"
-        name = "budget_per_run"
+        name = "wallclock_time"
 
         if value is not None and self.__check_setting_state(
-                self.__config_budget_per_run_set, origin, name):
+                self.__config_wallclock_time_set, origin, name):
             self.__init_section(section)
-            self.__config_budget_per_run_set = origin
+            self.__config_wallclock_time_set = origin
             self.__settings[section][name] = str(value)
 
         return
 
-    def get_config_budget_per_run(self: Settings) -> int:
-        """Return the budget per configuration run in seconds."""
-        if self.__config_budget_per_run_set == SettingState.NOT_SET:
-            self.set_config_budget_per_run()
+    def get_config_wallclock_time(self: Settings) -> int:
+        """Return the budget per configuration run in seconds (wallclock)."""
+        if self.__config_wallclock_time_set == SettingState.NOT_SET:
+            self.set_config_wallclock_time()
 
-        return int(self.__settings["configuration"]["budget_per_run"])
+        return int(self.__settings["configuration"]["wallclock_time"])
+
+    def set_config_cpu_time(
+            self: Settings, value: int = DEFAULT_config_cpu_time,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the budget per configuration run in seconds (cpu)."""
+        section = "configuration"
+        name = "cpu_time"
+
+        if value is not None and self.__check_setting_state(
+                self.__config_cpu_time_set, origin, name):
+            self.__init_section(section)
+            self.__config_cpu_time_set = origin
+            self.__settings[section][name] = str(value)
+
+        return
+
+    def get_config_cpu_time(self: Settings) -> int | None:
+        """Return the budget per configuration run in seconds (cpu)."""
+        if self.__config_cpu_time_set == SettingState.NOT_SET:
+            self.set_config_cpu_time()
+            return None
+
+        return int(self.__settings["configuration"]["cpu_time"])
+
+    def set_config_solver_calls(
+            self: Settings, value: int = DEFAULT_config_solver_calls,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of solver calls."""
+        section = "configuration"
+        name = "solver_calls"
+
+        if value is not None and self.__check_setting_state(
+                self.__config_solver_calls_set, origin, name):
+            self.__init_section(section)
+            self.__config_solver_calls_set = origin
+            self.__settings[section][name] = str(value)
+
+        return
+
+    def get_config_solver_calls(self: Settings) -> int | None:
+        """Return the number of solver calls."""
+        if self.__config_solver_calls_set == SettingState.NOT_SET:
+            self.set_config_solver_calls()
+            return None
+
+        return int(self.__settings["configuration"]["solver_calls"])
 
     def set_config_number_of_runs(
             self: Settings, value: int = DEFAULT_config_number_of_runs,
@@ -759,3 +832,38 @@ class Settings:
 
         return ProcessMonitoring.from_str(
             self.__settings["parallel_portfolio"]["process_monitoring"])
+
+    @staticmethod
+    def check_settings_changes(cur_settings: Settings, prev_settings: Settings) -> bool:
+        """Check if there are changes between the previous and the current settings.
+
+        Returns true iff there are no changes.
+
+        Args:
+          cur_settings: The current settings
+          prev_settings: The previous settings
+        """
+        printed_warning = False
+
+        cur_dict = cur_settings.__settings._sections
+        prev_dict = prev_settings.__settings._sections
+
+        for section in cur_dict.keys():
+            printed_section = False
+            for name in cur_dict[section].keys():
+                if cur_dict[section][name] != prev_dict[section][name]:
+                    # do we have yet to print the initial warning?
+                    if not printed_warning:
+                        print("Warning: The following attributes/options have changed:")
+                        printed_warning = True
+
+                    # do we have yet to print the section?
+                    if not printed_section:
+                        print(f"In the section '{section}':")
+                        printed_section = True
+
+                    # print actual change
+                    print(f"  - '{name}' changed from '{prev_dict[section][name]}' "
+                          f"to '{cur_dict[section][name]}'")
+
+        return not printed_warning
