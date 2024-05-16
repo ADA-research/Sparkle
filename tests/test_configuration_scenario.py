@@ -34,7 +34,7 @@ class TestConfigurationScenario(TestCase):
         self.instance_file_directory = Path("tests/test_files/test_configurator"
                                             "/scenarios/instances/Test-Instance-Set")
         self.instance_file_directory.mkdir(parents=True, exist_ok=True)
-        self.time_budget = 600
+        self.wallclock_time = 600
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective =\
@@ -44,7 +44,7 @@ class TestConfigurationScenario(TestCase):
             solver=self.solver,
             instance_directory=self.instance_directory,
             number_of_runs=self.run_number,
-            time_budget=self.time_budget,
+            wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
             cutoff_length=self.cutoff_length,
             sparkle_objective=self.sparkle_objective,

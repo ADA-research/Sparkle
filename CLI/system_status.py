@@ -7,17 +7,14 @@ import argparse
 import global_variables as sgh
 from sparkle.platform import system_status as sssh
 import sparkle_logging as sl
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="output system status in verbose mode",
-    )
+    parser.add_argument(*ac.VerboseArgument.names,
+                        **ac.VerboseArgument.kwargs)
     return parser
 
 

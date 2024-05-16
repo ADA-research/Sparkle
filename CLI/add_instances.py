@@ -17,46 +17,28 @@ import sparkle_logging as sl
 from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as apc
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "instances_path",
-        metavar="instances-path",
-        type=str,
-        help="path to the instance set")
+    parser.add_argument(*apc.InstancesPathArgument.names,
+                        **apc.InstancesPathArgument.kwargs)
     group_extractor_run = parser.add_mutually_exclusive_group()
-    group_extractor_run.add_argument(
-        "--run-extractor-now",
-        default=False,
-        action="store_true",
-        help="immediately run the feature extractor(s) on the newly added instances")
-    group_extractor_run.add_argument(
-        "--run-extractor-later",
-        dest="run_extractor_now",
-        action="store_false",
-        help=("do not immediately run the feature extractor(s) "
-              + "on the newly added instances (default)"))
+    group_extractor_run.add_argument(*apc.RunExtractorNowArgument.names,
+                                     **apc.RunExtractorNowArgument.kwargs)
+    group_extractor_run.add_argument(*apc.RunExtractorLaterArgument.names,
+                                     **apc.RunExtractorLaterArgument.kwargs)
     group_solver = parser.add_mutually_exclusive_group()
-    group_solver.add_argument(
-        "--run-solver-now",
-        default=False,
-        action="store_true",
-        help="immediately run the solver(s) on the newly added instances")
-    group_solver.add_argument(
-        "--run-solver-later",
-        dest="run_solver_now",
-        action="store_false",
-        help=("do not immediately run the solver(s) "
-              + "on the newly added instances (default)"))
-    parser.add_argument(
-        "--nickname", type=str, help="set a nickname for the instance set")
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the solvers and feature extractor on multiple instances in parallel")
+    group_solver.add_argument(*apc.RunSolverNowArgument.names,
+                              **apc.RunSolverNowArgument.kwargs)
+    group_solver.add_argument(*apc.RunSolverLaterArgument.names,
+                              **apc.RunSolverLaterArgument.kwargs)
+    parser.add_argument(*apc.NicknameInstanceSetArgument.names,
+                        **apc.NicknameInstanceSetArgument.kwargs)
+    parser.add_argument(*apc.ParallelArgument.names,
+                        **apc.ParallelArgument.kwargs)
 
     return parser
 

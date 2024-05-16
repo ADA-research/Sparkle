@@ -464,7 +464,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
         get_num_instance_for_configurator(instance_set_train_name)
 
     smac_run_obj = smac_help.get_smac_run_obj()
-    smac_whole_time_budget = gv.settings.get_config_budget_per_run()
+    smac_whole_time_budget = gv.settings.get_config_wallclock_time()
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     num_of_smac_run_str = gv.settings.get_config_number_of_runs()
 

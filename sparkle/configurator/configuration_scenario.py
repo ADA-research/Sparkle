@@ -16,7 +16,8 @@ from sparkle.solver.solver import Solver
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
     def __init__(self: ConfigurationScenario, solver: Solver, instance_directory: Path,
-                 number_of_runs: int = None, time_budget: int = None,
+                 number_of_runs: int = None, solver_calls: int = None,
+                 cpu_time: int = None, wallclock_time: int = None,
                  cutoff_time: int = None, cutoff_length: int = None,
                  sparkle_objective: SparkleObjective = None, use_features: bool = None,
                  configurator_target: Path = None, feature_data_df: pd.DataFrame = None)\
@@ -28,7 +29,11 @@ class ConfigurationScenario:
             instance_directory: Original directory of instances.
             number_of_runs: The number of configurator runs to perform
                 for configuring the solver.
-            time_budget: The time budget allocated for each configuration run.
+            solver_calls: The number of times the solver is called for each
+                configuration run
+            cpu_time: The time budget allocated for each configuration run. (cpu)
+            wallclock_time: The time budget allocated for each configuration run.
+                (wallclock)
             cutoff_time: The maximum time allowed for each individual run during
                 configuration.
             cutoff_length: The maximum number of iterations allowed for each
@@ -45,7 +50,9 @@ class ConfigurationScenario:
         self.name = f"{self.solver.name}_{self.instance_directory.name}"
 
         self.number_of_runs = number_of_runs
-        self.time_budget = time_budget
+        self.solver_calls = solver_calls
+        self.cpu_time = cpu_time
+        self.wallclock_time = wallclock_time
         self.cutoff_time = cutoff_time
         self.cutoff_length = cutoff_length
         self.sparkle_objective = sparkle_objective
@@ -113,7 +120,6 @@ class ConfigurationScenario:
                        f"execdir = {self.tmp.absolute()}/\n"
                        f"deterministic = {self.solver.is_deterministic()}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
-                       f"wallclock-limit = {self.time_budget}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
                        f"paramfile = {self.solver.get_pcs_file()}\n"
@@ -122,6 +128,12 @@ class ConfigurationScenario:
                        f"test_instance_file = {self.instance_file_path.absolute()}\n")
             if self.use_features:
                 file.write(f"feature_file = {self.feature_file_path}\n")
+            if self.wallclock_time is not None:
+                file.write(f"wallclock-limit = {self.wallclock_time}\n")
+            if self.cpu_time is not None:
+                file.write(f"cputime-limit = {self.cpu_time}\n")
+            if self.solver_calls is not None:
+                file.write(f"runcount-limit = {self.solver_calls}\n")
             # We don't let SMAC do the validation
             file.write("validation = false" + "\n")
 

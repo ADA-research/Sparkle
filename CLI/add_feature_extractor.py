@@ -14,6 +14,7 @@ from sparkle.instance import compute_features_help as scf
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as apc
 
 
 def _check_existence_of_test_instance_list_file(extractor_directory: str) -> bool:
@@ -32,37 +33,17 @@ def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "extractor_path",
-        metavar="extractor-path",
-        type=str,
-        help="path to the feature extractor",
-    )
+    parser.add_argument(*apc.ExtractorPathArgument.names,
+                        **apc.ExtractorPathArgument.kwargs)
     group_extractor_run = parser.add_mutually_exclusive_group()
-    group_extractor_run.add_argument(
-        "--run-extractor-now",
-        default=False,
-        action="store_true",
-        help=("immediately run the newly added feature extractor "
-              + "on the existing instances")
-    )
-    group_extractor_run.add_argument(
-        "--run-extractor-later",
-        dest="run_extractor_now",
-        action="store_false",
-        help=("do not immediately run the newly added feature extractor "
-              + "on the existing instances (default)")
-    )
-    parser.add_argument(
-        "--nickname",
-        type=str,
-        help="set a nickname for the feature extractor"
-    )
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the feature extractor on multiple instances in parallel",
-    )
+    group_extractor_run.add_argument(*apc.RunExtractorNowArgument.names,
+                                     **apc.RunExtractorNowArgument.kwargs)
+    group_extractor_run.add_argument(*apc.RunExtractorLaterArgument.names,
+                                     **apc.RunExtractorLaterArgument)
+    parser.add_argument(*apc.NicknameFeatureExtractorArgument.names,
+                        **apc.NicknameFeatureExtractorArgument.kwargs)
+    parser.add_argument(*apc.ParallelArgument.names,
+                        **apc.ParallelArgument.kwargs)
     return parser
 
 
