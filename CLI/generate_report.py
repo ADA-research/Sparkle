@@ -20,7 +20,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
-
+from CLI.help.nicknames import resolve_object_name
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
@@ -67,9 +67,12 @@ if __name__ == "__main__":
     selection = args.selection
     test_case_directory = args.test_case_directory
 
-    solver = args.solver
-    instance_set_train = args.instance_set_train
-    instance_set_test = args.instance_set_test
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train,
+                                             target_dir=gv.instance_dir)
+    instance_set_test = resolve_object_name(args.instance_set_test,
+                                            target_dir=gv.instance_dir)
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])
@@ -148,7 +151,7 @@ if __name__ == "__main__":
         if solver is None:
             print("Error! No Solver found for configuration report generation.")
             sys.exit(-1)
-        solver_name = Path(solver).name
+        solver_name = solver.name
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
         # validate_configured_vs_default
@@ -168,13 +171,13 @@ if __name__ == "__main__":
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
 
-        instance_set_train_name = Path(instance_set_train).name
+        instance_set_train_name = instance_set_train.name
         instance_set_test_name = None
         gv.settings.get_general_sparkle_configurator()\
             .set_scenario_dirs(solver_name, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train and flag_instance_set_test:
-            instance_set_test_name = Path(instance_set_test).name
+            instance_set_test_name = instance_set_test.name
             sgrfch.check_results_exist(
                 solver_name, instance_set_train_name, instance_set_test_name
             )

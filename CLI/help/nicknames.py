@@ -15,9 +15,9 @@ def resolve_object_name(name: str | Path,
     Returns:
         Path to the object, None if unresolvable.
     """
-    # First check if the name itself exists as a path
+    # First check if the name already is a path
     if Path(name).exists():
-        return name
+        return Path(name)
     # Second check if its a nickname registered in Sparkle
     if str(name) in nickname_dict:
         return Path(nickname_dict[str(name)])
