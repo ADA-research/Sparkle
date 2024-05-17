@@ -53,18 +53,6 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
     return total_job_num > 0
 
 
-def delete_log_files() -> None:
-    """Remove the log files."""
-    sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path])
-
-
-def print_log_paths() -> None:
-    """Print paths to the log files."""
-    print("Consider investigating the log files:")
-    print(f"stdout: {sgh.sparkle_log_path}")
-    print(f"stderr: {sgh.sparkle_err_path}")
-
-
 if __name__ == "__main__":
     # Initialise settings
     global settings
@@ -112,7 +100,7 @@ if __name__ == "__main__":
 
         sys.exit(-1)
 
-    delete_log_files()  # Make sure no old log files remain
+    sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path])  # remove old log files
     success = scps.construct_sparkle_portfolio_selector(
         sgh.sparkle_algorithm_selector_path,
         sgh.performance_data_csv_path,
@@ -141,7 +129,7 @@ if __name__ == "__main__":
 
         status_info.delete()
 
-        delete_log_files()
+        sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path]) # Delete log files
 
     # Write used settings to file
     sgh.settings.write_used_settings()
