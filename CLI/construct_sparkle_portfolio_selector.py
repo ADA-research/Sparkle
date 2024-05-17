@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
         status_info.delete()
 
-        sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path]) # Delete log files
+        sfh.rmfiles([sgh.sparkle_log_path, sgh.sparkle_err_path])  # Delete log files
 
     # Write used settings to file
     sgh.settings.write_used_settings()
