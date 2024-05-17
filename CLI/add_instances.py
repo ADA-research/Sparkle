@@ -125,10 +125,11 @@ if __name__ == "__main__":
                       f"{instances_directory}")
                 print(f"Ignore adding file {intended_filename}")
             else:
-                sfh.add_remove_platform_item(intended_filename, sgh.instance_list_path)
-                feature_data_csv.add_row(intended_filename)
-                performance_data_csv.add_instance(intended_filename)
                 shutil.copy(intended_filepath, instances_directory)
+                sfh.add_remove_platform_item(intended_filename, sgh.instance_list_path)
+                feature_data_csv.add_row(instances_directory / intended_filename)
+                performance_data_csv.add_instance(intended_filename)
+                
                 added += 1
         if added == num_inst:
             print(f"All instances of {instances_source} have been added!")
