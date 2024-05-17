@@ -100,6 +100,11 @@ if __name__ == "__main__":
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
+    if not sash.check_solver_executable_permission(solver_directory):
+        print("ERROR: Missing execution permission for binary of solver "
+              f"{solver_directory}. Stopping execution.")
+        sys.exit(-1)
+
     # Add RunSolver executable to the solver
     runsolver_path = Path(sgh.runsolver_path)
     if runsolver_path.name in [file.name for file in Path(solver_directory).iterdir()]:
