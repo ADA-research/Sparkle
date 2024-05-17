@@ -39,23 +39,3 @@ def check_adding_solver_contain_pcs_file(solver_directory: str) -> bool:
             pcs_count += 1
 
     return False if pcs_count != 1 else True
-
-
-def check_solver_executable_permission(solver_directory: str) -> bool:
-    """Check whether the solver binary in the given directory has execution permission.
-
-    Args:
-        solver_directory: The directory containing the solver binary
-
-    Returns:
-        A Boolean that is true if and only if the solver binary has execution
-        permission.
-    """
-    binaries = [f for f in os.listdir(Path(solver_directory))
-                if Path(solver_directory + "/" + f).is_file() and "." not in f]
-
-    for file in binaries:
-        if not os.access(Path(solver_directory + "/" + file), os.X_OK):
-            return False
-
-    return True
