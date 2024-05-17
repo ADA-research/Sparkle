@@ -60,7 +60,7 @@ if __name__ == "__main__":
                 output = solver_nickname_mapping.pop(key)
                 break
         gv.write_data_to_file(gv.solver_nickname_list_path,
-                               gv.solver_nickname_mapping)
+                              gv.solver_nickname_mapping)
 
     if Path(gv.performance_data_csv_path).exists():
         performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
