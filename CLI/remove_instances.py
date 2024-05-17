@@ -15,6 +15,7 @@ from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -22,9 +23,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.InstancesPathRemoveArgument.names,
                         **ac.InstancesPathRemoveArgument.kwargs)
-    parser.add_argument(*ac.NicknameRemoveInstancesArgument.names,
-                        **ac.NicknameRemoveInstancesArgument.kwargs)
-
     return parser
 
 
@@ -37,15 +35,13 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    instances_path = Path(args.instances_path)
+    instances_path = resolve_object_name(args.instances_path,
+                                         target_dir=gv.instance_dir)
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_INSTANCES])
 
-    if args.nickname or not instances_path.exists():
-        # Try to resolve the argument as a nickname
-        instances_path = gv.instance_dir / instances_path
-    if not instances_path.exists():
+    if instances_path is None:
         print(f'Could not resolve instances path arg "{args.instances_path}"!')
         print("Check that the path or nickname is spelled correctly.")
         sys.exit(-1)
