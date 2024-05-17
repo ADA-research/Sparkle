@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
-import global_variables as sgh
+import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 import sparkle_logging as sl
 from CLI.help import command_help as ch
@@ -40,44 +40,43 @@ if __name__ == "__main__":
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_SOLVER])
 
     if args.nickname:
-        solver_path = Path(sgh.solver_nickname_mapping[args.nickname])
-    if not solver_path.parent == sgh.solver_dir:
+        solver_path = Path(gv.solver_nickname_mapping[args.nickname])
+    if not solver_path.parent == gv.solver_dir:
         # Allow user to only specify solvers in Sparkle solver dir
-        solver_path = sgh.solver_dir / solver_path
+        solver_path = gv.solver_dir / solver_path
     if not solver_path.exists():
         print(f'Sparkle Solver path "{solver_path}" does not exist!')
         sys.exit(-1)
 
     print(f"Start removing solver {solver_path.name} ...")
 
-    if len(sgh.solver_list) > 0:
+    if len(gv.solver_list) > 0:
         sfh.add_remove_platform_item(str(solver_path),
-                                     sgh.solver_list_path)
+                                     gv.solver_list_path)
 
-    solver_nickname_mapping = sgh.solver_nickname_mapping
+    solver_nickname_mapping = gv.solver_nickname_mapping
     if len(solver_nickname_mapping):
         for key in solver_nickname_mapping:
             if solver_nickname_mapping[key] == str(solver_path):
                 output = solver_nickname_mapping.pop(key)
                 break
-        sgh.write_data_to_file(sgh.solver_nickname_list_path,
-                               sgh.solver_nickname_mapping)
+        gv.write_data_to_file(gv.solver_nickname_list_path,
+                              gv.solver_nickname_mapping)
 
-    if Path(sgh.performance_data_csv_path).exists():
-        performance_data = PerformanceDataFrame(sgh.performance_data_csv_path)
-        if solver_path.name in performance_data.dataframe.columns:
-            performance_data.remove_solver(solver_path.name)
+    if Path(gv.performance_data_csv_path).exists():
+        performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
+        performance_data.remove_solver(str(solver_path))
         performance_data.save_csv()
 
     shutil.rmtree(solver_path)
 
-    if Path(sgh.sparkle_algorithm_selector_path).exists():
-        shutil.rmtree(sgh.sparkle_algorithm_selector_path)
+    if Path(gv.sparkle_algorithm_selector_path).exists():
+        shutil.rmtree(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_algorithm_selector_path} done!")
+              f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(sgh.sparkle_report_path).exists():
-        shutil.rmtree(sgh.sparkle_report_path)
-        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
+    if Path(gv.sparkle_report_path).exists():
+        shutil.rmtree(gv.sparkle_report_path)
+        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     print(f"Removing solver {solver_path.name} done!")

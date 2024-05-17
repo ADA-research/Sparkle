@@ -11,11 +11,11 @@ import sys
 
 from statistics import mean
 import pandas as pd
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import settings_help
 
 global settings
-sgh.settings = settings_help.Settings()
+gv.settings = settings_help.Settings()
 
 
 class PerformanceDataFrame():
@@ -55,7 +55,7 @@ class PerformanceDataFrame():
         self.multi_dim_names = ["Objective", "Instance", "Run"]
         # Objectives is a ``static'' dimension
         if objectives is None:
-            objectives = sgh.settings.get_general_sparkle_objectives()
+            objectives = gv.settings.get_general_sparkle_objectives()
         self.objective_names =\
             [o.name if isinstance(o, settings_help.SparkleObjective) else o
              for o in objectives]
@@ -89,7 +89,7 @@ class PerformanceDataFrame():
                 midx = pd.MultiIndex.from_product(
                     [self.objective_names, instances, self.run_ids],
                     names=self.multi_dim_names)
-                self.dataframe = pd.DataFrame(sgh.sparkle_missing_value,
+                self.dataframe = pd.DataFrame(gv.sparkle_missing_value,
                                               index=midx,
                                               columns=solvers)
                 self.save_csv()
@@ -190,7 +190,7 @@ class PerformanceDataFrame():
                       self.dataframe.index.levels[2].tolist()]
             emidx = pd.MultiIndex(levels, names=self.multi_dim_names)
             # Create the missing column values
-            edf = pd.DataFrame(sgh.sparkle_missing_value,
+            edf = pd.DataFrame(gv.sparkle_missing_value,
                                index=emidx,
                                columns=self.dataframe.columns)
             # Concatenate the original and new dataframe together
@@ -224,7 +224,7 @@ class PerformanceDataFrame():
 
     def remove_instance(self: PerformanceDataFrame, instance_name: str) -> None:
         """Drop an instance from the Dataframe."""
-        self.dataframe.drop(instance_name, axis=0, level="Instance")
+        self.dataframe.drop(instance_name, axis=0, level="Instance", inplace=True)
 
     def reset_value(self: PerformanceDataFrame,
                     solver: str,
@@ -232,7 +232,7 @@ class PerformanceDataFrame():
                     objective: str = None,
                     run: int = None) -> None:
         """Reset a value in the dataframe."""
-        self.set_value(sgh.sparkle_missing_value, solver, instance, objective, run)
+        self.set_value(gv.sparkle_missing_value, solver, instance, objective, run)
 
     def get_value(self: PerformanceDataFrame,
                   solver: str,
@@ -376,7 +376,7 @@ class PerformanceDataFrame():
             The virtual best solver performance for this instance.
         """
         objective = self.verify_objective(objective)
-        penalty_factor = sgh.settings.get_general_penalty_multiplier()
+        penalty_factor = gv.settings.get_general_penalty_multiplier()
         if capvalue is None:
             capvalue = sys.float_info.max
             if not minimise:
@@ -443,7 +443,7 @@ class PerformanceDataFrame():
         """Return a dictionary of penalised runtimes and instances for the VBS."""
         objective = self.verify_objective(objective)
         instance_penalized_runtimes = {}
-        vbs_penalty_time = sgh.settings.get_penalised_time()
+        vbs_penalty_time = gv.settings.get_penalised_time()
         for instance in self.dataframe.index.levels[1]:
             if run_id is None:
                 runtime = self.dataframe.loc[(objective, instance), :].min(axis=None)
@@ -459,8 +459,8 @@ class PerformanceDataFrame():
                               run_id: int = None) -> float:
         """Return the penalised performance of the VBS."""
         objective = self.verify_objective(objective)
-        cutoff_time = sgh.settings.get_general_target_cutoff_time()
-        penalty_multiplier = sgh.settings.get_general_penalty_multiplier()
+        cutoff_time = gv.settings.get_general_target_cutoff_time()
+        penalty_multiplier = gv.settings.get_general_penalty_multiplier()
         penalty_time_each_run = cutoff_time * penalty_multiplier
 
         # Calculate the minimum for the selected objective per instance
@@ -479,11 +479,11 @@ class PerformanceDataFrame():
                                              objective: str = None) -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
         objective = self.verify_objective(objective)
-        cutoff_time = sgh.settings.get_general_target_cutoff_time()
+        cutoff_time = gv.settings.get_general_target_cutoff_time()
 
         solver_penalty_time_ranking_list = []
         penalty_time_each_run =\
-            cutoff_time * sgh.settings.get_general_penalty_multiplier()
+            cutoff_time * gv.settings.get_general_penalty_multiplier()
         num_instances = self.dataframe.index.size
         sub_df = self.dataframe.loc(axis=0)[objective, :, :]
         for solver in self.dataframe.columns:
@@ -500,7 +500,7 @@ class PerformanceDataFrame():
 
     def clean_csv(self: PerformanceDataFrame) -> None:
         """Set all values in Performance Data to None."""
-        self.dataframe[:] = sgh.sparkle_missing_value
+        self.dataframe[:] = gv.sparkle_missing_value
         self.save_csv()
 
     def copy(self: PerformanceDataFrame,

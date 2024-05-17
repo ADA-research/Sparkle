@@ -16,7 +16,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
-import global_variables as sgh
+import global_variables as gv
 import sparkle_logging as slog
 from sparkle.platform import slurm_help as ssh
 from sparkle.platform.settings_help import ProcessMonitoring
@@ -105,11 +105,11 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
         sbatch_script_path: Path to the sbatch script.
         temp_solvers: A list of temporary solvers.
     """
-    tmp_dir = sgh.sparkle_tmp_path
+    tmp_dir = gv.sparkle_tmp_path
 
     # Removes statusinfo files
     for solver_instance in solver_instance_list:
-        shutil.rmtree(f"{sgh.pap_sbatch_tmp_path}/{solver_instance}", ignore_errors=True)
+        shutil.rmtree(f"{gv.pap_sbatch_tmp_path}/{solver_instance}", ignore_errors=True)
 
     # Removes the generated sbatch files
     sbatch_script_path.unlink()
@@ -148,12 +148,12 @@ def remove_temp_files_unfinished_solvers(solver_instance_list: list[str],
     for file in to_be_moved:
         if ".val" in file:
             path_from = f"{tmp_dir}{file}"
-            path_to = f"{str(sgh.pap_performance_data_tmp_path)}/{file}"
+            path_to = f"{str(gv.pap_performance_data_tmp_path)}/{file}"
 
             try:
                 shutil.move(path_from, path_to)
             except shutil.Error:
-                print(f"the {str(sgh.pap_performance_data_tmp_path)} directory already "
+                print(f"the {str(gv.pap_performance_data_tmp_path)} directory already "
                       "contains a file with the same name, it will be skipped")
             Path(path_from).unlink(missing_ok=True)
 
@@ -173,7 +173,7 @@ def find_finished_time_finished_solver(solver_instance_list: list[str],
         A formatted string that represents the finishing time of a solver.
     """
     time_in_format_str = "-1:00"
-    solutions_dir = sgh.pap_performance_data_tmp_path
+    solutions_dir = gv.pap_performance_data_tmp_path
     results = sfh.get_list_all_extensions(solutions_dir, "result")
 
     for result in results:
@@ -228,7 +228,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
 
         # If option extended is used some jobs are not directly cancelled to allow all
         # jobs to compute for at least the same running time.
-        if (sgh.settings.get_paraport_process_monitoring()
+        if (gv.settings.get_paraport_process_monitoring()
                 == ProcessMonitoring.EXTENDED):
             # If a job in a portfolio with a finished solver starts running its timelimit
             # needs to be updated.
@@ -251,7 +251,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                     == int(int(finished_solver_id) / portfolio_size)):
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
-                if (sgh.settings.get_paraport_process_monitoring()
+                if (gv.settings.get_paraport_process_monitoring()
                         == ProcessMonitoring.EXTENDED):
                     # Update the cutofftime of the to be cancelled job, if job if
                     # already past that it automatically stops.
@@ -259,7 +259,7 @@ def cancel_remaining_jobs(logging_file: str, job_id: str,
                         solver_instance_list, finished_solver_id)
                     current_seconds = jobtime_to_seconds(remaining_jobs[job][0])
                     cutoff_seconds = jobtime_to_seconds(new_cutoff_time)
-                    actual_cutofftime = sgh.settings.get_general_target_cutoff_time()
+                    actual_cutofftime = gv.settings.get_general_target_cutoff_time()
 
                     if (remaining_jobs[job][1] == "R"
                             and int(cutoff_seconds) < int(actual_cutofftime)):
@@ -402,7 +402,7 @@ def wait_for_finished_solver(
 
                 # If option extended is used some jobs are not directly cancelled to
                 # allow all jobs to compute for at least the same running time.
-                if (sgh.settings.get_paraport_process_monitoring()
+                if (gv.settings.get_paraport_process_monitoring()
                         == ProcessMonitoring.EXTENDED):
                     if jobid in pending_job_with_new_cutoff and jobstatus == "R":
                         # Job is in a portfolio with a solver that already has finished
@@ -457,7 +457,7 @@ def handle_waiting_and_removal_process(
         for instance in instances:
             finished_instances_dict[Path(instance).name] = ["UNSOLVED", 0]
 
-    perf_data_tmp_path = sgh.pap_performance_data_tmp_path
+    perf_data_tmp_path = gv.pap_performance_data_tmp_path
 
     # For each finished instance
     for instance in finished_instances_dict:
@@ -488,14 +488,14 @@ def handle_waiting_and_removal_process(
                     finished_instances_dict[instance][1] = solving_time
 
                     if (solving_time
-                            > float(sgh.settings.get_general_target_cutoff_time())):
+                            > float(gv.settings.get_general_target_cutoff_time())):
                         print(f"{str(instance)} has reached the cutoff time without "
                               "being solved.")
                     else:
                         print(f"{str(instance)} has been solved in "
                               f"{str(solving_time)} seconds!")
 
-                        temp_files = glob.glob(f"{sgh.sparkle_tmp_path}{solver_instance}"
+                        temp_files = glob.glob(f"{gv.sparkle_tmp_path}{solver_instance}"
                                                f"*.rawres")
 
                         for rawres_file_path in temp_files:
@@ -553,9 +553,9 @@ def remove_result_files(instances: list[str]) -> None:
     """
     for instance in instances:
         instance = Path(instance).name
-        pap_files = [f for f in sgh.pap_performance_data_tmp_path.iterdir()
+        pap_files = [f for f in gv.pap_performance_data_tmp_path.iterdir()
                      if f"_{instance}_" in str(f)]
-        tmp_files = [f for f in Path(sgh.sparkle_tmp_path).iterdir()
+        tmp_files = [f for f in Path(gv.sparkle_tmp_path).iterdir()
                      if f"_{instance}_" in str(f)]
         sfh.rmfiles(pap_files + tmp_files)
 
@@ -577,7 +577,7 @@ def run_parallel_portfolio(instances: list[str],
     solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
 
     performance_measure =\
-        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+        gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     parameters = []
     num_jobs = len(solver_list) * len(instances)
     temp_solvers = []
@@ -612,15 +612,15 @@ def run_parallel_portfolio(instances: list[str],
 
     # Run the script and cancel the remaining solvers if a solver finishes before the
     # end of the cutoff_time
-    file_path_output1 = str(PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
+    file_path_output1 = str(PurePath(gv.sparkle_global_output_dir / slog.caller_out_dir
                             / "Log/logging.txt"))
     sfh.create_new_empty_file(file_path_output1)
     srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
-    parallel_jobs = min(sgh.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
+    parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
     sbatch_options_list = ssh.get_slurm_options_list()
     # Create cmd list
     base_cmd_str = ("CLI/core/run_solvers_core.py --run-status-path "
-                    f"{str(sgh.pap_sbatch_tmp_path)}")
+                    f"{str(gv.pap_sbatch_tmp_path)}")
     cmd_list = [f"{base_cmd_str} {params}" for params in parameters]
 
     # TODO: This try/except structure is absolutely massive.
@@ -632,7 +632,7 @@ def run_parallel_portfolio(instances: list[str],
             name=CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO,
             parallel_jobs=parallel_jobs,
             path="./",
-            base_dir=sgh.sparkle_tmp_path,
+            base_dir=gv.sparkle_tmp_path,
             sbatch_options=sbatch_options_list,
             srun_options=srun_options)
         if run_on == Runner.LOCAL:
@@ -642,7 +642,7 @@ def run_parallel_portfolio(instances: list[str],
         # As running runtime based performance may be less relevant for Local
         # NOTE: Why does this command have its own waiting process? If we need to handle
         # Something after the job is done, we can just create a callback script to that
-        perf_m = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+        perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if (run_on == Runner.SLURM and perf_m == PerformanceMeasure.RUNTIME):
             handle_waiting_and_removal_process(instances, file_path_output1, run.run_id,
                                                solver_instance_list, run.script_filepath,
@@ -683,7 +683,7 @@ def run_parallel_portfolio(instances: list[str],
                 else:
                     # Wait until the last few seconds before checking often
                     if not wait_cutoff_time:
-                        n_seconds = sgh.settings.get_general_target_cutoff_time() - 6
+                        n_seconds = gv.settings.get_general_target_cutoff_time() - 6
                         time.sleep(n_seconds)
                         wait_cutoff_time = True
                         n_seconds = 1  # Start checking often
@@ -697,7 +697,7 @@ def run_parallel_portfolio(instances: list[str],
             instance = Path(instance).name
             finished_instances_dict[instance] = ["UNSOLVED", 0]
 
-        tmp_res_files = glob.glob(f"{str(sgh.pap_performance_data_tmp_path)}/*.result")
+        tmp_res_files = glob.glob(f"{str(gv.pap_performance_data_tmp_path)}/*.result")
         for finished_solver_files in tmp_res_files:
             for instance in finished_instances_dict:
                 if str(instance) in str(finished_solver_files):

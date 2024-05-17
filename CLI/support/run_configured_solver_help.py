@@ -8,7 +8,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner
 
-import global_variables as sgh
+import global_variables as gv
 from CLI.help.command_help import CommandName
 from sparkle.platform import slurm_help as ssh
 from sparkle.instance import instances_help as sih
@@ -73,12 +73,12 @@ def call_configured_solver_sequential(instances_list: list[list[Path]],
         config_str: Configuration to be used.
     """
     # Prepare runsolver call
-    custom_cutoff = sgh.settings.get_general_target_cutoff_time()
+    custom_cutoff = gv.settings.get_general_target_cutoff_time()
     solver_params = Solver.config_str_to_dict(config_str)
     solver_params["specifics"] = "rawres"
     solver_params["cutoff_time"] = custom_cutoff
     solver_params["run_length"] = "2147483647"  # Arbitrary, not used by SMAC wrapper
-    solver_params["seed"] = sgh.get_seed()
+    solver_params["seed"] = gv.get_seed()
 
     for instance_path_list in instances_list:
         # Use original path for output string
@@ -90,7 +90,7 @@ def call_configured_solver_sequential(instances_list: list[list[Path]],
 
         for instance_path in instance_path_list:
             raw_result_path = Path(f"{solver.name}_{Path(instance_path).name}"
-                                   f"_{sgh.get_time_pid_random_string()}.rawres")
+                                   f"_{gv.get_time_pid_random_string()}.rawres")
             runsolver_watch_data_path = raw_result_path.with_suffix(".log")
             runsolver_values_path = raw_result_path.with_suffix(".val")
 
@@ -139,12 +139,12 @@ def call_solver_parallel(
             instances_list[index] = " ".join([str(path) for path in value])
 
     num_jobs = len(instances_list)
-    custom_cutoff = sgh.settings.get_general_target_cutoff_time()
+    custom_cutoff = gv.settings.get_general_target_cutoff_time()
     cmd_list = []
     for instance_path in instances_list:
         instance_path = Path(instance_path)
         raw_result_path = Path(f"{solver.name}_{instance_path.name}"
-                               f"_{sgh.get_time_pid_random_string()}.rawres")
+                               f"_{gv.get_time_pid_random_string()}.rawres")
         runsolver_watch_data_path = raw_result_path.with_suffix(".log")
         runsolver_values_path = raw_result_path.with_suffix(".val")
 
@@ -161,7 +161,7 @@ def call_solver_parallel(
         solver_params["cutoff_time"] = custom_cutoff
         solver_params["run_length"] = "2147483647"  # Arbitrary, not used by SMAC wrapper
         if seed is None:
-            solver_params["seed"] = sgh.get_seed()
+            solver_params["seed"] = gv.get_seed()
         else:
             # Use the seed to determine the configuration line in the file
             solver_params["seed"] = seed
@@ -181,7 +181,7 @@ def call_solver_parallel(
         cmd=cmd_list,
         name=commandname,
         parallel_jobs=num_jobs,
-        base_dir=sgh.sparkle_tmp_path,
+        base_dir=gv.sparkle_tmp_path,
         path=outdir,
         dependencies=dependency,
         sbatch_options=sbatch_options,

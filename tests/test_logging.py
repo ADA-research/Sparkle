@@ -3,7 +3,7 @@
 from pathlib import Path, PurePath
 
 import sparkle_logging as sl
-import global_variables as sgh
+import global_variables as gv
 
 
 def test__update_caller() -> None:
@@ -44,7 +44,7 @@ def test_log_command() -> None:
     """Test log_command correctly logs the call to a command."""
     argv = ["test.py"]
     sl.log_command(argv)
-    log_path = sgh.sparkle_global_log_path
+    log_path = gv.sparkle_global_log_path
     with Path(str(log_path)).open(mode="r") as log_file:
         for line in log_file:
             continue

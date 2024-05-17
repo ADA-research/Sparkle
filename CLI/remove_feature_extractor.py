@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
-import global_variables as sgh
+import global_variables as gv
 from sparkle.structures import feature_data_csv_help as sfdcsv
 import sparkle_logging as sl
 from CLI.help import command_help as ch
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     )
 
     if args.nickname:
-        extractor_path = sgh.extractor_nickname_mapping[extractor_path]
+        extractor_path = gv.extractor_nickname_mapping[extractor_path]
     if not Path(extractor_path).exists():
         print(f'Feature extractor path "{extractor_path}" does not exist!')
         sys.exit(-1)
@@ -54,28 +54,28 @@ if __name__ == "__main__":
     print("Starting removing feature extractor "
           f"{Path(extractor_path).name} ...")
 
-    if len(sgh.extractor_list) > 0:
+    if len(gv.extractor_list) > 0:
         sfh.add_remove_platform_item(extractor_path,
-                                     sgh.extractor_list_path, remove=True)
+                                     gv.extractor_list_path, remove=True)
 
-    if len(sgh.extractor_feature_vector_size_mapping) > 0:
+    if len(gv.extractor_feature_vector_size_mapping) > 0:
         sfh.add_remove_platform_item(None,
-                                     sgh.extractor_feature_vector_size_list_path,
+                                     gv.extractor_feature_vector_size_list_path,
                                      key=extractor_path,
                                      remove=False)
 
-    if len(sgh.extractor_nickname_mapping) > 0:
-        for key in sgh.extractor_nickname_mapping:
-            if sgh.extractor_nickname_mapping[key] == extractor_path:
+    if len(gv.extractor_nickname_mapping) > 0:
+        for key in gv.extractor_nickname_mapping:
+            if gv.extractor_nickname_mapping[key] == extractor_path:
                 sfh.add_remove_platform_item(None,
-                                             sgh.extractor_nickname_list_path,
+                                             gv.extractor_nickname_list_path,
                                              key=key,
                                              remove=False)
                 break
 
-    if Path(sgh.feature_data_csv_path).exists():
+    if Path(gv.feature_data_csv_path).exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
-            sgh.feature_data_csv_path
+            gv.feature_data_csv_path
         )
         for column_name in feature_data_csv.list_columns():
             tmp_extractor_path = feature_data_csv.get_extractor_path_from_feature(
@@ -86,14 +86,14 @@ if __name__ == "__main__":
         feature_data_csv.save_csv()
         shutil.rmtree(extractor_path)
 
-    if Path(sgh.sparkle_algorithm_selector_path).exists():
-        shutil.rmtree(sgh.sparkle_algorithm_selector_path)
+    if Path(gv.sparkle_algorithm_selector_path).exists():
+        shutil.rmtree(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_algorithm_selector_path} done!")
+              f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(sgh.sparkle_report_path).exists():
-        shutil.rmtree(sgh.sparkle_report_path)
-        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
+    if Path(gv.sparkle_report_path).exists():
+        shutil.rmtree(gv.sparkle_report_path)
+        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     print("Removing feature extractor "
           f"{Path(extractor_path).name} done!")

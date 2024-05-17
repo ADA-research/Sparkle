@@ -9,7 +9,7 @@ from pathlib import Path
 from collections import Counter
 import subprocess
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh, tex_help as stex
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
@@ -36,7 +36,7 @@ def get_solver_list_latex(solver_list: list[str] = None) -> str:
         The list of solver names as LaTeX str.
     """
     if solver_list is None:
-        solver_list = sgh.solver_list
+        solver_list = gv.solver_list
     return "".join(f"\\item \\textbf{{{Path(solver_path).name}}}\n"
                    for solver_path in solver_list)
 
@@ -48,7 +48,7 @@ def get_feature_extractor_list() -> str:
         The list of feature extractors as LaTeX str.
     """
     return "".join(f"\\item \\textbf{{{Path(extractor_path).name}}}\n"
-                   for extractor_path in sgh.extractor_list)
+                   for extractor_path in gv.extractor_list)
 
 
 def get_num_instance_classes() -> str:
@@ -58,7 +58,7 @@ def get_num_instance_classes() -> str:
         The number of instance sets as LaTeX str.
     """
     return str(len(set([Path(instance_path).parent.name
-                        for instance_path in sgh.instance_list])))
+                        for instance_path in gv.instance_list])))
 
 
 def get_instance_set_count_list(instance_list: list[str] = None) -> str:
@@ -68,7 +68,7 @@ def get_instance_set_count_list(instance_list: list[str] = None) -> str:
         The list of instance sets as LaTeX str.
     """
     if instance_list is None:
-        instance_list = sgh.instance_list
+        instance_list = gv.instance_list
     instance_list = [Path(instance_path).parent.name
                      for instance_path in instance_list]
     count = Counter(instance_list)
@@ -109,11 +109,11 @@ def get_par_ranking_list() -> str:
         The list of solvers ranked by PAR as LaTeX str.
     """
     performance_data_csv = (
-        PerformanceDataFrame(sgh.performance_data_csv_path))
+        PerformanceDataFrame(gv.performance_data_csv_path))
 
     solver_penalty_ranking =\
         performance_data_csv.get_solver_penalty_time_ranking_list()
-    penalty = sgh.settings.get_general_penalty_multiplier()
+    penalty = gv.settings.get_general_penalty_multiplier()
     return "".join(f"\\item \\textbf{{{solver}}}, PAR{penalty}: {solver_penalty}\n"
                    for solver, solver_penalty in solver_penalty_ranking)
 
@@ -125,7 +125,7 @@ def get_vbs_par() -> str:
         The PAR (Penalised Average Runtime) of the VBS (virtual best solver) over a set
         of instances.
     """
-    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     return str(performance_data_csv.calc_vbs_penalty_time())
 
 
@@ -148,8 +148,8 @@ def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
         A dict that maps instance name str to their penalised performance int.
     """
     sbs_dict = {}
-    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
-    cutoff_time = sgh.settings.get_general_target_cutoff_time()
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
 
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
@@ -161,7 +161,7 @@ def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
         if this_run_time <= cutoff_time:
             sbs_dict[instance] = this_run_time
         else:
-            sbs_dict[instance] = sgh.settings.get_penalised_time()
+            sbs_dict[instance] = gv.settings.get_penalised_time()
 
     return sbs_dict
 
@@ -172,7 +172,7 @@ def get_dict_vbs_penalty_time_on_each_instance() -> dict[str, int]:
     Returns:
         A dict that maps instance name str to their penalised performance int.
     """
-    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     return performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
 
 
@@ -183,12 +183,12 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
         A dict that maps instance name str to their penalised performance int.
     """
     actual_selector_penalty = {}
-    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
-    actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
+    actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
     minimise = True
     performance_measure = \
-        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    capvalue = sgh.settings.get_general_cap_value()
+        gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    capvalue = gv.settings.get_general_cap_value()
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
         minimise = False
@@ -196,13 +196,13 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     for instance in performance_data_csv.get_instances():
         used_time_for_this_instance, flag_successfully_solving = \
             scmch.compute_actual_performance_for_instance(
-                actual_portfolio_selector_path, instance, sgh.feature_data_csv_path,
+                actual_portfolio_selector_path, instance, gv.feature_data_csv_path,
                 performance_data_csv, minimise, performance_measure, capvalue)
 
         if flag_successfully_solving:
             actual_selector_penalty[instance] = used_time_for_this_instance
         else:
-            actual_selector_penalty[instance] = sgh.settings.get_penalised_time()
+            actual_selector_penalty[instance] = gv.settings.get_penalised_time()
 
     return actual_selector_penalty
 
@@ -235,11 +235,11 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path) -> str:
     figure_filename = (
         "figure_portfolio_selector_sparkle_vs_sbs")
 
-    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     solver_penalty_time_ranking_list = (
         performance_data_csv.get_solver_penalty_time_ranking_list())
     sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
-    penalty = sgh.settings.get_general_penalty_multiplier()
+    penalty = gv.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
                              figure_filename,
@@ -248,7 +248,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path) -> str:
                              limit="magnitude",
                              limit_min=0.25,
                              limit_max=0.25,
-                             penalty_time=sgh.settings.get_penalised_time(),
+                             penalty_time=gv.settings.get_penalised_time(),
                              replace_zeros=True,
                              output_dir=output_dir)
     return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
@@ -281,7 +281,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path) -> str:
 
     figure_filename = (
         "figure_portfolio_selector_sparkle_vs_vbs")
-    penalty = sgh.settings.get_general_penalty_multiplier()
+    penalty = gv.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
                              figure_filename,
@@ -290,7 +290,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path) -> str:
                              limit="magnitude",
                              limit_min=0.25,
                              limit_max=0.25,
-                             penalty_time=sgh.settings.get_penalised_time(),
+                             penalty_time=gv.settings.get_penalised_time(),
                              replace_zeros=True,
                              output_dir=output_dir)
 
@@ -325,7 +325,7 @@ def get_test_actual_par(test_case_directory: str) -> str:
     # Why is it selecting the first solver?
     solver = performance_data_csv.dataframe.columns[0]
 
-    cutoff_time_each_run = sgh.settings.get_general_target_cutoff_time()
+    cutoff_time_each_run = gv.settings.get_general_target_cutoff_time()
 
     sparkle_penalty_time = 0.0
     sparkle_penalty_time_count = 0
@@ -336,7 +336,7 @@ def get_test_actual_par(test_case_directory: str) -> str:
         if this_run_time <= cutoff_time_each_run:
             sparkle_penalty_time += this_run_time
         else:
-            sparkle_penalty_time += sgh.settings.get_penalised_time()
+            sparkle_penalty_time += gv.settings.get_penalised_time()
 
     return str(sparkle_penalty_time / sparkle_penalty_time_count)
 
@@ -352,24 +352,24 @@ def selection_report_variables(target_dir: Path,
         A dict matching str variables in the LaTeX template with their value str.
     """
     latex_dict = {"bibliographypath":
-                  str(sgh.sparkle_report_bibliography_path.absolute())}
-    latex_dict["bibpath"] = str(sgh.sparkle_report_bibliography_path.absolute())
-    latex_dict["numSolvers"] = str(len(sgh.solver_list))
+                  str(gv.sparkle_report_bibliography_path.absolute())}
+    latex_dict["bibpath"] = str(gv.sparkle_report_bibliography_path.absolute())
+    latex_dict["numSolvers"] = str(len(gv.solver_list))
     latex_dict["solverList"] = get_solver_list_latex()
-    latex_dict["numFeatureExtractors"] = str(len(sgh.extractor_list))
+    latex_dict["numFeatureExtractors"] = str(len(gv.extractor_list))
     latex_dict["featureExtractorList"] = get_feature_extractor_list()
     latex_dict["numInstanceClasses"] = get_num_instance_classes()
     latex_dict["instanceClassList"] = get_instance_set_count_list()
     latex_dict["featureComputationCutoffTime"] =\
-        str(sgh.settings.get_general_extractor_cutoff_time())
+        str(gv.settings.get_general_extractor_cutoff_time())
     latex_dict["performanceComputationCutoffTime"] =\
-        str(sgh.settings.get_general_target_cutoff_time())
+        str(gv.settings.get_general_target_cutoff_time())
     latex_dict["solverPerfectRankingList"] = get_solver_perfect_ranking_list()
     latex_dict["solverActualRankingList"] = get_solver_actual_ranking_list()
     latex_dict["PARRankingList"] = get_par_ranking_list()
     latex_dict["VBSPAR"] = get_vbs_par()
     latex_dict["actualPAR"] = get_actual_par()
-    latex_dict["penalty"] = str(sgh.settings.get_general_penalty_multiplier())
+    latex_dict["penalty"] = str(gv.settings.get_general_penalty_multiplier())
     latex_dict["figure-portfolio-selector-sparkle-vs-sbs"] =\
         get_figure_portfolio_selector_sparkle_vs_sbs(target_dir)
     latex_dict["figure-portfolio-selector-sparkle-vs-vbs"] =\
@@ -621,12 +621,12 @@ def generate_report_selection(test_case_directory: str = None) -> None:
     # Only look at the training instance set(s)
     else:
         latex_report_filename = Path("Sparkle_Report")
-    target_path = sgh.selection_output_analysis
+    target_path = gv.selection_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = selection_report_variables(target_path,
                                                         test_case_directory)
 
-    generate_report(sgh.sparkle_latex_dir,
+    generate_report(gv.sparkle_latex_dir,
                     "template-Sparkle.tex",
                     target_path,
                     latex_report_filename,
