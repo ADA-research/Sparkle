@@ -127,8 +127,8 @@ if __name__ == "__main__":
             else:
                 shutil.copy(intended_filepath, instances_directory)
                 sfh.add_remove_platform_item(intended_filename, sgh.instance_list_path)
-                feature_data_csv.add_row(instances_directory / intended_filename)
-                performance_data_csv.add_instance(intended_filename)
+                feature_data_csv.add_row(intended_filepath)
+                performance_data_csv.add_instance(intended_filepath)
                 added += 1
 
         if added == num_inst:
