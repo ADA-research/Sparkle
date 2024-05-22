@@ -29,7 +29,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(*ac.RecomputeMarginalContributionForSelectorArgument.names,
                         **ac.RecomputeMarginalContributionForSelectorArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureArgument.names,
-                        *ac.PerformanceMeasureArgument.kwargs)
+                        **ac.PerformanceMeasureArgument.kwargs)
 
     return parser
 
