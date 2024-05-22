@@ -236,7 +236,7 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "slurm"
-            option_names = ("max_parallel_runs_per_node", )
+            option_names = ("max_parallel_runs_per_node", "clis_per_node", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)

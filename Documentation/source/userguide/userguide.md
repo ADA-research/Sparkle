@@ -628,7 +628,7 @@ number_of_runs_in_parallel = 25
 > description: The number of configuration runs that can run in parallel. 
 
 `max_parallel_runs_per_node`
-> aliases: N/A
+> aliases: `clis_per_node`
 >
 > values: integer
 >
