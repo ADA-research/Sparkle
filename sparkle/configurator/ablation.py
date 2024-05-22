@@ -90,7 +90,7 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
     smac_run_obj = smac_help.get_smac_run_obj()
     smac_each_run_cutoff_length = gv.settings.get_smac_target_cutoff_length()
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
-    concurrent_clis = gv.settings.get_slurm_clis_per_node()
+    concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
     ablation_racing = gv.settings.get_ablation_racing_flag()
     configurator = gv.settings.get_general_sparkle_configurator()
 
@@ -214,7 +214,7 @@ def submit_ablation(ablation_scenario_dir: str,
     # the Log/Ablation/.. folder.
 
     # 1. submit the ablation to the runrunner queue
-    clis = gv.settings.get_slurm_clis_per_node()
+    clis = gv.settings.get_slurm_max_parallel_runs_per_node()
     cmd = "../../ablationAnalysis --optionFile ablation_config.txt"
     srun_options = ["-N1", "-n1", f"-c{clis}"]
     sbatch_options = [f"--cpus-per-task={clis}"] +\
