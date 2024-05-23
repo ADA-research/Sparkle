@@ -14,7 +14,7 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-slurm_true="slurm"
+slurm_true="SLURM"
 slurm_available=$(detect_slurm)
 
 # Settings

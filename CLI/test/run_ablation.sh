@@ -27,7 +27,7 @@ mv $slurm_settings_path $slurm_settings_tmp # Save user settings
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
-slurm_true="slurm"
+slurm_true="SLURM"
 slurm_available=$(detect_slurm)
 
 # Prepare for test

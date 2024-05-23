@@ -28,7 +28,7 @@ mkdir -p $smac_configuration_files_path # Make sure directory exists
 cp $configuration_files_path $smac_configuration_files_path
 
 #Check if Slurm is present in the env
-slurm_true="slurm"
+slurm_true="SLURM"
 slurm_available=$(detect_slurm)
 
 # Copy scenario
