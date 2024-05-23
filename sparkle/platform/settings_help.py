@@ -82,7 +82,7 @@ class Settings:
     DEFAULT_config_number_of_runs = 25
 
     DEFAULT_slurm_number_of_runs_in_parallel = 25
-    DEFAULT_slurm_clis_per_node = 8
+    DEFAULT_slurm_max_parallel_runs_per_node = 8
 
     DEFAULT_smac_target_cutoff_length = "max"
 
@@ -112,7 +112,7 @@ class Settings:
         self.__config_number_of_runs_set = SettingState.NOT_SET
 
         self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
-        self.__slurm_clis_per_node_set = SettingState.NOT_SET
+        self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
         self.__smac_target_cutoff_length_set = SettingState.NOT_SET
         self.__ablation_racing_flag_set = SettingState.NOT_SET
@@ -236,11 +236,11 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "slurm"
-            option_names = ("clis_per_node", )
+            option_names = ("max_parallel_runs_per_node", "clis_per_node", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_slurm_clis_per_node(value, state)
+                    self.set_slurm_max_parallel_runs_per_node(value, state)
                     file_settings.remove_option(section, option)
 
             section = "smac"
@@ -714,26 +714,28 @@ class Settings:
 
         return int(self.__settings["slurm"]["number_of_runs_in_parallel"])
 
-    def set_slurm_clis_per_node(self: Settings, value: int = DEFAULT_slurm_clis_per_node,
-                                origin: SettingState = SettingState.DEFAULT) -> None:
+    def set_slurm_max_parallel_runs_per_node(
+            self: Settings,
+            value: int = DEFAULT_slurm_max_parallel_runs_per_node,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of algorithms Slurm can run in parallel per node."""
         section = "slurm"
-        name = "clis_per_node"
+        name = "max_parallel_runs_per_node"
 
         if value is not None and self.__check_setting_state(
-                self.__slurm_clis_per_node_set, origin, name):
+                self.__slurm_max_parallel_runs_per_node_set, origin, name):
             self.__init_section(section)
-            self.__slurm_clis_per_node_set = origin
+            self.__slurm_max_parallel_runs_per_node_set = origin
             self.__settings[section][name] = str(value)
 
         return
 
-    def get_slurm_clis_per_node(self: Settings) -> int:
+    def get_slurm_max_parallel_runs_per_node(self: Settings) -> int:
         """Return the number of algorithms Slurm can run in parallel per node."""
-        if self.__slurm_clis_per_node_set == SettingState.NOT_SET:
-            self.set_slurm_clis_per_node()
+        if self.__slurm_max_parallel_runs_per_node_set == SettingState.NOT_SET:
+            self.set_slurm_max_parallel_runs_per_node()
 
-        return int(self.__settings["slurm"]["clis_per_node"])
+        return int(self.__settings["slurm"]["max_parallel_runs_per_node"])
 
     # SLURM extra options
 
