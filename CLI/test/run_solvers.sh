@@ -27,7 +27,7 @@ CLI/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run solvers
 output_true="Running solvers done!"
-output=$(CLI/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
+output=$(CLI/run_solvers.py --run-on=LOCAL --settings-file $sparkle_test_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then
@@ -39,7 +39,7 @@ fi
 
 # Run solvers recompute and parallel
 output_true="Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
+output=$(CLI/run_solvers.py --run-on=SLURM --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
@@ -53,7 +53,7 @@ else
 fi
 
 # Run solvers with verifier
-output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
+output=$(CLI/run_solvers.py --run-on=SLURM --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
