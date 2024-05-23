@@ -9,7 +9,6 @@ from sparkle.platform import file_help as sfh
 from CLI.help.status_info import (SolverRunStatusInfo,
                                   StatusInfoType,
                                   ConfigureSolverStatusInfo,
-                                  ConstructParallelPortfolioStatusInfo,
                                   ConstructPortfolioSelectorStatusInfo,
                                   GenerateReportStatusInfo)
 from CLI.help.command_help import CommandName
