@@ -5,14 +5,18 @@
 import sys
 import os
 import argparse
+import random
+import time
 from pathlib import Path, PurePath
 
 from runrunner.base import Runner
 
+from CLI.help.reporting_scenario import Scenario
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 import global_variables as gv
 from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.solver.solver import Solver
 from CLI.support import run_parallel_portfolio_help as srpp
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
@@ -39,6 +43,13 @@ def parser_function() -> argparse.ArgumentParser:
              " directory, use its full path, the default directory is "
              f"{gv.sparkle_parallel_portfolio_dir}. (default: use the latest "
              f"constructed portfolio) (current latest: {latest})")
+    parser.add_argument(
+        "--solvers",
+        type=list[str],
+        nargs='+',
+        help="Specify the list of solvers to be used. If not specifed, all solvers known"
+             " in Sparkle will be employed."
+    )
     parser.add_argument(*ac.ProcessMonitoringArgument.names,
                         **ac.ProcessMonitoringArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
@@ -64,6 +75,17 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+    if args.solvers is not None:
+        solver_names = ["".join(s) for s in args.solvers]
+        solvers = [Solver.get_solver_by_name(solver) for solver in solver_names]
+        if None in solvers:
+            print("Some solvers not recognised! Check solver names:")
+            for i, name in enumerate(solver_names):
+                if solvers[i] is None:
+                    print(f'\t- "{solver_names[i]}" ')
+            sys.exit(-1)
+    else:
+        solvers = [Solver.get_solver_by_name(p) for p in gv.solver_dir.iterdir()]
 
     check_for_initialise(
         sys.argv,
@@ -87,11 +109,12 @@ if __name__ == "__main__":
 
     if args.portfolio_name is None:
         portfolio_path = gv.latest_scenario().get_parallel_portfolio_path()
-    elif not portfolio_path.is_dir():
-        portfolio_path = Path(gv.sparkle_parallel_portfolio_dir / args.portfolio_name)
+    #elif not portfolio_path.is_dir():
+        #portfolio_path = Path(gv.sparkle_parallel_portfolio_dir / args.portfolio_name)
 
-        if not portfolio_path.is_dir():
-            sys.exit(f'Portfolio "{portfolio_path}" not found, aborting the process.')
+        #if not portfolio_path.is_dir():
+        #    print(f'Portfolio "{portfolio_path}" not found, aborting the process.')
+        #    sys.exit(-1)
 
     # Create list of instance paths
     instance_paths = []
@@ -130,10 +153,27 @@ if __name__ == "__main__":
     print("Sparkle parallel portfolio is running ...")
     # instance_paths = list of paths to all instances
     # portfolio_path = Path to the portfolio containing the solvers
-    succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path, run_on=run_on)
+    if args.portfolio_name is not None:
+        # Use a nickname
+        portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
+    else:
+        # Generate a timestamped nickname
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+        randintstamp = int(random.getrandbits(32))
+        portfolio_path = gv.parallel_portfolio_output_raw / f"{timestamp}_{randintstamp}"
+    portfolio_path.mkdir(parents=True)
+    succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path, solvers, run_on=run_on)
 
     if succes:
+        # Update latest scenario
+        gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
+        gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
         gv.latest_scenario().set_parallel_portfolio_instance_list(instance_paths)
+        # NOTE: Patching code to make sure generate report still works
+        solvers_file = portfolio_path / "solvers.txt"
+        with solvers_file.open("w") as fout:
+            for solver in solvers:
+                fout.write(f"{solver.directory}\n")
         print("Running Sparkle parallel portfolio is done!")
 
         # Write used settings to file

@@ -21,6 +21,7 @@ import sparkle_logging as slog
 from sparkle.platform import slurm_help as ssh
 from sparkle.platform.settings_help import ProcessMonitoring
 from sparkle.types.objective import PerformanceMeasure
+from sparkle.solver.solver import Solver
 from CLI.help.command_help import CommandName
 
 import functools
@@ -420,6 +421,7 @@ def wait_for_finished_solver(
     return finished_solver_list, pending_job_with_new_cutoff, started
 
 
+# NOTE: This method can result in recursion for some reason
 def handle_waiting_and_removal_process(
         instances: list[str],
         logging_file: str,
@@ -562,6 +564,7 @@ def remove_result_files(instances: list[str]) -> None:
 
 def run_parallel_portfolio(instances: list[str],
                            portfolio_path: Path,
+                           solvers: list[Solver],
                            run_on: Runner = Runner.SLURM) -> bool:
     """Run the parallel algorithm portfolio and return whether this was successful.
 
@@ -573,42 +576,24 @@ def run_parallel_portfolio(instances: list[str],
         True if successful; False otherwise.
     """
     # Remove existing result files
-    remove_result_files(instances)
-    solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
+    #remove_result_files(instances)
+    #solver_list = sfh.get_solver_list_from_parallel_portfolio(portfolio_path)
+    solver_list = [solver.directory for solver in solvers]
 
     performance_measure =\
         sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     parameters = []
     num_jobs = len(solver_list) * len(instances)
-    temp_solvers = []
     solver_instance_list = []
     # Create a command for each instance-solver combination
     for instance_path in instances:
         instance_name = Path(instance_path).name
         for solver_path in solver_list:
-            seeds = []
-            # If the solver has a seed range specified, create a call per seed
-            if " " in solver_path:
-                solver_path, _, seed_range = solver_path.strip().split()
-                seed_range = int(seed_range)
-                seeds = [seed_val for seed_val in range(1, seed_range + 1)]
-                solver_name = Path(solver_path).name
-                temp_solvers.append(f"{solver_name}_seed_")
-                num_jobs += (seed_range - 1)
-            else:
-                solver_path = Path(solver_path)
-
-            base_param = f"--instance {(instance_path)} --solver "\
-                         f"{str(solver_path)} --performance-measure "\
+            base_param = f"--instance {instance_path} --solver "\
+                         f"{solver_path} --performance-measure "\
                          f"{performance_measure.name}"
-            if len(seeds) > 0:
-                for seed_idx in seeds:
-                    parameters.append(f"{base_param} --seed {seed_idx}")
-                    solver_instance_list.append(
-                        f"{solver_name}_seed_{str(seed_idx)}_{instance_name}")
-            else:
-                parameters.append(base_param)
-                solver_instance_list.append(f"{solver_name}_{instance_name}")
+            parameters.append(base_param)
+            solver_instance_list.append(f"{solver_path.name}_{instance_name}")
 
     # Run the script and cancel the remaining solvers if a solver finishes before the
     # end of the cutoff_time
@@ -648,18 +633,16 @@ def run_parallel_portfolio(instances: list[str],
                                                solver_instance_list, run.script_filepath,
                                                num_jobs / len(instances))
 
-            now = datetime.datetime.now()
-            current_time = now.strftime("%H:%M:%S")
-
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
             with Path(file_path_output1).open("a+") as outfile:
                 fcntl.flock(outfile.fileno(), fcntl.LOCK_EX)
                 outfile.write(f"ending time of portfolio: {current_time}\n")
 
             # After all jobs have finished remove/extract the files in temp only needed
             # for the running of the portfolios.
-            remove_temp_files_unfinished_solvers(solver_instance_list,
-                                                 run.script_filepath,
-                                                 temp_solvers)
+            #remove_temp_files_unfinished_solvers(solver_instance_list,
+            #                                     run.script_filepath,
+            #                                     temp_solvers)
         elif run_on == Runner.SLURM:
             done = False
             wait_cutoff_time = False

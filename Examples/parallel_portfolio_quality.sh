@@ -25,30 +25,16 @@ sparkle add_instances Examples/Resources/CCAG/Instances/CCAG/
 sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/
 sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/
 
-#### Construct the portfolio
-
-# The construction of the portfolio uses all the added solvers in the Solver/ directory and keeps in mind the --overwrite setting.
-# By default --overwrite is set to false, which means an existing portfolio with the same name cannot be overwritten and will throw an error instead. If set to true, an existing portfolio with the same name will be overwritten (if it exists)
-
-# The --nickname option can be used to name your portfolio. 
-# For example '--nickname quality_experiment', if this option is not used then the default nickname is used
-# This is sparkle_parallel_portfolio
-# Without using the --solver option all solvers will be added, if you want, for example, only a subset of solvers from the Solver/ directory 
-# you can use a space seperated list, like --solver Solvers/FastCA Solvers/TCA
-
-# In order to add multiple variations of a single solver you have to add ',number_of_solver_variations' within the space seperated solver list.
-# For example --solver Solvers/FastCA,4 wich will create a portfolio containing four variations of FastCA
-# If this is not used only a single variation of the solver will be added.
-
-sparkle construct_sparkle_parallel_portfolio --nickname quality_experiment
-
 #### Run the portfolio 
 
 # By running the portfolio a list of jobs will be created which will be executed by the cluster.
 # Use the --cutoff-time option to specify the maximal time for which the portfolio is allowed to run.
-# add --portfolio-name to specify a portfolio otherwise it will select the last constructed portfolio
+# add --portfolio-name to specify a nickname for your portfolio
 
-# The --instance-paths option must be followed by a space seperated list of paths to an instance or an instance set.
+# The --solvers option must be followed by a space sepearted list of Solver paths/names. If none are specified,
+# the know list of solvers for Sparkle will be used. 
+
+# The --instance-paths option must be followed by a space separated list of paths to an instance or an instance set.
 # For example --instance-paths Instances/Instance_Set_Name/Single_Instance Instances/Other_Instance_Set_Name
 
 sparkle run_sparkle_parallel_portfolio --instance-paths Instances/CCAG/ --performance-measure QUALITY_ABSOLUTE --portfolio-name quality_experiment
