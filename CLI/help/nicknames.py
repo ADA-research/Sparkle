@@ -15,6 +15,9 @@ def resolve_object_name(name: str | Path,
     Returns:
         Path to the object, None if unresolvable.
     """
+    # We cannot handle None as a name
+    if name is None:
+        return None
     # First check if the name already is a path
     if Path(name).exists():
         return Path(name)
