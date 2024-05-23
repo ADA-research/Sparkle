@@ -31,7 +31,6 @@ CLI/add_instances.py $instances_path > /dev/null
 CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
 CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
 CLI/add_solver.py --deterministic 0 $solverC_path > /dev/null
-CLI/construct_sparkle_parallel_portfolio.py > /dev/null
 
 # Run sparkle parallel portfolio on a single instance
 output_true="Running Sparkle parallel portfolio is done!"
