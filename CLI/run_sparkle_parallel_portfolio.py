@@ -46,7 +46,7 @@ def parser_function() -> argparse.ArgumentParser:
     parser.add_argument(
         "--solvers",
         type=list[str],
-        nargs='+',
+        nargs="+",
         help="Specify the list of solvers to be used. If not specifed, all solvers known"
              " in Sparkle will be employed."
     )
@@ -109,12 +109,6 @@ if __name__ == "__main__":
 
     if args.portfolio_name is None:
         portfolio_path = gv.latest_scenario().get_parallel_portfolio_path()
-    #elif not portfolio_path.is_dir():
-        #portfolio_path = Path(gv.sparkle_parallel_portfolio_dir / args.portfolio_name)
-
-        #if not portfolio_path.is_dir():
-        #    print(f'Portfolio "{portfolio_path}" not found, aborting the process.')
-        #    sys.exit(-1)
 
     # Create list of instance paths
     instance_paths = []
