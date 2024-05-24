@@ -3,10 +3,10 @@
 """Sparkle command to execute a parallel algorithm portfolio.."""
 
 import sys
-import os
 import argparse
 import random
 import time
+import shutil
 from pathlib import Path, PurePath
 
 from runrunner.base import Runner
@@ -14,6 +14,7 @@ from runrunner.base import Runner
 from CLI.help.reporting_scenario import Scenario
 import sparkle_logging as sl
 from sparkle.platform import settings_help
+from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
 from sparkle.platform.settings_help import SettingState, Settings
 from sparkle.solver.solver import Solver
@@ -29,20 +30,14 @@ def parser_function() -> argparse.ArgumentParser:
     Returns:
         parser: The parser with the parsed command line arguments
     """
-    if gv._latest_scenario is None:
-        latest = "no scenario found, you have to construct a parallel portfolio first."
-    else:
-        latest = gv.latest_scenario().get_parallel_portfolio_path()
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.InstancePathsRunParallelPortfolioArgument.names,
                         **ac.InstancePathsRunParallelPortfolioArgument.kwargs)
     parser.add_argument(
         "--portfolio-name",
         type=Path,
-        help="Specify the name of the portfolio. If the portfolio is not in the standard"
-             " directory, use its full path, the default directory is "
-             f"{gv.sparkle_parallel_portfolio_dir}. (default: use the latest "
-             f"constructed portfolio) (current latest: {latest})")
+        help="Specify a name of the portfolio. If none is given, one will be generated."
+    )
     parser.add_argument(
         "--solvers",
         type=list[str],
@@ -107,27 +102,26 @@ if __name__ == "__main__":
         print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")
         sys.exit(-1)
 
-    if args.portfolio_name is None:
-        portfolio_path = gv.latest_scenario().get_parallel_portfolio_path()
-
     # Create list of instance paths
     instance_paths = []
 
     for instance in args.instance_paths:
-        if not Path(instance).exists():
-            sys.exit(f'Instance "{instance}" not found, aborting the process.')
-        if Path(instance).is_file():
+        instance_path = Path(instance)
+        if not instance_path.exists():
+            print(f'Instance "{instance}" not found, aborting the process.')
+            sys.exit(-1)
+        if instance_path.is_file():
             print(f"Running on instance {instance}")
             instance_paths.append(instance)
-        elif not Path(instance).is_dir():
-            instance = f"Instances/{instance}"
+        elif not instance_path.is_dir():
+            instance_path = gv.instance_dir / instance
 
-        if Path(instance).is_dir():
-            print(f"Running on {str(len(os.listdir(instance)))} instance(s) from "
+        if instance_path.is_dir():
+            items = [f"{instance}{p.name}" for p in Path(instance).iterdir()
+                     if p.is_file()]
+            print(f"Running on {len(items)} instance(s) from "
                   f"directory {instance}")
-            for item in os.listdir(instance):
-                item_with_dir = f"{instance}{item}"
-                instance_paths.append(item_with_dir)
+            instance_paths.extend(items)
 
     if args.cutoff_time is not None:
         gv.settings.set_general_target_cutoff_time(args.cutoff_time,
@@ -140,21 +134,29 @@ if __name__ == "__main__":
     if args.performance_measure is not None:
         gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
-
+    if gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
+        is not PerformanceMeasure.RUNTIME:
+        print("ERROR: Parallel Portfolio is currently only relevant for "
+              f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
+              "use validation")
+        sys.exit(-1)
     # Write settings to file before starting, since they are used in callback scripts
     gv.settings.write_used_settings()
 
     print("Sparkle parallel portfolio is running ...")
-    # instance_paths = list of paths to all instances
-    # portfolio_path = Path to the portfolio containing the solvers
-    if args.portfolio_name is not None:
-        # Use a nickname
+    if args.portfolio_name is not None:  # Use a nickname
         portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
-    else:
-        # Generate a timestamped nickname
+    else:  # Generate a timestamped nickname
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
         randintstamp = int(random.getrandbits(32))
         portfolio_path = gv.parallel_portfolio_output_raw / f"{timestamp}_{randintstamp}"
+    if portfolio_path.exists():
+        print(f"[WARNING] Portfolio path {portfolio_path} already exists! "
+              "Overwrite? [y/n] ", end="")
+        user_input = input()
+        if user_input != "y":
+            sys.exit()
+        shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
     succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path, solvers, run_on=run_on)
 
