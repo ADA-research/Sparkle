@@ -479,7 +479,7 @@ def handle_waiting_and_removal_process(
     return True
 
 
-def run_parallel_portfolio(instances: list[str],
+def run_parallel_portfolio(instances: list[Path],
                            portfolio_path: Path,
                            solvers: list[Solver],
                            run_on: Runner = Runner.SLURM) -> bool:
@@ -495,33 +495,49 @@ def run_parallel_portfolio(instances: list[str],
     solver_list = [solver.directory for solver in solvers]
     num_solvers, num_instances = len(solver_list), len(instances)
     num_jobs = num_solvers * num_instances
-    parameters = []
-    
+    parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(),
+                        num_jobs)
+    if parallel_jobs > num_jobs:
+        print("WARNING: Not all jobs will be started at the same time due to the "
+              "limitation of number of Slurm jobs that can be run in parallel. Check"
+              " your Sparkle Slurm Settings.")
+    cmd_list = []
+    runsolver_logs = []
+    cutoff = gv.settings.get_general_target_cutoff_time()
+    log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
+    run_status_path = portfolio_path / "run-status-path"
+    run_status_path.mkdir()
     #solver_instance_list = []
     # Create a command for each instance-solver combination
-    for instance_path in instances:
-        #instance_name = Path(instance_path).name
-        for solver_path in solver_list:
-            base_param = f"--instance {instance_path} --solver "\
-                         f"{solver_path} --performance-measure "\
-                         f"{PerformanceMeasure.RUNTIME}"
-            parameters.append(base_param)
-            #solver_instance_list.append(f"{solver_path.name}_{instance_name}")
+    for instance in instances:
+        for solver in solvers:
+            runsolver_watch_log =\
+                run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.log"
+            runsolver_values_log =\
+                run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.var"
+            raw_result_path =\
+                run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.raw"
+            runsolver_args = ["--timestamp", "--use-pty",
+                              "--cpu-limit", str(cutoff),
+                              "-w", runsolver_watch_log,
+                              "-v", runsolver_values_log,
+                              "-o", raw_result_path]
+            solver_call_list = solver.build_solver_cmd(str(instance),
+                configuration={"specifics": "rawres",
+                               "seed": 1,
+                               "cutoff_time": cutoff,
+                               "run_length": cutoff,
+                               },
+                runsolver_configuration=runsolver_args)
+            cmd_list.append(" ".join(solver_call_list))
+            runsolver_logs.append([runsolver_watch_log,
+                                   runsolver_values_log,
+                                   raw_result_path])
 
     # Run the script and cancel the remaining solvers if a solver finishes before the
     # end of the cutoff_time
-    #parallel_portfolio_log = portfolio_path / "logging.txt"
-    #sfh.create_new_empty_file(parallel_portfolio_log)
     srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
-    parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
-    sbatch_options_list = ssh.get_slurm_options_list()
-    # Create cmd list
-    run_status_path = portfolio_path / "run-status-path"
-    run_status_path.mkdir()
-    base_cmd_str = ("CLI/core/run_solvers_core.py --run-status-path "
-                    f"{run_status_path}")
-    cmd_list = [f"{base_cmd_str} {params}" for params in parameters]
-    
+
     # Jobs are added in to the runrunner object in the same order they are provided
     run = rrr.add_to_queue(
         runner=run_on,
@@ -530,7 +546,6 @@ def run_parallel_portfolio(instances: list[str],
         parallel_jobs=parallel_jobs,
         path="./",
         base_dir=gv.sparkle_tmp_path,
-        sbatch_options=sbatch_options_list,
         srun_options=srun_options)
 
     check_interval = 4
@@ -550,7 +565,8 @@ def run_parallel_portfolio(instances: list[str],
                 # Kill all jobs for this instance
                 for job in run.jobs[i*num_solvers:(i+1)*num_solvers]:
                     job.kill()
-                # Extract the data for those that did finish
+                # TODO: Extract the data for those that did finish
+                # TODO: Count those that were cancelled
 
     # NOTE: the IF statement below is Slurm only as well?
     # As running runtime based performance may be less relevant for Local
@@ -599,7 +615,7 @@ def run_parallel_portfolio(instances: list[str],
 
     # NOTE: This is an extremely hardcoded process and the files location should be changed
     # Now that all solvers are either done or have been forcefully stopped, process results.
-    finished_instances_dict = {}
+    """finished_instances_dict = {}
     for instance in instances:
         instance = Path(instance).name
         finished_instances_dict[instance] = ["UNSOLVED", 0]
@@ -629,7 +645,7 @@ def run_parallel_portfolio(instances: list[str],
                 print(f"{str(instances)} was solved with the result: "
                         f"{str(finished_instances_dict[instances][1])}")
         else:
-            print(f"{str(instances)} was not solved in the given cutoff-time.")
+            print(f"{str(instances)} was not solved in the given cutoff-time.")"""
 
 
     return True

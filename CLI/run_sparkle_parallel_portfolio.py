@@ -117,7 +117,7 @@ if __name__ == "__main__":
             instance_path = gv.instance_dir / instance
 
         if instance_path.is_dir():
-            items = [f"{instance}{p.name}" for p in Path(instance).iterdir()
+            items = [instance_path / p.name for p in Path(instance).iterdir()
                      if p.is_file()]
             print(f"Running on {len(items)} instance(s) from "
                   f"directory {instance}")

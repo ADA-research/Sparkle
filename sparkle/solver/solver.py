@@ -83,7 +83,7 @@ class Solver:
 
         return deterministic
 
-    def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
+    def build_solver_cmd(self: Solver, instance: str, configuration: dict = {},
                          runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):
