@@ -8,7 +8,6 @@ import shutil
 from pathlib import Path
 
 import runrunner as rrr
-from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh, settings_help
 import global_variables as sgh
@@ -21,6 +20,7 @@ from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
 from sparkle.platform import slurm_help as ssh
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as apc
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -28,54 +28,23 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Add a solver to the Sparkle platform.",
         epilog="")
-    parser.add_argument(
-        "--deterministic",
-        required=True,
-        type=int,
-        choices=[0, 1],
-        help="indicate whether the solver is deterministic or not",
-    )
+    parser.add_argument(*apc.DeterministicArgument.names,
+                        **apc.DeterministicArgument.kwargs)
     group_solver_run = parser.add_mutually_exclusive_group()
-    group_solver_run.add_argument(
-        "--run-solver-now",
-        default=False,
-        action="store_true",
-        help="immediately run the newly added solver on all instances",
-    )
-    group_solver_run.add_argument(
-        "--run-solver-later",
-        dest="run_solver_now",
-        action="store_false",
-        help="do not immediately run the newly added solver on all instances (default)",
-    )
-    parser.add_argument(
-        "--nickname",
-        type=str,
-        help="set a nickname for the solver"
-    )
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the solver on multiple instances in parallel",
-    )
-    parser.add_argument(
-        "--solver-variations",
-        default=1,
-        type=int,
-        help=("Use this option to add multiple variations of the solver by using a "
-              "different random seed for each varation."))
-    parser.add_argument(
-        "solver_path",
-        metavar="solver-path",
-        type=str,
-        help="path to the solver"
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    group_solver_run.add_argument(*apc.RunSolverNowArgument.names,
+                                  **apc.RunSolverNowArgument.kwargs)
+    group_solver_run.add_argument(*apc.RunExtractorLaterArgument.names,
+                                  **apc.RunSolverLaterArgument.kwargs)
+    parser.add_argument(*apc.NicknameSolverArgument.names,
+                        **apc.NicknameSolverArgument.kwargs)
+    parser.add_argument(*apc.ParallelArgument.names,
+                        **apc.ParallelArgument.kwargs)
+    parser.add_argument(*apc.SolverVariationsArgument.names,
+                        **apc.SolverVariationsArgument.kwargs)
+    parser.add_argument(*apc.SolverPathArgument.names,
+                        **apc.SolverPathArgument.kwargs)
+    parser.add_argument(*apc.RunOnArgument.names,
+                        **apc.RunOnArgument.kwargs)
     return parser
 
 
@@ -130,6 +99,11 @@ if __name__ == "__main__":
               "Can not add new solver.")
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
+
+    # check if the solver binary in the given directory has execution permission
+    for f in Path(solver_directory).iterdir():
+        if f.is_file() and f.suffix == "":
+            sfh.check_file_is_executable(f)
 
     # Add RunSolver executable to the solver
     runsolver_path = Path(sgh.runsolver_path)

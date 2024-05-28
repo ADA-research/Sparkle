@@ -18,6 +18,7 @@ from CLI.help import command_help as ch
 from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as apc
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -25,30 +26,14 @@ def parser_function() -> argparse.ArgumentParser:
     sgh.settings = settings_help.Settings()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--recompute",
-        action="store_true",
-        help="Re-run feature extractor for instances with previously computed features",
-    )
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="Run the feature extractor on multiple instances in parallel",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help=("Specify the settings file to use in case you want to use one other than "
-              "the default"),
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    parser.add_argument(*apc.RecomputeFeaturesArgument.names,
+                        **apc.RecomputeFeaturesArgument.kwargs)
+    parser.add_argument(*apc.ParallelArgument.names,
+                        **apc.ParallelArgument.kwargs)
+    parser.add_argument(*apc.SettingsFileArgument.names,
+                        **apc.SettingsFileArgument.kwargs)
+    parser.add_argument(*apc.RunOnArgument.names,
+                        **apc.RunOnArgument.kwargs)
 
     return parser
 

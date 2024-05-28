@@ -574,12 +574,26 @@ number_of_runs_in_parallel = 25
 
 **\[configuration\]**
 
-`budget_per_run`
+`wallclock_time`
 > aliases: `smac_whole_time_budget`
 >
 > values: integer
 >
 > description: The wallclock time one configuration run is allowed to use for finding configurations.
+
+`cpu_time`
+> aliases: `smac_cpu_time_budget`
+>
+> values: integer
+>
+> description: The cpu time one configuration run is allowed to use for finding configurations.
+
+`solver_calls`
+> aliases: `smac_solver_calls_budget`
+>
+> values: integer
+>
+> description: The number of solver calls one configuration run is allowed to use for finding configurations.
 
 `number_of_runs`
 > aliases: `num_of_smac_runs`
@@ -613,14 +627,14 @@ number_of_runs_in_parallel = 25
 >
 > description: The number of configuration runs that can run in parallel. 
 
-`clis_per_node`
-> aliases: N/A
+`max_parallel_runs_per_node`
+> aliases: `clis_per_node`
 >
 > values: integer
 >
 > note: Not really a Slurm option, will likely be moved to another section.
 >
-> description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the `cli_per_node` is at most 16.
+> description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the `max_parallel_runs_per_node` is at most 16.
 
 ### Priorities
 

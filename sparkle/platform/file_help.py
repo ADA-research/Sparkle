@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import os
-import sys
 import time
 import shutil
 import random
@@ -191,16 +190,17 @@ def rmfiles(files: list[Path]) -> None:
         file.unlink(missing_ok=True)
 
 
-def check_file_is_executable(file_name: Path) -> None:
+def check_file_is_executable(file_name: Path) -> bool:
     """Check if the given file is executable and create an error if not.
 
     Args:
       file_name: Path object representing the file.
     """
     if not os.access(file_name, os.X_OK):
-        print(f"Error: The file {file_name} is not executable.\n"
+        print(f"Warning: The file {file_name} is not executable.\n"
               "Add execution permissions to allow Sparkle to run it.")
-        sys.exit(-1)
+        return False
+    return True
 
 
 def create_temporary_directories() -> None:
@@ -209,8 +209,6 @@ def create_temporary_directories() -> None:
     if not tmp_path.exists():
         tmp_path.mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
-
-    Path("Components/smac-v2.10.03-master-778/tmp/").mkdir(exist_ok=True)
     Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
@@ -230,6 +228,3 @@ def remove_temporary_files() -> None:
 
     for filename in Path("../../CLI/sparkle_help").glob("slurm-*"):
         shutil.rmtree(filename)
-
-    shutil.rmtree(Path("Components/smac-v2.10.03-master-778/tmp/"),
-                  ignore_errors=True)

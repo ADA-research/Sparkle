@@ -6,8 +6,8 @@ from pathlib import Path
 
 import global_variables as sgh
 from sparkle.platform import file_help as sfh
-from sparkle.sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle.sparkle_performance_dataframe import PerformanceDataFrame
+from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 
 
 def feature_data_csv_merge() -> None:

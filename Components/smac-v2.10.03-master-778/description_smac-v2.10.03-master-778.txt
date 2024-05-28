@@ -1,0 +1,6 @@
+Source: https://www.cs.ubc.ca/labs/beta/Projects/SMAC/
+Version: 2015 Jul 19, v2.10.03
+Authors: Hutter, Hoos, Leyton-Brown
+Paper: Hutter et al 2011 - Sequential Model-Based Optimization for General Algorithm Configuration
+License: AGPLv3
+License location: smac-v2.10.03-master-778/LICENSE-AGPLv3.txt

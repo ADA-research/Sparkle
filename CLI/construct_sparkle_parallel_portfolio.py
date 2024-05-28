@@ -15,6 +15,7 @@ from CLI.support import construct_parallel_portfolio_help as scpp
 from CLI.help.reporting_scenario import Scenario
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as apc
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -24,25 +25,14 @@ def parser_function() -> argparse.ArgumentParser:
         parser: The parser with the parsed command line arguments
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--nickname", type=Path,
-                        help="Give a nickname to the portfolio."
-                             f" (default: {sgh.sparkle_parallel_portfolio_name})")
-    parser.add_argument("--solver", required=False, nargs="+", type=str,
-                        help="Specify the list of solvers, add "
-                             '\",<#solver_variations>\" to the end of a path to add '
-                             "multiple instances of a single solver. For example "
-                             "--solver Solver/PbO-CCSAT-Generic,25 to construct a "
-                             "portfolio containing 25 variations of PbO-CCSAT-Generic.")
-    parser.add_argument("--overwrite", type=bool,
-                        help="When set to True an existing parallel portfolio with the "
-                             "same name will be overwritten, when False an error will "
-                             "be thrown instead."
-                             " (default: "
-                             f"{sgh.settings.DEFAULT_paraport_overwriting})")
-    parser.add_argument("--settings-file", type=Path,
-                        help="Specify the settings file to use in case you want to use "
-                             "one other than the default"
-                             f" (default: {sgh.settings.DEFAULT_settings_path}")
+    parser.add_argument(*apc.NicknamePortfolioArgument.names,
+                        **apc.NicknamePortfolioArgument.kwargs)
+    parser.add_argument(*apc.SolverPortfolioArgument.names,
+                        **apc.SolverPortfolioArgument.kwargs)
+    parser.add_argument(*apc.OverwriteArgument.names,
+                        **apc.OverwriteArgument.kwargs)
+    parser.add_argument(*apc.SettingsFileArgument.names,
+                        **apc.SettingsFileArgument.kwargs)
     return parser
 
 

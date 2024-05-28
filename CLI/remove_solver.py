@@ -12,22 +12,16 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "solver",
-        metavar="solver",
-        type=str,
-        help="name, path to or nickname of the solver",
-    )
-    parser.add_argument(
-        "--nickname",
-        action="store_true",
-        help="if set to True solver_path is used as a nickname for the solver",
-    )
+    parser.add_argument(*ac.SolverRemoveArgument.names,
+                        **ac.SolverRemoveArgument.kwargs)
+    parser.add_argument(*ac.NicknameRemoveSolver.names,
+                        **ac.NicknameRemoveSolver.kwargs)
     return parser
 
 
