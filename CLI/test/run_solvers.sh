@@ -26,10 +26,10 @@ CLI/add_instances.py $instances_path > /dev/null
 CLI/add_solver.py --deterministic 0 $solver_path > /dev/null
 
 # Run solvers
-output_true="Running solvers done!"
-output=$(CLI/run_solvers.py --run-on=local --settings-file $sparkle_test_settings_path | tail -1)
+output_true="RunRunner RUN csv_merge: "
+output=$(CLI/run_solvers.py --run-on=LOCAL --settings-file $sparkle_test_settings_path | tail -1)
 
-if [[ $output == $output_true ]];
+if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] run_solvers test succeeded"
 else
@@ -38,14 +38,15 @@ else
 fi
 
 # Run solvers recompute and parallel
-output_true="Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
-output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
+output_true="RunRunner Submitted a run to Slurm "
+output=$(CLI/run_solvers.py --run-on=SLURM --settings-file $sparkle_test_settings_path --parallel --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] run_solvers --parallel --recompute test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	jobid_trimmed=${jobid::-1}
+	scancel $jobid_trimmed
 else
 	echo "[failure] run_solvers --parallel --recompute test failed with output:"
 	echo $output
@@ -53,13 +54,14 @@ else
 fi
 
 # Run solvers with verifier
-output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
+output=$(CLI/run_solvers.py --run-on=SLURM --settings-file $sparkle_test_settings_path --parallel --recompute --verifier SAT | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] run_solvers --parallel --recompute --verifier SAT test succeeded"
     jobid=${output##* }
-	scancel $jobid
+	jobid_trimmed=${jobid::-1}
+	scancel $jobid_trimmed
 else
 	echo "[failure] run_solvers --parallel --recompute --verifier SAT test failed with output:"
 	echo $output

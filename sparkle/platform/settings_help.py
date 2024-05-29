@@ -852,8 +852,11 @@ class Settings:
 
         for section in cur_dict.keys():
             printed_section = False
-            for name in cur_dict[section].keys():
-                if cur_dict[section][name] != prev_dict[section][name]:
+            names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
+            for name in names:
+                cur_val = cur_dict[section].get(name, None)
+                prev_val = prev_dict[section].get(name, None)
+                if cur_val != prev_val:
                     # do we have yet to print the initial warning?
                     if not printed_warning:
                         print("Warning: The following attributes/options have changed:")
@@ -865,7 +868,7 @@ class Settings:
                         printed_section = True
 
                     # print actual change
-                    print(f"  - '{name}' changed from '{prev_dict[section][name]}' "
-                          f"to '{cur_dict[section][name]}'")
+                    print(f"  - '{name}' changed from '{prev_val}' "
+                          f"to '{cur_val}'")
 
         return not printed_warning
