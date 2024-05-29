@@ -96,6 +96,7 @@ def running_solvers_performance_data(
 
     return run
 
+
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
