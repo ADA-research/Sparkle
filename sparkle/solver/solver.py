@@ -45,10 +45,10 @@ class Solver:
         self.solver_wrapper = "sparkle_solver_wrapper.py"
 
     def _get_pcs_file(self: Solver) -> Path | bool:
-        """ Get path of the parameter file.
+        """Get path of the parameter file.
 
         Returns:
-            Path to the parameter file and a False value if the parameter file does not exist.
+            Path to the parameter file or False if the parameter file does not exist.
         """
         file_count = 0
         file_name = ""
@@ -65,10 +65,10 @@ class Solver:
         return self.directory / file_name
 
     def check_pcs_file_exists(self: Solver) -> bool:
-        """
-        Check if the parameter file exists.
-        Returns: Boolean if there is one pcs file in the solver directory.
+        """Check if the parameter file exists.
 
+        Returns:
+            Boolean if there is one pcs file in the solver directory.
         """
         return isinstance(self._get_pcs_file(), Path)
 
@@ -85,8 +85,8 @@ class Solver:
 
         return file_path
 
-    def read_pcs_file(self) -> None:
-        """Read the pcs file """
+    def read_pcs_file(self: Solver) -> None:
+        """Read the pcs file."""
         pcs_file = self._get_pcs_file()
         try:
             parser = pcsparser.PCSParser()
@@ -94,7 +94,6 @@ class Solver:
             print("Could read pcs file")
         except SyntaxError:
             print("Unable to read the pcs file.")
-
 
     # TODO: This information should be stored in the solver as an attribute too.
     # That will allow us to at least skip this method.
@@ -113,9 +112,6 @@ class Solver:
                 break
 
         return deterministic
-
-
-
 
     def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
                          runsolver_configuration: list[str] = None) -> list[str]:

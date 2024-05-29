@@ -51,7 +51,8 @@ def parser_function() -> argparse.ArgumentParser:
         dest="run_checks",
         default=True,
         action="store_false",
-        help="Checks the solver's functionality by testing it on an instance and the pcs file, when applicable."
+        help="Checks the solver's functionality by testing it on an instance "
+             "and the pcs file, when applicable."
     )
     return parser
 
@@ -98,11 +99,11 @@ if __name__ == "__main__":
             solver.read_pcs_file()
 
         configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
-        if not (configurator_wrapper_path.is_file() and
-                sfh.check_file_is_executable(configurator_wrapper_path)):
+        if not (configurator_wrapper_path.is_file()
+                and sfh.check_file_is_executable(configurator_wrapper_path)):
             print(f"WARNING: Solver {solver_source.name} does not have a "
-                  f"configurator wrapper (Missing file {gv.sparkle_solver_wrapper}) "
-                  "or is not executable. Therefore it cannot be automatically configured.")
+                  f"configurator wrapper (Missing file {gv.sparkle_solver_wrapper}) or "
+                  f"is not executable. Therefore it cannot be automatically configured.")
 
     # Start add solver
     solver_directory = sash.get_solver_directory(solver_source.name)
@@ -136,7 +137,6 @@ if __name__ == "__main__":
     performance_data_csv.save_csv()
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", gv.solver_list_path)
-
 
     print(f"Adding solver {solver_source.name} done!")
 
