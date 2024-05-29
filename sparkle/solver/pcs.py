@@ -35,7 +35,6 @@ def write_configuration_pcs(solver_name: str, config_str: str, tmp_path: Path) -
     """
     # Read optimised configuration and convert to dict
 
-    config_str += " -arena '12345'"
     optimised_configuration_list = config_str.split()
 
     # Create dictionary

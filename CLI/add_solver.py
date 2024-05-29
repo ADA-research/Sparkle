@@ -15,6 +15,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 from CLI.run_solvers import running_solvers_performance_data
 from sparkle.solver import add as sash
+from sparkle.solver import Solver
 import sparkle_logging as sl
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
@@ -45,6 +46,14 @@ def parser_function() -> argparse.ArgumentParser:
                         **apc.SolverPathArgument.kwargs)
     parser.add_argument(*apc.RunOnArgument.names,
                         **apc.RunOnArgument.kwargs)
+    parser.add_argument(
+        "--skip-checks",
+        dest="run_checks",
+        default=True,
+        action="store_false",
+        help="Checks the solver's functionality by testing it on an instance "
+             "and the pcs file, when applicable."
+    )
     return parser
 
 
@@ -82,13 +91,22 @@ if __name__ == "__main__":
               "a postive integer must be used. Stopping execution.")
         sys.exit(-1)
 
-    configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
-    if configurator_wrapper_path.is_file():
-        sfh.check_file_is_executable(configurator_wrapper_path)
-    else:
-        print(f"WARNING: Solver {solver_source.name} does not have a "
-              f"configurator wrapper (Missing file {gv.sparkle_solver_wrapper})."
-              "Therefore it cannot be automatically be configured.")
+    if args.run_checks:
+        print("Running checks...")
+        solver = Solver(Path(solver_source))
+        if solver.check_pcs_file_exists():
+            print("One pcs file detected, this is a configurable solver.")
+            if solver.read_pcs_file():
+                print("Can read the pcs file.")
+            else:
+                print("WARNING: Can not read the provided pcs file format.")
+
+        configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
+        if not (configurator_wrapper_path.is_file()
+                and sfh.check_file_is_executable(configurator_wrapper_path)):
+            print(f"WARNING: Solver {solver_source.name} does not have a "
+                  f"configurator wrapper (Missing file {gv.sparkle_solver_wrapper}) or "
+                  f"is not executable. Therefore it cannot be automatically configured.")
 
     # Start add solver
     solver_directory = sash.get_solver_directory(solver_source.name)
@@ -99,11 +117,6 @@ if __name__ == "__main__":
               "Can not add new solver.")
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
-
-    # check if the solver binary in the given directory has execution permission
-    for f in Path(solver_directory).iterdir():
-        if f.is_file() and f.suffix == "":
-            sfh.check_file_is_executable(f)
 
     # Add RunSolver executable to the solver
     runsolver_path = Path(gv.runsolver_path)
@@ -120,9 +133,6 @@ if __name__ == "__main__":
     performance_data_csv.save_csv()
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", gv.solver_list_path)
-
-    if sash.check_adding_solver_contain_pcs_file(solver_directory):
-        print("One pcs file detected, this is a configurable solver.")
 
     print(f"Adding solver {solver_source.name} done!")
 
