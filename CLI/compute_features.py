@@ -8,7 +8,7 @@ from pathlib import Path
 from runrunner.base import Runner
 import runrunner as rrr
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.instance import compute_features_help as scf
 import sparkle_logging as sl
 from sparkle.platform import settings_help
@@ -23,7 +23,7 @@ from CLI.help import argparse_custom as apc
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     parser = argparse.ArgumentParser()
     parser.add_argument(*apc.RecomputeFeaturesArgument.names,
@@ -47,7 +47,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
             On which computer or cluster environment to run the solvers.
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
     """
-    runs = [scf.computing_features_parallel(Path(sgh.feature_data_csv_path),
+    runs = [scf.computing_features_parallel(Path(gv.feature_data_csv_path),
                                             recompute, run_on=run_on)]
     # If there are no jobs return
     if all(run is None for run in runs):
@@ -60,7 +60,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
         cmd="sparkle/structures/csv_merge.py",
         name=CommandName.CSV_MERGE,
         dependencies=runs[-1],
-        base_dir=sgh.sparkle_tmp_path,
+        base_dir=gv.sparkle_tmp_path,
         sbatch_options=ssh.get_slurm_options_list()))
 
     if run_on == Runner.LOCAL:
@@ -74,7 +74,7 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -89,12 +89,12 @@ if __name__ == "__main__":
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
-        sgh.settings.read_settings_ini(
+        gv.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
 
     # Check if there are any feature extractors registered
-    if not sgh.extractor_list:
+    if not gv.extractor_list:
         print("No feature extractors present! Add feature extractors to Sparkle "
               "by using the add_feature_extractor command.")
         sys.exit()
@@ -103,12 +103,12 @@ if __name__ == "__main__":
     print("Start computing features ...")
 
     if not args.parallel:
-        scf.computing_features(Path(sgh.feature_data_csv_path), args.recompute)
+        scf.computing_features(Path(gv.feature_data_csv_path), args.recompute)
 
-        print("Feature data file " + sgh.feature_data_csv_path + " has been updated!")
+        print("Feature data file " + gv.feature_data_csv_path + " has been updated!")
         print("Computing features done!")
     else:
         compute_features_parallel(args.recompute, run_on=args.run_on)
 
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()

@@ -10,7 +10,7 @@ from pathlib import Path
 import runrunner as rrr
 
 from sparkle.platform import file_help as sfh, settings_help
-import global_variables as sgh
+import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 from CLI.support import run_solvers_parallel_help as srsp
@@ -51,7 +51,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -82,12 +82,12 @@ if __name__ == "__main__":
               "a postive integer must be used. Stopping execution.")
         sys.exit(-1)
 
-    configurator_wrapper_path = solver_source / sgh.sparkle_solver_wrapper
+    configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
     if configurator_wrapper_path.is_file():
         sfh.check_file_is_executable(configurator_wrapper_path)
     else:
         print(f"WARNING: Solver {solver_source.name} does not have a "
-              f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper})."
+              f"configurator wrapper (Missing file {gv.sparkle_solver_wrapper})."
               "Therefore it cannot be automatically be configured.")
 
     # Start add solver
@@ -106,7 +106,7 @@ if __name__ == "__main__":
             sfh.check_file_is_executable(f)
 
     # Add RunSolver executable to the solver
-    runsolver_path = Path(sgh.runsolver_path)
+    runsolver_path = Path(gv.runsolver_path)
     if runsolver_path.name in [file.name for file in Path(solver_directory).iterdir()]:
         print("Warning! RunSolver executable detected in Solver "
               f"{Path(solver_source).name}. This will be replaced with "
@@ -115,41 +115,41 @@ if __name__ == "__main__":
     shutil.copyfile(runsolver_path, runsolver_target)
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
-    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     performance_data_csv.add_solver(solver_directory)
     performance_data_csv.save_csv()
     sfh.add_remove_platform_item(
-        f"{solver_directory} {deterministic} {solver_variations}", sgh.solver_list_path)
+        f"{solver_directory} {deterministic} {solver_variations}", gv.solver_list_path)
 
     if sash.check_adding_solver_contain_pcs_file(solver_directory):
         print("One pcs file detected, this is a configurable solver.")
 
     print(f"Adding solver {solver_source.name} done!")
 
-    if Path(sgh.sparkle_algorithm_selector_path).exists():
-        sfh.rmfiles(sgh.sparkle_algorithm_selector_path)
+    if Path(gv.sparkle_algorithm_selector_path).exists():
+        sfh.rmfiles(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_algorithm_selector_path} done!")
+              f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(sgh.sparkle_report_path).exists():
-        sfh.rmfiles(sgh.sparkle_report_path)
-        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
+    if Path(gv.sparkle_report_path).exists():
+        sfh.rmfiles(gv.sparkle_report_path)
+        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     if nickname_str is not None:
         sfh.add_remove_platform_item(solver_directory,
-                                     sgh.solver_nickname_list_path, key=nickname_str)
+                                     gv.solver_nickname_list_path, key=nickname_str)
 
     if args.run_solver_now:
         if not my_flag_parallel:
             print("Start running solvers ...")
-            srs.running_solvers(sgh.performance_data_csv_path, rerun=False)
-            print(f"Performance data file {sgh.performance_data_csv_path}"
+            srs.running_solvers(gv.performance_data_csv_path, rerun=False)
+            print(f"Performance data file {gv.performance_data_csv_path}"
                   " has been updated!")
             print("Running solvers done!")
         else:
-            num_job_in_parallel = sgh.settings.get_slurm_number_of_runs_in_parallel()
+            num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
             dependency_run_list = [srsp.running_solvers_parallel(
-                sgh.performance_data_csv_path, num_job_in_parallel,
+                gv.performance_data_csv_path, num_job_in_parallel,
                 rerun=False, run_on=run_on
             )]
 
@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 cmd="CLI/construct_sparkle_portfolio_selector.py",
                 name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
                 dependencies=dependency_run_list,
-                base_dir=sgh.sparkle_tmp_path,
+                base_dir=gv.sparkle_tmp_path,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)
 
@@ -169,9 +169,9 @@ if __name__ == "__main__":
                 cmd="CLI/generate_report.py",
                 name=CommandName.GENERATE_REPORT,
                 dependencies=dependency_run_list,
-                base_dir=sgh.sparkle_tmp_path,
+                base_dir=gv.sparkle_tmp_path,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)
 
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()

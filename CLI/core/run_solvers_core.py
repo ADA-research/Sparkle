@@ -7,7 +7,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh, settings_help
 from CLI.support import run_solvers_help as srs
 from sparkle.types.objective import PerformanceMeasure
@@ -18,8 +18,8 @@ if __name__ == "__main__":
     # Initialise settings
     global settings
     file_path_latest = Path("Settings/latest.ini")
-    sgh.settings = settings_help.Settings(file_path_latest)
-    perf_measure = sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
+    gv.settings = settings_help.Settings(file_path_latest)
+    perf_measure = gv.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance", required=False, type=str, nargs="+",
@@ -29,9 +29,9 @@ if __name__ == "__main__":
                         default=perf_measure,
                         help="the performance measure, e.g. runtime")
     parser.add_argument("--run-status-path", type=Path,
-                        choices=[sgh.run_solvers_sbatch_tmp_path,
-                                 sgh.pap_sbatch_tmp_path],
-                        default=sgh.run_solvers_sbatch_tmp_path,
+                        choices=[gv.run_solvers_sbatch_tmp_path,
+                                 gv.pap_sbatch_tmp_path],
+                        default=gv.run_solvers_sbatch_tmp_path,
                         help="set the runstatus path of the process")
     parser.add_argument("--seed", type=str, required=False,
                         help="sets the seed used for the solver")
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         # Creating a new directory for the solver to facilitate running several
         # solver_instances in parallel.
         new_solver_directory_path = Path(
-            f"{sgh.sparkle_tmp_path}{solver_path.name}_"
+            f"{gv.sparkle_tmp_path}{solver_path.name}_"
             f"seed_{args.seed}_{instance_name}")
         subtarget = new_solver_directory_path / solver_path.name
         shutil.copytree(solver_path, subtarget, dirs_exist_ok=True)
@@ -60,14 +60,14 @@ if __name__ == "__main__":
     run_status_path = args.run_status_path
     key_str = (f"{solver_path.name}_"
                f"{instance_name}_"
-               f"{sgh.get_time_pid_random_string()}")
+               f"{gv.get_time_pid_random_string()}")
     raw_result_path = f"Tmp/{key_str}.rawres"
     start_time = time.time()
     # create statusinfo file
     status_info = SolverRunStatusInfo()
     status_info.set_solver(solver_path.name)
     status_info.set_instance(instance_name)
-    cutoff_str = str(sgh.settings.get_general_target_cutoff_time())
+    cutoff_str = str(gv.settings.get_general_target_cutoff_time())
     status_info.set_cutoff_time(f"{cutoff_str}"
                                 f" second(s)")
     print("Writing run status to file")
@@ -84,17 +84,17 @@ if __name__ == "__main__":
                     f"{time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))}]")
     run_time_str = "[Actual Run Time (wall clock): " + str(wc_time) + " second(s)]"
     recorded_run_time_str = ("[Recorded Run Time (CPU PAR"
-                             f"{str(sgh.settings.get_general_penalty_multiplier())}): "
+                             f"{str(gv.settings.get_general_penalty_multiplier())}): "
                              f"{str(cpu_time_penalised)} second(s)]")
     status_str = "[Run Status: " + status + "]"
 
     log_str = (f"{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, "
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
-    sfh.write_string_to_file(sgh.sparkle_system_log_path, log_str, append=True)
+    sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     status_info.delete()
 
-    if run_status_path != sgh.pap_sbatch_tmp_path:
-        if sgh.sparkle_tmp_path in solver_path.parents:
+    if run_status_path != gv.pap_sbatch_tmp_path:
+        if gv.sparkle_tmp_path in solver_path.parents:
             shutil.rmtree(solver_path)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
@@ -103,14 +103,14 @@ if __name__ == "__main__":
         obj_str = str(cpu_time_penalised)
     else:
         print(f"*** ERROR: Unknown performance measure detected: {performance_measure}")
-    processed_result_path = sgh.performance_data_dir / "Tmp" / f"{key_str}.result"
+    processed_result_path = gv.performance_data_dir / "Tmp" / f"{key_str}.result"
     with Path(processed_result_path).open("w+") as fout:
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
         fout.write(f"{instance_path}\n"
                    f"{solver_path}\n"
                    f"{obj_str}\n")
 
-    pap_result_path = sgh.pap_performance_data_tmp_path / f"{key_str}.result"
+    pap_result_path = gv.pap_performance_data_tmp_path / f"{key_str}.result"
     with pap_result_path.open("w+") as fout:
         fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
         fout.write(f"{instance_path}\n"

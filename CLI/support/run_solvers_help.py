@@ -9,7 +9,7 @@ import shutil
 from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import sparkle_job_help as sjh
@@ -22,9 +22,9 @@ def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
                                  seed_str: str = None) -> str:
     """Return the command line call string retrieved from the solver wrapper."""
     if seed_str is None:
-        seed_str = str(sgh.get_seed())
+        seed_str = str(gv.get_seed())
 
-    cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
+    cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
     cmd_get_solver_call = (f'{solver_wrapper_path} --print-command "{instance_path}"'
                            f" --seed {seed_str} --cutoff-time {cutoff_time_str}")
     solver_call_rawresult = os.popen(cmd_get_solver_call)
@@ -86,7 +86,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         Path to the solver output
     """
     if custom_cutoff is None:
-        custom_cutoff = sgh.settings.get_general_target_cutoff_time()
+        custom_cutoff = gv.settings.get_general_target_cutoff_time()
 
     # For configured solvers change the directory to accommodate sparkle_smac_wrapper
     original_path = Path.cwd()
@@ -103,7 +103,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         solver_path = "."
 
     # Prepare runsolver call
-    runsolver_path = rs_prefix + sgh.runsolver_path
+    runsolver_path = rs_prefix + gv.runsolver_path
     runsolver_values_log = f"{rs_prefix}{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
     raw_result_path_option = f"{rs_prefix}{raw_result_path}"
@@ -157,12 +157,12 @@ def run_solver_on_instance_and_process_results(
     # Prepare paths
     # TODO: Fix result path for multi-file instances (only a single file is part of the
     # result path)
-    raw_result_path = (f"{sgh.sparkle_tmp_path}"
+    raw_result_path = (f"{gv.sparkle_tmp_path}"
                        f"{Path(solver_path).name}_"
                        f"{Path(instance_path).name}_"
-                       f"{sgh.get_time_pid_random_string()}.rawres")
+                       f"{gv.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
-    solver_wrapper_path = Path(solver_path) / sgh.sparkle_run_default_wrapper
+    solver_wrapper_path = Path(solver_path) / gv.sparkle_run_default_wrapper
 
     # Run
     run_solver_on_instance(solver_path, solver_wrapper_path, instance_path,
@@ -183,8 +183,8 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
 
     If rerun is True, rerun for instances with existing performance data.
     """
-    cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     performance_data = PerformanceDataFrame(performance_data_csv_path)
 
     if rerun:
@@ -266,14 +266,14 @@ def handle_timeouts(runtime: float, status: str,
                     custom_cutoff: int = None) -> tuple[float, str]:
     """Check if there is a timeout and return the status and penalised runtime."""
     if custom_cutoff is None:
-        cutoff_time = sgh.settings.get_general_target_cutoff_time()
+        cutoff_time = gv.settings.get_general_target_cutoff_time()
     else:
         cutoff_time = custom_cutoff
 
     if runtime > cutoff_time and status != "CRASHED":
         status = "TIMEOUT"  # Overwrites possible user status, unless it is 'CRASHED'
     if status == "TIMEOUT" or status == "UNKNOWN":
-        runtime_penalised = sgh.settings.get_penalised_time(cutoff_time)
+        runtime_penalised = gv.settings.get_penalised_time(cutoff_time)
     else:
         runtime_penalised = runtime
 
@@ -283,7 +283,7 @@ def handle_timeouts(runtime: float, status: str,
 def verify(instance_path: str, raw_result_path: str, solver_path: str, status: str)\
         -> str:
     """Run a solution verifier on the solution and update the status if needed."""
-    verifier = sgh.settings.get_general_solution_verifier()
+    verifier = gv.settings.get_general_solution_verifier()
     # Use verifier if one is given and the solver did not time out
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
         return sssh.sat_verify(instance_path, raw_result_path, solver_path)
@@ -404,10 +404,10 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     # TODO: Fix solver removal from performanc data CSV file
     # performance_data_csv.remove_solver(solver_path)
     sfh.add_remove_platform_item(solver_path,
-                                 sgh.solver_list_path,
+                                 gv.solver_list_path,
                                  remove=True)
     sfh.add_remove_platform_item(None,
-                                 sgh.solver_nickname_list_path,
+                                 gv.solver_nickname_list_path,
                                  key=solver_path,
                                  remove=True)
 
@@ -420,7 +420,7 @@ def update_performance_data_id() -> None:
     # Get next pd_id
     pd_id = get_performance_data_id() + 1
     # Write new pd_id
-    pd_id_path = sgh.performance_data_id_path
+    pd_id_path = gv.performance_data_id_path
     with Path(pd_id_path).open("w") as pd_id_file:
         pd_id_file.write(str(pd_id))
 
@@ -430,6 +430,6 @@ def update_performance_data_id() -> None:
 def get_performance_data_id() -> int:
     """Return the current performance data ID."""
     pd_id = 0
-    if Path(sgh.performance_data_id_path).exists():
-        pd_id = int(Path(sgh.performance_data_id_path).open("r").readline())
+    if Path(gv.performance_data_id_path).exists():
+        pd_id = int(Path(gv.performance_data_id_path).open("r").readline())
     return pd_id
