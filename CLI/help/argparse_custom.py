@@ -30,10 +30,9 @@ class SetByUser(argparse.Action):
 
 # taken from https://stackoverflow.com/a/60750535
 class EnumAction(argparse.Action):
-    """
-    Argparse action for handling Enums
-    """
-    def __init__(self, **kwargs):
+    """Argparse action for handling Enums."""
+    def __init__(self: EnumAction, **kwargs: str) -> None:
+        """Initialise the EnumAction."""
         # Pop off the type value
         enum_type = kwargs.pop("type", None)
 
@@ -50,8 +49,10 @@ class EnumAction(argparse.Action):
 
         self._enum = enum_type
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        # Convert value back into an Enum
+    def __call__(self: EnumAction, parser: argparse.ArgumentParser,
+                 namespace: argparse.Namespace, values: str, option_string: str = None) \
+            -> None:
+        """Converts value back to Enum."""
         value = self._enum(values)
         setattr(namespace, self.dest, value)
 
