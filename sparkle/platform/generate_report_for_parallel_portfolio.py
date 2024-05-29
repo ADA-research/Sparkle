@@ -3,7 +3,7 @@
 """Helper functions for parallel portfolio report generation."""
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 import sparkle_logging as sl
 from sparkle.platform import generate_report_help as sgrh
@@ -43,7 +43,7 @@ def get_results() -> dict[str, list[str, str]]:
         A dict consists of a string indicating the instance name, and a list which
         contains the solver name followed by the performance (both as string).
     """
-    solutions_dir = sgh.pap_performance_data_tmp_path
+    solutions_dir = gv.pap_performance_data_tmp_path
     results = sfh.get_list_all_extensions(solutions_dir, "result")
     results_dict = dict()
 
@@ -79,7 +79,7 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
     """
     results_on_instances = get_results()
     latex_itemize = ""
-    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     # Count the number of solved instances per solver, and the unsolved instances
     if perf_measure == PerformanceMeasure.RUNTIME:
         solver_dict = dict()
@@ -87,7 +87,7 @@ def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
 
         for instances in results_on_instances:
             solver_name = Path(results_on_instances[instances][0]).name
-            cutoff_time = str(sgh.settings.get_penalised_time())
+            cutoff_time = str(gv.settings.get_penalised_time())
 
             if results_on_instances[instances][1] != cutoff_time:
                 if "_seed_" in solver_name:
@@ -151,7 +151,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
                         solver_variant_name[:solver_variant_name.rfind("/")])
 
                 solver_variant_name = (
-                    f"{sgh.sparkle_tmp_path}{solver_variant_name}_seed_"
+                    f"{gv.sparkle_tmp_path}{solver_variant_name}_seed_"
                     f"{str(solver_variations)}")
                 full_solver_list.append(solver_variant_name)
         else:
@@ -163,12 +163,12 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
     for instance in instance_list:
         instance_name = Path(instance).name
-        penalised_time = float(sgh.settings.get_penalised_time())
+        penalised_time = float(gv.settings.get_penalised_time())
 
         if instance_name in results:
             run_time = float(results[instance_name][1])
 
-            if run_time <= sgh.settings.get_general_target_cutoff_time():
+            if run_time <= gv.settings.get_general_target_cutoff_time():
                 for solver in full_solver_list:
                     # in because the solver name contains the instance name as well,
                     # or the solver can have an additional '/' at the end of the path
@@ -208,7 +208,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
             if sbs_name in results[instance_name][0]:
                 sbs_dict[instance_name] = results[instance_name][1]
             else:
-                sbs_dict[instance_name] = sgh.settings.get_penalised_time()
+                sbs_dict[instance_name] = gv.settings.get_penalised_time()
         else:
             print(f"WARNING: No result found for instance: {instance_name}")
 
@@ -227,9 +227,9 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     """
     instance_penalty_dict = {}
 
-    cutoff_time = sgh.settings.get_general_target_cutoff_time()
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
     results = get_results()
-    default_penalty = float(sgh.settings.get_penalised_time())
+    default_penalty = float(gv.settings.get_penalised_time())
 
     for instance in instance_list:
         instance_name = Path(instance).name
@@ -279,8 +279,8 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
                 dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance])
             outfile.write(str(sbs_penalty_time) + " " + str(sparkle_penalty_time) + "\n")
 
-    penalised_time_str = str(sgh.settings.get_penalised_time())
-    performance_metric_str = sgh.settings.get_performance_metric_for_report()
+    penalised_time_str = str(gv.settings.get_penalised_time())
+    performance_metric_str = gv.settings.get_performance_metric_for_report()
 
     generate_figure(target_directory, data_filename, penalised_time_str,
                     f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
@@ -311,7 +311,7 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
         A string containing LaTeX code for a table with the portfolio results.
     """
     portfolio_par = 0.0
-    performance_metric_str = sgh.settings.get_performance_metric_for_report()
+    performance_metric_str = gv.settings.get_performance_metric_for_report()
 
     for instance in dict_portfolio:
         portfolio_par += dict_portfolio[instance]
@@ -377,15 +377,15 @@ def parallel_report_variables(target_directory: Path,
         A dictionary that maps variables used in the LaTeX report to values.
     """
     variables_dict = {"bibliographypath":
-                      str(sgh.sparkle_report_bibliography_path.absolute())}
+                      str(gv.sparkle_report_bibliography_path.absolute())}
     solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
     variables_dict["numSolvers"] = str(len(solver_list))
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
     variables_dict["numInstanceClasses"] = str(len(set(
         [Path(instance_path).parent.name for instance_path in instances])))
-    variables_dict["cutoffTime"] = str(sgh.settings.get_general_target_cutoff_time())
+    variables_dict["cutoffTime"] = str(gv.settings.get_general_target_cutoff_time())
     variables_dict["performanceMetric"] =\
-        sgh.settings.get_performance_metric_for_report()
+        gv.settings.get_performance_metric_for_report()
 
     variables_dict["instanceClassList"] = sgrh.get_instance_set_count_list(instances)
 
@@ -403,7 +403,7 @@ def parallel_report_variables(target_directory: Path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
         solvers_with_solution, unsolved_instances, len(instances))
 
-    if (sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    if (gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
             == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
         variables_dict["decisionBool"] = "\\decisionfalse"
     else:
@@ -467,12 +467,12 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         parallel_portfolio_path: Parallel portfolio path.
         instances: List of instances.
     """
-    target_path = sgh.parallel_portfolio_output_analysis
+    target_path = gv.selection_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = parallel_report_variables(
         target_path, parallel_portfolio_path, instances)
 
-    sgrh.generate_report(sgh.sparkle_latex_dir,
+    sgrh.generate_report(gv.sparkle_latex_dir,
                          "template-Sparkle-for-parallel-portfolio.tex",
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",

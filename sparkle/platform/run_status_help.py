@@ -3,7 +3,7 @@
 """Helper functions to communicate run statuses of various commands."""
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from CLI.support import sparkle_job_help as sjh
 from sparkle.platform import file_help as sfh
 from CLI.help.status_info import (SolverRunStatusInfo,
@@ -49,7 +49,7 @@ def print_running_solver_jobs() -> None:
     """Print a list of currently active run solver job."""
     command = CommandName.RUN_SOLVERS
     command_jobs_ids = get_running_jobs_for_command(command)
-    tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
+    tmp_directory = f"{gv.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
     statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
@@ -73,7 +73,7 @@ def print_running_configuration_jobs() -> None:
     """Print a list of currently active run solver job."""
     command = CommandName.CONFIGURE_SOLVER
     command_jobs_ids = get_running_jobs_for_command(command)
-    tmp_directory = f"{sgh.sparkle_tmp_path}/{StatusInfoType.CONFIGURE_SOLVER}/"
+    tmp_directory = f"{gv.sparkle_tmp_path}/{StatusInfoType.CONFIGURE_SOLVER}/"
     statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
@@ -97,7 +97,7 @@ def print_running_portfolio_selector_construction_jobs() -> None:
     """Print a list of currently active ps construction jobs."""
     command = CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR
     command_jobs_ids = get_running_jobs_for_command(command)
-    tmp_directory = (f"{sgh.sparkle_tmp_path}/"
+    tmp_directory = (f"{gv.sparkle_tmp_path}/"
                      f"{StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR}/")
     statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
@@ -124,7 +124,7 @@ def print_running_portfolio_selector_construction_jobs() -> None:
 
 def print_running_generate_report_jobs() -> None:
     """Print a list of currently active generate report jobs."""
-    tmp_directory = (f"{sgh.sparkle_tmp_path}/"
+    tmp_directory = (f"{gv.sparkle_tmp_path}/"
                      f"{StatusInfoType.GENERATE_REPORT}/")
     statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(statusinfo_files) > 0:

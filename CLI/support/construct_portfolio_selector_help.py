@@ -6,7 +6,7 @@ import sys
 import shutil
 from pathlib import Path, PurePath
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
@@ -146,7 +146,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     # (Re)create the path to the selector
     selector_path.parent.mkdir(parents=True, exist_ok=True)
 
-    cutoff_time = sgh.settings.get_general_target_cutoff_time()
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
     cutoff_time_minimum = 2
 
     # AutoFolio cannot handle cutoff time less than 2, adjust if needed
@@ -156,8 +156,8 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         cutoff_time = cutoff_time_minimum
 
     cutoff_time_str = str(cutoff_time)
-    python_executable = sgh.python_executable
-    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    python_executable = gv.python_executable
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     if perf_measure == PerformanceMeasure.RUNTIME:
         objective_function = "--objective runtime"
     elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
@@ -182,7 +182,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         feature_data_csv.impute_missing_value_of_all_columns()
         print("Imputing all missing values done!")
         impute_feature_data_csv_path = (
-            f"{feature_data_csv_path}_{sgh.get_time_pid_random_string()}"
+            f"{feature_data_csv_path}_{gv.get_time_pid_random_string()}"
             "_impute.csv")
         feature_data_csv.save_csv(impute_feature_data_csv_path)
         feature_data_csv_path = impute_feature_data_csv_path
@@ -193,7 +193,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     err_path_str = str(Path(sl.caller_log_dir / err_file))
     performance_data = PerformanceDataFrame(performance_data_csv_path)
     pf_data_autofolio_path = performance_data.to_autofolio()
-    cmd_list = [python_executable, sgh.autofolio_path, "--performance_csv",
+    cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
                 str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
                 objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
                 "--save", str(selector_path)]

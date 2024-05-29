@@ -16,6 +16,7 @@ from sparkle.solver.validator import Validator
 from CLI.help import command_help as ch
 from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -55,9 +56,11 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver = args.solver
-    instance_set_train = args.instance_set_train
-    instance_set_test = args.instance_set_test
+    solver = resolve_object_name(args.solver, gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train,
+                                             target_dir=gv.instance_dir)
+    instance_set_test = resolve_object_name(args.instance_set_test,
+                                            target_dir=gv.instance_dir)
     run_on = args.run_on
 
     check_for_initialise(
@@ -90,7 +93,7 @@ if __name__ == "__main__":
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings.get_general_sparkle_configurator()
-    configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
+    configurator.set_scenario_dirs(solver.name, instance_set_train.name)
 
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(
@@ -106,12 +109,12 @@ if __name__ == "__main__":
                        instance_sets=all_validation_instances)
 
     # Update latest scenario
-    gv.latest_scenario().set_config_solver(Path(solver))
-    gv.latest_scenario().set_config_instance_set_train(Path(instance_set_train))
+    gv.latest_scenario().set_config_solver(solver)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(Path(instance_set_test))
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()
