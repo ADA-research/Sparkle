@@ -13,6 +13,7 @@ import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -34,18 +35,18 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver_path = Path(args.solver)
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping,
+                                      gv.solver_dir)
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_SOLVER])
-
-    if args.nickname:
-        solver_path = Path(gv.solver_nickname_mapping[args.nickname])
+    if solver_path is None:
+        print(f'Could not resolve Solver path/name "{solver_path}"!')
+        sys.exit(-1)
     if not solver_path.parent == gv.solver_dir:
         # Allow user to only specify solvers in Sparkle solver dir
-        solver_path = gv.solver_dir / solver_path
-    if not solver_path.exists():
-        print(f'Sparkle Solver path "{solver_path}" does not exist!')
+        print("Specified Solver is not is Sparkle solver dir! Exiting.")
         sys.exit(-1)
 
     print(f"Start removing solver {solver_path.name} ...")
@@ -65,7 +66,8 @@ if __name__ == "__main__":
 
     if Path(gv.performance_data_csv_path).exists():
         performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
-        performance_data.remove_solver(str(solver_path))
+        if solver_path.name in performance_data.dataframe.columns:
+            performance_data.remove_solver(solver_path.name)
         performance_data.save_csv()
 
     shutil.rmtree(solver_path)

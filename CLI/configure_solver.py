@@ -23,6 +23,7 @@ from sparkle.platform import slurm_help as ssh
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
+from CLI.help.nicknames import resolve_object_name
 from sparkle.solver.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
@@ -156,9 +157,13 @@ if __name__ == "__main__":
 
     validate = args.validate
     ablation = args.ablation
-    solver_path = args.solver
-    instance_set_train = args.instance_set_train
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train,
+                                             target_dir=gv.instance_dir)
     instance_set_test = args.instance_set_test
+    if instance_set_test is not None:
+        instance_set_test = Path(instance_set_test)
     use_features = args.use_features
     run_on = args.run_on
     if args.configurator is not None:
@@ -166,6 +171,7 @@ if __name__ == "__main__":
             value=getattr(Configurator, args.configurator),
             origin=SettingState.CMD_LINE)
 
+    # Check if Solver and instance sets were resolved
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
 

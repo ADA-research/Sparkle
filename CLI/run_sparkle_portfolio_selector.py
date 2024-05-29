@@ -16,6 +16,7 @@ from CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -46,10 +47,14 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+    run_on = args.run_on
+    # NOTE: I don't think the code below actually works for the rest of Sparkle - T.S.
     instance_path = " ".join(
         args.instance_path
     )  # Turn multiple instance files into a space separated string
-    run_on = args.run_on
+    instance_resolved = resolve_object_name(instance_path, target_dir=gv.instance_dir)
+    if instance_resolved is not None:
+        instance_path = instance_resolved
 
     check_for_initialise(
         sys.argv,

@@ -13,6 +13,7 @@ import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -20,9 +21,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.ExtractorPathRemoveArgument.names,
                         **ac.ExtractorPathRemoveArgument.kwargs)
-    parser.add_argument(*ac.NicknameRemoveExtractor.names,
-                        **ac.NicknameRemoveExtractor.kwargs)
-
     return parser
 
 
@@ -35,15 +33,15 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    extractor_path = args.extractor_path
+    extractor_path = resolve_object_name(args.extractor_path,
+                                         gv.extractor_nickname_mapping,
+                                         gv.extractor_dir)
 
     check_for_initialise(
         sys.argv,
         ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_FEATURE_EXTRACTOR]
     )
 
-    if args.nickname:
-        extractor_path = gv.extractor_nickname_mapping[extractor_path]
     if not Path(extractor_path).exists():
         print(f'Feature extractor path "{extractor_path}" does not exist!')
         sys.exit(-1)

@@ -139,7 +139,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                       f"{instance_path} failed! ******")
                 print("****** WARNING: The feature vector of this instance consists of "
                       "missing values ******")
-                print(f"****** Run solver Output:\n{runsolver.stderr}")
+                print(f"****** Run solver Output:\n{runsolver.stderr.decode()}")
                 Path(result_path).unlink(missing_ok=True)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
                     feature_data_csv, instance_path, extractor_path,
