@@ -1,4 +1,4 @@
-name: sparkletest
+name: sparkle
 channels:
   - conda-forge
   - defaults
