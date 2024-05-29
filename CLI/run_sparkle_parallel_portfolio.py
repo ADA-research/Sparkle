@@ -22,7 +22,6 @@ import global_variables as gv
 from sparkle.platform import slurm_help as ssh
 from sparkle.platform.settings_help import SettingState, Settings
 from sparkle.solver.solver import Solver
-from CLI.support import run_parallel_portfolio_help as srpp
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -290,7 +289,7 @@ if __name__ == "__main__":
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    srpp.run_parallel_portfolio(instance_paths, portfolio_path, solvers, run_on=run_on)
+    run_parallel_portfolio(instance_paths, portfolio_path, solvers, run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
