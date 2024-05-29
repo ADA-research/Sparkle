@@ -85,15 +85,16 @@ class Solver:
 
         return file_path
 
-    def read_pcs_file(self: Solver) -> None:
-        """Read the pcs file."""
+    def read_pcs_file(self: Solver) -> bool:
+        """Checks if the pcs file can be read."""
         pcs_file = self._get_pcs_file()
         try:
             parser = pcsparser.PCSParser()
             parser.load(str(pcs_file), convention="smac")
-            print("Could read pcs file.")
+            return True
         except SyntaxError:
-            print("Unable to read the pcs file.")
+            pass
+        return False
 
     # TODO: This information should be stored in the solver as an attribute too.
     # That will allow us to at least skip this method.

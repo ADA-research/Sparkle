@@ -96,7 +96,10 @@ if __name__ == "__main__":
         solver = Solver(Path(solver_source))
         if solver.check_pcs_file_exists():
             print("One pcs file detected, this is a configurable solver.")
-            solver.read_pcs_file()
+            if solver.read_pcs_file():
+                print("Can read the pcs file.")
+            else:
+                print("WARNING: Can not read the provided pcs file format.")
 
         configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
         if not (configurator_wrapper_path.is_file()
