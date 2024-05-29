@@ -13,7 +13,6 @@ from runrunner.base import Runner
 import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.platform import slurm_help as ssh
-from CLI.support import run_solvers_parallel_help as srsph
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SolutionVerifier
@@ -150,7 +149,7 @@ def run_solvers_on_instances(
     if parallel:
         num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
 
-    runs = [srsph.running_solvers_performance_data(
+    runs = [running_solvers_performance_data(
         performance_data_csv_path=gv.performance_data_csv_path,
         num_job_in_parallel=num_job_in_parallel,
         rerun=recompute,
