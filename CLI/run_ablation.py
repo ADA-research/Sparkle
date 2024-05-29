@@ -4,19 +4,19 @@
 import argparse
 import sys
 import shutil
-from pathlib import Path
+from pathlib import PurePath
 
 from runrunner.base import Runner
 
 from sparkle.configurator import ablation as sah
-import global_variables as sgh
+import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -28,74 +28,26 @@ def parser_function() -> argparse.ArgumentParser:
         epilog=("Note that if no test instance set is given, the validation is performed"
                 " on the training set."))
     parser.add_argument("--solver", required=False, type=str, help="path to solver")
-    parser.add_argument(
-        "--instance-set-train",
-        required=False,
-        type=str,
-        help="Path to training instance set",
-    )
-    parser.add_argument(
-        "--instance-set-test",
-        required=False,
-        type=str,
-        help="Path to testing instance set",
-    )
-    parser.add_argument(
-        "--ablation-settings-help",
-        required=False,
-        dest="ablation_settings_help",
-        action="store_true",
-        help="Prints a list of setting that can be used for the ablation analysis",
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=sgh.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
-        action=ac.SetByUser,
-        help="The performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--target-cutoff-time",
-        type=int,
-        default=sgh.settings.DEFAULT_general_target_cutoff_time,
-        action=ac.SetByUser,
-        help="Cutoff time per target algorithm run in seconds",
-    )
-    parser.add_argument(
-        "--budget-per-run",
-        type=int,
-        default=sgh.settings.DEFAULT_config_budget_per_run,
-        action=ac.SetByUser,
-        help="Configuration budget per configurator run in seconds",
-    )
-    parser.add_argument(
-        "--number-of-runs",
-        type=int,
-        default=sgh.settings.DEFAULT_config_number_of_runs,
-        action=ac.SetByUser,
-        help="Number of configuration runs to execute",
-    )
-    parser.add_argument(
-        "--racing",
-        type=bool,
-        default=sgh.settings.DEFAULT_ablation_racing,
-        action=ac.SetByUser,
-        help="Performs abaltion analysis with racing",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=sgh.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help=("Specify the settings file to use in case you want to use one other than "
-              "the default"),
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    parser.add_argument(*ac.InstanceSetTrainAblationArgument.names,
+                        **ac.InstanceSetTrainAblationArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
+                        **ac.InstanceSetTestAblationArgument.kwargs)
+    parser.add_argument(*ac.AblationSettingsHelpArgument.names,
+                        **ac.AblationSettingsHelpArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeAblationArgument.names,
+                        **ac.TargetCutOffTimeAblationArgument.kwargs)
+    parser.add_argument(*ac.WallClockTimeArgument.names,
+                        **ac.WallClockTimeArgument.kwargs)
+    parser.add_argument(*ac.NumberOfRunsAblationArgument.names,
+                        **ac.NumberOfRunsAblationArgument.kwargs)
+    parser.add_argument(*ac.RacingArgument.names,
+                        **ac.RacingArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     parser.set_defaults(ablation_settings_help=False)
     return parser
 
@@ -103,7 +55,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     sl.log_command(sys.argv)
 
@@ -117,9 +69,11 @@ if __name__ == "__main__":
         sah.print_ablation_help()
         sys.exit()
 
-    solver = args.solver
-    instance_set_train = args.instance_set_train
-    instance_set_test = args.instance_set_test
+    solver = resolve_object_name(args.solver, gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train,
+                                             target_dir=gv.instance_dir)
+    instance_set_test = resolve_object_name(args.instance_set_test,
+                                            target_dir=gv.instance_dir)
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
@@ -127,37 +81,40 @@ if __name__ == "__main__":
 
     if ac.set_by_user(args, "settings_file"):
         # Do first, so other command line options can override settings from the file
-        sgh.settings.read_settings_ini(
+        gv.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "target_cutoff_time"):
-        sgh.settings.set_general_target_cutoff_time(
+        gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE
         )
-    if ac.set_by_user(args, "budget_per_run"):
-        sgh.settings.set_config_budget_per_run(
-            args.budget_per_run, SettingState.CMD_LINE
+    if ac.set_by_user(args, "wallclock_time"):
+        gv.settings.set_config_wallclock_time(
+            args.wallclock_time, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "number_of_runs"):
-        sgh.settings.set_config_number_of_runs(
+        gv.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE
         )
     if ac.set_by_user(args, "racing"):
-        sgh.settings.set_ablation_racing_flag(
+        gv.settings.set_ablation_racing_flag(
             args.number_of_runs, SettingState.CMD_LINE
         )
 
-    solver_name = Path(solver).name
-    instance_set_train_name = Path(instance_set_train).name
-    instance_set_test_name = None
-    configurator = sgh.settings.get_general_sparkle_configurator()
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
+
+    solver_name = solver.name
+    instance_set_train_name = instance_set_train.name
+    configurator = gv.settings.get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver_name, instance_set_train_name)
     if instance_set_test is not None:
-        instance_set_test_name = Path(instance_set_test).name
+        instance_set_test_name = instance_set_test.name
     else:
         instance_set_test = instance_set_train
         instance_set_test_name = instance_set_train_name
@@ -178,7 +135,7 @@ if __name__ == "__main__":
                               instance_set_test_name):
         print("Warning: found existing ablation scenario for this combination. "
               "This will be removed.")
-        shutil.rmtree(sgh.ablation_dir + ablation_scenario_dir)
+        shutil.rmtree(gv.ablation_dir + ablation_scenario_dir)
 
     # Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(

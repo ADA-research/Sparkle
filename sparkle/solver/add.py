@@ -3,7 +3,7 @@
 """Helper functions for adding solvers."""
 import os
 from pathlib import Path
-import global_variables as sgh
+import global_variables as gv
 
 
 def get_solver_directory(solver_name: str) -> str:
@@ -15,4 +15,4 @@ def get_solver_directory(solver_name: str) -> str:
     Returns:
         A str of the path to the solver.
     """
-    return str(sgh.solver_dir / solver_name)
+    return str(gv.solver_dir / solver_name)

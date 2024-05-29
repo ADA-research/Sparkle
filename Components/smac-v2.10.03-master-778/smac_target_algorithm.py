@@ -4,10 +4,11 @@
 import sys
 import ast
 import time
+import random
 import subprocess
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from tools.runsolver_parsing import get_runtime
 
 
@@ -31,14 +32,15 @@ if __name__ == "__main__":
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-    runsolver_watch_data_path = Path(f"{str(Path.cwd())}/runsolver_{log_timestamp}.log")
+    runsolver_watch_data_path = Path(f"runsolver_{int(random.getrandbits(32))}_{log_timestamp}.log")
+    runsolver_var_data_path = Path(f"runsolver_{int(random.getrandbits(32))}_{log_timestamp}.var")
 
     runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),
+                      "-v", str(runsolver_var_data_path),
                       "--cpu-limit", str(cutoff_time),
-                      str(solver_dir / sgh.sparkle_solver_wrapper),
-                      str(args)]
-
+                      str(solver_dir / gv.sparkle_solver_wrapper),
+                      '"' + str(args) + '"']
     # 3. Call Runsolver with the solver configurator wrapper and its arguments
     start_t = time.time()
     run_solver = subprocess.run(runsolver_call,
@@ -70,26 +72,26 @@ if __name__ == "__main__":
 
     # Overwrite the CPU runtime with runsolver log value
     # TODO: Runsolver also registers WALL time, add as a settings option in Sparkle
-    runsolver_runtime, run_wtime = get_runtime(runsolver_watch_data_path)
+    runsolver_runtime, run_wtime = get_runtime(runsolver_var_data_path)
     if runsolver_runtime != -1.0:  # Valid value found
         run_time = runsolver_runtime
-        runsolver_watch_data_path.unlink(missing_ok=True)
+        runsolver_var_data_path.unlink(missing_ok=True)
     elif run_wtime != -1.0:
         run_time = run_wtime
         print("WARNING: CPU time not found in Runsolver log. "
               "Using Runsolver Wall Time instead.")
     else:
         print("WARNING: Was not able to deduce runtime from Runsolver. Using Python "
-              f"timer instead for runtime. See {runsolver_watch_data_path}")
+              f"timer instead for runtime. See {runsolver_var_data_path}")
 
     # 5. Return values to SMAC
     # We need to check how the "quality" in the output directory must be formatted
-    quality = '\0'
+    quality = "0"
     if "quality" in outdict.keys():
         quality = outdict["quality"]
         if isinstance(quality, dict):
             #SMAC2 does not support multi-objective so always opt for the first objective
-            objective = sgh.settings.get_general_sparkle_objectives()[0]
+            objective = gv.settings.get_general_sparkle_objectives()[0]
             quality = quality[objective.metric]
         
     print(f"Result for SMAC: {outdict['status']}, {run_time}, 0, {quality}, {args['seed']}")

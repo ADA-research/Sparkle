@@ -12,11 +12,10 @@ from runrunner.base import Runner
 import runrunner as rrr
 
 from CLI.help.status_info import ConfigureSolverStatusInfo
-import global_variables as sgh
+import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.configurator import ablation as sah
-from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import feature_data_csv_help as sfdcsv
@@ -24,9 +23,11 @@ from sparkle.platform import slurm_help as ssh
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
+from CLI.help.nicknames import resolve_object_name
 from sparkle.solver.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -35,78 +36,36 @@ def parser_function() -> argparse.ArgumentParser:
         description="Configure a solver in the Sparkle platform.",
         epilog=("Note that the test instance set is only used if the ``--ablation``"
                 " or ``--validation`` flags are given"))
-    parser.add_argument(
-        "--configurator",
-        type=Path,
-        help="path to configurator"
-    )
-    parser.add_argument(
-        "--solver",
-        type=Path,
-        required=True,
-        help="path to solver"
-    )
-    parser.add_argument(
-        "--instance-set-train",
-        type=Path,
-        required=True,
-        help="path to training instance set",
-    )
-    parser.add_argument(
-        "--instance-set-test",
-        type=Path,
-        required=False,
-        help="path to testing instance set (only for validating)",
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--target-cutoff-time",
-        type=int,
-        help="cutoff time per target algorithm run in seconds",
-    )
-    parser.add_argument(
-        "--budget-per-run",
-        type=int,
-        help="configuration budget per configurator run in seconds",
-    )
-    parser.add_argument(
-        "--number-of-runs",
-        type=int,
-        help="number of configuration runs to execute",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        help="specify the settings file to use instead of the default",
-    )
-    parser.add_argument(
-        "--use-features",
-        required=False,
-        action="store_true",
-        help="use the training set's features for configuration",
-    )
-    parser.add_argument(
-        "--validate",
-        required=False,
-        action="store_true",
-        help="validate after configuration",
-    )
-    parser.add_argument(
-        "--ablation",
-        required=False,
-        action="store_true",
-        help="run ablation after configuration",
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    parser.add_argument(*ac.ConfiguratorArgument.names,
+                        **ac.ConfiguratorArgument.kwargs)
+    parser.add_argument(*ac.SolverArgument.names,
+                        **ac.SolverArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainArgument.names,
+                        **ac.InstanceSetTrainArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTestArgument.names,
+                        **ac.InstanceSetTestArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeConfigurationArgument.names,
+                        **ac.TargetCutOffTimeConfigurationArgument.kwargs)
+    parser.add_argument(*ac.WallClockTimeArgument.names,
+                        **ac.WallClockTimeArgument.kwargs)
+    parser.add_argument(*ac.CPUTimeArgument.names,
+                        **ac.CPUTimeArgument.kwargs)
+    parser.add_argument(*ac.SolverCallsArgument.names,
+                        **ac.SolverCallsArgument.kwargs)
+    parser.add_argument(*ac.NumberOfRunsConfigurationArgument.names,
+                        **ac.NumberOfRunsConfigurationArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.UseFeaturesArgument.names,
+                        **ac.UseFeaturesArgument.kwargs)
+    parser.add_argument(*ac.ValidateArgument.names,
+                        **ac.ValidateArgument.kwargs)
+    parser.add_argument(*ac.AblationArgument.names,
+                        **ac.AblationArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 
@@ -117,25 +76,31 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
         args: Arguments object created by ArgumentParser.
     """
     if args.settings_file is not None:
-        sgh.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
+        gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
     if args.performance_measure is not None:
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
     if args.target_cutoff_time is not None:
-        sgh.settings.set_general_target_cutoff_time(
+        gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
-    if args.budget_per_run is not None:
-        sgh.settings.set_config_budget_per_run(
-            args.budget_per_run, SettingState.CMD_LINE)
+    if args.wallclock_time is not None:
+        gv.settings.set_config_wallclock_time(
+            args.wallclock_time, SettingState.CMD_LINE)
+    if args.cpu_time is not None:
+        gv.settings.set_config_cpu_time(
+            args.cpu_time, SettingState.CMD_LINE)
+    if args.solver_calls is not None:
+        gv.settings.set_config_solver_calls(
+            args.solver_calls, SettingState.CMD_LINE)
     if args.number_of_runs is not None:
-        sgh.settings.set_config_number_of_runs(
+        gv.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
 
 
 def run_after(solver: Path,
               instance_set_train: Path,
               instance_set_test: Path,
-              dependency: rrr.SlurmRun | rrr.LocalRun,
+              dependency: list[rrr.SlurmRun | rrr.LocalRun],
               command: CommandName,
               run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Add a command to run after configuration to RunRunner queue.
@@ -165,7 +130,7 @@ def run_after(solver: Path,
                            cmd=command_line,
                            name=command,
                            dependencies=dependency,
-                           base_dir=sgh.sparkle_tmp_path,
+                           base_dir=gv.sparkle_tmp_path,
                            srun_options=["-N1", "-n1"],
                            sbatch_options=ssh.get_slurm_options_list())
 
@@ -178,7 +143,7 @@ def run_after(solver: Path,
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -192,22 +157,27 @@ if __name__ == "__main__":
 
     validate = args.validate
     ablation = args.ablation
-    solver_path = args.solver
-    instance_set_train = args.instance_set_train
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train,
+                                             target_dir=gv.instance_dir)
     instance_set_test = args.instance_set_test
+    if instance_set_test is not None:
+        instance_set_test = Path(instance_set_test)
     use_features = args.use_features
     run_on = args.run_on
     if args.configurator is not None:
-        sgh.settings.set_general_sparkle_configurator(
+        gv.settings.set_general_sparkle_configurator(
             value=getattr(Configurator, args.configurator),
             origin=SettingState.CMD_LINE)
 
+    # Check if Solver and instance sets were resolved
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.CONFIGURE_SOLVER])
 
     feature_data_df = None
     if use_features:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
             print("Given training set path is not an existing directory")
@@ -249,45 +219,44 @@ if __name__ == "__main__":
     status_info.set_instance_set_test(str(instance_set_test))
     status_info.save()
 
-    number_of_runs = sgh.settings.get_config_number_of_runs()
-    time_budget = sgh.settings.get_config_budget_per_run()
-    cutoff_time = sgh.settings.get_general_target_cutoff_time()
-    cutoff_length = sgh.settings.get_smac_target_cutoff_length()
+    number_of_runs = gv.settings.get_config_number_of_runs()
+    solver_calls = gv.settings.get_config_solver_calls()
+    cpu_time = gv.settings.get_config_cpu_time()
+    wallclock_time = gv.settings.get_config_wallclock_time()
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
+    cutoff_length = gv.settings.get_smac_target_cutoff_length()
     sparkle_objective =\
-        sgh.settings.get_general_sparkle_objectives()[0]
-    configurator = sgh.settings.get_general_sparkle_configurator()
+        gv.settings.get_general_sparkle_objectives()[0]
+    configurator = gv.settings.get_general_sparkle_configurator()
     config_scenario = ConfigurationScenario(
-        solver, instance_set_train, number_of_runs, time_budget, cutoff_time,
-        cutoff_length, sparkle_objective, use_features,
+        solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
+        wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    configure_job = configurator.configure(scenario=config_scenario, run_on=run_on)
+    dependency_job_list = configurator.configure(scenario=config_scenario, run_on=run_on)
 
     # Update latest scenario
-    sgh.latest_scenario().set_config_solver(solver.directory)
-    sgh.latest_scenario().set_config_instance_set_train(instance_set_train)
-    sgh.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
+    gv.latest_scenario().set_config_solver(solver.directory)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
+    gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        sgh.latest_scenario().set_config_instance_set_test(instance_set_test)
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
     else:
         # Set to default to overwrite possible old path
-        sgh.latest_scenario().set_config_instance_set_test()
-
-    dependency_job_list = [configure_job]
-    callback_job = configurator.configuration_callback(configure_job, run_on=run_on)
+        gv.latest_scenario().set_config_instance_set_test()
 
     # Set validation to wait until configuration is done
     if validate:
         validate_jobid = run_after(
-            solver, instance_set_train, instance_set_test, configure_job,
+            solver, instance_set_train, instance_set_test, dependency_job_list,
             command=CommandName.VALIDATE_CONFIGURED_VS_DEFAULT, run_on=run_on
         )
         dependency_job_list.append(validate_jobid)
 
     if ablation:
         ablation_jobid = run_after(
-            solver, instance_set_train, instance_set_test, configure_job,
+            solver, instance_set_train, instance_set_test, dependency_job_list,
             command=CommandName.RUN_ABLATION, run_on=run_on
         )
         dependency_job_list.append(ablation_jobid)
@@ -301,6 +270,6 @@ if __name__ == "__main__":
 
     status_info.delete()
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()
     # Write used scenario to file
-    sgh.latest_scenario().write_scenario_ini()
+    gv.latest_scenario().write_scenario_ini()

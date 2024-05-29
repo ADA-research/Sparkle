@@ -14,7 +14,7 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 
-slurm_true="slurm"
+slurm_true="SLURM"
 slurm_available=$(detect_slurm)
 
 # Settings
@@ -113,7 +113,7 @@ fi
 sleep 1 # Sleep to avoid interference from previous test
 
 # Configure solver with budget per run option
-output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --budget-per-run 10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path --wallclock-time 10 --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
