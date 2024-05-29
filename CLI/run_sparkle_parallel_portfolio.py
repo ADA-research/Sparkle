@@ -135,7 +135,7 @@ if __name__ == "__main__":
         gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE)
     if gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure\
-        is not PerformanceMeasure.RUNTIME:
+            is not PerformanceMeasure.RUNTIME:
         print("ERROR: Parallel Portfolio is currently only relevant for "
               f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
               "use validation")
@@ -158,21 +158,18 @@ if __name__ == "__main__":
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    succes = srpp.run_parallel_portfolio(instance_paths, portfolio_path, solvers, run_on=run_on)
+    srpp.run_parallel_portfolio(instance_paths, portfolio_path, solvers, run_on=run_on)
 
-    if succes:
-        # Update latest scenario
-        gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
-        gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
-        gv.latest_scenario().set_parallel_portfolio_instance_list(instance_paths)
-        # NOTE: Patching code to make sure generate report still works
-        solvers_file = portfolio_path / "solvers.txt"
-        with solvers_file.open("w") as fout:
-            for solver in solvers:
-                fout.write(f"{solver.directory}\n")
-        print("Running Sparkle parallel portfolio is done!")
+    # Update latest scenario
+    gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
+    gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
+    gv.latest_scenario().set_parallel_portfolio_instance_list(instance_paths)
+    # NOTE: Patching code to make sure generate report still works
+    solvers_file = portfolio_path / "solvers.txt"
+    with solvers_file.open("w") as fout:
+        for solver in solvers:
+            fout.write(f"{solver.directory}\n")
+    print("Running Sparkle parallel portfolio is done!")
 
-        # Write used settings to file
-        gv.settings.write_used_settings()
-    else:
-        print("An unexpected error occurred, please check your input and try again.")
+    # Write used settings to file
+    gv.settings.write_used_settings()

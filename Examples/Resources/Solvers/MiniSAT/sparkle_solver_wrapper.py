@@ -4,13 +4,13 @@
 
 import time
 import sys
-import ast
 import subprocess
 from pathlib import Path
+from tools.slurm_parsing import parse_commandline_dict
 
 # Convert the argument of the target_algorithm script to dictionary
-# use the join of the argsv to prevent errors with spaces in the string
-args = ast.literal_eval(" ".join(sys.argv[1:]))
+args = parse_commandline_dict(sys.argv[1:])
+
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
@@ -81,7 +81,7 @@ for key in args:
         params.append(f"-{key}={args[key]}")
 
 # MiniSAT does not use an instance param, instead the filename is just at the end
-params += [instance]
+params += [str(instance)]
 
 try:
     solver_call = subprocess.run(solver_cmd + params,
@@ -106,11 +106,12 @@ if specifics == "rawres":
     tmp_directory = Path("tmp/")
     timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     rawres_file_name = Path(f"{solver_name}_{instance.name}_{timestamp}.rawres_solver")
-    if tmp_directory.name not in [p.name for p in Path.cwd().iterdir()]:
+    if Path.cwd().name != tmp_directory.name:
         tmp_directory.mkdir(exist_ok=True)
         raw_result_path = tmp_directory / rawres_file_name
     else:
         raw_result_path = rawres_file_name
+    raw_result_path.parent.mkdir(parents=True, exist_ok=True)
     with raw_result_path.open("w") as outfile:
         outfile.write(output_str)
 

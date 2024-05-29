@@ -1,16 +1,19 @@
-"""This module helps to extract and structure information from Slurm sbatch files."""
-
-# Standard libs
+"""This module helps to extract and structure information from Slurm I/O."""
 from __future__ import annotations
 import re
 from pathlib import Path
+import ast
 
-# Precompiled regex
-re_sbatch = re.compile("#SBATCH (.*)")
-re_params_all = re.compile(r"params=\( \\\n(?:(.*))\)", re.DOTALL)
-re_params_items = re.compile(r"'(.*)'")
-re_srun_all = re.compile(r"srun (.*)")
-re_srun_split = re.compile(r" (?!-)")
+
+def parse_commandline_dict(args: list[str]) -> dict:
+    """Parses a commandline dictionary to the object."""
+    dict_str = " ".join(args)
+    # Remove all quotes to avoid double strings
+    dict_str = dict_str.replace('"', "").replace("'", "")
+    # Place the quotes only there where needed
+    dict_str = dict_str.replace("{", "{'").replace(": ", "': '")
+    dict_str = dict_str.replace(", ", "', '").replace("}", "'}")
+    return ast.literal_eval(dict_str)
 
 
 class SlurmBatch:
@@ -29,6 +32,12 @@ class SlurmBatch:
     file: Path
         The loaded file Path
     """
+    # Precompiled regex
+    re_sbatch = re.compile("#SBATCH (.*)")
+    re_params_all = re.compile(r"params=\( \\\n(?:(.*))\)", re.DOTALL)
+    re_params_items = re.compile(r"'(.*)'")
+    re_srun_all = re.compile(r"srun (.*)")
+    re_srun_split = re.compile(r" (?!-)")
 
     def __init__(self: SlurmBatch, srcfile: Path) -> None:
         """Parse the data contained in srcfile and localy store the information."""
@@ -37,18 +46,18 @@ class SlurmBatch:
         with Path(self.file).open() as f:
             filestr = f.read()
 
-        self.sbatch_options = re_sbatch.findall(filestr)
+        self.sbatch_options = SlurmBatch.re_sbatch.findall(filestr)
 
         # First find the cmd_params block ...
         cmd_block = ""
-        if len(re_params_all.findall(filestr)) > 0:
-            cmd_block = re_params_all.findall(filestr)[0]
+        if len(SlurmBatch.re_params_all.findall(filestr)) > 0:
+            cmd_block = SlurmBatch.re_params_all.findall(filestr)[0]
 
         # ... then parse it
-        self.cmd_params = re_params_items.findall(cmd_block)
+        self.cmd_params = SlurmBatch.re_params_items.findall(cmd_block)
 
-        srun = re_srun_all.findall(filestr)[0]
-        srun_args, cmd = re_srun_split.split(srun, maxsplit=1)
+        srun = SlurmBatch.re_srun_all.findall(filestr)[0]
+        srun_args, cmd = SlurmBatch.re_srun_split.split(srun, maxsplit=1)
 
         self.srun_options = srun_args.split()
 

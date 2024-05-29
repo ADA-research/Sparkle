@@ -24,6 +24,21 @@ def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
     return cpu_time, wc_time
 
 
+def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> str:
+    """Get run status from runsolver logs."""
+    # First check if runsolver reported time out
+    for line in reversed(runsolver_values_path.open("r").readlines()):
+        if line.startswith("TIMEOUT"):
+            if line == "TIMEOUT=false":
+                return "TIMEOUT"
+            break
+    # Last line of runsolver log should contain the raw sparkle solver wrapper output
+    sparkle_wrapper_dict_str = runsolver_raw_path.open("r").readlines()[-1]
+    solver_regex_filter = re.findall("{.*}", sparkle_wrapper_dict_str)[0]
+    output_dict = ast.literal_eval(solver_regex_filter)
+    return output_dict["status"]
+
+
 def get_solver_args(runsolver_log_path: Path) -> str:
     """Retrieves solver arguments dict from runsolver log."""
     if runsolver_log_path.exists():

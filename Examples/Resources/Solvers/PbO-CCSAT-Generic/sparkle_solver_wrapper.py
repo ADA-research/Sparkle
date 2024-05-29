@@ -3,13 +3,12 @@
 
 import time
 import sys
-import ast
 import subprocess
 from pathlib import Path
+from tools.slurm_parsing import parse_commandline_dict
 
 # Convert the argument of the target_algorithm script to dictionary
-# Join the argv to ensure we can work with broken up arguments
-args = ast.literal_eval(" ".join(sys.argv[1:]))
+args = parse_commandline_dict(sys.argv[1:])
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
