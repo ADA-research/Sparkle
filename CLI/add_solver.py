@@ -115,13 +115,6 @@ if __name__ == "__main__":
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
 
-    # JG: This is not correct as there does not necessarily need to be a binary.
-    # JG: It is important that the wrapper python file has executable rights!
-    # check if the solver binary in the given directory has execution permission
-    # for f in Path(solver_directory).iterdir():
-    #     if f.is_file() and f.suffix == "":
-    #         sfh.check_file_is_executable(f)
-
     # Add RunSolver executable to the solver
     runsolver_path = Path(gv.runsolver_path)
     if runsolver_path.name in [file.name for file in Path(solver_directory).iterdir()]:

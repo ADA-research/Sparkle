@@ -91,7 +91,7 @@ class Solver:
         try:
             parser = pcsparser.PCSParser()
             parser.load(str(pcs_file), convention="smac")
-            print("Could read pcs file")
+            print("Could read pcs file.")
         except SyntaxError:
             print("Unable to read the pcs file.")
 
