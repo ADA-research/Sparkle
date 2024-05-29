@@ -260,18 +260,6 @@ NicknameRemoveExtractor = \
                               "help": "if set to True extractor_path is used as a "
                                       "nickname for the feature extractor"})
 
-NicknameRemoveInstancesArgument = \
-    ArgumentContainer(names=["--nickname"],
-                      kwargs={"action": "store_true",
-                              "help": "if given instances_path is used as a nickname "
-                                      "for the instance set"})
-
-NicknameRemoveSolver = \
-    ArgumentContainer(names=["--nickname"],
-                      kwargs={"action": "store_true",
-                              "help": "if set to True solver_path is used as a nickname "
-                                      "for the solver"})
-
 NicknameSolverArgument = \
     ArgumentContainer(names=["--nickname"],
                       kwargs={"type": str,

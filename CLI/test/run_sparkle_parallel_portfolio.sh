@@ -23,7 +23,7 @@ solverB_path="Examples/Resources/Solvers/MiniSAT/"
 solverC_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
-slurm_true="slurm"
+slurm_true="SLURM"
 slurm_available=$(detect_slurm)
 
 CLI/initialise.py > /dev/null

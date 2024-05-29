@@ -12,8 +12,8 @@ kill_started_jobs_slurm(){
 detect_slurm(){
   if [ -x "$(command -v sinfo)" ];
   then
-    echo "slurm"
+    echo "SLURM"
   else
-    echo "local"
+    echo "LOCAL"
   fi
 }

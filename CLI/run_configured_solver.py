@@ -15,6 +15,7 @@ from CLI.support import run_configured_solver_help as srcsh
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -46,7 +47,8 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    instance_path = args.instance_path
+    instance_path = resolve_object_name(args.instance_path,
+                                        target_dir=gv.instance_dir)
     run_on = args.run_on
 
     check_for_initialise(sys.argv,

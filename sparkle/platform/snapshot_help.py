@@ -6,10 +6,10 @@ import sys
 from pathlib import Path
 import zipfile
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 
-snapshot_log_file_path = sgh.sparkle_err_path
+snapshot_log_file_path = gv.sparkle_err_path
 
 
 def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
@@ -22,16 +22,16 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
       Boolean value indicating whether a Sparkle platform is active or not.
     """
     if check_all_dirs:
-        return all([x.exists() for x in sgh.working_dirs])
+        return all([x.exists() for x in gv.working_dirs])
     else:
-        return any([x.exists() for x in sgh.working_dirs])
+        return any([x.exists() for x in gv.working_dirs])
 
 
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
-    suffix = sgh.get_time_pid_random_string()
-    snapshot_filename = f"{sgh.snapshot_dir}/My_Snapshot_{suffix}"
-    for working_dir in sgh.working_dirs:
+    suffix = gv.get_time_pid_random_string()
+    snapshot_filename = f"{gv.snapshot_dir}/My_Snapshot_{suffix}"
+    for working_dir in gv.working_dirs:
         if working_dir.exists():
             shutil.make_archive(snapshot_filename, "zip", working_dir)
 
@@ -43,10 +43,10 @@ def remove_current_sparkle_platform() -> None:
     print("Cleaning existing Sparkle platform ...")
     sfh.remove_temporary_files()
 
-    for working_dir in sgh.working_dirs:
+    for working_dir in gv.working_dirs:
         shutil.rmtree(working_dir, ignore_errors=True)
 
-    ablation_scenario_dir = f"{sgh.ablation_dir}scenarios/"
+    ablation_scenario_dir = f"{gv.ablation_dir}scenarios/"
     shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
     Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf").unlink(missing_ok=True)
     print("Existing Sparkle platform cleaned!")
@@ -59,10 +59,10 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
       my_snapshot_filename: File path to the file where the current Sparkle
         platform should be stored.
     """
-    my_suffix = sgh.get_time_pid_random_string()
+    my_suffix = gv.get_time_pid_random_string()
     my_tmp_directory = f"tmp_directory_{my_suffix}"
 
-    Path(sgh.sparkle_tmp_path).mkdir(exist_ok=True)
+    Path(gv.sparkle_tmp_path).mkdir(exist_ok=True)
 
     with zipfile.ZipFile(my_snapshot_filename, "r") as zip_ref:
         zip_ref.extractall(my_tmp_directory)

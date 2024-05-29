@@ -8,7 +8,7 @@ import random
 import subprocess
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from tools.runsolver_parsing import get_runtime
 
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
                       "-w", str(runsolver_watch_data_path),
                       "-v", str(runsolver_var_data_path),
                       "--cpu-limit", str(cutoff_time),
-                      str(solver_dir / sgh.sparkle_solver_wrapper),
+                      str(solver_dir / gv.sparkle_solver_wrapper),
                       '"' + str(args) + '"']
     # 3. Call Runsolver with the solver configurator wrapper and its arguments
     start_t = time.time()
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         quality = outdict["quality"]
         if isinstance(quality, dict):
             #SMAC2 does not support multi-objective so always opt for the first objective
-            objective = sgh.settings.get_general_sparkle_objectives()[0]
+            objective = gv.settings.get_general_sparkle_objectives()[0]
             quality = quality[objective.metric]
         
     print(f"Result for SMAC: {outdict['status']}, {run_time}, 0, {quality}, {args['seed']}")

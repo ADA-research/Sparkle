@@ -8,10 +8,10 @@ from pathlib import Path
 
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.platform import settings_help
-import global_variables as sgh
+import global_variables as gv
 
 global settings
-sgh.settings = settings_help.Settings()
+gv.settings = settings_help.Settings()
 
 
 class TestPerformanceData(TestCase):

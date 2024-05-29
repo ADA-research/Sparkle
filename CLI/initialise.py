@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """Command to initialise a Sparkle platform."""
-
 import sys
 import subprocess
 import argparse
 import shutil
 from pathlib import Path
-
 
 from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
@@ -15,14 +13,6 @@ from sparkle.platform import snapshot_help as snh
 from sparkle.structures import csv_help as scsv
 import global_variables as gv
 import sparkle_logging as sl
-
-
-def parser_function() -> argparse.ArgumentParser:
-    """Parse CLI arguments for the initialise command."""
-    parser = argparse.ArgumentParser(
-        description=("Initialise the Sparkle platform, this command does not have any "
-                     "arguments."))
-    return parser
 
 
 def check_for_initialise(argv: list[str], requirements: list[CommandName] = None)\
@@ -103,7 +93,9 @@ def initialise_sparkle(argv: list[str]) -> None:
 
 if __name__ == "__main__":
     # Define command line arguments
-    parser = parser_function()
+    parser = argparse.ArgumentParser(
+        description=("Initialise the Sparkle platform, this command does not have any "
+                     "arguments."))
     # Process command line arguments
     args = parser.parse_args()
 
