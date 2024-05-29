@@ -45,11 +45,11 @@ class Solver:
         self.solver_wrapper = "sparkle_solver_wrapper.py"
 
     def _get_pcs_file(self: Solver) -> Path | bool:
-        """Get path of the parameter file.
+        """ Get path of the parameter file.
 
-                Returns:
-                    Path to the parameter file and a False value if the parameter file does not exist.
-                """
+        Returns:
+            Path to the parameter file and a False value if the parameter file does not exist.
+        """
         file_count = 0
         file_name = ""
         for file_path in self.directory.iterdir():
@@ -90,7 +90,6 @@ class Solver:
         pcs_file = self._get_pcs_file()
         try:
             parser = pcsparser.PCSParser()
-            # TODO add support for more pcs formats
             parser.load(str(pcs_file), convention="smac")
             print("Could read pcs file")
         except SyntaxError:
@@ -115,14 +114,7 @@ class Solver:
 
         return deterministic
 
-    # def check_solver(self: Solver, instance: str = None) -> bool:
-    #
-    #     # Get PCS file
-    #     pcs_file = self.get_pcs_file()
-    #     # Load PCS file
-    #
-    #     # Run on instance
-    #     if instance is not None:
+
 
 
     def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,

@@ -122,13 +122,19 @@ if __name__ == "__main__":
               "a postive integer must be used. Stopping execution.")
         sys.exit(-1)
 
-    configurator_wrapper_path = solver_source / sgh.sparkle_solver_wrapper
-    if configurator_wrapper_path.is_file():
-        sfh.check_file_is_executable(configurator_wrapper_path)
-    else:
-        print(f"WARNING: Solver {solver_source.name} does not have a "
-              f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper})."
-              "Therefore it cannot be automatically configured.")
+    if args.run_checks:
+        print("Running checks...")
+        solver = Solver(Path(solver_directory))
+        if solver.check_pcs_file_exists():
+            print("One pcs file detected, this is a configurable solver.")
+            solver.read_pcs_file()
+
+        configurator_wrapper_path = solver_source / sgh.sparkle_solver_wrapper
+        if not (configurator_wrapper_path.is_file() and
+                sfh.check_file_is_executable(configurator_wrapper_path)):
+            print(f"WARNING: Solver {solver_source.name} does not have a "
+                  f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper}) "
+                  "or is not executable. Therefore it cannot be automatically configured.")
 
     # Start add solver
     solver_directory = sash.get_solver_directory(solver_source.name)
@@ -158,18 +164,6 @@ if __name__ == "__main__":
 
 
     print(f"Adding solver {solver_source.name} done!")
-
-    if args.run_checks:
-        print("Running checks...")
-        solver = Solver(Path(solver_directory))
-        if solver.check_pcs_file_exists():
-            print("One pcs file detected, this is a configurable solver.")
-            solver.read_pcs_file()
-
-        #Check if run results in crash
-        solver.run_solver(instance=".", configuration=dict())
-        # TODO results in error due missing seed, cutoff, runlength, specifics
-        # TODO when missing results are passed, wrapper evaluates to success, but should have crashed as it did not solve anything
 
     if Path(sgh.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(sgh.sparkle_algorithm_selector_path)

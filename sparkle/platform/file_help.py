@@ -191,16 +191,13 @@ def rmfiles(files: list[Path]) -> None:
         file.unlink(missing_ok=True)
 
 
-def check_file_is_executable(file_name: Path) -> None:
+def check_file_is_executable(file_name: Path) -> bool:
     """Check if the given file is executable and create an error if not.
 
     Args:
       file_name: Path object representing the file.
     """
-    if not os.access(file_name, os.X_OK):
-        print(f"Error: The file {file_name} is not executable.\n"
-              "Add execution permissions to allow Sparkle to run it.")
-        sys.exit(-1)
+    return os.access(file_name, os.X_OK)
 
 
 def create_temporary_directories() -> None:
