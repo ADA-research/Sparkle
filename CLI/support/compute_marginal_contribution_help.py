@@ -472,7 +472,7 @@ def print_rank_list(rank_list: list, mode: str) -> None:
 
 def compute_marginal_contribution(
         flag_compute_perfect: bool, flag_compute_actual: bool,
-        flag_recompute: bool) -> None:
+        flag_recompute: bool, selector_timeout: int) -> None:
     """Compute the marginal contribution.
 
     Args:
@@ -482,6 +482,7 @@ def compute_marginal_contribution(
              selector should be computed.
         flag_recompute: Flag indicating whether marginal contributions
             should be recalculated.
+        selector_timeout: The cuttoff time to configure the algorithm selector.
     """
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     performance_measure =\
@@ -525,7 +526,8 @@ def compute_marginal_contribution(
         rank_list = compute_actual_selector_marginal_contribution(
             aggregation_function,
             capvalue_list, minimise,
-            flag_recompute=flag_recompute
+            flag_recompute=flag_recompute,
+            selector_timeout=selector_timeout
         )
         print_rank_list(rank_list, "actual selector")
         print("Marginal contribution (actual selector) computing done!")

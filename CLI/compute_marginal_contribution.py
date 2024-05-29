@@ -66,7 +66,7 @@ if __name__ == "__main__":
         )
 
     scmch.compute_marginal_contribution(
-        args.perfect, args.actual, args.recompute
+        args.perfect, args.actual, args.recompute, args.selector_timeout
     )
 
     # Write used settings to file
