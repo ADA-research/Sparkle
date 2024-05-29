@@ -12,7 +12,7 @@ from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.instance import compute_features_help as scf
 from CLI.support import run_solvers_help as srs
-from CLI.support import run_solvers_parallel_help as srsp
+from CLI.run_solvers import running_solvers_performance_data
 import sparkle_logging as sl
 from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
@@ -171,7 +171,7 @@ if __name__ == "__main__":
             print("Running solvers done!")
         else:
             num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
-            srsp.running_solvers_parallel(
+            running_solvers_performance_data(
                 gv.performance_data_csv_path, num_job_in_parallel, rerun=False)
             print("Running solvers in parallel ...")
 
