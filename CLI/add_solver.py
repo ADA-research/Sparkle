@@ -92,16 +92,16 @@ if __name__ == "__main__":
 
     if args.run_checks:
         print("Running checks...")
-        solver = Solver(Path(solver_directory))
+        solver = Solver(Path(solver_source))
         if solver.check_pcs_file_exists():
             print("One pcs file detected, this is a configurable solver.")
             solver.read_pcs_file()
 
-        configurator_wrapper_path = solver_source / sgh.sparkle_solver_wrapper
+        configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
         if not (configurator_wrapper_path.is_file() and
                 sfh.check_file_is_executable(configurator_wrapper_path)):
             print(f"WARNING: Solver {solver_source.name} does not have a "
-                  f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper}) "
+                  f"configurator wrapper (Missing file {gv.sparkle_solver_wrapper}) "
                   "or is not executable. Therefore it cannot be automatically configured.")
 
     # Start add solver
