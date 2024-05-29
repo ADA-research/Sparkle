@@ -196,11 +196,7 @@ def check_file_is_executable(file_name: Path) -> bool:
     Args:
       file_name: Path object representing the file.
     """
-    if not os.access(file_name, os.X_OK):
-        print(f"Warning: The file {file_name} is not executable.\n"
-              "Add execution permissions to allow Sparkle to run it.")
-        return False
-    return True
+    return os.access(file_name, os.X_OK)
 
 
 def create_temporary_directories() -> None:

@@ -2,6 +2,11 @@
 
 Notable changes to Sparkle will be documented in this file.
 
+## [0.9]
+
+### Added
+- PCS files for configuration are checked if they can be parsed. [SPRK-80]
+
 ## [0.8] - 2024/04/29
 
 ### Added
