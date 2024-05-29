@@ -854,6 +854,7 @@ class Settings:
             printed_section = False
             names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
             for name in names:
+                # if name is not present in one of the two dicts, get None as placeholder
                 cur_val = cur_dict[section].get(name, None)
                 prev_val = prev_dict[section].get(name, None)
                 if cur_val != prev_val:
