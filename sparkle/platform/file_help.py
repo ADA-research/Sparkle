@@ -12,7 +12,7 @@ import fcntl
 from pathlib import Path
 
 import sparkle_logging as sl
-import global_variables as sgh
+import global_variables as gv
 
 
 def create_new_empty_file(filepath: str) -> None:
@@ -35,7 +35,7 @@ def get_instance_list_from_reference(instances_path: Path) -> list[str]:
       List of instances file paths.
     """
     # Read instances from reference file
-    with sgh.instance_list_path.open("r") as infile:
+    with gv.instance_list_path.open("r") as infile:
         instance_list = [x.strip() for x in infile.readlines()
                          if x.startswith(str(instances_path))]
 
@@ -53,7 +53,7 @@ def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
       List of solvers.
     """
     portfolio_solver_list = []
-    solvers_path_str = str(sgh.solver_dir)
+    solvers_path_str = str(gv.solver_dir)
 
     # Read the included solvers (or solver instances) from file
     with (portfolio_path / "solvers.txt").open("r") as infile:
@@ -115,7 +115,7 @@ def add_remove_platform_item(item: any,
         file_target = Path(file_target)
     # Determine object if not present
     if target is None:
-        target = sgh.file_storage_data_mapping[file_target]
+        target = gv.file_storage_data_mapping[file_target]
     # Add/Remove item to/from object
     if isinstance(target, dict):
         if remove:
@@ -211,7 +211,7 @@ def create_temporary_directories() -> None:
         sl.add_output("Tmp/", "Directory with temporary files")
     Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
-    sgh.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
+    gv.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
 
 
@@ -223,7 +223,7 @@ def remove_temporary_files() -> None:
     shutil.rmtree(Path("Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Performance_Data/Tmp/"), ignore_errors=True)
-    shutil.rmtree(sgh.pap_performance_data_tmp_path, ignore_errors=True)
+    shutil.rmtree(gv.pap_performance_data_tmp_path, ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)
 
     for filename in Path("../../CLI/sparkle_help").glob("slurm-*"):

@@ -10,7 +10,7 @@ import builtins
 import statistics
 
 import sparkle_logging as slog
-import global_variables as sgh
+import global_variables as gv
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
@@ -304,7 +304,7 @@ class Settings:
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
         # Write to general output directory
-        file_path_output = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
+        file_path_output = PurePath(gv.sparkle_global_output_dir / slog.caller_out_dir
                                     / self.__settings_dir / self.__settings_file)
         self.write_settings_ini(Path(file_path_output))
 

@@ -6,7 +6,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
@@ -55,15 +55,15 @@ if __name__ == "__main__":
     list_all_filename = sfh.get_list_all_filename_recursive(instances_path)
     list_instances = sfh.get_instance_list_from_reference(instances_path)
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
     performance_data_csv = PerformanceDataFrame(
-        sgh.performance_data_csv_path
+        gv.performance_data_csv_path
     )
 
     for intended_instance in list_instances:
         # Remove instance records
         sfh.add_remove_platform_item(intended_instance,
-                                     sgh.instance_list_path, remove=True)
+                                     gv.instance_list_path, remove=True)
         feature_data_csv.delete_row(intended_instance)
         performance_data_csv.remove_instance(intended_instance)
 
@@ -86,13 +86,13 @@ if __name__ == "__main__":
     feature_data_csv.save_csv()
     performance_data_csv.save_csv()
 
-    if Path(sgh.sparkle_algorithm_selector_path).exists():
-        shutil.rmtree(sgh.sparkle_algorithm_selector_path)
+    if Path(gv.sparkle_algorithm_selector_path).exists():
+        shutil.rmtree(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_algorithm_selector_path} done!")
+              f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(sgh.sparkle_report_path).exists():
-        shutil.rmtree(sgh.sparkle_report_path)
-        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
+    if Path(gv.sparkle_report_path).exists():
+        shutil.rmtree(gv.sparkle_report_path)
+        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     print(f"Removing instances in directory {instances_path} done!")

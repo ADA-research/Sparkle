@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import fcntl
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 
 
@@ -27,7 +27,7 @@ def sparkle_sat_parser(raw_result_path: str, runtime: float) -> str:
 
     NOTE: This parser probably does not work for all SAT solvers.
     """
-    if runtime > sgh.settings.get_general_target_cutoff_time():
+    if runtime > gv.settings.get_general_target_cutoff_time():
         status = "TIMEOUT"
     else:
         status = sat_get_result_status(raw_result_path)
@@ -84,12 +84,12 @@ def sat_get_verify_string(tmp_verify_result_path: str) -> str:
 def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -> str:
     """Run a SAT verifier to determine correctness of a result."""
     tmp_verify_result_path = (
-        f"Tmp/{Path(sgh.sat_verifier_path).name}_"
+        f"Tmp/{Path(gv.sat_verifier_path).name}_"
         f"{Path(raw_result_path).name}_"
-        f"{sgh.get_time_pid_random_string()}.vryres")
+        f"{gv.get_time_pid_random_string()}.vryres")
     # TODO: Log output file
     print("Run SAT verifier")
-    subprocess.run([sgh.sat_verifier_path, instance_path, raw_result_path],
+    subprocess.run([gv.sat_verifier_path, instance_path, raw_result_path],
                    stdout=Path(tmp_verify_result_path).open("w+"))
     print("SAT verifier done")
 
