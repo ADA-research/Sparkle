@@ -303,7 +303,8 @@ def compute_actual_selector_marginal_contribution(
         minimise: bool = True,
         performance_data_csv_path: str = gv.performance_data_csv_path,
         feature_data_csv_path: str = gv.feature_data_csv_path,
-        flag_recompute: bool = False) -> list[tuple[str, float]]:
+        flag_recompute: bool = False,
+        selector_timeout=172000) -> list[tuple[str, float]]:
     """Compute the marginal contributions of solvers in the selector.
 
     Args:
@@ -346,7 +347,8 @@ def compute_actual_selector_marginal_contribution(
     actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
     scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
                                               performance_data_csv_path,
-                                              feature_data_csv_path)
+                                              feature_data_csv_path,
+                                              selector_timeout=selector_timeout)
 
     if not Path(actual_portfolio_selector_path).exists():
         print(f"****** ERROR: {actual_portfolio_selector_path} does not exist! ******")

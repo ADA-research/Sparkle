@@ -81,6 +81,8 @@ class Settings:
     DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
 
+    DEFAULT_portfolio_construction_timeout = None
+
     DEFAULT_slurm_number_of_runs_in_parallel = 25
     DEFAULT_slurm_max_parallel_runs_per_node = 8
 

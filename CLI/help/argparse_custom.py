@@ -502,3 +502,9 @@ WallClockTimeArgument = \
                       kwargs={"type": int,
                               "help": "configuration budget per configurator run in "
                                       "seconds (wallclock)"})
+
+SelectorTimeoutArgument = \
+    ArgumentContainer(names=["--selector-timeout"],
+                      kwargs={"type": int,
+                              "default": Settings.DEFAULT_portfolio_construction_timeout,
+                              "help": "Cuttoff time (in seconds) for the algorithm selector construction"})

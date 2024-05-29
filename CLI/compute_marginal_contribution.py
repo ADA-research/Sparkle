@@ -25,6 +25,8 @@ def parser_function() -> argparse.ArgumentParser:
                        **apc.ActualArgument.kwargs)
     parser.add_argument(*apc.RecomputeMarginalContributionArgument.names,
                         **apc.RecomputeMarginalContributionArgument.kwargs)
+    parser.add_argument(*apc.SelectorTimeoutArgument.names,
+                        **apc.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*apc.PerformanceMeasureArgument.names,
                         **apc.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*apc.SettingsFileArgument.names,
