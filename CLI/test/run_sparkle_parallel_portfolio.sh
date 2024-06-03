@@ -23,7 +23,7 @@ solverB_path="Examples/Resources/Solvers/MiniSAT/"
 solverC_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
-slurm_true="SLURM"
+slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
 CLI/initialise.py > /dev/null
@@ -39,7 +39,7 @@ output=$(CLI/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_set
 if [[ $output == $output_true ]];
 then
 	echo "[success] ($slurm_available) run_sparkle_parallel_portfolio test on a single instance succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_sparkle_parallel_portfolio test on a single instance failed with output:"
 	echo $output
 fi
@@ -50,7 +50,7 @@ output=$(CLI/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_set
 if [[ $output == $output_true ]];
 then
 	echo "[success] ($slurm_available) run_sparkle_parallel_portfolio test on a set of instances succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_sparkle_parallel_portfolio test on a set of instances failed with output:"
 	echo $output
 fi

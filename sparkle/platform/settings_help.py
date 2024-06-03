@@ -81,6 +81,8 @@ class Settings:
     DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
 
+    DEFAULT_portfolio_construction_timeout = None
+
     DEFAULT_slurm_number_of_runs_in_parallel = 25
     DEFAULT_slurm_max_parallel_runs_per_node = 8
 
@@ -852,8 +854,12 @@ class Settings:
 
         for section in cur_dict.keys():
             printed_section = False
-            for name in cur_dict[section].keys():
-                if cur_dict[section][name] != prev_dict[section][name]:
+            names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
+            for name in names:
+                # if name is not present in one of the two dicts, get None as placeholder
+                cur_val = cur_dict[section].get(name, None)
+                prev_val = prev_dict[section].get(name, None)
+                if cur_val != prev_val:
                     # do we have yet to print the initial warning?
                     if not printed_warning:
                         print("Warning: The following attributes/options have changed:")
@@ -865,7 +871,7 @@ class Settings:
                         printed_section = True
 
                     # print actual change
-                    print(f"  - '{name}' changed from '{prev_dict[section][name]}' "
-                          f"to '{cur_dict[section][name]}'")
+                    print(f"  - '{name}' changed from '{prev_val}' "
+                          f"to '{cur_val}'")
 
         return not printed_warning

@@ -156,7 +156,8 @@ class TestMarginalContribution(TestCase):
             minimise=True,
             performance_data_csv_path=perf_path,
             feature_data_csv_path=feature_csv_path,
-            flag_recompute=True
+            flag_recompute=True,
+            selector_timeout=60
         )
 
         self.assertEqual(output, result)

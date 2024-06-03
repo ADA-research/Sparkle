@@ -15,7 +15,7 @@
 
 # Settings
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
-slurm_true="SLURM"
+slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
 # Prepare for test
@@ -33,7 +33,7 @@ output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path | t
 if [[ $output == $output_true ]];
 then
 	echo "[success] compute_features test succeeded"
-else              
+else
 	echo "[failure] compute_features test failed with output:"
 	echo $output
 fi
@@ -56,7 +56,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) compute_features --parallel test failed with output:"
 	echo $output
 	if [[ $slurm_available =~ "${slurm_true}" ]];

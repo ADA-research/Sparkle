@@ -132,7 +132,7 @@ def print_running_generate_report_jobs() -> None:
         for statusinfo_filename in statusinfo_files:
             statusinfo_filepath = Path(
                 tmp_directory
-                + Path(statusinfo_filename).parent)
+                + str(Path(statusinfo_filename).parent))
             status_info = (GenerateReportStatusInfo
                            .from_file(statusinfo_filepath))
             print(f"Start Time: {status_info.get_start_time()}")

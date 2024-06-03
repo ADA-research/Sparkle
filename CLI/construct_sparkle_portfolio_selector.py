@@ -28,6 +28,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.RecomputePortfolioSelectorArgument.kwargs)
     parser.add_argument(*ac.RecomputeMarginalContributionForSelectorArgument.names,
                         **ac.RecomputeMarginalContributionForSelectorArgument.kwargs)
+    parser.add_argument(*ac.SelectorTimeoutArgument.names,
+                        **ac.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureArgument.names,
                         **ac.PerformanceMeasureArgument.kwargs)
 
@@ -106,6 +108,7 @@ if __name__ == "__main__":
         gv.performance_data_csv_path,
         gv.feature_data_csv_path,
         flag_recompute_portfolio,
+        args.selector_timeout
     )
 
     if success:

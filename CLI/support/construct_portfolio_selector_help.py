@@ -117,7 +117,8 @@ def get_selector_fd_id(selector_dir: PurePath) -> int:
 def construct_sparkle_portfolio_selector(selector_path: Path,
                                          performance_data_csv_path: str,
                                          feature_data_csv_path: str,
-                                         flag_recompute: bool = False) -> bool:
+                                         flag_recompute: bool = False,
+                                         selector_timeout=None) -> bool:
     """Create the Sparkle portfolio selector.
 
     Args:
@@ -126,6 +127,8 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         feature_data_csv_path: Feature data csv path.
         flag_recompute: Whether or not to recompute if the selector exists and no data
             was changed. Defaults to False.
+        selector_timeout: The cuttoff time to configure the algorithm selector. If None
+            uses the default selector configuration. Defaults to None.
 
     Returns:
         True if portfolio construction is successful.
@@ -192,10 +195,15 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     err_path_str = str(Path(sl.caller_log_dir / err_file))
     performance_data = PerformanceDataFrame(performance_data_csv_path)
     pf_data_autofolio_path = performance_data.to_autofolio()
-    cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
+    if selector_timeout is None:
+        cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
                 str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
-                objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
-                "--save", str(selector_path)]
+                objective_function, "--save", str(selector_path)]
+    else:
+        cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
+                    str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
+                    objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
+                    "--save", str(selector_path), "--wallclock_limit", str(selector_timeout)]
     # Write command line to log
     print("Running command below:\n", " ".join(cmd_list), file=open(log_path_str, "a+"))
     sl.add_output(log_path_str, "Command line used to construct portfolio through "

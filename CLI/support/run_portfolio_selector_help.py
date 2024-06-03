@@ -152,6 +152,8 @@ def call_sparkle_portfolio_selector_solve_instance(
         performance_data_csv_path: path to the performance data
     """
     # Create instance strings to accommodate multi-file instances
+    if isinstance(instance_path, Path):
+        instance_path = str(instance_path)
     instance_path_list = instance_path.split()
     instance_file_list = []
 

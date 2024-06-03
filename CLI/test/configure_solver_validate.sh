@@ -16,7 +16,7 @@
 
 # Settings
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
-slurm_true="SLURM"
+slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
 # Prepare for test
@@ -47,7 +47,7 @@ if [[ $output =~ "${output_true}" ]]; then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) configure_solver_validation test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];

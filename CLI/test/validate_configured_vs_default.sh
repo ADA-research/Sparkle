@@ -22,7 +22,7 @@ mv $slurm_settings_path $slurm_settings_tmp # Save user settings
 cp $slurm_settings_test $slurm_settings_path # Activate test settings
 
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
-slurm_true="SLURM"
+slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
 # Prepare for test
@@ -66,7 +66,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -86,7 +86,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) validate_configured_vs_default with just training set test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
