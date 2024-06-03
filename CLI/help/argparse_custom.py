@@ -288,14 +288,6 @@ NumberOfRunsAblationArgument = \
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
-OverwriteArgument = \
-    ArgumentContainer(names=["--overwrite"],
-                      kwargs={"type": bool,
-                              "help": "When set to True an existing parallel portfolio "
-                              "with the same name will be overwritten, when False an "
-                              "error will be thrown instead.  (default: "
-                              f"{Settings.DEFAULT_paraport_overwriting})"})
-
 ParallelArgument = ArgumentContainer(names=["--parallel"],
                                      kwargs={"action": "store_true",
                                              "help": "Run the command in parallel"})
@@ -328,8 +320,9 @@ ProcessMonitoringArgument = \
                               "within a portfolio to get an equal chance to have the "
                               "shortest running time on an instance (EXTENDED), e.g., "
                               "when this information is needed in an experiment. "
-                              f"(default: {Settings.DEFAULT_paraport_process_monitoring}"
-                              })
+                              "(default: "
+                              f"{Settings.DEFAULT_parallel_portfolio_process_monitoring}"
+                              ")"})
 
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,

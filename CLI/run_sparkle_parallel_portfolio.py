@@ -91,8 +91,7 @@ def run_parallel_portfolio(instances: list[Path],
         srun_options=["-N1", "-n1"] + ssh.get_slurm_options_list(),
         sbatch_options=ssh.get_slurm_options_list()
     )
-
-    check_interval = 4  # TODO: This should be a setting
+    check_interval = gv.settings.get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
     job_output_dict = {instance.name: {solver.name: {"killed": False,
                                                      "cpu-time": -1.0,
@@ -259,8 +258,8 @@ if __name__ == "__main__":
                                                    SettingState.CMD_LINE)
 
     if args.process_monitoring is not None:
-        gv.settings.set_paraport_process_monitoring(args.process_monitoring,
-                                                    SettingState.CMD_LINE)
+        gv.settings.set_parallel_portfolio_process_monitoring(args.process_monitoring,
+                                                              SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
         gv.settings.set_general_sparkle_objectives(
