@@ -56,9 +56,8 @@ class ReportType(str, Enum):
 
 # Log that keeps track of which commands were executed and where output details can be
 # found
-sparkle_global_log_file = "sparkle.log"
-sparkle_global_log_dir = "Log/"
-sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_log_file)
+sparkle_global_log_dir = Path("Log")
+sparkle_global_log_path = PurePath(sparkle_global_output_dir / "sparkle.log")
 
 sparkle_tmp_path = "Tmp/"
 
@@ -66,7 +65,7 @@ sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"
 
 sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
 
-snapshot_dir = Path("Snapshots/")
+snapshot_dir = Path("Snapshots")
 sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector/")
 
 sparkle_algorithm_selector_name = f"sparkle_portfolio_selector{sparkle_special_string}"

@@ -238,7 +238,7 @@ def submit_ablation(ablation_scenario_dir: str,
     # 2. Submit intermediate actions (copy path from log)
     log_source = "log/ablation-run1234.txt"
     ablation_path = "ablationPath.txt"
-    log_path = Path(gv.sparkle_global_log_dir) / "Ablation" / run_ablation.name
+    log_path = gv.sparkle_global_log_dir / "Ablation" / run_ablation.name
     log_path.mkdir(parents=True, exist_ok=True)
 
     cmd_list = [f"cp {log_source} {ablation_path}", f"cp -r log/ {log_path.absolute()}"]
@@ -281,7 +281,7 @@ def submit_ablation(ablation_scenario_dir: str,
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
         val_dir = run_ablation_validation.name + "_validation"
-        log_path = Path(gv.sparkle_global_log_dir) / "Ablation" / val_dir
+        log_path = gv.sparkle_global_log_dir / "Ablation" / val_dir
         log_path.mkdir(parents=True, exist_ok=True)
         cmd_list = [f"cp {log_source} {ablation_path}",
                     f"cp -r log/ {log_path.absolute()}"]
