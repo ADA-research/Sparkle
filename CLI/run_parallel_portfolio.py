@@ -41,8 +41,7 @@ def run_parallel_portfolio(instances: list[Path],
         solvers: List of solvers to run on the instances.
         run_on: Currently only supports Slurm.
     """
-    solver_list = [solver.directory for solver in solvers]
-    num_solvers, num_instances = len(solver_list), len(instances)
+    num_solvers, num_instances = len(solvers), len(instances)
     num_jobs = num_solvers * num_instances
     parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
     if parallel_jobs > num_jobs:
@@ -51,7 +50,7 @@ def run_parallel_portfolio(instances: list[Path],
               " your Sparkle Slurm Settings.")
     cmd_list, runsolver_logs = [], []
     cutoff = gv.settings.get_general_target_cutoff_time()
-    log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
+    log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     run_status_path = portfolio_path / "run-status-path"
     run_status_path.mkdir()
     # Create a command for each instance-solver combination
@@ -63,6 +62,7 @@ def run_parallel_portfolio(instances: list[Path],
                 run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.var"
             raw_result_path =\
                 run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.raw"
+            print(runsolver_values_log)
             solver_call_list = solver.build_solver_cmd(
                 str(instance),
                 configuration={"specifics": "",
@@ -232,7 +232,7 @@ if __name__ == "__main__":
             sys.exit(-1)
         if instance_path.is_file():
             print(f"Running on instance {instance}")
-            instance_paths.append(instance)
+            instance_paths.append(instance_path)
         elif not instance_path.is_dir():
             instance_path = gv.instance_dir / instance
 
@@ -246,10 +246,6 @@ if __name__ == "__main__":
     if args.cutoff_time is not None:
         gv.settings.set_general_target_cutoff_time(args.cutoff_time,
                                                    SettingState.CMD_LINE)
-
-    if args.process_monitoring is not None:
-        gv.settings.set_parallel_portfolio_process_monitoring(args.process_monitoring,
-                                                              SettingState.CMD_LINE)
 
     if args.performance_measure is not None:
         gv.settings.set_general_sparkle_objectives(
@@ -267,7 +263,7 @@ if __name__ == "__main__":
     if args.portfolio_name is not None:  # Use a nickname
         portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
     else:  # Generate a timestamped nickname
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+        timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.gmtime(time.time()))
         randintstamp = int(random.getrandbits(32))
         portfolio_path = gv.parallel_portfolio_output_raw / f"{timestamp}_{randintstamp}"
     if portfolio_path.exists():
