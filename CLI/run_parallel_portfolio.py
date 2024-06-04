@@ -175,8 +175,6 @@ def parser_function() -> argparse.ArgumentParser:
         help="Specify the list of solvers to be used. If not specifed, all solvers known"
              " in Sparkle will be employed."
     )
-    parser.add_argument(*ac.ProcessMonitoringArgument.names,
-                        **ac.ProcessMonitoringArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,

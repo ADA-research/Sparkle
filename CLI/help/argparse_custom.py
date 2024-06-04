@@ -12,7 +12,6 @@ from sparkle.platform.settings_help import SettingState
 import global_variables as gv
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
-from sparkle.platform.settings_help import ProcessMonitoring
 from CLI.help.command_help import CommandName
 from sparkle.platform.settings_help import Settings
 
@@ -309,20 +308,6 @@ PerformanceMeasureSimpleArgument = \
     ArgumentContainer(names=["--performance-measure"],
                       kwargs={"choices": PerformanceMeasure.__members__,
                               "help": "the performance measure, e.g. runtime"})
-
-ProcessMonitoringArgument = \
-    ArgumentContainer(names=["--process-monitoring"],
-                      kwargs={"choices": ProcessMonitoring.__members__,
-                              "type": ProcessMonitoring,
-                              "help": "Specify whether the monitoring of the portfolio "
-                              "should cancel all solvers within a portfolio once a "
-                              "solver finishes (REALISTIC). Or allow all solvers "
-                              "within a portfolio to get an equal chance to have the "
-                              "shortest running time on an instance (EXTENDED), e.g., "
-                              "when this information is needed in an experiment. "
-                              "(default: "
-                              f"{Settings.DEFAULT_parallel_portfolio_process_monitoring}"
-                              ")"})
 
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,

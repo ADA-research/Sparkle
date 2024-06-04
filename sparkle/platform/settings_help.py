@@ -33,24 +33,6 @@ class SolutionVerifier(Enum):
         return verifier
 
 
-class ProcessMonitoring(str, Enum):
-    """Possible process monitoring approaches."""
-
-    # Cancel all solvers within a portfolio once one solver finishes with an instance
-    REALISTIC = "REALISTIC"
-    # Cancel all solvers within a portfolio once one solver finishes with an instance,
-    # after they have run equally long as the fastest solver on this instance so far.
-    # This makes it possible to measure which solver would be fastest when they are
-    # not able to start at the same time due to, e.g., insufficient CPU cores to start
-    # all solvers at the same time.
-    EXTENDED = "EXTENDED"
-
-    @staticmethod
-    def from_str(process_monitoring: str) -> ProcessMonitoring:
-        """Return a given str as ProcessMonitoring."""
-        return ProcessMonitoring(process_monitoring)
-
-
 class SettingState(Enum):
     """Possible setting states."""
 
