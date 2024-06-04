@@ -7,7 +7,7 @@ from pathlib import Path
 
 from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
 import global_variables as gv
-from sparkle.platform import file_help as sfh, settings_help
+from sparkle.platform import settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
@@ -102,7 +102,6 @@ if __name__ == "__main__":
 
         sys.exit(-1)
 
-    sfh.rmfiles([gv.sparkle_log_path, gv.sparkle_err_path])  # remove old log files
     success = scps.construct_sparkle_portfolio_selector(
         gv.sparkle_algorithm_selector_path,
         gv.performance_data_csv_path,
@@ -132,8 +131,6 @@ if __name__ == "__main__":
                                             selector_timeout=args.selector_timeout)
 
         status_info.delete()
-
-        sfh.rmfiles([gv.sparkle_log_path, gv.sparkle_err_path])  # Delete log files
 
     # Write used settings to file
     gv.settings.write_used_settings()

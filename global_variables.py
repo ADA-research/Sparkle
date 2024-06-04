@@ -62,7 +62,6 @@ sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_lo
 
 sparkle_tmp_path = "Tmp/"
 
-sparkle_log_path = sparkle_tmp_path + "sparkle_log.out"
 sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"
 
 sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
