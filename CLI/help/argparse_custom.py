@@ -9,7 +9,6 @@ from typing import Any
 from runrunner.base import Runner
 
 from sparkle.platform.settings_help import SettingState
-import global_variables as gv
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
 from CLI.help.command_help import CommandName
@@ -249,10 +248,10 @@ NicknameInstanceSetArgument = \
                               "help": "set a nickname for the instance set"})
 
 NicknamePortfolioArgument = \
-    ArgumentContainer(names=["--nickname"],
+    ArgumentContainer(names=["--portfolio-name"],
                       kwargs={"type": Path,
-                              "help": "Give a nickname to the portfolio (default: "
-                                      f"{gv.sparkle_parallel_portfolio_name})"})
+                              "help": "Specify a name of the portfolio. "
+                                      "If none is given, one will be generated."})
 
 NicknameRemoveExtractor = \
     ArgumentContainer(names=["--nickname"],
@@ -411,6 +410,14 @@ SolverArgument = ArgumentContainer(names=["--solver"],
                                    kwargs={"required": True,
                                            "type": Path,
                                            "help": "path to solver"})
+
+SolversArgument = ArgumentContainer(names=["--solvers"],
+                                    kwargs={"required": False,
+                                            "nargs": "+",
+                                            "type": list[str],
+                                            "help": "Specify the list of solvers to be "
+                                                    "used. If not specifed, all solvers "
+                                                    "known in Sparkle will be employed."})
 
 SolverCallsArgument = \
     ArgumentContainer(names=["--solver-calls"],

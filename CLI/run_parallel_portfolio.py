@@ -163,18 +163,10 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.InstancePathsRunParallelPortfolioArgument.names,
                         **ac.InstancePathsRunParallelPortfolioArgument.kwargs)
-    parser.add_argument(
-        "--portfolio-name",
-        type=Path,
-        help="Specify a name of the portfolio. If none is given, one will be generated."
-    )
-    parser.add_argument(
-        "--solvers",
-        type=list[str],
-        nargs="+",
-        help="Specify the list of solvers to be used. If not specifed, all solvers known"
-             " in Sparkle will be employed."
-    )
+    parser.add_argument(*ac.NicknamePortfolioArgument.names,
+                        **ac.NicknamePortfolioArgument.kwargs)
+    parser.add_argument(*ac.SolversArgument.names,
+                        **ac.SolversArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.CutOffTimeArgument.names,
