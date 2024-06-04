@@ -38,7 +38,7 @@ sparkle add_solver --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generi
 # The --instance-paths option must be followed by a space separated list of paths to an instance or an instance set.
 # For example --instance-paths Instances/Instance_Set_Name/Single_Instance Instances/Other_Instance_Set_Name
 
-sparkle run_sparkle_parallel_portfolio --instance-paths Instances/PTN/ --portfolio-name runtime_experiment
+sparkle run_parallel_portfolio --instance-paths Instances/PTN/ --portfolio-name runtime_experiment
 
 #### Generate the report
 

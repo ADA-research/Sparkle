@@ -90,7 +90,7 @@ CLI/test/run_ablation.sh
 CLI/test/run_configured_solver.sh
 
 # Test run parallel portfolio
-CLI/test/run_sparkle_parallel_portfolio.sh
+CLI/test/run_parallel_portfolio.sh
 
 # Test generate report for parallel portfolio
 CLI/test/generate_report_parallel_portfolio.sh

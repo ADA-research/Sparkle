@@ -37,7 +37,7 @@ class CommandName(str, Enum):
     SYSTEM_STATUS = "system_status"
     VALIDATE_CONFIGURED_VS_DEFAULT = "validate_configured_vs_default"
     RUN_CONFIGURED_SOLVER = "run_configured_solver"
-    RUN_SPARKLE_PARALLEL_PORTFOLIO = "run_sparkle_parallel_portfolio"
+    RUN_PARALLEL_PORTFOLIO = "run_parallel_portfolio"
     CSV_MERGE = "csv_merge"
     VALIDATION = "validation"
 
@@ -105,6 +105,6 @@ COMMAND_DEPENDENCIES = {
                                                  CommandName.CONFIGURE_SOLVER],
     CommandName.RUN_CONFIGURED_SOLVER: [CommandName.INITIALISE,
                                         CommandName.CONFIGURE_SOLVER],
-    CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO: [
+    CommandName.RUN_PARALLEL_PORTFOLIO: [
         CommandName.INITIALISE]
 }

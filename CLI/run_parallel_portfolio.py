@@ -84,7 +84,7 @@ def run_parallel_portfolio(instances: list[Path],
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
-        name=CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO,
+        name=CommandName.RUN_PARALLEL_PORTFOLIO,
         parallel_jobs=parallel_jobs,
         path=".",
         base_dir=gv.sparkle_tmp_path,
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 
     check_for_initialise(
         sys.argv,
-        sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SPARKLE_PARALLEL_PORTFOLIO]
+        sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_PARALLEL_PORTFOLIO]
     )
 
     # Compare current settings to latest.ini
