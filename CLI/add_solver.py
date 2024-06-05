@@ -88,7 +88,7 @@ if __name__ == "__main__":
     else:
         print(f"WARNING: Solver {solver_source.name} does not have a "
               f"configurator wrapper (Missing file {sgh.sparkle_solver_wrapper})."
-              "Therefore it cannot be automatically be configured.")
+              "Therefore it cannot be automatically configured.")
 
     # Start add solver
     solver_directory = sash.get_solver_directory(solver_source.name)

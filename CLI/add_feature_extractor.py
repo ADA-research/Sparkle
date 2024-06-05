@@ -80,6 +80,11 @@ if __name__ == "__main__":
         sys.exit(-1)
     extractor_target_path.mkdir()
     shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
+
+    # Set execution permissions for wrapper
+    sparkle_extractor_wrapper = extractor_target_path / sgh.sparkle_extractor_wrapper
+    if sparkle_extractor_wrapper.exists():
+        sparkle_extractor_wrapper.chmod(0o755)
     sfh.add_remove_platform_item(str(extractor_target_path), sgh.extractor_list_path)
 
     # pre-run the feature extractor on a testing instance, to obtain the feature names
@@ -99,7 +104,7 @@ if __name__ == "__main__":
             + sgh.get_time_pid_random_string()
             + ".rawres"
         )
-        command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,
+        command_line = [extractor_target_path / sgh.sparkle_extractor_wrapper,
                         f"{extractor_target_path}/",
                         extractor_target_path / model_file,
                         extractor_target_path / constraint_file,
@@ -118,10 +123,13 @@ if __name__ == "__main__":
             + sgh.get_time_pid_random_string()
             + ".rawres"
         )
-        command_line = [extractor_target_path / sgh.sparkle_run_default_wrapper,
-                        f"{extractor_target_path}/",
-                        str(instance_path),
-                        result_path]
+        command_line = [
+            "python3", str(extractor_target_path / sgh.sparkle_extractor_wrapper),
+            "-extractor_dir", str(extractor_target_path),
+            "-instance_file", str(instance_path),
+            "-output_file", result_path
+        ]
+
         subprocess.run(command_line)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
