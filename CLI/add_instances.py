@@ -97,9 +97,10 @@ if __name__ == "__main__":
                 intended_instance_line += str(target_file_path) + " "
 
             intended_instance_line = intended_instance_line.strip()
+            target_instance = instances_directory / Path(intended_instance_line).name
             sfh.add_remove_platform_item(intended_instance_line, gv.instance_list_path)
-            feature_data_csv.add_row(intended_instance_line)
-            performance_data_csv.add_instance(intended_instance_line)
+            feature_data_csv.add_row(target_instance)
+            performance_data_csv.add_instance(target_instance)
 
             print(f"Instance {instance_line} has been added!\n")
 

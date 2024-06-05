@@ -152,6 +152,8 @@ if __name__ == "__main__":
         if solver is None:
             print("Error! No Solver found for configuration report generation.")
             sys.exit(-1)
+        elif isinstance(solver, str):
+            solver = Path(solver)
         solver_name = solver.name
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
