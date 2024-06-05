@@ -6,14 +6,14 @@ from pathlib import Path
 
 from CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import settings_help
 
 from unittest.mock import patch
 from unittest.mock import MagicMock, Mock
 
 global settings
-sgh.settings = settings_help.Settings()
+gv.settings = settings_help.Settings()
 
 
 class TestMarginalContribution(TestCase):
@@ -156,7 +156,8 @@ class TestMarginalContribution(TestCase):
             minimise=True,
             performance_data_csv_path=perf_path,
             feature_data_csv_path=feature_csv_path,
-            flag_recompute=True
+            flag_recompute=True,
+            selector_timeout=60
         )
 
         self.assertEqual(output, result)

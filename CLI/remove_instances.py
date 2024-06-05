@@ -6,7 +6,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
@@ -15,6 +15,7 @@ from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -22,9 +23,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.InstancesPathRemoveArgument.names,
                         **ac.InstancesPathRemoveArgument.kwargs)
-    parser.add_argument(*ac.NicknameRemoveInstancesArgument.names,
-                        **ac.NicknameRemoveInstancesArgument.kwargs)
-
     return parser
 
 
@@ -37,62 +35,52 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    instances_path = args.instances_path
+    instances_path = resolve_object_name(args.instances_path,
+                                         target_dir=gv.instance_dir)
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_INSTANCES])
 
-    if args.nickname:
-        instances_path = "Instances/" + args.nickname
-    if not Path(instances_path).exists():
-        print(f'Instances path "{instances_path}" does not exist!')
-        print("Removing possible leftovers (if any)")
-
-    if instances_path[-1] == "/":
-        instances_path = instances_path[:-1]
+    if instances_path is None:
+        print(f'Could not resolve instances path arg "{args.instances_path}"!')
+        print("Check that the path or nickname is spelled correctly.")
+        sys.exit(-1)
 
     print(f"Start removing all instances in directory {instances_path} ...")
     list_all_filename = sfh.get_list_all_filename_recursive(instances_path)
-    list_instances = sfh.get_instance_list_from_reference(instances_path)
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
-    performance_data_csv = PerformanceDataFrame(
-        sgh.performance_data_csv_path
-    )
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
 
-    for intended_instance in list_instances:
+    for intended_instance in list_all_filename:
+        intended_instance_name = intended_instance.name
         # Remove instance records
-        sfh.add_remove_platform_item(intended_instance,
-                                     sgh.instance_list_path, remove=True)
-        feature_data_csv.delete_row(intended_instance)
-        performance_data_csv.remove_instance(intended_instance)
+        sfh.add_remove_platform_item(intended_instance_name,
+                                     gv.instance_list_path, remove=True)
+        feature_data_csv.delete_row(intended_instance_name)
+        performance_data_csv.remove_instance(intended_instance_name)
 
-        # Delete instance file(s)
-        for instance_file in intended_instance.split():
-            print(f"Removing instance file {instance_file}")
-            sfh.rmfiles(Path(instance_file))
+        print(f"Instance {intended_instance} has been removed from platform!")
 
-        print(f"Instance {intended_instance} has been removed!")
-
-    if Path(instances_path).exists() and Path(instances_path).is_dir():
+    if instances_path.exists() and instances_path.is_dir():
         shutil.rmtree(instances_path)
+        print(f"Instance set {instances_path} has been removed!")
     else:
         print(f"Warning: Path {instances_path} did not exist. Continuing")
 
     # Remove instance reference list (for multi-file instances)
-    instance_set_name = Path(instances_path).name
-    sih.remove_reference_instance_list(instance_set_name)
+    sih.remove_reference_instance_list(instances_path.name)
 
     feature_data_csv.save_csv()
     performance_data_csv.save_csv()
 
-    if Path(sgh.sparkle_algorithm_selector_path).exists():
-        shutil.rmtree(sgh.sparkle_algorithm_selector_path)
+    if Path(gv.sparkle_algorithm_selector_path).exists():
+        shutil.rmtree(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_algorithm_selector_path} done!")
+              f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(sgh.sparkle_report_path).exists():
-        shutil.rmtree(sgh.sparkle_report_path)
-        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
+    if Path(gv.sparkle_report_path).exists():
+        shutil.rmtree(gv.sparkle_report_path)
+        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     print(f"Removing instances in directory {instances_path} done!")

@@ -51,7 +51,7 @@ output=$(CLI/run_sparkle_portfolio_selector.py $instance_path_test --settings-fi
 if [[ $output == $output_true ]];
 then
 	echo "[success] ($slurm_available) run_sparkle_portfolio_selector on single instance test succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_sparkle_portfolio_selector on single instance test failed with output:"
 	echo $output
 fi
@@ -66,7 +66,7 @@ output=$(CLI/run_sparkle_portfolio_selector.py $instances_path_test --settings-f
 if [[ $output == $output_true ]];
 then
 	echo "[success] ($slurm_available) run_sparkle_portfolio_selector on instance directory test succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_sparkle_portfolio_selector on instance directory test failed with output:"
 	echo $output
 fi

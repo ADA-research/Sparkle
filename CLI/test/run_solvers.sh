@@ -65,4 +65,3 @@ else
 	echo $output
     kill_started_jobs_slurm
 fi
-

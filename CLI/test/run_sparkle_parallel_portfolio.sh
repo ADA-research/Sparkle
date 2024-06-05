@@ -40,7 +40,7 @@ output=$(CLI/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_set
 if [[ $output == $output_true ]];
 then
 	echo "[success] ($slurm_available) run_sparkle_parallel_portfolio test on a single instance succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_sparkle_parallel_portfolio test on a single instance failed with output:"
 	echo $output
 fi
@@ -51,7 +51,7 @@ output=$(CLI/run_sparkle_parallel_portfolio.py --settings-file $sparkle_test_set
 if [[ $output == $output_true ]];
 then
 	echo "[success] ($slurm_available) run_sparkle_parallel_portfolio test on a set of instances succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_sparkle_parallel_portfolio test on a set of instances failed with output:"
 	echo $output
 fi

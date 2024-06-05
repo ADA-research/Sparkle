@@ -63,7 +63,7 @@ output=$(CLI/run_configured_solver.py $instance_path_test --settings-file $spark
 if [[ $output == $output_true ]];
 then
 	echo "[success] ($slurm_available) run_configured_solver on single instance test succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_configured_solver on single instance test failed with output:"
 	echo $output
 fi
@@ -78,7 +78,7 @@ output=$(CLI/run_configured_solver.py $instances_path_test --settings-file $spar
 if [[ $output =~ "${output_true}" ]];
 then
 	echo "[success] ($slurm_available) run_configured_solver in parallel on instance directory test succeeded"
-else              
+else
 	echo "[failure] ($slurm_available) run_configured_solver in parallel on instance directory test failed with output:"
 	echo $output
 fi

@@ -91,7 +91,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) run_ablation test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];

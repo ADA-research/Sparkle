@@ -77,7 +77,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) configure_solver performance measure RUNTIME option test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -101,7 +101,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) configure_solver cutoff time option test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -123,7 +123,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) configure_solver budget per run option test failed with output:"
 	echo $output
 	if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -145,7 +145,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) configure_solver number of runs option test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];

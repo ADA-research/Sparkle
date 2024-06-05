@@ -4,7 +4,7 @@
 import sys
 import argparse
 
-import global_variables as sgh
+import global_variables as gv
 from CLI.support import compute_marginal_contribution_help as scmch
 import sparkle_logging as sl
 from sparkle.platform import settings_help
@@ -25,6 +25,8 @@ def parser_function() -> argparse.ArgumentParser:
                        **apc.ActualArgument.kwargs)
     parser.add_argument(*apc.RecomputeMarginalContributionArgument.names,
                         **apc.RecomputeMarginalContributionArgument.kwargs)
+    parser.add_argument(*apc.SelectorTimeoutArgument.names,
+                        **apc.SelectorTimeoutArgument.kwargs)
     parser.add_argument(*apc.PerformanceMeasureArgument.names,
                         **apc.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*apc.SettingsFileArgument.names,
@@ -36,7 +38,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -55,17 +57,17 @@ if __name__ == "__main__":
     print("[Deprecated] command, functionality is called automatically by other commands"
           " when needed.")
     if ac.set_by_user(args, "settings_file"):
-        sgh.settings.read_settings_ini(
+        gv.settings.read_settings_ini(
             args.settings_file, SettingState.CMD_LINE
         )  # Do first, so other command line options can override settings from the file
     if ac.set_by_user(args, "performance_measure"):
-        sgh.settings.set_general_sparkle_objectives(
+        gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
 
     scmch.compute_marginal_contribution(
-        args.perfect, args.actual, args.recompute
+        args.perfect, args.actual, args.recompute, args.selector_timeout
     )
 
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()

@@ -8,7 +8,7 @@ import argparse
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh, settings_help
-import global_variables as sgh
+import global_variables as gv
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.instance import compute_features_help as scf
 import sparkle_logging as sl
@@ -50,7 +50,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    sgh.settings = settings_help.Settings()
+    gv.settings = settings_help.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -71,8 +71,7 @@ if __name__ == "__main__":
     nickname_str = args.nickname
 
     # Start add feature extractor
-
-    extractor_target_path = sgh.extractor_dir / extractor_source.name
+    extractor_target_path = gv.extractor_dir / extractor_source.name
 
     if extractor_target_path.exists():
         print(f"Feature extractor {extractor_source.name} already exists! "
@@ -82,10 +81,10 @@ if __name__ == "__main__":
     shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
 
     # Set execution permissions for wrapper
-    sparkle_extractor_wrapper = extractor_target_path / sgh.sparkle_extractor_wrapper
+    sparkle_extractor_wrapper = extractor_target_path / gv.sparkle_extractor_wrapper
     if sparkle_extractor_wrapper.exists():
         sparkle_extractor_wrapper.chmod(0o755)
-    sfh.add_remove_platform_item(str(extractor_target_path), sgh.extractor_list_path)
+    sfh.add_remove_platform_item(str(extractor_target_path), gv.extractor_list_path)
 
     # pre-run the feature extractor on a testing instance, to obtain the feature names
     if _check_existence_of_test_instance_list_file(extractor_target_path):
@@ -101,10 +100,10 @@ if __name__ == "__main__":
             + "_"
             + Path(model_file).name
             + "_"
-            + sgh.get_time_pid_random_string()
+            + gv.get_time_pid_random_string()
             + ".rawres"
         )
-        command_line = [extractor_target_path / sgh.sparkle_extractor_wrapper,
+        command_line = [extractor_target_path / gv.sparkle_extractor_wrapper,
                         f"{extractor_target_path}/",
                         extractor_target_path / model_file,
                         extractor_target_path / constraint_file,
@@ -120,11 +119,11 @@ if __name__ == "__main__":
             + "_"
             + instance_path.name
             + "_"
-            + sgh.get_time_pid_random_string()
+            + gv.get_time_pid_random_string()
             + ".rawres"
         )
         command_line = [
-            "python3", str(extractor_target_path / sgh.sparkle_extractor_wrapper),
+            "python3", str(extractor_target_path / gv.sparkle_extractor_wrapper),
             "-extractor_dir", str(extractor_target_path),
             "-instance_file", str(instance_path),
             "-output_file", result_path
@@ -132,7 +131,7 @@ if __name__ == "__main__":
 
         subprocess.run(command_line)
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
 
     tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
     list_columns = tmp_fdcsv.list_columns()
@@ -141,7 +140,7 @@ if __name__ == "__main__":
 
     feature_data_csv.save_csv()
     sfh.add_remove_platform_item(len(list_columns),
-                                 sgh.extractor_feature_vector_size_list_path,
+                                 gv.extractor_feature_vector_size_list_path,
                                  key=str(extractor_target_path))
 
     sfh.rmfiles(Path(result_path))
@@ -149,28 +148,28 @@ if __name__ == "__main__":
     print("Adding feature extractor "
           f"{extractor_target_path.name} done!")
 
-    if Path(sgh.sparkle_algorithm_selector_path).exists():
-        sfh.rmfiles(Path(sgh.sparkle_algorithm_selector_path))
+    if Path(gv.sparkle_algorithm_selector_path).exists():
+        sfh.rmfiles(Path(gv.sparkle_algorithm_selector_path))
         print("Removing Sparkle portfolio selector "
-              f"{sgh.sparkle_algorithm_selector_path} done!")
+              f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(sgh.sparkle_report_path).exists():
-        sfh.rmfiles(Path(sgh.sparkle_report_path))
-        print(f"Removing Sparkle report {sgh.sparkle_report_path} done!")
+    if Path(gv.sparkle_report_path).exists():
+        sfh.rmfiles(Path(gv.sparkle_report_path))
+        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     if nickname_str is not None:
         sfh.add_remove_platform_item(str(extractor_target_path),
-                                     sgh.extractor_nickname_list_path, key=nickname_str)
+                                     gv.extractor_nickname_list_path, key=nickname_str)
 
     if args.run_extractor_now:
         if not args.parallel:
             print("Start computing features ...")
-            scf.computing_features(Path(sgh.feature_data_csv_path), False)
-            print(f"Feature data file {sgh.feature_data_csv_path} has been updated!")
+            scf.computing_features(Path(gv.feature_data_csv_path), False)
+            print(f"Feature data file {gv.feature_data_csv_path} has been updated!")
             print("Computing features done!")
         else:
-            scf.computing_features_parallel(Path(sgh.feature_data_csv_path), False)
+            scf.computing_features_parallel(Path(gv.feature_data_csv_path), False)
             print("Computing features in parallel ...")
 
     # Write used settings to file
-    sgh.settings.write_used_settings()
+    gv.settings.write_used_settings()

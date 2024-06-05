@@ -66,7 +66,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) validate_configured_vs_default with both train and test sets test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -86,7 +86,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) validate_configured_vs_default with just training set test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];

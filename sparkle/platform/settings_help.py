@@ -10,7 +10,7 @@ import builtins
 import statistics
 
 import sparkle_logging as slog
-import global_variables as sgh
+import global_variables as gv
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
@@ -80,6 +80,8 @@ class Settings:
     DEFAULT_config_cpu_time = None
     DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
+
+    DEFAULT_portfolio_construction_timeout = None
 
     DEFAULT_slurm_number_of_runs_in_parallel = 25
     DEFAULT_slurm_max_parallel_runs_per_node = 8
@@ -304,7 +306,7 @@ class Settings:
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
         # Write to general output directory
-        file_path_output = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
+        file_path_output = PurePath(gv.sparkle_global_output_dir / slog.caller_out_dir
                                     / self.__settings_dir / self.__settings_file)
         self.write_settings_ini(Path(file_path_output))
 
@@ -852,8 +854,12 @@ class Settings:
 
         for section in cur_dict.keys():
             printed_section = False
-            for name in cur_dict[section].keys():
-                if cur_dict[section][name] != prev_dict[section][name]:
+            names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
+            for name in names:
+                # if name is not present in one of the two dicts, get None as placeholder
+                cur_val = cur_dict[section].get(name, None)
+                prev_val = prev_dict[section].get(name, None)
+                if cur_val != prev_val:
                     # do we have yet to print the initial warning?
                     if not printed_warning:
                         print("Warning: The following attributes/options have changed:")
@@ -865,7 +871,7 @@ class Settings:
                         printed_section = True
 
                     # print actual change
-                    print(f"  - '{name}' changed from '{prev_dict[section][name]}' "
-                          f"to '{cur_dict[section][name]}'")
+                    print(f"  - '{name}' changed from '{prev_val}' "
+                          f"to '{cur_val}'")
 
         return not printed_warning

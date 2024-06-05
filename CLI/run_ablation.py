@@ -4,7 +4,7 @@
 import argparse
 import sys
 import shutil
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 from runrunner.base import Runner
 
@@ -16,6 +16,7 @@ from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -68,9 +69,11 @@ if __name__ == "__main__":
         sah.print_ablation_help()
         sys.exit()
 
-    solver = args.solver
-    instance_set_train = args.instance_set_train
-    instance_set_test = args.instance_set_test
+    solver = resolve_object_name(args.solver, gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train,
+                                             target_dir=gv.instance_dir)
+    instance_set_test = resolve_object_name(args.instance_set_test,
+                                            target_dir=gv.instance_dir)
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
@@ -106,13 +109,12 @@ if __name__ == "__main__":
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings, prev_settings)
 
-    solver_name = Path(solver).name
-    instance_set_train_name = Path(instance_set_train).name
-    instance_set_test_name = None
+    solver_name = solver.name
+    instance_set_train_name = instance_set_train.name
     configurator = gv.settings.get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver_name, instance_set_train_name)
     if instance_set_test is not None:
-        instance_set_test_name = Path(instance_set_test).name
+        instance_set_test_name = instance_set_test.name
     else:
         instance_set_test = instance_set_train
         instance_set_test_name = instance_set_train_name

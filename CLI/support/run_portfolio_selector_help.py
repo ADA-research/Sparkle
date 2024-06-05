@@ -13,7 +13,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
-import global_variables as sgh
+import global_variables as gv
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
@@ -30,11 +30,11 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
     runsolver_watch_data_path = result_path.replace(".rawres", ".log")
     runsolver_value_data_path = result_path.replace(".rawres", ".val")
 
-    cmd_list_runsolver = [sgh.runsolver_path,
+    cmd_list_runsolver = [gv.runsolver_path,
                           "--cpu-limit", str(cutoff_time_each_extractor_run),
                           "-w", runsolver_watch_data_path,  # Set log path
                           "-v", runsolver_value_data_path]  # Set information path
-    cmd_list_extractor = [f"{extractor_path}/{sgh.sparkle_run_default_wrapper}",
+    cmd_list_extractor = [f"{extractor_path}/{gv.sparkle_run_default_wrapper}",
                           f"{extractor_path}/", instance_path, result_path]
 
     runsolver = subprocess.run(cmd_list_runsolver, capture_output=True)
@@ -62,7 +62,7 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
               " failed! ******")
         print("****** WARNING: The feature vector of this instance will be imputed as "
               "the mean value of all other non-missing values! ******")
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(sgh.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
         list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
     else:
         fin = Path(result_path).open("r+")
@@ -101,7 +101,7 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
         print("ERROR: Failed to get schedule from algorithm portfolio. Stopping "
               "execution!\n"
               f"Schedule file appears to be empty: {predict_schedule_result_path}\n"
-              f"Selector error output path: {sgh.sparkle_err_path}")
+              f"Selector error output path: {gv.sparkle_err_path}")
         sys.exit(-1)
 
     predict_schedule_string = predict_schedule[len(prefix_string):]
@@ -152,6 +152,8 @@ def call_sparkle_portfolio_selector_solve_instance(
         performance_data_csv_path: path to the performance data
     """
     # Create instance strings to accommodate multi-file instances
+    if isinstance(instance_path, Path):
+        instance_path = str(instance_path)
     instance_path_list = instance_path.split()
     instance_file_list = []
 
@@ -169,19 +171,19 @@ def call_sparkle_portfolio_selector_solve_instance(
     print(f"Sparkle computing features of instance {instance_files_str} ...")
     list_feature_vector = []
 
-    if len(sgh.extractor_list) == 0:
+    if len(gv.extractor_list) == 0:
         print("ERROR: No feature extractor added to Sparkle.")
         sys.exit(-1)
 
     cutoff_time_each_extractor_run = (
-        sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
+        gv.settings.get_general_extractor_cutoff_time() / len(gv.extractor_list))
 
-    for extractor_path in sgh.extractor_list:
+    for extractor_path in gv.extractor_list:
         extractor_name = Path(extractor_path).name
         print(f"Extractor {extractor_name} computing "
               f"features of instance {instance_files_str} ...")
         result_path = (f"Tmp/{extractor_name}_{instance_files_str_}_"
-                       f"{sgh.get_time_pid_random_string()}.rawres")
+                       f"{gv.get_time_pid_random_string()}.rawres")
 
         list_feature_vector = list_feature_vector + get_list_feature_vector(
             extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
@@ -191,27 +193,27 @@ def call_sparkle_portfolio_selector_solve_instance(
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = ("Tmp/predict_schedule_"
-                                    f"{sgh.get_time_pid_random_string()}"
+                                    f"{gv.get_time_pid_random_string()}"
                                     ".predres")
     print("Sparkle portfolio selector predicting ...")
-    cmd_list = [sgh.python_executable, sgh.autofolio_path, "--load",
-                sgh.sparkle_algorithm_selector_path, "--feature_vec",
+    cmd_list = [gv.python_executable, gv.autofolio_path, "--load",
+                gv.sparkle_algorithm_selector_path, "--feature_vec",
                 " ".join(map(str, list_feature_vector))]
 
     process = subprocess.run(cmd_list,
                              stdout=Path(predict_schedule_result_path).open("w+"),
-                             stderr=Path(sgh.sparkle_err_path).open("w+"))
+                             stderr=Path(gv.sparkle_err_path).open("w+"))
 
     if process.returncode != 0:
         # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"
-        print(f"Error getting predict schedule! See {sgh.sparkle_err_path} for output.")
+        print(f"Error getting predict schedule! See {gv.sparkle_err_path} for output.")
         sys.exit(process.returncode)
     print("Predicting done!")
 
     print_predict_schedule(predict_schedule_result_path)
     list_predict_schedule = get_list_predict_schedule_from_file(
         predict_schedule_result_path)
-    sfh.rmfiles([predict_schedule_result_path, sgh.sparkle_err_path])
+    sfh.rmfiles([predict_schedule_result_path, gv.sparkle_err_path])
 
     for pred in list_predict_schedule:
         solver_path = pred[0]
@@ -246,11 +248,11 @@ def call_sparkle_portfolio_selector_solve_directory(
     test_case_path = Path("Test_Cases") / instance_directory_name
 
     # Update latest scenario
-    sgh.latest_scenario().set_selection_test_case_directory(
+    gv.latest_scenario().set_selection_test_case_directory(
         test_case_path)
-    sgh.latest_scenario().set_latest_scenario(Scenario.SELECTION)
+    gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
     # Write used scenario to file
-    sgh.latest_scenario().write_scenario_ini()
+    gv.latest_scenario().write_scenario_ini()
     test_case_tmp_path = test_case_path / "Tmp"
     test_case_tmp_path.mkdir(parents=True, exist_ok=True)
 
