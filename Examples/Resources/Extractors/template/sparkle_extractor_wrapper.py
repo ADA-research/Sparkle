@@ -43,25 +43,26 @@ with Path(raw_result_file_name).open("w+") as raw_result_file:
 
 #Processes raw result file and writes to the final result file
 with open(raw_result_file_name, 'r') as fin, open(output_file, 'w') as fout:
-        while True:
-            # Reads every line, strips whitespace and returns on empty line
-            myline = fin.readline().strip()
-            if not myline:
-                break
-            
-            # Splits the line into single words and skips empty lines & lines starting with 'c'
-            mylist = myline.split()
-            if len(mylist) == 0 or mylist[0] == 'c':
+        for line in fin:
+            # Strip any leading or trailing whitespace from the line.
+            line = line.strip()
+            if not line:
                 continue
-            
+
+            # Split the line into words and skip if the line is empty or starts with 'c'.
+            words = line.split()
+            if not words or words[0] == 'c':
+                continue
+
             # Splits the line by commas, writes each part to the output file with additional information
-            mylist_comma = myline.split(',')
-            for item in mylist_comma:
+            items = line.split(',')
+            for item in items:
                 fout.write(f',{item}{sparkle_special_string}{get_last_level_directory_name(extractor_dir)}')
             fout.write('\n')
 
-            myline2 = fin.readline().strip()
-            fout.write(f'{instance_path},{myline2}\n')
+            # Read the next line, strip it, and write it to the output file with instance path.
+            next_line = fin.readline().strip()
+            fout.write(f'{instance_path},{next_line}\n')
 
 # Deletes temporary files
 Path(tmp_output).unlink(missing_ok=True)
