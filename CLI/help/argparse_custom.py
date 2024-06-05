@@ -412,7 +412,7 @@ SolversArgument = ArgumentContainer(names=["--solvers"],
                                             "type": list[str],
                                             "help": "Specify the list of solvers to be "
                                                     "used. If not specifed, all solvers "
-                                                    "known in Sparkle will be employed."})
+                                                    "known in Sparkle will be used."})
 
 SolverCallsArgument = \
     ArgumentContainer(names=["--solver-calls"],

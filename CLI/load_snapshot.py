@@ -23,8 +23,6 @@ if __name__ == "__main__":
 
     # Define command line arguments
     parser = parser_function()
-
     # Process command line arguments
     args = parser.parse_args()
-    
     snapshot_help.load_snapshot(args.snapshot_file_path)

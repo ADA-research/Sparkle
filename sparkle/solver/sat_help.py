@@ -8,7 +8,7 @@ import global_variables as gv
 from sparkle.platform import file_help as sfh
 
 sat_verifier_path = Path("Components/Sparkle-SAT-verifier/SAT")
-                         
+
 
 def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:
     """Run a SAT verifier and return its status."""
@@ -91,7 +91,7 @@ def sat_judge_correctness_raw_result(instance_path: str, raw_result_path: str) -
     # TODO: Log output file
     print("Run SAT verifier")
     subprocess.run([sat_verifier_path, instance_path, raw_result_path],
-                    stdout=Path(tmp_verify_result_path).open("w+"))
+                   stdout=Path(tmp_verify_result_path).open("w+"))
     print("SAT verifier done")
 
     ret = sat_get_verify_string(tmp_verify_result_path)
