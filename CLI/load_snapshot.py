@@ -14,7 +14,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.SnapshotArgument.names,
                         **ac.SnapshotArgument.kwargs)
-
     return parser
 
 
@@ -27,4 +26,5 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+    
     snapshot_help.load_snapshot(args.snapshot_file_path)

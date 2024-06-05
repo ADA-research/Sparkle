@@ -47,8 +47,12 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    instance_path = resolve_object_name(args.instance_path,
-                                        target_dir=gv.instance_dir)
+    if isinstance(args.instance_path, list):
+        instance_path = [resolve_object_name(instance, target_dir=gv.instance_dir)
+                         for instance in args.instance_path]
+    else:
+        instance_path = resolve_object_name(args.instance_path,
+                                            target_dir=gv.instance_dir)
     run_on = args.run_on
 
     check_for_initialise(sys.argv,

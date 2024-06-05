@@ -401,7 +401,7 @@ SettingsFileArgument = \
                               "help": "Specify the settings file to use in case you want"
                                       " to use one other than the default"})
 
-SnapshotArgument = ArgumentContainer(names=["snapshot-file-path"],
+SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                      kwargs={"metavar": "snapshot-file-path",
                                              "type": str,
                                              "help": "path to the snapshot file"})
