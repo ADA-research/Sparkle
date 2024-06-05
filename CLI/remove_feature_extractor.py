@@ -19,8 +19,8 @@ from CLI.help.nicknames import resolve_object_name
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*ac.ExtractorPathRemoveArgument.names,
-                        **ac.ExtractorPathRemoveArgument.kwargs)
+    parser.add_argument(*ac.ExtractorPathArgument.names,
+                        **ac.ExtractorPathArgument.kwargs)
     return parser
 
 
@@ -45,9 +45,6 @@ if __name__ == "__main__":
     if not Path(extractor_path).exists():
         print(f'Feature extractor path "{extractor_path}" does not exist!')
         sys.exit(-1)
-
-    if extractor_path[-1] == "/":
-        extractor_path = extractor_path[:-1]
 
     print("Starting removing feature extractor "
           f"{Path(extractor_path).name} ...")

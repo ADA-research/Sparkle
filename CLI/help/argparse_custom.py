@@ -146,14 +146,9 @@ DeterministicArgument = ArgumentContainer(names=["--deterministic"],
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                           kwargs={"metavar": "extractor-path",
                                                   "type": str,
-                                                  "help": "path to the feature extractor"
+                                                  "help": "path or nickname of the "
+                                                          "feature extractor"
                                                   })
-
-ExtractorPathRemoveArgument = ArgumentContainer(names=["extractor-path"],
-                                                kwargs={"metavar": "extractor-path",
-                                                        "type": str,
-                                                        "help": "path to or nickname of "
-                                                                "the feature extractor"})
 
 InstancePathRunConfiguredSolverArgument = \
     ArgumentContainer(names=["instance_path"],
