@@ -5,7 +5,6 @@ import sys
 import shutil
 import subprocess
 import argparse
-import os
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh, settings_help
@@ -82,9 +81,11 @@ if __name__ == "__main__":
     shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
 
     # Set execution permissions for wrapper
-    sparkle_extractor_wrapper = extractor_target_path / gv.sparkle_extractor_wrapper
-    if not os.path.isfile(sparkle_extractor_wrapper) or not os.access(sparkle_extractor_wrapper, os.X_OK):
-        print(f"The file {sparkle_extractor_wrapper} does not exist or is not executable.")
+    extractor_wrapper = extractor_target_path / gv.sparkle_extractor_wrapper
+    if not extractor_wrapper.is_file() or not \
+       sfh.check_file_is_executable(extractor_wrapper):
+        print(f"The file {extractor_wrapper} does not exist or is \
+              not executable.")
         sys.exit(-1)
 
     sfh.add_remove_platform_item(str(extractor_target_path), gv.extractor_list_path)
@@ -126,7 +127,8 @@ if __name__ == "__main__":
             + ".rawres"
         )
         command_line = [
-            gv.python_executable, str(extractor_target_path / gv.sparkle_extractor_wrapper),
+            gv.python_executable, str(extractor_target_path
+                                      / gv.sparkle_extractor_wrapper),
             "-extractor_dir", str(extractor_target_path),
             "-instance_file", str(instance_path),
             "-output_file", result_path
@@ -138,7 +140,6 @@ if __name__ == "__main__":
 
     tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
     list_columns = tmp_fdcsv.list_columns()
-    print(list_columns)
     for column_name in list_columns:
         feature_data_csv.add_column(column_name)
 
