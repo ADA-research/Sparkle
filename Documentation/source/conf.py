@@ -17,8 +17,8 @@ import sys
 
 # Add path to sparkle root
 sys.path.insert(0, os.path.abspath("../.."))
-sys.path.insert(0, os.path.abspath("../../../CLI"))
-sys.path.insert(0, os.path.abspath("../../../sparkle"))
+sys.path.insert(0, os.path.abspath("../../CLI"))
+sys.path.insert(0, os.path.abspath("../../sparkle"))
 print("sys.path: ", sys.path)
 
 from sparkle import about  # noqa: E402
