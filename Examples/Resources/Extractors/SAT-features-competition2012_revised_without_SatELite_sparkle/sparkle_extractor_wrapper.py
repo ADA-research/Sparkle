@@ -19,23 +19,22 @@ parser.add_argument('-instance_file', type=str, help='Path to the instance file'
 parser.add_argument('-output_file', type=str, help='Path to the output file')
 args = parser.parse_args()
 
-extractor_dir = args.extractor_dir
+extractor_dir = Path(args.extractor_dir)
 instance_path = Path(args.instance_file)
-output_file = args.output_file
+output_file = Path(args.output_file)
 
 extractor_name = "SATFeatureCompetition2012"
 
 executable_name = "features"
-executable = Path(extractor_dir) / executable_name
+executable = extractor_dir / executable_name
 
 raw_result_file_name = Path(f"{extractor_dir}{executable_name}_" \
                             f"{instance_path.name}_{get_time_random_string()}.rawres")
-tmp_output = Path("TMP") / raw_result_file_name
+tmp_output = Path("TMP") / raw_result_file_name #T.S: Why is this seperately used from raw result? shouldn't there be only one variable describign the raw output?
 
-command_line = [Path(extractor_dir) / executable_name, instance_path, tmp_output]
-
-subprocess.run([Path(extractor_dir) / executable_name,
-                instance_path, tmp_output],
+subprocess.run([extractor_dir / executable_name,
+                instance_path,
+                tmp_output],
                 stdout=raw_result_file_name.open("w+"))
 
 # Read all lines from the input file
