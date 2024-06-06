@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     sphinx_file = Path("source/userguide/commandsautoprogram.md").open("w")
     for i, command in enumerate(commands):
-        print(command)
+        #print(command)
         sphinx_file.write(
             f"""(cmd-{command.replace(".py", "").replace("_", "-")})=\n"""
             f"""\n```{{eval-rst}}\n"""

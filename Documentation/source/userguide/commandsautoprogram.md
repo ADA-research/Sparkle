@@ -1,8 +1,8 @@
 (cmd-about)=
 
 ```{eval-rst}
-.. autoprogram:: about:parser_function()
-   :prog: about.py
+.. autoprogram:: about_cli:parser_function()
+   :prog: about_cli.py
 
 ```
 
@@ -182,11 +182,11 @@
 
 ```
 
-(cmd-sparkle-wait)=
+(cmd-wait)=
 
 ```{eval-rst}
-.. autoprogram:: sparkle_wait:parser_function()
-   :prog: sparkle_wait.py
+.. autoprogram:: wait:parser_function()
+   :prog: wait.py
 
 ```
 
