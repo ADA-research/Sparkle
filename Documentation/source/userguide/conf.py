@@ -18,7 +18,8 @@ import sys
 # Add path to sparkle root
 sys.path.insert(0, os.path.abspath("../../../.."))
 sys.path.insert(0, os.path.abspath("../../.."))
-sys.path.insert(0, os.path.abspath("../../../Commands"))
+sys.path.insert(0, os.path.abspath("../../../CLI"))
+sys.path.insert(0, os.path.abspath("../../../sparkle"))
 print("sys.path: ", sys.path)
 
 from sparkle import about  # noqa: E402
@@ -30,9 +31,9 @@ copyright = "2021, ADA Research Group, LIACS"
 author = "ADA Research Group, LIACS"
 
 # The short X.Y version
-version = str(about.about_info["version"])
+version = about.version
 # The full version, including alpha/beta/rc tags
-release = str(about.about_info["version"])
+release = about.version
 
 
 # -- General configuration ---------------------------------------------------

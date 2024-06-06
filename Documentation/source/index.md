@@ -8,7 +8,7 @@
 ```{toctree}
 :caption: 'Contents:'
 :maxdepth: 3
-:numbered: true
+:numbered:
 
 userguide/userguide
 examples/examples

@@ -15,6 +15,14 @@ import global_variables as gv
 import sparkle_logging as sl
 
 
+def parser_function() -> argparse.ArgumentParser:
+    """Parse CLI arguments for the initialise command."""
+    parser = argparse.ArgumentParser(
+        description=("Initialise the Sparkle platform, this command does not have any "
+                     "arguments."))
+    return parser
+
+
 def check_for_initialise(argv: list[str], requirements: list[CommandName] = None)\
         -> None:
     """Function to check if initialize command was executed and execute it otherwise.

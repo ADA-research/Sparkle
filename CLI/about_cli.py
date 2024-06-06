@@ -3,8 +3,19 @@
 
 import sys
 import sparkle_logging as sl
-
+import argparse
 import sparkle
+
+
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments.
+
+    Returns:
+      The argument parser.
+    """
+    parser = argparse.ArgumentParser()
+    return parser
+
 
 if __name__ == "__main__":
     # Log command call

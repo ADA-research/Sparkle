@@ -4,6 +4,12 @@ import sys
 
 from sparkle.platform import snapshot_help
 import sparkle_logging as sl
+import argparse
+
+
+def parser_function() -> argparse.ArgumentParser:
+    """Parser for save_snapshot"""
+    return argparse.ArgumentParser()
 
 
 if __name__ == "__main__":
