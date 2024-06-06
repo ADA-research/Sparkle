@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Template for users to create Feature Extractor wrappers."""
-
-import sys
-import os
 import time
 import random
 import argparse
