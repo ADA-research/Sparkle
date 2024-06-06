@@ -29,9 +29,9 @@ copyright = "2021, ADA Research Group, LIACS"
 author = "ADA Research Group, LIACS"
 
 # The short X.Y version
-version = str(about.about_info["version"])
+version = about.version
 # The full version, including alpha/beta/rc tags
-release = str(about.about_info["version"])
+release = about.version
 
 
 # -- General configuration ---------------------------------------------------
