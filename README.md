@@ -20,7 +20,7 @@ To get a copy of Sparkle you can clone the repository using `git`.
 
 ### Install dependencies
 
-Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. LaTeX is used to create the reports, if you want to use this functionality you will need to install it manually.
+Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. LaTeX is used to create the reports, if you want to use this functionality you will need to install it manually. Sparkle uses RunSolver 3.4.1 (http://www.cril.univ-artois.fr/~roussel/runsolver/) to measure solvers meta data, which is restricted to Linux based systems.
 
 The rest of the dependencies can installed and activated with
 
