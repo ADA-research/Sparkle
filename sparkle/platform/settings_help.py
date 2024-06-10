@@ -73,6 +73,7 @@ class Settings:
     DEFAULT_ablation_racing = False
 
     DEFAULT_parallel_portfolio_check_interval = 4
+    DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -101,6 +102,7 @@ class Settings:
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
+        self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -248,6 +250,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = int(file_settings.get(section, option))
                     self.set_parallel_portfolio_check_interval(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("num_seeds_per_solver", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = int(file_settings.get(section, option))
+                    self.set_parallel_portfolio_number_of_seeds_per_solver(value, state)
                     file_settings.remove_option(section, option)
 
             # TODO: Report on any unknown settings that were read
@@ -786,6 +795,30 @@ class Settings:
 
         return int(
             self.__settings["parallel_portfolio"]["check_interval"])
+
+    def set_parallel_portfolio_number_of_seeds_per_solver(
+            self: Settings,
+            value: int = DEFAULT_parallel_portfolio_num_seeds_per_solver,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the parallel portfolio seeds per solver to start."""
+        section = "parallel_portfolio"
+        name = "num_seeds_per_solver"
+
+        if value is not None and self.__check_setting_state(
+                self.__parallel_portfolio_num_seeds_per_solver_set, origin, name):
+            self.__init_section(section)
+            self.__parallel_portfolio_check_interval_set = origin
+            self.__settings[section][name] = str(value)
+
+        return
+
+    def get_parallel_portfolio_number_of_seeds_per_solver(self: Settings) -> int:
+        """Return the parallel portfolio seeds per solver to start."""
+        if self.__parallel_portfolio_num_seeds_per_solver_set == SettingState.NOT_SET:
+            self.set_parallel_portfolio_number_of_seeds_per_solver()
+
+        return int(
+            self.__settings["parallel_portfolio"]["num_seeds_per_solver"])
 
     @staticmethod
     def check_settings_changes(cur_settings: Settings, prev_settings: Settings) -> bool:

@@ -6,10 +6,10 @@ import re
 import math
 
 
-def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
+def get_runtime(runsolver_values_path: Path,
+                not_found: float = -1.0) -> tuple[float, float]:
     """Return the CPU and wallclock time reported by runsolver in values log."""
-    cpu_time = -1.0
-    wc_time = -1.0
+    cpu_time, wc_time = not_found, not_found
     if runsolver_values_path.exists():
         with runsolver_values_path.open("r") as infile:
             lines = [line.strip().split("=") for line in infile.readlines()
@@ -26,14 +26,21 @@ def get_runtime(runsolver_values_path: Path) -> tuple[float, float]:
 
 def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> str:
     """Get run status from runsolver logs."""
+    if not runsolver_values_path.exists():
+        # Runsolver value log was not created, job was stopped ''incorrectly''
+        return "KILLED"
     # First check if runsolver reported time out
     for line in reversed(runsolver_values_path.open("r").readlines()):
-        if line.startswith("TIMEOUT"):
-            if line == "TIMEOUT=false":
+        if line.strip().startswith("TIMEOUT="):
+            if line.strip() == "TIMEOUT=true":
                 return "TIMEOUT"
             break
+    if not runsolver_raw_path.exists():
+        # Runsolver log was not created, job was stopped ''incorrectly''
+        return "KILLED"
     # Last line of runsolver log should contain the raw sparkle solver wrapper output
-    sparkle_wrapper_dict_str = runsolver_raw_path.open("r").readlines()[-1]
+    runsolver_raw_contents = runsolver_raw_path.open("r").read().strip()
+    sparkle_wrapper_dict_str = runsolver_raw_contents.splitlines()[-1]
     solver_regex_filter = re.findall("{.*}", sparkle_wrapper_dict_str)[0]
     output_dict = ast.literal_eval(solver_regex_filter)
     return output_dict["status"]

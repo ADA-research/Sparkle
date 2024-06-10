@@ -114,11 +114,13 @@ class Solver:
 
         return deterministic
 
-    def build_solver_cmd(self: Solver, instance: str, configuration: dict = {},
+    def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
                          runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):
             configuration = Solver.config_str_to_dict(configuration)
+        if configuration is None:
+            configuration = {}
         if "instance" not in configuration:
             configuration["instance"] = instance
         if "solver_dir" not in configuration:

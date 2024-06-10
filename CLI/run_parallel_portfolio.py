@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Sparkle command to execute a parallel algorithm portfolio.."""
+"""Sparkle command to execute a parallel algorithm portfolio."""
 
 import sys
 import argparse
@@ -8,6 +8,7 @@ import random
 import time
 import shutil
 import csv
+import itertools
 from pathlib import Path, PurePath
 
 import runrunner as rrr
@@ -42,7 +43,8 @@ def run_parallel_portfolio(instances: list[Path],
         run_on: Currently only supports Slurm.
     """
     num_solvers, num_instances = len(solvers), len(instances)
-    num_jobs = num_solvers * num_instances
+    seeds_per_solver = gv.settings.get_parallel_portfolio_number_of_seeds_per_solver()
+    num_jobs = num_solvers * num_instances * seeds_per_solver
     parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
     if parallel_jobs > num_jobs:
         print("WARNING: Not all jobs will be started at the same time due to the "
@@ -51,22 +53,22 @@ def run_parallel_portfolio(instances: list[Path],
     cmd_list, runsolver_logs = [], []
     cutoff = gv.settings.get_general_target_cutoff_time()
     log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    run_status_path = portfolio_path / "run-status-path"
-    run_status_path.mkdir()
-    # Create a command for each instance-solver combination
-    for instance in instances:
-        for solver in solvers:
+    log_path = portfolio_path / "run-status-path"
+    log_path.mkdir()
+    # Create a command for each instance-solver-seed combination
+    for instance, solver in itertools.product(instances, solvers):
+        for _ in range(seeds_per_solver):
+            seed = int(random.getrandbits(32))
             runsolver_watch_log =\
-                run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.log"
+                log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.log"
             runsolver_values_log =\
-                run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.var"
+                log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.var"
             raw_result_path =\
-                run_status_path / f"{solver.name}_{instance.name}_{log_timestamp}.raw"
-            print(runsolver_values_log)
+                log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.raw"
             solver_call_list = solver.build_solver_cmd(
                 str(instance),
                 configuration={"specifics": "",
-                               "seed": 1,
+                               "seed": seed,
                                "cutoff_time": cutoff,
                                "run_length": cutoff},
                 runsolver_configuration=["--timestamp", "--use-pty",
@@ -93,12 +95,14 @@ def run_parallel_portfolio(instances: list[Path],
     )
     check_interval = gv.settings.get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
+    # We record the 'best' of all seed results per solver-instance
     job_output_dict = {instance.name: {solver.name: {"killed": False,
-                                                     "cpu-time": -1.0,
-                                                     "wc-time": -1.0,
+                                                     "cpu-time": float(sys.maxsize),
+                                                     "wc-time": float(sys.maxsize),
                                                      "status": "UNKNOWN"}
                                        for solver in solvers}
                        for instance in instances}
+    n_instance_jobs = num_solvers * seeds_per_solver
     while not all(instances_done):
         time.sleep(check_interval)
         job_status_list = [r.status for r in run.jobs]
@@ -107,36 +111,64 @@ def run_parallel_portfolio(instances: list[Path],
         for i, instance in enumerate(instances):
             if instances_done[i]:
                 continue
-            if any(job_status_completed[i * num_solvers:(i + 1) * num_solvers]):
+            instance_job_slice = slice(i * n_instance_jobs, (i + 1) * n_instance_jobs)
+            if any(job_status_completed[instance_job_slice]):
                 instances_done[i] = True
                 # Kill all running jobs for this instance
-                for job_index in range(i * num_solvers, (i + 1) * num_solvers):
+                solver_kills = [0] * num_solvers
+                for job_index in range(i * n_instance_jobs, (i + 1) * n_instance_jobs):
                     if not job_status_completed[job_index]:
                         run.jobs[job_index].kill()
-                        solver_name = solvers[job_index % num_solvers].name
+                        solver_index = int(
+                            (job_index % n_instance_jobs) / seeds_per_solver)
+                        solver_kills[solver_index] += 1
+                for solver_index in range(num_solvers):
+                    # All seeds of a solver were killed on instance, set state to killed
+                    if solver_kills[solver_index] == seeds_per_solver:
+                        solver_name = solvers[solver_index].name
                         job_output_dict[instance.name][solver_name]["killed"] = True
                         job_output_dict[instance.name][solver_name]["status"] = "KILLED"
 
-    # Now we iterate over the logs to get the runtime values
+    # Now iterate over runsolver logs to get runtime, get the lowest value per seed
     for index, solver_logs in enumerate(runsolver_logs):
-        solver_name = solvers[index % num_solvers].name
-        instance_name = instances[int(index / num_solvers)].name
+        solver_index = int((index % n_instance_jobs) / seeds_per_solver)
+        solver_name = solvers[solver_index].name
+        instance_name = instances[int(index / n_instance_jobs)].name
         if not solver_logs[1].exists():
             # NOTE: Runsolver is still wrapping up, not a pretty solution
             time.sleep(5)
+        if not solver_logs[2].exists():
+            # NOTE: Runsolver is still wrapping up, not a pretty solution
+            time.sleep(5)
         cpu_time, wallclock_time = get_runtime(solver_logs[1])
-        job_output_dict[instance_name][solver_name]["cpu-time"] = cpu_time
-        job_output_dict[instance_name][solver_name]["wc-time"] = wallclock_time
-        if not job_output_dict[instance_name][solver_name]["killed"]:
-            job_output_dict[instance_name][solver_name]["status"] =\
-                get_status(solver_logs[1], solver_logs[2])
+        if cpu_time < job_output_dict[instance_name][solver_name]["cpu-time"]:
+            job_output_dict[instance_name][solver_name]["cpu-time"] = cpu_time
+            job_output_dict[instance_name][solver_name]["wc-time"] = wallclock_time
+            if not job_output_dict[instance_name][solver_name]["killed"]:
+                job_output_dict[instance_name][solver_name]["status"] =\
+                    get_status(solver_logs[1], solver_logs[2])
+
+    # Fix the CPU/WC time for non existent logs to instance min time + check_interval
+    for instance in job_output_dict.keys():
+        no_log_solvers = []
+        min_time = cutoff
+        for solver in job_output_dict[instance].keys():
+            if job_output_dict[instance][solver]["cpu-time"] == -1.0:
+                no_log_solvers.append(solver)
+            elif job_output_dict[instance][solver]["cpu-time"] < min_time:
+                min_time = job_output_dict[instance][solver]["cpu-time"]
+        for solver in no_log_solvers:
+            job_output_dict[instance][solver]["cpu-time"] = min_time + cutoff
+            job_output_dict[instance][solver]["wc-time"] = min_time + cutoff
 
     for index, instance in enumerate(instances):
-        index_print = f"[{index + 1}/{num_instances}] "
-        if not instances_done[index]:
-            print(f"{index_print}{instance.name} was not solved within the cutoff-time.")
+        index_str = f"[{index + 1}/{num_instances}] "
+        instance_output = job_output_dict[instance.name]
+        if all([instance_output[k]["status"] == "TIMEOUT"
+                for k in instance_output.keys()]):
+            print(f"\n{index_str}{instance.name} was not solved within the cutoff-time.")
             continue
-        print(f"\n{index_print}{instance.name} yielded the following Solver results:")
+        print(f"\n{index_str}{instance.name} yielded the following Solver results:")
         for sindex in range(index * num_solvers, (index + 1) * num_solvers):
             solver_name = solvers[sindex % num_solvers].name
             job_info = job_output_dict[instance.name][solver_name]
