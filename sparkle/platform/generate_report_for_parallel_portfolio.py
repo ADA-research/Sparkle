@@ -56,8 +56,8 @@ def get_dict_sbs_penalty_time_on_each_instance(
     cutoff = gv.settings.get_general_target_cutoff_time()
     penalised_time = float(gv.settings.get_penalised_time())
     for instance in results:
-        for (solver, runtime) in results[instance]:
-            if float(runtime) >= cutoff:
+        for (solver, status, runtime) in results[instance]:
+            if float(runtime) >= cutoff or status.lower() != "success":
                 runtime = penalised_time
             averaged_penalised_runtime[solver] += float(runtime)
     for solver in averaged_penalised_runtime:
@@ -75,8 +75,8 @@ def get_dict_sbs_penalty_time_on_each_instance(
         for result in results[instance_name]:
             if result[0] == sbs_name:
                 found = True
-                if float(result[1]) < penalised_time:
-                    sbs_dict[instance_name] = float(result[1])
+                if float(result[2]) < penalised_time:
+                    sbs_dict[instance_name] = float(result[2])
                 break
         if not found:
             print(f"WARNING: No result found for instance: {instance_name}")
@@ -105,11 +105,13 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
         if instance_name in results:
             selected_value = results[instance_name][0]
             for solver in results[instance_name]:
-                if solver[1] < selected_value[1]:
+                if solver[2] < selected_value[2]:
                     selected_value = solver
-            if float(selected_value[1]) <= cutoff_time:
-                instance_penalty_dict[instance_name] = float(selected_value[1])
-            else:
+            _, status, runtime = selected_value
+            # Assign the measured result if exit status was success
+            if status.lower() == "success" and float(runtime) <= cutoff_time:
+                instance_penalty_dict[instance_name] = float(runtime)
+            else:  # Assign the penalized result
                 instance_penalty_dict[instance_name] = default_penalty
         else:
             instance_penalty_dict[instance_name] = default_penalty
@@ -259,7 +261,7 @@ def parallel_report_variables(target_directory: Path,
     results = {Path(instance).name: [] for instance in instances}
     for row in csv_data:
         if row[0] in results.keys():
-            results[row[0]].append([row[1], row[3]])
+            results[row[0]].append([row[1], row[2], row[3]])
 
     variables_dict["numSolvers"] = str(len(solver_list))
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
