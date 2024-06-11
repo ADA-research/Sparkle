@@ -8,7 +8,6 @@ authors = ["Koen van der Blom",
            "Jeremie Gobeil",
            "Holger H. Hoos",
            "Chuan Luo",
-           "Richard Middelkoop",
            "Jeroen Rook",
            "Thijs Snelleman",
            ]
