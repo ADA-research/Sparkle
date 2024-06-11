@@ -402,8 +402,6 @@ def fill_template_tex(template_tex: str, variables: dict) -> str:
         # We don't modify variable names in the Latex file
         if "\\includegraphics" not in target_value and "\\label" not in target_value:
             # Rectify underscores in target_value
-            if not isinstance(target_value, str):
-                print(target_value)
             target_value = target_value.replace("_", r"\textunderscore ")
         template_tex = template_tex.replace(variable, target_value)
     return template_tex
