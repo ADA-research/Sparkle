@@ -7,6 +7,9 @@ import argparse
 import subprocess
 from pathlib import Path
 
+global sparkle_special_string
+sparkle_special_string = r'__@@SPARKLE@@__'
+
 parser = argparse.ArgumentParser(description="Process some integers.")
 parser.add_argument('-extractor_dir', type=str, help='Path to the extractor directory')
 parser.add_argument('-instance_file', type=str, help='Path to the instance file')
@@ -37,21 +40,11 @@ raw_lines = Path(raw_result_file_name).read_text().splitlines()
 
 # Process raw result file and write to the final result file
 with open(output_file, 'w') as out_file:
-    #TS: Don't use this for loop, instead just extract the latest two lines and do some checks to see if they are correct
-    # e.g. minor regex, checking if the raw_lines are >=2, 
-    for idx, current_line in enumerate(raw_lines):
-        stripped_line = current_line.strip()
-        if not stripped_line or stripped_line.startswith('c'):
-            continue
-
-        # Split the line by commas, write each part to the output file with additional information
-        features = stripped_line.split(',')
-        out_file.write(','.join(f',{feature}{extractor_name}' for feature in features) + '\n')
-
-        # Ensure not to go out of index range for the next line
-        if idx + 1 < len(raw_lines):
-            next_line = raw_lines[idx + 1].strip()
-            out_file.write(f'{instance_path},{next_line}\n')
+    if len(raw_lines) >= 2:
+        features = raw_lines[-2].strip().split(',')
+        values = raw_lines[-1].strip()
+        out_file.write(','.join(f'{feature}{sparkle_special_string}{extractor_dir.name}' for feature in features) + '\n')
+        out_file.write(f'{instance_path},{values}\n')
 
 # Deletes temporary files
 raw_result_file_name.unlink(missing_ok=True)

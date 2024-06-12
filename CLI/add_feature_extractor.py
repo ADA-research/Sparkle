@@ -138,8 +138,13 @@ if __name__ == "__main__":
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
 
+    print(result_path)
+    input()
+
     tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
     list_columns = tmp_fdcsv.list_columns()
+    print("result")
+    print(list_columns)
     for column_name in list_columns:
         feature_data_csv.add_column(column_name)
 
