@@ -4,7 +4,10 @@
 
 ```{note}
 Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), but in some cases works locally as well.
+Sparkle also relies on [RunSolver](http://www.cril.univ-artois.fr/~roussel/runsolver/), which is a Linux based program. Thus Sparkle can only run on Linux based systems in many cases.
 ```
+
+
 
 Follow these steps:
 
