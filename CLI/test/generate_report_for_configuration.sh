@@ -38,13 +38,10 @@ scenario_path="Output/latest_scenario.ini"
 scenario_tmp="${scenario_path}_tmp"
 scenario_test="CLI/test/test_files/latest_scenario.ini"
 
-instances_config_dir="$smac_validation_results_path/instances"
-instances_config_dir_train="$instances_config_dir/PTN/"
-instances_config_dir_test="$instances_config_dir/PTN2/"
-tmp_instances_config_dir="${instances_config_dir}_tmp"
-
-config_scenario_path="$smac_validation_results_path/PbO-CCSAT-Generic_PTN/PbO-CCSAT-Generic_PTN_scenario.txt"
-config_scenario_test="CLI/test/test_files/PbO-CCSAT-Generic_PTN_scenario.txt"
+config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
+validation_scenario_path="Output/Validation/"
+config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
+validation_test_data="/home/snelleman/Sparkle/CLI/test/test_files/Output/Validation"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
@@ -60,13 +57,10 @@ cp -r $validation_results_path $smac_validation_results_path
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user data (if any)
 cp $scenario_test $scenario_path
 
-# Prepare instance directories in configuration environemnt
-mv $instances_config_dir $tmp_instances_config_dir 2> /dev/null # Save user data (if any)
-mkdir -p $instances_config_dir_train
-mkdir -p $instances_config_dir_test
-
-# Prepare configuration scenario file
-cp $config_scenario_test $config_scenario_path
+# Prepare configuration scenario output files
+mkdir -p $config_scenario_path # Make sure directory exists
+cp -r $config_test_data $config_scenario_path
+cp -r $validation_test_data $
 
 # Test generate report for configuration with both train and test sets
 output_true="Report is placed at:"
@@ -91,11 +85,11 @@ else
 	echo $output
 fi
 
-# Remove temporary data
-rm -r $instances_config_dir_train
-rm -r $instances_config_dir_test
+# Remove copied data
+rm -rf $config_scenario_path
+rm -rf $validation_scenario_path
+
 # Restore original data if any
-mv $tmp_instances_config_dir $instances_config_dir 2> /dev/null
 mv $slurm_settings_tmp $slurm_settings_path 2> /dev/null
 # OR true to get success exit code even when no user data was stored in the tmp file
 mv $scenario_tmp $scenario_path 2> /dev/null || true
