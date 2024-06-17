@@ -162,16 +162,17 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     python_executable = gv.python_executable
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     if perf_measure == PerformanceMeasure.RUNTIME:
-        objective_type = "runtime"
+        objective_function = "--objective runtime"
     elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
             perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        objective_type = "solution_quality"
+        objective_function = "--objective solution_quality"
     else:
         print("ERROR: Unknown performance measure in "
               "construct_sparkle_portfolio_selector")
         sys.exit(-1)
 
-    Path("Tmp").mkdir(exist_ok=True)
+    if not Path(r"Tmp/").exists():
+        Path(r"Tmp/").mkdir()
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
     bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()
@@ -196,20 +197,15 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     performance_data = PerformanceDataFrame(performance_data_csv_path)
     pf_data_autofolio_path = performance_data.to_autofolio()
     if selector_timeout is None:
-        cmd_list = [python_executable, gv.autofolio_path,
-                    "--performance_csv", str(pf_data_autofolio_path),
-                    "--feature_csv", feature_data_csv_path,
-                    "--objective", objective_type,
-                    "--save", str(selector_path)]
+        cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
+                    str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
+                    objective_function, "--save", str(selector_path)]
     else:
-        cmd_list = [python_executable, gv.autofolio_path,
-                    "--performance_csv", str(pf_data_autofolio_path),
-                    "--feature_csv", feature_data_csv_path,
-                    "--objective", objective_type,
-                    "--runtime_cutoff", cutoff_time_str,
-                    "--tune",
-                    "--save", str(selector_path),
-                    "--wallclock_limit", str(selector_timeout)]
+        cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
+                    str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
+                    objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
+                    "--save", str(selector_path), "--wallclock_limit",
+                    str(selector_timeout)]
     # Write command line to log
     print("Running command below:\n", " ".join(cmd_list), file=open(log_path_str, "a+"))
     sl.add_output(log_path_str, "Command line used to construct portfolio through "
