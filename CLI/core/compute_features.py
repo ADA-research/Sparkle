@@ -58,8 +58,10 @@ if __name__ == "__main__":
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
     command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
                     f"{runsolver_watch_data_path_option} {extractor_path}/"
-                    f"{gv.sparkle_run_default_wrapper} {extractor_path}/ "
-                    f"{instance_path} {result_path} 2> {err_path}")
+                    f"{gv.sparkle_extractor_wrapper} "
+                    f"-extractor_dir {extractor_path} "
+                    f"-instance_file {instance_path} "
+                    f"-output_file {result_path} 2> {err_path}")
 
     try:
         task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"

@@ -304,7 +304,7 @@ def compute_actual_selector_marginal_contribution(
         performance_data_csv_path: str = gv.performance_data_csv_path,
         feature_data_csv_path: str = gv.feature_data_csv_path,
         flag_recompute: bool = False,
-        selector_timeout=172000) -> list[tuple[str, float]]:
+        selector_timeout: int = 172000) -> list[tuple[str, float]]:
     """Compute the marginal contributions of solvers in the selector.
 
     Args:

@@ -128,7 +128,8 @@ if __name__ == "__main__":
         # selectors
         scmch.compute_marginal_contribution(flag_compute_perfect=True,
                                             flag_compute_actual=True,
-                                            flag_recompute=flag_recompute_marg_cont)
+                                            flag_recompute=flag_recompute_marg_cont,
+                                            selector_timeout=args.selector_timeout)
 
         status_info.delete()
 

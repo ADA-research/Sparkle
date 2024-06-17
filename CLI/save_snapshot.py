@@ -8,7 +8,7 @@ import argparse
 
 
 def parser_function() -> argparse.ArgumentParser:
-    """Parser for save_snapshot"""
+    """Parser for save_snapshot."""
     return argparse.ArgumentParser()
 
 
