@@ -34,7 +34,7 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
                           "--cpu-limit", str(cutoff_time_each_extractor_run),
                           "-w", runsolver_watch_data_path,  # Set log path
                           "-v", runsolver_value_data_path]  # Set information path
-    cmd_list_extractor = [f"{extractor_path}/{gv.sparkle_run_default_wrapper}",
+    cmd_list_extractor = [f"{extractor_path}/{gv.sparkle_extractor_wrapper}",
                           f"{extractor_path}/", instance_path, result_path]
 
     runsolver = subprocess.run(cmd_list_runsolver, capture_output=True)

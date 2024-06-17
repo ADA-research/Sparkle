@@ -162,10 +162,10 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     python_executable = gv.python_executable
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     if perf_measure == PerformanceMeasure.RUNTIME:
-        objective_function = "--objective runtime"
+        objective_type = "runtime"
     elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or\
             perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        objective_function = "--objective solution_quality"
+        objective_type = "solution_quality"
     else:
         print("ERROR: Unknown performance measure in "
               "construct_sparkle_portfolio_selector")
@@ -199,13 +199,13 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         cmd_list = [python_executable, gv.autofolio_path,
                     "--performance_csv", str(pf_data_autofolio_path),
                     "--feature_csv", feature_data_csv_path,
-                    objective_function,
+                    "--objective", objective_type,
                     "--save", str(selector_path)]
     else:
         cmd_list = [python_executable, gv.autofolio_path,
                     "--performance_csv", str(pf_data_autofolio_path),
                     "--feature_csv", feature_data_csv_path,
-                    objective_function,
+                    "--objective", objective_type,
                     "--runtime_cutoff", cutoff_time_str,
                     "--tune",
                     "--save", str(selector_path),
