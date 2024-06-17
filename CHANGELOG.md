@@ -2,10 +2,30 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.9]
+## [0.8.1] - 2024/06/??
+
+### Changed
+- Nickname system has been re-evaluated and is now available in any command. CLI now supports nickname, directory name and path as inputs for Instances/Solvers/Extractors. [SPRK-55]
+- The Sparkle environment has swig updated to 4.0.2 [SPRK-187] and Runsolver to 219 [SPRK-219].
+- CLI arguments are now unified into one file for user readiblity and to reduce maintenance cost. [SPRK-265]
 
 ### Added
+- Runsolver is now automatically compiled upon running CLI initialisation if the executable does not exist. [SPRK-75]
+- Sparkle settings now support multiple budget types for configurators: Number of solver calls, Wall-clock, CPU-time. [SPRK-76]
 - PCS files for configuration are checked if they can be parsed. [SPRK-80]
+- The user is now notified by the CLI when changing settings values in between commands. [SPRK-88]
+- Added a template for feature extractors. [SPRK-102]
+- The user is notified if the submitted solver does not have correct executable rights for the CLI. [SPRK-120]
+- The Sparkle setting clis_per_node is now renamed to max_parallel_runs_per_node, but the old name is still supported. [SPRK-128]
+- Sparkle now uses its own validation implementation instead of the one given by SMACv2, allowing validation to run in parallel instead of sequential. [SPRK-270]
+
+
+### Fixed
+- AutoFolio cutoff time was set to an odd value. Now matches the original paper. [SPRK-220]
+- The parallel portfolio runner has had a complete rework, resulting in the disabling of support for the QUALITY objective.[SPRK-269]
+- Bug in removing a solver in the CLI, resulting in it still being present in some parts. [SPRK-276]
+- Bug fix for AutoFolio when running portfolio for selection. [SPRK-281]
+
 
 ## [0.8] - 2024/04/29
 
@@ -31,7 +51,7 @@ Notable changes to Sparkle will be documented in this file.
 - Fixed bugs for running configured solver
 
 ## [Known issues]
-- [CHECK BEFORE PUBLISHING TO MAIN] Running configured solver in parallel now tends to lead to empty raw output files from the solver. This will be either solved in this version or the next
+- Running configured solver in parallel now tends to lead to empty raw output files from the solver. This will be either solved in the next version.
 
 ## [0.7] - 2024/04/05
 
