@@ -99,7 +99,7 @@ class SparkleCSV:
     def delete_row(self: SparkleCSV, row_name: str) -> None:
         """Delete a specified row."""
         if row_name not in self.list_rows():
-            print("Row " + row_name + " does not exist!")
+            print(f"Row {row_name} does not exist!")
             print("Nothing changed!")
             return
         self.dataframe = self.dataframe.drop(row_name, axis=0)

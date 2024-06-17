@@ -57,8 +57,9 @@ if __name__ == "__main__":
         # Remove instance records
         sfh.add_remove_platform_item(intended_instance_name,
                                      gv.instance_list_path, remove=True)
-        feature_data_csv.delete_row(intended_instance_name)
-        performance_data_csv.remove_instance(intended_instance_name)
+        print(intended_instance_name)
+        feature_data_csv.delete_row(str(intended_instance))
+        performance_data_csv.remove_instance(str(intended_instance))
 
         print(f"Instance {intended_instance} has been removed from platform!")
 
