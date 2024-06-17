@@ -8,12 +8,12 @@ import subprocess
 from pathlib import Path
 
 global sparkle_special_string
-sparkle_special_string = r'__@@SPARKLE@@__'
+sparkle_special_string = r"__@@SPARKLE@@__"
 
-parser = argparse.ArgumentParser(description="Process some integers.")
-parser.add_argument('-extractor_dir', type=str, help='Path to the extractor directory')
-parser.add_argument('-instance_file', type=str, help='Path to the instance file')
-parser.add_argument('-output_file', type=str, help='Path to the output file')
+parser = argparse.ArgumentParser(description="Handle I/O for the extractor.")
+parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
+parser.add_argument("-instance_file", type=str, help="Path to the instance file")
+parser.add_argument("-output_file", type=str, help="Path to the output file")
 args = parser.parse_args()
 
 extractor_dir = Path(args.extractor_dir)
