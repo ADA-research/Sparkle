@@ -57,6 +57,10 @@ if __name__ == "__main__":
     global settings
     gv.settings = settings_help.Settings()
 
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
+
     # Log command call
     sl.log_command(sys.argv)
 
@@ -199,10 +203,6 @@ if __name__ == "__main__":
         )
 
         status_info.delete()
-
-        # Compare current settings to latest.ini
-        prev_settings = Settings(PurePath("Settings/latest.ini"))
-        Settings.check_settings_changes(gv.settings, prev_settings)
 
     # Write used settings to file
     gv.settings.write_used_settings()

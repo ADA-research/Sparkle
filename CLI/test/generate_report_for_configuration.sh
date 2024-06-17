@@ -35,9 +35,10 @@ scenario_tmp="${scenario_path}_tmp"
 scenario_test="CLI/test/test_files/latest_scenario.ini"
 
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
-validation_scenario_path="Output/Validation/Validation/PbO-CCSAT-Generic_PTN"
+validation_scenario_path="Output/Validation/"
 config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
-validation_test_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PTN/"
+validation_train_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PTN/"
+validation_test_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PTN2/"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
@@ -52,6 +53,7 @@ cp $scenario_test $scenario_path
 mkdir -p $config_scenario_path # Make sure directory exists
 mkdir -p $validation_scenario_path
 cp -r $config_test_data $config_scenario_path
+cp -r $validation_train_data $validation_scenario_path
 cp -r $validation_test_data $validation_scenario_path
 
 # Test generate report for configuration with both train and test sets
