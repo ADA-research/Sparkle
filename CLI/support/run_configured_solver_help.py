@@ -189,7 +189,5 @@ def call_solver_parallel(
 
     if run_on == Runner.LOCAL:
         run.wait()
-    else:
-        print(f"Configured solver added to {run_on} queue.")
 
     return run
