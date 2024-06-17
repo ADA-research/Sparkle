@@ -184,7 +184,6 @@ class SMAC2(Configurator):
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.output_path)
 
-
     @staticmethod
     def get_smac_run_obj(smac_run_obj: PerformanceMeasure) -> str:
         """Return the SMAC run objective based on the Performance Measure.

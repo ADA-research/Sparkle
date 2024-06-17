@@ -48,8 +48,8 @@ if __name__ == "__main__":
 
     print(f"Start removing all instances in directory {instances_path} ...")
     list_all_filename = sfh.get_list_all_filename_recursive(instances_path)
-    reference_list = gv.reference_list_dir / (instances_path.name +
-                                              gv.instance_list_postfix)
+    reference_list = gv.reference_list_dir / (instances_path.name
+                                              + gv.instance_list_postfix)
     if reference_list.exists():
         list_all_filename = reference_list.open("r").read().splitlines()
         # Prepend the instance path to each name
@@ -57,7 +57,6 @@ if __name__ == "__main__":
             file_names = instance.split(" ")
             list_all_filename[i] = " ".join([f"{instances_path / fname}"
                                              for fname in file_names])
-
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
@@ -75,7 +74,6 @@ if __name__ == "__main__":
         feature_data_csv.delete_row(intended_instance)
         performance_data_csv.remove_instance(intended_instance)
         print(f"Instance {intended_instance} has been removed from platform!")
-        
 
     if instances_path.exists() and instances_path.is_dir():
         shutil.rmtree(instances_path)

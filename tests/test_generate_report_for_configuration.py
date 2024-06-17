@@ -9,6 +9,7 @@ from sparkle.platform import generate_report_for_configuration as sgrch
 import global_variables as gv
 from sparkle.platform import settings_help
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
+from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 from sparkle.solver.solver import Solver
 import csv
 
@@ -20,6 +21,10 @@ configurator_path = configurator.configurator_path
 solver_name = "test-solver"
 train_instance = "train-instance"
 test_instance = "test-instance"
+test_objective_runtime = SparkleObjective("RUNTIME:PAR10")
+test_objective_quality = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
+test_objective_err = SparkleObjective("ERR:ERR")
+test_objective_err.PerformanceMeasure = PerformanceMeasure.ERR
 
 
 def setup_conf() -> None:
@@ -121,9 +126,9 @@ def test_get_performance_measure_par10(mocker: MockFixture) -> None:
 
     Return `PAR10` for RUNTIME with default penalty multiplier of 10.
     """
-    mock_settings = mocker.patch("CLI.support.smac_help."
-                                 "get_smac_run_obj",
-                                 return_value="RUNTIME")
+    mock_settings = mocker.patch("sparkle.platform.settings_help.Settings."
+                                 "get_general_sparkle_objectives",
+                                 return_value=[test_objective_runtime])
     mock_multiplier = mocker.patch("sparkle.platform.settings_help.Settings."
                                    "get_general_penalty_multiplier",
                                    return_value=10)
@@ -140,9 +145,9 @@ def test_get_performance_measure_par5(mocker: MockFixture) -> None:
 
     Return `PAR5` for RUNTIME with non-default penalty multiplier of 5.
     """
-    mock_settings = mocker.patch("CLI.support.smac_help."
-                                 "get_smac_run_obj",
-                                 return_value="RUNTIME")
+    mock_settings = mocker.patch("sparkle.platform.settings_help.Settings."
+                                 "get_general_sparkle_objectives",
+                                 return_value=[test_objective_runtime])
     mock_multiplier = mocker.patch("sparkle.platform.settings_help.Settings."
                                    "get_general_penalty_multiplier",
                                    return_value=5)
@@ -154,33 +159,32 @@ def test_get_performance_measure_par5(mocker: MockFixture) -> None:
     assert measure == "PAR5"
 
 
-def test_get_performance_measure_performance(mocker: MockFixture) -> None:
+def test_get_performance_measure_quality(mocker: MockFixture) -> None:
     """Test get_performance_measure returns correct measure for QUALITY."""
-    mock_settings = mocker.patch("CLI.support.smac_help."
-                                 "get_smac_run_obj",
-                                 return_value="QUALITY")
-
+    mock_settings = mocker.patch("sparkle.platform.settings_help.Settings."
+                                 "get_general_sparkle_objectives",
+                                 return_value=[test_objective_quality])
     measure = sgrch.get_performance_measure()
-
+    print(measure)
+    print(test_objective_quality.PerformanceMeasure)
     mock_settings.assert_called_once_with()
     assert measure == "performance"
 
 
 def test_get_runtime_bool(mocker: MockFixture) -> None:
     """Test get_runtime_bool returns correct string for objective RUNTIME."""
-    mock_settings = mocker.patch("CLI.support.smac_help."
-                                 "get_smac_run_obj",
-                                 return_value="RUNTIME")
-
+    mock_settings = mocker.patch("sparkle.platform.settings_help.Settings."
+                                 "get_general_sparkle_objectives",
+                                 return_value=[test_objective_runtime])
     runtime_bool = sgrch.get_runtime_bool()
 
     mock_settings.assert_called_once_with()
     assert runtime_bool == r"\runtimetrue"
 
     # Quality
-    mock_settings = mocker.patch("CLI.support.smac_help."
-                                 "get_smac_run_obj",
-                                 return_value="QUALITY")
+    mock_settings = mocker.patch("sparkle.platform.settings_help.Settings."
+                                 "get_general_sparkle_objectives",
+                                 return_value=[test_objective_quality])
 
     runtime_bool = sgrch.get_runtime_bool()
 
@@ -188,9 +192,9 @@ def test_get_runtime_bool(mocker: MockFixture) -> None:
     assert runtime_bool == r"\runtimefalse"
 
     # Other
-    mock_settings = mocker.patch("CLI.support.smac_help."
-                                 "get_smac_run_obj",
-                                 return_value="ERROR")
+    mock_settings = mocker.patch("sparkle.platform.settings_help.Settings."
+                                 "get_general_sparkle_objectives",
+                                 return_value=[test_objective_err])
 
     runtime_bool = sgrch.get_runtime_bool()
 
