@@ -1,2 +1,0 @@
-13:11:41.859 [main] WARN  c.u.c.b.a.t.d.s.TimingCheckerTargetAlgorithmEvaluator - Algorithm Run Result reported a runtime of 61.1087 (secs) that exceeded it's cutoff time of 60.0 (secs) by 1.108699999999999 (secs). Next warning at 2.108699999999999 (secs)  
-13:11:41.860 [main] WARN  c.u.c.b.a.t.d.s.TimingCheckerTargetAlgorithmEvaluator - Algorithm Run Result reported wallclock time of 82.12 (secs) that exceeded it's cutoff time of 60.0 (secs) by 22.120000000000005 (secs). Next warning at 23.120000000000005 (secs)  

@@ -30,37 +30,29 @@ instances_src_path_train="${examples_path}${instances_path_train}"
 instances_src_path_test="${examples_path}${instances_path_test}"
 solver_src_path="${examples_path}${solver_path}"
 
-configuration_results_path="CLI/test/test_files/results/"
-validation_results_path="CLI/test/test_files/PbO-CCSAT-Generic_PTN/"
-smac_path="Components/smac-v2.10.03-master-778"
-smac_validation_results_path="$smac_path/scenarios"
 scenario_path="Output/latest_scenario.ini"
 scenario_tmp="${scenario_path}_tmp"
 scenario_test="CLI/test/test_files/latest_scenario.ini"
 
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
-validation_scenario_path="Output/Validation/"
+validation_scenario_path="Output/Validation/Validation/PbO-CCSAT-Generic_PTN"
 config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
-validation_test_data="/home/snelleman/Sparkle/CLI/test/test_files/Output/Validation"
+validation_test_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PTN/"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
 CLI/add_instances.py $instances_src_path_test > /dev/null
 CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
-# Copy configuration results to simulate the configuration command
-cp -r $configuration_results_path $smac_path
-# Copy validation results to simulate the validation command
-mkdir -p $smac_validation_results_path # Make sure directory exists
-cp -r $validation_results_path $smac_validation_results_path
 # Copy scenario to simulate configuration
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user data (if any)
 cp $scenario_test $scenario_path
 
 # Prepare configuration scenario output files
 mkdir -p $config_scenario_path # Make sure directory exists
+mkdir -p $validation_scenario_path
 cp -r $config_test_data $config_scenario_path
-cp -r $validation_test_data $
+cp -r $validation_test_data $validation_scenario_path
 
 # Test generate report for configuration with both train and test sets
 output_true="Report is placed at:"
