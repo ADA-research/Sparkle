@@ -28,7 +28,7 @@ executable = extractor_dir / executable_name
 raw_result_file_name = Path(f"{extractor_dir}{executable_name}_" \
                             f"{instance_path.name}_{time.strftime('%Y%m%d-%H%M%S')}" \
                             f"_{int(random.getrandbits(32))}.rawres")
-tmp_output = Path("TMP") / raw_result_file_name #T.S: Why is this seperately used from raw result? shouldn't there be only one variable describign the raw output?
+tmp_output = Path("TMP") / raw_result_file_name
 
 subprocess.run([extractor_dir / executable_name,
                 instance_path,
@@ -39,12 +39,13 @@ subprocess.run([extractor_dir / executable_name,
 raw_lines = Path(raw_result_file_name).read_text().splitlines()
 
 # Process raw result file and write to the final result file
-with open(output_file, 'w') as out_file:
+with open(output_file, "w") as out_file:
     if len(raw_lines) >= 2:
-        features = raw_lines[-2].strip().split(',')
+        features = raw_lines[-2].strip().split(",")
         values = raw_lines[-1].strip()
-        out_file.write(','.join(f'{feature}{sparkle_special_string}{extractor_dir.name}' for feature in features) + '\n')
-        out_file.write(f'{instance_path},{values}\n')
+        out_file.write(",".join(f"{feature}{sparkle_special_string}{extractor_dir.name}"
+                                for feature in features) + "\n")
+        out_file.write(f"{instance_path},{values}\n")
 
 # Deletes temporary files
 raw_result_file_name.unlink(missing_ok=True)
