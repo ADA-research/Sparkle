@@ -132,7 +132,7 @@ pap_performance_data_tmp_path = Path("Performance_Data/Tmp_PaP/")
 pap_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/")
 run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")
 
-reference_list_dir = Path("Reference_Lists/")
+reference_list_dir = Path("Reference_Lists")
 instance_list_postfix = "_instance_list.txt"
 extractor_nickname_list_path = (
     f"{str(reference_list_dir)}/sparkle_extractor_nickname_list.txt")
