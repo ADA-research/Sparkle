@@ -18,14 +18,11 @@
 CLI/initialise.py > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
-configuration_results_path="CLI/test/test_files/results"
-configuration_files_path="CLI/test/test_files/PbO-CCSAT-Generic_PTN/PTN_train.txt"
-smac_path="Components/smac-v2.10.03-master-778/"
-smac_configuration_files_path="$smac_path/scenarios/PbO-CCSAT-Generic/"
-# TODO: Save possibly existing results directory
-cp -r $configuration_results_path $smac_path
-mkdir -p $smac_configuration_files_path # Make sure directory exists
-cp $configuration_files_path $smac_configuration_files_path
+config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
+config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
+
+mkdir -p $config_scenario_path # Make sure directory exists
+cp -r $config_test_data $config_scenario_path
 
 #Check if Slurm is present in the env
 slurm_true="slurm"
