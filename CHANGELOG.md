@@ -2,7 +2,7 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.8.1] - 2024/06/??
+## [0.8.2] - 2024/06/2?
 
 ### Changed
 - Nickname system has been re-evaluated and is now available in any command. CLI now supports nickname, directory name and path as inputs for Instances/Solvers/Extractors. [SPRK-55]
