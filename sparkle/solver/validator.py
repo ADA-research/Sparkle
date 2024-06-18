@@ -103,13 +103,10 @@ class Validator():
         for res in log_dir.iterdir():
             if res.suffix != ".rawres":
                 continue
-            res_str = res.name
-            first_underscore_index = res_str.find("_")
-            second_underscore_index = res_str.find("_", first_underscore_index + 1)
-            instance_name = res_str[first_underscore_index + 1:second_underscore_index]
             solver_args = get_solver_args(res.with_suffix(".log"))
-            # Remove default args
             solver_args = ast.literal_eval(solver_args.strip())
+            instance_name = Path(solver_args["instance"]).name
+            # Remove default args
             if "config_path" in solver_args:
                 # The actual solver configuration can be found elsewhere
                 row_idx = int(solver_args["seed"])
