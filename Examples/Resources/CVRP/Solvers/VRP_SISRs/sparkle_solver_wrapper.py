@@ -57,7 +57,7 @@ if len(output_list) > 0:
 if specifics == 'rawres':
     tmp_directory = Path("tmp/")
     time_stamp = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
-    rawres_file_name = Path(f"{solver_name}_{instance.name}_{time_stamp}.rawres_solver")
+    rawres_file_name = Path(f"{solver_name}_{instance_name}_{time_stamp}.rawres_solver")
     if Path.cwd().name != tmp_directory.name:
         tmp_directory.mkdir(exist_ok=True)
         raw_result_path = tmp_directory / rawres_file_name
