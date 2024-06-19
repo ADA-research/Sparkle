@@ -6,6 +6,7 @@ import pathlib
 import subprocess
 import sys
 import fcntl
+from filelock import FileLock, Timeout
 from pathlib import Path
 import ast
 
@@ -112,7 +113,7 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
 def call_solver_solve_instance_within_cutoff(solver_path: str,
                                              instance_path: str,
                                              cutoff_time: int,
-                                             performance_data_csv_path: str = None)\
+                                             performance_data_csv: str = None)\
         -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
     _, _, cpu_time_penalised, _, status, raw_result_path = (
@@ -122,22 +123,27 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
     if status == "SUCCESS" or status == "SAT" or status == "UNSAT":
         flag_solved = True
 
-    if performance_data_csv_path is not None:
+    if performance_data_csv is not None:
+        performance_data_csv_path = Path(performance_data_csv)
         solver_name = "Sparkle_Portfolio_Selector"
         check_selector_status(solver_name)
-        with Path(performance_data_csv_path).open("r+") as fo:
-            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-            performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
-            performance_data_csv.set_value(cpu_time_penalised,
-                                           solver_name, instance_path)
-            performance_data_csv.save_csv()
+        print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance_path}")
+        try:
+            lock = FileLock(f"{performance_data_csv}.lock")  # Creating a seperate locked file for writing
+            with lock.acquire(timeout=60):
+                performance_dataframe = PerformanceDataFrame(performance_data_csv_path)
+                performance_dataframe.set_value(cpu_time_penalised, solver_name,
+                                                Path(instance_path).name)
+                performance_dataframe.save_csv()
+        except Timeout:
+            print(f"ERROR: Cannot acquire File Lock on {performance_data_csv}.")
     else:
         if flag_solved:
             print(f"Instance solved by solver {solver_path}")
         else:
             print(f"Solver {solver_path} failed to solve the instance with status "
                   f"{status}")
-
+    print("done!")
     sfh.rmfiles(raw_result_path)
     return flag_solved
 
@@ -220,7 +226,6 @@ def call_sparkle_portfolio_selector_solve_instance(
         cutoff_time = pred[1]
         print(f"Calling solver {Path(solver_path).name} with "
               f"time budget {str(cutoff_time)} for solving ...")
-        sys.stdout.flush()
         flag_solved = call_solver_solve_instance_within_cutoff(
             solver_path, instance_path, cutoff_time, performance_data_csv_path)
         print(f"Calling solver {Path(solver_path).name} done!")
@@ -246,15 +251,13 @@ def call_sparkle_portfolio_selector_solve_directory(
     instance_directory_name = instance_directory_path.name
 
     test_case_path = Path("Test_Cases") / instance_directory_name
-
+    test_case_path.mkdir(parents=True, exist_ok=True)
     # Update latest scenario
     gv.latest_scenario().set_selection_test_case_directory(
         test_case_path)
     gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
-    test_case_tmp_path = test_case_path / "Tmp"
-    test_case_tmp_path.mkdir(parents=True, exist_ok=True)
 
     test_performance_data_path = test_case_path / "sparkle_performance_data.csv"
     test_performance_data_csv = PerformanceDataFrame(test_performance_data_path)
@@ -276,13 +279,13 @@ def call_sparkle_portfolio_selector_solve_directory(
     n_jobs = len(total_job_list)
     target_call = "python CLI/core/run_sparkle_portfolio_core.py" +\
                   f" --performance-data-csv {test_performance_data_path}"
-    cmd_list = [f"{target_call} --instance {job_instance[0]}"
+    cmd_list = [f"{target_call} --instance {instance_directory_path / job_instance[0]}"
                 for job_instance in total_job_list]
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
-        base_dir=str(test_case_tmp_path),
+        base_dir=gv.sparkle_tmp_path,
         parallel_jobs=n_jobs,
         sbatch_options=ssh.get_slurm_options_list(),
         srun_options=["-N1", "-n1", "--exclusive"])
