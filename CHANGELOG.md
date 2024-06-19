@@ -13,12 +13,12 @@ Notable changes to Sparkle will be documented in this file.
 - Runsolver is now automatically compiled upon running CLI initialisation if the executable does not exist. [SPRK-75]
 - Sparkle settings now support multiple budget types for configurators: Number of solver calls, Wall-clock, CPU-time. [SPRK-76]
 - PCS files for configuration are checked if they can be parsed. [SPRK-80]
+- Status command now also checks configurator logs for errors [SPRK-82] 
 - The user is now notified by the CLI when changing settings values in between commands. [SPRK-88]
 - Added a template for feature extractors. [SPRK-102]
 - The user is notified if the submitted solver does not have correct executable rights for the CLI. [SPRK-120]
 - The Sparkle setting clis_per_node is now renamed to max_parallel_runs_per_node, but the old name is still supported. [SPRK-128]
 - Sparkle now uses its own validation implementation instead of the one given by SMACv2, allowing validation to run in parallel instead of sequential. [SPRK-270]
-
 
 ### Fixed
 - AutoFolio cutoff time was set to an odd value. Now matches the original paper. [SPRK-220]
