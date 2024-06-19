@@ -187,17 +187,20 @@ class SMAC2(Configurator):
 
     def get_status_from_logs(self: SMAC2) -> None:
         """Method to scan the log files of the configurator for warnings."""
+        # print header
+        print("Checking configurator log files for warnings...")
         base_dir = self.output_path / "scenarios"
         scenarios = [f for f in base_dir.iterdir() if f.is_dir()]
         for scenario in scenarios:
             log_dir = scenario / "outdir_train_configuration" \
                 / (scenario.name + "_scenario")
             warn_files = glob.glob(str(log_dir) + "/log-warn*")
-            non_empty = [f for f in warn_files if Path(f).stat().st_size > 0]
+            non_empty = [log_file for log_file in warn_files
+                         if Path(log_file).stat().st_size > 0]
             if len(non_empty) > 0:
                 print(f"Scenario {scenario.name} has {len(non_empty)} warning(s), see "
                       "the following log file(s) for more information:")
-                for f in non_empty:
-                    print("  ", f)
+                for log_file in non_empty:
+                    print(f"\t-{log_file}")
             else:
                 print(f"Scenario {scenario.name} has no warnings.")
