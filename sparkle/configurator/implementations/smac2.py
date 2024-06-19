@@ -10,6 +10,7 @@ from statistics import mean
 import operator
 import fcntl
 import shutil
+import glob
 
 import runrunner as rrr
 from runrunner import Runner
@@ -200,3 +201,24 @@ class SMAC2(Configurator):
         else:
             print(f"Warning: Unknown SMAC objective {smac_run_obj}")
         return smac_run_obj
+
+    def get_status_from_logs(self: SMAC2) -> None:
+        """Method to scan the log files of the configurator for warnings."""
+        # print the header
+        print(f"Checking the log files of configurator {type(self).__name__} for "
+              "warnings...")
+        base_dir = self.output_path / "scenarios"
+        scenarios = [f for f in base_dir.iterdir() if f.is_dir()]
+        for scenario in scenarios:
+            log_dir = scenario / "outdir_train_configuration" \
+                / (scenario.name + "_scenario")
+            warn_files = glob.glob(str(log_dir) + "/log-warn*")
+            non_empty = [log_file for log_file in warn_files
+                         if Path(log_file).stat().st_size > 0]
+            if len(non_empty) > 0:
+                print(f"Scenario {scenario.name} has {len(non_empty)} warning(s), see "
+                      "the following log file(s) for more information:")
+                for log_file in non_empty:
+                    print(f"\t-{log_file}")
+            else:
+                print(f"Scenario {scenario.name} has no warnings.")
