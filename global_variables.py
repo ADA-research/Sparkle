@@ -76,7 +76,6 @@ sparkle_algorithm_selector_path = (
 output_dir = Path("Output")
 instance_dir = Path("Instances")
 solver_dir = Path("Solvers")
-test_data_dir = Path("Test_Data")
 extractor_dir = Path("Extractors")
 feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
@@ -146,8 +145,7 @@ instance_list_path = Path(reference_list_dir / instance_list_file)
 
 working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir,
-                sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
-                test_data_dir]
+                sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir]
 
 file_storage_data_mapping = {Solver.solver_list_path: Solver.get_solver_list(),
                              Path(solver_nickname_list_path): {},
