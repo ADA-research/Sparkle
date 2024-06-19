@@ -10,6 +10,7 @@ from statistics import mean
 import operator
 import fcntl
 import shutil
+import glob
 
 import runrunner as rrr
 from runrunner import Runner
@@ -183,3 +184,20 @@ class SMAC2(Configurator):
             solver = Solver.get_solver_by_name(solver)
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.output_path)
+
+    def get_status_from_logs(self: SMAC2) -> None:
+        """Method to scan the log files of the configurator for warnings."""
+        base_dir = self.output_path / "scenarios"
+        scenarios = [f for f in base_dir.iterdir() if f.is_dir()]
+        for scenario in scenarios:
+            log_dir = scenario / "outdir_train_configuration" \
+                / (scenario.name + "_scenario")
+            warn_files = glob.glob(str(log_dir) + "/log-warn*")
+            non_empty = [f for f in warn_files if Path(f).stat().st_size > 0]
+            if len(non_empty) > 0:
+                print(f"Scenario {scenario.name} has {len(non_empty)} warning(s), see "
+                      "the following log file(s) for more information:")
+                for f in non_empty:
+                    print("  ", f)
+            else:
+                print(f"Scenario {scenario.name} has no warnings.")
