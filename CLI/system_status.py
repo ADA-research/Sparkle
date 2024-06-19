@@ -38,4 +38,9 @@ if __name__ == "__main__":
     sssh.print_list_remaining_performance_computation_job(
         gv.performance_data_csv_path, args.verbose
     )
-    print("Current system status of Sparkle reported!")
+
+    # scan configurator log files for warnings
+    configurator = gv.settings.get_general_sparkle_configurator()
+    configurator.get_status_from_logs()
+
+    print("\nCurrent system status of Sparkle reported!")
