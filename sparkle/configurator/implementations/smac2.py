@@ -187,8 +187,9 @@ class SMAC2(Configurator):
 
     def get_status_from_logs(self: SMAC2) -> None:
         """Method to scan the log files of the configurator for warnings."""
-        # print header
-        print("Checking configurator log files for warnings...")
+        # print the header
+        print(f"Checking the log files of configurator {type(self).__name__} for "
+              "warnings...")
         base_dir = self.output_path / "scenarios"
         scenarios = [f for f in base_dir.iterdir() if f.is_dir()]
         for scenario in scenarios:
