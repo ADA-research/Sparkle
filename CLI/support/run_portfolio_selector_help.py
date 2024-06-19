@@ -129,7 +129,8 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
         check_selector_status(solver_name)
         print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance_path}")
         try:
-            lock = FileLock(f"{performance_data_csv}.lock")  # Creating a seperate locked file for writing
+            # Creating a seperate locked file for writing
+            lock = FileLock(f"{performance_data_csv}.lock")  
             with lock.acquire(timeout=60):
                 performance_dataframe = PerformanceDataFrame(performance_data_csv_path)
                 performance_dataframe.set_value(cpu_time_penalised, solver_name,
