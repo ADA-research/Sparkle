@@ -26,6 +26,10 @@ def run_solver_on_instance_with_cmd(solver_path: Path, instance_path: str, seed_
     ----------
     solver_path: Path
         The path to the solver
+    instance_path: str
+        Path to the instance
+    seed_str: str
+        Seed for the call
     cmd_solver_call: str
         The cmd wrapper containing relevant information
     raw_result_path: Path
@@ -58,7 +62,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, instance_path: str, seed_
                                  "--cpu-limit", str(custom_cutoff),
                                  "-w", runsolver_watch_data_path,
                                  "-v", runsolver_values_log,
-                                 "-o", raw_result_path_option,])
+                                 "-o", raw_result_path_option])
 
     process = subprocess.run(solver_cmd, cwd=Path.cwd(), capture_output=True)
     if process.returncode != 0:
