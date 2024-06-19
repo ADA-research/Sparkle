@@ -121,10 +121,17 @@ class Solver:
             configuration = Solver.config_str_to_dict(configuration)
         if configuration is None:
             configuration = {}
+        # Ensure configuration contains required entries for each wrapper
         if "instance" not in configuration:
             configuration["instance"] = instance
         if "solver_dir" not in configuration:
             configuration["solver_dir"] = str(self.directory.absolute())
+        if "specifics" not in configuration:
+            configuration["specifics"] = ""
+        if "run_length" not in configuration:
+            configuration["run_length"] = ""
+        if "cutoff_time" not in configuration:
+            configuration["cutoff_time"] = sys.maxsize
         # Ensure stringification of dictionary will go correctly
         configuration = {key: str(configuration[key]) for key in configuration}
         # Ensure stringifcation of cmd call will go correctly
