@@ -50,9 +50,9 @@ def get_dict_sbs_penalty_time_on_each_instance(
         A three-tuple:
             A dict containing the run time per instance for the single best solver.
             A string containing the name of the single best solver.
-            A second dict containing penalised run time per solver.
+            A second dict containing penalised averaged run time per solver.
     """
-    penalised_runtime = {solver: 0.0 for solver in solver_list}
+    penalised_averaged_runtime = {solver: 0.0 for solver in solver_list}
     cutoff = gv.settings.get_general_target_cutoff_time()
     penalised_time = float(gv.settings.get_penalised_time())
     for instance in results:
@@ -60,10 +60,10 @@ def get_dict_sbs_penalty_time_on_each_instance(
             # Those that did not finish or exceed the thresh get the penalty
             if float(runtime) >= cutoff or status.lower() != "success":
                 runtime = penalised_time
-            penalised_runtime[solver] += float(runtime)
+            penalised_averaged_runtime[solver] += (float(runtime) / len(instance_list))
 
     # Find the single best solver (SBS)
-    sbs_name = min(penalised_runtime, key=penalised_runtime.get)
+    sbs_name = min(penalised_averaged_runtime, key=penalised_averaged_runtime.get)
     sbs_name = Path(sbs_name).name
     sbs_dict = {Path(instance).name: penalised_time for instance in instance_list}
 
@@ -78,7 +78,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
                 break
         if not found:
             print(f"WARNING: No result found for instance: {instance_name}")
-    return sbs_dict, sbs_name, penalised_runtime
+    return sbs_dict, sbs_name, penalised_averaged_runtime
 
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
@@ -97,7 +97,6 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     cutoff_time = gv.settings.get_general_target_cutoff_time()
     default_penalty = float(gv.settings.get_penalised_time())
 
-
     for instance in instance_list:
         instance_name = Path(instance).name
         if instance_name in results:
@@ -114,7 +113,6 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
                 instance_penalty_dict[instance_name] = default_penalty
         else:
             instance_penalty_dict[instance_name] = default_penalty
-   
     return instance_penalty_dict
 
 
@@ -191,13 +189,14 @@ def get_results_table(results: dict[str, str, str],
     performance_metric_str = gv.settings.get_performance_metric_for_report()
     for instance in dict_portfolio:
         portfolio_par += dict_portfolio[instance]
+    portfolio_par = portfolio_par / n_instances
     total_killed = 0
     for instance in results:
         for (_, status, _) in results[instance]:
             total_killed += (status.lower() == "killed")
     # Table 1: Portfolio results
     table_string = (
-        "\\caption *{\\textbf{Portfolio results}} \\label{tab:portfolio_results} ")
+        "\\caption{\\textbf{Portfolio results}} \\label{tab:portfolio_results} ")
     table_string += "\\begin{tabular}{rrrrr}"
     table_string += (
         "\\textbf{Portfolio nickname} & \\textbf{"
@@ -211,7 +210,7 @@ def get_results_table(results: dict[str, str, str],
     table_string += "\\end{tabular}"
     table_string += "\\bigskip"
     # Table 2: Solver results
-    table_string += "\\caption *{\\textbf{Solver results}} \\label{tab:solver_results} "
+    table_string += "\\caption{\\textbf{Solver results}} \\label{tab:solver_results} "
     table_string += "\\begin{tabular}{rrrrr}"
 
     for i, line in enumerate(dict_all_solvers):

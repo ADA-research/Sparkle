@@ -50,6 +50,8 @@ def run_parallel_portfolio(instances: list[Path],
         print("WARNING: Not all jobs will be started at the same time due to the "
               "limitation of number of Slurm jobs that can be run in parallel. Check"
               " your Sparkle Slurm Settings.")
+    print(f"Sparkle parallel portfolio is running {seeds_per_solver} of "
+          f"{num_solvers} on {num_instances} ...")
     cmd_list, runsolver_logs = [], []
     cutoff = gv.settings.get_general_target_cutoff_time()
     log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
@@ -291,7 +293,6 @@ if __name__ == "__main__":
     # Write settings to file before starting, since they are used in callback scripts
     gv.settings.write_used_settings()
 
-    print("Sparkle parallel portfolio is running ...")
     if args.portfolio_name is not None:  # Use a nickname
         portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
     else:  # Generate a timestamped nickname
