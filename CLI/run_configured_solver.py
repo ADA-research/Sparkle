@@ -11,7 +11,7 @@ import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
-from CLI.support import run_solver_help as srcsh
+from CLI.help import run_solver_help as srcsh
 from sparkle.solver.solver import Solver
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
