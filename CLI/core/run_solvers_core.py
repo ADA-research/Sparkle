@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from CLI.support import run_solvers_help as srs
 from sparkle.types.objective import PerformanceMeasure
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     run_status_path = args.run_status_path
     key_str = (f"{solver_path.name}_"
                f"{instance_name}_"
-               f"{gv.get_time_pid_random_string()}")
+               f"{tg.get_time_pid_random_string()}")
     raw_result_path = f"Tmp/{key_str}.rawres"
     start_time = time.time()
     # create statusinfo file

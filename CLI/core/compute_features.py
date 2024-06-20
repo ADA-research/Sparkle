@@ -9,6 +9,7 @@ from pathlib import Path
 from pathlib import PurePath
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.instance import compute_features_help as scf
@@ -50,7 +51,7 @@ if __name__ == "__main__":
     # TODO: Handle multi-file instances
     key_str = (f"{extractor_path.name}_"
                f"{instance_path.name}_"
-               f"{gv.get_time_pid_random_string()}")
+               f"{tg.get_time_pid_random_string()}")
     result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
     basic_part = "Tmp/" + key_str
     runsolver_watch_data_path = basic_part + ".log"

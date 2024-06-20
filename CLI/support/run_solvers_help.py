@@ -8,6 +8,7 @@ from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import sparkle_job_help as sjh
@@ -82,7 +83,7 @@ def run_solver_on_instance_and_process_results(
     raw_result_path = (f"{gv.sparkle_tmp_path}"
                        f"{Path(solver_path).name}_"
                        f"{Path(instance_path).name}_"
-                       f"{gv.get_time_pid_random_string()}.rawres")
+                       f"{tg.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
     solver_wrapper_path = Path(solver_path) / gv.sparkle_run_default_wrapper
 
@@ -240,7 +241,8 @@ def process_results(
         if first_line_parts[2].lower() == "sat":
             quality = []  # Not defined for SAT
             # TODO: Handle wc_time when user can choose which to use
-            status = sssh.sparkle_sat_parser(raw_result_path, cpu_time)
+            status = sssh.sparkle_sat_parser(
+                raw_result_path, cpu_time, gv.settings.get_general_target_cutoff_time())
         else:
             parser_list = "SAT"
             print(f'ERROR: Wrapper at "{solver_wrapper_path}" requested Sparkle to use '

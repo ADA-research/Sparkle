@@ -3,10 +3,6 @@
 
 import fcntl
 import ast
-import os
-import random
-import sys
-import time
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
@@ -168,13 +164,3 @@ extractor_nickname_mapping =\
 extractor_feature_vector_size_mapping =\
     file_storage_data_mapping[Path(extractor_feature_vector_size_list_path)]
 instance_list = file_storage_data_mapping[instance_list_path]
-
-
-def get_time_pid_random_string() -> str:
-    """Return a combination of time, PID, and random str.
-
-    Returns:
-      A random string composed of time, PID and a random positive integer value.
-    """
-    time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    return f"{time_stamp}_{os.getpid()}_{random.randint(1, sys.maxsize)}"

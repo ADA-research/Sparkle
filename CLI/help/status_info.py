@@ -10,6 +10,7 @@ from typing import Type
 from abc import ABC, abstractmethod
 
 import global_variables as gv
+import tools.general as tg
 
 
 class StatusInfoType(str, Enum):
@@ -157,7 +158,7 @@ class SolverRunStatusInfo(StatusInfo):
         """Create key string."""
         return (f"{self.get_solver()}_"
                 f"{self.get_instance()}_"
-                f"{gv.get_time_pid_random_string()}")
+                f"{tg.get_time_pid_random_string()}")
 
 
 class ConfigureSolverStatusInfo(StatusInfo):
@@ -245,7 +246,7 @@ class ConstructParallelPortfolioStatusInfo(StatusInfo):
 
     def get_key_string(self: ConstructParallelPortfolioStatusInfo) -> str:
         """Create key string."""
-        return f"{self.get_portfolio_name()}_{gv.get_time_pid_random_string()}"
+        return f"{self.get_portfolio_name()}_{tg.get_time_pid_random_string()}"
 
 
 class ConstructPortfolioSelectorStatusInfo(StatusInfo):
@@ -287,7 +288,7 @@ class ConstructPortfolioSelectorStatusInfo(StatusInfo):
         algorithm_selector = self.get_algorithm_selector_path().split("/")[-1]
         feature_data = self.get_feature_data_csv_path().split("/")[-1]
         performance_data = self.get_performance_data_csv_path().split("/")[-1]
-        random_string = gv.get_time_pid_random_string()
+        random_string = tg.get_time_pid_random_string()
 
         return f"{algorithm_selector}_{feature_data}_{performance_data}_{random_string}"
 
@@ -308,4 +309,4 @@ class GenerateReportStatusInfo(StatusInfo):
 
     def get_key_string(self: GenerateReportStatusInfo) -> str:
         """Create key string."""
-        return f"{self.get_report_type()}_{gv.get_time_pid_random_string()}"
+        return f"{self.get_report_type()}_{tg.get_time_pid_random_string()}"

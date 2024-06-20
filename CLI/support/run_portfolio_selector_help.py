@@ -15,6 +15,7 @@ from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
 import global_variables as gv
+import tools.general as tg
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
@@ -190,7 +191,7 @@ def call_sparkle_portfolio_selector_solve_instance(
         print(f"Extractor {extractor_name} computing "
               f"features of instance {instance_files_str} ...")
         result_path = (f"Tmp/{extractor_name}_{instance_files_str_}_"
-                       f"{gv.get_time_pid_random_string()}.rawres")
+                       f"{tg.get_time_pid_random_string()}.rawres")
 
         list_feature_vector = list_feature_vector + get_list_feature_vector(
             extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
@@ -200,7 +201,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = ("Tmp/predict_schedule_"
-                                    f"{gv.get_time_pid_random_string()}"
+                                    f"{tg.get_time_pid_random_string()}"
                                     ".predres")
     print("Sparkle portfolio selector predicting ...")
     cmd_list = [gv.python_executable, gv.autofolio_path, "--load",

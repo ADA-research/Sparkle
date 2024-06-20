@@ -9,6 +9,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh
 from sparkle.platform import slurm_help as ssh
 from CLI.support import sparkle_job_help as sjh
@@ -104,7 +105,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             basic_part = (f"{gv.sparkle_tmp_path}/"
                           f"{extractor_path.name}_"
                           f"{instance_path.name}_"
-                          f"{gv.get_time_pid_random_string()}")
+                          f"{tg.get_time_pid_random_string()}")
             result_path = f"{basic_part}.rawres"
             runsolver_watch_data_path = f"{basic_part}.log"
             runsolver_values_path = result_path.replace(".rawres", ".val")

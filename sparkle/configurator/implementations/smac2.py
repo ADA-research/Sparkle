@@ -35,6 +35,8 @@ class SMAC2(Configurator):
         output_path = gv.configuration_output_raw / SMAC2.__name__
         validator = Validator(out_dir=output_path)
         objectives = gv.settings.get_general_sparkle_objectives()
+        self.max_slurm_runs_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
+        self.base_dir = gv.sparkle_tmp_path
         return super().__init__(
             validator=validator,
             output_path=output_path,
@@ -77,7 +79,7 @@ class SMAC2(Configurator):
                 f"--seed {seed} "
                 f"--execdir {self.scenario.tmp.absolute()}"
                 for seed in range(self.scenario.number_of_runs)]
-        parallel_jobs = max(gv.settings.get_slurm_number_of_runs_in_parallel(),
+        parallel_jobs = max(self.max_slurm_runs_parallel,
                             self.scenario.number_of_runs)
         sbatch_options = ssh.get_slurm_options_list()
 
@@ -85,7 +87,7 @@ class SMAC2(Configurator):
             runner=run_on,
             cmd=cmds,
             name=CommandName.CONFIGURE_SOLVER,
-            base_dir=gv.sparkle_tmp_path,
+            base_dir=self.base_dir,
             output_path=output,
             path=SMAC2.configurator_path,
             parallel_jobs=parallel_jobs,

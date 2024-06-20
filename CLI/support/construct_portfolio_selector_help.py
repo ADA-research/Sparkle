@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path, PurePath
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
@@ -185,7 +186,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         feature_data_csv.impute_missing_value_of_all_columns()
         print("Imputing all missing values done!")
         impute_feature_data_csv_path = (
-            f"{feature_data_csv_path}_{gv.get_time_pid_random_string()}"
+            f"{feature_data_csv_path}_{tg.get_time_pid_random_string()}"
             "_impute.csv")
         feature_data_csv.save_csv(impute_feature_data_csv_path)
         feature_data_csv_path = impute_feature_data_csv_path

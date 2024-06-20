@@ -9,6 +9,7 @@ from pathlib import Path
 
 from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
+import tools.general as tg
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.instance import compute_features_help as scf
 import sparkle_logging as sl
@@ -104,7 +105,7 @@ if __name__ == "__main__":
             + "_"
             + Path(model_file).name
             + "_"
-            + gv.get_time_pid_random_string()
+            + tg.get_time_pid_random_string()
             + ".rawres"
         )
         command_line = [extractor_target_path / gv.sparkle_extractor_wrapper,
@@ -123,7 +124,7 @@ if __name__ == "__main__":
             + "_"
             + instance_path.name
             + "_"
-            + gv.get_time_pid_random_string()
+            + tg.get_time_pid_random_string()
             + ".rawres"
         )
         command_line = [

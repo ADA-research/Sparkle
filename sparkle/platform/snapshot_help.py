@@ -7,6 +7,7 @@ from pathlib import Path
 import zipfile
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh
 
 
@@ -27,7 +28,7 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
 
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
-    suffix = gv.get_time_pid_random_string()
+    suffix = tg.get_time_pid_random_string()
     snapshot_filename = f"{gv.snapshot_dir}/My_Snapshot_{suffix}"
     for working_dir in gv.working_dirs:
         if working_dir.exists():
@@ -57,15 +58,15 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
       my_snapshot_filename: File path to the file where the current Sparkle
         platform should be stored.
     """
-    my_suffix = gv.get_time_pid_random_string()
-    my_tmp_directory = f"tmp_directory_{my_suffix}"
+    suffix = tg.get_time_pid_random_string()
+    tmp_directory = f"tmp_directory_{suffix}"
 
     Path(gv.sparkle_tmp_path).mkdir(exist_ok=True)
 
     with zipfile.ZipFile(my_snapshot_filename, "r") as zip_ref:
-        zip_ref.extractall(my_tmp_directory)
-    shutil.copytree(my_tmp_directory, "./", dirs_exist_ok=True)
-    shutil.rmtree(Path(my_tmp_directory))
+        zip_ref.extractall(tmp_directory)
+    shutil.copytree(tmp_directory, "./", dirs_exist_ok=True)
+    shutil.rmtree(Path(tmp_directory))
 
 
 def load_snapshot(snapshot_file_path: str) -> None:
