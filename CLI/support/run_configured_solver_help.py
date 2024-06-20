@@ -9,6 +9,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 import global_variables as gv
+import tools.general as tg
 from CLI.help.command_help import CommandName
 from sparkle.platform import slurm_help as ssh
 from sparkle.instance import instances_help as sih
@@ -90,7 +91,7 @@ def call_configured_solver_sequential(instances_list: list[list[Path]],
 
         for instance_path in instance_path_list:
             raw_result_path = Path(f"{solver.name}_{Path(instance_path).name}"
-                                   f"_{gv.get_time_pid_random_string()}.rawres")
+                                   f"_{tg.get_time_pid_random_string()}.rawres")
             runsolver_watch_data_path = raw_result_path.with_suffix(".log")
             runsolver_values_path = raw_result_path.with_suffix(".val")
 
@@ -144,7 +145,7 @@ def call_solver_parallel(
     for instance_path in instances_list:
         instance_path = Path(instance_path)
         raw_result_path = Path(f"{solver.name}_{instance_path.name}"
-                               f"_{gv.get_time_pid_random_string()}.rawres")
+                               f"_{tg.get_time_pid_random_string()}.rawres")
         runsolver_watch_data_path = raw_result_path.with_suffix(".log")
         runsolver_values_path = raw_result_path.with_suffix(".val")
 
