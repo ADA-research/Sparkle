@@ -21,6 +21,6 @@
 - {ref}`cmd-run-sparkle-portfolio-selector`
 - {ref}`cmd-run-status`
 - {ref}`cmd-save-snapshot`
-- {ref}`cmd-sparkle-wait`
+- {ref}`cmd-wait`
 - {ref}`cmd-system-status`
 - {ref}`cmd-validate-configured-vs-default`

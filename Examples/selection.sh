@@ -50,7 +50,7 @@ sparkle wait
 
 # Construct a portfolio selector, using the previously computed features and the results of running the solvers
 
-sparkle construct_sparkle_portfolio_selector
+sparkle construct_sparkle_portfolio_selector --selector-timeout 1000
 
 #### Generate a report
 

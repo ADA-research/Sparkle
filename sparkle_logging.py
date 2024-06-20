@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from pathlib import PurePath
 
-import global_variables as sgh
+import global_variables as gv
 
 
 # Keep track of which command called Sparkle
@@ -53,11 +53,11 @@ def _update_caller_file_path(timestamp: str) -> None:
     global caller_out_dir
     caller_out_dir = Path(caller_dir)
     global caller_log_path
-    caller_log_path = PurePath(sgh.sparkle_global_output_dir / caller_out_dir
+    caller_log_path = PurePath(gv.sparkle_global_output_dir / caller_out_dir
                                / caller_file)
     global caller_log_dir
-    caller_log_dir = Path(sgh.sparkle_global_output_dir / caller_out_dir
-                          / sgh.sparkle_global_log_dir)
+    caller_log_dir = (
+        gv.sparkle_global_output_dir / caller_out_dir / gv.sparkle_global_log_dir)
 
     # Create needed directories if they don't exist
     caller_dir = Path(caller_log_path).parents[0]
@@ -110,11 +110,11 @@ def log_command(argv: list[str]) -> None:
     log_str = timestamp + "   " + args + "   " + str(output_file) + "\n"
 
     # Make sure directory exists
-    log_dir = Path(sgh.sparkle_global_output_dir)
+    log_dir = Path(gv.sparkle_global_output_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
 
     # If the log file does not exist yet, write the header
-    log_path = sgh.sparkle_global_log_path
+    log_path = gv.sparkle_global_log_path
     if not Path(log_path).is_file():
         log_header = ("     Timestamp                              Command            "
                       "                 Output details\n")

@@ -11,7 +11,7 @@ from typing import Callable
 from statistics import mean
 
 from sparkle.platform import file_help as sfh
-import global_variables as sgh
+import global_variables as gv
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
@@ -63,7 +63,7 @@ def compute_perfect_selector_marginal_contribution(
         aggregation_function: Callable[[list[float]], float] = mean,
         capvalue_list: list[float] = None,
         minimise: bool = min,
-        performance_data_csv_path: Path = sgh.performance_data_csv_path,
+        performance_data_csv_path: Path = gv.performance_data_csv_path,
         flag_recompute: bool = False) -> list[tuple[str, float]]:
     """Return the marginal contributions of solvers for the VBS.
 
@@ -78,7 +78,7 @@ def compute_perfect_selector_marginal_contribution(
     Returns:
       A list of 2-tuples of the form (solver name, marginal contribution).
     """
-    perfect_margi_cont_path = sgh.sparkle_marginal_contribution_perfect_path
+    perfect_margi_cont_path = gv.sparkle_marginal_contribution_perfect_path
 
     # If the marginal contribution already exists in file, read it and return
     if not flag_recompute and perfect_margi_cont_path.is_file():
@@ -87,7 +87,7 @@ def compute_perfect_selector_marginal_contribution(
         return read_marginal_contribution_csv(perfect_margi_cont_path)
 
     print("In this calculation, cutoff time for each run is "
-          f"{sgh.settings.get_general_target_cutoff_time()} seconds")
+          f"{gv.settings.get_general_target_cutoff_time()} seconds")
 
     rank_list = []
     performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
@@ -147,20 +147,20 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
       List of floating point numbers.
     """
     list_predict_schedule = []
-    python_executable = sgh.python_executable
+    python_executable = gv.python_executable
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
     feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
 
     pred_sched_file = ("predict_schedule_"
-                       f"{sgh.get_time_pid_random_string()}.predres")
+                       f"{gv.get_time_pid_random_string()}.predres")
     log_file = "predict_schedule_autofolio.out"
     err_file = "predict_schedule_autofolio.err"
     predict_schedule_result_file = str(sl.caller_log_dir) + "/" + pred_sched_file
     log_path = sl.caller_log_dir / log_file
     err_path_str = str(sl.caller_log_dir) + "/" + err_file
 
-    cmd = [python_executable, sgh.autofolio_path, "--load",
+    cmd = [python_executable, gv.autofolio_path, "--load",
            actual_portfolio_selector_path, "--feature_vec", feature_vector_string]
 
     with log_path.open("a+") as log_file:
@@ -203,9 +203,9 @@ def compute_actual_selector_performance(
       The selector performance as a single floating point number.
     """
     performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
-    penalty_factor = sgh.settings.get_general_penalty_multiplier()
+    penalty_factor = gv.settings.get_general_penalty_multiplier()
     performances = []
-    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     capvalue = None
     for index, instance in enumerate(performance_data_csv.get_instances()):
         if capvalue_list is not None:
@@ -255,7 +255,7 @@ def compute_actual_performance_for_instance(
 
     performance = None
     flag_successfully_solving = False
-    cutoff_time = sgh.settings.get_general_target_cutoff_time()
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
     if objective_type == PerformanceMeasure.RUNTIME:
         performance_list = []
         # In case of Runtime, we loop through the selected solvers
@@ -301,9 +301,10 @@ def compute_actual_selector_marginal_contribution(
         aggregation_function: Callable[[list[float]], float] = mean,
         capvalue_list: list[float] = None,
         minimise: bool = True,
-        performance_data_csv_path: str = sgh.performance_data_csv_path,
-        feature_data_csv_path: str = sgh.feature_data_csv_path,
-        flag_recompute: bool = False) -> list[tuple[str, float]]:
+        performance_data_csv_path: str = gv.performance_data_csv_path,
+        feature_data_csv_path: str = gv.feature_data_csv_path,
+        flag_recompute: bool = False,
+        selector_timeout: int = 172000) -> list[tuple[str, float]]:
     """Compute the marginal contributions of solvers in the selector.
 
     Args:
@@ -320,7 +321,7 @@ def compute_actual_selector_marginal_contribution(
       A list of 2-tuples where every 2-tuple is of the form
       (solver name, marginal contribution).
     """
-    actual_margi_cont_path = sgh.sparkle_marginal_contribution_actual_path
+    actual_margi_cont_path = gv.sparkle_marginal_contribution_actual_path
 
     # If the marginal contribution already exists in file, read it and return
     if not flag_recompute and actual_margi_cont_path.is_file():
@@ -331,7 +332,7 @@ def compute_actual_selector_marginal_contribution(
         return rank_list
 
     print("In this calculation, cutoff time for each run is "
-          f"{sgh.settings.get_general_target_cutoff_time()} seconds")
+          f"{gv.settings.get_general_target_cutoff_time()} seconds")
 
     rank_list = []
 
@@ -343,10 +344,11 @@ def compute_actual_selector_marginal_contribution(
 
     # Compute performance of actual selector
     print("Computing actual performance for portfolio selector with all solvers ...")
-    actual_portfolio_selector_path = sgh.sparkle_algorithm_selector_path
+    actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
     scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
                                               performance_data_csv_path,
-                                              feature_data_csv_path)
+                                              feature_data_csv_path,
+                                              selector_timeout=selector_timeout)
 
     if not Path(actual_portfolio_selector_path).exists():
         print(f"****** ERROR: {actual_portfolio_selector_path} does not exist! ******")
@@ -372,7 +374,7 @@ def compute_actual_selector_marginal_contribution(
         # 1. Create a temporary df file name
         tmp_performance_df_file = (
             f"tmp_performance_data_csv_without_{solver_name}_"
-            f"{sgh.get_time_pid_random_string()}.csv")
+            f"{gv.get_time_pid_random_string()}.csv")
         # 2. Create the path using the log dir and the file name
         tmp_performance_df_path = sl.caller_log_dir / tmp_performance_df_file
 
@@ -390,8 +392,8 @@ def compute_actual_selector_marginal_contribution(
 
         # 7. create the actual selector path
         tmp_actual_portfolio_selector_path = (
-            sgh.sparkle_algorithm_selector_dir / f"without_{solver_name}"
-            / f"{sgh.sparkle_algorithm_selector_name}")
+            gv.sparkle_algorithm_selector_dir / f"without_{solver_name}"
+            / f"{gv.sparkle_algorithm_selector_name}")
 
         if tmp_performance_df.get_num_solvers() >= 1:
             # 8. Construct the portfolio selector for this subset
@@ -470,7 +472,7 @@ def print_rank_list(rank_list: list, mode: str) -> None:
 
 def compute_marginal_contribution(
         flag_compute_perfect: bool, flag_compute_actual: bool,
-        flag_recompute: bool) -> None:
+        flag_recompute: bool, selector_timeout: int) -> None:
     """Compute the marginal contribution.
 
     Args:
@@ -480,20 +482,21 @@ def compute_marginal_contribution(
              selector should be computed.
         flag_recompute: Flag indicating whether marginal contributions
             should be recalculated.
+        selector_timeout: The cuttoff time to configure the algorithm selector.
     """
-    performance_data_csv = PerformanceDataFrame(sgh.performance_data_csv_path)
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     performance_measure =\
-        sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    aggregation_function = sgh.settings.get_general_metric_aggregation_function()
+        gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    aggregation_function = gv.settings.get_general_metric_aggregation_function()
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-        capvalue_list = sgh.settings.get_general_cap_value()
+        capvalue_list = gv.settings.get_general_cap_value()
         minimise = False
     elif performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        capvalue = sgh.settings.get_general_cap_value()
+        capvalue = gv.settings.get_general_cap_value()
         minimise = True
     else:
         # assume runtime optimization
-        capvalue = sgh.settings.get_general_target_cutoff_time()
+        capvalue = gv.settings.get_general_target_cutoff_time()
         minimise = True
 
     num_of_instances = performance_data_csv.get_num_instances()
@@ -523,7 +526,8 @@ def compute_marginal_contribution(
         rank_list = compute_actual_selector_marginal_contribution(
             aggregation_function,
             capvalue_list, minimise,
-            flag_recompute=flag_recompute
+            flag_recompute=flag_recompute,
+            selector_timeout=selector_timeout
         )
         print_rank_list(rank_list, "actual selector")
         print("Marginal contribution (actual selector) computing done!")

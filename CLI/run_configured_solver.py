@@ -3,49 +3,34 @@
 
 import sys
 import argparse
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from runrunner.base import Runner
 
 import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState
-from sparkle.types.objective import PerformanceMeasure
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.support import run_configured_solver_help as srcsh
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
+from CLI.help import argparse_custom as ac
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    perf_measure = gv.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
-    parser.add_argument(
-        "instance_path",
-        type=Path,
-        nargs="+",
-        help=("Path(s) to instance file(s) (when multiple files are given, it is assumed"
-              " this is a multi-file instance) or instance directory."))
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        help=("settings file to use instead of the default (default: "
-              f"{gv.settings.DEFAULT_settings_path})"))
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        help=f"the performance measure, e.g. runtime (default: {perf_measure.name})")
-    parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="run the solver on multiple instances in parallel")
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    parser.add_argument(*ac.InstancePathRunConfiguredSolverArgument.names,
+                        **ac.InstancePathRunConfiguredSolverArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.ParallelArgument.names,
+                        **ac.ParallelArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 
@@ -62,7 +47,12 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    instance_path = args.instance_path
+    if isinstance(args.instance_path, list):
+        instance_path = [resolve_object_name(instance, target_dir=gv.instance_dir)
+                         for instance in args.instance_path]
+    else:
+        instance_path = resolve_object_name(args.instance_path,
+                                            target_dir=gv.instance_dir)
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
@@ -75,6 +65,10 @@ if __name__ == "__main__":
         gv.settings.set_general_sparkle_objectives(
             args.performance_measure, SettingState.CMD_LINE
         )
+
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
 
     # Validate input (is directory, or single instance (single-file or multi-file))
     if ((len(instance_path) == 1 and instance_path[0].is_dir())

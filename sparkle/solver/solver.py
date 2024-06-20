@@ -11,6 +11,7 @@ import ast
 from pathlib import Path
 import subprocess
 from tools import runsolver_parsing
+import pcsparser
 
 
 class Solver:
@@ -43,11 +44,11 @@ class Solver:
         # Can not extract from gv due to circular imports
         self.solver_wrapper = "sparkle_solver_wrapper.py"
 
-    def get_pcs_file(self: Solver) -> Path:
+    def _get_pcs_file(self: Solver) -> Path | bool:
         """Get path of the parameter file.
 
         Returns:
-            Path to the parameter file.
+            Path to the parameter file or False if the parameter file does not exist.
         """
         file_count = 0
         file_name = ""
@@ -59,11 +60,41 @@ class Solver:
                 file_count += 1
 
         if file_count != 1:
+            return False
+
+        return self.directory / file_name
+
+    def check_pcs_file_exists(self: Solver) -> bool:
+        """Check if the parameter file exists.
+
+        Returns:
+            Boolean if there is one pcs file in the solver directory.
+        """
+        return isinstance(self._get_pcs_file(), Path)
+
+    def get_pcs_file(self: Solver) -> Path:
+        """Get path of the parameter file.
+
+        Returns:
+            Path to the parameter file.
+        """
+        if not (file_path := self._get_pcs_file()):
             print("None or multiple .pcs files found. Solver "
                   "is not valid for configuration.")
             sys.exit(-1)
 
-        return self.directory / file_name
+        return file_path
+
+    def read_pcs_file(self: Solver) -> bool:
+        """Checks if the pcs file can be read."""
+        pcs_file = self._get_pcs_file()
+        try:
+            parser = pcsparser.PCSParser()
+            parser.load(str(pcs_file), convention="smac")
+            return True
+        except SyntaxError:
+            pass
+        return False
 
     # TODO: This information should be stored in the solver as an attribute too.
     # That will allow us to at least skip this method.
@@ -88,10 +119,19 @@ class Solver:
         """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):
             configuration = Solver.config_str_to_dict(configuration)
+        if configuration is None:
+            configuration = {}
+        # Ensure configuration contains required entries for each wrapper
         if "instance" not in configuration:
             configuration["instance"] = instance
         if "solver_dir" not in configuration:
             configuration["solver_dir"] = str(self.directory.absolute())
+        if "specifics" not in configuration:
+            configuration["specifics"] = ""
+        if "run_length" not in configuration:
+            configuration["run_length"] = ""
+        if "cutoff_time" not in configuration:
+            configuration["cutoff_time"] = sys.maxsize
         # Ensure stringification of dictionary will go correctly
         configuration = {key: str(configuration[key]) for key in configuration}
         # Ensure stringifcation of cmd call will go correctly
@@ -125,7 +165,7 @@ class Solver:
                                  cwd=self.raw_output_directory,
                                  capture_output=True)
         if process.returncode != 0:
-            print(f"WARNING: Solver {self.solver_name} execution seems to have failed!\n"
+            print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
                   f"The used command was: {solver_cmd}", flush=True)
             return {"status": "ERROR", }
         # Resolving solver output

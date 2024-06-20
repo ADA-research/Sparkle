@@ -6,18 +6,14 @@ import argparse
 
 from sparkle.platform import snapshot_help
 import sparkle_logging as sl
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "snapshot_file_path",
-        metavar="snapshot-file-path",
-        type=str,
-        help="path to the snapshot file",
-    )
-
+    parser.add_argument(*ac.SnapshotArgument.names,
+                        **ac.SnapshotArgument.kwargs)
     return parser
 
 
@@ -27,7 +23,6 @@ if __name__ == "__main__":
 
     # Define command line arguments
     parser = parser_function()
-
     # Process command line arguments
     args = parser.parse_args()
     snapshot_help.load_snapshot(args.snapshot_file_path)

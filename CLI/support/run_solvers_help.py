@@ -4,70 +4,32 @@
 import os
 import subprocess
 import sys
-import ast
-import shutil
 from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import sparkle_job_help as sjh
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
+from sparkle.solver.solver import Solver
 from sparkle.solver import sat_help as sssh
 
 
-def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
-                                 seed_str: str = None) -> str:
-    """Return the command line call string retrieved from the solver wrapper."""
-    if seed_str is None:
-        seed_str = str(sgh.get_seed())
-
-    cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    cmd_get_solver_call = (f'{solver_wrapper_path} --print-command "{instance_path}"'
-                           f" --seed {seed_str} --cutoff-time {cutoff_time_str}")
-    solver_call_rawresult = os.popen(cmd_get_solver_call)
-    solver_call_result = solver_call_rawresult.readlines()[0].strip()
-
-    if len(solver_call_result) > 0:
-        return solver_call_result
-    else:
-        # TODO: Add instructions for the user that might fix the issue?
-        print("ERROR: Failed to get valid solver call command from wrapper at "
-              f'"{solver_wrapper_path}" stopping execution!')
-        sys.exit(-1)
-
-
-def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
-                           instance_path: str, raw_result_path: str,
-                           runsolver_values_path: str, seed_str: str = None,
-                           custom_cutoff: int = None) -> None:
-    """Prepare for execution, run the solver on an instance, check output for errors."""
-    if not Path(solver_wrapper_path).is_file():
-        print(f'ERROR: Wrapper named "{solver_wrapper_path}" not found, stopping '
-              "execution!")
-        sys.exit(-1)
-
-    # Get the solver call command from the wrapper
-    cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path,
-                                                   seed_str)
-
-    run_solver_on_instance_with_cmd(Path(solver_path), cmd_solver_call,
-                                    Path(raw_result_path),
-                                    Path(runsolver_values_path), custom_cutoff)
-
-
-def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
+def run_solver_on_instance_with_cmd(solver_path: Path, instance_path: str, seed_str: str,
                                     raw_result_path: Path, runsolver_values_path: Path,
-                                    custom_cutoff: int = None,
-                                    is_configured: bool = False) -> Path:
+                                    custom_cutoff: int = None) -> Path:
     """Run the solver on the given instance, with a given command line call.
 
     Parameters
     ----------
     solver_path: Path
         The path to the solver
+    instance_path: str
+        Path to the instance
+    seed_str: str
+        Seed for the call
     cmd_solver_call: str
         The cmd wrapper containing relevant information
     raw_result_path: Path
@@ -76,9 +38,6 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         Path to the .val file for storing values (?)
     custom_cutoff: int
         A custom cpu time limit
-    is_configured: bool
-        Whether the solver is configured (config is contained
-        in the wrapper)
 
     Returns
     -------
@@ -86,68 +45,31 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         Path to the solver output
     """
     if custom_cutoff is None:
-        custom_cutoff = sgh.settings.get_general_target_cutoff_time()
-
-    # For configured solvers change the directory to accommodate sparkle_smac_wrapper
-    original_path = Path.cwd()
-    exec_path = original_path
-
-    rs_prefix = ""
-    if is_configured:
-        # Update paths to match configured solver dirs
-        rs_prefix = "../../"
-        exec_path = str(raw_result_path).replace(".rawres", "_exec_dir/")
-        # Copy files
-        shutil.copytree(solver_path, exec_path, dirs_exist_ok=True)
-        # Executable is now in "current dir"
-        solver_path = "."
-
+        custom_cutoff = gv.settings.get_general_target_cutoff_time()
+    if seed_str is None:
+        seed_str = str(gv.get_seed())
     # Prepare runsolver call
-    runsolver_path = rs_prefix + sgh.runsolver_path
-    runsolver_values_log = f"{rs_prefix}{runsolver_values_path}"
+    runsolver_values_log = f"{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
-    raw_result_path_option = f"{rs_prefix}{raw_result_path}"
-    cmd_solver_name, cmd_solver_args = cmd_solver_call.split(" ", 1)
-    cmd = [runsolver_path, "--timestamp", "--use-pty",
-           "--cpu-limit", str(custom_cutoff),
-           "-w", runsolver_watch_data_path,
-           "-v", runsolver_values_log,
-           "-o", raw_result_path_option,
-           f"{solver_path}/{cmd_solver_name}", cmd_solver_args]
+    raw_result_path_option = f"{raw_result_path}"
+    solver = Solver.get_solver_by_name(Path(solver_path).name)
+    solver_cmd = solver.build_solver_cmd(
+        instance_path,
+        configuration={"seed": seed_str,
+                       "cutoff_time": custom_cutoff,
+                       "specifics": ""},
+        runsolver_configuration=["--timestamp", "--use-pty",
+                                 "--cpu-limit", str(custom_cutoff),
+                                 "-w", runsolver_watch_data_path,
+                                 "-v", runsolver_values_log,
+                                 "-o", raw_result_path_option])
 
-    process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
+    process = subprocess.run(solver_cmd, cwd=Path.cwd(), capture_output=True)
     if process.returncode != 0:
         print("WARNING: Solver execution seems to have failed!\n"
-              f"The used command was: {cmd}", flush=True)
-    else:
-        if is_configured:
-            if not raw_result_path.exists() or raw_result_path.stat().st_size == 0:
-                # Runsolver cutoff solver wrapper before it showed its output
-                Path(raw_result_path).open("w").write(
-                    r"{'status': 'TIMEOUT', 'quality': 'nan'}")
-            elif check_solver_output_for_errors(Path(raw_result_path)):
-                sfh.rmfiles(runsolver_watch_data_path)
+              f"The used command was: {solver_cmd}", flush=True)
 
     return raw_result_path
-
-
-def check_solver_output_for_errors(raw_result_path: Path) -> bool:
-    """Check solver output for known errors.
-
-    Args:
-        raw_result_path: Path to the file to verify.
-    """
-    # Check if we can decode the output dictionary
-    raw_output_str = raw_result_path.open("r").read()
-    try:
-        raw_output_dict_str =\
-            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
-        ast.literal_eval(raw_output_dict_str)
-    except Exception as ex:
-        print(f"WARNING: Possible error detected in {raw_result_path}. "
-              f"Decoding the output dictionary threw exception: {ex}")
-        return False
-    return True
 
 
 def run_solver_on_instance_and_process_results(
@@ -157,17 +79,17 @@ def run_solver_on_instance_and_process_results(
     # Prepare paths
     # TODO: Fix result path for multi-file instances (only a single file is part of the
     # result path)
-    raw_result_path = (f"{sgh.sparkle_tmp_path}"
+    raw_result_path = (f"{gv.sparkle_tmp_path}"
                        f"{Path(solver_path).name}_"
                        f"{Path(instance_path).name}_"
-                       f"{sgh.get_time_pid_random_string()}.rawres")
+                       f"{gv.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
-    solver_wrapper_path = Path(solver_path) / sgh.sparkle_run_default_wrapper
+    solver_wrapper_path = Path(solver_path) / gv.sparkle_run_default_wrapper
 
     # Run
-    run_solver_on_instance(solver_path, solver_wrapper_path, instance_path,
-                           raw_result_path, runsolver_values_path, seed_str,
-                           custom_cutoff)
+    run_solver_on_instance_with_cmd(Path(solver_path), instance_path, seed_str,
+                                    Path(raw_result_path),
+                                    Path(runsolver_values_path), custom_cutoff)
 
     # Process results
     cpu_time, wc_time, quality, status = process_results(
@@ -183,8 +105,8 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
 
     If rerun is True, rerun for instances with existing performance data.
     """
-    cutoff_time_str = str(sgh.settings.get_general_target_cutoff_time())
-    perf_measure = sgh.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     performance_data = PerformanceDataFrame(performance_data_csv_path)
 
     if rerun:
@@ -266,14 +188,14 @@ def handle_timeouts(runtime: float, status: str,
                     custom_cutoff: int = None) -> tuple[float, str]:
     """Check if there is a timeout and return the status and penalised runtime."""
     if custom_cutoff is None:
-        cutoff_time = sgh.settings.get_general_target_cutoff_time()
+        cutoff_time = gv.settings.get_general_target_cutoff_time()
     else:
         cutoff_time = custom_cutoff
 
     if runtime > cutoff_time and status != "CRASHED":
         status = "TIMEOUT"  # Overwrites possible user status, unless it is 'CRASHED'
     if status == "TIMEOUT" or status == "UNKNOWN":
-        runtime_penalised = sgh.settings.get_penalised_time(cutoff_time)
+        runtime_penalised = gv.settings.get_penalised_time(cutoff_time)
     else:
         runtime_penalised = runtime
 
@@ -283,7 +205,7 @@ def handle_timeouts(runtime: float, status: str,
 def verify(instance_path: str, raw_result_path: str, solver_path: str, status: str)\
         -> str:
     """Run a solution verifier on the solution and update the status if needed."""
-    verifier = sgh.settings.get_general_solution_verifier()
+    verifier = gv.settings.get_general_solution_verifier()
     # Use verifier if one is given and the solver did not time out
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
         return sssh.sat_verify(instance_path, raw_result_path, solver_path)
@@ -404,10 +326,10 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     # TODO: Fix solver removal from performanc data CSV file
     # performance_data_csv.remove_solver(solver_path)
     sfh.add_remove_platform_item(solver_path,
-                                 sgh.solver_list_path,
+                                 gv.solver_list_path,
                                  remove=True)
     sfh.add_remove_platform_item(None,
-                                 sgh.solver_nickname_list_path,
+                                 gv.solver_nickname_list_path,
                                  key=solver_path,
                                  remove=True)
 
@@ -420,7 +342,7 @@ def update_performance_data_id() -> None:
     # Get next pd_id
     pd_id = get_performance_data_id() + 1
     # Write new pd_id
-    pd_id_path = sgh.performance_data_id_path
+    pd_id_path = gv.performance_data_id_path
     with Path(pd_id_path).open("w") as pd_id_file:
         pd_id_file.write(str(pd_id))
 
@@ -430,6 +352,6 @@ def update_performance_data_id() -> None:
 def get_performance_data_id() -> int:
     """Return the current performance data ID."""
     pd_id = 0
-    if Path(sgh.performance_data_id_path).exists():
-        pd_id = int(Path(sgh.performance_data_id_path).open("r").readline())
+    if Path(gv.performance_data_id_path).exists():
+        pd_id = int(Path(gv.performance_data_id_path).open("r").readline())
     return pd_id

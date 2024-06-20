@@ -4,20 +4,17 @@
 import sys
 import argparse
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import system_status as sssh
 import sparkle_logging as sl
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="output system status in verbose mode",
-    )
+    parser.add_argument(*ac.VerboseArgument.names,
+                        **ac.VerboseArgument.kwargs)
     return parser
 
 
@@ -32,13 +29,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Reporting current system status of Sparkle ...")
-    sssh.print_sparkle_list(sgh.solver_list, "Solver", args.verbose)
-    sssh.print_sparkle_list(sgh.extractor_list, "Extractor", args.verbose)
-    sssh.print_sparkle_list(sgh.instance_list, "Instance", args.verbose)
+    sssh.print_sparkle_list(gv.solver_list, "Solver", args.verbose)
+    sssh.print_sparkle_list(gv.extractor_list, "Extractor", args.verbose)
+    sssh.print_sparkle_list(gv.instance_list, "Instance", args.verbose)
     sssh.print_list_remaining_feature_computation_job(
-        sgh.feature_data_csv_path, args.verbose
+        gv.feature_data_csv_path, args.verbose
     )
     sssh.print_list_remaining_performance_computation_job(
-        sgh.performance_data_csv_path, args.verbose
+        gv.performance_data_csv_path, args.verbose
     )
-    print("Current system status of Sparkle reported!")
+
+    # scan configurator log files for warnings
+    configurator = gv.settings.get_general_sparkle_configurator()
+    configurator.get_status_from_logs()
+
+    print("\nCurrent system status of Sparkle reported!")

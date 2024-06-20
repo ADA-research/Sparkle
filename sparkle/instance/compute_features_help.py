@@ -77,9 +77,8 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         cutoff_time_each_extractor_run = (
             gv.settings.get_general_extractor_cutoff_time() / len(gv.extractor_list))
 
-    cutoff_time_each_run_option = f"--cpu-limit {str(cutoff_time_each_extractor_run)}"
     print("Cutoff time for each run on computing features is set to "
-          f"{str(cutoff_time_each_extractor_run)} seconds")
+          f"{cutoff_time_each_extractor_run} seconds")
 
     total_job_num = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
@@ -107,24 +106,24 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                           f"{instance_path.name}_"
                           f"{gv.get_time_pid_random_string()}")
             result_path = f"{basic_part}.rawres"
-            err_path = f"{basic_part}.err"
             runsolver_watch_data_path = f"{basic_part}.log"
-            runsolver_watch_data_path_option = f"-w {runsolver_watch_data_path}"
-            runsolver_value_data_path = result_path.replace(".rawres", ".val")
-            runsolver_value_data_path_option = f"-v {runsolver_value_data_path}"
+            runsolver_values_path = result_path.replace(".rawres", ".val")
 
-            command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
-                            f"{runsolver_watch_data_path_option} "
-                            f"{runsolver_value_data_path_option} {extractor_path}/"
-                            f"{gv.sparkle_run_default_wrapper} {extractor_path}/ "
-                            f"{instance_path} {result_path} 2> {err_path}")
+            command_line = [runsolver_path,
+                            "--cpu-limit", str(cutoff_time_each_extractor_run),
+                            "-w", runsolver_watch_data_path,
+                            "-v", runsolver_values_path,
+                            extractor_path / gv.sparkle_extractor_wrapper,
+                            "-extractor_dir", extractor_path,
+                            "-instance_file", instance_path,
+                            "-output_file", result_path]
 
             print(f"Extractor {extractor_path.name} computing feature vector of instance"
                   f" {instance_path.name} ...")
 
             try:
-                runsolver = subprocess.run(command_line.split(" "), capture_output=True)
-                with Path(runsolver_value_data_path).open() as file:
+                runsolver = subprocess.run(command_line, capture_output=True)
+                with Path(runsolver_values_path).open() as file:
                     if "TIMEOUT=true" in file.read():
                         print(f"****** WARNING: Feature vector computation on instance "
                               f"{instance_path} timed out! ******")
@@ -139,7 +138,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                       f"{instance_path} failed! ******")
                 print("****** WARNING: The feature vector of this instance consists of "
                       "missing values ******")
-                print(f"****** Run solver Output:\n{runsolver.stderr}")
+                print(f"****** Run solver Output:\n{runsolver.stderr.decode()}")
                 Path(result_path).unlink(missing_ok=True)
                 tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
                     feature_data_csv, instance_path, extractor_path,
@@ -148,9 +147,8 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             feature_data_csv.combine(tmp_fdcsv)
 
             Path(result_path).unlink(missing_ok=True)
-            Path(err_path).unlink(missing_ok=True)
             Path(runsolver_watch_data_path).unlink(missing_ok=True)
-            Path(runsolver_value_data_path).unlink(missing_ok=True)
+            Path(runsolver_values_path).unlink(missing_ok=True)
 
             print(f"Executing Progress: {str(current_job_num)} out of "
                   f"{str(total_job_num)}")

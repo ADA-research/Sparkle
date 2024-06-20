@@ -1,1 +1,0 @@
-This solver is included for testing configuration with multi-file instances. Because this solver does not have actual parameters it exposes, the seed is configured. Naturally, this is a poor example for users, and as such only included here for testing purposes.

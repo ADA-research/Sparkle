@@ -39,17 +39,24 @@ instances_src_path_train="${examples_path}${instances_path_train}"
 instances_src_path_test="${examples_path}${instances_path_test}"
 solver_src_path="${examples_path}${solver_path}"
 
-configuration_results_path="CLI/test/test_files/results"
-smac_path="Components/smac-v2.10.03-master-778/"
-smac_results_path="${smac_path}results/"
-smac_results_path_tmp="${smac_path}results/"
+config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
+validation_scenario_path="Output/Validation/"
+config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
+validation_train_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PTN/"
+validation_test_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PTN2/"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
 CLI/add_instances.py $instances_src_path_test > /dev/null
 CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
 
-mv $smac_results_path $smac_results_path_tmp &> /dev/null # Save user results
+# Copy configuration results and other files to simulate the configuration command
+# Prepare configuration scenario output files
+mkdir -p $config_scenario_path # Make sure directory exists
+mkdir -p $validation_scenario_path
+cp -r $config_test_data $config_scenario_path
+cp -r $validation_train_data $validation_scenario_path
+cp -r $validation_test_data $validation_scenario_path
 
 # Configure solver
 output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation --run-on $slurm_available | tail -1)
@@ -76,8 +83,13 @@ else
 	fi
 fi
 
-# Copy configuration results to simulate the configuration command (it won't have finished yet)
-cp -r $configuration_results_path $smac_path # Place test results
+# Re-Copy configuration results and other files to simulate the configuration command
+# Prepare configuration scenario output files
+mkdir -p $config_scenario_path # Make sure directory exists
+mkdir -p $validation_scenario_path
+cp -r $config_test_data $config_scenario_path
+cp -r $validation_train_data $validation_scenario_path
+cp -r $validation_test_data $validation_scenario_path
 
 # Run ablation on train set
 output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --run-on $slurm_available | tail -1)
@@ -91,7 +103,7 @@ then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) run_ablation test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -99,6 +111,8 @@ else
 		kill_started_jobs_slurm
 	fi
 fi
+
+
 
 # Run ablation on test set
 output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --run-on $slurm_available | tail -1)
@@ -120,6 +134,7 @@ else
 	fi
 fi
 
-rm -r $smac_results_path # Remove test results
+#rm -rf $config_scenario_path # Remove test results
+#rm -rf $validation_scenario_path
 mv $smac_results_path_tmp $smac_results_path &> /dev/null # Restore user results
 mv $slurm_settings_tmp $slurm_settings_path # Restore original settings

@@ -8,13 +8,13 @@ from pathlib import Path
 import math
 
 import sparkle_logging as sl
-from CLI.support import smac_help
 from sparkle.platform import file_help as sfh
 import global_variables as gv
 from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from sparkle.configurator import ablation as sah
 from sparkle.solver.validator import Validator
+from sparkle.configurator.implementations import SMAC2
 from sparkle.platform.generate_report_help import generate_comparison_plot
 
 
@@ -80,7 +80,8 @@ def get_dict_instance_to_performance(results: list[list[str]],
         A dictionary containing the performance for each instance
     """
     value_column = -1  # Last column is runtime
-    smac_run_obj = smac_help.get_smac_run_obj()
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
     if smac_run_obj != "RUNTIME":
         # Quality column
         value_column = -2
@@ -100,7 +101,8 @@ def get_performance_measure() -> str:
     Returns:
         A string containing the performance measure
     """
-    smac_run_obj = smac_help.get_smac_run_obj()
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
 
     if smac_run_obj == "RUNTIME":
         penalty = gv.settings.get_general_penalty_multiplier()
@@ -115,7 +117,8 @@ def get_runtime_bool() -> str:
     Returns:
         A string containing the runtime boolean
     """
-    smac_run_obj = smac_help.get_smac_run_obj()
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
 
     if smac_run_obj == "RUNTIME":
         return "\\runtimetrue"
@@ -463,7 +466,8 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     latex_dict["numInstanceInTrainingInstanceSet"] = \
         get_num_instance_for_configurator(instance_set_train_name)
 
-    smac_run_obj = smac_help.get_smac_run_obj()
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
     smac_whole_time_budget = gv.settings.get_config_wallclock_time()
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     num_of_smac_run_str = gv.settings.get_config_number_of_runs()

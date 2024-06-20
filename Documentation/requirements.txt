@@ -5,3 +5,4 @@ sphinxcontrib-jsmath
 sphinxcontrib-autoprogram
 pandas # Also in environment.yml but needed for readthedocs
 RunRunner==0.1.3
+pcsparser @ git+https://github.com/jeroenrook/pcsparser.git

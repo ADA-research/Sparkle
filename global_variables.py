@@ -34,7 +34,7 @@ def latest_scenario() -> ReportingScenario:
     return _latest_scenario
 
 
-sparkle_version = str(about.version)
+sparkle_version = about.version
 
 sparkle_special_string = "__@@SPARKLE@@__"
 
@@ -56,43 +56,38 @@ class ReportType(str, Enum):
 
 # Log that keeps track of which commands were executed and where output details can be
 # found
-sparkle_global_log_file = "sparkle.log"
-sparkle_global_log_dir = "Log/"
-sparkle_global_log_path = PurePath(sparkle_global_output_dir / sparkle_global_log_file)
+sparkle_global_log_dir = Path("Log")
+sparkle_global_log_path = PurePath(sparkle_global_output_dir / "sparkle.log")
 
 sparkle_tmp_path = "Tmp/"
 
-sparkle_log_path = sparkle_tmp_path + "sparkle_log.out"
 sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"
 
 sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
 
-snapshot_dir = Path("Snapshots/")
-sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector/")
+snapshot_dir = Path("Snapshots")
+sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
 
 sparkle_algorithm_selector_name = f"sparkle_portfolio_selector{sparkle_special_string}"
 
 sparkle_algorithm_selector_path = (
     sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name)
 
-output_dir = Path("Output/")
-instance_dir = Path("Instances/")
-solver_dir = Path("Solvers/")
-test_data_dir = Path("Test_Data/")
-extractor_dir = Path("Extractors/")
-feature_data_dir = Path("Feature_Data/")
+output_dir = Path("Output")
+instance_dir = Path("Instances")
+solver_dir = Path("Solvers")
+extractor_dir = Path("Extractors")
+feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
 
-sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio/")
-sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio/")
+sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio")
+sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio")
 
 sparkle_marginal_contribution_perfect_path = (
-    sparkle_algorithm_selector_dir / "margi_contr_perfect.csv")
+    sparkle_algorithm_selector_dir / "marginal_contribution_perfect.csv")
 
 sparkle_marginal_contribution_actual_path = (
-    sparkle_algorithm_selector_dir / "margi_contr_actual.csv")
-
-sparkle_last_test_file_name = "last_test_configured_default.txt"
+    sparkle_algorithm_selector_dir / "marginal_contribution_actual.csv")
 
 sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
 sparkle_latex_dir = Path("Components/Sparkle-latex-generator")
@@ -119,12 +114,12 @@ selection_output_analysis = selection_output_general / analysis_dir_name
 
 runsolver_dir = "Components/runsolver/src/"
 runsolver_path = runsolver_dir + "runsolver"
-sat_verifier_path = "Components/Sparkle-SAT-verifier/SAT"
 autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
 sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
 
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
+sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
 ablation_dir = "Components/ablationAnalysis-0.9.4/"
 
@@ -136,7 +131,7 @@ pap_performance_data_tmp_path = Path("Performance_Data/Tmp_PaP/")
 pap_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/")
 run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")
 
-reference_list_dir = Path("Reference_Lists/")
+reference_list_dir = Path("Reference_Lists")
 instance_list_postfix = "_instance_list.txt"
 extractor_nickname_list_path = (
     f"{str(reference_list_dir)}/sparkle_extractor_nickname_list.txt")
@@ -150,8 +145,7 @@ instance_list_path = Path(reference_list_dir / instance_list_file)
 
 working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir,
-                sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir,
-                test_data_dir]
+                sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir]
 
 file_storage_data_mapping = {Solver.solver_list_path: Solver.get_solver_list(),
                              Path(solver_nickname_list_path): {},
@@ -182,11 +176,5 @@ def get_time_pid_random_string() -> str:
     Returns:
       A random string composed of time, PID and a random positive integer value.
     """
-    my_time_str = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
-    my_pid = os.getpid()
-    my_pid_str = str(my_pid)
-    my_random = random.randint(1, sys.maxsize)
-    my_random_str = str(my_random)
-    my_time_pid_random_str = my_time_str + "_" + my_pid_str + "_" + my_random_str
-
-    return my_time_pid_random_str
+    time_stamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
+    return f"{time_stamp}_{os.getpid()}_{random.randint(1, sys.maxsize)}"

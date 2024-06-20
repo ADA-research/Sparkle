@@ -3,15 +3,14 @@
 
 import sys
 import argparse
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from runrunner.base import Runner
 
 import global_variables as gv
 from sparkle.solver import pcs
 import sparkle_logging as sl
-from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
@@ -19,6 +18,7 @@ from sparkle.solver.validator import Validator
 from CLI.help import command_help as ch
 from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise
+from CLI.help.nicknames import resolve_object_name
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -27,56 +27,22 @@ def parser_function() -> argparse.ArgumentParser:
         description=("Test the performance of the configured solver and the default "
                      "solver by doing validation experiments on the training and test "
                      "sets."))
-    parser.add_argument(
-        "--solver",
-        required=True,
-        type=Path,
-        help="path to solver"
-    )
-    parser.add_argument(
-        "--instance-set-train",
-        required=True,
-        type=Path,
-        help="path to training instance set",
-    )
-    parser.add_argument(
-        "--instance-set-test",
-        required=False,
-        type=Path,
-        help="path to testing instance set",
-    )
-    parser.add_argument(
-        "--configurator",
-        type=Path,
-        help="path to configurator"
-    )
-    parser.add_argument(
-        "--performance-measure",
-        choices=PerformanceMeasure.__members__,
-        default=gv.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure,
-        action=ac.SetByUser,
-        help="the performance measure, e.g. runtime",
-    )
-    parser.add_argument(
-        "--target-cutoff-time",
-        type=int,
-        default=gv.settings.DEFAULT_general_target_cutoff_time,
-        action=ac.SetByUser,
-        help="cutoff time per target algorithm run in seconds",
-    )
-    parser.add_argument(
-        "--settings-file",
-        type=Path,
-        default=gv.settings.DEFAULT_settings_path,
-        action=ac.SetByUser,
-        help="specify the settings file to use instead of the default",
-    )
-    parser.add_argument(
-        "--run-on",
-        default=Runner.SLURM,
-        choices=[Runner.LOCAL, Runner.SLURM],
-        help=("On which computer or cluster environment to execute the calculation.")
-    )
+    parser.add_argument(*ac.SolverArgument.names,
+                        **ac.SolverArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTrainArgument.names,
+                        **ac.InstanceSetTrainArgument.kwargs)
+    parser.add_argument(*ac.InstanceSetTestArgument.names,
+                        **ac.InstanceSetTestArgument.kwargs)
+    parser.add_argument(*ac.ConfiguratorArgument.names,
+                        **ac.ConfiguratorArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureArgument.names,
+                        **ac.PerformanceMeasureArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeValidationArgument.names,
+                        **ac.TargetCutOffTimeValidationArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
     return parser
 
 
@@ -92,9 +58,11 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver = args.solver
-    instance_set_train = args.instance_set_train
-    instance_set_test = args.instance_set_test
+    solver = resolve_object_name(args.solver, gv.solver_nickname_mapping, gv.solver_dir)
+    instance_set_train = resolve_object_name(args.instance_set_train,
+                                             target_dir=gv.instance_dir)
+    instance_set_test = resolve_object_name(args.instance_set_test,
+                                            target_dir=gv.instance_dir)
     run_on = args.run_on
 
     check_for_initialise(
@@ -121,9 +89,13 @@ if __name__ == "__main__":
             args.target_cutoff_time, SettingState.CMD_LINE
         )
 
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
+
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings.get_general_sparkle_configurator()
-    configurator.set_scenario_dirs(Path(solver).name, instance_set_train.name)
+    configurator.set_scenario_dirs(solver.name, instance_set_train.name)
 
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(
@@ -139,12 +111,12 @@ if __name__ == "__main__":
                        instance_sets=all_validation_instances)
 
     # Update latest scenario
-    gv.latest_scenario().set_config_solver(Path(solver))
-    gv.latest_scenario().set_config_instance_set_train(Path(instance_set_train))
+    gv.latest_scenario().set_config_solver(solver)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(Path(instance_set_test))
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()

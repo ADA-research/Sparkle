@@ -47,7 +47,7 @@ if [[ $output =~ "${output_true}" ]]; then
 	then
 		scancel $jobid
 	fi
-else              
+else
 	echo "[failure] ($slurm_available) configure_solver_validation test failed with output:"
 	echo $output
     if [[ $slurm_available =~ "${slurm_true}" ]];

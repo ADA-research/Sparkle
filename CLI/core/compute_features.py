@@ -8,7 +8,7 @@ import argparse
 from pathlib import Path
 from pathlib import PurePath
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.instance import compute_features_help as scf
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     global settings
     settings_dir = Path("Settings")
     file_path_latest = PurePath(settings_dir / "latest.ini")
-    sgh.settings = settings_help.Settings(file_path_latest)
+    gv.settings = settings_help.Settings(file_path_latest)
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
@@ -37,29 +37,30 @@ if __name__ == "__main__":
     feature_data_csv_path = Path(args.feature_csv)
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-    runsolver_path = sgh.runsolver_path
+    runsolver_path = gv.runsolver_path
 
-    if len(sgh.extractor_list) == 0:
-        cutoff_time_each_extractor_run = sgh.settings.get_general_extractor_cutoff_time()
+    if len(gv.extractor_list) == 0:
+        cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
     else:
         cutoff_time_each_extractor_run = (
-            sgh.settings.get_general_extractor_cutoff_time() / len(sgh.extractor_list))
+            gv.settings.get_general_extractor_cutoff_time() / len(gv.extractor_list))
 
     cutoff_time_each_run_option = "--cpu-limit " + str(cutoff_time_each_extractor_run)
 
     # TODO: Handle multi-file instances
     key_str = (f"{extractor_path.name}_"
                f"{instance_path.name}_"
-               f"{sgh.get_time_pid_random_string()}")
+               f"{gv.get_time_pid_random_string()}")
     result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
     basic_part = "Tmp/" + key_str
-    err_path = basic_part + ".err"
     runsolver_watch_data_path = basic_part + ".log"
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
     command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
                     f"{runsolver_watch_data_path_option} {extractor_path}/"
-                    f"{sgh.sparkle_run_default_wrapper} {extractor_path}/ "
-                    f"{instance_path} {result_path} 2> {err_path}")
+                    f"{gv.sparkle_extractor_wrapper} "
+                    f"-extractor_dir {extractor_path} "
+                    f"-instance_file {instance_path} "
+                    f"-output_file {result_path}")
 
     try:
         task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
@@ -110,6 +111,6 @@ if __name__ == "__main__":
 
     log_str = (f"{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, "
                f"{result_string_str}")
-    sfh.write_string_to_file(sgh.sparkle_system_log_path, log_str, append=True)
+    sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     tmp_fdcsv.save_csv(result_path)
-    sfh.rmfiles([task_run_status_path, err_path, runsolver_watch_data_path])
+    sfh.rmfiles([task_run_status_path, runsolver_watch_data_path])

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Sparkle command to add a feature extractor to the Sparkle platform."""
+"""Sparkle CLi pass through."""
 import sys
 import os
 from pathlib import Path
 
 
 def main() -> None:
-    """Pass through command to launch CLI commands!"""
+    """Pass through command to launch CLI commands."""
     if len(sys.argv) < 2:
         print("Usage: sparkle <command>")
         sys.exit(1)

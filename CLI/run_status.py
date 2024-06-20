@@ -6,6 +6,7 @@ import argparse
 
 from sparkle.platform import run_status_help
 import sparkle_logging as sl
+from CLI.help import argparse_custom as ac
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -15,12 +16,8 @@ def parser_function() -> argparse.ArgumentParser:
       The argument parser.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="output run status in verbose mode"
-    )
+    parser.add_argument(*ac.VerboseArgument.names,
+                        **ac.VerboseArgument.kwargs)
     return parser
 
 
@@ -37,7 +34,6 @@ if __name__ == "__main__":
     print("Reporting current running status of Sparkle ...")
     run_status_help.print_running_solver_jobs()
     run_status_help.print_running_configuration_jobs()
-    run_status_help.print_running_parallel_portfolio_construction_jobs()
     run_status_help.print_running_portfolio_selector_construction_jobs()
     run_status_help.print_running_generate_report_jobs()
     print("Current running status of Sparkle reported!")

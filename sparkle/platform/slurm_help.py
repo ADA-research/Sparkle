@@ -7,7 +7,7 @@ import shlex
 import subprocess
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 
 
 def get_slurm_options_list(path_modifier: str = None) -> list[str]:
@@ -24,8 +24,8 @@ def get_slurm_options_list(path_modifier: str = None) -> list[str]:
         path_modifier = ""
 
     slurm_options_list = []
-    sparkle_slurm_settings_path = Path(path_modifier) / sgh.sparkle_slurm_settings_path
-    with Path(sparkle_slurm_settings_path).open("r") as settings_file:
+    sparkle_slurm_settings_path = Path(path_modifier) / gv.sparkle_slurm_settings_path
+    with sparkle_slurm_settings_path.open("r") as settings_file:
         slurm_options_list.extend([line.strip() for line in settings_file.readlines()
                                    if line.startswith("-")])
 

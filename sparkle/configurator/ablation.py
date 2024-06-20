@@ -11,7 +11,8 @@ from runrunner.base import Runner
 
 import global_variables as gv
 from sparkle.instance import instances_help as sih
-from CLI.support import smac_help
+
+from sparkle.configurator.implementations import SMAC2
 from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
@@ -87,10 +88,11 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
         solver_name, instance_train_name)
     if "-init_solution" not in opt_config_str:
         opt_config_str = "-init_solution '1' " + opt_config_str
-    smac_run_obj = smac_help.get_smac_run_obj()
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
     smac_each_run_cutoff_length = gv.settings.get_smac_target_cutoff_length()
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
-    concurrent_clis = gv.settings.get_slurm_clis_per_node()
+    concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
     ablation_racing = gv.settings.get_ablation_racing_flag()
     configurator = gv.settings.get_general_sparkle_configurator()
 
@@ -214,7 +216,7 @@ def submit_ablation(ablation_scenario_dir: str,
     # the Log/Ablation/.. folder.
 
     # 1. submit the ablation to the runrunner queue
-    clis = gv.settings.get_slurm_clis_per_node()
+    clis = gv.settings.get_slurm_max_parallel_runs_per_node()
     cmd = "../../ablationAnalysis --optionFile ablation_config.txt"
     srun_options = ["-N1", "-n1", f"-c{clis}"]
     sbatch_options = [f"--cpus-per-task={clis}"] +\
@@ -238,7 +240,7 @@ def submit_ablation(ablation_scenario_dir: str,
     # 2. Submit intermediate actions (copy path from log)
     log_source = "log/ablation-run1234.txt"
     ablation_path = "ablationPath.txt"
-    log_path = Path(gv.sparkle_global_log_dir) / "Ablation" / run_ablation.name
+    log_path = gv.sparkle_global_log_dir / "Ablation" / run_ablation.name
     log_path.mkdir(parents=True, exist_ok=True)
 
     cmd_list = [f"cp {log_source} {ablation_path}", f"cp -r log/ {log_path.absolute()}"]
@@ -281,7 +283,7 @@ def submit_ablation(ablation_scenario_dir: str,
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
         val_dir = run_ablation_validation.name + "_validation"
-        log_path = Path(gv.sparkle_global_log_dir) / "Ablation" / val_dir
+        log_path = gv.sparkle_global_log_dir / "Ablation" / val_dir
         log_path.mkdir(parents=True, exist_ok=True)
         cmd_list = [f"cp {log_source} {ablation_path}",
                     f"cp -r log/ {log_path.absolute()}"]

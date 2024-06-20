@@ -4,7 +4,7 @@
 import fcntl
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
@@ -14,8 +14,8 @@ def feature_data_csv_merge() -> None:
     """Merge feature data of new results into the main feature data CSV."""
     try:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
-            sgh.feature_data_csv_path)
-        tmp_feature_data_csv_directory = sgh.feature_data_dir / "Tmp"
+            gv.feature_data_csv_path)
+        tmp_feature_data_csv_directory = gv.feature_data_dir / "Tmp"
         csv_list = sfh.get_list_all_extensions(tmp_feature_data_csv_directory, "csv")
     except Exception:
         return
@@ -31,8 +31,8 @@ def performance_data_csv_merge() -> None:
     """Merge performance data of new results into the main performance data CSV."""
     try:
         performance_data_csv = PerformanceDataFrame(
-            sgh.performance_data_csv_path)
-        tmp_performance_data_result_directory = sgh.performance_data_dir / "Tmp"
+            gv.performance_data_csv_path)
+        tmp_performance_data_result_directory = gv.performance_data_dir / "Tmp"
         result_list = sfh.get_list_all_extensions(
             tmp_performance_data_result_directory, "result")
     except Exception:
@@ -63,10 +63,10 @@ def performance_data_csv_merge() -> None:
         performance_data_csv.remove_solver(wrong_solver_path)
         performance_data_csv.save_csv()
         sfh.add_remove_platform_item(wrong_solver_path,
-                                     sgh.solver_list_path,
+                                     gv.solver_list_path,
                                      remove=True)
         sfh.add_remove_platform_item(None,
-                                     sgh.solver_nickname_list_path,
+                                     gv.solver_nickname_list_path,
                                      key=wrong_solver_path,
                                      remove=True)
 

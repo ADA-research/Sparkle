@@ -4,7 +4,10 @@
 
 ```{note}
 Sparkle currently relies on [Slurm](https://slurm.schedmd.com/), but in some cases works locally as well.
+Sparkle also relies on [RunSolver](http://www.cril.univ-artois.fr/~roussel/runsolver/), which is a Linux based program. Thus Sparkle can only run on Linux based systems in many cases.
 ```
+
+
 
 Follow these steps:
 
@@ -627,14 +630,14 @@ number_of_runs_in_parallel = 25
 >
 > description: The number of configuration runs that can run in parallel. 
 
-`clis_per_node`
-> aliases: N/A
+`max_parallel_runs_per_node`
+> aliases: `clis_per_node`
 >
 > values: integer
 >
 > note: Not really a Slurm option, will likely be moved to another section.
 >
-> description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the `cli_per_node` is at most 16.
+> description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the `max_parallel_runs_per_node` is at most 16.
 
 ### Priorities
 

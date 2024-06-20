@@ -10,7 +10,7 @@ import builtins
 import statistics
 
 import sparkle_logging as slog
-import global_variables as sgh
+import global_variables as gv
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
@@ -31,24 +31,6 @@ class SolutionVerifier(Enum):
             verifier = SolutionVerifier.SAT
 
         return verifier
-
-
-class ProcessMonitoring(str, Enum):
-    """Possible process monitoring approaches."""
-
-    # Cancel all solvers within a portfolio once one solver finishes with an instance
-    REALISTIC = "REALISTIC"
-    # Cancel all solvers within a portfolio once one solver finishes with an instance,
-    # after they have run equally long as the fastest solver on this instance so far.
-    # This makes it possible to measure which solver would be fastest when they are
-    # not able to start at the same time due to, e.g., insufficient CPU cores to start
-    # all solvers at the same time.
-    EXTENDED = "EXTENDED"
-
-    @staticmethod
-    def from_str(process_monitoring: str) -> ProcessMonitoring:
-        """Return a given str as ProcessMonitoring."""
-        return ProcessMonitoring(process_monitoring)
 
 
 class SettingState(Enum):
@@ -81,15 +63,17 @@ class Settings:
     DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
 
+    DEFAULT_portfolio_construction_timeout = None
+
     DEFAULT_slurm_number_of_runs_in_parallel = 25
-    DEFAULT_slurm_clis_per_node = 8
+    DEFAULT_slurm_max_parallel_runs_per_node = 8
 
     DEFAULT_smac_target_cutoff_length = "max"
 
     DEFAULT_ablation_racing = False
 
-    DEFAULT_paraport_overwriting = False
-    DEFAULT_paraport_process_monitoring = ProcessMonitoring.REALISTIC
+    DEFAULT_parallel_portfolio_check_interval = 4
+    DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -112,12 +96,13 @@ class Settings:
         self.__config_number_of_runs_set = SettingState.NOT_SET
 
         self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
-        self.__slurm_clis_per_node_set = SettingState.NOT_SET
+        self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
         self.__smac_target_cutoff_length_set = SettingState.NOT_SET
         self.__ablation_racing_flag_set = SettingState.NOT_SET
-        self.__paraport_overwriting_flag_set = SettingState.NOT_SET
-        self.__paraport_process_monitoring_set = SettingState.NOT_SET
+
+        self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
+        self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -236,11 +221,11 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "slurm"
-            option_names = ("clis_per_node", )
+            option_names = ("max_parallel_runs_per_node", "clis_per_node", )
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
-                    self.set_slurm_clis_per_node(value, state)
+                    self.set_slurm_max_parallel_runs_per_node(value, state)
                     file_settings.remove_option(section, option)
 
             section = "smac"
@@ -260,20 +245,18 @@ class Settings:
                     file_settings.remove_option(section, option)
 
             section = "parallel_portfolio"
-            option_names = ("overwriting", )
+            option_names = ("check_interval", )
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = file_settings.getboolean(section, option)
-                    self.set_paraport_overwriting_flag(value, state)
+                    value = int(file_settings.get(section, option))
+                    self.set_parallel_portfolio_check_interval(value, state)
                     file_settings.remove_option(section, option)
 
-            section = "parallel_portfolio"
-            option_names = ("process_monitoring", )
+            option_names = ("num_seeds_per_solver", )
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = ProcessMonitoring.from_str(
-                        file_settings.get(section, option))
-                    self.set_paraport_process_monitoring(value, state)
+                    value = int(file_settings.get(section, option))
+                    self.set_parallel_portfolio_number_of_seeds_per_solver(value, state)
                     file_settings.remove_option(section, option)
 
             # TODO: Report on any unknown settings that were read
@@ -304,7 +287,7 @@ class Settings:
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
         # Write to general output directory
-        file_path_output = PurePath(sgh.sparkle_global_output_dir / slog.caller_out_dir
+        file_path_output = PurePath(gv.sparkle_global_output_dir / slog.caller_out_dir
                                     / self.__settings_dir / self.__settings_file)
         self.write_settings_ini(Path(file_path_output))
 
@@ -714,26 +697,28 @@ class Settings:
 
         return int(self.__settings["slurm"]["number_of_runs_in_parallel"])
 
-    def set_slurm_clis_per_node(self: Settings, value: int = DEFAULT_slurm_clis_per_node,
-                                origin: SettingState = SettingState.DEFAULT) -> None:
+    def set_slurm_max_parallel_runs_per_node(
+            self: Settings,
+            value: int = DEFAULT_slurm_max_parallel_runs_per_node,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of algorithms Slurm can run in parallel per node."""
         section = "slurm"
-        name = "clis_per_node"
+        name = "max_parallel_runs_per_node"
 
         if value is not None and self.__check_setting_state(
-                self.__slurm_clis_per_node_set, origin, name):
+                self.__slurm_max_parallel_runs_per_node_set, origin, name):
             self.__init_section(section)
-            self.__slurm_clis_per_node_set = origin
+            self.__slurm_max_parallel_runs_per_node_set = origin
             self.__settings[section][name] = str(value)
 
         return
 
-    def get_slurm_clis_per_node(self: Settings) -> int:
+    def get_slurm_max_parallel_runs_per_node(self: Settings) -> int:
         """Return the number of algorithms Slurm can run in parallel per node."""
-        if self.__slurm_clis_per_node_set == SettingState.NOT_SET:
-            self.set_slurm_clis_per_node()
+        if self.__slurm_max_parallel_runs_per_node_set == SettingState.NOT_SET:
+            self.set_slurm_max_parallel_runs_per_node()
 
-        return int(self.__settings["slurm"]["clis_per_node"])
+        return int(self.__settings["slurm"]["max_parallel_runs_per_node"])
 
     # SLURM extra options
 
@@ -785,50 +770,94 @@ class Settings:
 
         return bool(self.__settings["ablation"]["racing"])
 
-    # Parallel Portfolio settings ###
+    # Parallel Portfolio settings
 
-    def set_paraport_overwriting_flag(
-            self: Settings, value: bool = DEFAULT_paraport_overwriting,
+    def set_parallel_portfolio_check_interval(
+            self: Settings,
+            value: int = DEFAULT_parallel_portfolio_check_interval,
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the parallel portfolio overwriting flag to a given value."""
+        """Set the parallel portfolio check interval."""
         section = "parallel_portfolio"
-        name = "overwriting"
+        name = "check_interval"
 
         if value is not None and self.__check_setting_state(
-                self.__paraport_overwriting_flag_set, origin, name):
+                self.__parallel_portfolio_check_interval_set, origin, name):
             self.__init_section(section)
-            self.__paraport_overwriting_flag_set = origin
+            self.__parallel_portfolio_check_interval_set = origin
             self.__settings[section][name] = str(value)
 
         return
 
-    def get_paraport_overwriting_flag(self: Settings) -> bool:
-        """Return the parallel portfolio overwriting flag state."""
-        if self.__paraport_overwriting_flag_set == SettingState.NOT_SET:
-            self.set_paraport_overwriting_flag()
+    def get_parallel_portfolio_check_interval(self: Settings) -> int:
+        """Return the parallel portfolio check interval."""
+        if self.__parallel_portfolio_check_interval_set == SettingState.NOT_SET:
+            self.set_parallel_portfolio_check_interval()
 
-        return bool(self.__settings["parallel_portfolio"]["overwriting"])
+        return int(
+            self.__settings["parallel_portfolio"]["check_interval"])
 
-    def set_paraport_process_monitoring(
+    def set_parallel_portfolio_number_of_seeds_per_solver(
             self: Settings,
-            value: ProcessMonitoring = DEFAULT_paraport_process_monitoring,
+            value: int = DEFAULT_parallel_portfolio_num_seeds_per_solver,
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the parallel portfolio process monitoring state."""
+        """Set the parallel portfolio seeds per solver to start."""
         section = "parallel_portfolio"
-        name = "process_monitoring"
+        name = "num_seeds_per_solver"
 
         if value is not None and self.__check_setting_state(
-                self.__paraport_overwriting_flag_set, origin, name):
+                self.__parallel_portfolio_num_seeds_per_solver_set, origin, name):
             self.__init_section(section)
-            self.__paraport_process_monitoring_set = origin
-            self.__settings[section][name] = value.name
+            self.__parallel_portfolio_check_interval_set = origin
+            self.__settings[section][name] = str(value)
 
         return
 
-    def get_paraport_process_monitoring(self: Settings) -> ProcessMonitoring:
-        """Return the parallel portfolio process monitoring state."""
-        if self.__paraport_process_monitoring_set == SettingState.NOT_SET:
-            self.set_paraport_process_monitoring()
+    def get_parallel_portfolio_number_of_seeds_per_solver(self: Settings) -> int:
+        """Return the parallel portfolio seeds per solver to start."""
+        if self.__parallel_portfolio_num_seeds_per_solver_set == SettingState.NOT_SET:
+            self.set_parallel_portfolio_number_of_seeds_per_solver()
 
-        return ProcessMonitoring.from_str(
-            self.__settings["parallel_portfolio"]["process_monitoring"])
+        return int(
+            self.__settings["parallel_portfolio"]["num_seeds_per_solver"])
+
+    @staticmethod
+    def check_settings_changes(cur_settings: Settings, prev_settings: Settings) -> bool:
+        """Check if there are changes between the previous and the current settings.
+
+        Prints any section changes, printing None if no setting was found.
+
+        Args:
+          cur_settings: The current settings
+          prev_settings: The previous settings
+
+        Returns:
+          True iff there are no changes.
+        """
+        printed_warning = False
+
+        cur_dict = cur_settings.__settings._sections
+        prev_dict = prev_settings.__settings._sections
+
+        for section in cur_dict.keys():
+            printed_section = False
+            names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
+            for name in names:
+                # if name is not present in one of the two dicts, get None as placeholder
+                cur_val = cur_dict[section].get(name, None)
+                prev_val = prev_dict[section].get(name, None)
+                if cur_val != prev_val:
+                    # do we have yet to print the initial warning?
+                    if not printed_warning:
+                        print("Warning: The following attributes/options have changed:")
+                        printed_warning = True
+
+                    # do we have yet to print the section?
+                    if not printed_section:
+                        print(f"In the section '{section}':")
+                        printed_section = True
+
+                    # print actual change
+                    print(f"  - '{name}' changed from '{prev_val}' "
+                          f"to '{cur_val}'")
+
+        return not printed_warning

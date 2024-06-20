@@ -4,7 +4,7 @@
 import argparse
 from pathlib import Path
 
-import global_variables as sgh
+import global_variables as gv
 from sparkle.platform import settings_help
 from CLI.support import run_portfolio_selector_help as srpsh
 
@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # Initialise settings
     global settings
     file_path_latest = Path("Settings/latest.ini")
-    sgh.settings = settings_help.Settings(file_path_latest)
+    gv.settings = settings_help.Settings(file_path_latest)
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
