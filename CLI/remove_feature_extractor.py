@@ -50,14 +50,14 @@ if __name__ == "__main__":
           f"{Path(extractor_path).name} ...")
 
     if len(gv.extractor_list) > 0:
-        sfh.add_remove_platform_item(extractor_path,
+        sfh.add_remove_platform_item(str(extractor_path),
                                      gv.extractor_list_path, remove=True)
 
     if len(gv.extractor_feature_vector_size_mapping) > 0:
         sfh.add_remove_platform_item(None,
                                      gv.extractor_feature_vector_size_list_path,
-                                     key=extractor_path,
-                                     remove=False)
+                                     key=str(extractor_path),
+                                     remove=True)
 
     if len(gv.extractor_nickname_mapping) > 0:
         for key in gv.extractor_nickname_mapping:
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 sfh.add_remove_platform_item(None,
                                              gv.extractor_nickname_list_path,
                                              key=key,
-                                             remove=False)
+                                             remove=True)
                 break
 
     if Path(gv.feature_data_csv_path).exists():
