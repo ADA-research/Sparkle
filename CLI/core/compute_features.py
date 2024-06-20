@@ -36,8 +36,6 @@ if __name__ == "__main__":
     instance_path = Path(" ".join(args.instance))
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
-
-    
     runsolver_path = gv.runsolver_path
 
     if len(gv.extractor_list) == 0:
@@ -107,7 +105,7 @@ if __name__ == "__main__":
         result_string = "Failed -- using missing value instead"
     lock.release()
     result_path.unlink(missing_ok=True)
-    
+
     # TODO: Handle multi-file instances
     description_str = (
         f"[Extractor: {extractor_path.name},"

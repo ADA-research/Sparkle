@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     run_status_path = args.run_status_path
-    key_str = f"{solver_path.name}_{instance_name}_{tg.get_time_pid_random_string()}" 
+    key_str = f"{solver_path.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     raw_result_path = f"Tmp/{key_str}.rawres"
     start_time = time.time()
     # create statusinfo file
