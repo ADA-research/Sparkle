@@ -15,7 +15,7 @@ from CLI.help.status_info import ConfigureSolverStatusInfo
 import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from CLI.support import ablation as sah
+from CLI.support import ablation_help as sah
 from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import feature_data_csv_help as sfdcsv

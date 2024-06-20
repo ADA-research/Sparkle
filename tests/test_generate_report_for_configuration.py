@@ -204,7 +204,7 @@ def test_get_runtime_bool(mocker: MockFixture) -> None:
 
 def test_get_ablation_bool_true(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is True."""
-    mock_check = mocker.patch("sparkle.configurator.ablation."
+    mock_check = mocker.patch("CLI.support.ablation_help."
                               "check_for_ablation",
                               return_value=True)
 
@@ -220,7 +220,7 @@ def test_get_ablation_bool_true(mocker: MockFixture) -> None:
 
 def test_get_ablation_bool_false(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is False."""
-    mock_check = mocker.patch("sparkle.configurator.ablation."
+    mock_check = mocker.patch("CLI.support.ablation_help."
                               "check_for_ablation",
                               return_value=False)
 
@@ -412,7 +412,7 @@ def test_get_ablation_table(mocker: MockFixture) -> None:
          ["0", "-source-", "N/A", "N/A", "76.53275"],
          ["1", "sel_var_div", "3", "6", "68.41392"],
          ["2", "-target-", "N/A", "N/A", "92.06944"]])
-    mock_table = mocker.patch("sparkle.configurator.ablation."
+    mock_table = mocker.patch("CLI.support.ablation_help."
                               "read_ablation_table",
                               return_value=sah_ablation_table)
 

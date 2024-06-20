@@ -89,8 +89,8 @@ def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
     Returns:
         A bool indicating whether a reference list of the instances in this set exists.
     """
-    return (gv.reference_list_dir / 
-            (instance_set_name + gv.instance_list_postfix)).is_file()
+    return Path(gv.reference_list_dir
+                / Path(instance_set_name + gv.instance_list_postfix)).is_file()
 
 
 def remove_reference_instance_list(instance_set_name: str) -> None:
