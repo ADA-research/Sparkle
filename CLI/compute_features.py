@@ -9,7 +9,7 @@ from runrunner.base import Runner
 import runrunner as rrr
 
 import global_variables as gv
-from sparkle.instance import compute_features_help as scf
+from CLI.help import compute_features_help as scf
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState

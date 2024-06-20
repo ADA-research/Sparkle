@@ -12,7 +12,7 @@ import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle.instance import compute_features_help as scf
+from CLI.help import compute_features_help as scf
 
 if __name__ == "__main__":
     # Initialise settings

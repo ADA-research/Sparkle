@@ -11,7 +11,7 @@ from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
 import tools.general as tg
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle.instance import compute_features_help as scf
+from CLI.help import compute_features_help as scf
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise

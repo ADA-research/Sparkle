@@ -12,7 +12,7 @@ from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srsh
-from sparkle.instance import compute_features_help as scfh
+from CLI.help import compute_features_help as scfh
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 
