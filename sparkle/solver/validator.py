@@ -67,14 +67,14 @@ class Validator():
                     out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
                 else:
                     out_path = self.out_dir / subdir
-                run = rcsh.call_solver_parallel(instance_path_list,
-                                                solver,
-                                                config,
-                                                seed=index if use_seed else None,
-                                                outdir=out_path,
-                                                commandname=CommandName.VALIDATION,
-                                                dependency=dependency,
-                                                run_on=run_on)
+                run = rcsh.call_solver(instance_path_list,
+                                       solver,
+                                       config=config,
+                                       seed=index if use_seed else None,
+                                       outdir=out_path,
+                                       commandname=CommandName.VALIDATION,
+                                       dependency=dependency,
+                                       run_on=run_on)
                 jobs.append(run)
         return jobs
 
