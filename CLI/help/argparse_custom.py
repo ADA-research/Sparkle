@@ -138,8 +138,7 @@ CutOffTimeArgument = \
 
 DeterministicArgument = ArgumentContainer(names=["--deterministic"],
                                           kwargs={"required": True,
-                                                  "type": int,
-                                                  "choices": [0, 1],
+                                                  "type": bool,
                                                   "help": "indicate whether the solver "
                                                           "is deterministic or not"})
 

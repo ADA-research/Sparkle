@@ -16,9 +16,9 @@ Add solvers (here for the constrained covering array generation (CCAG) problem) 
 
 Each solver directory should contain the solver executable and a wrapper
 
-`sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/`
+`sparkle add_solver --deterministic False Examples/Resources/CCAG/Solvers/TCA/`
 
-`sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/`
+`sparkle add_solver --deterministic False Examples/Resources/CCAG/Solvers/FastCA/`
 
 ## Add feature extractor
 

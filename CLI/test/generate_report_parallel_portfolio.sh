@@ -23,9 +23,9 @@ sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverC_path > /dev/null
+CLI/add_solver.py --deterministic False $solverA_path > /dev/null
+CLI/add_solver.py --deterministic False $solverB_path > /dev/null
+CLI/add_solver.py --deterministic False $solverC_path > /dev/null
 CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path > /dev/null
 
 # Generate report for parallel portfolio on a single instance

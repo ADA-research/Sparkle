@@ -18,11 +18,11 @@ Add solvers (here for SAT solving) with a wrapper containing the executable name
 
 Each solver directory should contain the solver executable and a wrapper
 
-`sparkle add_solver --deterministic 0 Examples/Resources/Solvers/CSCCSat/`
+`sparkle add_solver --deterministic False Examples/Resources/Solvers/CSCCSat/`
 
-`sparkle add_solver --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/`
+`sparkle add_solver --deterministic False Examples/Resources/Solvers/PbO-CCSAT-Generic/`
 
-`sparkle add_solver --deterministic 0 Examples/Resources/Solvers/MiniSAT/`
+`sparkle add_solver --deterministic False Examples/Resources/Solvers/MiniSAT/`
 
 ## Add feature extractor
 

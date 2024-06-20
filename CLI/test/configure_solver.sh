@@ -35,7 +35,7 @@ solver_src_path="${examples_path}${solver_path}"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/add_solver.py --deterministic False $solver_src_path > /dev/null
 
 # Set up output conditions
 output_true="Running configuration finished!"

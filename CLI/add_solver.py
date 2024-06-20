@@ -116,10 +116,9 @@ if __name__ == "__main__":
               "Can not add new solver.")
         sys.exit(-1)
     shutil.copytree(solver_source, solver_directory, dirs_exist_ok=True)
-    if deterministic is not None:
-        # Save the deterministic bool in the solver
-        with (solver_directory / Solver.meta_data).open("w+") as fout:
-            fout.write(str({"deterministic": int(deterministic) == 1}))
+    # Save the deterministic bool in the solver
+    with (solver_directory / Solver.meta_data).open("w+") as fout:
+        fout.write(str({"deterministic": deterministic}))
 
     # Add RunSolver executable to the solver
     runsolver_path = Path(gv.runsolver_path)
