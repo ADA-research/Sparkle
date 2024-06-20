@@ -14,7 +14,6 @@ import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 from CLI.run_solvers import running_solvers_performance_data
-from sparkle.solver import add as sash
 from sparkle.solver import Solver
 import sparkle_logging as sl
 from CLI.help.command_help import CommandName
@@ -109,7 +108,7 @@ if __name__ == "__main__":
                   f"is not executable. Therefore it cannot be automatically configured.")
 
     # Start add solver
-    solver_directory = sash.get_solver_directory(solver_source.name)
+    solver_directory = gv.solver_dir / solver_source.name
     if not Path(solver_directory).exists():
         Path(solver_directory).mkdir(parents=True, exist_ok=True)
     else:
