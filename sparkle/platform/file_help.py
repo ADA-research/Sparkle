@@ -24,45 +24,6 @@ def create_new_empty_file(filepath: str) -> None:
     Path(filepath).write_text("")
 
 
-def get_instance_list_from_reference(instances_path: Path) -> list[str]:
-    """Return a list of instances read from a file.
-
-    Args:
-      instances_path: Path object pointing to the directory where the instances
-        are stored.
-
-    Returns:
-      List of instances file paths.
-    """
-    # Read instances from reference file
-    with gv.instance_list_path.open("r") as infile:
-        instance_list = [x.strip() for x in infile.readlines()
-                         if x.startswith(str(instances_path))]
-
-    return instance_list
-
-
-def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
-    """Return a list of solvers for a parallel portfolio specified by its path.
-
-    Args:
-      portfolio_path: Path object pointing to the directory where solvers
-        are stored.
-
-    Returns:
-      List of solvers.
-    """
-    portfolio_solver_list = []
-    solvers_path_str = str(gv.solver_dir)
-
-    # Read the included solvers (or solver instances) from file
-    with (portfolio_path / "solvers.txt").open("r") as infile:
-        portfolio_solver_list = [line.strip() for line in infile.readlines()
-                                 if line.strip().startswith(solvers_path_str)]
-
-    return portfolio_solver_list
-
-
 def get_list_all_filename_recursive(path: Path) -> list[Path]:
     """Extend a given list of filenames with all files found under a path.
 
