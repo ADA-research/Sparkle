@@ -117,8 +117,6 @@ class SMAC2(Configurator):
             performance: PerformanceMeasure = None,
             aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns the optimal configuration string for a solver of an instance set."""
-        if not isinstance(solver, Solver):
-            solver = Solver.get_solver_by_name(solver)
         if self.scenario is None:
             self.set_scenario_dirs(solver, instance_set)
         if not Path(instance_set).exists():
@@ -182,8 +180,6 @@ class SMAC2(Configurator):
     def set_scenario_dirs(self: Configurator,
                           solver: Solver, instance_set_name: str) -> None:
         """Patching method to allow the rebuilding of configuratio scenario."""
-        if isinstance(solver, str) or isinstance(solver, Path):
-            solver = Solver.get_solver_by_name(solver)
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.output_path)
 

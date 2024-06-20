@@ -14,6 +14,7 @@ from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
+from sparkle.solver.solver import Solver
 from sparkle.configurator.implementations import SMAC2
 from sparkle.platform.generate_report_help import generate_comparison_plot
 
@@ -127,37 +128,37 @@ def get_runtime_bool() -> str:
     return ""
 
 
-def get_ablation_bool(solver_name: str, instance_train_name: str,
+def get_ablation_bool(solver: Solver, instance_train_name: str,
                       instance_test_name: str) -> str:
     """Return the ablation bool as LaTeX string.
 
     Args:
-        solver_name: Name of the solver
+        solver: The solver object
         instance_train_name: Name of the trianing instance set
         instance_test_name: Name of the testing instance set
 
     Returns:
         A string describing whether ablation was run or not
     """
-    if sah.check_for_ablation(solver_name, instance_train_name, instance_test_name):
+    if sah.check_for_ablation(solver, instance_train_name, instance_test_name):
         return "\\ablationtrue"
     return "\\ablationfalse"
 
 
-def get_features_bool(solver_name: str, instance_set_train_name: str) -> str:
+def get_features_bool(solver: Solver, instance_set_train_name: str) -> str:
     """Return a bool string for latex indicating whether features were used.
 
     True if a feature file is given in the scenario file, false otherwise.
 
     Args:
-        solver_name: Name of the solver
+        solver: The solver object
         instance_set_train_name: Name of the instance set used for training
 
     Returns:
         A string describing whether features are used
     """
     scenario_file = gv.settings.get_general_sparkle_configurator().scenario.directory \
-        / f"{solver_name}_{instance_set_train_name}_scenario.txt"
+        / f"{solver.name}_{instance_set_train_name}_scenario.txt"
 
     for line in scenario_file.open("r").readlines():
         if line.split(" ")[0] == "feature_file":
@@ -250,7 +251,7 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
-def get_figure_configured_vs_default_on_instance_set(solver_name: str,
+def get_figure_configured_vs_default_on_instance_set(solver: Solver,
                                                      instance_set_name: str,
                                                      res_default: list[list[str]],
                                                      res_conf: list[list[str]],
@@ -264,7 +265,7 @@ def get_figure_configured_vs_default_on_instance_set(solver_name: str,
     based on the performance measure.
 
     Args:
-        solver_name: Name of the solver
+        solver: The solver object
         instance_set_train_name: Name of the instance set for training
         configuration_reports_directory: Directory to the configuration reports
         smac_each_run_cutoff_time: Cutoff time
@@ -273,19 +274,20 @@ def get_figure_configured_vs_default_on_instance_set(solver_name: str,
         A string containing the latex comand to include the figure
     """
     data_plot_configured_vs_default_on_instance_set_filename = (
-        f"data_{solver_name}_configured_vs_default_on_{instance_set_name}_{data_type}")
+        f"data_{solver.name}_configured_vs_default_on_{instance_set_name}_{data_type}")
     return get_figure_configure_vs_default(
         res_conf, res_default, target_directory,
         data_plot_configured_vs_default_on_instance_set_filename,
         smac_each_run_cutoff_time)
 
 
-def get_timeouts_instanceset(solver_name: str,
+def get_timeouts_instanceset(solver: Solver,
                              instance_set_name: str,
                              cutoff: int) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
     Args:
+        solver: The solver object
         instance_set_test_name: Name of the testing instance set
         cutoff: Cutoff time
 
@@ -293,12 +295,12 @@ def get_timeouts_instanceset(solver_name: str,
         A tuple containing the number of timeouts for the different configurations
     """
     _, config = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver_name, instance_set_name)
+        .get_optimal_configuration(solver, instance_set_name)
     validator = Validator(gv.validation_output_general)
-    res_default = validator.get_validation_results(solver_name,
+    res_default = validator.get_validation_results(solver,
                                                    gv.instance_dir / instance_set_name,
                                                    config="")
-    res_conf = validator.get_validation_results(solver_name,
+    res_conf = validator.get_validation_results(solver,
                                                 gv.instance_dir / instance_set_name,
                                                 config=config)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
@@ -342,21 +344,21 @@ def get_timeouts(instance_to_par_configured: dict,
     return configured_timeouts, default_timeouts, overlapping_timeouts
 
 
-def get_ablation_table(solver_name: str, instance_set_train_name: str,
+def get_ablation_table(solver: Solver, instance_set_train_name: str,
                        instance_set_test_name: str = None) -> str:
     """Generate a LaTeX table of the ablation path.
 
     This is the result of the ablation analysis to determine the parameter importance.
 
     Args:
-        solver_name: Name of the solver
+        solver: The solver object
         instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing
 
     Returns:
         A string containing the LaTeX table code of the ablation path
     """
-    results = sah.read_ablation_table(solver_name, instance_set_train_name,
+    results = sah.read_ablation_table(solver, instance_set_train_name,
                                       instance_set_test_name)
     table_string = r"\begin{tabular}{rp{0.25\linewidth}rrr}"
     # "Round", "Flipped parameter", "Source value", "Target value", "Validation result"
@@ -393,14 +395,14 @@ def get_ablation_table(solver_name: str, instance_set_train_name: str,
     return table_string
 
 
-def configuration_report_variables(target_dir: Path, solver_name: str,
+def configuration_report_variables(target_dir: Path, solver: Solver,
                                    instance_set_train_name: str,
                                    instance_set_test_name: str = None,
                                    ablation: bool = True) -> dict:
     """Return a dict matching LaTeX variables and their values.
 
     Args:
-        solver_name: Name of the solver
+        solver: Object representation of the Solver
         instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing. Defaults to None.
         ablation: Whether or not ablation is used. Defaults to True.
@@ -410,13 +412,13 @@ def configuration_report_variables(target_dir: Path, solver_name: str,
     """
     has_test = instance_set_test_name is not None
 
-    full_dict = get_dict_variable_to_value_common(solver_name,
+    full_dict = get_dict_variable_to_value_common(solver,
                                                   instance_set_train_name,
                                                   instance_set_test_name,
                                                   target_dir)
 
     if has_test:
-        test_dict = get_dict_variable_to_value_test(target_dir, solver_name,
+        test_dict = get_dict_variable_to_value_test(target_dir, solver,
                                                     instance_set_train_name,
                                                     instance_set_test_name)
         full_dict.update(test_dict)
@@ -434,13 +436,13 @@ def configuration_report_variables(target_dir: Path, solver_name: str,
     return full_dict
 
 
-def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name: str,
+def get_dict_variable_to_value_common(solver: Solver, instance_set_train_name: str,
                                       instance_set_test_name: str,
                                       target_directory: Path) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
 
     Args:
-        solver_name: Name of the solver
+        Solver: The solver object
         instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing
         target_directory: Path to directory with configuration reports
@@ -449,18 +451,18 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
         A dictionary containing the variables and values
     """
     _, config = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver_name, instance_set_train_name)
+        .get_optimal_configuration(solver, instance_set_train_name)
     validator = Validator(gv.validation_output_general)
     res_default = validator.get_validation_results(
-        solver_name, gv.instance_dir / instance_set_train_name, config="")
+        solver, gv.instance_dir / instance_set_train_name, config="")
     res_conf = validator.get_validation_results(
-        solver_name, gv.instance_dir / instance_set_train_name, config=config)
+        solver, gv.instance_dir / instance_set_train_name, config=config)
 
     latex_dict = {"bibliographypath":
                   str(gv.sparkle_report_bibliography_path.absolute())}
     latex_dict["performanceMeasure"] = get_performance_measure()
     latex_dict["runtimeBool"] = get_runtime_bool()
-    latex_dict["solver"] = solver_name
+    latex_dict["solver"] = solver.name
     latex_dict["instanceSetTrain"] = instance_set_train_name
     latex_dict["sparkleVersion"] = gv.sparkle_version
     latex_dict["numInstanceInTrainingInstanceSet"] = \
@@ -477,7 +479,7 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     latex_dict["smacWholeTimeBudget"] = str(smac_whole_time_budget)
     latex_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
     _, optimised_configuration_str = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver_name, instance_set_train_name)
+        .get_optimal_configuration(solver, instance_set_train_name)
     latex_dict["optimisedConfiguration"] = str(optimised_configuration_str)
     str_value = get_par_performance(res_conf, smac_each_run_cutoff_time)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
@@ -486,13 +488,13 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     latex_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
 
     str_value = get_figure_configured_vs_default_on_instance_set(
-        solver_name, instance_set_train_name, res_default, res_conf, target_directory,
+        solver, instance_set_train_name, res_default, res_conf, target_directory,
         float(smac_each_run_cutoff_time))
     latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = (
-        get_timeouts_instanceset(solver_name, instance_set_train_name,
+        get_timeouts_instanceset(solver, instance_set_train_name,
                                  float(smac_each_run_cutoff_time)))
 
     latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
@@ -502,22 +504,22 @@ def get_dict_variable_to_value_common(solver_name: str, instance_set_train_name:
     ablation_validation_name = instance_set_test_name
     if ablation_validation_name is None:
         ablation_validation_name = instance_set_train_name
-    latex_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
+    latex_dict["ablationBool"] = get_ablation_bool(solver, instance_set_train_name,
                                                    ablation_validation_name)
     latex_dict["ablationPath"] = get_ablation_table(
-        solver_name, instance_set_train_name, ablation_validation_name)
-    latex_dict["featuresBool"] = get_features_bool(solver_name, instance_set_train_name)
+        solver, instance_set_train_name, ablation_validation_name)
+    latex_dict["featuresBool"] = get_features_bool(solver, instance_set_train_name)
 
     return latex_dict
 
 
-def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
+def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
                                     instance_set_train_name: str,
                                     instance_set_test_name: str) -> dict:
     """Return a dict matching test set specific latex variables with their values.
 
     Args:
-        solver_name: Name of the solver
+        solver: The solver object
         instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing
 
@@ -525,12 +527,12 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
         A dictionary containting the variables and their values
     """
     _, config = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver_name, instance_set_train_name)
+        .get_optimal_configuration(solver, instance_set_train_name)
     validator = Validator(gv.validation_output_general)
     res_default = validator.get_validation_results(
-        solver_name, gv.instance_dir / instance_set_test_name, config="")
+        solver, gv.instance_dir / instance_set_test_name, config="")
     res_conf = validator.get_validation_results(
-        solver_name, gv.instance_dir / instance_set_test_name, config=config)
+        solver, gv.instance_dir / instance_set_test_name, config=config)
     test_dict = {"instanceSetTest": instance_set_test_name}
     test_dict["numInstanceInTestingInstanceSet"] =\
         get_num_instance_for_configurator(instance_set_test_name)
@@ -541,39 +543,39 @@ def get_dict_variable_to_value_test(target_dir: Path, solver_name: str,
         str(get_par_performance(res_default, smac_each_run_cutoff_time))
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
-        solver_name, instance_set_test_name, res_default, res_conf, target_dir,
+        solver, instance_set_test_name, res_default, res_conf, target_dir,
         float(smac_each_run_cutoff_time), data_type="test")
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test =\
-        get_timeouts_instanceset(solver_name,
+        get_timeouts_instanceset(solver,
                                  instance_set_test_name,
                                  float(smac_each_run_cutoff_time))
 
     test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
     test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
     test_dict["timeoutsTestOverlap"] = str(overlapping_timeouts_test)
-    test_dict["ablationBool"] = get_ablation_bool(solver_name, instance_set_train_name,
+    test_dict["ablationBool"] = get_ablation_bool(solver, instance_set_train_name,
                                                   instance_set_test_name)
-    test_dict["ablationPath"] = get_ablation_table(solver_name, instance_set_train_name,
+    test_dict["ablationPath"] = get_ablation_table(solver, instance_set_train_name,
                                                    instance_set_test_name)
     return test_dict
 
 
-def check_results_exist(solver_name: str, instance_set_train: str,
+def check_results_exist(solver: Solver, instance_set_train: str,
                         instance_set_test: str = None) -> None:
     """Check whether configuration results exist.
 
     Args:
-        solver_name: Name of the solver
+        solver: The solver object
         instance_set_train: Name of the instance set for training
         instance_set_test: Name of the instance set for testing. Defaults to None.
     """
     validator = Validator(gv.validation_output_general)
     train_res = validator.get_validation_results(
-        solver_name, gv.instance_dir / instance_set_train)
+        solver, gv.instance_dir / instance_set_train)
     if instance_set_test is not None:
-        test_res = validator.get_validation_results(solver_name,
+        test_res = validator.get_validation_results(solver,
                                                     gv.instance_dir / instance_set_test)
     if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
         print("Error: Results not found for the given solver and instance set(s) "
@@ -615,13 +617,13 @@ def get_most_recent_test_run() -> tuple[str, str, bool, bool]:
             flag_instance_set_test)
 
 
-def generate_report_for_configuration(solver_name: str, instance_set_train_name: str,
+def generate_report_for_configuration(solver: Solver, instance_set_train_name: str,
                                       instance_set_test_name: str = None,
                                       ablation: bool = True) -> None:
     """Generate a report for algorithm configuration.
 
     Args:
-        solver_name: Name of the solver
+        solver: Object representation of the solver
         instance_set_train_name: Name of the instance set for training
         instance_set_test_name: Name of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
@@ -629,7 +631,7 @@ def generate_report_for_configuration(solver_name: str, instance_set_train_name:
     target_path = gv.configuration_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
-        target_path, solver_name, instance_set_train_name, instance_set_test_name,
+        target_path, solver, instance_set_train_name, instance_set_test_name,
         ablation)
     sgrh.generate_report(gv.sparkle_latex_dir,
                          "template-Sparkle-for-configuration.tex",

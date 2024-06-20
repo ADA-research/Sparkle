@@ -86,7 +86,7 @@ class Configurator:
         raise NotImplementedError
 
     def set_scenario_dirs(self: Configurator,
-                          solver: str | Solver, instance_set_name: str) -> None:
+                          solver: Solver, instance_set_name: str) -> None:
         """Patching method to allow the rebuilding of configuration scenario."""
         raise NotImplementedError
 

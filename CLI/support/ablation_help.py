@@ -19,7 +19,7 @@ from sparkle.solver.solver import Solver
 from sparkle.solver import pcs
 
 
-def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
+def get_ablation_scenario_directory(solver: Solver, instance_train_name: str,
                                     instance_test_name: str, exec_path: str = False)\
         -> str:
     """Return the directory where ablation analysis is executed.
@@ -31,7 +31,7 @@ def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
 
     ablation_scenario_dir = "" if exec_path else gv.ablation_dir
     ablation_scenario_dir += (
-        f"scenarios/{solver_name}_"
+        f"scenarios/{solver.name}_"
         f"{instance_train_name}{instance_test_name}/"
     )
     return ablation_scenario_dir
@@ -47,17 +47,16 @@ def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str) -> 
     return
 
 
-def prepare_ablation_scenario(solver_name: str, instance_train_name: str,
+def prepare_ablation_scenario(solver: Solver, instance_train_name: str,
                               instance_test_name: str) -> str:
     """Prepare directories and files for ablation analysis."""
-    ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
+    ablation_scenario_dir = get_ablation_scenario_directory(solver.name,
                                                             instance_train_name,
                                                             instance_test_name)
 
     ablation_scenario_solver_dir = Path(ablation_scenario_dir, "solver/")
     # Copy solver
-    solver_directory = "Solvers/" + solver_name
-    shutil.copytree(solver_directory, ablation_scenario_solver_dir, dirs_exist_ok=True)
+    shutil.copytree(solver.directory, ablation_scenario_solver_dir, dirs_exist_ok=True)
     return ablation_scenario_dir
 
 
@@ -68,24 +67,24 @@ def print_ablation_help() -> None:
     print(process.stdout)
 
 
-def create_configuration_file(solver_name: str, instance_train_name: str,
+def create_configuration_file(solver: Solver, instance_train_name: str,
                               instance_test_name: str) -> None:
     """Create a configuration file for ablation analysis.
 
     Args:
-        solver_name: Name of the solver
+        solver: Solver object
         instance_train_name: The training instance
         instance_test_name: The test instance
 
     Returns:
         None
     """
-    ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
+    ablation_scenario_dir = get_ablation_scenario_directory(solver,
                                                             instance_train_name,
                                                             instance_test_name)
     configurator = gv.settings.get_general_sparkle_configurator()
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver_name, instance_train_name)
+        solver, instance_train_name)
     if "-init_solution" not in opt_config_str:
         opt_config_str = "-init_solution '1' " + opt_config_str
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
@@ -103,7 +102,6 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
                    f'{Path(ablation_scenario_dir).absolute()}/solver"\n'
                    "execdir = ./solver/\n"
                    "experimentDir = ./\n")
-        solver = Solver.get_solver_by_name(solver_name)
         # USER SETTINGS
         fout.write(f"deterministic = {solver.is_deterministic()}\n"
                    f"run_obj = {smac_run_obj}\n")
@@ -115,8 +113,7 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
                    f"useRacing = {ablation_racing}\n"
                    "seed = 1234\n")
         # Get PCS file name from solver directory
-        solver_directory = Path("Solvers/", solver_name)
-        pcs_file_name = pcs.get_pcs_file_from_solver_directory(solver_directory)
+        pcs_file_name = pcs.get_pcs_file_from_solver_directory(solver.directory)
         pcs_file_path = "./solver/" + str(pcs_file_name)
         fout.write(f"paramfile = {pcs_file_path}\n"
                    "instance_file = instances_train.txt\n"
@@ -154,10 +151,10 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
     return
 
 
-def check_for_ablation(solver_name: str, instance_train_name: str,
+def check_for_ablation(solver: Solver, instance_train_name: str,
                        instance_test_name: str) -> bool:
     """Run a solver on an instance, only for internal calls from Sparkle."""
-    scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name,
+    scenario_dir = get_ablation_scenario_directory(solver.name, instance_train_name,
                                                    instance_test_name, exec_path=False)
     table_file = Path(scenario_dir, "ablationValidation.txt")
     if not table_file.is_file():
@@ -168,13 +165,13 @@ def check_for_ablation(solver_name: str, instance_train_name: str,
     return True
 
 
-def read_ablation_table(solver_name: str, instance_train_name: str,
+def read_ablation_table(solver: Solver, instance_train_name: str,
                         instance_test_name: str) -> list[list[str]]:
     """Read from ablation table of a scenario."""
-    if not check_for_ablation(solver_name, instance_train_name, instance_test_name):
+    if not check_for_ablation(solver, instance_train_name, instance_test_name):
         # No ablation table exists for this solver-instance pair
         return []
-    scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name,
+    scenario_dir = get_ablation_scenario_directory(solver, instance_train_name,
                                                    instance_test_name, exec_path=False)
     table_file = Path(scenario_dir) / "ablationValidation.txt"
 

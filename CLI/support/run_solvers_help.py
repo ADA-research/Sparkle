@@ -53,7 +53,7 @@ def run_solver_on_instance_with_cmd(solver_path: Path, instance_path: str, seed_
     runsolver_values_log = f"{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
     raw_result_path_option = f"{raw_result_path}"
-    solver = Solver.get_solver_by_name(Path(solver_path).name)
+    solver = Solver(Path(solver_path))
     solver_cmd = solver.build_solver_cmd(
         instance_path,
         configuration={"seed": seed_str,

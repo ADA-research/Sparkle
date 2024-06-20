@@ -17,7 +17,7 @@ from sparkle.solver.solver import Solver
 
 
 def call_configured_solver(instance_path_list: list[Path],
-                           solver_name: str,
+                           solver: Solver,
                            config_str: str,
                            parallel: bool,
                            run_on: Runner = Runner.SLURM) -> str:
@@ -25,7 +25,7 @@ def call_configured_solver(instance_path_list: list[Path],
 
     Args:
         instance_path_list: List of paths to all the instances.
-        solver_name: Name of the solver to be used.
+        solver: Object representation of the solver to be used.
         config_str: Configuration to be used.
         parallel: Boolean indicating a parallel call if True. Sequential otherwise.
         run_on: Whether the command is run with Slurm or not.
@@ -48,7 +48,6 @@ def call_configured_solver(instance_path_list: list[Path],
     # Else single instance turn it into list[list[Path]]
     else:
         instances_list = [instance_path_list]
-    solver = Solver.get_solver_by_name(solver_name)
     # If parallel, pass instances list to parallel function
     if parallel:
         job_id_str = call_solver_parallel(instances_list,

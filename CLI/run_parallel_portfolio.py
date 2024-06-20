@@ -28,6 +28,7 @@ from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
 from CLI.help.command_help import CommandName
 from tools.runsolver_parsing import get_runtime, get_status
+from CLI.help.nicknames import resolve_object_name
 
 
 def run_parallel_portfolio(instances: list[Path],
@@ -225,16 +226,17 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     if args.solvers is not None:
-        solver_names = ["".join(s) for s in args.solvers]
-        solvers = [Solver.get_solver_by_name(solver) for solver in solver_names]
-        if None in solvers:
+        solver_paths = [resolve_object_name("".join(s), target_dir=gv.solver_dir)
+                        for s in args.solvers]
+        if None in solver_paths:
             print("Some solvers not recognised! Check solver names:")
-            for i, name in enumerate(solver_names):
-                if solvers[i] is None:
-                    print(f'\t- "{solver_names[i]}" ')
+            for i, name in enumerate(solver_paths):
+                if solver_paths[i] is None:
+                    print(f'\t- "{solver_paths[i]}" ')
             sys.exit(-1)
+        solvers = [Solver(p) for p in solver_paths]
     else:
-        solvers = [Solver.get_solver_by_name(p) for p in gv.solver_dir.iterdir()]
+        solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
 
     check_for_initialise(
         sys.argv,

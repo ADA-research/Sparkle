@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 import sys
-import fcntl
 import shlex
 import ast
 from pathlib import Path
@@ -16,8 +15,6 @@ import pcsparser
 
 class Solver:
     """Class to handle a solver and its directories."""
-    solver_dir = Path("Solvers/")
-    solver_list_path = Path("Reference_Lists/") / "sparkle_solver_list.txt"
 
     def __init__(self: Solver,
                  solver_directory: Path,
@@ -192,28 +189,3 @@ class Solver:
             value = config_list[index + 1].strip('"').strip("'")
             config_dict[config_list[index]] = value
         return config_dict
-
-    @staticmethod
-    def get_solver_by_name(name: str) -> Solver:
-        """Attempt to resolve the solver object by name.
-
-        Args:
-            name: The name of the solver
-
-        Returns:
-            A Solver object if found, None otherwise
-        """
-        if isinstance(name, Path):
-            name = name.name
-        if (Solver.solver_dir / name).exists():
-            return Solver(Solver.solver_dir / name)
-        return None
-
-    @staticmethod
-    def get_solver_list() -> list[str]:
-        """Get solver list from file."""
-        if Solver.solver_list_path.exists():
-            with Solver.solver_list_path.open("r+") as fo:
-                fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-                return ast.literal_eval(fo.read())
-        return []

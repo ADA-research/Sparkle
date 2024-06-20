@@ -18,6 +18,7 @@ from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
+from sparkle.solver.solver import Solver
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
@@ -72,8 +73,9 @@ if __name__ == "__main__":
     selection = args.selection
     test_case_directory = args.test_case_directory
 
-    solver = resolve_object_name(args.solver,
-                                 gv.solver_nickname_mapping, gv.solver_dir)
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping, gv.solver_dir)
+    solver = Solver(solver_path)
     instance_set_train = resolve_object_name(args.instance_set_train,
                                              target_dir=gv.instance_dir)
     instance_set_test = resolve_object_name(args.instance_set_test,
@@ -92,7 +94,7 @@ if __name__ == "__main__":
             args.performance_measure, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
-    if not selection and test_case_directory is None and solver is None:
+    if not selection and test_case_directory is None and solver_path is None:
         scenario = gv.latest_scenario().get_latest_scenario()
         if scenario == Scenario.SELECTION:
             selection = True
@@ -100,7 +102,7 @@ if __name__ == "__main__":
                 gv.latest_scenario().get_selection_test_case_directory()
             )
         elif scenario == Scenario.CONFIGURATION:
-            solver = str(gv.latest_scenario().get_config_solver())
+            solver_path = str(gv.latest_scenario().get_config_solver())
             instance_set_train = gv.latest_scenario().get_config_instance_set_train()
             instance_set_test = gv.latest_scenario().get_config_instance_set_test()
         elif scenario == Scenario.PARALLEL_PORTFOLIO:
@@ -153,12 +155,12 @@ if __name__ == "__main__":
         status_info.set_report_type(gv.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
         # Reporting for algorithm configuration
-        if solver is None:
+        if solver_path is None:
             print("Error! No Solver found for configuration report generation.")
             sys.exit(-1)
-        elif isinstance(solver, str):
-            solver = Path(solver)
-        solver_name = solver.name
+        elif isinstance(solver_path, str):
+            solver_path = Path(solver_path)
+        solver_name = solver_path.name
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
         # validate_configured_vs_default
@@ -186,17 +188,17 @@ if __name__ == "__main__":
         if flag_instance_set_train and flag_instance_set_test:
             instance_set_test_name = instance_set_test.name
             sgrfch.check_results_exist(
-                solver_name, instance_set_train_name, instance_set_test_name
+                solver, instance_set_train_name, instance_set_test_name
             )
         elif flag_instance_set_train:
-            sgrfch.check_results_exist(solver_name, instance_set_train_name)
+            sgrfch.check_results_exist(solver, instance_set_train_name)
         else:
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
             sys.exit(-1)
 
         sgrfch.generate_report_for_configuration(
-            solver_name,
+            solver,
             instance_set_train_name,
             instance_set_test_name,
             ablation=args.flag_ablation,

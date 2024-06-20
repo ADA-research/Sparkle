@@ -12,6 +12,7 @@ import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
 from CLI.support import run_configured_solver_help as srcsh
+from sparkle.solver.solver import Solver
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -74,22 +75,22 @@ if __name__ == "__main__":
     if ((len(instance_path) == 1 and instance_path[0].is_dir())
             or (all([path.is_file() for path in instance_path]))):
         # Get the name of the configured solver and the training set
-        solver_name = Path(gv.latest_scenario().get_config_solver()).name
+        solver_path = Path(gv.latest_scenario().get_config_solver())
         instance_set_name = Path(
             gv.latest_scenario().get_config_instance_set_train()).name
-        if solver_name is None or instance_set_name is None:
+        if solver_path is None or instance_set_name is None:
             # Print error and stop execution
             print("ERROR: No configured solver found! Stopping execution.")
             sys.exit(-1)
-
         # Get optimised configuration
         configurator = gv.settings.get_general_sparkle_configurator()
-        _, config_str = configurator.get_optimal_configuration(solver_name,
+        solver = Solver(solver_path)
+        _, config_str = configurator.get_optimal_configuration(solver,
                                                                instance_set_name)
 
         # Call the configured solver
         run = srcsh.call_configured_solver(args.instance_path,
-                                           solver_name,
+                                           solver,
                                            config_str,
                                            args.parallel,
                                            run_on=run_on)

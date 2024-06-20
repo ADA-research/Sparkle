@@ -53,15 +53,16 @@ class Validator():
         if not isinstance(solvers, list) or len(configurations) != len(solvers):
             print("Error: Number of solvers and configurations does not match!")
             sys.exit(-1)
+        # Ensure we have the object representation of solvers
+        solvers = [Solver(s) if isinstance(s, Path) else s for s in solvers]
         jobs = []
-        for index, (solver_path, config) in enumerate(zip(solvers, configurations)):
+        for index, (solver, config) in enumerate(zip(solvers, configurations)):
             # run a configured solver
             if config is None:
                 config = ""
 
             for instance_set in instance_sets:
                 instance_path_list = list(p.absolute() for p in instance_set.iterdir())
-                solver = Solver.get_solver_by_name(solver_path.name)
                 if subdir is None:
                     out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
                 else:
@@ -138,7 +139,7 @@ class Validator():
                 res.with_suffix(".log").unlink(missing_ok=True)
 
     def get_validation_results(self: Validator,
-                               solver: Solver | str,
+                               solver: Solver,
                                instance_set: Path | str,
                                source_dir: Path = None,
                                subdir: Path = None,
@@ -146,7 +147,7 @@ class Validator():
         """Query the results of the validation of solver on instance_set.
 
         Args:
-            solver: Path to the validated solver
+            solver: Solver object
             instance_set: Instance set path/name
             source_dir: Path where to look for any unprocessed output.
                 By default, look in the solver's tmp dir.
@@ -158,8 +159,6 @@ class Validator():
             A list of row lists with string values
         """
         instance_set_name = Path(instance_set).name
-        if isinstance(solver, str):
-            solver = Solver.get_solver_by_name(solver)
         if source_dir is None:
             source_dir = self.out_dir / f"{solver.name}_{instance_set_name}"
         if any(x.suffix == ".rawres" for x in source_dir.iterdir()):
