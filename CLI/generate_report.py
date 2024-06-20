@@ -57,6 +57,10 @@ if __name__ == "__main__":
     global settings
     gv.settings = settings_help.Settings()
 
+    # Compare current settings to latest.ini
+    prev_settings = Settings(PurePath("Settings/latest.ini"))
+    Settings.check_settings_changes(gv.settings, prev_settings)
+
     # Log command call
     sl.log_command(sys.argv)
 
@@ -152,6 +156,8 @@ if __name__ == "__main__":
         if solver is None:
             print("Error! No Solver found for configuration report generation.")
             sys.exit(-1)
+        elif isinstance(solver, str):
+            solver = Path(solver)
         solver_name = solver.name
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
@@ -197,10 +203,6 @@ if __name__ == "__main__":
         )
 
         status_info.delete()
-
-        # Compare current settings to latest.ini
-        prev_settings = Settings(PurePath("Settings/latest.ini"))
-        Settings.check_settings_changes(gv.settings, prev_settings)
 
     # Write used settings to file
     gv.settings.write_used_settings()

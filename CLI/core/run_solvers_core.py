@@ -70,7 +70,6 @@ if __name__ == "__main__":
     cutoff_str = str(gv.settings.get_general_target_cutoff_time())
     status_info.set_cutoff_time(f"{cutoff_str}"
                                 f" second(s)")
-    print("Writing run status to file")
     status_info.save()
     cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = (
         srs.run_solver_on_instance_and_process_results(solver_path, instance_path,

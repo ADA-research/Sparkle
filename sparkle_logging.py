@@ -56,8 +56,8 @@ def _update_caller_file_path(timestamp: str) -> None:
     caller_log_path = PurePath(gv.sparkle_global_output_dir / caller_out_dir
                                / caller_file)
     global caller_log_dir
-    caller_log_dir = Path(gv.sparkle_global_output_dir / caller_out_dir
-                          / gv.sparkle_global_log_dir)
+    caller_log_dir = (
+        gv.sparkle_global_output_dir / caller_out_dir / gv.sparkle_global_log_dir)
 
     # Create needed directories if they don't exist
     caller_dir = Path(caller_log_path).parents[0]

@@ -53,7 +53,6 @@ if __name__ == "__main__":
                f"{gv.get_time_pid_random_string()}")
     result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
     basic_part = "Tmp/" + key_str
-    err_path = basic_part + ".err"
     runsolver_watch_data_path = basic_part + ".log"
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
     command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
@@ -61,7 +60,7 @@ if __name__ == "__main__":
                     f"{gv.sparkle_extractor_wrapper} "
                     f"-extractor_dir {extractor_path} "
                     f"-instance_file {instance_path} "
-                    f"-output_file {result_path} 2> {err_path}")
+                    f"-output_file {result_path}")
 
     try:
         task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
@@ -114,4 +113,4 @@ if __name__ == "__main__":
                f"{result_string_str}")
     sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     tmp_fdcsv.save_csv(result_path)
-    sfh.rmfiles([task_run_status_path, err_path, runsolver_watch_data_path])
+    sfh.rmfiles([task_run_status_path, runsolver_watch_data_path])

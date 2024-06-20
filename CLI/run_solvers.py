@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Sparkle command to run solvers to get their performance data."""
+from __future__ import annotations
+
 
 import sys
 import argparse
@@ -11,7 +13,6 @@ from runrunner.base import Runner
 import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.platform import slurm_help as ssh
-from CLI.support import run_solvers_parallel_help as srsph
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SolutionVerifier
@@ -20,9 +21,79 @@ from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from CLI.support import run_solvers_help as srs
 
 import functools
 print = functools.partial(print, flush=True)
+
+
+def running_solvers_performance_data(
+        performance_data_csv_path: str,
+        num_job_in_parallel: int,
+        rerun: bool = False,
+        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+    """Run the solvers for the performance data.
+
+    Parameters
+    ----------
+    performance_data_csv_path: str
+        The path to the performance data file
+    num_job_in_parallel: int
+        The maximum number of jobs to run in parallel
+    rerun: bool
+        Run only solvers for which no data is available yet (False) or (re)run all
+        solvers to get (new) performance data for them (True)
+    run_on: Runner
+        Where to execute the solvers. For available values see runrunner.base.Runner
+        enum. Default: "Runner.SLURM".
+
+    Returns
+    -------
+    run: runrunner.LocalRun or runrunner.SlurmRun
+        If the run is local return a QueuedRun object with the information concerning
+        the run.
+    """
+    # Open the performance data csv file
+    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+
+    # List of jobs to do
+    jobs = performance_data_csv.get_job_list(rerun=rerun)
+    num_jobs = len(jobs)
+
+    cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
+
+    print(f"Cutoff time for each solver run: {cutoff_time_str} seconds")
+    print(f"Total number of jobs to run: {num_jobs}")
+
+    # If there are no jobs, stop
+    if num_jobs == 0:
+        return None
+    # If there are jobs update performance data ID
+    else:
+        srs.update_performance_data_id()
+
+    if run_on == Runner.LOCAL:
+        print("Running the solvers locally")
+    elif run_on == Runner.SLURM:
+        print("Running the solvers through Slurm")
+
+    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
+    sbatch_options = ssh.get_slurm_options_list()
+    cmd_base = "CLI/core/run_solvers_core.py"
+    perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    cmd_list = [f"{cmd_base} --instance {inst_p} --solver {solver_p} "
+                f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]
+
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        parallel_jobs=num_job_in_parallel,
+        name=CommandName.RUN_SOLVERS,
+        base_dir=gv.sparkle_tmp_path,
+        sbatch_options=sbatch_options,
+        srun_options=srun_options)
+
+    return run
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -78,7 +149,7 @@ def run_solvers_on_instances(
     if parallel:
         num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
 
-    runs = [srsph.running_solvers_parallel(
+    runs = [running_solvers_performance_data(
         performance_data_csv_path=gv.performance_data_csv_path,
         num_job_in_parallel=num_job_in_parallel,
         rerun=recompute,

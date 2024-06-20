@@ -9,8 +9,6 @@ import zipfile
 import global_variables as gv
 from sparkle.platform import file_help as sfh
 
-snapshot_log_file_path = gv.sparkle_err_path
-
 
 def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
     """Return whether a Sparkle platform is currently active.

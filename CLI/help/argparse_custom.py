@@ -9,10 +9,8 @@ from typing import Any
 from runrunner.base import Runner
 
 from sparkle.platform.settings_help import SettingState
-import global_variables as gv
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
-from sparkle.platform.settings_help import ProcessMonitoring
 from CLI.help.command_help import CommandName
 from sparkle.platform.settings_help import Settings
 
@@ -148,14 +146,9 @@ DeterministicArgument = ArgumentContainer(names=["--deterministic"],
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                           kwargs={"metavar": "extractor-path",
                                                   "type": str,
-                                                  "help": "path to the feature extractor"
+                                                  "help": "path or nickname of the "
+                                                          "feature extractor"
                                                   })
-
-ExtractorPathRemoveArgument = ArgumentContainer(names=["extractor-path"],
-                                                kwargs={"metavar": "extractor-path",
-                                                        "type": str,
-                                                        "help": "path to or nickname of "
-                                                                "the feature extractor"})
 
 InstancePathRunConfiguredSolverArgument = \
     ArgumentContainer(names=["instance_path"],
@@ -250,10 +243,10 @@ NicknameInstanceSetArgument = \
                               "help": "set a nickname for the instance set"})
 
 NicknamePortfolioArgument = \
-    ArgumentContainer(names=["--nickname"],
+    ArgumentContainer(names=["--portfolio-name"],
                       kwargs={"type": Path,
-                              "help": "Give a nickname to the portfolio (default: "
-                                      f"{gv.sparkle_parallel_portfolio_name})"})
+                              "help": "Specify a name of the portfolio. "
+                                      "If none is given, one will be generated."})
 
 NicknameRemoveExtractor = \
     ArgumentContainer(names=["--nickname"],
@@ -288,14 +281,6 @@ NumberOfRunsAblationArgument = \
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
-OverwriteArgument = \
-    ArgumentContainer(names=["--overwrite"],
-                      kwargs={"type": bool,
-                              "help": "When set to True an existing parallel portfolio "
-                              "with the same name will be overwritten, when False an "
-                              "error will be thrown instead.  (default: "
-                              f"{Settings.DEFAULT_paraport_overwriting})"})
-
 ParallelArgument = ArgumentContainer(names=["--parallel"],
                                      kwargs={"action": "store_true",
                                              "help": "Run the command in parallel"})
@@ -317,19 +302,6 @@ PerformanceMeasureSimpleArgument = \
     ArgumentContainer(names=["--performance-measure"],
                       kwargs={"choices": PerformanceMeasure.__members__,
                               "help": "the performance measure, e.g. runtime"})
-
-ProcessMonitoringArgument = \
-    ArgumentContainer(names=["--process-monitoring"],
-                      kwargs={"choices": ProcessMonitoring.__members__,
-                              "type": ProcessMonitoring,
-                              "help": "Specify whether the monitoring of the portfolio "
-                              "should cancel all solvers within a portfolio once a "
-                              "solver finishes (REALISTIC). Or allow all solvers "
-                              "within a portfolio to get an equal chance to have the "
-                              "shortest running time on an instance (EXTENDED), e.g., "
-                              "when this information is needed in an experiment. "
-                              f"(default: {Settings.DEFAULT_paraport_process_monitoring}"
-                              })
 
 RacingArgument = ArgumentContainer(names=["--racing"],
                                    kwargs={"type": bool,
@@ -424,7 +396,7 @@ SettingsFileArgument = \
                               "help": "Specify the settings file to use in case you want"
                                       " to use one other than the default"})
 
-SnapshotArgument = ArgumentContainer(names=["snapshot-file-path"],
+SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                      kwargs={"metavar": "snapshot-file-path",
                                              "type": str,
                                              "help": "path to the snapshot file"})
@@ -433,6 +405,14 @@ SolverArgument = ArgumentContainer(names=["--solver"],
                                    kwargs={"required": True,
                                            "type": Path,
                                            "help": "path to solver"})
+
+SolversArgument = ArgumentContainer(names=["--solvers"],
+                                    kwargs={"required": False,
+                                            "nargs": "+",
+                                            "type": list[str],
+                                            "help": "Specify the list of solvers to be "
+                                                    "used. If not specifed, all solvers "
+                                                    "known in Sparkle will be used."})
 
 SolverCallsArgument = \
     ArgumentContainer(names=["--solver-calls"],

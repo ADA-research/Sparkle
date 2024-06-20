@@ -185,12 +185,30 @@ class SMAC2(Configurator):
         self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
         self.scenario._set_paths(self.output_path)
 
+    @staticmethod
+    def get_smac_run_obj(smac_run_obj: PerformanceMeasure) -> str:
+        """Return the SMAC run objective based on the Performance Measure.
+
+        Returns:
+            A string that represents the run objective set in the settings.
+        """
+        if smac_run_obj == PerformanceMeasure.RUNTIME:
+            return smac_run_obj.name
+        elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
+            return "QUALITY"
+        elif smac_run_obj == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
+            print(f"Warning: Performance measure not available for SMAC: {smac_run_obj}")
+        else:
+            print(f"Warning: Unknown SMAC objective {smac_run_obj}")
+        return smac_run_obj
+
     def get_status_from_logs(self: SMAC2) -> None:
         """Method to scan the log files of the configurator for warnings."""
-        # print the header
+        base_dir = self.output_path / "scenarios"
+        if not base_dir.exists():
+            return
         print(f"Checking the log files of configurator {type(self).__name__} for "
               "warnings...")
-        base_dir = self.output_path / "scenarios"
         scenarios = [f for f in base_dir.iterdir() if f.is_dir()]
         for scenario in scenarios:
             log_dir = scenario / "outdir_train_configuration" \

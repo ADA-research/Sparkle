@@ -153,8 +153,8 @@
 (cmd-run-sparkle-parallel-portfolio)=
 
 ```{eval-rst}
-.. autoprogram:: run_sparkle_parallel_portfolio:parser_function()
-   :prog: run_sparkle_parallel_portfolio.py
+.. autoprogram:: run_parallel_portfolio:parser_function()
+   :prog: run_parallel_portfolio.py
 
 ```
 

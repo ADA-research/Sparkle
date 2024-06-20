@@ -21,8 +21,6 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*ac.SolverRemoveArgument.names,
                         **ac.SolverRemoveArgument.kwargs)
-    parser.add_argument(*ac.SolverRemoveArgument.names,
-                        **ac.SolverRemoveArgument.kwargs)
     return parser
 
 

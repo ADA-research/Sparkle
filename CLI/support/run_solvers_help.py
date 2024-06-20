@@ -4,8 +4,6 @@
 import os
 import subprocess
 import sys
-import ast
-import shutil
 from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
@@ -15,59 +13,23 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import sparkle_job_help as sjh
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
+from sparkle.solver.solver import Solver
 from sparkle.solver import sat_help as sssh
 
 
-def get_solver_call_from_wrapper(solver_wrapper_path: str, instance_path: str,
-                                 seed_str: str = None) -> str:
-    """Return the command line call string retrieved from the solver wrapper."""
-    if seed_str is None:
-        seed_str = str(gv.get_seed())
-
-    cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
-    cmd_get_solver_call = (f'{solver_wrapper_path} --print-command "{instance_path}"'
-                           f" --seed {seed_str} --cutoff-time {cutoff_time_str}")
-    solver_call_rawresult = os.popen(cmd_get_solver_call)
-    solver_call_result = solver_call_rawresult.readlines()[0].strip()
-
-    if len(solver_call_result) > 0:
-        return solver_call_result
-    else:
-        # TODO: Add instructions for the user that might fix the issue?
-        print("ERROR: Failed to get valid solver call command from wrapper at "
-              f'"{solver_wrapper_path}" stopping execution!')
-        sys.exit(-1)
-
-
-def run_solver_on_instance(solver_path: str, solver_wrapper_path: str,
-                           instance_path: str, raw_result_path: str,
-                           runsolver_values_path: str, seed_str: str = None,
-                           custom_cutoff: int = None) -> None:
-    """Prepare for execution, run the solver on an instance, check output for errors."""
-    if not Path(solver_wrapper_path).is_file():
-        print(f'ERROR: Wrapper named "{solver_wrapper_path}" not found, stopping '
-              "execution!")
-        sys.exit(-1)
-
-    # Get the solver call command from the wrapper
-    cmd_solver_call = get_solver_call_from_wrapper(solver_wrapper_path, instance_path,
-                                                   seed_str)
-
-    run_solver_on_instance_with_cmd(Path(solver_path), cmd_solver_call,
-                                    Path(raw_result_path),
-                                    Path(runsolver_values_path), custom_cutoff)
-
-
-def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
+def run_solver_on_instance_with_cmd(solver_path: Path, instance_path: str, seed_str: str,
                                     raw_result_path: Path, runsolver_values_path: Path,
-                                    custom_cutoff: int = None,
-                                    is_configured: bool = False) -> Path:
+                                    custom_cutoff: int = None) -> Path:
     """Run the solver on the given instance, with a given command line call.
 
     Parameters
     ----------
     solver_path: Path
         The path to the solver
+    instance_path: str
+        Path to the instance
+    seed_str: str
+        Seed for the call
     cmd_solver_call: str
         The cmd wrapper containing relevant information
     raw_result_path: Path
@@ -76,9 +38,6 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
         Path to the .val file for storing values (?)
     custom_cutoff: int
         A custom cpu time limit
-    is_configured: bool
-        Whether the solver is configured (config is contained
-        in the wrapper)
 
     Returns
     -------
@@ -87,67 +46,30 @@ def run_solver_on_instance_with_cmd(solver_path: Path, cmd_solver_call: str,
     """
     if custom_cutoff is None:
         custom_cutoff = gv.settings.get_general_target_cutoff_time()
-
-    # For configured solvers change the directory to accommodate sparkle_smac_wrapper
-    original_path = Path.cwd()
-    exec_path = original_path
-
-    rs_prefix = ""
-    if is_configured:
-        # Update paths to match configured solver dirs
-        rs_prefix = "../../"
-        exec_path = str(raw_result_path).replace(".rawres", "_exec_dir/")
-        # Copy files
-        shutil.copytree(solver_path, exec_path, dirs_exist_ok=True)
-        # Executable is now in "current dir"
-        solver_path = "."
-
+    if seed_str is None:
+        seed_str = str(gv.get_seed())
     # Prepare runsolver call
-    runsolver_path = rs_prefix + gv.runsolver_path
-    runsolver_values_log = f"{rs_prefix}{runsolver_values_path}"
+    runsolver_values_log = f"{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
-    raw_result_path_option = f"{rs_prefix}{raw_result_path}"
-    cmd_solver_name, cmd_solver_args = cmd_solver_call.split(" ", 1)
-    cmd = [runsolver_path, "--timestamp", "--use-pty",
-           "--cpu-limit", str(custom_cutoff),
-           "-w", runsolver_watch_data_path,
-           "-v", runsolver_values_log,
-           "-o", raw_result_path_option,
-           f"{solver_path}/{cmd_solver_name}", cmd_solver_args]
+    raw_result_path_option = f"{raw_result_path}"
+    solver = Solver.get_solver_by_name(Path(solver_path).name)
+    solver_cmd = solver.build_solver_cmd(
+        instance_path,
+        configuration={"seed": seed_str,
+                       "cutoff_time": custom_cutoff,
+                       "specifics": ""},
+        runsolver_configuration=["--timestamp", "--use-pty",
+                                 "--cpu-limit", str(custom_cutoff),
+                                 "-w", runsolver_watch_data_path,
+                                 "-v", runsolver_values_log,
+                                 "-o", raw_result_path_option])
 
-    process = subprocess.run(cmd, cwd=exec_path, capture_output=True)
+    process = subprocess.run(solver_cmd, cwd=Path.cwd(), capture_output=True)
     if process.returncode != 0:
         print("WARNING: Solver execution seems to have failed!\n"
-              f"The used command was: {cmd}", flush=True)
-    else:
-        if is_configured:
-            if not raw_result_path.exists() or raw_result_path.stat().st_size == 0:
-                # Runsolver cutoff solver wrapper before it showed its output
-                Path(raw_result_path).open("w").write(
-                    r"{'status': 'TIMEOUT', 'quality': 'nan'}")
-            elif check_solver_output_for_errors(Path(raw_result_path)):
-                sfh.rmfiles(runsolver_watch_data_path)
+              f"The used command was: {solver_cmd}", flush=True)
 
     return raw_result_path
-
-
-def check_solver_output_for_errors(raw_result_path: Path) -> bool:
-    """Check solver output for known errors.
-
-    Args:
-        raw_result_path: Path to the file to verify.
-    """
-    # Check if we can decode the output dictionary
-    raw_output_str = raw_result_path.open("r").read()
-    try:
-        raw_output_dict_str =\
-            raw_output_str[raw_output_str.find("{"): raw_output_str.find("}") + 1]
-        ast.literal_eval(raw_output_dict_str)
-    except Exception as ex:
-        print(f"WARNING: Possible error detected in {raw_result_path}. "
-              f"Decoding the output dictionary threw exception: {ex}")
-        return False
-    return True
 
 
 def run_solver_on_instance_and_process_results(
@@ -165,9 +87,9 @@ def run_solver_on_instance_and_process_results(
     solver_wrapper_path = Path(solver_path) / gv.sparkle_run_default_wrapper
 
     # Run
-    run_solver_on_instance(solver_path, solver_wrapper_path, instance_path,
-                           raw_result_path, runsolver_values_path, seed_str,
-                           custom_cutoff)
+    run_solver_on_instance_with_cmd(Path(solver_path), instance_path, seed_str,
+                                    Path(raw_result_path),
+                                    Path(runsolver_values_path), custom_cutoff)
 
     # Process results
     cpu_time, wc_time, quality, status = process_results(

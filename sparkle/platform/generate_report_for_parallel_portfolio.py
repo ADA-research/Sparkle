@@ -4,7 +4,6 @@
 from pathlib import Path
 
 import global_variables as gv
-from sparkle.platform import file_help as sfh
 import sparkle_logging as sl
 from sparkle.platform import generate_report_help as sgrh
 from sparkle.types.objective import PerformanceMeasure
@@ -36,187 +35,55 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
     return latex_itemize
 
 
-def get_results() -> dict[str, list[str, str]]:
-    """Return a dict with the performance results on each instance.
-
-    Returns:
-        A dict consists of a string indicating the instance name, and a list which
-        contains the solver name followed by the performance (both as string).
-    """
-    solutions_dir = gv.pap_performance_data_tmp_path
-    results = sfh.get_list_all_extensions(solutions_dir, "result")
-    results_dict = dict()
-
-    if len(results) == 0:
-        print(f"WARNING No parallel portfolio in result files found: {solutions_dir}")
-
-    for result_path in results:
-        lines = Path(result_path).open("r").readlines()
-        lines = [line.strip() for line in lines]
-
-        if len(lines) == 3:
-            instance = Path(lines[0]).name
-
-            if instance in results_dict:
-                if float(results_dict[instance][1]) > float(lines[2]):
-                    results_dict[instance][0] = lines[1]
-                    results_dict[instance][1] = lines[2]
-            else:
-                results_dict[instance] = [lines[1], lines[2]]
-    return results_dict
-
-
-def get_solvers_with_solution() -> tuple[str, dict[str, int], int]:
-    """Retrieve the number of solved and unsolved instances per solver.
-
-    Returns:
-        A three-tuple:
-            str_value: a string with the number of instances solved per successful
-                solver.
-            solver_dict: a dict with solver name as key, and number of solved instances
-                for the corresponding solver as value
-            unsolved_instances: number of unsolved instances.
-    """
-    results_on_instances = get_results()
-    latex_itemize = ""
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    # Count the number of solved instances per solver, and the unsolved instances
-    if perf_measure == PerformanceMeasure.RUNTIME:
-        solver_dict = dict()
-        unsolved_instances = 0
-
-        for instances in results_on_instances:
-            solver_name = Path(results_on_instances[instances][0]).name
-            cutoff_time = str(gv.settings.get_penalised_time())
-
-            if results_on_instances[instances][1] != cutoff_time:
-                if "_seed_" in solver_name:
-                    solver_name = solver_name[:solver_name.rfind("_seed_") + 7]
-                if solver_name in solver_dict:
-                    solver_dict[solver_name] = solver_dict[solver_name] + 1
-                else:
-                    solver_dict[solver_name] = 1
-            else:
-                unsolved_instances += 1
-    if perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-        print("*** ERROR: Parallel Portfolio is not available currently for"
-              f" performance measure: {perf_measure}")
-    elif perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
-        for instance in results_on_instances:
-            solver_name = sgrh.underscore_for_latex(
-                Path(results_on_instances[instances][0]).name)
-            score = results_on_instances[instances][1]
-            latex_itemize += (f"\\item \\textbf{{{sgrh.underscore_for_latex(instance)}}}"
-                              f", was scored by: \\textbf{{{solver_name}}} with a score "
-                              f"of {score}")
-    else:
-        for solver in solver_dict:
-            latex_itemize += \
-                f"\\item Solver \\textbf{{{sgrh.underscore_for_latex(solver)}}}, "\
-                f"was the best solver on \\textbf{{{solver_dict[solver]}}} instance(s)"
-        if unsolved_instances:
-            latex_itemize += \
-                f"\\item \\textbf{{{unsolved_instances}}} instances(s) remained unsolved"
-
-    return latex_itemize, solver_dict, unsolved_instances
-
-
 def get_dict_sbs_penalty_time_on_each_instance(
-        parallel_portfolio_path: Path,
-        instance_list: list[str]) -> tuple[dict[str, float], str, dict[str, float]]:
+        solver_list: list[str],
+        instance_list: list[str],
+        results: dict[list[str, str]]) -> tuple[dict[str, float], str, dict[str, float]]:
     """Return the penalised run time for the single best solver and per solver.
 
     Args:
-        parallel_portfolio_path: Path to the parallel portfolio.
-        instance_list: List of paths to instance sets.
+        solver_list: list of solvers
+        instance_list: List of paths to instance sets
+        results: dictionary of results of the portfolio
 
     Returns:
         A three-tuple:
             A dict containing the run time per instance for the single best solver.
             A string containing the name of the single best solver.
-            A second dict containing penalised average run time per solver.
+            A second dict containing penalised averaged run time per solver.
     """
-    # Collect full solver list, including solver variants
-    solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
-    full_solver_list = []
-
-    for lines in solver_list:
-        if " " in lines:
-            for solver_variations in range(1, int(lines[lines.rfind(" ") + 1:]) + 1):
-                solver_path = Path(lines[:lines.rfind(" ")])
-                solver_variant_name = solver_path.name
-
-                if "/" in solver_variant_name:
-                    solver_variant_name = (
-                        solver_variant_name[:solver_variant_name.rfind("/")])
-
-                solver_variant_name = (
-                    f"{gv.sparkle_tmp_path}{solver_variant_name}_seed_"
-                    f"{str(solver_variations)}")
-                full_solver_list.append(solver_variant_name)
-        else:
-            full_solver_list.append(lines)
-
-    # Collect penalised average run time (PAR) results for all solvers
-    all_solvers_dict = {}
-    results = get_results()
-
-    for instance in instance_list:
-        instance_name = Path(instance).name
-        penalised_time = float(gv.settings.get_penalised_time())
-
-        if instance_name in results:
-            run_time = float(results[instance_name][1])
-
-            if run_time <= gv.settings.get_general_target_cutoff_time():
-                for solver in full_solver_list:
-                    # in because the solver name contains the instance name as well,
-                    # or the solver can have an additional '/' at the end of the path
-                    if (solver in results[instance_name][0]
-                            or results[instance_name][0] in solver):
-                        if solver in all_solvers_dict:
-                            all_solvers_dict[solver] += run_time
-                        else:
-                            all_solvers_dict[solver] = run_time
-                    else:
-                        if solver in all_solvers_dict:
-                            all_solvers_dict[solver] += penalised_time
-                        else:
-                            all_solvers_dict[solver] = penalised_time
-            else:
-                for solver in full_solver_list:
-                    if solver in all_solvers_dict:
-                        all_solvers_dict[solver] += penalised_time
-                    else:
-                        all_solvers_dict[solver] = penalised_time
-        else:
-            for solver in full_solver_list:
-                if solver in all_solvers_dict:
-                    all_solvers_dict[solver] += penalised_time
-                else:
-                    all_solvers_dict[solver] = penalised_time
+    penalised_averaged_runtime = {solver: 0.0 for solver in solver_list}
+    cutoff = gv.settings.get_general_target_cutoff_time()
+    penalised_time = float(gv.settings.get_penalised_time())
+    for instance in results:
+        for (solver, status, runtime) in results[instance]:
+            # Those that did not finish or exceed the thresh get the penalty
+            if float(runtime) >= cutoff or status.lower() != "success":
+                runtime = penalised_time
+            penalised_averaged_runtime[solver] += (float(runtime) / len(instance_list))
 
     # Find the single best solver (SBS)
-    sbs_name = min(all_solvers_dict, key=all_solvers_dict.get)
+    sbs_name = min(penalised_averaged_runtime, key=penalised_averaged_runtime.get)
     sbs_name = Path(sbs_name).name
-    sbs_dict = {}
+    sbs_dict = {Path(instance).name: penalised_time for instance in instance_list}
 
-    for instance in instance_list:
+    for instance in results:
         instance_name = Path(instance).name
-
-        if instance_name in results:
-            if sbs_name in results[instance_name][0]:
-                sbs_dict[instance_name] = results[instance_name][1]
-            else:
-                sbs_dict[instance_name] = gv.settings.get_penalised_time()
-        else:
+        found = False
+        for result in results[instance_name]:
+            if result[0] == sbs_name:
+                found = True
+                if float(result[2]) < penalised_time:
+                    sbs_dict[instance_name] = float(result[2])
+                break
+        if not found:
             print(f"WARNING: No result found for instance: {instance_name}")
-
-    return sbs_dict, sbs_name, all_solvers_dict
+    return sbs_dict, sbs_name, penalised_averaged_runtime
 
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
-        instance_list: list[str]) -> dict[str, float]:
+        instance_list: list[str],
+        results: dict[str, list[str]]) -> dict[str, float]:
     """Returns the instance names and corresponding penalised running times of the PaP.
 
     Args:
@@ -228,25 +95,30 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     instance_penalty_dict = {}
 
     cutoff_time = gv.settings.get_general_target_cutoff_time()
-    results = get_results()
     default_penalty = float(gv.settings.get_penalised_time())
 
     for instance in instance_list:
         instance_name = Path(instance).name
         if instance_name in results:
-            if float(results[instance_name][1]) <= cutoff_time:
-                instance_penalty_dict[instance_name] = float(results[instance_name][1])
-            else:
+            selected_value = results[instance_name][0]
+            for solver in results[instance_name]:
+                if solver[2] < selected_value[2]:
+                    selected_value = solver
+            _, status, runtime = selected_value
+            # Assign the measured result if exit status was not timeout
+            # and measured time less then cutoff
+            if float(runtime) < cutoff_time and status != "TIMEOUT":
+                instance_penalty_dict[instance_name] = float(runtime)
+            else:  # Assign the penalized result
                 instance_penalty_dict[instance_name] = default_penalty
         else:
             instance_penalty_dict[instance_name] = default_penalty
-
     return instance_penalty_dict
 
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
         target_directory: Path,
-        parallel_portfolio_path: Path, instances: list[str]) -> tuple[
+        solver_list: list[str], instances: list[str], results: list[str]) -> tuple[
         str, dict[str, float], dict[str, float]]:
     """Generate PaP vs SBS figure and return a string to include it in LaTeX.
 
@@ -263,10 +135,11 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
             dict_actual_parallel_portfolio_penalty_time_on_each_instance: A dict with
                 instance names and the penalised running time of the PaP.
     """
-    dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers = (
-        get_dict_sbs_penalty_time_on_each_instance(parallel_portfolio_path, instances))
-    dict_actual_parallel_portfolio_penalty_time_on_each_instance = (
-        get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances))
+    dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers =\
+        get_dict_sbs_penalty_time_on_each_instance(solver_list, instances, results)
+    dict_actual_parallel_portfolio_penalty_time_on_each_instance =\
+        get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances,
+                                                                         results)
 
     figure_filename = "figure_parallel_portfolio_sparkle_vs_sbs"
     data_filename = "data_parallel_portfolio_sparkle_vs_sbs.dat"
@@ -290,14 +163,16 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
             dict_actual_parallel_portfolio_penalty_time_on_each_instance)
 
 
-def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
+def get_results_table(results: dict[str, str, str],
+                      dict_all_solvers: dict[str, float], parallel_portfolio_path: Path,
                       dict_portfolio: dict[str, float],
                       solver_with_solutions: dict[str, int],
                       n_unsolved_instances: int, n_instances: int) -> str:
     """Returns a LaTeX table with the portfolio results.
 
     Args:
-        results: A dict containing the penalised average run time per solver.
+        results: The total results with status and runtime per solver
+        dict_all_solvers: A dict containing the penalised average run time per solver.
         parallel_portfolio_path: Parallel portfolio path
         dict_portfolio: A dict with instance names and the penalised running time of the
             PaP.
@@ -312,30 +187,33 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
     """
     portfolio_par = 0.0
     performance_metric_str = gv.settings.get_performance_metric_for_report()
-
     for instance in dict_portfolio:
         portfolio_par += dict_portfolio[instance]
-
+    portfolio_par = portfolio_par / n_instances
+    total_killed = 0
+    for instance in results:
+        for (_, status, _) in results[instance]:
+            total_killed += (status.lower() == "killed")
     # Table 1: Portfolio results
     table_string = (
-        "\\caption *{\\textbf{Portfolio results}} \\label{tab:portfolio_results} ")
+        "\\caption{\\textbf{Portfolio results}} \\label{tab:portfolio_results} ")
     table_string += "\\begin{tabular}{rrrrr}"
     table_string += (
         "\\textbf{Portfolio nickname} & \\textbf{"
         f"{performance_metric_str}"
         "} & \\textbf{\\#Timeouts} & "
-        "\\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline ")
+        "\\textbf{\\#Cancelled} & \\textbf{\\# Solved} \\\\ \\hline ")
     table_string += (
         f"{sgrh.underscore_for_latex(parallel_portfolio_path.name)} & "
-        f"{str(round(portfolio_par,2))} & {str(n_unsolved_instances)} & 0 & "
-        f"{str(n_instances-n_unsolved_instances)} \\\\ ")
+        f"{round(portfolio_par,2)} & {n_unsolved_instances} & {total_killed} & "
+        f"{n_instances-n_unsolved_instances} \\\\ ")
     table_string += "\\end{tabular}"
     table_string += "\\bigskip"
     # Table 2: Solver results
-    table_string += "\\caption *{\\textbf{Solver results}} \\label{tab:solver_results} "
+    table_string += "\\caption{\\textbf{Solver results}} \\label{tab:solver_results} "
     table_string += "\\begin{tabular}{rrrrr}"
 
-    for i, line in enumerate(results):
+    for i, line in enumerate(dict_all_solvers):
         solver_name = Path(line).name
 
         if i == 0:
@@ -349,15 +227,15 @@ def get_results_table(results: dict[str, float], parallel_portfolio_path: Path,
             cancelled = n_instances - n_unsolved_instances
             table_string += (
                 f"{sgrh.underscore_for_latex(solver_name)} & "
-                f"{str(round(results[line], 2))} & {str(n_unsolved_instances)} & "
-                f"{str(cancelled)} & 0 \\\\ ")
+                f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
+                f"{cancelled} & 0 \\\\ ")
         else:
             cancelled = (n_instances - n_unsolved_instances
                          - solver_with_solutions[solver_name])
             table_string += (
                 f"{sgrh.underscore_for_latex(solver_name)} & "
-                f"{str(round(results[line], 2))} & {str(n_unsolved_instances)} & "
-                f"{str(cancelled)} & {str(solver_with_solutions[solver_name])} \\\\ ")
+                f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
+                f"{cancelled} & {solver_with_solutions[solver_name]} \\\\ ")
     table_string += "\\end{tabular}"
 
     return table_string
@@ -378,30 +256,55 @@ def parallel_report_variables(target_directory: Path,
     """
     variables_dict = {"bibliographypath":
                       str(gv.sparkle_report_bibliography_path.absolute())}
-    solver_list = sfh.get_solver_list_from_parallel_portfolio(parallel_portfolio_path)
+    # Get the results data
+    csv_data = [line.split(",") for line in
+                (parallel_portfolio_path / "results.csv").open("r").readlines()]
+    solver_list = list(set([line[1] for line in csv_data]))  # Unique set of solvers
+    results = {Path(instance).name: [] for instance in instances}
+    for row in csv_data:
+        if row[0] in results.keys():
+            results[row[0]].append([row[1], row[2], row[3]])
+
     variables_dict["numSolvers"] = str(len(solver_list))
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
     variables_dict["numInstanceClasses"] = str(len(set(
         [Path(instance_path).parent.name for instance_path in instances])))
     variables_dict["cutoffTime"] = str(gv.settings.get_general_target_cutoff_time())
-    variables_dict["performanceMetric"] =\
-        gv.settings.get_performance_metric_for_report()
-
+    variables_dict["performanceMetric"] = gv.settings.get_performance_metric_for_report()
     variables_dict["instanceClassList"] = sgrh.get_instance_set_count_list(instances)
 
-    inst_succes, solvers_with_solution, unsolved_instances = get_solvers_with_solution()
-    variables_dict["solversWithSolution"] = inst_succes
+    # Produce some statistics on the parallel portfolio
+    solvers_solutions = {solver: 0 for solver in solver_list}
+    instances_copy = [Path(instance).name for instance in instances]
+    for line in csv_data:
+        if line[0] in instances_copy and line[2].lower() == "success":
+            solvers_solutions[line[1]] += 1
+            instances_copy.remove(line[0])
+    unsolved_instances = len(instances) - sum([solvers_solutions[key]
+                                               for key in solvers_solutions])
+    inst_succes = []
+    for solver in solvers_solutions:
+        inst_succes.append("\\item Solver "
+                           f"\\textbf{{{sgrh.underscore_for_latex(solver)}}}, was the "
+                           "best solver on "
+                           f"\\textbf{{{solvers_solutions[solver]}}} instance(s)")
+    if unsolved_instances > 0:
+        inst_succes.append(f"\\item \\textbf{{{unsolved_instances}}} instances(s) "
+                           "remained unsolved")
+
+    variables_dict["solversWithSolution"] = "\n".join(inst_succes)
 
     (figure_name, dict_all_solvers,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance) = (
         get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory,
-                                                     parallel_portfolio_path, instances))
+                                                     solver_list, instances, results))
+
     variables_dict["figure-parallel-portfolio-sparkle-vs-sbs"] = figure_name
 
     variables_dict["resultsTable"] = get_results_table(
-        dict_all_solvers, parallel_portfolio_path,
+        results, dict_all_solvers, parallel_portfolio_path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
-        solvers_with_solution, unsolved_instances, len(instances))
+        solvers_solutions, unsolved_instances, len(instances))
 
     if (gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
             == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
@@ -467,7 +370,7 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         parallel_portfolio_path: Parallel portfolio path.
         instances: List of instances.
     """
-    target_path = gv.selection_output_analysis
+    target_path = gv.parallel_portfolio_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = parallel_report_variables(
         target_path, parallel_portfolio_path, instances)
