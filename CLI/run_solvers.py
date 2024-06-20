@@ -12,7 +12,7 @@ from runrunner.base import Runner
 
 import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from sparkle.platform import slurm_help as ssh
+from CLI.help import slurm_help as ssh
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SolutionVerifier

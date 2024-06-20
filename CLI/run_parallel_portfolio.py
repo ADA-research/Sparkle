@@ -20,7 +20,7 @@ import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
-from sparkle.platform import slurm_help as ssh
+from CLI.help import slurm_help as ssh
 from sparkle.platform.settings_help import SettingState, Settings
 from sparkle.solver.solver import Solver
 from CLI.help import command_help as sch

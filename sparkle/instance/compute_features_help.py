@@ -11,7 +11,7 @@ from runrunner.base import Runner
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh
-from sparkle.platform import slurm_help as ssh
+from CLI.help import slurm_help as ssh
 from CLI.support import sparkle_job_help as sjh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.support import sparkle_job_help

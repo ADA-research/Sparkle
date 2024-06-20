@@ -3,20 +3,12 @@
 """Helper functions for instance (set) management."""
 import shutil
 from pathlib import Path
-from typing import Union
 
 from sparkle.platform import file_help as sfh
 import global_variables as gv
 
 
 __sparkle_instance_list_file = "sparkle_instance_list.txt"
-
-
-def get_list_all_path(instances_directory: Union[str, Path]) -> list[Path]:
-    """Return a list with all instance paths."""
-    p = Path(instances_directory)
-
-    return [f for f in p.rglob("*") if f.is_file()]
 
 
 def _check_existence_of_instance_list_file(instances_source: str) -> bool:
@@ -33,17 +25,12 @@ def _get_list_instance(instances_source: str) -> list[str]:
     """Return a list of instances."""
     list_instance = []
     instance_list_file_path = Path(instances_source) / __sparkle_instance_list_file
-    infile = Path(instance_list_file_path).open()
-    lines = infile.readlines()
+    lines = Path(instance_list_file_path).open().readlines()
 
     for line in lines:
         words = line.strip().split()
-
-        if len(words) <= 0:
-            continue
-        list_instance.append(line.strip())
-
-    infile.close()
+        if len(words) > 0:
+            list_instance.append(line.strip())
 
     return list_instance
 
@@ -102,19 +89,15 @@ def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
     Returns:
         A bool indicating whether a reference list of the instances in this set exists.
     """
-    instance_list_path = Path(gv.reference_list_dir
-                              / Path(instance_set_name + gv.instance_list_postfix))
-    return instance_list_path.is_file()
+    return (gv.reference_list_dir / 
+            (instance_set_name + gv.instance_list_postfix)).is_file()
 
 
 def remove_reference_instance_list(instance_set_name: str) -> None:
     """Remove a file with a list of instances."""
     instance_list_path = Path(gv.reference_list_dir
                               / Path(instance_set_name + gv.instance_list_postfix))
-
     sfh.rmfiles(instance_list_path)
-
-    return
 
 
 def copy_reference_instance_list(target_file: Path, instance_set_name: str,

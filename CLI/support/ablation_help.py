@@ -13,7 +13,7 @@ import global_variables as gv
 from sparkle.instance import instances_help as sih
 
 from sparkle.configurator.implementations import SMAC2
-from sparkle.platform import slurm_help as ssh
+from CLI.help import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
 from sparkle.solver import pcs
@@ -132,12 +132,12 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
     file_suffix = "_train.txt"
     if test:
         file_suffix = "_test.txt"
-
+    instances_directory = Path(instances_directory)
     # We give the Ablation script directly the paths of the instances (no copying)
-    list_all_path = sih.get_list_all_path(instances_directory)
+    list_all_path = [f for f in instances_directory.rglob("*") if f.is_file()]
     file_instance_path = ablation_scenario_dir + "instances" + file_suffix
 
-    instance_set_name = Path(instances_directory).name
+    instance_set_name = instances_directory.name
 
     # If a reference list does not exist this is a single-file instance
     if not sih.check_existence_of_reference_instance_list(instance_set_name):

@@ -18,7 +18,7 @@ from sparkle.solver import Solver
 import sparkle_logging as sl
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
-from sparkle.platform import slurm_help as ssh
+from CLI.help import slurm_help as ssh
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
 

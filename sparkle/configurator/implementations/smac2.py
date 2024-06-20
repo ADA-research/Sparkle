@@ -18,7 +18,7 @@ from runrunner import Runner
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 import global_variables as gv
-from sparkle.platform import slurm_help as ssh
+from CLI.help import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
 from sparkle.solver.validator import Validator
