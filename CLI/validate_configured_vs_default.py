@@ -5,6 +5,8 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
+from runrunner.base import Runner
+
 import global_variables as gv
 from sparkle.solver import pcs
 import sparkle_logging as sl
