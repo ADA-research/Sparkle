@@ -103,7 +103,7 @@ def create_configuration_file(solver: Solver, instance_train_name: str,
                    "execdir = ./solver/\n"
                    "experimentDir = ./\n")
         # USER SETTINGS
-        fout.write(f"deterministic = {solver.is_deterministic()}\n"
+        fout.write(f"deterministic = {1 if solver.deterministic else 0}\n"
                    f"run_obj = {smac_run_obj}\n")
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         fout.write(f"overall_obj = {objective_str}\n"

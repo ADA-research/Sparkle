@@ -118,7 +118,7 @@ class ConfigurationScenario:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"
                        f"execdir = {self.tmp.absolute()}/\n"
-                       f"deterministic = {self.solver.is_deterministic()}\n"
+                       f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"
