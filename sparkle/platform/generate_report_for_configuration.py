@@ -12,7 +12,7 @@ from sparkle.platform import file_help as sfh
 import global_variables as gv
 from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
-from sparkle.configurator import ablation as sah
+from CLI.support import ablation as sah
 from sparkle.solver.validator import Validator
 from sparkle.configurator.implementations import SMAC2
 from sparkle.platform.generate_report_help import generate_comparison_plot

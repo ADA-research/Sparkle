@@ -8,7 +8,7 @@ from pathlib import PurePath
 
 from runrunner.base import Runner
 
-from sparkle.configurator import ablation as sah
+from CLI.support import ablation_help as sah
 import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
