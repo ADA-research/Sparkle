@@ -50,7 +50,7 @@ def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str) -> 
 def prepare_ablation_scenario(solver: Solver, instance_train_name: str,
                               instance_test_name: str) -> str:
     """Prepare directories and files for ablation analysis."""
-    ablation_scenario_dir = get_ablation_scenario_directory(solver.name,
+    ablation_scenario_dir = get_ablation_scenario_directory(solver,
                                                             instance_train_name,
                                                             instance_test_name)
 
@@ -154,7 +154,7 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
 def check_for_ablation(solver: Solver, instance_train_name: str,
                        instance_test_name: str) -> bool:
     """Run a solver on an instance, only for internal calls from Sparkle."""
-    scenario_dir = get_ablation_scenario_directory(solver.name, instance_train_name,
+    scenario_dir = get_ablation_scenario_directory(solver, instance_train_name,
                                                    instance_test_name, exec_path=False)
     table_file = Path(scenario_dir, "ablationValidation.txt")
     if not table_file.is_file():

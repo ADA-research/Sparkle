@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping, gv.solver_dir)
-    solver = Solver(solver_path)
+    solver = Solver(solver_path) if solver_path is not None else None
     instance_set_train = resolve_object_name(args.instance_set_train,
                                              target_dir=gv.instance_dir)
     instance_set_test = resolve_object_name(args.instance_set_test,
@@ -102,7 +102,7 @@ if __name__ == "__main__":
                 gv.latest_scenario().get_selection_test_case_directory()
             )
         elif scenario == Scenario.CONFIGURATION:
-            solver_path = str(gv.latest_scenario().get_config_solver())
+            solver = Solver(gv.latest_scenario().get_config_solver())
             instance_set_train = gv.latest_scenario().get_config_instance_set_train()
             instance_set_test = gv.latest_scenario().get_config_instance_set_test()
         elif scenario == Scenario.PARALLEL_PORTFOLIO:
@@ -155,12 +155,10 @@ if __name__ == "__main__":
         status_info.set_report_type(gv.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
         # Reporting for algorithm configuration
-        if solver_path is None:
+        if solver is None:
             print("Error! No Solver found for configuration report generation.")
             sys.exit(-1)
-        elif isinstance(solver_path, str):
-            solver_path = Path(solver_path)
-        solver_name = solver_path.name
+        solver_name = solver.name
 
         # If no instance set(s) is/are given, try to retrieve them from the last run of
         # validate_configured_vs_default
@@ -179,11 +177,10 @@ if __name__ == "__main__":
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
-
         instance_set_train_name = instance_set_train.name
         instance_set_test_name = None
         gv.settings.get_general_sparkle_configurator()\
-            .set_scenario_dirs(solver_name, instance_set_train_name)
+            .set_scenario_dirs(solver, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train and flag_instance_set_test:
             instance_set_test_name = instance_set_test.name
@@ -201,7 +198,7 @@ if __name__ == "__main__":
             solver,
             instance_set_train_name,
             instance_set_test_name,
-            ablation=args.flag_ablation,
+            ablation=args.flag_ablation
         )
 
         status_info.delete()
