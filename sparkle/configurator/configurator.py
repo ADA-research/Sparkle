@@ -55,14 +55,16 @@ class Configurator:
     @abstractmethod
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
-                  validator: Validator = None,
+                  validate_after: bool = True,
+                  sbatch_options: list[str] = [],
                   run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
         """Start configuration job.
 
         Args:
             scenario: ConfigurationScenario to execute.
-            validator: The validator to run validation with after. If none,
-                no validation is performed afterwards.
+            validate_after: Whether to validate the configuration on the training set
+                afterwards or not.
+            sbatch_options: List of slurm batch options to use
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:

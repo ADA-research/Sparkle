@@ -233,7 +233,10 @@ if __name__ == "__main__":
         wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    dependency_job_list = configurator.configure(scenario=config_scenario, run_on=run_on)
+    sbatch_options = ssh.get_slurm_options_list() if run_on == Runner.SLURM else []
+    dependency_job_list = configurator.configure(scenario=config_scenario,
+                                                 sbatch_options=sbatch_options,
+                                                 run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver.directory)

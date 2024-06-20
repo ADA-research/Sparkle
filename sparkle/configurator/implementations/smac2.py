@@ -18,7 +18,6 @@ from runrunner import Runner
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 import global_variables as gv
-from CLI.help import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver.solver import Solver
 from sparkle.solver.validator import Validator
@@ -50,12 +49,14 @@ class SMAC2(Configurator):
     def configure(self: Configurator,
                   scenario: ConfigurationScenario,
                   validate_after: bool = True,
+                  sbatch_options: list[str] = [],
                   run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun | rrr.LocalRun]:
         """Start configuration job.
 
         Args:
             scenario: ConfigurationScenario object
             validate_after: Whether the Validator will be called after the configuration
+            sbatch_options: List of slurm batch options to use
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:
@@ -81,7 +82,6 @@ class SMAC2(Configurator):
                 for seed in range(self.scenario.number_of_runs)]
         parallel_jobs = max(self.max_slurm_runs_parallel,
                             self.scenario.number_of_runs)
-        sbatch_options = ssh.get_slurm_options_list()
 
         configuration_run = rrr.add_to_queue(
             runner=run_on,
