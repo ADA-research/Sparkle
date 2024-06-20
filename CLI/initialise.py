@@ -74,7 +74,6 @@ def initialise_sparkle(argv: list[str]) -> None:
     Path(f"{gv.ablation_dir}scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(gv.feature_data_csv_path)
     scsv.SparkleCSV.create_empty_csv(gv.performance_data_csv_path)
-    gv.pap_performance_data_tmp_path.mkdir(exist_ok=True)
 
     # Check that Runsolver is compiled, otherwise, compile
     if not Path(gv.runsolver_path).exists():

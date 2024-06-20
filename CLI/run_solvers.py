@@ -81,7 +81,8 @@ def running_solvers_performance_data(
     sbatch_options = ssh.get_slurm_options_list()
     cmd_base = "CLI/core/run_solvers_core.py"
     perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    cmd_list = [f"{cmd_base} --instance {inst_p} --solver {solver_p} "
+    cmd_list = [f"{cmd_base} --performance-data {performance_data_csv_path} "
+                f"--instance {inst_p} --solver {solver_p} "
                 f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]
 
     run = rrr.add_to_queue(
@@ -161,16 +162,6 @@ def run_solvers_on_instances(
         return
 
     sbatch_user_options = ssh.get_slurm_options_list()
-
-    # Update performance data csv after the last job is done
-    runs.append(rrr.add_to_queue(
-        runner=run_on,
-        cmd="sparkle/structures/csv_merge.py",
-        name=CommandName.CSV_MERGE,
-        dependencies=runs[-1],
-        base_dir=gv.sparkle_tmp_path,
-        sbatch_options=sbatch_user_options))
-
     if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
             runner=run_on,

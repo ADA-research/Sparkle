@@ -7,12 +7,12 @@ import time
 import argparse
 from pathlib import Path
 from pathlib import PurePath
+from filelock import FileLock
 
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from CLI.help import compute_features_help as scf
 
 if __name__ == "__main__":
     # Initialise settings
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+    
     runsolver_path = gv.runsolver_path
 
     if len(gv.extractor_list) == 0:
@@ -84,20 +84,30 @@ if __name__ == "__main__":
         if not Path(result_path).exists():
             sfh.create_new_empty_file(result_path)
 
+    # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
+    lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
         tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
+        with lock.acquire(timeout=60):
+            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+            feature_data_csv.combine(tmp_fdcsv)
+            feature_data_csv.save_csv()
         result_string = "Successful"
     except Exception:
         print(f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
         print("****** WARNING: The feature vector of this instace consists of missing "
               "values ******")
-
-        result_path.unlink(missing_ok=True)
-        tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(
-            feature_data_csv, instance_path, extractor_path, result_path)
+        length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
+        missing_values_row = [gv.sparkle_missing_value] * length
+        with lock.acquire(timeout=60):
+            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+            feature_data_csv.add_row(instance_path, missing_values_row)
+            feature_data_csv.save_csv()
         result_string = "Failed -- using missing value instead"
-
+    lock.release()
+    result_path.unlink(missing_ok=True)
+    
     # TODO: Handle multi-file instances
     description_str = (
         f"[Extractor: {extractor_path.name},"
@@ -113,5 +123,4 @@ if __name__ == "__main__":
     log_str = (f"{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, "
                f"{result_string_str}")
     sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
-    tmp_fdcsv.save_csv(result_path)
     sfh.rmfiles([task_run_status_path, runsolver_watch_data_path])

@@ -6,7 +6,6 @@ import argparse
 from pathlib import Path
 
 from runrunner.base import Runner
-import runrunner as rrr
 
 import global_variables as gv
 from CLI.help import compute_features_help as scf
@@ -15,8 +14,6 @@ from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
-from CLI.help import slurm_help as ssh
-from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
 
@@ -53,15 +50,6 @@ def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) ->
     if all(run is None for run in runs):
         print("Running solvers done!")
         return
-
-    # Update performance data csv after the last job is done
-    runs.append(rrr.add_to_queue(
-        runner=run_on,
-        cmd="sparkle/structures/csv_merge.py",
-        name=CommandName.CSV_MERGE,
-        dependencies=runs[-1],
-        base_dir=gv.sparkle_tmp_path,
-        sbatch_options=ssh.get_slurm_options_list()))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")

@@ -38,7 +38,6 @@ class CommandName(str, Enum):
     VALIDATE_CONFIGURED_VS_DEFAULT = "validate_configured_vs_default"
     RUN_CONFIGURED_SOLVER = "run_configured_solver"
     RUN_PARALLEL_PORTFOLIO = "run_parallel_portfolio"
-    CSV_MERGE = "csv_merge"
     VALIDATION = "validation"
 
     @staticmethod

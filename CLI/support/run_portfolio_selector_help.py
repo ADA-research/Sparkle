@@ -137,6 +137,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
                 performance_dataframe.set_value(cpu_time_penalised, solver_name,
                                                 Path(instance_path).name)
                 performance_dataframe.save_csv()
+            lock.release()
         except Timeout:
             print(f"ERROR: Cannot acquire File Lock on {performance_data_csv}.")
     else:
