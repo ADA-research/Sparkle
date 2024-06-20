@@ -54,7 +54,6 @@ def _copy_instance_list_to_reference(instances_source: Path) -> None:
     target_path = Path(gv.reference_list_dir
                        / Path(instances_source.name + gv.instance_list_postfix))
     shutil.copy(instance_list_path, target_path)
-    return
 
 
 def count_instances_in_reference_list(instance_set_name: str) -> int:
@@ -119,9 +118,7 @@ def copy_reference_instance_list(target_file: Path, instance_set_name: str,
             outline = outline + '\"\n'
             outlines.append(outline)
 
-    # Write quoted instance list to SMAC instance file
+    # Write quoted instance list to ablation instance file
     with target_file.open("w") as outfile:
         for line in outlines:
             outfile.write(line)
-
-    return
