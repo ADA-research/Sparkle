@@ -21,5 +21,3 @@ if __name__ == "__main__":
     # 3b. Have the configurator implementation organise the output
     configurator.organise_output(output_source, output_target)
     print(f"Organising done! See {output_target}")
-    import time
-    time.sleep(60)
