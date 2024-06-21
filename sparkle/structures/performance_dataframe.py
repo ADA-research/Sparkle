@@ -31,9 +31,9 @@ class PerformanceDataFrame():
         Consists of:
             - Columns representing the Solvers
             - Rows representing the result by multi-index in order of:
-                * Objective (Static, from settings)
+                * Objective (Static, given in constructor or read from file)
                 * Instance
-                * Runs (Static, given in constructor)
+                * Runs (Static, given in constructor or read from file)
 
         Args:
             csv_filepath: If path exists, load from Path.
