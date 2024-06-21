@@ -97,7 +97,6 @@ if __name__ == "__main__":
         if pcs_file is None:
             print("None or multiple .pcs files found. Solver "
                   "is not valid for configuration.")
-            sys.exit(-1)
         else:
             print("One pcs file detected, this is a configurable solver.")
             if solver.read_pcs_file():
