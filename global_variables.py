@@ -111,8 +111,6 @@ runsolver_dir = "Components/runsolver/src/"
 runsolver_path = runsolver_dir + "runsolver"
 autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
-sparkle_run_default_wrapper = "sparkle_run_default_wrapper.py"
-
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
