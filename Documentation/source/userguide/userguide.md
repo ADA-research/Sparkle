@@ -136,7 +136,7 @@ following minimal requirements (for an example of a solver directory see
 {numref}`dir-solvers-selection`):
 
 - A working solver executable
-- An algorithm wrapper called `sparkle_run_default_wrapper.py`
+- An algorithm wrapper called `sparkle_solver_wrapper.py`
 
 Further, training and testing instance sets are needed (for an example
 of an instances directory see {numref}`dir-instances`). For
@@ -154,7 +154,7 @@ See the {doc}`example </examples/selection>` page for a walk-through on how to p
 
 A template for the wrapper that connects your algorithm with Sparkle is
 available at
-`Examples/Resources/Solvers/template/sparkle_run_default_wrapper.py`.
+`Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`.
 Within this template a number of `TODO`s are indicated where you are
 likely to need to make changes for your specific algorithm. You can also
 compare the different example solvers to get an idea for what kind of
@@ -254,11 +254,11 @@ A solver directory should look something like this:
 Solver/
   Example_Solver/
     solver
-    sparkle_run_default_wrapper.py
+    sparkle_solver_wrapper.py
 ```
 
 Here `solver` is a binary executable of a solver that is to be
-included in a portfolio selector. The `sprakle_run_default_wrapper.py`
+included in a portfolio selector. The `sprakle_solver_wrapper.py`
 is a wrapper that Sparkle should call to run the solver on a specific
 instance.
 
@@ -311,44 +311,35 @@ For each type of task run by Sparkle, the `related files` differ. The aim is alw
 
 ## Wrappers
 
-### `sparkle_run_default_wrapper.py`
+### `sparkle_solver_wrapper.py`
 
-The `sparkle_run_default_wrapper.py` has two functions that need to be
-implemented for each algorithm:
-
-- `print_command(instance_file, seed_str: str, cutoff_time_str: str)`
-- `print_output(terminal_output_file: str)`
-
-`print_command(...)` should print a command line call that Sparkle can
-use to run the algorithm on a given instance file. Ideally, for
-reproducibility purposes, the seed provided by Sparkle should also be
-passed to the algorithm. If the algorithm requires this, the cutoff time
-can also be passed to the algorithm. However, in this case the cutoff
-time should be made very large. For instance by multiplying by ten with:
-`cutoff_time_str = str(int(cutoff_time_str) * 10)`. This is necessary
-to ensure Sparkle stops the algorithm after the cutoff time, rather than
-the algorithm itself. By doing this it is ensured runtime measurements
-are always done by Sparkle, and thus consistent between algorithms that
-might measure time differently.
-
-`print_output(...)` should process the algorithm output. If the
-performance measure is `RUNTIME`, this function only needs to output
-the algorithm status. For all `QUALITY` performance measures both the
-algorithm status and the solution quality have to be given. Sparkle
-internally measures `RUNTIME`, while it can be overwritten by the user
-if desired, for consistent runtime measurements between solvers this is
-not recommended. The output should be printed and formatted as in the
-example below.
+The `sparkle_solver_wrapper.py` uses a commandline dictionary to receive it inputs. This can be easily parsed using a Sparkle tool: `from tools.slurm_parsing import parse_commandline_dict`.
+The dictionary should always have the following values:
 
 ```
-quality 8734
-status SUCCESS
+solver_dir: str
+instance: str,
+cutoff_time: int,
+seed: int
+specifics: str
+run_length: str
+```
+
+Note that all the Paths are handed as str and should be converted in the wrapper. The solver_dir specifies the Path to the executable directory of your algorithm. This can be empty, e.g. the cwd contains your executable. The instance is the path to the instance we are going to run on. Cutoff time is the maximum amount of time your algorithm is allowed to run. Seed is the seed for this run. Specifics and run_length are depricated and should not be used.
+
+A solver wrapper should always return a dictionary by printing it, containing the following values:
+
+```
+status: str
+quality: int,
+solver_call: str
 ```
 
 Status can hold the following values `{SUCCESS, TIMEOUT, CRASHED}`. If
-the status is not known, reporting `SUCCESS` will allow Sparkle to
-continue, but may mean that Sparkle does not know when the algorithm
+the status is not known, reporting `SUCCESS` will allow Sparkle to continue, but may mean that Sparkle does not know when the algorithm
 crashed, and continues with faulty results.
+The quality may be irrelevant for your purpose and can thus be set to some default value.
+The solver_call is only used for logging purposes, to allow for easy inspection of the solver wrapper's subprocess.
 
 ## Commands
 
