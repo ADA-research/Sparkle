@@ -27,7 +27,7 @@ def get_runtime(runsolver_values_path: Path,
 def handle_timeouts(runtime: float, status: str,
                     cutoff_time: float, penalty: float) -> tuple[float, str]:
     """Determines whether runtime should be penalised based on status and cutoff."""
-    if runtime > cutoff_time or status != "TIMEOUT":
+    if runtime > cutoff_time or status == "TIMEOUT":
         if status == "CRASHED":
             status = "TIMEOUT"
         return penalty, status
