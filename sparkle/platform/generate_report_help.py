@@ -108,12 +108,12 @@ def get_par_ranking_list() -> str:
     Returns:
         The list of solvers ranked by PAR as LaTeX str.
     """
-    performance_data_csv = (
-        PerformanceDataFrame(gv.performance_data_csv_path))
-
-    solver_penalty_ranking =\
-        performance_data_csv.get_solver_penalty_time_ranking_list()
+    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
     penalty = gv.settings.get_general_penalty_multiplier()
+    penalty_time_each_run = cutoff_time * penalty
+    solver_penalty_ranking = performance_data_csv.get_solver_penalty_time_ranking_list(
+        cutoff_time, penalty_time_each_run)
     return "".join(f"\\item \\textbf{{{solver}}}, PAR{penalty}: {solver_penalty}\n"
                    for solver, solver_penalty in solver_penalty_ranking)
 
@@ -126,7 +126,10 @@ def get_vbs_par() -> str:
         of instances.
     """
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
-    return str(performance_data_csv.calc_vbs_penalty_time())
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
+    penalty_time_each_run = cutoff_time * gv.settings.get_general_penalty_multiplier()
+    return str(performance_data_csv.calc_vbs_penalty_time(cutoff_time,
+                                                          penalty_time_each_run))
 
 
 def get_actual_par() -> str:
@@ -150,9 +153,12 @@ def get_dict_sbs_penalty_time_on_each_instance() -> dict[str, int]:
     sbs_dict = {}
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     cutoff_time = gv.settings.get_general_target_cutoff_time()
+    penalty_time_each_run =\
+        cutoff_time * gv.settings.get_general_penalty_multiplier()
 
     solver_penalty_time_ranking_list = (
-        performance_data_csv.get_solver_penalty_time_ranking_list())
+        performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time,
+                                                                  penalty_time_each_run))
     sbs_solver = solver_penalty_time_ranking_list[0][0]
 
     for instance in performance_data_csv.get_instances():
@@ -173,7 +179,8 @@ def get_dict_vbs_penalty_time_on_each_instance() -> dict[str, int]:
         A dict that maps instance name str to their penalised performance int.
     """
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
-    return performance_data_csv.get_dict_vbs_penalty_time_on_each_instance()
+    penalty_time = gv.settings.get_penalised_time()
+    return performance_data_csv.get_dict_vbs_penalty_time_on_each_instance(penalty_time)
 
 
 def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[str, int]:
@@ -236,10 +243,14 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path) -> str:
         "figure_portfolio_selector_sparkle_vs_sbs")
 
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
-    solver_penalty_time_ranking_list = (
-        performance_data_csv.get_solver_penalty_time_ranking_list())
-    sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
+    cutoff_time = gv.settings.get_general_target_cutoff_time()
     penalty = gv.settings.get_general_penalty_multiplier()
+    penalty_time_each_run =\
+        cutoff_time * penalty
+    solver_penalty_time_ranking_list =\
+        performance_data_csv.get_solver_penalty_time_ranking_list(cutoff_time,
+                                                                  penalty_time_each_run)
+    sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
 
     generate_comparison_plot(points,
                              figure_filename,

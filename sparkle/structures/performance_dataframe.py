@@ -8,11 +8,13 @@ from typing import Callable
 import fcntl
 from pathlib import Path
 import sys
-
+import math
 from statistics import mean
 import pandas as pd
+
 import global_variables as gv
 from sparkle.platform import settings_help
+from sparkle.types.objective import SparkleObjective
 
 global settings
 gv.settings = settings_help.Settings()
@@ -20,11 +22,12 @@ gv.settings = settings_help.Settings()
 
 class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
+    missing_value = math.nan
 
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
                  solvers: list[str] = [],
-                 objectives: list[str | settings_help.SparkleObjective] = None,
+                 objectives: list[str | SparkleObjective] = None,
                  instances: list[str] = [],
                  n_runs: int = 1,
                  init_df: bool = True) -> None:
@@ -89,7 +92,7 @@ class PerformanceDataFrame():
                 midx = pd.MultiIndex.from_product(
                     [self.objective_names, instances, self.run_ids],
                     names=self.multi_dim_names)
-                self.dataframe = pd.DataFrame(gv.sparkle_missing_value,
+                self.dataframe = pd.DataFrame(PerformanceDataFrame.missing_value,
                                               index=midx,
                                               columns=solvers)
                 self.save_csv()
@@ -190,7 +193,7 @@ class PerformanceDataFrame():
                       self.dataframe.index.levels[2].tolist()]
             emidx = pd.MultiIndex(levels, names=self.multi_dim_names)
             # Create the missing column values
-            edf = pd.DataFrame(gv.sparkle_missing_value,
+            edf = pd.DataFrame(PerformanceDataFrame.missing_value,
                                index=emidx,
                                columns=self.dataframe.columns)
             # Concatenate the original and new dataframe together
@@ -232,7 +235,8 @@ class PerformanceDataFrame():
                     objective: str = None,
                     run: int = None) -> None:
         """Reset a value in the dataframe."""
-        self.set_value(gv.sparkle_missing_value, solver, instance, objective, run)
+        self.set_value(PerformanceDataFrame.missing_value,
+                       solver, instance, objective, run)
 
     def get_value(self: PerformanceDataFrame,
                   solver: str,
@@ -361,6 +365,7 @@ class PerformanceDataFrame():
             minimise: bool,
             objective: str = None,
             capvalue: float = None,
+            penalty: float = None,
             run_aggregator: Callable = mean) -> float:
         """Return the VBS performance for a specific instance.
 
@@ -376,12 +381,14 @@ class PerformanceDataFrame():
             The virtual best solver performance for this instance.
         """
         objective = self.verify_objective(objective)
-        penalty_factor = gv.settings.get_general_penalty_multiplier()
         if capvalue is None:
             capvalue = sys.float_info.max
             if not minimise:
                 capvalue = capvalue * -1
-        penalty = penalty_factor * capvalue
+        if penalty is None:
+            penalty = sys.float_info.max
+            if not minimise:
+                penalty = penalty * -1
         virtual_best_score = None
         for solver in self.dataframe.columns:
             if isinstance(instance, str):
@@ -411,6 +418,7 @@ class PerformanceDataFrame():
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
             capvalue_list: list[float],
+            penalty_list: list[float],
             objective: str = None) -> float:
         """Return the overall VBS performance of the portfolio.
 
@@ -425,43 +433,44 @@ class PerformanceDataFrame():
         objective = self.verify_objective(objective)
         virtual_best = []
         capvalue = None
+        penalty = None
         for idx, instance in enumerate(self.dataframe.index):
             if capvalue_list is not None:
                 capvalue = capvalue_list[idx]
-
+            if penalty_list is not None:
+                penalty = penalty_list[idx]
             virtual_best_score = (
                 self.calc_portfolio_vbs_instance(
-                    instance, minimise, objective, capvalue))
+                    instance, minimise, objective, capvalue, penalty))
             virtual_best.append(virtual_best_score)
 
         return aggregation_function(virtual_best)
 
     def get_dict_vbs_penalty_time_on_each_instance(
             self: PerformanceDataFrame,
+            penalised_time: int,
             objective: str = None,
             run_id: int = None) -> dict:
         """Return a dictionary of penalised runtimes and instances for the VBS."""
         objective = self.verify_objective(objective)
         instance_penalized_runtimes = {}
-        vbs_penalty_time = gv.settings.get_penalised_time()
         for instance in self.dataframe.index.levels[1]:
             if run_id is None:
                 runtime = self.dataframe.loc[(objective, instance), :].min(axis=None)
             else:
                 runtime =\
                     self.dataframe.loc[(objective, instance, run_id), :].min(axis=None)
-            instance_penalized_runtimes[instance] = min(vbs_penalty_time, runtime)
+            instance_penalized_runtimes[instance] = min(penalised_time, runtime)
 
         return instance_penalized_runtimes
 
     def calc_vbs_penalty_time(self: PerformanceDataFrame,
+                              cutoff_time: int,
+                              penalty: int,
                               objective: str = None,
                               run_id: int = None) -> float:
         """Return the penalised performance of the VBS."""
         objective = self.verify_objective(objective)
-        cutoff_time = gv.settings.get_general_target_cutoff_time()
-        penalty_multiplier = gv.settings.get_general_penalty_multiplier()
-        penalty_time_each_run = cutoff_time * penalty_multiplier
 
         # Calculate the minimum for the selected objective per instance
         if run_id is not None:
@@ -471,24 +480,23 @@ class PerformanceDataFrame():
             min_instance_df =\
                 self.dataframe.loc(axis=0)[objective, :, :].min(axis=1)
         # Penalize those exceeding cutoff
-        min_instance_df[min_instance_df > cutoff_time] = penalty_time_each_run
+        min_instance_df[min_instance_df > cutoff_time] = penalty
         # Return average
         return min_instance_df.sum() / self.dataframe.index.size
 
     def get_solver_penalty_time_ranking_list(self: PerformanceDataFrame,
-                                             objective: str = None) -> list[list[float]]:
+                                             cutoff_time: int,
+                                             penalty: int,
+                                             objective: str = None,
+                                             ) -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
         objective = self.verify_objective(objective)
-        cutoff_time = gv.settings.get_general_target_cutoff_time()
-
         solver_penalty_time_ranking_list = []
-        penalty_time_each_run =\
-            cutoff_time * gv.settings.get_general_penalty_multiplier()
         num_instances = self.dataframe.index.size
         sub_df = self.dataframe.loc(axis=0)[objective, :, :]
         for solver in self.dataframe.columns:
             masked_col = sub_df[solver]
-            masked_col[masked_col > cutoff_time] = penalty_time_each_run
+            masked_col[masked_col > cutoff_time] = penalty
             this_penalty_time = masked_col.sum() / num_instances
             solver_penalty_time_ranking_list.append([solver, this_penalty_time])
 
@@ -500,7 +508,7 @@ class PerformanceDataFrame():
 
     def clean_csv(self: PerformanceDataFrame) -> None:
         """Set all values in Performance Data to None."""
-        self.dataframe[:] = gv.sparkle_missing_value
+        self.dataframe[:] = PerformanceDataFrame.missing_value
         self.save_csv()
 
     def copy(self: PerformanceDataFrame,

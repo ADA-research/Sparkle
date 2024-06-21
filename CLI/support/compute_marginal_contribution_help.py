@@ -91,13 +91,18 @@ def compute_perfect_selector_marginal_contribution(
           f"{gv.settings.get_general_target_cutoff_time()} seconds")
 
     rank_list = []
+    penalty_list = None
+    if capvalue_list is not None:
+        penalty_factor = gv.settings.get_general_penalty_multiplier()
+        penalty_list = [cap * penalty_factor for cap in capvalue_list]
     performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
+
     virtual_best_performance = (
         performance_data_csv.calc_virtual_best_performance_of_portfolio(
-            aggregation_function, minimise, capvalue_list))
+            aggregation_function, minimise, capvalue_list, penalty_list))
     print("Virtual best performance for portfolio selector with all solvers is "
           f"{str(virtual_best_performance)}")
     print("Computing done!")
@@ -110,7 +115,7 @@ def compute_perfect_selector_marginal_contribution(
         tmp_performance_data_csv.remove_solver(solver)
         tmp_virt_best_perf = (
             tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
-                aggregation_function, minimise, capvalue_list))
+                aggregation_function, minimise, capvalue_list, penalty_list))
         print("Virtual best performance for portfolio selector excluding solver "
               f"{solver_name} is {tmp_virt_best_perf}")
         print("Computing done!")
