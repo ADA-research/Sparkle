@@ -83,6 +83,10 @@ class PerformanceDataFrame():
                     # Runs are present, determine run ids
                     self.run_ids =\
                         self.dataframe[self.multi_dim_names[2]].unique().tolist()
+                if self.multi_dim_names[1] not in self.dataframe.columns:
+                    # Instances are listed as rows, force into column
+                    self.dataframe = self.dataframe.reset_index().rename(
+                        columns={"index": self.multi_dim_names[1]})
                 # Now we can cast the columns into multi dim
                 self.dataframe = self.dataframe.set_index(self.multi_dim_names)
             else:

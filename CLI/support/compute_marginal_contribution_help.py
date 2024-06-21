@@ -254,7 +254,8 @@ def compute_actual_performance_for_instance(
       within the cutoff time (Runtime) or at least one solver performance
       did not exceed capvalue
     """
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+                                                    gv.extractor_list)
     # Get the prediction of the selector over the solvers
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data_csv, instance)

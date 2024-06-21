@@ -175,7 +175,8 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     if not Path(r"Tmp/").exists():
         Path(r"Tmp/").mkdir()
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+                                                    gv.extractor_list)
     bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()
 
     if bool_exists_missing_value:

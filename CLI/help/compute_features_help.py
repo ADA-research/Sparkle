@@ -41,7 +41,8 @@ def generate_missing_value_csv_like_feature_data_csv(
     """
     # create an empty CSV
     sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
-    zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path)
+    zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path,
+                                                  gv.extractor_list)
 
     # add as many columns as feature_data_csv has
     for column_name in feature_data_csv.list_columns():
@@ -66,7 +67,8 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         recompute: boolean indicating if features should be recomputed
 
     """
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+                                                    gv.extractor_list)
     list_feature_computation_job = get_feature_computation_job_list(
         feature_data_csv, recompute)
 
@@ -133,7 +135,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
                     sfh.create_new_empty_file(result_path)
 
             try:
-                tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
+                tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path, gv.extractor_list)
             except Exception:
                 print("****** WARNING: Feature vector computation on instance "
                       f"{instance_path} failed! ******")
@@ -183,7 +185,8 @@ def computing_features_parallel(feature_data_csv_path: Path,
         jobid: The jobid of the created slurm job
 
     """
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+                                                    gv.extractor_list)
     list_feature_computation_job = get_feature_computation_job_list(
         feature_data_csv, recompute)
     n_jobs = sparkle_job_help.get_num_of_total_job_from_list(

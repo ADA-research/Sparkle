@@ -58,13 +58,15 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
         sfh.create_new_empty_file(result_path)
 
     try:
-        sfdcsv.SparkleFeatureDataCSV(result_path)
+        sfdcsv.SparkleFeatureDataCSV(result_path,
+                                     gv.extractor_list)
     except Exception:
         print(f"****** WARNING: Feature vector computing on instance {instance_path}"
               " failed! ******")
         print("****** WARNING: The feature vector of this instance will be imputed as "
               "the mean value of all other non-missing values! ******")
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                                        gv.extractor_list)
         list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
     else:
         fin = Path(result_path).open("r+")

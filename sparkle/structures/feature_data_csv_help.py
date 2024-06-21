@@ -4,18 +4,23 @@
 from __future__ import annotations
 import sys
 import numpy as np
+import math
 
-import global_variables as gv
 from sparkle.structures import csv_help as scsv
 
 
 class SparkleFeatureDataCSV(scsv.SparkleCSV):
     """Class to manage feature data CSV files and common operations on them."""
+    sparkle_special_string = "__@@SPARKLE@@__"  # No idea who came up with this baloney
+    missing_value = math.nan
 
-    def __init__(self: SparkleFeatureDataCSV, csv_filepath: str) -> None:
+    def __init__(self: SparkleFeatureDataCSV, csv_filepath: str,
+                 extractor_list: list[str] = None) -> None:
         """Initialise a SparkleFeatureDataCSV object."""
         scsv.SparkleCSV.__init__(self, csv_filepath)
-        self.extractor_list = gv.extractor_list
+        if extractor_list is None:
+            extractor_list = []
+        self.extractor_list = extractor_list
 
     def get_list_recompute_feature_computation_job(self: SparkleFeatureDataCSV)  \
             -> list[list[str | list[str]]]:
@@ -63,13 +68,9 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
     def get_extractor_path_from_feature(self: SparkleFeatureDataCSV,
                                         given_column_name: str) -> str:
         """Return the path to the feature extractor for a given feature."""
-        sparkle_special_string = gv.sparkle_special_string
-        index = given_column_name.find(sparkle_special_string)
-        length = len(sparkle_special_string)
-        extractor_name = given_column_name[index + length:]
-        extractor_path = "Extractors/" + extractor_name
-
-        return extractor_path
+        extractor_name = given_column_name.replace(
+            SparkleFeatureDataCSV.sparkle_special_string, "")
+        return f"Extractors/{extractor_name}"
 
     def get_bool_in_rows(self: SparkleFeatureDataCSV, given_row_name: str) -> bool:
         """Return whether a row with a given name exists."""
@@ -141,13 +142,13 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         for row_name in self.list_rows():
             tmp_value = self.get_value(row_name, column_name)
-            if tmp_value != gv.sparkle_missing_value:
+            if tmp_value != SparkleFeatureDataCSV.sparkle_missing_value:
                 num += 1
                 sum_value += tmp_value
 
         if num == 0:
             # all values are missing value
-            return gv.sparkle_missing_value
+            return SparkleFeatureDataCSV.sparkle_missing_value
 
         return sum_value / num
 

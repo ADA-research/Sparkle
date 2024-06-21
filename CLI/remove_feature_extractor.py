@@ -69,9 +69,8 @@ if __name__ == "__main__":
                 break
 
     if Path(gv.feature_data_csv_path).exists():
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(
-            gv.feature_data_csv_path
-        )
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                                        gv.extractor_list)
         for column_name in feature_data_csv.list_columns():
             tmp_extractor_path = feature_data_csv.get_extractor_path_from_feature(
                 column_name

@@ -85,7 +85,8 @@ if __name__ == "__main__":
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
-        tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
+        tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path,
+                                                 gv.extractor_list)
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
             feature_data_csv.combine(tmp_fdcsv)
@@ -99,7 +100,8 @@ if __name__ == "__main__":
         length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
         missing_values_row = [gv.sparkle_missing_value] * length
         with lock.acquire(timeout=60):
-            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+                                                            gv.extractor_list)
             feature_data_csv.add_row(instance_path, missing_values_row)
             feature_data_csv.save_csv()
         result_string = "Failed -- using missing value instead"

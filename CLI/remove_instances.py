@@ -58,7 +58,8 @@ if __name__ == "__main__":
             list_all_filename[i] = " ".join([f"{instances_path / fname}"
                                              for fname in file_names])
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                                    gv.extractor_list)
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
 
     for instance_path in list_all_filename:
