@@ -93,7 +93,12 @@ if __name__ == "__main__":
     if args.run_checks:
         print("Running checks...")
         solver = Solver(Path(solver_source))
-        if solver.check_pcs_file_exists():
+        pcs_file = solver.get_pcs_file()
+        if pcs_file is None:
+            print("None or multiple .pcs files found. Solver "
+                  "is not valid for configuration.")
+            sys.exit(-1)
+        else:
             print("One pcs file detected, this is a configurable solver.")
             if solver.read_pcs_file():
                 print("Can read the pcs file.")

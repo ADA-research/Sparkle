@@ -67,25 +67,14 @@ class Solver:
             return False
         return pcs_files[0]
 
-    def check_pcs_file_exists(self: Solver) -> bool:
-        """Check if the parameter file exists.
-
-        Returns:
-            Boolean if there is one pcs file in the solver directory.
-        """
-        return isinstance(self._get_pcs_file(), Path)
-
     def get_pcs_file(self: Solver) -> Path:
         """Get path of the parameter file.
 
         Returns:
-            Path to the parameter file.
+            Path to the parameter file. None if it can not be resolved.
         """
         if not (file_path := self._get_pcs_file()):
-            print("None or multiple .pcs files found. Solver "
-                  "is not valid for configuration.")
-            sys.exit(-1)
-
+            return None
         return file_path
 
     def read_pcs_file(self: Solver) -> bool:
@@ -131,33 +120,44 @@ class Solver:
                        str(configuration)]
         return solver_cmd
 
-    def run_solver(self: Solver, instance: str, configuration: dict = None,
-                   runsolver_configuration: list[str] = None) -> dict[str, str]:
+    def run_solver(self: Solver, instance: str,
+                   configuration: dict = None,
+                   runsolver_configuration: list[str] = None,
+                   cwd: Path = None) -> dict[str, str]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
-            instance:
-            configuration:
-            runsolver_configuration:
+            instance: The instance to run the solver on
+            configuration: The solver configuration to use. Can be empty.
+            runsolver_configuration: The runsolver configuration to wrap the solver
+                with. If None (default), runsolver will not be used.
+            cwd: Path where to execute. Defaults to self.raw_output_directory.
 
         Returns:
             Solver output dict possibly with runsolver values.
         """
+        if cwd is None:
+            cwd = self.raw_output_directory
         solver_cmd = self.build_solver_cmd(instance,
                                            configuration,
                                            runsolver_configuration)
         process = subprocess.run(solver_cmd,
-                                 cwd=self.raw_output_directory,
+                                 cwd=cwd,
                                  capture_output=True)
+
+        # Subprocess resulted in error
         if process.returncode != 0:
             print(f"WARNING: Solver {self.name} execution seems to have failed!\n"
-                  f"The used command was: {solver_cmd}", flush=True)
+                  f"The used command was: {solver_cmd}\n The error yielded was: \n"
+                  f"\t-stdout: '{process.stdout.decode()}'\n"
+                  f"\t-stderr: '{process.stderr.decode()}'\n")
             return {"status": "ERROR", }
+
         # Resolving solver output
         if runsolver_configuration is not None:
             return runsolver_parsing.get_solver_output(runsolver_configuration,
                                                        process.stdout.decode(),
-                                                       self.raw_output_directory)
+                                                       cwd)
 
         # Ran without runsolver, can read solver output directly
         return ast.literal_eval(process.stdout.decode())

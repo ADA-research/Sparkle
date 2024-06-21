@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to run solvers."""
-import os
-import subprocess
-import sys
-from tools.runsolver_parsing import get_runtime
 from pathlib import Path
 
 import global_variables as gv
@@ -16,61 +12,7 @@ from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
 from sparkle.solver.solver import Solver
 from sparkle.solver import sat_help as sssh
-
-
-def run_solver_on_instance_with_cmd(solver_path: Path, instance_path: str, seed_str: str,
-                                    raw_result_path: Path, runsolver_values_path: Path,
-                                    custom_cutoff: int = None) -> Path:
-    """Run the solver on the given instance, with a given command line call.
-
-    Parameters
-    ----------
-    solver_path: Path
-        The path to the solver
-    instance_path: str
-        Path to the instance
-    seed_str: str
-        Seed for the call
-    cmd_solver_call: str
-        The cmd wrapper containing relevant information
-    raw_result_path: Path
-        Path to the .rawres file for storing results (?)
-    runsolver_values_path: Path
-        Path to the .val file for storing values (?)
-    custom_cutoff: int
-        A custom cpu time limit
-
-    Returns
-    -------
-    raw_result_path:
-        Path to the solver output
-    """
-    if custom_cutoff is None:
-        custom_cutoff = gv.settings.get_general_target_cutoff_time()
-    if seed_str is None:
-        seed_str = str(gv.get_seed())
-    # Prepare runsolver call
-    runsolver_values_log = f"{runsolver_values_path}"
-    runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
-    raw_result_path_option = f"{raw_result_path}"
-    solver = Solver(Path(solver_path))
-    solver_cmd = solver.build_solver_cmd(
-        instance_path,
-        configuration={"seed": seed_str,
-                       "cutoff_time": custom_cutoff,
-                       "specifics": ""},
-        runsolver_configuration=["--timestamp", "--use-pty",
-                                 "--cpu-limit", str(custom_cutoff),
-                                 "-w", runsolver_watch_data_path,
-                                 "-v", runsolver_values_log,
-                                 "-o", raw_result_path_option])
-
-    process = subprocess.run(solver_cmd, cwd=Path.cwd(), capture_output=True)
-    if process.returncode != 0:
-        print("WARNING: Solver execution seems to have failed!\n"
-              f"The used command was: {solver_cmd}", flush=True)
-
-    return raw_result_path
+from tools.runsolver_parsing import handle_timeouts
 
 
 def run_solver_on_instance_and_process_results(
@@ -85,20 +27,37 @@ def run_solver_on_instance_and_process_results(
                        f"{Path(instance_path).name}_"
                        f"{tg.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
-    solver_wrapper_path = Path(solver_path) / gv.sparkle_run_default_wrapper
 
     # Run
-    run_solver_on_instance_with_cmd(Path(solver_path), instance_path, seed_str,
-                                    Path(raw_result_path),
-                                    Path(runsolver_values_path), custom_cutoff)
+    if custom_cutoff is None:
+        custom_cutoff = gv.settings.get_general_target_cutoff_time()
+    if seed_str is None:
+        seed_str = str(gv.get_seed())
+    # Prepare runsolver call
+    runsolver_values_log = f"{runsolver_values_path}"
+    runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
+    raw_result_path_option = f"{raw_result_path}"
+    solver = Solver(Path(solver_path))
+    solver_output = solver.run_solver(
+        instance_path,
+        configuration={"seed": seed_str,
+                       "cutoff_time": custom_cutoff,
+                       "specifics": ""},
+        runsolver_configuration=["--timestamp", "--use-pty",
+                                 "--cpu-limit", str(custom_cutoff),
+                                 "-w", runsolver_watch_data_path,
+                                 "-v", runsolver_values_log,
+                                 "-o", raw_result_path_option],
+        cwd=Path.cwd())
 
-    # Process results
-    cpu_time, wc_time, quality, status = process_results(
-        raw_result_path, solver_wrapper_path, runsolver_values_path)
-    cpu_time_penalised, status = handle_timeouts(cpu_time, status, custom_cutoff)
+    cpu_time_penalised, status =\
+        handle_timeouts(solver_output["runtime"],
+                        solver_output["status"],
+                        custom_cutoff,
+                        gv.settings.get_penalised_time(custom_cutoff))
     status = verify(instance_path, raw_result_path, solver_path, status)
-
-    return cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path
+    return (solver_output["cpu_time"], solver_output["wc_time"],
+            cpu_time_penalised, solver_output["quality"], status, raw_result_path)
 
 
 def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
@@ -185,24 +144,6 @@ def running_solvers(performance_data_csv_path: str, rerun: bool) -> None:
           flush=True)
 
 
-def handle_timeouts(runtime: float, status: str,
-                    custom_cutoff: int = None) -> tuple[float, str]:
-    """Check if there is a timeout and return the status and penalised runtime."""
-    if custom_cutoff is None:
-        cutoff_time = gv.settings.get_general_target_cutoff_time()
-    else:
-        cutoff_time = custom_cutoff
-
-    if runtime > cutoff_time and status != "CRASHED":
-        status = "TIMEOUT"  # Overwrites possible user status, unless it is 'CRASHED'
-    if status == "TIMEOUT" or status == "UNKNOWN":
-        runtime_penalised = gv.settings.get_penalised_time(cutoff_time)
-    else:
-        runtime_penalised = runtime
-
-    return runtime_penalised, status
-
-
 def verify(instance_path: str, raw_result_path: str, solver_path: str, status: str)\
         -> str:
     """Run a solution verifier on the solution and update the status if needed."""
@@ -210,107 +151,6 @@ def verify(instance_path: str, raw_result_path: str, solver_path: str, status: s
     # Use verifier if one is given and the solver did not time out
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
         return sssh.sat_verify(instance_path, raw_result_path, solver_path)
-    return status
-
-
-def process_results(
-        raw_result_path: str, solver_wrapper_path: str,
-        runsolver_values_path: str) -> tuple[float, float, list[float], str]:
-    """Process results from raw output, the wrapper, and runsolver."""
-    # By default runtime comes from runsolver, may be overwritten by user wrapper
-    cpu_time, wc_time = get_runtime(Path(runsolver_values_path))
-
-    # Get results from the wrapper
-    cmd_get_results_from_wrapper = (
-        f"{solver_wrapper_path} --print-output {raw_result_path}")
-    results = os.popen(cmd_get_results_from_wrapper)
-    result_lines = results.readlines()
-
-    if len(result_lines) <= 0:
-        # TODO: Add instructions for the user that might fix the issue?
-        print(f'ERROR: Failed to get output from wrapper at "{solver_wrapper_path}" '
-              "stopping execution!", flush=True)
-        sys.exit(-1)
-
-    # Check if Sparkle should use it's own parser
-    first_line = result_lines[0]
-    first_line_parts = first_line.strip().split()
-
-    if (len(first_line_parts) == 4 and first_line_parts[0].lower() == "use"
-       and first_line_parts[1].lower() == "sparkle"):
-        if first_line_parts[2].lower() == "sat":
-            quality = []  # Not defined for SAT
-            # TODO: Handle wc_time when user can choose which to use
-            status = sssh.sparkle_sat_parser(
-                raw_result_path, cpu_time, gv.settings.get_general_target_cutoff_time())
-        else:
-            parser_list = "SAT"
-            print(f'ERROR: Wrapper at "{solver_wrapper_path}" requested Sparkle to use '
-                  "an internal parser that does not exist")
-            print(f"Possible internal parsers: {parser_list}")
-            print("If your problem domain is not in the list, please parse the output in"
-                  " the wrapper.")
-            print("Stopping execution!", flush=True)
-            sys.exit(-1)
-    else:
-        # Read output
-        quality = []
-        status = "UNKNOWN"
-        for line in result_lines:
-            parts = line.strip().split()
-            # Skip empty lines
-            if len(parts) <= 0:
-                continue
-            # Handle lines that are too short
-            if len(parts) <= 1:
-                print(f'Warning: The line "{line.strip()}" contains no result '
-                      "information or is not formatted correctly: "
-                      "<quality/status/runtime> VALUE", flush=True)
-            if parts[0].lower() == "quality":
-                quality = get_quality_from_wrapper(parts)
-            elif parts[0].lower() == "status":
-                status = get_status_from_wrapper(parts[1])
-            elif parts[0].lower() == "runtime":
-                cpu_time = float(parts[1])
-                wc_time = cpu_time
-            # TODO: Handle unknown keywords?
-
-    return cpu_time, wc_time, quality, status
-
-
-# quality -- comma separated list of quality measurements; [required when one or more
-# quality objectives are used, optional otherwise]
-def get_quality_from_wrapper(result_list: list[str]) -> list[float]:
-    """Return a list based on the quality performances returned from by the wrapper."""
-    # 0 is the keyword 'quality'
-    return [float(result_list[i]) for i in range(1, len(result_list))]
-
-
-# NOTE: This should be an ENUM, but its hard coded in many places of Sparkle
-def get_status_from_wrapper(result: str) -> str:
-    """Return the status reported by the wrapper as standardised str."""
-    status_list = "<SUCCESS/TIMEOUT/CRASHED/SAT/UNSAT/WRONG/UNKNOWN>"
-    status = "SUCCESS"
-
-    if result.upper() == "SUCCESS":
-        status = "SUCCESS"
-    elif result.upper() == "TIMEOUT":
-        status = "TIMEOUT"
-    elif result.upper() == "CRASHED":
-        status = "CRASHED"
-    elif result.upper() == "SAT":
-        status = "SAT"
-    elif result.upper() == "UNSAT":
-        status = "UNSAT"
-    elif result.upper() == "WRONG":
-        status = "WRONG"
-    elif result.upper() == "UNKNOWN":
-        status = "UNKNOWN"
-    else:
-        print(f'ERROR: Invalid status "{result}" given, possible statuses are: '
-              f"{status_list}\nStopping execution!", flush=True)
-        sys.exit(-1)
-
     return status
 
 
