@@ -98,7 +98,7 @@ if __name__ == "__main__":
             print("None or multiple .pcs files found. Solver "
                   "is not valid for configuration.")
         else:
-            print("One pcs file detected, this is a configurable solver.")
+            print(f"One pcs file detected: {pcs_file.name}. ", end="")
             if solver.read_pcs_file():
                 print("Can read the pcs file.")
             else:
@@ -107,9 +107,8 @@ if __name__ == "__main__":
         configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
         if not (configurator_wrapper_path.is_file()
                 and sfh.check_file_is_executable(configurator_wrapper_path)):
-            print(f"WARNING: Solver {solver_source.name} does not have a "
-                  f"configurator wrapper (Missing file {gv.sparkle_solver_wrapper}) or "
-                  f"is not executable. Therefore it cannot be automatically configured.")
+            print(f"WARNING: Solver {solver_source.name} does not have a solver wrapper "
+                  f"(Missing file {gv.sparkle_solver_wrapper}) or is not executable. ")
 
     # Start add solver
     solver_directory = gv.solver_dir / solver_source.name
