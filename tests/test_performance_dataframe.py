@@ -115,54 +115,43 @@ class TestPerformanceData(TestCase):
         """Test calculating vbs on the entire portfolio."""
         vbs_portfolio = 87.0
         result = self.pd.calc_virtual_best_performance_of_portfolio(
-            aggregation_function=sum, minimise=True, capvalue_list=None
+            aggregation_function=sum, minimise=True,
+            capvalue_list=None, penalty_list=None
         )
         assert result == vbs_portfolio
 
         vbs_portfolio = 420.0
         result = self.pd.calc_virtual_best_performance_of_portfolio(
-            aggregation_function=sum, minimise=False, capvalue_list=None
+            aggregation_function=sum, minimise=False,
+            capvalue_list=None, penalty_list=None
         )
         assert result == vbs_portfolio
 
-    @patch("global_variables."
-           "settings.get_penalised_time")
-    def test_get_dict_vbs_penalty_time_on_each_instance(self: TestPerformanceData,
-                                                        mock_penalty: Mock)\
+    def test_get_dict_vbs_penalty_time_on_each_instance(self: TestPerformanceData)\
             -> None:
         """Test getting a dictionary representing penalized runtime per instance."""
-        mock_penalty.return_value = 40
+        penalty = 40
         penalty_time_dict = {"Instance1": 30, "Instance2": 5, "Instance3": 3,
                              "Instance4": 8, "Instance5": 40}
-        result = self.pd.get_dict_vbs_penalty_time_on_each_instance()
-        print(result)
+        result = self.pd.get_dict_vbs_penalty_time_on_each_instance(penalty)
         assert result == penalty_time_dict
 
-    @patch("global_variables."
-           "settings.get_general_target_cutoff_time")
-    @patch("global_variables."
-           "settings.get_general_penalty_multiplier")
-    def test_calc_vbs_penalty_time(self: TestPerformanceData,
-                                   mock_cutoff: Mock,
-                                   mock_multiplier: Mock) -> None:
+    def test_calc_vbs_penalty_time(self: TestPerformanceData) -> None:
         """Test calculating the penalized vbs."""
-        mock_cutoff.return_value = 60
-        mock_multiplier.return_value = 10
-        vbs_penalized = 243.2
-        result = self.pd.calc_vbs_penalty_time()
+        cutoff = 40
+        multiplier = 10
+        vbs_penalized = 89.2
+        result = self.pd.calc_vbs_penalty_time(cutoff, cutoff * multiplier)
+        print(self.pd.dataframe)
         assert result == vbs_penalized
 
-    @patch("global_variables."
-           "settings.get_general_target_cutoff_time")
-    @patch("global_variables."
-           "settings.get_general_penalty_multiplier")
-    def test_get_solver_penalty_time_ranking_list(self: TestPerformanceData,
-                                                  mock_cutoff: Mock,
-                                                  mock_multiplier: Mock) -> None:
+    def test_get_solver_penalty_time_ranking_list(self: TestPerformanceData) -> None:
         """Test getting the solver ranking list with penalty."""
-        mock_cutoff.return_value = 50
-        mock_multiplier.return_value = 10
-        rank_list = [["AlgorithmE", 400.6], ["AlgorithmC", 401.0],
-                     ["AlgorithmB", 401.6], ["AlgorithmA", 500.0], ["AlgorithmD", 500.0]]
-        result = self.pd.get_solver_penalty_time_ranking_list()
+        cutoff = 50
+        multiplier = 10
+        penalty = cutoff * multiplier
+        rank_list = [['AlgorithmB', 210.8], ['AlgorithmC', 216.6],
+                     ['AlgorithmE', 218.8], ['AlgorithmA', 310.4], ['AlgorithmD', 313.8]]
+        result = self.pd.get_solver_penalty_time_ranking_list(cutoff_time=cutoff,
+                                                              penalty=penalty)
         assert result == rank_list
