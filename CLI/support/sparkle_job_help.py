@@ -45,26 +45,6 @@ def expand_total_job_from_list(list_jobs: list) -> list:
     return total_job_list
 
 
-def check_job_is_done(job_id: str) -> bool:
-    """Check whether a job is done.
-
-    Args:
-      job_id: String job identifier.
-
-    Returns:
-      Boolean indicating whether the job has finished.
-    """
-    # TODO: Handle other cases than slurm when they are implemented
-    jobs = get_runs_from_file()
-    for j in jobs:
-        if j.run_id == job_id:
-            if j.status == Status.COMPLETED:
-                return True
-            return False
-    print(f"WARNING: Could not find job with id {job_id}")
-    return False
-
-
 # Wait until all dependencies of the command to run are completed
 def wait_for_dependencies(command_to_run: CommandName) -> None:
     """Wait for all dependencies of a given command to finish executing.
