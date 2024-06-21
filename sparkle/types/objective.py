@@ -6,26 +6,26 @@ from enum import Enum
 class PerformanceMeasure(Enum):
     """Possible performance measures."""
     ERR = -1
-    RUNTIME = 0
-    QUALITY_ABSOLUTE = 1
-    QUALITY_ABSOLUTE_MINIMISATION = 1
-    QUALITY_ABSOLUTE_MAXIMISATION = 2
+    DEFAULT = 0
+    RUNTIME = 1
+    QUALITY_ABSOLUTE = 2
+    QUALITY_ABSOLUTE_MINIMISATION = 2
+    QUALITY_ABSOLUTE_MAXIMISATION = 3
 
     @staticmethod
     def from_str(performance_measure: str) -> PerformanceMeasure:
         """Return a given str as PerformanceMeasure."""
+        if performance_measure == "DEFAULT":
+            return PerformanceMeasure.DEFAULT
         if performance_measure == "RUNTIME":
-            performance_measure = PerformanceMeasure.RUNTIME
+            return PerformanceMeasure.RUNTIME
         elif performance_measure == "QUALITY_ABSOLUTE":
-            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE
+            return PerformanceMeasure.QUALITY_ABSOLUTE
         elif performance_measure == "QUALITY_ABSOLUTE_MAXIMISATION":
-            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
+            return PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
         elif performance_measure == "QUALITY_ABSOLUTE_MINIMISATION":
-            performance_measure = PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
-        else:
-            performance_measure = PerformanceMeasure.ERR
-
-        return performance_measure
+            return PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION
+        return PerformanceMeasure.ERR
 
 
 class SparkleObjective():

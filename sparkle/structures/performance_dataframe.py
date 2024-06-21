@@ -12,12 +12,7 @@ import math
 from statistics import mean
 import pandas as pd
 
-import global_variables as gv
-from sparkle.platform import settings_help
 from sparkle.types.objective import SparkleObjective
-
-global settings
-gv.settings = settings_help.Settings()
 
 
 class PerformanceDataFrame():
@@ -58,34 +53,41 @@ class PerformanceDataFrame():
         self.multi_dim_names = ["Objective", "Instance", "Run"]
         # Objectives is a ``static'' dimension
         if objectives is None:
-            objectives = gv.settings.get_general_sparkle_objectives()
-        self.objective_names =\
-            [o.name if isinstance(o, settings_help.SparkleObjective) else o
-             for o in objectives]
+            # Set default objective names if the user does not specify any
+            self.objective_names = ["DEFAULT:UNKNOWN"]
+        else:
+            self.objective_names =\
+                [o.name if isinstance(o, SparkleObjective) else o
+                 for o in objectives]
         self.multi_objective = len(self.objective_names) > 1
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
-        self.run_ids = list(range(1, self.n_runs + 1))
+        self.run_ids = list(range(1, self.n_runs + 1))  # We count runs from 1
         if init_df:
             if self.csv_filepath.exists():
-                self.dataframe = pd.read_csv(csv_filepath, index_col=0)
-                # Enforce dimensions
+                self.dataframe = pd.read_csv(csv_filepath)
                 if self.multi_dim_names[0] not in self.dataframe.columns:
-                    # No Objective, cast column
-                    self.objective_names = [self.multi_dim_names[0]]
+                    # No objective present, force into column
                     self.dataframe[self.multi_dim_names[0]] = self.objective_names[0]
                     self.multi_objective = False
+                else:
+                    # Objectives are present, extract names
+                    self.objective_names =\
+                        self.dataframe[self.multi_dim_names[0]].unique().tolist()
                 if self.multi_dim_names[2] not in self.dataframe.columns:
-                    # No runs column
+                    # No runs column present, force into column
                     self.n_runs = 1
                     self.dataframe[self.multi_dim_names[2]] = self.n_runs
                     self.run_ids = [self.n_runs]
+                else:
+                    # Runs are present, determine run ids
+                    self.run_ids =\
+                        self.dataframe[self.multi_dim_names[2]].unique().tolist()
                 if self.multi_dim_names[1] not in self.dataframe.columns:
                     # Instances are listed as rows, force into column
                     self.dataframe = self.dataframe.reset_index().rename(
                         columns={"index": self.multi_dim_names[1]})
-
-                # Cast Columns to multi dim
+                # Now we can cast the columns into multi dim
                 self.dataframe = self.dataframe.set_index(self.multi_dim_names)
             else:
                 # Initialize empty DataFrame

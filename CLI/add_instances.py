@@ -82,7 +82,10 @@ if __name__ == "__main__":
         list_instance = sih._get_list_instance(instances_source)
 
         feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path)
-        performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
+        # When adding instances, an empty performance DF has no objectives yet
+        performance_data_csv = PerformanceDataFrame(
+            gv.performance_data_csv_path,
+            objectives=gv.settings.get_general_sparkle_objectives())
 
         print(f"Number of instances to be added: {len(list_instance)}")
 
@@ -111,7 +114,10 @@ if __name__ == "__main__":
         target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
 
         feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path)
-        performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
+        # When adding instances, an empty performance DF has no objectives yet
+        performance_data_csv = PerformanceDataFrame(
+            gv.performance_data_csv_path,
+            objectives=gv.settings.get_general_sparkle_objectives())
 
         num_inst = len(list_source_all_filename)
         added = 0
