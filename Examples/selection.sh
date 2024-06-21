@@ -34,13 +34,13 @@ sparkle add_feature_extractor Examples/Resources/Extractors/SAT-features-competi
 
 # Compute features for all the instances; add the `--parallel` option to run in parallel
 
-sparkle compute_features
+sparkle compute_features --parallel
 
 #### Run the solvers
 
 # Run the solvers on all instances; add the `--parallel` option to run in parallel
 
-sparkle run_solvers
+sparkle run_solvers --parallel
 
 #### Construct a portfolio selector
 
