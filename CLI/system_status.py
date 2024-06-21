@@ -8,6 +8,7 @@ import global_variables as gv
 from sparkle.platform import system_status as sssh
 import sparkle_logging as sl
 from CLI.help import argparse_custom as ac
+from sparkle.platform import settings_help
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -27,6 +28,9 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
+
+    global settings
+    gv.settings = settings_help.Settings()
 
     print("Reporting current system status of Sparkle ...")
     sssh.print_sparkle_list(gv.solver_list, "Solver", args.verbose)
