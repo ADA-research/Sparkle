@@ -21,7 +21,7 @@ class Configurator:
 
     def __init__(self: Configurator, validator: Validator, output_path: Path,
                  executable_path: Path, settings_path: Path, configurator_target: Path,
-                 objectives: list[SparkleObjective], tmp_path: Path = None,
+                 objectives: list[SparkleObjective], base_dir: Path, tmp_path: Path,
                  multi_objective_support: bool = False) -> None:
         """Initialize Configurator.
 
@@ -34,6 +34,7 @@ class Configurator:
                 input/output towards solver wrappers.
             objectives: The list of Sparkle Objectives the configurator has to
                 optimize.
+            base_dir: Where to execute the configuration
             tmp_path: Path for the temporary files of the configurator, optional
             multi_objective_support: Whether the configurator supports
                 multi objective optimization for solvers.
@@ -44,6 +45,7 @@ class Configurator:
         self.settings_path = settings_path
         self.configurator_target = configurator_target
         self.objectives = objectives
+        self.base_dir = base_dir
         self.tmp_path = tmp_path
         self.multiobjective = multi_objective_support
         self.scenario = None
@@ -57,6 +59,7 @@ class Configurator:
                   scenario: ConfigurationScenario,
                   validate_after: bool = True,
                   sbatch_options: list[str] = [],
+                  num_parallel_jobs: int = None,
                   run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
         """Start configuration job.
 
@@ -65,6 +68,7 @@ class Configurator:
             validate_after: Whether to validate the configuration on the training set
                 afterwards or not.
             sbatch_options: List of slurm batch options to use
+            num_parallel_jobs: The maximum number of jobs to run in parallel
             run_on: On which platform to run the jobs. Default: Slurm.
 
         Returns:

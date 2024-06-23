@@ -235,9 +235,11 @@ if __name__ == "__main__":
         configurator.configurator_target, feature_data_df)
 
     sbatch_options = ssh.get_slurm_options_list() if run_on == Runner.SLURM else []
-    dependency_job_list = configurator.configure(scenario=config_scenario,
-                                                 sbatch_options=sbatch_options,
-                                                 run_on=run_on)
+    dependency_job_list = configurator.configure(
+        scenario=config_scenario,
+        sbatch_options=sbatch_options,
+        num_parallel_jobs=gv.settings.get_slurm_number_of_runs_in_parallel(),
+        run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver.directory)

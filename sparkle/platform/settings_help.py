@@ -388,7 +388,11 @@ class Settings:
             configurator_subclass =\
                 cim.resolve_configurator(self.__settings["general"]["configurator"])
             if configurator_subclass is not None:
-                self.__general_sparkle_configurator = configurator_subclass()
+                self.__general_sparkle_configurator = configurator_subclass(
+                    objectives=self.get_general_sparkle_objectives(),
+                    base_dir=gv.sparkle_tmp_path,
+                    output_path=gv.configuration_output_raw
+                )
             else:
                 print("WARNING: Configurator class name not recognised:"
                       f'{self.__settings["general"]["configurator"]}. '
