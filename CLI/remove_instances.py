@@ -11,7 +11,6 @@ from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 import sparkle_logging as sl
-from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -83,7 +82,9 @@ if __name__ == "__main__":
         print(f"Warning: Path {instances_path} did not exist. Continuing")
 
     # Remove instance reference list (for multi-file instances)
-    sih.remove_reference_instance_list(instances_path.name)
+    instance_list_path = Path(gv.reference_list_dir
+                              / Path(instances_path.name + gv.instance_list_postfix))
+    sfh.rmfiles(instance_list_path)
 
     feature_data_csv.save_csv()
     performance_data_csv.save_csv()

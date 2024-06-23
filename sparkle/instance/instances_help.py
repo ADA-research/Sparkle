@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for instance (set) management."""
-import shutil
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 import global_variables as gv
 
 
-__sparkle_instance_list_file = "sparkle_instance_list.txt"
+_instance_list_file = "sparkle_instance_list.txt"
 
 
-def _check_existence_of_instance_list_file(instances_source: str) -> bool:
+def _check_existence_of_instance_list_file(instances_source: Path) -> bool:
     """Return whether a given instance list file exists."""
-    if not Path(instances_source).is_dir():
+    if not instances_source.is_dir():
         return False
 
-    instance_list_file_path = Path(instances_source) / __sparkle_instance_list_file
+    instance_list_file_path = instances_source / _instance_list_file
 
-    return Path(instance_list_file_path).is_file()
+    return instance_list_file_path.is_file()
 
 
 def _get_list_instance(instances_source: str) -> list[str]:
     """Return a list of instances."""
     list_instance = []
-    instance_list_file_path = Path(instances_source) / __sparkle_instance_list_file
+    instance_list_file_path = Path(instances_source) / _instance_list_file
     lines = Path(instance_list_file_path).open().readlines()
 
     for line in lines:
@@ -38,7 +37,7 @@ def _get_list_instance(instances_source: str) -> list[str]:
 def get_instance_list_from_path(path: Path) -> list[str]:
     """Return a list of instance name strings located in a given path."""
     # Multi-file instances
-    if _check_existence_of_instance_list_file(str(path)):
+    if _check_existence_of_instance_list_file(path):
         list_all_filename = _get_list_instance(str(path))
     # Single file instances
     else:
@@ -46,14 +45,6 @@ def get_instance_list_from_path(path: Path) -> list[str]:
                              sfh.get_list_all_filename_recursive(path)]
 
     return list_all_filename
-
-
-def _copy_instance_list_to_reference(instances_source: Path) -> None:
-    """Copy an instance list to the reference list directory."""
-    instance_list_path = Path(instances_source / Path(__sparkle_instance_list_file))
-    target_path = Path(gv.reference_list_dir
-                       / Path(instances_source.name + gv.instance_list_postfix))
-    shutil.copy(instance_list_path, target_path)
 
 
 def count_instances_in_reference_list(instance_set_name: str) -> int:
@@ -90,13 +81,6 @@ def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
     """
     return Path(gv.reference_list_dir
                 / Path(instance_set_name + gv.instance_list_postfix)).is_file()
-
-
-def remove_reference_instance_list(instance_set_name: str) -> None:
-    """Remove a file with a list of instances."""
-    instance_list_path = Path(gv.reference_list_dir
-                              / Path(instance_set_name + gv.instance_list_postfix))
-    sfh.rmfiles(instance_list_path)
 
 
 def copy_reference_instance_list(target_file: Path, instance_set_name: str,

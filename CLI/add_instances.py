@@ -56,12 +56,12 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    instances_source = args.instances_path
+    instances_source = Path(args.instances_path)
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
 
-    if not Path(instances_source).exists():
+    if not instances_source.exists():
         print(f'Instance set path "{instances_source}" does not exist!')
         sys.exit(-1)
 
@@ -72,13 +72,17 @@ if __name__ == "__main__":
     if nickname_str is not None:
         instances_directory = gv.instance_dir / nickname_str
     else:
-        instances_directory = gv.instance_dir / Path(instances_source).name
+        instances_directory = gv.instance_dir / instances_source.name
 
     if not instances_directory.exists():
         instances_directory.mkdir(parents=True, exist_ok=True)
 
     if sih._check_existence_of_instance_list_file(instances_source):
-        sih._copy_instance_list_to_reference(Path(instances_source))
+        # Copy the reference list to the reference list dir of Sparkle
+        instance_list_path = instances_source / Path(sih._instance_list_file)
+        target_path = gv.reference_list_dir / (
+            instances_source.name + gv.instance_list_postfix)
+        shutil.copy(instance_list_path, target_path)
         list_instance = sih._get_list_instance(instances_source)
 
         feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
@@ -95,7 +99,7 @@ if __name__ == "__main__":
             intended_instance_line = ""
 
             for related_file_name in instance_related_files:
-                source_file_path = Path(instances_source) / related_file_name
+                source_file_path = instances_source / related_file_name
                 target_file_path = instances_directory / related_file_name
                 shutil.copy(source_file_path, target_file_path)
                 intended_instance_line += str(target_file_path) + " "
