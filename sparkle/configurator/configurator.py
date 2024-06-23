@@ -10,7 +10,7 @@ import runrunner as rrr
 from runrunner import Runner
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 

@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from pathlib import Path
 
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2

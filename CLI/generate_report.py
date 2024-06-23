@@ -18,7 +18,7 @@ from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name

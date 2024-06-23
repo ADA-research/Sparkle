@@ -24,7 +24,7 @@ from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.help.nicknames import resolve_object_name
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac

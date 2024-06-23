@@ -14,7 +14,7 @@ from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_help as sgrh
 from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.configurator.implementations import SMAC2
 from sparkle.platform.generate_report_help import generate_comparison_plot
 

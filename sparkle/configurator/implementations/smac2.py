@@ -19,7 +19,7 @@ from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 import global_variables as gv
 from CLI.help.command_help import CommandName
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.types.objective import PerformanceMeasure
 

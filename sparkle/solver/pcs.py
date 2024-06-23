@@ -1,7 +1,7 @@
 """Methods to deal with Parameter Configuration Space files."""
 
 from pathlib import Path
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 
 import sparkle_logging as sl
 

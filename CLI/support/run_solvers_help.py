@@ -10,7 +10,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import sparkle_job_help as sjh
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_help import SolutionVerifier
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.solver import sat_help as sssh
 from tools.runsolver_parsing import handle_timeouts
 

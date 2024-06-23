@@ -6,7 +6,7 @@ import shutil
 
 from unittest import TestCase
 from pathlib import Path
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 
 
 class TestSolver(TestCase):

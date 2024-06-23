@@ -13,7 +13,7 @@ from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help import command_help as ch
 from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise

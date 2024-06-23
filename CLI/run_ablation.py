@@ -13,7 +13,7 @@ import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise

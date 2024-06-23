@@ -10,7 +10,7 @@ from pathlib import Path
 import pandas as pd
 
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 
 
 class ConfigurationScenario:

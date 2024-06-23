@@ -10,7 +10,7 @@ from unittest.mock import Mock
 from pathlib import Path
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.platform import settings_help
 import global_variables as gv
 

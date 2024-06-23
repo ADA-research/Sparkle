@@ -10,7 +10,7 @@ import global_variables as gv
 from sparkle.platform import settings_help
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 import csv
 
 global settings

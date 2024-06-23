@@ -22,7 +22,7 @@ from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
 from CLI.help import slurm_help as ssh
 from sparkle.platform.settings_help import SettingState, Settings
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
