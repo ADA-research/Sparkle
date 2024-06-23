@@ -7,7 +7,6 @@ from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
 
-from sparkle import about
 from CLI.help.reporting_scenario import ReportingScenario
 
 
