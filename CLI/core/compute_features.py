@@ -98,7 +98,7 @@ if __name__ == "__main__":
         print("****** WARNING: The feature vector of this instace consists of missing "
               "values ******")
         length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
-        missing_values_row = [gv.sparkle_missing_value] * length
+        missing_values_row = [sfdcsv.SparkleFeatureDataCSV.missing_value] * length
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
                                                             gv.extractor_list)

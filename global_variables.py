@@ -35,8 +35,6 @@ sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
 
-sparkle_missing_value = math.nan
-
 sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
 
 sparkle_global_output_dir = Path("Output")

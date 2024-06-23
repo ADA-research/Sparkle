@@ -146,13 +146,13 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         for row_name in self.list_rows():
             tmp_value = self.get_value(row_name, column_name)
-            if tmp_value != SparkleFeatureDataCSV.sparkle_missing_value:
+            if tmp_value != SparkleFeatureDataCSV.missing_value:
                 num += 1
                 sum_value += tmp_value
 
         if num == 0:
             # all values are missing value
-            return SparkleFeatureDataCSV.sparkle_missing_value
+            return SparkleFeatureDataCSV.missing_value
 
         return sum_value / num
 
