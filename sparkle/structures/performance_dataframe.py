@@ -243,7 +243,7 @@ class PerformanceDataFrame():
                   solver: str,
                   instance: str,
                   objective: str = None,
-                  run: int = None) -> None:
+                  run: int = None) -> float:
         """Index a value of the DataFrame and return it."""
         objective, run = self.verify_indexing(objective, run)
         return self.dataframe.loc[(objective, instance, run), solver]
