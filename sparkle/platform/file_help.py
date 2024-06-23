@@ -56,15 +56,15 @@ def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
 
 def add_remove_platform_item(item: any,
                              file_target: Path,
-                             target: list | dict = None,
+                             target: list | dict,
                              key: str = None,
                              remove: bool = False) -> None:
     """Add/remove item from a list or dictionary of the platform that must saved to disk.
 
     Args:
         item: The item to be added to the data structure.
-        target: Either a list or dictionary to add the item to.
         file_target: Path to the file where we want to keep the disk storage.
+        target: Either a list or dictionary to add the item to.
         key: Optional string, in case we use a dictionary.
         remove: If true, remove the item from platform.
                 If the target is a dict, the key is used to remove the entry.
@@ -74,9 +74,6 @@ def add_remove_platform_item(item: any,
         item = str(item)
     if isinstance(file_target, str):
         file_target = Path(file_target)
-    # Determine object if not present
-    if target is None:
-        target = gv.file_storage_data_mapping[file_target]
     # Add/Remove item to/from object
     if isinstance(target, dict):
         if remove:

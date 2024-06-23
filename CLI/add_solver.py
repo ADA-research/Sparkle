@@ -139,7 +139,9 @@ if __name__ == "__main__":
     performance_data.add_solver(solver_directory)
     performance_data.save_csv()
     sfh.add_remove_platform_item(
-        f"{solver_directory} {deterministic} {solver_variations}", gv.solver_list_path)
+        f"{solver_directory} {deterministic} {solver_variations}",
+        gv.solver_list_path,
+        gv.file_storage_data_mapping[gv.solver_list_path])
 
     print(f"Adding solver {solver_source.name} done!")
 

@@ -66,7 +66,9 @@ if __name__ == "__main__":
         print(intended_instance)
         # Remove instance records
         sfh.add_remove_platform_item(intended_instance,
-                                     gv.instance_list_path, remove=True)
+                                     gv.instance_list_path,
+                                     gv.file_storage_data_mapping[gv.instance_list_path],
+                                     remove=True)
         if reference_list.exists():
             # In case of reference lists, we only take the last instance part
             # For the matrix rows to remove them

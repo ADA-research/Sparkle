@@ -50,22 +50,29 @@ if __name__ == "__main__":
           f"{Path(extractor_path).name} ...")
 
     if len(gv.extractor_list) > 0:
-        sfh.add_remove_platform_item(str(extractor_path),
-                                     gv.extractor_list_path, remove=True)
+        sfh.add_remove_platform_item(
+            extractor_path,
+            gv.extractor_list_path,
+            gv.file_storage_data_mapping[gv.extractor_list_path],
+            remove=True)
 
     if len(gv.extractor_feature_vector_size_mapping) > 0:
-        sfh.add_remove_platform_item(None,
-                                     gv.extractor_feature_vector_size_list_path,
-                                     key=str(extractor_path),
-                                     remove=True)
+        sfh.add_remove_platform_item(
+            None,
+            gv.extractor_feature_vector_size_list_path,
+            gv.file_storage_data_mapping[gv.extractor_feature_vector_size_list_path],
+            key=str(extractor_path),
+            remove=True)
 
     if len(gv.extractor_nickname_mapping) > 0:
         for key in gv.extractor_nickname_mapping:
             if gv.extractor_nickname_mapping[key] == extractor_path:
-                sfh.add_remove_platform_item(None,
-                                             gv.extractor_nickname_list_path,
-                                             key=key,
-                                             remove=True)
+                sfh.add_remove_platform_item(
+                    None,
+                    gv.extractor_nickname_list_path,
+                    gv.file_storage_data_mapping[gv.extractor_nickname_list_path],
+                    key=key,
+                    remove=True)
                 break
 
     if Path(gv.feature_data_csv_path).exists():

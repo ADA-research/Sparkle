@@ -169,11 +169,14 @@ def remove_faulty_solver(solver_path: str, instance_path: str) -> None:
     # performance_data_csv.remove_solver(solver_path)
     sfh.add_remove_platform_item(solver_path,
                                  gv.solver_list_path,
+                                 gv.file_storage_data_mapping[gv.solver_list_path],
                                  remove=True)
-    sfh.add_remove_platform_item(None,
-                                 gv.solver_nickname_list_path,
-                                 key=solver_path,
-                                 remove=True)
+    sfh.add_remove_platform_item(
+        None,
+        gv.solver_nickname_list_path,
+        gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+        key=solver_path,
+        remove=True)
 
     print(f"Solver {solver_name} is a wrong solver, running on instance {instance_name} "
           " ignored!", flush=True)

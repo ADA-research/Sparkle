@@ -106,7 +106,10 @@ if __name__ == "__main__":
 
             intended_instance_line = intended_instance_line.strip()
             target_instance = instances_directory / Path(intended_instance_line).name
-            sfh.add_remove_platform_item(intended_instance_line, gv.instance_list_path)
+            sfh.add_remove_platform_item(
+                intended_instance_line,
+                gv.instance_list_path,
+                gv.file_storage_data_mapping[gv.instance_list_path])
             feature_data_csv.add_row(target_instance)
             performance_data.add_instance(target_instance)
 
@@ -138,8 +141,10 @@ if __name__ == "__main__":
                 print(f"Ignore adding file {intended_filename}")
             else:
                 shutil.copy(intended_filepath, instances_directory)
-                sfh.add_remove_platform_item(instances_directory / intended_filename,
-                                             gv.instance_list_path)
+                sfh.add_remove_platform_item(
+                    instances_directory / intended_filename,
+                    gv.instance_list_path,
+                    gv.file_storage_data_mapping[gv.instance_list_path])
                 feature_data_csv.add_row(instances_directory / intended_filename)
                 performance_data.add_instance(
                     str(instances_directory / intended_filename))
