@@ -34,6 +34,8 @@ class TestConfigurator():
             executable_path=exec_path,
             settings_path=None,
             configurator_target=None,
+            base_dir=Path(),
+            tmp_path=Path(),
             objectives=[SparkleObjective("RUNTIME:PAR10")])
 
         assert configurator.executable_path == exec_path
