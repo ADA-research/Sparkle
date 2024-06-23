@@ -133,9 +133,11 @@ if __name__ == "__main__":
     shutil.copyfile(runsolver_path, runsolver_target)
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 
-    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
-    performance_data_csv.add_solver(solver_directory)
-    performance_data_csv.save_csv()
+    performance_data = PerformanceDataFrame(
+        gv.performance_data_csv_path,
+        objectives=gv.settings.get_general_sparkle_objectives())
+    performance_data.add_solver(solver_directory)
+    performance_data.save_csv()
     sfh.add_remove_platform_item(
         f"{solver_directory} {deterministic} {solver_variations}", gv.solver_list_path)
 

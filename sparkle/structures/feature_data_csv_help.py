@@ -68,9 +68,13 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
     def get_extractor_path_from_feature(self: SparkleFeatureDataCSV,
                                         given_column_name: str) -> str:
         """Return the path to the feature extractor for a given feature."""
-        extractor_name = given_column_name.replace(
-            SparkleFeatureDataCSV.sparkle_special_string, "")
-        return f"Extractors/{extractor_name}"
+        sparkle_special_string = SparkleFeatureDataCSV.sparkle_special_string
+        index = given_column_name.find(sparkle_special_string)
+        length = len(sparkle_special_string)
+        extractor_name = given_column_name[index + length:]
+        extractor_path = "Extractors/" + extractor_name
+
+        return extractor_path
 
     def get_bool_in_rows(self: SparkleFeatureDataCSV, given_row_name: str) -> bool:
         """Return whether a row with a given name exists."""

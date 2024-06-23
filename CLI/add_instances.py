@@ -84,7 +84,7 @@ if __name__ == "__main__":
         feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
                                                  gv.extractor_list)
         # When adding instances, an empty performance DF has no objectives yet
-        performance_data_csv = PerformanceDataFrame(
+        performance_data = PerformanceDataFrame(
             gv.performance_data_csv_path,
             objectives=gv.settings.get_general_sparkle_objectives())
 
@@ -104,12 +104,12 @@ if __name__ == "__main__":
             target_instance = instances_directory / Path(intended_instance_line).name
             sfh.add_remove_platform_item(intended_instance_line, gv.instance_list_path)
             feature_data_csv.add_row(target_instance)
-            performance_data_csv.add_instance(target_instance)
+            performance_data.add_instance(target_instance)
 
             print(f"Instance {instance_line} has been added!\n")
 
         feature_data_csv.save_csv()
-        performance_data_csv.save_csv()
+        performance_data.save_csv()
     else:
         list_source_all_filename = sfh.get_list_all_filename_recursive(instances_source)
         target_all_filename = sfh.get_list_all_filename_recursive(instances_directory)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
                                                  gv.extractor_list)
         # When adding instances, an empty performance DF has no objectives yet
-        performance_data_csv = PerformanceDataFrame(
+        performance_data = PerformanceDataFrame(
             gv.performance_data_csv_path,
             objectives=gv.settings.get_general_sparkle_objectives())
 
@@ -128,7 +128,6 @@ if __name__ == "__main__":
             intended_filename = intended_filepath.name
             print(f"Adding {intended_filename} ... "
                   f"({i + 1} out of {num_inst})", end="\r")
-
             if intended_filename in target_all_filename:
                 print(f"Instance {intended_filename} already exists in Directory "
                       f"{instances_directory}")
@@ -138,17 +137,16 @@ if __name__ == "__main__":
                 sfh.add_remove_platform_item(instances_directory / intended_filename,
                                              gv.instance_list_path)
                 feature_data_csv.add_row(instances_directory / intended_filename)
-                performance_data_csv.add_instance(
-                    instances_directory / intended_filename)
+                performance_data.add_instance(
+                    str(instances_directory / intended_filename))
                 added += 1
-
         if added == num_inst:
             print(f"All instances of {instances_source} have been added!")
         else:
             print(f"{added}/{num_inst} instances of {instances_source} have been added!")
 
         feature_data_csv.save_csv()
-        performance_data_csv.save_csv()
+        performance_data.save_csv()
 
     print("\nAdding instance set "
           f"{instances_directory.name} done!")

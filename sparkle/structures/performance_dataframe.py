@@ -66,15 +66,15 @@ class PerformanceDataFrame():
         if init_df:
             if self.csv_filepath.exists():
                 self.dataframe = pd.read_csv(csv_filepath)
-                if self.multi_dim_names[0] not in self.dataframe.columns:
+                has_rows = len(self.dataframe.index) > 0
+                if self.multi_dim_names[0] not in self.dataframe.columns or not has_rows:
                     # No objective present, force into column
                     self.dataframe[self.multi_dim_names[0]] = self.objective_names[0]
-                    self.multi_objective = False
                 else:
                     # Objectives are present, extract names
                     self.objective_names =\
                         self.dataframe[self.multi_dim_names[0]].unique().tolist()
-                if self.multi_dim_names[2] not in self.dataframe.columns:
+                if self.multi_dim_names[2] not in self.dataframe.columns or not has_rows:
                     # No runs column present, force into column
                     self.n_runs = 1
                     self.dataframe[self.multi_dim_names[2]] = self.n_runs
@@ -83,7 +83,7 @@ class PerformanceDataFrame():
                     # Runs are present, determine run ids
                     self.run_ids =\
                         self.dataframe[self.multi_dim_names[2]].unique().tolist()
-                if self.multi_dim_names[1] not in self.dataframe.columns:
+                if self.multi_dim_names[1] not in self.dataframe.columns or not has_rows:
                     # Instances are listed as rows, force into column
                     self.dataframe = self.dataframe.reset_index().rename(
                         columns={"index": self.multi_dim_names[1]})
@@ -186,7 +186,7 @@ class PerformanceDataFrame():
             self.dataframe = pd.DataFrame(initial_value, index=midx, columns=solvers)
         else:
             if instance_name in self.dataframe.index.levels[1]:
-                print(f"WARNING: Tried adding already existing solver {instance_name} "
+                print(f"WARNING: Tried adding already existing instance {instance_name} "
                       f"to Performance DataFrame: {self.csv_filepath}")
                 return
             # Create the missing indices
@@ -200,7 +200,6 @@ class PerformanceDataFrame():
                                columns=self.dataframe.columns)
             # Concatenate the original and new dataframe together
             self.dataframe = pd.concat([self.dataframe, edf])
-        return
 
     # Can we make this handle a sequence of inputs instead of just 1?
     def set_value(self: PerformanceDataFrame,

@@ -23,8 +23,29 @@ from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
 from CLI.support import run_solvers_help as srs
 
-import functools
-print = functools.partial(print, flush=True)
+
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments."""
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(*ac.RecomputeRunSolversArgument.names,
+                        **ac.RecomputeRunSolversArgument.kwargs)
+    parser.add_argument(*ac.ParallelArgument.names,
+                        **ac.ParallelArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
+                        **ac.TargetCutOffTimeRunSolversArgument.kwargs)
+    parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
+                        **ac.AlsoConstructSelectorAndReportArgument.kwargs)
+    parser.add_argument(*ac.VerifierArgument.names,
+                        **ac.VerifierArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+
+    return parser
 
 
 def running_solvers_performance_data(
@@ -54,10 +75,10 @@ def running_solvers_performance_data(
         the run.
     """
     # Open the performance data csv file
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
-
+    performance_dataframe = PerformanceDataFrame(performance_data_csv_path)
+    print(performance_dataframe.dataframe)
     # List of jobs to do
-    jobs = performance_data_csv.get_job_list(rerun=rerun)
+    jobs = performance_dataframe.get_job_list(rerun=rerun)
     num_jobs = len(jobs)
 
     cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
@@ -95,30 +116,6 @@ def running_solvers_performance_data(
         srun_options=srun_options)
 
     return run
-
-
-def parser_function() -> argparse.ArgumentParser:
-    """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(*ac.RecomputeRunSolversArgument.names,
-                        **ac.RecomputeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.ParallelArgument.names,
-                        **ac.ParallelArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
-                        **ac.TargetCutOffTimeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
-                        **ac.AlsoConstructSelectorAndReportArgument.kwargs)
-    parser.add_argument(*ac.VerifierArgument.names,
-                        **ac.VerifierArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-
-    return parser
 
 
 def run_solvers_on_instances(
