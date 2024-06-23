@@ -89,7 +89,9 @@ if __name__ == "__main__":
               not executable.")
         sys.exit(-1)
 
-    sfh.add_remove_platform_item(str(extractor_target_path), gv.extractor_list_path)
+    sfh.add_remove_platform_item(extractor_target_path,
+                                 gv.extractor_list_path,
+                                 gv.file_storage_data_mapping[gv.extractor_list_path])
 
     # pre-run the feature extractor on a testing instance, to obtain the feature names
     if _check_existence_of_test_instance_list_file(extractor_target_path):
@@ -148,9 +150,11 @@ if __name__ == "__main__":
         feature_data_csv.add_column(column_name)
 
     feature_data_csv.save_csv()
-    sfh.add_remove_platform_item(len(list_columns),
-                                 gv.extractor_feature_vector_size_list_path,
-                                 key=str(extractor_target_path))
+    sfh.add_remove_platform_item(
+        len(list_columns),
+        gv.extractor_feature_vector_size_list_path,
+        gv.file_storage_data_mapping[gv.extractor_feature_vector_size_list_path],
+        key=str(extractor_target_path))
 
     sfh.rmfiles(Path(result_path))
 
@@ -167,8 +171,11 @@ if __name__ == "__main__":
         print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     if nickname_str is not None:
-        sfh.add_remove_platform_item(str(extractor_target_path),
-                                     gv.extractor_nickname_list_path, key=nickname_str)
+        sfh.add_remove_platform_item(
+            extractor_target_path,
+            gv.extractor_nickname_list_path,
+            gv.file_storage_data_mapping[gv.extractor_nickname_list_path],
+            key=nickname_str)
 
     if args.run_extractor_now:
         if not args.parallel:
