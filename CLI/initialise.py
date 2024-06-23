@@ -8,8 +8,8 @@ from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
-from sparkle.platform import snapshot_help as srh
-from sparkle.platform import snapshot_help as snh
+from CLI.help import snapshot_help as srh
+from CLI.help import snapshot_help as snh
 from sparkle.platform import settings_help
 from sparkle.structures import csv_help as scsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
