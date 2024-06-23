@@ -48,7 +48,7 @@ def get_instance_list_from_path(path: Path) -> list[str]:
 
 
 def count_instances_in_reference_list(instance_set_name: str) -> int:
-    """Return the number of instances in a given instance set.
+    """Return the number of instances in a given instance set with a reference list.
 
     Args:
         instance_set_name: The name of the instance set.
@@ -56,18 +56,11 @@ def count_instances_in_reference_list(instance_set_name: str) -> int:
     Returns:
         An integer indicating the number of instances in this set.
     """
-    count = 0
-    instance_list_path = Path(gv.reference_list_dir
-                              / Path(instance_set_name + gv.instance_list_postfix))
-
-    # Count instances in instance list file
-    with instance_list_path.open("r") as infile:
-        for line in infile:
-            # If the line does not only contain white space, count it
-            if line.strip():
-                count = count + 1
-
-    return count
+    instance_list_path = gv.reference_list_dir / (
+        instance_set_name + gv.instance_list_postfix)
+    non_empty_lines = [line for line in
+                       instance_list_path.open("r").readlines() if line.strip()]
+    return len(non_empty_lines)
 
 
 def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
