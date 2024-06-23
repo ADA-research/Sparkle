@@ -155,7 +155,7 @@ if __name__ == "__main__":
     print("Create config file")
     # Configurations
     sah.create_configuration_file(
-        solver, instance_set_train_name, instance_set_test_name
+        solver, instance_set_train, instance_set_test
     )
     print("Submit ablation run")
     runs = sah.submit_ablation(

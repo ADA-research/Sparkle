@@ -196,8 +196,8 @@ if __name__ == "__main__":
 
         sgrfch.generate_report_for_configuration(
             solver,
-            instance_set_train_name,
-            instance_set_test_name,
+            instance_set_train,
+            instance_set_test,
             ablation=args.flag_ablation
         )
 

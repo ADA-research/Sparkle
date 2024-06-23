@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver, instance_set_train.name)
+        solver, instance_set_train)
     pcs.write_configuration_pcs(solver, opt_config_str,
                                 Path(gv.sparkle_tmp_path))
 

@@ -78,8 +78,9 @@ if __name__ == "__main__":
             or (all([path.is_file() for path in instance_path]))):
         # Get the name of the configured solver and the training set
         solver_path = Path(gv.latest_scenario().get_config_solver())
-        instance_set_name = Path(
-            gv.latest_scenario().get_config_instance_set_train()).name
+        instance_set_path = Path(
+            gv.latest_scenario().get_config_instance_set_train())
+        instance_set_name = instance_set_path.name
         if solver_path is None or instance_set_name is None:
             # Print error and stop execution
             print("ERROR: No configured solver found! Stopping execution.")
@@ -88,7 +89,7 @@ if __name__ == "__main__":
         configurator = gv.settings.get_general_sparkle_configurator()
         solver = Solver(solver_path)
         _, config_str = configurator.get_optimal_configuration(solver,
-                                                               instance_set_name)
+                                                               instance_set_path)
 
         # If directory, get instance list from directory as list[list[Path]]
         if len(args.instance_path) == 1 and args.instance_path[0].is_dir():

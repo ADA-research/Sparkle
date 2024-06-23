@@ -113,14 +113,12 @@ class SMAC2(Configurator):
     def get_optimal_configuration(
             self: Configurator,
             solver: Solver,
-            instance_set: str,
+            instance_set: Path,
             performance: PerformanceMeasure = None,
             aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns the optimal configuration string for a solver of an instance set."""
         if self.scenario is None:
-            self.set_scenario_dirs(solver, instance_set)
-        if not Path(instance_set).exists():
-            instance_set = gv.instance_dir / instance_set
+            self.set_scenario_dirs(solver, instance_set.name)
         results = self.validator.get_validation_results(
             solver,
             instance_set,

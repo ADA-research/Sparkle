@@ -67,8 +67,8 @@ def print_ablation_help() -> None:
     print(process.stdout)
 
 
-def create_configuration_file(solver: Solver, instance_train_name: str,
-                              instance_test_name: str) -> None:
+def create_configuration_file(solver: Solver, instance_train: Path,
+                              instance_test: Path) -> None:
     """Create a configuration file for ablation analysis.
 
     Args:
@@ -80,11 +80,11 @@ def create_configuration_file(solver: Solver, instance_train_name: str,
         None
     """
     ablation_scenario_dir = get_ablation_scenario_directory(solver,
-                                                            instance_train_name,
-                                                            instance_test_name)
+                                                            instance_train.name,
+                                                            instance_test.name)
     configurator = gv.settings.get_general_sparkle_configurator()
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver, instance_train_name)
+        solver, instance_train)
     if "-init_solution" not in opt_config_str:
         opt_config_str = "-init_solution '1' " + opt_config_str
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure

@@ -75,7 +75,7 @@ class Configurator:
     @abstractmethod
     def get_optimal_configuration(self: Configurator,
                                   solver: Solver,
-                                  instance_set: str,
+                                  instance_set: Path,
                                   performance: PerformanceMeasure = None) -> str:
         """Returns the optimal configuration string for a solver of an instance set."""
         raise NotImplementedError

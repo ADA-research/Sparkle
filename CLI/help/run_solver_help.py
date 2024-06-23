@@ -98,7 +98,8 @@ def call_solver(
         outdir = solver.raw_output_directory
     outdir.mkdir(exist_ok=True, parents=True)
 
-    print(f"\nStart running solver on {len(instances_list)} instances...")
+    if run_on == Runner.LOCAL:
+        print(f"\nStart running solver on {len(instances_list)} instances...")
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
