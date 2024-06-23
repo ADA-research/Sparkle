@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Class to handle all activities around configuration scenarios."""
-
-
 from __future__ import annotations
 import shutil
 from pathlib import Path
