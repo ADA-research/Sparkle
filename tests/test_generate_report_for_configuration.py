@@ -606,7 +606,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                 "report_for_configuration."
                                 "get_runtime_bool",
                                 return_value="runtimetrue")
-    mocker.patch("global_variables.sparkle_version", "0.8")
+    mocker.patch("sparkle.about.version", "0.8")
     mock_instance_num = mocker.patch("sparkle.platform.generate_"
                                      "report_for_configuration."
                                      "get_num_instance_for_configurator",

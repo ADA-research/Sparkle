@@ -17,6 +17,7 @@ from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
 from sparkle.configurator.implementations import SMAC2
 from sparkle.platform.generate_report_help import generate_comparison_plot
+from sparkle import about
 
 
 def get_num_instance_for_configurator(instance_set_name: str) -> str:
@@ -464,7 +465,7 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train_name: s
     latex_dict["runtimeBool"] = get_runtime_bool()
     latex_dict["solver"] = solver.name
     latex_dict["instanceSetTrain"] = instance_set_train_name
-    latex_dict["sparkleVersion"] = gv.sparkle_version
+    latex_dict["sparkleVersion"] = about.version
     latex_dict["numInstanceInTrainingInstanceSet"] = \
         get_num_instance_for_configurator(instance_set_train_name)
 

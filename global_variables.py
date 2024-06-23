@@ -28,8 +28,6 @@ def latest_scenario() -> ReportingScenario:
     return _latest_scenario
 
 
-sparkle_version = about.version
-
 sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
