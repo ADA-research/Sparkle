@@ -76,7 +76,6 @@ def running_solvers_performance_data(
     """
     # Open the performance data csv file
     performance_dataframe = PerformanceDataFrame(performance_data_csv_path)
-    print(performance_dataframe.dataframe)
     # List of jobs to do
     jobs = performance_dataframe.get_job_list(rerun=rerun)
     num_jobs = len(jobs)
