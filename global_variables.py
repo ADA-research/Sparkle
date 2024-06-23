@@ -119,13 +119,11 @@ run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")
 
 reference_list_dir = Path("Reference_Lists")
 instance_list_postfix = "_instance_list.txt"
-extractor_nickname_list_path = (
-    f"{str(reference_list_dir)}/sparkle_extractor_nickname_list.txt")
-extractor_list_path = str(reference_list_dir) + "/sparkle_extractor_list.txt"
-extractor_feature_vector_size_list_path = (
-    f"{str(reference_list_dir)}/extractor_feature_vector_size_list.txt")
-solver_nickname_list_path = str(reference_list_dir) + "/sparkle_solver_nickname_list.txt"
-solver_list_path = str(reference_list_dir / "sparkle_solver_list.txt")
+extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
+extractor_list_path = reference_list_dir / "sparkle_extractor_list.txt"
+extractor_feature_dim_list_path = reference_list_dir / "extractor_feature_dim_list.txt"
+solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
+solver_list_path = reference_list_dir / "sparkle_solver_list.txt"
 instance_list_file = Path("sparkle" + instance_list_postfix)
 instance_list_path = Path(reference_list_dir / instance_list_file)
 
@@ -133,11 +131,11 @@ working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir,
                 sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir]
 
-file_storage_data_mapping = {Path(solver_list_path): [],
-                             Path(solver_nickname_list_path): {},
-                             Path(extractor_list_path): [],
-                             Path(extractor_nickname_list_path): {},
-                             Path(extractor_feature_vector_size_list_path): {},
+file_storage_data_mapping = {solver_list_path: [],
+                             solver_nickname_list_path: {},
+                             extractor_list_path: [],
+                             extractor_nickname_list_path: {},
+                             extractor_feature_dim_list_path: {},
                              instance_list_path: []}
 
 for data_path in file_storage_data_mapping.keys():
@@ -146,11 +144,10 @@ for data_path in file_storage_data_mapping.keys():
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
-solver_list = file_storage_data_mapping[Path(solver_list_path)]
-solver_nickname_mapping = file_storage_data_mapping[Path(solver_nickname_list_path)]
-extractor_list = file_storage_data_mapping[Path(extractor_list_path)]
-extractor_nickname_mapping =\
-    file_storage_data_mapping[Path(extractor_nickname_list_path)]
+solver_list = file_storage_data_mapping[solver_list_path]
+solver_nickname_mapping = file_storage_data_mapping[solver_nickname_list_path]
+extractor_list = file_storage_data_mapping[extractor_list_path]
+extractor_nickname_mapping = file_storage_data_mapping[extractor_nickname_list_path]
 extractor_feature_vector_size_mapping =\
-    file_storage_data_mapping[Path(extractor_feature_vector_size_list_path)]
+    file_storage_data_mapping[extractor_feature_dim_list_path]
 instance_list = file_storage_data_mapping[instance_list_path]

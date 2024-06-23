@@ -59,8 +59,8 @@ if __name__ == "__main__":
     if len(gv.extractor_feature_vector_size_mapping) > 0:
         sfh.add_remove_platform_item(
             None,
-            gv.extractor_feature_vector_size_list_path,
-            gv.file_storage_data_mapping[gv.extractor_feature_vector_size_list_path],
+            gv.extractor_feature_dim_list_path,
+            gv.file_storage_data_mapping[gv.extractor_feature_dim_list_path],
             key=str(extractor_path),
             remove=True)
 

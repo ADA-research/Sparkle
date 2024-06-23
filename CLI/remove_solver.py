@@ -57,12 +57,16 @@ if __name__ == "__main__":
 
     solver_nickname_mapping = gv.solver_nickname_mapping
     if len(solver_nickname_mapping):
+        nickname = None
         for key in solver_nickname_mapping:
             if solver_nickname_mapping[key] == str(solver_path):
-                output = solver_nickname_mapping.pop(key)
+                nickname = key
                 break
-        gv.write_data_to_file(gv.solver_nickname_list_path,
-                              gv.solver_nickname_mapping)
+        sfh.add_remove_platform_item(
+            nickname,
+            gv.solver_nickname_list_path,
+            gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+            remove=True)
 
     if Path(gv.performance_data_csv_path).exists():
         performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
