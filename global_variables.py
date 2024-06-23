@@ -6,7 +6,6 @@ import ast
 from pathlib import Path
 from pathlib import PurePath
 from enum import Enum
-import math
 
 from sparkle import about
 from CLI.help.reporting_scenario import ReportingScenario
