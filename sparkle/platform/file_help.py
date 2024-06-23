@@ -12,7 +12,6 @@ import fcntl
 from pathlib import Path
 
 import sparkle_logging as sl
-import global_variables as gv
 
 
 def create_new_empty_file(filepath: str) -> None:
