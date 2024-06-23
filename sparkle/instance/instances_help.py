@@ -4,9 +4,12 @@
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
-import global_variables as gv
 
 
+# NOTE: These variables have been copied/moved from global variables
+# This is not the cleanest solution and should be solved in SPRK-271
+reference_list_dir = Path("Reference_Lists")
+instance_list_postfix = "_instance_list.txt"
 _instance_list_file = "sparkle_instance_list.txt"
 
 
@@ -56,8 +59,8 @@ def count_instances_in_reference_list(instance_set_name: str) -> int:
     Returns:
         An integer indicating the number of instances in this set.
     """
-    instance_list_path = gv.reference_list_dir / (
-        instance_set_name + gv.instance_list_postfix)
+    instance_list_path = reference_list_dir / (
+        instance_set_name + instance_list_postfix)
     non_empty_lines = [line for line in
                        instance_list_path.open("r").readlines() if line.strip()]
     return len(non_empty_lines)
@@ -72,15 +75,15 @@ def check_existence_of_reference_instance_list(instance_set_name: str) -> bool:
     Returns:
         A bool indicating whether a reference list of the instances in this set exists.
     """
-    return Path(gv.reference_list_dir
-                / Path(instance_set_name + gv.instance_list_postfix)).is_file()
+    return Path(reference_list_dir
+                / Path(instance_set_name + instance_list_postfix)).is_file()
 
 
 def copy_reference_instance_list(target_file: Path, instance_set_name: str,
                                  path_modifier: str) -> None:
     """Copy a file with a list of instances."""
-    instance_list_path = Path(gv.reference_list_dir
-                              / Path(instance_set_name + gv.instance_list_postfix))
+    instance_list_path = reference_list_dir / (
+        instance_set_name + instance_list_postfix)
     outlines = []
 
     # Add quotes around instances in instance list file
