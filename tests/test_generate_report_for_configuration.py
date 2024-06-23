@@ -48,12 +48,12 @@ def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> N
     mock_count_instances = mocker.patch("sparkle.instance.instances_help."
                                         "count_instances_in_reference_list",
                                         return_value=3)
-    instance_set_name = "test-instance"
+    instance_set = Path("test-instance")
 
-    number = sgrch.get_num_instance_for_configurator(instance_set_name)
+    number = sgrch.get_num_instance_for_configurator(instance_set)
 
-    mock_check_existence.assert_called_once_with(instance_set_name)
-    mock_count_instances.assert_called_once_with(instance_set_name)
+    mock_check_existence.assert_called_once_with(instance_set.name)
+    mock_count_instances.assert_called_once_with(instance_set.name)
     assert number == "3"
 
 
@@ -73,11 +73,11 @@ def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) 
                  "get_list_all_filename_recursive",
                  return_value=[Path("instance-1"),
                                Path("instance-2")])
-    instance_set_name = "test-instance"
+    instance_set = Path("test-instance")
 
-    number = sgrch.get_num_instance_for_configurator(instance_set_name)
+    number = sgrch.get_num_instance_for_configurator(instance_set)
 
-    mock_check_existence.assert_called_once_with(instance_set_name)
+    mock_check_existence.assert_called_once_with(instance_set.name)
     mock_count_instances.assert_not_called()
     assert number == "2"
 
@@ -594,8 +594,8 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     values are added to the common dictionary.
     """
     setup_conf()
-    train_instance = "train-instance"
-    test_instance = "test-instance"
+    train_instance = Path("train-instance")
+    test_instance = Path("test-instance")
     report_dir = "reports/directory"
     cutoff = "60"
     mock_perf = mocker.patch("sparkle.platform.generate_"
@@ -648,19 +648,19 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     mock_perf.assert_called_once_with()
     mock_runtime.assert_called_once_with()
     mock_instance_num.assert_called_once_with(train_instance)
-    mock_figure.assert_called_once_with(solver, train_instance, [], [], report_dir,
+    mock_figure.assert_called_once_with(solver, train_instance.name, [], [], report_dir,
                                         float(cutoff))
     mock_timeouts.assert_called_once_with(solver, train_instance, float(cutoff))
-    mock_ablation_bool.assert_called_once_with(solver, train_instance,
-                                               test_instance)
-    mock_ablation_table.assert_called_once_with(solver, train_instance,
-                                                test_instance)
-    mock_features.assert_called_once_with(solver, train_instance)
+    mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
+                                               test_instance.name)
+    mock_ablation_table.assert_called_once_with(solver, train_instance.name,
+                                                test_instance.name)
+    mock_features.assert_called_once_with(solver, train_instance.name)
     assert common_dict == {
         "performanceMeasure": "PERF",
         "runtimeBool": "runtimetrue",
         "solver": solver.name,
-        "instanceSetTrain": train_instance,
+        "instanceSetTrain": train_instance.name,
         "sparkleVersion": "0.8",
         "numInstanceInTrainingInstanceSet": "4",
         "numSmacRuns": "25",
@@ -688,7 +688,8 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     values are added to the common dictionary.
     """
     setup_conf()
-    test_instance = "test-instance"
+    train_instance = Path("train-instance")
+    test_instance = Path("test-instance")
     cutoff = "60"
 
     mock_instance_num = mocker.patch("sparkle.platform.generate_"
@@ -728,16 +729,16 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       test_instance)
 
     mock_instance_num.assert_called_once_with(test_instance)
-    mock_figure.assert_called_once_with(solver, test_instance,
+    mock_figure.assert_called_once_with(solver, test_instance.name,
                                         [], [], gv.configuration_output_analysis,
                                         float(cutoff), data_type="test")
     mock_timeouts.assert_called_once_with(solver, test_instance, float(cutoff))
-    mock_ablation_bool.assert_called_once_with(solver, train_instance,
-                                               test_instance)
-    mock_ablation_table.assert_called_once_with(solver, train_instance,
-                                                test_instance)
+    mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
+                                               test_instance.name)
+    mock_ablation_table.assert_called_once_with(solver, train_instance.name,
+                                                test_instance.name)
     assert test_dict == {
-        "instanceSetTest": test_instance,
+        "instanceSetTest": test_instance.name,
         "numInstanceInTestingInstanceSet": "4",
         "optimisedConfigurationTestingPerformancePAR": "42.1",
         "defaultConfigurationTestingPerformancePAR": "42.2",
