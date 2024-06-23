@@ -42,10 +42,10 @@ def get_num_instance_for_configurator(instance_set_path: Path) -> str:
         # directory, count number of lines in instance file
         if f"{instance_set_name}_train.txt" in list_instance:
             return str(len((instance_set_path / f"{instance_set_name}_train.txt")
-                            .open("r").readlines()))
+                           .open("r").readlines()))
         elif f"{instance_set_name}_test.txt" in list_instance:
             return str(len((instance_set_path / f"{instance_set_name}_test.txt")
-                            .open("r").readlines()))
+                           .open("r").readlines()))
         return str(len(list_instance))
 
 
@@ -621,8 +621,8 @@ def generate_report_for_configuration(solver: Solver, instance_set_train: Path,
 
     Args:
         solver: Object representation of the solver
-        instance_set_train_name: Name of the instance set for training
-        instance_set_test_name: Name of the instance set for testing
+        instance_set_train: Path of the instance set for training
+        instance_set_test: Path of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
     target_path = gv.configuration_output_analysis
