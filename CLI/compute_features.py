@@ -91,9 +91,9 @@ if __name__ == "__main__":
     print("Start computing features ...")
 
     if not args.parallel:
-        scf.computing_features(Path(gv.feature_data_csv_path), args.recompute)
+        scf.computing_features(gv.feature_data_csv_path, args.recompute)
 
-        print("Feature data file " + gv.feature_data_csv_path + " has been updated!")
+        print(f"Feature data file {gv.feature_data_csv_path} has been updated!")
         print("Computing features done!")
     else:
         compute_features_parallel(args.recompute, run_on=args.run_on)

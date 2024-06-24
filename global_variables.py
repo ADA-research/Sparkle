@@ -4,7 +4,6 @@
 import fcntl
 import ast
 from pathlib import Path
-from pathlib import PurePath
 from enum import Enum
 
 from CLI.help.reporting_scenario import ReportingScenario
@@ -46,7 +45,7 @@ class ReportType(str, Enum):
 # Log that keeps track of which commands were executed and where output details can be
 # found
 sparkle_global_log_dir = Path("Log")
-sparkle_global_log_path = PurePath(sparkle_global_output_dir / "sparkle.log")
+sparkle_global_log_path = sparkle_global_output_dir / "sparkle.log"
 
 sparkle_tmp_path = Path("Tmp")
 
