@@ -4,7 +4,6 @@ import sys
 import subprocess
 import argparse
 import shutil
-from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
