@@ -124,7 +124,7 @@ if __name__ == "__main__":
         fout.write(str({"deterministic": deterministic}))
 
     # Add RunSolver executable to the solver
-    runsolver_path = Path(gv.runsolver_path)
+    runsolver_path = gv.runsolver_path
     if runsolver_path.name in [file.name for file in Path(solver_directory).iterdir()]:
         print("Warning! RunSolver executable detected in Solver "
               f"{Path(solver_source).name}. This will be replaced with "
@@ -149,10 +149,6 @@ if __name__ == "__main__":
         sfh.rmfiles(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
-
-    if Path(gv.sparkle_report_path).exists():
-        sfh.rmfiles(gv.sparkle_report_path)
-        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     if nickname_str is not None:
         sfh.add_remove_platform_item(solver_directory,

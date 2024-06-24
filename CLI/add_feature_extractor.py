@@ -167,10 +167,6 @@ if __name__ == "__main__":
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(gv.sparkle_report_path).exists():
-        sfh.rmfiles(Path(gv.sparkle_report_path))
-        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
-
     if nickname_str is not None:
         sfh.add_remove_platform_item(
             extractor_target_path,

@@ -73,7 +73,7 @@ def initialise_sparkle(argv: list[str]) -> None:
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
 
-    Path(f"{gv.ablation_dir}scenarios/").mkdir(exist_ok=True)
+    (gv.ablation_dir / "scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(gv.feature_data_csv_path)
     # Initialise the Performance DF with the static dimensions
     # TODO: We have many sparkle settings values regarding ``number of runs''
@@ -84,9 +84,9 @@ def initialise_sparkle(argv: list[str]) -> None:
                          n_runs=1)
 
     # Check that Runsolver is compiled, otherwise, compile
-    if not Path(gv.runsolver_path).exists():
+    if not gv.runsolver_path.exists():
         print("Runsolver does not exist, trying to compile...")
-        if not Path(gv.runsolver_dir + "Makefile").exists():
+        if not (gv.runsolver_dir / "Makefile").exists():
             print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
                   f" Please verify the contents of the directory: {gv.runsolver_dir}")
         else:

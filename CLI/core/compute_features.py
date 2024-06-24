@@ -36,7 +36,6 @@ if __name__ == "__main__":
     instance_path = Path(" ".join(args.instance))
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
-    runsolver_path = gv.runsolver_path
 
     if len(gv.extractor_list) == 0:
         cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
@@ -54,7 +53,7 @@ if __name__ == "__main__":
     basic_part = "Tmp/" + key_str
     runsolver_watch_data_path = basic_part + ".log"
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
-    command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
+    command_line = (f"{gv.runsolver_path} {cutoff_time_each_run_option} "
                     f"{runsolver_watch_data_path_option} {extractor_path}/"
                     f"{gv.sparkle_extractor_wrapper} "
                     f"-extractor_dir {extractor_path} "

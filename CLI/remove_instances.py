@@ -96,8 +96,4 @@ if __name__ == "__main__":
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(gv.sparkle_report_path).exists():
-        shutil.rmtree(gv.sparkle_report_path)
-        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
-
     print(f"Removing instances in directory {instances_path} done!")

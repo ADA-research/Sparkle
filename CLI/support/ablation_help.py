@@ -29,17 +29,15 @@ def get_ablation_scenario_directory(solver: Solver, instance_train_name: str,
     instance_test_name = (
         f"_{instance_test_name}" if instance_test_name is not None else "")
 
-    ablation_scenario_dir = "" if exec_path else gv.ablation_dir
-    ablation_scenario_dir += (
-        f"scenarios/{solver.name}_"
-        f"{instance_train_name}{instance_test_name}/"
-    )
-    return ablation_scenario_dir
+    ablation_scenario_dir = "" if exec_path else f"{gv.ablation_dir / 'scenarios'}/"
+    scenario_dir = f"{ablation_scenario_dir}"\
+                   f"{solver.name}_{instance_train_name}{instance_test_name}"
+    return scenario_dir
 
 
 def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str) -> None:
     """Clean up ablation analysis directory."""
-    ablation_scenario_dir = Path(gv.ablation_dir + "scenarios/")
+    ablation_scenario_dir = gv.ablation_dir / "scenarios"
     if ablation_scenario_dir.is_dir():
         for ablation_scenario in ablation_scenario_dir.glob(
                 f"{solver_name}_{instance_set_train_name}_*"):

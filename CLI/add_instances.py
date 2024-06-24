@@ -165,10 +165,6 @@ if __name__ == "__main__":
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if Path(gv.sparkle_report_path).exists():
-        sfh.rmfiles(gv.sparkle_report_path)
-        print("Removing Sparkle report " + gv.sparkle_report_path + " done!")
-
     if args.run_extractor_now:
         if not args.parallel:
             print("Start computing features ...")

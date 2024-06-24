@@ -78,7 +78,6 @@ sparkle_marginal_contribution_perfect_path = (
 sparkle_marginal_contribution_actual_path = (
     sparkle_algorithm_selector_dir / "marginal_contribution_actual.csv")
 
-sparkle_report_path = "Components/Sparkle-latex-generator/Sparkle_Report.pdf"
 sparkle_latex_dir = Path("Components/Sparkle-latex-generator")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
 
@@ -101,14 +100,14 @@ parallel_portfolio_output_analysis =\
     parallel_portfolio_output_general / analysis_dir_name
 selection_output_analysis = selection_output_general / analysis_dir_name
 
-runsolver_dir = "Components/runsolver/src/"
-runsolver_path = runsolver_dir + "runsolver"
+runsolver_dir = Path("Components/runsolver/src/")
+runsolver_path = runsolver_dir / "runsolver"
 autofolio_path = "Components/AutoFolio/scripts/autofolio"
 
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
-ablation_dir = "Components/ablationAnalysis-0.9.4/"
+ablation_dir = Path("Components/ablationAnalysis-0.9.4/")
 
 feature_data_csv_path = "Feature_Data/sparkle_feature_data.csv"
 feature_data_id_path = "Feature_Data/sparkle_feature_data.id"
@@ -119,13 +118,14 @@ run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")
 
 reference_list_dir = Path("Reference_Lists")
 instance_list_postfix = "_instance_list.txt"
+# NOTE: These data structures / files seem to be only written to / removed from but not actually read?
+# NOTE: This could be a bug though, should test before removing stuff!
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
 extractor_list_path = reference_list_dir / "sparkle_extractor_list.txt"
 extractor_feature_dim_list_path = reference_list_dir / "extractor_feature_dim_list.txt"
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 solver_list_path = reference_list_dir / "sparkle_solver_list.txt"
-instance_list_file = Path("sparkle" + instance_list_postfix)
-instance_list_path = Path(reference_list_dir / instance_list_file)
+instance_list_path = reference_list_dir / f"sparkle{instance_list_postfix}"
 
 working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir,

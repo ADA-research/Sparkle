@@ -72,8 +72,6 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
     list_feature_computation_job = get_feature_computation_job_list(
         feature_data_csv, recompute)
 
-    runsolver_path = gv.runsolver_path
-
     if len(gv.extractor_list) == 0:
         cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
     else:
@@ -112,7 +110,7 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
             runsolver_watch_data_path = f"{basic_part}.log"
             runsolver_values_path = result_path.replace(".rawres", ".val")
 
-            command_line = [runsolver_path,
+            command_line = [gv.runsolver_path,
                             "--cpu-limit", str(cutoff_time_each_extractor_run),
                             "-w", runsolver_watch_data_path,
                             "-v", runsolver_values_path,

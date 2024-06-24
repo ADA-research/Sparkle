@@ -137,7 +137,7 @@ if __name__ == "__main__":
                               instance_set_test_name):
         print("Warning: found existing ablation scenario for this combination. "
               "This will be removed.")
-        shutil.rmtree(gv.ablation_dir + ablation_scenario_dir)
+        shutil.rmtree(gv.ablation_dir / ablation_scenario_dir)
 
     # Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(

@@ -45,9 +45,8 @@ def remove_current_sparkle_platform() -> None:
     for working_dir in gv.working_dirs:
         shutil.rmtree(working_dir, ignore_errors=True)
 
-    ablation_scenario_dir = f"{gv.ablation_dir}scenarios/"
-    shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
-    Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf").unlink(missing_ok=True)
+    ablation_scenario_dir = gv.ablation_dir / "scenarios"
+    shutil.rmtree(ablation_scenario_dir, ignore_errors=True)
     print("Existing Sparkle platform cleaned!")
 
 
