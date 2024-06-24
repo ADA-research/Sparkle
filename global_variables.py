@@ -59,8 +59,8 @@ sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
 
 sparkle_algorithm_selector_name = f"sparkle_portfolio_selector{sparkle_special_string}"
 
-sparkle_algorithm_selector_path = (
-    sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name)
+sparkle_algorithm_selector_path =\
+    sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name
 
 output_dir = Path("Output")
 instance_dir = Path("Instances")
@@ -102,14 +102,14 @@ selection_output_analysis = selection_output_general / analysis_dir_name
 
 runsolver_dir = Path("Components/runsolver/src/")
 runsolver_path = runsolver_dir / "runsolver"
-autofolio_path = "Components/AutoFolio/scripts/autofolio"
+autofolio_exec_path = Path("Components/AutoFolio/scripts/autofolio")
 
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
 ablation_dir = Path("Components/ablationAnalysis-0.9.4/")
 
-feature_data_csv_path = "Feature_Data/sparkle_feature_data.csv"
+feature_data_csv_path = Path("Feature_Data/sparkle_feature_data.csv")
 performance_data_csv_path = Path("Performance_Data/sparkle_performance_data.csv")
 pap_sbatch_tmp_path = sparkle_tmp_path / "SBATCH_Parallel_Portfolio_Jobs"
 run_solvers_sbatch_tmp_path = sparkle_tmp_path / "SBATCH_Solver_Jobs"

@@ -10,20 +10,20 @@ from pathlib import Path
 class SparkleCSV:
     """Class to read, write, and update a CSV file."""
 
-    def __init__(self: SparkleCSV, csv_filepath: str) -> None:
+    def __init__(self: SparkleCSV, csv_filepath: Path) -> None:
         """Initialise a CSV."""
         self.csv_filepath = csv_filepath
         self.dataframe = pd.read_csv(csv_filepath, index_col=0)
 
     @staticmethod
-    def create_empty_csv(csv_filepath: str) -> None:
+    def create_empty_csv(csv_filepath: Path) -> None:
         """Create an empty CSV file."""
-        if Path(csv_filepath).exists():
+        if csv_filepath.exists():
             print("Path", csv_filepath, "already exists!")
             print("Nothing changed!")
             return
 
-        with Path(csv_filepath).open("w+") as fo:
+        with csv_filepath.open("w+") as fo:
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             fo.write('""')
 
@@ -34,7 +34,7 @@ class SparkleCSV:
                 self.set_value(row, column, None)
         self.save_csv()
 
-    def save_csv(self: SparkleCSV, csv_filepath: str = None) -> None:
+    def save_csv(self: SparkleCSV, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
 
         Args:
@@ -42,7 +42,7 @@ class SparkleCSV:
         """
         if csv_filepath is None:
             csv_filepath = self.csv_filepath
-        with Path(csv_filepath).open("w+") as fo:
+        with csv_filepath.open("w+") as fo:
             fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
             self.dataframe.to_csv(csv_filepath)
 

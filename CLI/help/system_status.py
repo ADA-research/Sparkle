@@ -27,12 +27,12 @@ def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> 
     print()
 
 
-def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
+def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
                                                  verbose: bool = False) -> None:
     """Print a list of remaining feature computation jobs.
 
     Args:
-        feature_data_csv_path: path to the feature data csv
+        feature_data_csv_path: Path to the feature data csv
         verbose: Indicating, if output should be verbose
     """
     try:
@@ -44,7 +44,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
     total_job_num = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
 
-    print(f"\nCurrently Sparkle has {str(total_job_num)} remaining feature computation "
+    print(f"\nCurrently Sparkle has {total_job_num} remaining feature computation "
           "jobs that need to be performed before creating an algorithm selector"
           + (":" if verbose else ""))
 

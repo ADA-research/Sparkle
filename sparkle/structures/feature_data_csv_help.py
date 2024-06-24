@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 import numpy as np
 import math
+from pathlib import Path
 
 from sparkle.structures import csv_help as scsv
 
@@ -14,7 +15,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
     sparkle_special_string = "__@@SPARKLE@@__"  # No idea who came up with this baloney
     missing_value = math.nan
 
-    def __init__(self: SparkleFeatureDataCSV, csv_filepath: str,
+    def __init__(self: SparkleFeatureDataCSV, csv_filepath: Path,
                  extractor_list: list[str] = None) -> None:
         """Initialise a SparkleFeatureDataCSV object."""
         scsv.SparkleCSV.__init__(self, csv_filepath)

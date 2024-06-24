@@ -17,7 +17,7 @@ from sparkle.types.objective import PerformanceMeasure
 
 def construct_sparkle_portfolio_selector(selector_path: Path,
                                          performance_data_csv_path: str,
-                                         feature_data_csv_path: str,
+                                         feature_data_csv_path: Path,
                                          flag_recompute: bool = False,
                                          selector_timeout: int = None) -> bool:
     """Create the Sparkle portfolio selector.
@@ -85,7 +85,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         print("Imputing all missing values starts ...")
         feature_data_csv.impute_missing_value_of_all_columns()
         print("Imputing all missing values done!")
-        impute_feature_data_csv_path = (
+        impute_feature_data_csv_path = Path(
             f"{feature_data_csv_path}_{tg.get_time_pid_random_string()}"
             "_impute.csv")
         feature_data_csv.save_csv(impute_feature_data_csv_path)
@@ -98,17 +98,18 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     performance_data = PerformanceDataFrame(performance_data_csv_path)
     pf_data_autofolio_path = performance_data.to_autofolio()
     if selector_timeout is None:
-        cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
+        cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
                     str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
                     objective_function, "--save", str(selector_path)]
     else:
-        cmd_list = [python_executable, gv.autofolio_path, "--performance_csv",
+        cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
                     str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
                     objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
                     "--save", str(selector_path), "--wallclock_limit",
                     str(selector_timeout)]
     # Write command line to log
-    print("Running command below:\n", " ".join(cmd_list), file=open(log_path_str, "a+"))
+    print("Running command below:\n", " ".join([str(c) for c in cmd_list]),
+          file=open(log_path_str, "a+"))
     sl.add_output(log_path_str, "Command line used to construct portfolio through "
                   "AutoFolio and associated output")
     sl.add_output(err_path_str,

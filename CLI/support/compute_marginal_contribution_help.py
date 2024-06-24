@@ -166,7 +166,7 @@ def get_list_predict_schedule(actual_portfolio_selector_path: str,
     log_path = sl.caller_log_dir / log_file
     err_path_str = str(sl.caller_log_dir) + "/" + err_file
 
-    cmd = [python_executable, gv.autofolio_path, "--load",
+    cmd = [python_executable, gv.autofolio_exec_path, "--load",
            actual_portfolio_selector_path, "--feature_vec", feature_vector_string]
 
     with log_path.open("a+") as log_file:
@@ -231,7 +231,7 @@ def compute_actual_selector_performance(
 def compute_actual_performance_for_instance(
         actual_portfolio_selector_path: str,
         instance: str,
-        feature_data_csv_path: str,
+        feature_data_csv_path: Path,
         performance_data_csv: PerformanceDataFrame,
         minimise: bool,
         objective_type: PerformanceMeasure,
@@ -308,8 +308,8 @@ def compute_actual_selector_marginal_contribution(
         aggregation_function: Callable[[list[float]], float] = mean,
         capvalue_list: list[float] = None,
         minimise: bool = True,
-        performance_data_csv_path: str = gv.performance_data_csv_path,
-        feature_data_csv_path: str = gv.feature_data_csv_path,
+        performance_data_csv_path: Path = gv.performance_data_csv_path,
+        feature_data_csv_path: Path = gv.feature_data_csv_path,
         flag_recompute: bool = False,
         selector_timeout: int = 172000) -> list[tuple[str, float]]:
     """Compute the marginal contributions of solvers in the selector.

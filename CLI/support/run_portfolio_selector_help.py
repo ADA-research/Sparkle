@@ -207,7 +207,7 @@ def call_sparkle_portfolio_selector_solve_instance(
                                     f"{tg.get_time_pid_random_string()}"
                                     ".predres")
     print("Sparkle portfolio selector predicting ...")
-    cmd_list = [gv.python_executable, gv.autofolio_path, "--load",
+    cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
                 gv.sparkle_algorithm_selector_path, "--feature_vec",
                 " ".join(map(str, list_feature_vector))]
 
