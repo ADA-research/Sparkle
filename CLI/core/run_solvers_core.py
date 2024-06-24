@@ -84,9 +84,9 @@ if __name__ == "__main__":
                     f"{time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))}]")
     run_time_str = "[Actual Run Time (wall clock): " + str(wc_time) + " second(s)]"
     recorded_run_time_str = ("[Recorded Run Time (CPU PAR"
-                             f"{str(gv.settings.get_general_penalty_multiplier())}): "
-                             f"{str(cpu_time_penalised)} second(s)]")
-    status_str = "[Run Status: " + status + "]"
+                             f"{gv.settings.get_general_penalty_multiplier()}): "
+                             f"{cpu_time_penalised} second(s)]")
+    status_str = f"[Run Status: {status}]"
 
     log_str = (f"{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, "
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")

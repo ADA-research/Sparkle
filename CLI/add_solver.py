@@ -12,7 +12,6 @@ import runrunner as rrr
 from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.support import run_solvers_help as srs
 from CLI.run_solvers import running_solvers_performance_data
 from sparkle.solver import Solver
 import sparkle_logging as sl
@@ -155,38 +154,31 @@ if __name__ == "__main__":
                                      gv.solver_nickname_list_path, key=nickname_str)
 
     if args.run_solver_now:
-        if not my_flag_parallel:
-            print("Start running solvers ...")
-            srs.running_solvers(gv.performance_data_csv_path, rerun=False)
-            print(f"Performance data file {gv.performance_data_csv_path}"
-                  " has been updated!")
-            print("Running solvers done!")
-        else:
-            num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
-            dependency_run_list = [running_solvers_performance_data(
-                gv.performance_data_csv_path, num_job_in_parallel,
-                rerun=False, run_on=run_on
-            )]
+        num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
+        dependency_run_list = [running_solvers_performance_data(
+            gv.performance_data_csv_path, num_job_in_parallel,
+            rerun=False, run_on=run_on
+        )]
 
-            sbatch_options = ssh.get_slurm_options_list()
-            srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
-            run_construct_portfolio_selector = rrr.add_to_queue(
-                cmd="CLI/construct_sparkle_portfolio_selector.py",
-                name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
-                dependencies=dependency_run_list,
-                base_dir=gv.sparkle_tmp_path,
-                sbatch_options=sbatch_options,
-                srun_options=srun_options)
+        sbatch_options = ssh.get_slurm_options_list()
+        srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
+        run_construct_portfolio_selector = rrr.add_to_queue(
+            cmd="CLI/construct_sparkle_portfolio_selector.py",
+            name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
+            dependencies=dependency_run_list,
+            base_dir=gv.sparkle_tmp_path,
+            sbatch_options=sbatch_options,
+            srun_options=srun_options)
 
-            dependency_run_list.append(run_construct_portfolio_selector)
+        dependency_run_list.append(run_construct_portfolio_selector)
 
-            run_generate_report = rrr.add_to_queue(
-                cmd="CLI/generate_report.py",
-                name=CommandName.GENERATE_REPORT,
-                dependencies=dependency_run_list,
-                base_dir=gv.sparkle_tmp_path,
-                sbatch_options=sbatch_options,
-                srun_options=srun_options)
+        run_generate_report = rrr.add_to_queue(
+            cmd="CLI/generate_report.py",
+            name=CommandName.GENERATE_REPORT,
+            dependencies=dependency_run_list,
+            base_dir=gv.sparkle_tmp_path,
+            sbatch_options=sbatch_options,
+            srun_options=srun_options)
 
     # Write used settings to file
     gv.settings.write_used_settings()

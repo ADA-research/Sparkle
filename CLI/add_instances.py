@@ -11,7 +11,6 @@ from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help import compute_features_help as scf
-from CLI.support import run_solvers_help as srs
 from CLI.run_solvers import running_solvers_performance_data
 import sparkle_logging as sl
 from sparkle.instance import instances_help as sih
@@ -39,6 +38,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **apc.NicknameInstanceSetArgument.kwargs)
     parser.add_argument(*apc.ParallelArgument.names,
                         **apc.ParallelArgument.kwargs)
+    parser.add_argument(*apc.RunOnArgument.names,
+                        **apc.RunOnArgument.kwargs)
 
     return parser
 
@@ -57,6 +58,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_source = Path(args.instances_path)
+    run_on = args.run_on
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])
@@ -177,17 +179,10 @@ if __name__ == "__main__":
             print("Computing features in parallel ...")
 
     if args.run_solver_now:
-        if not args.parallel:
-            print("Start running solvers ...")
-            srs.running_solvers(gv.performance_data_csv_path, rerun=False)
-            print(f"Performance data file {gv.performance_data_csv_path} has been "
-                  "updated!")
-            print("Running solvers done!")
-        else:
-            num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
-            running_solvers_performance_data(
-                gv.performance_data_csv_path, num_job_in_parallel, rerun=False)
-            print("Running solvers in parallel ...")
+        num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
+        running_solvers_performance_data(
+            gv.performance_data_csv_path, num_job_in_parallel, rerun=False, run_on=run_on)
+        print("Running solvers in parallel ...")
 
     # Write used settings to file
     gv.settings.write_used_settings()

@@ -21,7 +21,6 @@ from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
-from CLI.support import run_solvers_help as srs
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -88,9 +87,6 @@ def running_solvers_performance_data(
     # If there are no jobs, stop
     if num_jobs == 0:
         return None
-    # If there are jobs update performance data ID
-    else:
-        srs.update_performance_data_id()
 
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
@@ -99,9 +95,9 @@ def running_solvers_performance_data(
 
     srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
     sbatch_options = ssh.get_slurm_options_list()
-    cmd_base = "CLI/core/run_solvers_core.py"
     perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    cmd_list = [f"{cmd_base} --performance-data {performance_data_csv_path} "
+    cmd_list = ["CLI/core/run_solvers_core.py"
+                f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
                 f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]
 
@@ -113,6 +109,9 @@ def running_solvers_performance_data(
         base_dir=gv.sparkle_tmp_path,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
+
+    if run_on == Runner.LOCAL:
+        run.wait()
 
     return run
 

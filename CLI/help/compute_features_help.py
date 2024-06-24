@@ -89,9 +89,6 @@ def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
         print("No feature computation jobs to run; stopping execution! To recompute "
               "feature values use the --recompute flag.")
         sys.exit()
-    # If there are jobs update feature data ID
-    else:
-        update_feature_data_id()
 
     current_job_num = 1
     print(f"Total number of jobs to run: {total_job_num}")
@@ -195,9 +192,6 @@ def computing_features_parallel(feature_data_csv_path: Path,
         print("No feature computation jobs to run; stopping execution! To recompute "
               "feature values use the --recompute flag.")
         sys.exit()
-    # If there are jobs update feature data ID
-    else:
-        update_feature_data_id()
 
     print("The number of total running jobs: " + str(n_jobs))
     total_job_list = sjh.expand_total_job_from_list(list_feature_computation_job)
@@ -251,24 +245,3 @@ def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureData
             feature_data_csv.get_list_remaining_feature_computation_job())
 
     return list_feature_computation_job
-
-
-def update_feature_data_id() -> None:
-    """Updates the feature data ID by incrementing the current feature data ID by 1."""
-    # Get the incremented fd_id
-    fd_id = get_feature_data_id() + 1
-    # Write it
-    with Path(gv.feature_data_id_path).open("w") as fd_id_file:
-        fd_id_file.write(str(fd_id))
-
-
-def get_feature_data_id() -> int:
-    """Returns the current feature data ID.
-
-    Returns:
-        An int containing the current feature data ID.
-    """
-    fd_id_path = Path(gv.feature_data_id_path)
-    if not fd_id_path.exists():
-        return 0
-    return int(Path(fd_id_path).open("r").readline())
