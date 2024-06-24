@@ -363,14 +363,15 @@ def generate_figure(
 
 
 def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
+                                       target_path: Path,
                                        instances: list[str]) -> None:
     """Generate a report for a parallel algorithm portfolio.
 
     Args:
         parallel_portfolio_path: Parallel portfolio path.
+        target_path: Where the report data will be placed.
         instances: List of instances.
     """
-    target_path = gv.parallel_portfolio_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = parallel_report_variables(
         target_path, parallel_portfolio_path, instances)

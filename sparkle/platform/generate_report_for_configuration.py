@@ -614,18 +614,20 @@ def get_most_recent_test_run() -> tuple[str, str, bool, bool]:
             flag_instance_set_test)
 
 
-def generate_report_for_configuration(solver: Solver, instance_set_train: Path,
+def generate_report_for_configuration(solver: Solver,
+                                      target_path: Path,
+                                      instance_set_train: Path,
                                       instance_set_test: Path = None,
                                       ablation: bool = True) -> None:
     """Generate a report for algorithm configuration.
 
     Args:
         solver: Object representation of the solver
+        target_path: Where the report files will be placed.
         instance_set_train: Path of the instance set for training
         instance_set_test: Path of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
-    target_path = gv.configuration_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
         target_path, solver, instance_set_train, instance_set_test,

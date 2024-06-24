@@ -133,7 +133,8 @@ if __name__ == "__main__":
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(gv.ReportType.ALGORITHM_SELECTION)
         status_info.save()
-        sgrh.generate_report_selection(test_case_directory)
+        sgrh.generate_report_selection(gv.selection_output_analysis,
+                                       test_case_directory)
         if test_case_directory is None:
             print("Report generated ...")
         else:
@@ -147,7 +148,9 @@ if __name__ == "__main__":
         status_info.save()
 
         sgrfpph.generate_report_parallel_portfolio(
-            parallel_portfolio_path, pap_instance_list)
+            parallel_portfolio_path,
+            gv.parallel_portfolio_output_analysis,
+            pap_instance_list)
         print("Parallel portfolio report generated ...")
         status_info.delete()
     else:
@@ -196,6 +199,7 @@ if __name__ == "__main__":
 
         sgrfch.generate_report_for_configuration(
             solver,
+            gv.configuration_output_analysis,
             instance_set_train,
             instance_set_test,
             ablation=args.flag_ablation

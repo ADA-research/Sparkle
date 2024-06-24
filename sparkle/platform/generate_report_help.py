@@ -613,10 +613,12 @@ def generate_comparison_plot(points: list,
     sfh.rmfiles(output_gnuplot_script)
 
 
-def generate_report_selection(test_case_directory: str = None) -> None:
+def generate_report_selection(target_path: Path,
+                              test_case_directory: str = None) -> None:
     """Generate a report for algorithm selection.
 
     Args:
+        target_path: Path where the outputfiles will be placed.
         test_case_directory: Path to the test case directory. Defaults to None.
     """
     # Include results on the test set if a test case directory is given
@@ -632,7 +634,6 @@ def generate_report_selection(test_case_directory: str = None) -> None:
     # Only look at the training instance set(s)
     else:
         latex_report_filename = Path("Sparkle_Report")
-    target_path = gv.selection_output_analysis
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = selection_report_variables(target_path,
                                                         test_case_directory)
