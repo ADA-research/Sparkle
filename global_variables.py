@@ -111,7 +111,7 @@ ablation_dir = Path("Components/ablationAnalysis-0.9.4/")
 
 feature_data_csv_path = "Feature_Data/sparkle_feature_data.csv"
 feature_data_id_path = "Feature_Data/sparkle_feature_data.id"
-performance_data_csv_path = "Performance_Data/sparkle_performance_data.csv"
+performance_data_csv_path = Path("Performance_Data/sparkle_performance_data.csv")
 performance_data_id_path = "Performance_Data/sparkle_performance_data.id"
 pap_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/")
 run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")

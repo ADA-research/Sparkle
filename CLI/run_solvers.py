@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import sys
 import argparse
-from pathlib import PurePath
+from pathlib import PurePath, Path
 
 import runrunner as rrr
 from runrunner.base import Runner
@@ -49,7 +49,7 @@ def parser_function() -> argparse.ArgumentParser:
 
 
 def running_solvers_performance_data(
-        performance_data_csv_path: str,
+        performance_data_csv_path: Path,
         num_job_in_parallel: int,
         rerun: bool = False,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
@@ -57,7 +57,7 @@ def running_solvers_performance_data(
 
     Parameters
     ----------
-    performance_data_csv_path: str
+    performance_data_csv_path: Path
         The path to the performance data file
     num_job_in_parallel: int
         The maximum number of jobs to run in parallel

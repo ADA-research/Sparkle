@@ -58,12 +58,12 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: str,
     print()
 
 
-def print_list_remaining_performance_computation_job(performance_data_csv_path: str,
+def print_list_remaining_performance_computation_job(performance_data_csv_path: Path,
                                                      verbose: bool = False) -> None:
     """Print a list of remaining performance computation jobs.
 
     Args:
-        performance_data_csv_path: path to the performance data csv
+        performance_data_csv_path: Path to the performance data csv
         verbose: Indicating, if output should be verbose
     """
     try:
