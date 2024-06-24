@@ -372,6 +372,12 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         target_path: Where the report data will be placed.
         instances: List of instances.
     """
+    #cutoff = gv.settings.get_general_target_cutoff_time()
+    #penalised_time = float(gv.settings.get_penalised_time())
+    #performance_metric_str = gv.settings.get_performance_metric_for_report()
+    #gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    #gv.sparkle_report_bibliography_path.absolute()
+    #gv.sparkle_latex_dir
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = parallel_report_variables(
         target_path, parallel_portfolio_path, instances)

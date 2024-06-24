@@ -751,26 +751,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     }
 
 
-def test_check_results_exist_all_error(mocker: MockFixture) -> None:
-    """Test check_results_exist produces the correct error if no path exists.
-
-    If none of the tested paths exist, test that a SystemExit is raised.
-    Also, test that the correct error string is printed, explaining each missing path.
-    """
-    mock_print = mocker.patch("builtins.print")
-    mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
-    mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
-                 return_value=[])
-
-    with pytest.raises(SystemExit):
-        sgrch.check_results_exist(solver, train_instance, test_instance)
-
-    mock_print.assert_called_once_with(
-        "Error: Results not found for the given solver and instance set(s) combination. "
-        'Make sure the "configure_solver" and "validate_configured_vs_default" commands '
-        "were correctly executed. ")
-
-
 def test_get_most_recent_test_run_full(mocker: MockFixture) -> None:
     """Test get_most_recent_test_run returns the correct tuple if present in file.
 

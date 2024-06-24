@@ -559,28 +559,6 @@ def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
     return test_dict
 
 
-def check_results_exist(solver: Solver, instance_set_train: str,
-                        instance_set_test: str = None) -> None:
-    """Check whether configuration results exist.
-
-    Args:
-        solver: The solver object
-        instance_set_train: Name of the instance set for training
-        instance_set_test: Name of the instance set for testing. Defaults to None.
-    """
-    validator = Validator(gv.validation_output_general)
-    train_res = validator.get_validation_results(
-        solver, gv.instance_dir / instance_set_train)
-    if instance_set_test is not None:
-        test_res = validator.get_validation_results(solver,
-                                                    gv.instance_dir / instance_set_test)
-    if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
-        print("Error: Results not found for the given solver and instance set(s) "
-              'combination. Make sure the "configure_solver" and '
-              '"validate_configured_vs_default" commands were correctly executed. ')
-        sys.exit(-1)
-
-
 def get_most_recent_test_run() -> tuple[str, str, bool, bool]:
     """Return the instance sets used most recently to configure a given solver.
 

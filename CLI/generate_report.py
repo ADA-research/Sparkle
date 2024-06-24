@@ -19,6 +19,7 @@ from CLI.help.reporting_scenario import Scenario
 from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
+from sparkle.solver.validator import Validator
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
@@ -185,13 +186,20 @@ if __name__ == "__main__":
         gv.settings.get_general_sparkle_configurator()\
             .set_scenario_dirs(solver, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
-        if flag_instance_set_train and flag_instance_set_test:
+        if flag_instance_set_train or flag_instance_set_test:
+            # Check if there are result to generate a report from
             instance_set_test_name = instance_set_test.name
-            sgrfch.check_results_exist(
-                solver, instance_set_train_name, instance_set_test_name
-            )
-        elif flag_instance_set_train:
-            sgrfch.check_results_exist(solver, instance_set_train_name)
+            validator = Validator(gv.validation_output_general)
+            train_res = validator.get_validation_results(
+                solver, instance_set_train)
+            if instance_set_test is not None:
+                test_res = validator.get_validation_results(solver,
+                                                            instance_set_test)
+            if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
+                print("Error: Results not found for the given solver and instance set(s) "
+                    'combination. Make sure the "configure_solver" and '
+                    '"validate_configured_vs_default" commands were correctly executed. ')
+                sys.exit(-1)
         else:
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
