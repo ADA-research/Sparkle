@@ -5,7 +5,7 @@ from pathlib import Path
 
 import global_variables as gv
 import sparkle_logging as sl
-from sparkle.platform import generate_report_help as sgrh
+from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import PerformanceMeasure
 
 
@@ -26,7 +26,7 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
         solver_name = Path(solver_split[0]).name
         solver_seeds = int(solver_split[2]) if len(solver_split) == 3 else 0
 
-        latex_itemize += f"\\item \\textbf{{{sgrh.underscore_for_latex(solver_name)}}}\n"
+        latex_itemize += f"\\item \\textbf{{{sgfs.underscore_for_latex(solver_name)}}}\n"
         # Only include if we used more than one seed
         if solver_seeds > 1:
             seeds = ",".join(list[range(1, solver_seeds + 1)])
@@ -156,7 +156,7 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
     performance_metric_str = gv.settings.get_performance_metric_for_report()
 
     generate_figure(target_directory, data_filename, penalised_time_str,
-                    f"SBS ({sgrh.underscore_for_latex(sbs_solver)})",
+                    f"SBS ({sgfs.underscore_for_latex(sbs_solver)})",
                     "Parallel-Portfolio", figure_filename, performance_metric_str)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
     return (latex_include, dict_all_solvers,
@@ -204,7 +204,7 @@ def get_results_table(results: dict[str, str, str],
         "} & \\textbf{\\#Timeouts} & "
         "\\textbf{\\#Cancelled} & \\textbf{\\# Solved} \\\\ \\hline ")
     table_string += (
-        f"{sgrh.underscore_for_latex(parallel_portfolio_path.name)} & "
+        f"{sgfs.underscore_for_latex(parallel_portfolio_path.name)} & "
         f"{round(portfolio_par,2)} & {n_unsolved_instances} & {total_killed} & "
         f"{n_instances-n_unsolved_instances} \\\\ ")
     table_string += "\\end{tabular}"
@@ -226,14 +226,14 @@ def get_results_table(results: dict[str, str, str],
         if solver_name not in solver_with_solutions:
             cancelled = n_instances - n_unsolved_instances
             table_string += (
-                f"{sgrh.underscore_for_latex(solver_name)} & "
+                f"{sgfs.underscore_for_latex(solver_name)} & "
                 f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
                 f"{cancelled} & 0 \\\\ ")
         else:
             cancelled = (n_instances - n_unsolved_instances
                          - solver_with_solutions[solver_name])
             table_string += (
-                f"{sgrh.underscore_for_latex(solver_name)} & "
+                f"{sgfs.underscore_for_latex(solver_name)} & "
                 f"{round(dict_all_solvers[line], 2)} & {n_unsolved_instances} & "
                 f"{cancelled} & {solver_with_solutions[solver_name]} \\\\ ")
     table_string += "\\end{tabular}"
@@ -271,7 +271,7 @@ def parallel_report_variables(target_directory: Path,
         [Path(instance_path).parent.name for instance_path in instances])))
     variables_dict["cutoffTime"] = str(gv.settings.get_general_target_cutoff_time())
     variables_dict["performanceMetric"] = gv.settings.get_performance_metric_for_report()
-    variables_dict["instanceClassList"] = sgrh.get_instance_set_count_list(instances)
+    variables_dict["instanceClassList"] = sgfs.get_instance_set_count_list(instances)
 
     # Produce some statistics on the parallel portfolio
     solvers_solutions = {solver: 0 for solver in solver_list}
@@ -285,7 +285,7 @@ def parallel_report_variables(target_directory: Path,
     inst_succes = []
     for solver in solvers_solutions:
         inst_succes.append("\\item Solver "
-                           f"\\textbf{{{sgrh.underscore_for_latex(solver)}}}, was the "
+                           f"\\textbf{{{sgfs.underscore_for_latex(solver)}}}, was the "
                            "best solver on "
                            f"\\textbf{{{solvers_solutions[solver]}}} instance(s)")
     if unsolved_instances > 0:
@@ -357,8 +357,8 @@ def generate_figure(
                       f"plot '{data_parallel_portfolio_sparkle_vs_sbs_filename}' with "
                       "points pt 2 ps 2\n")
 
-    sgrh.generate_gnuplot(output_gnuplot_script, target_directory)
-    sgrh.generate_pdf(output_eps_file, target_directory)
+    sgfs.generate_gnuplot(output_gnuplot_script, target_directory)
+    sgfs.generate_pdf(output_eps_file, target_directory)
     Path(output_gnuplot_script).unlink(missing_ok=True)
 
 
@@ -376,7 +376,7 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
     dict_variable_to_value = parallel_report_variables(
         target_path, parallel_portfolio_path, instances)
 
-    sgrh.generate_report(gv.sparkle_latex_dir,
+    sgfs.generate_report(gv.sparkle_latex_dir,
                          "template-Sparkle-for-parallel-portfolio.tex",
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",

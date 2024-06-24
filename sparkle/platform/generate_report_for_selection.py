@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Helper functions for report generation."""
+"""Helper functions for selection report generation."""
 import os
 import sys
 import numpy as np

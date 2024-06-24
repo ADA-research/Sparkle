@@ -7,7 +7,7 @@ from pathlib import Path, PurePath
 
 from CLI.help.status_info import GenerateReportStatusInfo
 import global_variables as gv
-from sparkle.platform import generate_report_help as sgrh
+from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
 import sparkle_logging as sl
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(gv.ReportType.ALGORITHM_SELECTION)
         status_info.save()
-        sgrh.generate_report_selection(gv.selection_output_analysis,
+        sgfs.generate_report_selection(gv.selection_output_analysis,
                                        test_case_directory)
         if test_case_directory is None:
             print("Report generated ...")

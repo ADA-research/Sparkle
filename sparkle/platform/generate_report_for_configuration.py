@@ -11,12 +11,12 @@ import sparkle_logging as sl
 from sparkle.platform import file_help as sfh
 import global_variables as gv
 from sparkle.instance import instances_help as sih
-from sparkle.platform import generate_report_help as sgrh
+from sparkle.platform import generate_report_for_selection as sgfs
 from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
 from sparkle.configurator.implementations import SMAC2
-from sparkle.platform.generate_report_help import generate_comparison_plot
+from sparkle.platform.generate_report_for_selection import generate_comparison_plot
 from sparkle import about
 
 
@@ -426,7 +426,7 @@ def configuration_report_variables(target_dir: Path, solver: Solver,
 
     if full_dict["featuresBool"] == "\\featurestrue":
         full_dict["numFeatureExtractors"] = str(len(gv.extractor_list))
-        full_dict["featureExtractorList"] = sgrh.get_feature_extractor_list()
+        full_dict["featureExtractorList"] = sgfs.get_feature_extractor_list()
         full_dict["featureComputationCutoffTime"] =\
             str(gv.settings.get_general_extractor_cutoff_time())
 
@@ -632,7 +632,7 @@ def generate_report_for_configuration(solver: Solver,
     variables_dict = configuration_report_variables(
         target_path, solver, instance_set_train, instance_set_test,
         ablation)
-    sgrh.generate_report(gv.sparkle_latex_dir,
+    sgfs.generate_report(gv.sparkle_latex_dir,
                          "template-Sparkle-for-configuration.tex",
                          target_path,
                          "Sparkle_Report_for_Configuration",
