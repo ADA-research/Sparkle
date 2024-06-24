@@ -164,18 +164,8 @@ if __name__ == "__main__":
             sys.exit(-1)
         solver_name = solver.name
 
-        # If no instance set(s) is/are given, try to retrieve them from the last run of
-        # validate_configured_vs_default
-        if not flag_instance_set_train and not flag_instance_set_test:
-            (
-                instance_set_train,
-                instance_set_test,
-                flag_instance_set_train,
-                flag_instance_set_test,
-            ) = sgrfch.get_most_recent_test_run()
-
         # If only the testing set is given return an error
-        elif not flag_instance_set_train and flag_instance_set_test:
+        if not flag_instance_set_train and flag_instance_set_test:
             print("Argument Error! Only a testing set was provided, please also "
                   "provide a training set")
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "

@@ -559,39 +559,6 @@ def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
     return test_dict
 
 
-def get_most_recent_test_run() -> tuple[str, str, bool, bool]:
-    """Return the instance sets used most recently to configure a given solver.
-
-    Args:
-        solver_name: Name of the solver
-
-    Returns:
-        A tuple containg the training and test instance sets
-    """
-    instance_set_train = ""
-    instance_set_test = ""
-    flag_instance_set_train = False
-    flag_instance_set_test = False
-
-    # Read most recent run from file
-    last_test_file_path =\
-        gv.settings.get_general_sparkle_configurator().scenario.directory
-
-    test_file_lines = last_test_file_path.open("r").readlines()
-    for line in test_file_lines:
-        words = line.split()
-        if words[0] == "train":
-            instance_set_train = words[1]
-            if instance_set_train != "":
-                flag_instance_set_train = True
-        elif words[0] == "test":
-            instance_set_test = words[1]
-            if instance_set_test != "":
-                flag_instance_set_test = True
-    return (instance_set_train, instance_set_test, flag_instance_set_train,
-            flag_instance_set_test)
-
-
 def generate_report_for_configuration(solver: Solver,
                                       target_path: Path,
                                       instance_set_train: Path,

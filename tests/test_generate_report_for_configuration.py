@@ -751,46 +751,6 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     }
 
 
-def test_get_most_recent_test_run_full(mocker: MockFixture) -> None:
-    """Test get_most_recent_test_run returns the correct tuple if present in file.
-
-    If the last test file contains information on train and test instances, return the
-    corresponding information and set the flags to True.
-    """
-    file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n"
-                         "train Instances/PTN\n"
-                         "test Instances/PTN2")
-
-    mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
-
-    (train_instance, test_instance, train_flag, test_flag) = (
-        sgrch.get_most_recent_test_run())
-
-    assert train_instance == "Instances/PTN"
-    assert test_instance == "Instances/PTN2"
-    assert train_flag
-    assert test_flag
-
-
-def test_get_most_recent_test_run_empty(mocker: MockFixture) -> None:
-    """Test get_most_recent_test_run returns empyt strings if values not present in file.
-
-    If the last test file contains no information on train and test instances, return the
-    empty strings and set the flags to False.
-    """
-    file_content_mock = ("solver Solvers/PbO-CCSAT-Generic\n")
-
-    mocker.patch("pathlib.Path.open", mocker.mock_open(read_data=file_content_mock))
-
-    (train_instance, test_instance, train_flag, test_flag) = (
-        sgrch.get_most_recent_test_run())
-
-    assert train_instance == ""
-    assert test_instance == ""
-    assert not train_flag
-    assert not test_flag
-
-
 def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     """Test generate_report_for_configuration_train generates report.
 
