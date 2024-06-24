@@ -559,10 +559,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                              "report_for_configuration."
                              "get_performance_measure",
                              return_value="PERF")
-    mock_runtime = mocker.patch("sparkle.platform.generate_"
-                                "report_for_configuration."
-                                "get_runtime_bool",
-                                return_value="runtimetrue")
     mocker.patch("sparkle.about.version", "0.8")
     mocker.patch("sparkle.platform.generate_"
                  "report_for_configuration."
@@ -585,10 +581,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                        "report_for_configuration."
                                        "get_ablation_table",
                                        return_value="ablation/path")
-    mock_features = mocker.patch("sparkle.platform.generate_"
-                                 "report_for_configuration."
-                                 "get_features_bool",
-                                 return_value="featurestrue")
     mocker.patch("sparkle.configurator.implementations.smac2."
                  "SMAC2.get_optimal_configuration", return_value=(0, "123"))
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
@@ -599,7 +591,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                                           test_instance, report_dir)
 
     mock_perf.assert_called_once_with()
-    mock_runtime.assert_called_once_with()
     mock_figure.assert_called_once_with(solver, train_instance.name,
                                         validation_data, validation_data, report_dir,
                                         float(cutoff))
@@ -608,10 +599,10 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                                test_instance.name)
     mock_ablation_table.assert_called_once_with(solver, train_instance.name,
                                                 test_instance.name)
-    mock_features.assert_called_once_with(solver, train_instance.name)
+
     assert common_dict == {
         "performanceMeasure": "PERF",
-        "runtimeBool": "runtimetrue",
+        "runtimeBool": "\\runtimetrue",
         "solver": solver.name,
         "instanceSetTrain": train_instance.name,
         "sparkleVersion": "0.8",
@@ -630,7 +621,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "ablationBool": "ablationtrue",
         "ablationPath": "ablation/path",
         "bibliographypath": str(gv.sparkle_report_bibliography_path.absolute()),
-        "featuresBool": "featurestrue"
+        "featuresBool": "\\featuresfalse"
     }
 
 

@@ -8,9 +8,7 @@ from pathlib import Path
 import math
 
 import sparkle_logging as sl
-from sparkle.platform import file_help as sfh
 import global_variables as gv
-from sparkle.instance import instances_help as sih
 from sparkle.platform import generate_report_for_selection as sgfs
 from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
@@ -80,22 +78,6 @@ def get_performance_measure() -> str:
         return "performance"
 
 
-def get_runtime_bool() -> str:
-    """Return the runtime bool as LaTeX string.
-
-    Returns:
-        A string containing the runtime boolean
-    """
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
-
-    if smac_run_obj == "RUNTIME":
-        return "\\runtimetrue"
-    elif smac_run_obj == "QUALITY":
-        return "\\runtimefalse"
-    return ""
-
-
 def get_ablation_bool(solver: Solver, instance_train_name: str,
                       instance_test_name: str) -> str:
     """Return the ablation bool as LaTeX string.
@@ -111,27 +93,6 @@ def get_ablation_bool(solver: Solver, instance_train_name: str,
     if sah.check_for_ablation(solver, instance_train_name, instance_test_name):
         return "\\ablationtrue"
     return "\\ablationfalse"
-
-
-def get_features_bool(solver: Solver, instance_set_train_name: str) -> str:
-    """Return a bool string for latex indicating whether features were used.
-
-    True if a feature file is given in the scenario file, false otherwise.
-
-    Args:
-        solver: The solver object
-        instance_set_train_name: Name of the instance set used for training
-
-    Returns:
-        A string describing whether features are used
-    """
-    scenario_file = gv.settings.get_general_sparkle_configurator().scenario.directory \
-        / f"{solver.name}_{instance_set_train_name}_scenario.txt"
-
-    for line in scenario_file.open("r").readlines():
-        if line.split(" ")[0] == "feature_file":
-            return "\\featurestrue"
-    return "\\featuresfalse"
 
 
 def get_data_for_plot(configured_results: list[list[str]],
@@ -430,7 +391,14 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
     latex_dict = {"bibliographypath":
                   str(gv.sparkle_report_bibliography_path.absolute())}
     latex_dict["performanceMeasure"] = get_performance_measure()
-    latex_dict["runtimeBool"] = get_runtime_bool()
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
+
+    if smac_run_obj == "RUNTIME":
+        latex_dict["runtimeBool"] = "\\runtimetrue"
+    elif smac_run_obj == "QUALITY":
+        latex_dict["runtimeBool"] = "\\runtimefalse"
+
     latex_dict["solver"] = solver.name
     latex_dict["instanceSetTrain"] = instance_set_train.name
     latex_dict["sparkleVersion"] = about.version
@@ -476,7 +444,11 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
                                                    ablation_validation_name)
     latex_dict["ablationPath"] = get_ablation_table(
         solver, instance_set_train.name, ablation_validation_name)
-    latex_dict["featuresBool"] = get_features_bool(solver, instance_set_train.name)
+    scenario = gv.settings.get_general_sparkle_configurator().scenario
+    if scenario.use_features:
+        latex_dict["featuresBool"] = "\\featurestrue"
+    else:
+        latex_dict["featuresBool"] = "\\featuresfalse"
 
     return latex_dict
 
@@ -501,7 +473,6 @@ def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
         solver, instance_set_test, config="")
     res_conf = validator.get_validation_results(
         solver, instance_set_test, config=config)
-    print(res_default)
     instance_names = set([res[3] for res in res_default])
     test_dict = {"instanceSetTest": instance_set_test.name}
     test_dict["numInstanceInTestingInstanceSet"] = str(len(instance_names))
