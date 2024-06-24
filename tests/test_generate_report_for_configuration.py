@@ -565,7 +565,7 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     mock_test = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_variable_to_value_test",
                              return_value=test_dict)
-    mock_extractor_list = mocker.patch("sparkle.platform.generate_report_help."
+    mock_extractor_list = mocker.patch("sparkle.platform.generate_report_for_selection."
                                        "get_feature_extractor_list",
                                        return_value="43")
     mocker.patch("pathlib.Path.mkdir", return_value=None)
@@ -828,8 +828,8 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("sparkle.platform.generate_report"
-                                        "_help.generate_report", return_value=None)
+    mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection."
+                                        "generate_report", return_value=None)
     mock_log = mocker.patch("sparkle_logging.add_output",
                             return_value=None)
 
@@ -860,8 +860,8 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "configuration_report_variables",
                              return_value=value_dict)
-    mock_generate_report = mocker.patch("sparkle.platform.generate_report"
-                                        "_help.generate_report", return_value=None)
+    mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection"
+                                        ".generate_report", return_value=None)
     mock_log = mocker.patch("sparkle_logging.add_output",
                             return_value=None)
 
