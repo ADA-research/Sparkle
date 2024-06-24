@@ -37,51 +37,6 @@ def setup_conf() -> None:
     configurator.scenario._set_paths(configurator_path)
 
 
-def test_get_num_in_instance_set_reference_list_exists(mocker: MockFixture) -> None:
-    """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
-
-    Check that number of instances is retrieved from reference list when it exists.
-    """
-    mock_check_existence = mocker.patch("sparkle.instance.instances_help."
-                                        "check_existence_of_reference_instance_list",
-                                        return_value=True)
-    mock_count_instances = mocker.patch("sparkle.instance.instances_help."
-                                        "count_instances_in_reference_list",
-                                        return_value=3)
-    instance_set = Path("test-instance")
-
-    number = sgrch.get_num_instance_for_configurator(instance_set)
-
-    mock_check_existence.assert_called_once_with(instance_set.name)
-    mock_count_instances.assert_called_once_with(instance_set.name)
-    assert number == "3"
-
-
-def test_get_num_in_instance_set_reference_list_not_exists(mocker: MockFixture) -> None:
-    """Test get_num_in_instance_set_smac_dir for correct return and call of functions.
-
-    Check that number of instances is retrieved by counting all files in instance
-    directory when no reference list exists.
-    """
-    mock_check_existence = mocker.patch("sparkle.instance.instances_help."
-                                        "check_existence_of_reference_instance_list",
-                                        return_value=False)
-    mock_count_instances = mocker.patch("sparkle.instance.instances_help."
-                                        "count_instances_in_reference_list",
-                                        return_value=3)
-    mocker.patch("sparkle.platform.file_help."
-                 "get_list_all_filename_recursive",
-                 return_value=[Path("instance-1"),
-                               Path("instance-2")])
-    instance_set = Path("test-instance")
-
-    number = sgrch.get_num_instance_for_configurator(instance_set)
-
-    mock_check_existence.assert_called_once_with(instance_set.name)
-    mock_count_instances.assert_not_called()
-    assert number == "2"
-
-
 def test_get_par_performance(mocker: MockFixture) -> None:
     """Test get_par_performance returns correct PAR value.
 
@@ -596,6 +551,8 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     setup_conf()
     train_instance = Path("train-instance")
     test_instance = Path("test-instance")
+    validation_data = [
+        ["SolverName", "{}", "InstanceSetName", "InstanceName", "STATUS", "0", "25.323"]]
     report_dir = "reports/directory"
     cutoff = "60"
     mock_perf = mocker.patch("sparkle.platform.generate_"
@@ -607,10 +564,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                 "get_runtime_bool",
                                 return_value="runtimetrue")
     mocker.patch("sparkle.about.version", "0.8")
-    mock_instance_num = mocker.patch("sparkle.platform.generate_"
-                                     "report_for_configuration."
-                                     "get_num_instance_for_configurator",
-                                     return_value="4")
     mocker.patch("sparkle.platform.generate_"
                  "report_for_configuration."
                  "get_par_performance",
@@ -640,15 +593,15 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                  "SMAC2.get_optimal_configuration", return_value=(0, "123"))
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
-                 return_value=[])
+                 return_value=validation_data)
 
     common_dict = sgrch.get_dict_variable_to_value_common(solver, train_instance,
                                                           test_instance, report_dir)
 
     mock_perf.assert_called_once_with()
     mock_runtime.assert_called_once_with()
-    mock_instance_num.assert_called_once_with(train_instance)
-    mock_figure.assert_called_once_with(solver, train_instance.name, [], [], report_dir,
+    mock_figure.assert_called_once_with(solver, train_instance.name,
+                                        validation_data, validation_data, report_dir,
                                         float(cutoff))
     mock_timeouts.assert_called_once_with(solver, train_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
@@ -662,7 +615,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         "solver": solver.name,
         "instanceSetTrain": train_instance.name,
         "sparkleVersion": "0.8",
-        "numInstanceInTrainingInstanceSet": "4",
+        "numInstanceInTrainingInstanceSet": "1",
         "numSmacRuns": "25",
         "smacObjective": "RUNTIME",
         "smacWholeTimeBudget": "600",
@@ -690,12 +643,10 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     setup_conf()
     train_instance = Path("train-instance")
     test_instance = Path("test-instance")
+    validation_data = [
+        ["SolverName", "{}", "InstanceSetName", "InstanceName", "STATUS", "0", "25.323"]]
     cutoff = "60"
 
-    mock_instance_num = mocker.patch("sparkle.platform.generate_"
-                                     "report_for_configuration."
-                                     "get_num_instance_for_configurator",
-                                     return_value="4")
     mocker.patch("sparkle.platform.generate_"
                  "report_for_configuration."
                  "get_par_performance",
@@ -719,7 +670,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                        return_value="ablation/path")
     mocker.patch("pathlib.Path.iterdir", return_value=[Path("test1")])
     mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
-                 return_value=[])
+                 return_value=validation_data)
     mocker.patch("sparkle.configurator.implementations.SMAC2."
                  "get_optimal_configuration", return_value=(0.0, "configurino"))
 
@@ -728,9 +679,9 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       train_instance,
                                                       test_instance)
 
-    mock_instance_num.assert_called_once_with(test_instance)
     mock_figure.assert_called_once_with(solver, test_instance.name,
-                                        [], [], gv.configuration_output_analysis,
+                                        validation_data, validation_data,
+                                        gv.configuration_output_analysis,
                                         float(cutoff), data_type="test")
     mock_timeouts.assert_called_once_with(solver, test_instance, float(cutoff))
     mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
@@ -739,7 +690,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                 test_instance.name)
     assert test_dict == {
         "instanceSetTest": test_instance.name,
-        "numInstanceInTestingInstanceSet": "4",
+        "numInstanceInTestingInstanceSet": "1",
         "optimisedConfigurationTestingPerformancePAR": "42.1",
         "defaultConfigurationTestingPerformancePAR": "42.2",
         "figure-configured-vs-default-test": "figure-string",

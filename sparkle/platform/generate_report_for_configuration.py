@@ -20,35 +20,6 @@ from sparkle.platform.generate_report_for_selection import generate_comparison_p
 from sparkle import about
 
 
-def get_num_instance_for_configurator(instance_set_path: Path) -> str:
-    """Return the number of instances for an instance set used by configurator.
-
-    Args:
-        instance_set_name: Name of the instance set
-
-    Returns:
-        A string containing the number of instances
-    """
-    # For multi-file instances count based on the reference list
-    if sih.check_existence_of_reference_instance_list(instance_set_path.name):
-        instance_count = sih.count_instances_in_reference_list(instance_set_path.name)
-        return str(instance_count)
-    # For single-file instances just count the number of instance files
-    else:
-        instance_set_name = instance_set_path.name
-        list_instance = [x.name for x in
-                         sfh.get_list_all_filename_recursive(instance_set_path)]
-        # If there is only an instance file and not the actual instances in the
-        # directory, count number of lines in instance file
-        if f"{instance_set_name}_train.txt" in list_instance:
-            return str(len((instance_set_path / f"{instance_set_name}_train.txt")
-                           .open("r").readlines()))
-        elif f"{instance_set_name}_test.txt" in list_instance:
-            return str(len((instance_set_path / f"{instance_set_name}_test.txt")
-                           .open("r").readlines()))
-        return str(len(list_instance))
-
-
 def get_par_performance(results: list[list[str]], cutoff: int) -> float:
     """Return the PAR score for a given results file and cutoff time.
 
@@ -454,6 +425,7 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
         solver, instance_set_train, config="")
     res_conf = validator.get_validation_results(
         solver, instance_set_train, config=config)
+    instance_names = set([res[3] for res in res_default])
 
     latex_dict = {"bibliographypath":
                   str(gv.sparkle_report_bibliography_path.absolute())}
@@ -462,8 +434,7 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
     latex_dict["solver"] = solver.name
     latex_dict["instanceSetTrain"] = instance_set_train.name
     latex_dict["sparkleVersion"] = about.version
-    latex_dict["numInstanceInTrainingInstanceSet"] = \
-        get_num_instance_for_configurator(instance_set_train)
+    latex_dict["numInstanceInTrainingInstanceSet"] = str(len(instance_names))
 
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
@@ -530,9 +501,10 @@ def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
         solver, instance_set_test, config="")
     res_conf = validator.get_validation_results(
         solver, instance_set_test, config=config)
+    print(res_default)
+    instance_names = set([res[3] for res in res_default])
     test_dict = {"instanceSetTest": instance_set_test.name}
-    test_dict["numInstanceInTestingInstanceSet"] =\
-        get_num_instance_for_configurator(instance_set_test)
+    test_dict["numInstanceInTestingInstanceSet"] = str(len(instance_names))
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
         str(get_par_performance(res_conf, smac_each_run_cutoff_time))

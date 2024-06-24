@@ -185,10 +185,11 @@ if __name__ == "__main__":
             if instance_set_test is not None:
                 test_res = validator.get_validation_results(solver,
                                                             instance_set_test)
-            if len(train_res) == 0 or (instance_set_test is not None and len(test_res) == 0):
-                print("Error: Results not found for the given solver and instance set(s) "
-                    'combination. Make sure the "configure_solver" and '
-                    '"validate_configured_vs_default" commands were correctly executed. ')
+            if len(train_res) == 0 or (instance_set_test is not None
+                                       and len(test_res) == 0):
+                print("Error: Results not found for the given solver and instance set(s)"
+                      ' combination. Make sure the "configure_solver" and "validate_'
+                      'configured_vs_default" commands were correctly executed. ')
                 sys.exit(-1)
         else:
             print("Error: No results from validate_configured_vs_default found that "
