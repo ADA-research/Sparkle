@@ -29,8 +29,6 @@ def parser_function() -> argparse.ArgumentParser:
 
     parser.add_argument(*ac.RecomputeRunSolversArgument.names,
                         **ac.RecomputeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.ParallelArgument.names,
-                        **ac.ParallelArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
@@ -119,7 +117,6 @@ def running_solvers_performance_data(
 
 
 def run_solvers_on_instances(
-        parallel: bool = False,
         recompute: bool = False,
         run_on: Runner = Runner.SLURM,
         also_construct_selector_and_report: bool = False) -> None:
@@ -130,8 +127,6 @@ def run_solvers_on_instances(
 
     Parameters
     ----------
-    parallel: bool
-        Run the solvers in parallel or one at a time. Default: False
     recompute: bool
         If True, recompute all solver-instance pairs even if they were run before.
         Default: False
@@ -143,9 +138,7 @@ def run_solvers_on_instances(
     """
     if recompute:
         PerformanceDataFrame(gv.performance_data_csv_path).clean_csv()
-    num_job_in_parallel = 1
-    if parallel:
-        num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
+    num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
 
     runs = [running_solvers_performance_data(
         performance_data_csv_path=gv.performance_data_csv_path,
@@ -231,7 +224,6 @@ if __name__ == "__main__":
     gv.settings.write_used_settings()
 
     run_solvers_on_instances(
-        parallel=args.parallel,
         recompute=args.recompute,
         also_construct_selector_and_report=args.also_construct_selector_and_report,
         run_on=args.run_on)

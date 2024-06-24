@@ -180,8 +180,9 @@ if __name__ == "__main__":
 
     if args.run_solver_now:
         num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
-        running_solvers_performance_data(
-            gv.performance_data_csv_path, num_job_in_parallel, rerun=False, run_on=run_on)
+        running_solvers_performance_data(gv.performance_data_csv_path,
+                                         num_job_in_parallel,
+                                         rerun=False, run_on=run_on)
         print("Running solvers in parallel ...")
 
     # Write used settings to file

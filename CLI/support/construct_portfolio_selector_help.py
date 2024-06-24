@@ -15,7 +15,6 @@ import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 
 
-
 def construct_sparkle_portfolio_selector(selector_path: Path,
                                          performance_data_csv_path: str,
                                          feature_data_csv_path: str,
@@ -133,6 +132,4 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
 
     # Remove the data copy for AutoFolio
     pf_data_autofolio_path.unlink()
-    
-    # If we reach this point portfolio construction should be successful
     return True

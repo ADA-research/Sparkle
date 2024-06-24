@@ -64,4 +64,3 @@ def verify(instance_path: str, raw_result_path: str, solver_path: str, status: s
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
         return sssh.sat_verify(instance_path, raw_result_path, solver_path)
     return status
-
