@@ -31,7 +31,7 @@ def get_ablation_scenario_directory(solver: Solver, instance_train_name: str,
 
     ablation_scenario_dir = "" if exec_path else f"{gv.ablation_dir / 'scenarios'}/"
     scenario_dir = f"{ablation_scenario_dir}"\
-                   f"{solver.name}_{instance_train_name}{instance_test_name}"
+                   f"{solver.name}_{instance_train_name}{instance_test_name}/"
     return scenario_dir
 
 

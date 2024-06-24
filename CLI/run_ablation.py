@@ -152,12 +152,11 @@ if __name__ == "__main__":
         # TODO: check if needed
         sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=True)
 
-    print("Create config file")
     # Configurations
     sah.create_configuration_file(
         solver, instance_set_train, instance_set_test
     )
-    print("Submit ablation run")
+    print("Submiting ablation run...")
     runs = sah.submit_ablation(
         ablation_scenario_dir=ablation_scenario_dir,
         instance_set_test=instance_set_test,

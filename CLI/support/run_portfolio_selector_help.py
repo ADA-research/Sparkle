@@ -213,7 +213,7 @@ def call_sparkle_portfolio_selector_solve_instance(
 
     process = subprocess.run(cmd_list,
                              stdout=Path(predict_schedule_result_path).open("w+"),
-                             stderr=Path(gv.sparkle_err_path).open("w+"))
+                             stderr=gv.sparkle_err_path.open("w+"))
 
     if process.returncode != 0:
         # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"

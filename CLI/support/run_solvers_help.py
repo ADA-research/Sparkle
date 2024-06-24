@@ -18,7 +18,7 @@ def run_solver_on_instance_and_process_results(
     # Prepare paths
     # TODO: Fix result path for multi-file instances (only a single file is part of the
     # result path)
-    raw_result_path = (f"{gv.sparkle_tmp_path}"
+    raw_result_path = (f"{gv.sparkle_tmp_path}/"
                        f"{Path(solver_path).name}_"
                        f"{Path(instance_path).name}_"
                        f"{tg.get_time_pid_random_string()}.rawres")

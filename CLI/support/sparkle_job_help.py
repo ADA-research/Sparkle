@@ -75,7 +75,7 @@ def wait_for_job(job: str | SlurmRun) -> None:
     print(f"Job with ID {job.run_id} done!", flush=True)
 
 
-def find_run(job_id: str, path: Path = Path(gv.sparkle_tmp_path))\
+def find_run(job_id: str, path: Path = gv.sparkle_tmp_path)\
         -> SlurmRun:
     """Retrieve a specific RunRunner Slurm run using the job_id.
 
@@ -92,7 +92,7 @@ def find_run(job_id: str, path: Path = Path(gv.sparkle_tmp_path))\
     return None
 
 
-def get_runs_from_file(path: Path = Path(gv.sparkle_tmp_path))\
+def get_runs_from_file(path: Path = gv.sparkle_tmp_path)\
         -> list[SlurmRun]:
     """Retrieve all run objects from file storage.
 

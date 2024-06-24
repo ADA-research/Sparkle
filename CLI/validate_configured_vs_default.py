@@ -3,7 +3,7 @@
 
 import sys
 import argparse
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 import global_variables as gv
 from sparkle.solver import pcs
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     _, opt_config_str = configurator.get_optimal_configuration(
         solver, instance_set_train)
     pcs.write_configuration_pcs(solver, opt_config_str,
-                                Path(gv.sparkle_tmp_path))
+                                gv.sparkle_tmp_path)
 
     validator = Validator(gv.validation_output_general)
     all_validation_instances = [instance_set_train]

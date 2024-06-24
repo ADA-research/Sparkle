@@ -31,7 +31,7 @@ sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
 
-sparkle_slurm_settings_path = "Settings/sparkle_slurm_settings.txt"
+sparkle_slurm_settings_path = Path("Settings/sparkle_slurm_settings.txt")
 
 sparkle_global_output_dir = Path("Output")
 
@@ -48,11 +48,11 @@ class ReportType(str, Enum):
 sparkle_global_log_dir = Path("Log")
 sparkle_global_log_path = PurePath(sparkle_global_output_dir / "sparkle.log")
 
-sparkle_tmp_path = "Tmp/"
+sparkle_tmp_path = Path("Tmp")
 
-sparkle_err_path = sparkle_tmp_path + "sparkle_log.err"
+sparkle_err_path = sparkle_tmp_path / "sparkle_log.err"
 
-sparkle_system_log_path = "Log/sparkle_system_log_path.txt"
+sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
 
 snapshot_dir = Path("Snapshots")
 sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
@@ -72,11 +72,11 @@ performance_data_dir = Path("Performance_Data")
 sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio")
 sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio")
 
-sparkle_marginal_contribution_perfect_path = (
-    sparkle_algorithm_selector_dir / "marginal_contribution_perfect.csv")
+sparkle_marginal_contribution_perfect_path =\
+    sparkle_algorithm_selector_dir / "marginal_contribution_perfect.csv"
 
-sparkle_marginal_contribution_actual_path = (
-    sparkle_algorithm_selector_dir / "marginal_contribution_actual.csv")
+sparkle_marginal_contribution_actual_path =\
+    sparkle_algorithm_selector_dir / "marginal_contribution_actual.csv"
 
 sparkle_latex_dir = Path("Components/Sparkle-latex-generator")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
@@ -111,12 +111,12 @@ ablation_dir = Path("Components/ablationAnalysis-0.9.4/")
 
 feature_data_csv_path = "Feature_Data/sparkle_feature_data.csv"
 performance_data_csv_path = Path("Performance_Data/sparkle_performance_data.csv")
-pap_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Parallel_Portfolio_Jobs/")
-run_solvers_sbatch_tmp_path = Path(f"{sparkle_tmp_path}SBATCH_Solver_Jobs/")
+pap_sbatch_tmp_path = sparkle_tmp_path / "SBATCH_Parallel_Portfolio_Jobs"
+run_solvers_sbatch_tmp_path = sparkle_tmp_path / "SBATCH_Solver_Jobs"
 
 reference_list_dir = Path("Reference_Lists")
 instance_list_postfix = "_instance_list.txt"
-# NOTE: These data structures / files seem to be only written to / removed from but not actually read?
+# NOTE: These data structures seem to be only written to / removed from but not read/used
 # NOTE: This could be a bug though, should test before removing stuff!
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
 extractor_list_path = reference_list_dir / "sparkle_extractor_list.txt"
