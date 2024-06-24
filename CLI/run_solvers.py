@@ -96,7 +96,7 @@ def running_solvers_performance_data(
     srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
     sbatch_options = ssh.get_slurm_options_list()
     perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    cmd_list = ["CLI/core/run_solvers_core.py"
+    cmd_list = ["CLI/core/run_solvers_core.py "
                 f"--performance-data {performance_data_csv_path} "
                 f"--instance {inst_p} --solver {solver_p} "
                 f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]
@@ -111,6 +111,8 @@ def running_solvers_performance_data(
         srun_options=srun_options)
 
     if run_on == Runner.LOCAL:
+        # TODO: It would be nice to extract some info per job and print it
+        # As the user now only sees jobs starting and completing without their results
         run.wait()
 
     return run
