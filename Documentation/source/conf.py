@@ -89,7 +89,10 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = 'sphinx_rtd_theme'
+html_theme_options = {
+    'navigation_depth': 3,  # Adjust the depth as needed
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -111,6 +114,15 @@ html_theme = "alabaster"
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+
+html_sidebars = {
+    '**': [
+        'globaltoc.html',  # Table of contents
+        'relations.html',  # Prev/Next links
+        'sourcelink.html', # View page source link
+        'searchbox.html',  # Search box
+    ]
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
