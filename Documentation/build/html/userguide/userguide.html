@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-gb" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1. Sparkle user guide &mdash; Sparkle 0.8.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=67d9a984"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2. Examples" href="../examples/examples.html" />
+    <link rel="prev" title="Sparkle’s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Sparkle
+          </a>
+              <div class="version">
+                0.8.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Sparkle user guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">1.1. Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-sparkle">1.2. Installing Sparkle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-a-copy-of-sparkle">1.2.1. Get a copy of Sparkle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-dependencies">1.2.2. Install dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-sparkle-slurm">1.2.3. Configure Sparkle/Slurm</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithm-configuration">1.3. Algorithm Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-wrapper-for-your-algorithm">1.3.1. Creating a wrapper for your algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameter-configuration-space-pcs-file">1.3.2. Parameter configuration space (PCS) file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithm-selection">1.4. Algorithm Selection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#quick-select-wrapper">1.4.1. Creating a wrapper for your algorithm</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#executing-commands">1.5. Executing commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-structure">1.6. File structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-typical-instance-directory">1.6.1. A typical instance directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-typical-solver-directory-configuration">1.6.2. A typical solver directory (configuration)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-typical-solver-directory-selection">1.6.3. A typical solver directory (selection)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-output-directory">1.6.4. The output directory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#wrappers">1.7. Wrappers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sparkle-run-default-wrapper-py">1.7.1. <code class="docutils literal notranslate"><span class="pre">sparkle_run_default_wrapper.py</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#commands">1.8. Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#about-cli-py">1.8.1. about_cli.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add-feature-extractor-py">1.8.2. add_feature_extractor.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add-instances-py">1.8.3. add_instances.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add-solver-py">1.8.4. add_solver.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cleanup-temporary-files-py">1.8.5. cleanup_temporary_files.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compute-features-py">1.8.6. compute_features.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compute-marginal-contribution-py">1.8.7. compute_marginal_contribution.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-solver-py">1.8.8. configure_solver.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#construct-sparkle-portfolio-selector-py">1.8.9. construct_sparkle_portfolio_selector.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-report-py">1.8.10. generate_report.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initialise-py">1.8.11. initialise.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-snapshot-py">1.8.12. load_snapshot.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-feature-extractor-py">1.8.13. remove_feature_extractor.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-instances-py">1.8.14. remove_instances.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remove-solver-py">1.8.15. remove_solver.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-ablation-py">1.8.16. run_ablation.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-configured-solver-py">1.8.17. run_configured_solver.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-solvers-py">1.8.18. run_solvers.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-parallel-portfolio-py">1.8.19. run_parallel_portfolio.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-sparkle-portfolio-selector-py">1.8.20. run_sparkle_portfolio_selector.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-status-py">1.8.21. run_status.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-snapshot-py">1.8.22. save_snapshot.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wait-py">1.8.23. wait.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#system-status-py">1.8.24. system_status.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#validate-configured-vs-default-py">1.8.25. validate_configured_vs_default.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sparkle-settings">1.9. Sparkle settings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-sparkle-settings-ini">1.9.1. Example <code class="docutils literal notranslate"><span class="pre">sparkle_settings.ini</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#names-and-possible-values">1.9.2. Names and possible values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#priorities">1.9.3. Priorities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slurm-focused-on-grace">1.9.4. Slurm (focused on Grace)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#required-packages">1.10. Required packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sparkle-on-grace">1.10.1. Sparkle on Grace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-and-compilation-of-examples">1.11. Installation and compilation of examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#solvers">1.11.1. Solvers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">2. Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Sparkle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><span class="section-number">1. </span>Sparkle user guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/userguide/userguide.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sparkle-user-guide">
+<h1><span class="section-number">1. </span>Sparkle user guide<a class="headerlink" href="#sparkle-user-guide" title="Link to this heading"></a></h1>
+<section id="quick-start">
+<h2><span class="section-number">1.1. </span>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sparkle currently relies on <a class="reference external" href="https://slurm.schedmd.com/">Slurm</a>, but in some cases works locally as well.
+Sparkle also relies on <a class="reference external" href="http://www.cril.univ-artois.fr/~roussel/runsolver/">RunSolver</a>, which is a Linux based program. Thus Sparkle can only run on Linux based systems in many cases.</p>
+</div>
+<p>Follow these steps:</p>
+<ol class="arabic simple">
+<li><p><span class="xref std std-ref">Install Sparkle</span></p></li>
+<li><p>Prepare an <span class="xref std std-ref">algorithm configuration</span> or an <span class="xref std std-ref">algorithm selection</span>.</p></li>
+<li><p><span class="xref std std-ref">Execute commands</span></p></li>
+</ol>
+</section>
+<section id="installing-sparkle">
+<span id="quick-install"></span><h2><span class="section-number">1.2. </span>Installing Sparkle<a class="headerlink" href="#installing-sparkle" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The installation process use the <code class="docutils literal notranslate"><span class="pre">conda</span></code> command available in <a class="reference external" href="https://www.anaconda.com/">Anaconda</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> to manage some dependencies.</p>
+</div>
+<section id="get-a-copy-of-sparkle">
+<h3><span class="section-number">1.2.1. </span>Get a copy of Sparkle<a class="headerlink" href="#get-a-copy-of-sparkle" title="Link to this heading"></a></h3>
+<p>To get a copy of Sparkle you can clone the repository.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">git</span></code> is available on your system, this will clone the Sparkle repository and create a subdirectory named <code class="docutils literal notranslate"><span class="pre">sparkle</span></code> :</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ADA-research/Sparkle
+</pre></div>
+</div>
+<p>You can also download the stable version here:</p>
+</section>
+<section id="install-dependencies">
+<h3><span class="section-number">1.2.2. </span>Install dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading"></a></h3>
+<p>Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. An easy way to install most of what is needed is to use the <code class="docutils literal notranslate"><span class="pre">conda</span></code> package manager (<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>LaTeX is used to create the reports and the documentation and must be installed manually on the system. If you don’t plan to use the reports or recreate the documentations, you can skip it.</p>
+</div>
+<p>You can install the base requirements with</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+</pre></div>
+</div>
+<p>This will create an environment named <code class="docutils literal notranslate"><span class="pre">sparkle</span></code> that contains everything needed to run Sparkle, except LaTeX that needs to be installed manually.</p>
+<p>To activate the environment in the current shell, execute:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>sparkle
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You will need to reactivate the environment every time you log in, before using Sparkle.</p>
+</div>
+<p>The file <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.</p>
+<p>The file <code class="docutils literal notranslate"><span class="pre">environment-dev.txt</span></code> contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems.</p>
+<p>The two environments can be created in parallel since one is named <code class="docutils literal notranslate"><span class="pre">sparkle</span></code> and the other <code class="docutils literal notranslate"><span class="pre">sparkle-dev</span></code>. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>deactivate
+$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>-n<span class="w"> </span>sparkle
+$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>sparkle
+</pre></div>
+</div>
+<p>This should be fast as both <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code> use local cache for the packages.</p>
+</section>
+<section id="configure-sparkle-slurm">
+<h3><span class="section-number">1.2.3. </span>Configure Sparkle/Slurm<a class="headerlink" href="#configure-sparkle-slurm" title="Link to this heading"></a></h3>
+<p>Before running Sparkle, you probably want to have a look at the settings described in <code class="xref std std-numref docutils literal notranslate"><span class="pre">settings</span></code>.
+In particular, the default Slurm settings are set to work with the Grace cluster in Leiden University and should be adapted to your specific cluster.</p>
+</section>
+</section>
+<section id="algorithm-configuration">
+<span id="quick-config-environment"></span><h2><span class="section-number">1.3. </span>Algorithm Configuration<a class="headerlink" href="#algorithm-configuration" title="Link to this heading"></a></h2>
+<p>Configuring an algorithm has the following minimal requirements for the
+algorithm (for an example of a solver directory see <code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-solvers</span></code>):</p>
+<ul class="simple">
+<li><p>A working solver executable</p></li>
+<li><p>An algorithm wrapper called <code class="docutils literal notranslate"><span class="pre">sprakle_smac_wrapper.py</span></code></p></li>
+<li><p>A PCS (parameter configuration space) file</p></li>
+</ul>
+<p>Further, training and testing instance sets are needed (for an example
+of an instances directory see <code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-instances</span></code>). For
+the purpose of testing whether your configuration setup works with
+Sparkle, it is advised to primarily use instances that are solved
+(relatively) quickly even with the default parameters.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See the <a class="reference internal" href="../examples/configuration.html"><span class="doc">example</span></a> page for a walk-through on how to perform configuration with Sparkle.</p>
+</div>
+<section id="creating-a-wrapper-for-your-algorithm">
+<span id="quick-config-wrapper"></span><h3><span class="section-number">1.3.1. </span>Creating a wrapper for your algorithm<a class="headerlink" href="#creating-a-wrapper-for-your-algorithm" title="Link to this heading"></a></h3>
+<p>A template for the wrapper that connects your algorithm with Sparkle is
+available at <code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/template/sparkle_smac_wrapper.py</span></code>. Within
+this template a number of <code class="docutils literal notranslate"><span class="pre">TODO</span></code>s are indicated where you are likely
+to need to make changes for your specific algorithm. You can also
+compare the different example solvers to get an idea for what kind of
+changes are needed.</p>
+</section>
+<section id="parameter-configuration-space-pcs-file">
+<span id="quick-pcs-file"></span><h3><span class="section-number">1.3.2. </span>Parameter configuration space (PCS) file<a class="headerlink" href="#parameter-configuration-space-pcs-file" title="Link to this heading"></a></h3>
+<p>The PCS (parameter configuration space) format <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> is used to pass the
+possible parameter ranges of an algorithm to Sparkle in a <code class="docutils literal notranslate"><span class="pre">.pcs</span></code> file.
+For an example see e.g.
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test.pcs</span></code>.</p>
+<p>In this file you should enter all configurable parameters of your
+algorithm. Note that parameters such as the random seed used by the
+algorithm should not be configured and therefore should also not be
+included in the PCS file.</p>
+</section>
+</section>
+<section id="algorithm-selection">
+<span id="quick-select-environment"></span><h2><span class="section-number">1.4. </span>Algorithm Selection<a class="headerlink" href="#algorithm-selection" title="Link to this heading"></a></h2>
+<p>Creating a portfolio selector requires multiple algorithms with the
+following minimal requirements (for an example of a solver directory see
+<code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-solvers-selection</span></code>):</p>
+<ul class="simple">
+<li><p>A working solver executable</p></li>
+<li><p>An algorithm wrapper called <code class="docutils literal notranslate"><span class="pre">sparkle_run_default_wrapper.py</span></code></p></li>
+</ul>
+<p>Further, training and testing instance sets are needed (for an example
+of an instances directory see <code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-instances</span></code>). For
+the purpose of testing whether your selection setup works with Sparkle,
+it is advised to primarily use instances that are solved (relatively)
+quickly.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See the <a class="reference internal" href="../examples/selection.html"><span class="doc">example</span></a> page for a walk-through on how to perform selection with Sparkle.</p>
+</div>
+<section id="quick-select-wrapper">
+<span id="id2"></span><h3><span class="section-number">1.4.1. </span>Creating a wrapper for your algorithm<a class="headerlink" href="#quick-select-wrapper" title="Link to this heading"></a></h3>
+<p>A template for the wrapper that connects your algorithm with Sparkle is
+available at
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/template/sparkle_run_default_wrapper.py</span></code>.
+Within this template a number of <code class="docutils literal notranslate"><span class="pre">TODO</span></code>s are indicated where you are
+likely to need to make changes for your specific algorithm. You can also
+compare the different example solvers to get an idea for what kind of
+changes are needed.</p>
+</section>
+</section>
+<section id="executing-commands">
+<span id="quick-execute-commands"></span><h2><span class="section-number">1.5. </span>Executing commands<a class="headerlink" href="#executing-commands" title="Link to this heading"></a></h2>
+<p>Executing commands in Sparkle is as simple as running them in the top
+directory of Sparkle, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CLI</span><span class="o">/</span><span class="n">initialise</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Do note that when running on a cluster additional arguments may be
+needed, for instance under the Slurm workload manager the above command would change to
+something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">srun</span> <span class="o">-</span><span class="n">N1</span> <span class="o">-</span><span class="n">n1</span> <span class="o">-</span><span class="n">c1</span> <span class="n">CLI</span><span class="o">/</span><span class="n">initialise</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>In the <code class="docutils literal notranslate"><span class="pre">Examples/</span></code> directory a number of common command sequences are
+given. For instance, for configuration with specified training and
+testing sets see e.g. <code class="docutils literal notranslate"><span class="pre">Examples/configuration.md</span></code> for an example of a
+sequence of commands to execute. Note that some command run in the
+background and need time to complete before the next command is
+executed. To see whether a command is still running the Slurm command
+<code class="docutils literal notranslate"><span class="pre">squeue</span></code> can be used.</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">Output/</span></code> directory paths to generated scripts and logs are
+gathered per executed command.</p>
+</section>
+<section id="file-structure">
+<h2><span class="section-number">1.6. </span>File structure<a class="headerlink" href="#file-structure" title="Link to this heading"></a></h2>
+<section id="a-typical-instance-directory">
+<span id="dir-instances"></span><h3><span class="section-number">1.6.1. </span>A typical instance directory<a class="headerlink" href="#a-typical-instance-directory" title="Link to this heading"></a></h3>
+<p>An instance directory should look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Instances</span><span class="o">/</span>
+  <span class="n">Example_Instance_Set</span><span class="o">/</span>
+    <span class="n">instance_a</span><span class="o">.</span><span class="n">cnf</span>
+    <span class="n">instance_b</span><span class="o">.</span><span class="n">cnf</span>
+    <span class="o">...</span>        <span class="o">...</span>
+    <span class="n">instance_z</span><span class="o">.</span><span class="n">cnf</span>
+</pre></div>
+</div>
+<p>This directory simply contains a collection of instances, as example
+here SAT instances in the CNF format are given.</p>
+<p>For instances consisting of multiple files one additional file called <code class="docutils literal notranslate"><span class="pre">sparkle_instance_list.txt</span></code> should be
+included in the <code class="docutils literal notranslate"><span class="pre">Example_Instance_Set</span></code> directory, describing which
+files together form an instance. The format is a single instance per
+line with each file separated by a space, as shown below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">instance_a_part_one</span><span class="o">.</span><span class="n">abc</span> <span class="n">instance_a_part_two</span><span class="o">.</span><span class="n">xyz</span>
+<span class="n">instance_b_part_one</span><span class="o">.</span><span class="n">abc</span> <span class="n">instance_b_part_two</span><span class="o">.</span><span class="n">xyz</span>
+<span class="o">...</span>                     <span class="o">...</span>
+<span class="n">instance_z_part_one</span><span class="o">.</span><span class="n">abc</span> <span class="n">instance_z_part_two</span><span class="o">.</span><span class="n">xyz</span>
+</pre></div>
+</div>
+</section>
+<section id="a-typical-solver-directory-configuration">
+<span id="dir-solvers"></span><h3><span class="section-number">1.6.2. </span>A typical solver directory (configuration)<a class="headerlink" href="#a-typical-solver-directory-configuration" title="Link to this heading"></a></h3>
+<p>A solver directory should look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Solver</span><span class="o">/</span>
+  <span class="n">Example_Solver</span><span class="o">/</span>
+    <span class="n">solver</span>
+    <span class="n">sparkle_smac_wrapper</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">parameters</span><span class="o">.</span><span class="n">pcs</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">solver</span></code> is a binary executable of the solver that is to be
+configured. The <code class="docutils literal notranslate"><span class="pre">sprakle_smac_wrapper.py</span></code> is a wrapper that Sparkle
+should call to run the solver with specific settings, and then returns a
+result for the configurator. In <code class="docutils literal notranslate"><span class="pre">parameters.pcs</span></code> the configurable
+parameters are described in the PCS format. Finally, when importing your
+Solver into Sparkle, a binary executable of the runsolver tool <code class="docutils literal notranslate"><span class="pre">runsolver</span></code> is added.
+This allows Sparkle to make fair time measurements for all configuration experiments.</p>
+</section>
+<section id="a-typical-solver-directory-selection">
+<span id="dir-solvers-selection"></span><h3><span class="section-number">1.6.3. </span>A typical solver directory (selection)<a class="headerlink" href="#a-typical-solver-directory-selection" title="Link to this heading"></a></h3>
+<p>A solver directory should look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Solver</span><span class="o">/</span>
+  <span class="n">Example_Solver</span><span class="o">/</span>
+    <span class="n">solver</span>
+    <span class="n">sparkle_run_default_wrapper</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">solver</span></code> is a binary executable of a solver that is to be
+included in a portfolio selector. The <code class="docutils literal notranslate"><span class="pre">sprakle_run_default_wrapper.py</span></code>
+is a wrapper that Sparkle should call to run the solver on a specific
+instance.</p>
+</section>
+<section id="the-output-directory">
+<h3><span class="section-number">1.6.4. </span>The output directory<a class="headerlink" href="#the-output-directory" title="Link to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section describes a desirable behaviour but has not been implemented fully yet.</p>
+</div>
+<p>The output directory is located at the root of the Sparkle directory. Its structure is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Output</span><span class="o">/</span>
+  <span class="n">Logs</span><span class="o">/</span>
+  <span class="n">Common</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+  <span class="n">Configuration</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+      <span class="n">run_</span><span class="o">&lt;</span><span class="n">alias</span><span class="o">&gt;/</span>
+        <span class="n">related</span> <span class="n">files</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+  <span class="n">Parallel_Portfolio</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+      <span class="n">run_</span><span class="o">&lt;</span><span class="n">alias</span><span class="o">&gt;/</span>
+        <span class="n">related</span> <span class="n">files</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+  <span class="n">Selection</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+      <span class="n">run_</span><span class="o">&lt;</span><span class="n">alias</span><span class="o">&gt;/</span>
+        <span class="n">related</span> <span class="n">files</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">alias</span></code> is based on the command and a timestamp.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Logs</span></code> directory should contain the history of commands and their output such that one can easily know what has been done in which order and find enough pointers to debug unwanted behaviour.</p>
+<p>Other directories are cut into two subdirectories: <code class="docutils literal notranslate"><span class="pre">Raw_Data</span></code> contains the data produced by the main command, often time consuming to generate, handle with care; <code class="docutils literal notranslate"><span class="pre">Analysis</span></code> contains information extracted from the raw data, easy to generate, plots and reports.</p>
+<p>For each type of task run by Sparkle, the <code class="docutils literal notranslate"><span class="pre">related</span> <span class="pre">files</span></code> differ. The aim is always to have all required files for reproducibility. A copy of the sparkle configuration file at the time of the run and of all files relevant to the run, a copy of any log or error file that could help with debugging or a link to it, and the output of the executed task.</p>
+<p><em>For configuration</em> the configuration trajectory if available, the training and testing sets, the default configuration and the final found configuration. The performance of those will be in the Analysis folder.</p>
+<p><em>For parallel portfolio</em> the resulting portfolio and its components. The performance of the portfolio will be in the Analysis folder.</p>
+<p><em>For selection</em> the algorithms and their performance on the training set, the model(s) generated if available and the resulting selector. The performance evaluation of the selector will be in the Analysis folder.</p>
+<p><em>For analysis</em> a link to the folder on which the analysis was performed (configuration, portfolio or selection), the performance evaluation from it and the report if it was generated.</p>
+</section>
+</section>
+<section id="wrappers">
+<h2><span class="section-number">1.7. </span>Wrappers<a class="headerlink" href="#wrappers" title="Link to this heading"></a></h2>
+<section id="sparkle-run-default-wrapper-py">
+<h3><span class="section-number">1.7.1. </span><code class="docutils literal notranslate"><span class="pre">sparkle_run_default_wrapper.py</span></code><a class="headerlink" href="#sparkle-run-default-wrapper-py" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">sparkle_run_default_wrapper.py</span></code> has two functions that need to be
+implemented for each algorithm:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">print_command(instance_file,</span> <span class="pre">seed_str:</span> <span class="pre">str,</span> <span class="pre">cutoff_time_str:</span> <span class="pre">str)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">print_output(terminal_output_file:</span> <span class="pre">str)</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">print_command(...)</span></code> should print a command line call that Sparkle can
+use to run the algorithm on a given instance file. Ideally, for
+reproducibility purposes, the seed provided by Sparkle should also be
+passed to the algorithm. If the algorithm requires this, the cutoff time
+can also be passed to the algorithm. However, in this case the cutoff
+time should be made very large. For instance by multiplying by ten with:
+<code class="docutils literal notranslate"><span class="pre">cutoff_time_str</span> <span class="pre">=</span> <span class="pre">str(int(cutoff_time_str)</span> <span class="pre">*</span> <span class="pre">10)</span></code>. This is necessary
+to ensure Sparkle stops the algorithm after the cutoff time, rather than
+the algorithm itself. By doing this it is ensured runtime measurements
+are always done by Sparkle, and thus consistent between algorithms that
+might measure time differently.</p>
+<p><code class="docutils literal notranslate"><span class="pre">print_output(...)</span></code> should process the algorithm output. If the
+performance measure is <code class="docutils literal notranslate"><span class="pre">RUNTIME</span></code>, this function only needs to output
+the algorithm status. For all <code class="docutils literal notranslate"><span class="pre">QUALITY</span></code> performance measures both the
+algorithm status and the solution quality have to be given. Sparkle
+internally measures <code class="docutils literal notranslate"><span class="pre">RUNTIME</span></code>, while it can be overwritten by the user
+if desired, for consistent runtime measurements between solvers this is
+not recommended. The output should be printed and formatted as in the
+example below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">quality</span> <span class="mi">8734</span>
+<span class="n">status</span> <span class="n">SUCCESS</span>
+</pre></div>
+</div>
+<p>Status can hold the following values <code class="docutils literal notranslate"><span class="pre">{SUCCESS,</span> <span class="pre">TIMEOUT,</span> <span class="pre">CRASHED}</span></code>. If
+the status is not known, reporting <code class="docutils literal notranslate"><span class="pre">SUCCESS</span></code> will allow Sparkle to
+continue, but may mean that Sparkle does not know when the algorithm
+crashed, and continues with faulty results.</p>
+</section>
+</section>
+<section id="commands">
+<h2><span class="section-number">1.8. </span>Commands<a class="headerlink" href="#commands" title="Link to this heading"></a></h2>
+<p>Currently the commands below are available in Sparkle (listed
+alphabetically). Every command can be called with the <code class="docutils literal notranslate"><span class="pre">–help</span></code> option
+to get a description of the required arguments and other options.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#cmd-about"><span class="std std-ref">about_cli.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-add-feature-extractor"><span class="std std-ref">add_feature_extractor.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-add-instances"><span class="std std-ref">add_instances.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-add-solver"><span class="std std-ref">add_solver.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-cleanup-temporary-files"><span class="std std-ref">cleanup_temporary_files.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-compute-features"><span class="std std-ref">compute_features.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-compute-marginal-contribution"><span class="std std-ref">compute_marginal_contribution.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-configure-solver"><span class="std std-ref">configure_solver.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-generate-report"><span class="std std-ref">generate_report.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-initialise"><span class="std std-ref">initialise.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-load-snapshot"><span class="std std-ref">load_snapshot.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-remove-feature-extractor"><span class="std std-ref">remove_feature_extractor.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-remove-instances"><span class="std std-ref">remove_instances.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-remove-solver"><span class="std std-ref">remove_solver.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-run-ablation"><span class="std std-ref">run_ablation.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-run-configured-solver"><span class="std std-ref">run_configured_solver.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-run-solvers"><span class="std std-ref">run_solvers.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-run-sparkle-parallel-portfolio"><span class="std std-ref">run_parallel_portfolio.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-run-sparkle-portfolio-selector"><span class="std std-ref">run_sparkle_portfolio_selector.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-run-status"><span class="std std-ref">run_status.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-save-snapshot"><span class="std std-ref">save_snapshot.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-wait"><span class="std std-ref">wait.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-system-status"><span class="std std-ref">system_status.py</span></a></p></li>
+<li><p><a class="reference internal" href="#cmd-validate-configured-vs-default"><span class="std std-ref">validate_configured_vs_default.py</span></a></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Arguments in [square brackets] are optional, arguments without brackets
+are mandatory. Input in &lt;chevrons&gt; indicate required text input, {curly
+brackets} indicate a set of inputs to choose from.</p>
+</div>
+<section id="about-cli-py">
+<span id="cmd-about"></span><h3><span class="section-number">1.8.1. </span>about_cli.py<a class="headerlink" href="#about-cli-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: about_cli.py [-h]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-about_cli.py-h">
+<span id="cmdoption-about_cli.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-about_cli.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="add-feature-extractor-py">
+<span id="cmd-add-feature-extractor"></span><h3><span class="section-number">1.8.2. </span>add_feature_extractor.py<a class="headerlink" href="#add-feature-extractor-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: add_feature_extractor.py [-h] [--run-extractor-now | --run-extractor-later] [--nickname NICKNAME] [--parallel] extractor-path</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_feature_extractor.py-arg-extractor-path">
+<span class="sig-name descname"><span class="pre">extractor-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_feature_extractor.py-arg-extractor-path" title="Link to this definition"></a></dt>
+<dd><p>path or nickname of the feature extractor</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_feature_extractor.py-h">
+<span id="cmdoption-add_feature_extractor.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_feature_extractor.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_feature_extractor.py-run-extractor-now">
+<span class="sig-name descname"><span class="pre">--run-extractor-now</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_feature_extractor.py-run-extractor-now" title="Link to this definition"></a></dt>
+<dd><p>immediately run the feature extractor(s) on all the instances</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_feature_extractor.py-run-extractor-later">
+<span class="sig-name descname"><span class="pre">--run-extractor-later</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_feature_extractor.py-run-extractor-later" title="Link to this definition"></a></dt>
+<dd><p>do not immediately run the feature extractor(s) on all the instances (default)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_feature_extractor.py-nickname">
+<span class="sig-name descname"><span class="pre">--nickname</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;nickname&gt;</span></span><a class="headerlink" href="#cmdoption-add_feature_extractor.py-nickname" title="Link to this definition"></a></dt>
+<dd><p>set a nickname for the feature extractor</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_feature_extractor.py-parallel">
+<span class="sig-name descname"><span class="pre">--parallel</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_feature_extractor.py-parallel" title="Link to this definition"></a></dt>
+<dd><p>Run the command in parallel</p>
+</dd></dl>
+
+</section>
+<section id="add-instances-py">
+<span id="cmd-add-instances"></span><h3><span class="section-number">1.8.3. </span>add_instances.py<a class="headerlink" href="#add-instances-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: add_instances.py [-h] [--run-extractor-now | --run-extractor-later] [--run-solver-now | --run-solver-later] [--nickname NICKNAME] [--parallel] instances-path</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-arg-instances-path">
+<span class="sig-name descname"><span class="pre">instances-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_instances.py-arg-instances-path" title="Link to this definition"></a></dt>
+<dd><p>path to the instance set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-h">
+<span id="cmdoption-add_instances.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_instances.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-run-extractor-now">
+<span class="sig-name descname"><span class="pre">--run-extractor-now</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_instances.py-run-extractor-now" title="Link to this definition"></a></dt>
+<dd><p>immediately run the feature extractor(s) on all the instances</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-run-extractor-later">
+<span class="sig-name descname"><span class="pre">--run-extractor-later</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_instances.py-run-extractor-later" title="Link to this definition"></a></dt>
+<dd><p>do not immediately run the feature extractor(s) on all the instances (default)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-run-solver-now">
+<span class="sig-name descname"><span class="pre">--run-solver-now</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_instances.py-run-solver-now" title="Link to this definition"></a></dt>
+<dd><p>immediately run the solver(s) on all instances</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-run-solver-later">
+<span class="sig-name descname"><span class="pre">--run-solver-later</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_instances.py-run-solver-later" title="Link to this definition"></a></dt>
+<dd><p>do not immediately run the solver(s) on all instances (default)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-nickname">
+<span class="sig-name descname"><span class="pre">--nickname</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;nickname&gt;</span></span><a class="headerlink" href="#cmdoption-add_instances.py-nickname" title="Link to this definition"></a></dt>
+<dd><p>set a nickname for the instance set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_instances.py-parallel">
+<span class="sig-name descname"><span class="pre">--parallel</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_instances.py-parallel" title="Link to this definition"></a></dt>
+<dd><p>Run the command in parallel</p>
+</dd></dl>
+
+</section>
+<section id="add-solver-py">
+<span id="cmd-add-solver"></span><h3><span class="section-number">1.8.4. </span>add_solver.py<a class="headerlink" href="#add-solver-py" title="Link to this heading"></a></h3>
+<p>Add a solver to the Sparkle platform.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: add_solver.py [-h] --deterministic {0,1} [--run-solver-now | --run-extractor-later] [--nickname NICKNAME] [--parallel] [--solver-variations SOLVER_VARIATIONS]</span>
+<span class="go">                     [--run-on {Runner.LOCAL,Runner.SLURM}] [--skip-checks]</span>
+<span class="go">                     solver-path</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-arg-solver-path">
+<span class="sig-name descname"><span class="pre">solver-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_solver.py-arg-solver-path" title="Link to this definition"></a></dt>
+<dd><p>path to the solver</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-h">
+<span id="cmdoption-add_solver.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_solver.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-deterministic">
+<span class="sig-name descname"><span class="pre">--deterministic</span></span><span class="sig-prename descclassname"> <span class="pre">{0,1}</span></span><a class="headerlink" href="#cmdoption-add_solver.py-deterministic" title="Link to this definition"></a></dt>
+<dd><p>indicate whether the solver is deterministic or not</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-run-solver-now">
+<span class="sig-name descname"><span class="pre">--run-solver-now</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_solver.py-run-solver-now" title="Link to this definition"></a></dt>
+<dd><p>immediately run the solver(s) on all instances</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-run-extractor-later">
+<span class="sig-name descname"><span class="pre">--run-extractor-later</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_solver.py-run-extractor-later" title="Link to this definition"></a></dt>
+<dd><p>do not immediately run the solver(s) on all instances (default)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-nickname">
+<span class="sig-name descname"><span class="pre">--nickname</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;nickname&gt;</span></span><a class="headerlink" href="#cmdoption-add_solver.py-nickname" title="Link to this definition"></a></dt>
+<dd><p>set a nickname for the solver</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-parallel">
+<span class="sig-name descname"><span class="pre">--parallel</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_solver.py-parallel" title="Link to this definition"></a></dt>
+<dd><p>Run the command in parallel</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-solver-variations">
+<span class="sig-name descname"><span class="pre">--solver-variations</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;solver_variations&gt;</span></span><a class="headerlink" href="#cmdoption-add_solver.py-solver-variations" title="Link to this definition"></a></dt>
+<dd><p>Use this option to add multiple variations of the solver by using a different random seed for each varation.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_solver.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-add_solver.py-skip-checks">
+<span class="sig-name descname"><span class="pre">--skip-checks</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-add_solver.py-skip-checks" title="Link to this definition"></a></dt>
+<dd><p>Checks the solver’s functionality by testing it on an instance and the pcs file, when applicable.</p>
+</dd></dl>
+
+</section>
+<section id="cleanup-temporary-files-py">
+<span id="cmd-cleanup-temporary-files"></span><h3><span class="section-number">1.8.5. </span>cleanup_temporary_files.py<a class="headerlink" href="#cleanup-temporary-files-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: cleanup_temporary_files.py [-h]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-cleanup_temporary_files.py-h">
+<span id="cmdoption-cleanup_temporary_files.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-cleanup_temporary_files.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="compute-features-py">
+<span id="cmd-compute-features"></span><h3><span class="section-number">1.8.6. </span>compute_features.py<a class="headerlink" href="#compute-features-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: compute_features.py [-h] [--recompute] [--parallel] [--settings-file SETTINGS_FILE] [--run-on {Runner.LOCAL,Runner.SLURM}]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_features.py-h">
+<span id="cmdoption-compute_features.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_features.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_features.py-recompute">
+<span class="sig-name descname"><span class="pre">--recompute</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_features.py-recompute" title="Link to this definition"></a></dt>
+<dd><p>Re-run feature extractor for instances with previously computed features</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_features.py-parallel">
+<span class="sig-name descname"><span class="pre">--parallel</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_features.py-parallel" title="Link to this definition"></a></dt>
+<dd><p>Run the command in parallel</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_features.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_features.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_features.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_features.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+</section>
+<section id="compute-marginal-contribution-py">
+<span id="cmd-compute-marginal-contribution"></span><h3><span class="section-number">1.8.7. </span>compute_marginal_contribution.py<a class="headerlink" href="#compute-marginal-contribution-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: compute_marginal_contribution.py [-h] (--perfect | --actual) [--recompute] [--selector-timeout SELECTOR_TIMEOUT]</span>
+<span class="go">                                        [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+<span class="go">                                        [--settings-file SETTINGS_FILE]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_marginal_contribution.py-h">
+<span id="cmdoption-compute_marginal_contribution.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_marginal_contribution.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_marginal_contribution.py-perfect">
+<span class="sig-name descname"><span class="pre">--perfect</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_marginal_contribution.py-perfect" title="Link to this definition"></a></dt>
+<dd><p>compute the marginal contribution for the perfect selector</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_marginal_contribution.py-actual">
+<span class="sig-name descname"><span class="pre">--actual</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_marginal_contribution.py-actual" title="Link to this definition"></a></dt>
+<dd><p>compute the marginal contribution for the actual selector</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_marginal_contribution.py-recompute">
+<span class="sig-name descname"><span class="pre">--recompute</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_marginal_contribution.py-recompute" title="Link to this definition"></a></dt>
+<dd><p>force marginal contribution to be recomputed even when it already exists in file for the current selector</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_marginal_contribution.py-selector-timeout">
+<span class="sig-name descname"><span class="pre">--selector-timeout</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;selector_timeout&gt;</span></span><a class="headerlink" href="#cmdoption-compute_marginal_contribution.py-selector-timeout" title="Link to this definition"></a></dt>
+<dd><p>Cuttoff time (in seconds) for the algorithmselector construction</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_marginal_contribution.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_marginal_contribution.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-compute_marginal_contribution.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-compute_marginal_contribution.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+</section>
+<section id="configure-solver-py">
+<span id="cmd-configure-solver"></span><h3><span class="section-number">1.8.8. </span>configure_solver.py<a class="headerlink" href="#configure-solver-py" title="Link to this heading"></a></h3>
+<p>Configure a solver in the Sparkle platform.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: configure_solver.py [-h] [--configurator CONFIGURATOR] --solver SOLVER --instance-set-train INSTANCE_SET_TRAIN [--instance-set-test INSTANCE_SET_TEST]</span>
+<span class="go">                           [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+<span class="go">                           [--target-cutoff-time TARGET_CUTOFF_TIME] [--wallclock-time WALLCLOCK_TIME] [--cpu-time CPU_TIME] [--solver-calls SOLVER_CALLS]</span>
+<span class="go">                           [--number-of-runs NUMBER_OF_RUNS] [--settings-file SETTINGS_FILE] [--use-features] [--validate] [--ablation]</span>
+<span class="go">                           [--run-on {Runner.LOCAL,Runner.SLURM}]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-h">
+<span id="cmdoption-configure_solver.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-configure_solver.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-configurator">
+<span class="sig-name descname"><span class="pre">--configurator</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;configurator&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-configurator" title="Link to this definition"></a></dt>
+<dd><p>path to configurator</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-solver">
+<span class="sig-name descname"><span class="pre">--solver</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;solver&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-solver" title="Link to this definition"></a></dt>
+<dd><p>path to solver</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-instance-set-train">
+<span class="sig-name descname"><span class="pre">--instance-set-train</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_train&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-instance-set-train" title="Link to this definition"></a></dt>
+<dd><p>path to training instance set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-instance-set-test">
+<span class="sig-name descname"><span class="pre">--instance-set-test</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_test&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-instance-set-test" title="Link to this definition"></a></dt>
+<dd><p>path to test instance set (only for validating)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"> <span class="pre">{ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-target-cutoff-time">
+<span class="sig-name descname"><span class="pre">--target-cutoff-time</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;target_cutoff_time&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-target-cutoff-time" title="Link to this definition"></a></dt>
+<dd><p>cutoff time per target algorithm run in seconds</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-wallclock-time">
+<span class="sig-name descname"><span class="pre">--wallclock-time</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;wallclock_time&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-wallclock-time" title="Link to this definition"></a></dt>
+<dd><p>configuration budget per configurator run in seconds (wallclock)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-cpu-time">
+<span class="sig-name descname"><span class="pre">--cpu-time</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;cpu_time&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-cpu-time" title="Link to this definition"></a></dt>
+<dd><p>configuration budget per configurator run in seconds (cpu)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-solver-calls">
+<span class="sig-name descname"><span class="pre">--solver-calls</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;solver_calls&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-solver-calls" title="Link to this definition"></a></dt>
+<dd><p>number of solver calls to execute</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-number-of-runs">
+<span class="sig-name descname"><span class="pre">--number-of-runs</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;number_of_runs&gt;</span></span><a class="headerlink" href="#cmdoption-configure_solver.py-number-of-runs" title="Link to this definition"></a></dt>
+<dd><p>number of configuration runs to execute</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-configure_solver.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-use-features">
+<span class="sig-name descname"><span class="pre">--use-features</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-configure_solver.py-use-features" title="Link to this definition"></a></dt>
+<dd><p>use the training set’s features for configuration</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-validate">
+<span class="sig-name descname"><span class="pre">--validate</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-configure_solver.py-validate" title="Link to this definition"></a></dt>
+<dd><p>validate after configuration</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-ablation">
+<span class="sig-name descname"><span class="pre">--ablation</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-configure_solver.py-ablation" title="Link to this definition"></a></dt>
+<dd><p>run ablation after configuration</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-configure_solver.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-configure_solver.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+<p>Note that the test instance set is only used if the <code class="docutils literal notranslate"><span class="pre">--ablation</span></code> or <code class="docutils literal notranslate"><span class="pre">--validation</span></code> flags are given</p>
+</section>
+<section id="construct-sparkle-portfolio-selector-py">
+<span id="cmd-construct-sparkle-parallel-portfolio"></span><h3><span class="section-number">1.8.9. </span>construct_sparkle_portfolio_selector.py<a class="headerlink" href="#construct-sparkle-portfolio-selector-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: construct_sparkle_portfolio_selector.py [-h] [--recompute-portfolio-selector] [--recompute-marginal-contribution] [--selector-timeout SELECTOR_TIMEOUT]</span>
+<span class="go">                                               [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-construct_sparkle_portfolio_selector.py-h">
+<span id="cmdoption-construct_sparkle_portfolio_selector.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-construct_sparkle_portfolio_selector.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-construct_sparkle_portfolio_selector.py-recompute-portfolio-selector">
+<span class="sig-name descname"><span class="pre">--recompute-portfolio-selector</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-construct_sparkle_portfolio_selector.py-recompute-portfolio-selector" title="Link to this definition"></a></dt>
+<dd><p>force the construction of a new portfolio selector even when it already exists for the current feature and performance data. NOTE: This will also result in the computation of the marginal contributions of solvers to the new portfolio selector.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-construct_sparkle_portfolio_selector.py-recompute-marginal-contribution">
+<span class="sig-name descname"><span class="pre">--recompute-marginal-contribution</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-construct_sparkle_portfolio_selector.py-recompute-marginal-contribution" title="Link to this definition"></a></dt>
+<dd><p>force marginal contribution to be recomputed even when it already exists in file for the current selector</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-construct_sparkle_portfolio_selector.py-selector-timeout">
+<span class="sig-name descname"><span class="pre">--selector-timeout</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;selector_timeout&gt;</span></span><a class="headerlink" href="#cmdoption-construct_sparkle_portfolio_selector.py-selector-timeout" title="Link to this definition"></a></dt>
+<dd><p>Cuttoff time (in seconds) for the algorithmselector construction</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-construct_sparkle_portfolio_selector.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-construct_sparkle_portfolio_selector.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+</section>
+<section id="generate-report-py">
+<span id="cmd-generate-report"></span><h3><span class="section-number">1.8.10. </span>generate_report.py<a class="headerlink" href="#generate-report-py" title="Link to this heading"></a></h3>
+<p>Without any arguments a report for the most recent algorithm selection or algorithm configuration procedure is generated.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: generate_report.py [-h] [--solver SOLVER] [--instance-set-train INSTANCE_SET_TRAIN] [--instance-set-test INSTANCE_SET_TEST] [--no-ablation [FLAG_ABLATION]]</span>
+<span class="go">                          [--selection] [--test-case-directory TEST_CASE_DIRECTORY]</span>
+<span class="go">                          [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}] [--settings-file SETTINGS_FILE]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-h">
+<span id="cmdoption-generate_report.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-generate_report.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-solver">
+<span class="sig-name descname"><span class="pre">--solver</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;solver&gt;</span></span><a class="headerlink" href="#cmdoption-generate_report.py-solver" title="Link to this definition"></a></dt>
+<dd><p>path to solver for an algorithm configuration report</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-instance-set-train">
+<span class="sig-name descname"><span class="pre">--instance-set-train</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_train&gt;</span></span><a class="headerlink" href="#cmdoption-generate_report.py-instance-set-train" title="Link to this definition"></a></dt>
+<dd><p>path to training instance set included in Sparkle for an algorithm configuration report</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-instance-set-test">
+<span class="sig-name descname"><span class="pre">--instance-set-test</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_test&gt;</span></span><a class="headerlink" href="#cmdoption-generate_report.py-instance-set-test" title="Link to this definition"></a></dt>
+<dd><p>path to testing instance set included in Sparkle for an algorithm configuration report</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-no-ablation">
+<span class="sig-name descname"><span class="pre">--no-ablation</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;flag_ablation&gt;</span></span><a class="headerlink" href="#cmdoption-generate_report.py-no-ablation" title="Link to this definition"></a></dt>
+<dd><p>turn off reporting on ablation for an algorithm configuration report</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-selection">
+<span class="sig-name descname"><span class="pre">--selection</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-generate_report.py-selection" title="Link to this definition"></a></dt>
+<dd><p>set to generate a normal selection report</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-test-case-directory">
+<span class="sig-name descname"><span class="pre">--test-case-directory</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;test_case_directory&gt;</span></span><a class="headerlink" href="#cmdoption-generate_report.py-test-case-directory" title="Link to this definition"></a></dt>
+<dd><p>Path to test case directory of an instance set for a selection report</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-generate_report.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-generate_report.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-generate_report.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+<p>Note that if a test instance set is given, the training instance set must also be given.</p>
+</section>
+<section id="initialise-py">
+<span id="cmd-initialise"></span><h3><span class="section-number">1.8.11. </span>initialise.py<a class="headerlink" href="#initialise-py" title="Link to this heading"></a></h3>
+<p>Initialise the Sparkle platform, this command does not have any arguments.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: initialise.py [-h]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-initialise.py-h">
+<span id="cmdoption-initialise.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-initialise.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="load-snapshot-py">
+<span id="cmd-load-snapshot"></span><h3><span class="section-number">1.8.12. </span>load_snapshot.py<a class="headerlink" href="#load-snapshot-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: load_snapshot.py [-h] snapshot-file-path</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-load_snapshot.py-arg-snapshot-file-path">
+<span class="sig-name descname"><span class="pre">snapshot-file-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-load_snapshot.py-arg-snapshot-file-path" title="Link to this definition"></a></dt>
+<dd><p>path to the snapshot file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-load_snapshot.py-h">
+<span id="cmdoption-load_snapshot.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-load_snapshot.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="remove-feature-extractor-py">
+<span id="cmd-remove-feature-extractor"></span><h3><span class="section-number">1.8.13. </span>remove_feature_extractor.py<a class="headerlink" href="#remove-feature-extractor-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: remove_feature_extractor.py [-h] extractor-path</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-remove_feature_extractor.py-arg-extractor-path">
+<span class="sig-name descname"><span class="pre">extractor-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-remove_feature_extractor.py-arg-extractor-path" title="Link to this definition"></a></dt>
+<dd><p>path or nickname of the feature extractor</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-remove_feature_extractor.py-h">
+<span id="cmdoption-remove_feature_extractor.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-remove_feature_extractor.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="remove-instances-py">
+<span id="cmd-remove-instances"></span><h3><span class="section-number">1.8.14. </span>remove_instances.py<a class="headerlink" href="#remove-instances-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: remove_instances.py [-h] instances-path</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-remove_instances.py-arg-instances-path">
+<span class="sig-name descname"><span class="pre">instances-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-remove_instances.py-arg-instances-path" title="Link to this definition"></a></dt>
+<dd><p>path to or nickname of the instance set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-remove_instances.py-h">
+<span id="cmdoption-remove_instances.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-remove_instances.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="remove-solver-py">
+<span id="cmd-remove-solver"></span><h3><span class="section-number">1.8.15. </span>remove_solver.py<a class="headerlink" href="#remove-solver-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: remove_solver.py [-h] solver</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-remove_solver.py-arg-solver">
+<span class="sig-name descname"><span class="pre">solver</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-remove_solver.py-arg-solver" title="Link to this definition"></a></dt>
+<dd><p>name, path to or nickname of the solver</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-remove_solver.py-h">
+<span id="cmdoption-remove_solver.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-remove_solver.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="run-ablation-py">
+<span id="cmd-run-ablation"></span><h3><span class="section-number">1.8.16. </span>run_ablation.py<a class="headerlink" href="#run-ablation-py" title="Link to this heading"></a></h3>
+<p>Runs parameter importance between the default and configured parameters with ablation. This command requires a finished configuration for the solver instance pair.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: run_ablation.py [-h] [--solver SOLVER] [--instance-set-train INSTANCE_SET_TRAIN] [--instance-set-test INSTANCE_SET_TEST] [--ablation-settings-help]</span>
+<span class="go">                       [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+<span class="go">                       [--target-cutoff-time TARGET_CUTOFF_TIME] [--wallclock-time WALLCLOCK_TIME] [--number-of-runs NUMBER_OF_RUNS] [--racing RACING]</span>
+<span class="go">                       [--settings-file SETTINGS_FILE] [--run-on {Runner.LOCAL,Runner.SLURM}]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-h">
+<span id="cmdoption-run_ablation.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-solver">
+<span class="sig-name descname"><span class="pre">--solver</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;solver&gt;</span></span><a class="headerlink" href="#cmdoption-run_ablation.py-solver" title="Link to this definition"></a></dt>
+<dd><p>path to solver</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-instance-set-train">
+<span class="sig-name descname"><span class="pre">--instance-set-train</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_train&gt;</span></span><a class="headerlink" href="#cmdoption-run_ablation.py-instance-set-train" title="Link to this definition"></a></dt>
+<dd><p>path to training instance set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-instance-set-test">
+<span class="sig-name descname"><span class="pre">--instance-set-test</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_test&gt;</span></span><a class="headerlink" href="#cmdoption-run_ablation.py-instance-set-test" title="Link to this definition"></a></dt>
+<dd><p>path to test instance set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-ablation-settings-help">
+<span class="sig-name descname"><span class="pre">--ablation-settings-help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-ablation-settings-help" title="Link to this definition"></a></dt>
+<dd><p>Prints a list of setting that can be used for the ablation analysis</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-target-cutoff-time">
+<span class="sig-name descname"><span class="pre">--target-cutoff-time</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-target-cutoff-time" title="Link to this definition"></a></dt>
+<dd><p>cutoff time per target algorithm run in seconds</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-wallclock-time">
+<span class="sig-name descname"><span class="pre">--wallclock-time</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;wallclock_time&gt;</span></span><a class="headerlink" href="#cmdoption-run_ablation.py-wallclock-time" title="Link to this definition"></a></dt>
+<dd><p>configuration budget per configurator run in seconds (wallclock)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-number-of-runs">
+<span class="sig-name descname"><span class="pre">--number-of-runs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-number-of-runs" title="Link to this definition"></a></dt>
+<dd><p>Number of configuration runs to execute</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-racing">
+<span class="sig-name descname"><span class="pre">--racing</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-racing" title="Link to this definition"></a></dt>
+<dd><p>Performs abaltion analysis with racing</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_ablation.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_ablation.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+<p>Note that if no test instance set is given, the validation is performed on the training set.</p>
+</section>
+<section id="run-configured-solver-py">
+<span id="cmd-run-configured-solver"></span><h3><span class="section-number">1.8.17. </span>run_configured_solver.py<a class="headerlink" href="#run-configured-solver-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: run_configured_solver.py [-h] [--settings-file SETTINGS_FILE]</span>
+<span class="go">                                [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}] [--parallel]</span>
+<span class="go">                                [--run-on {Runner.LOCAL,Runner.SLURM}]</span>
+<span class="go">                                instance_path [instance_path ...]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_configured_solver.py-arg-instance_path">
+<span class="sig-name descname"><span class="pre">instance_path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_configured_solver.py-arg-instance_path" title="Link to this definition"></a></dt>
+<dd><p>Path(s) to instance file(s) (when multiple files are given, it is assumed this is a multi-file instance) or instance directory.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_configured_solver.py-h">
+<span id="cmdoption-run_configured_solver.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_configured_solver.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_configured_solver.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_configured_solver.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_configured_solver.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"> <span class="pre">{ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}</span></span><a class="headerlink" href="#cmdoption-run_configured_solver.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_configured_solver.py-parallel">
+<span class="sig-name descname"><span class="pre">--parallel</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_configured_solver.py-parallel" title="Link to this definition"></a></dt>
+<dd><p>Run the command in parallel</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_configured_solver.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_configured_solver.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+</section>
+<section id="run-solvers-py">
+<span id="cmd-run-solvers"></span><h3><span class="section-number">1.8.18. </span>run_solvers.py<a class="headerlink" href="#run-solvers-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: run_solvers.py [-h] [--recompute] [--parallel] [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+<span class="go">                      [--target-cutoff-time TARGET_CUTOFF_TIME] [--also-construct-selector-and-report] [--verifier {NONE,SAT}] [--run-on {Runner.LOCAL,Runner.SLURM}]</span>
+<span class="go">                      [--settings-file SETTINGS_FILE]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-h">
+<span id="cmdoption-run_solvers.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_solvers.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-recompute">
+<span class="sig-name descname"><span class="pre">--recompute</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_solvers.py-recompute" title="Link to this definition"></a></dt>
+<dd><p>recompute the performance of all solvers on all instances</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-parallel">
+<span class="sig-name descname"><span class="pre">--parallel</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_solvers.py-parallel" title="Link to this definition"></a></dt>
+<dd><p>Run the command in parallel</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"> <span class="pre">{ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}</span></span><a class="headerlink" href="#cmdoption-run_solvers.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-target-cutoff-time">
+<span class="sig-name descname"><span class="pre">--target-cutoff-time</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;target_cutoff_time&gt;</span></span><a class="headerlink" href="#cmdoption-run_solvers.py-target-cutoff-time" title="Link to this definition"></a></dt>
+<dd><p>cutoff time per target algorithm run in seconds</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-also-construct-selector-and-report">
+<span class="sig-name descname"><span class="pre">--also-construct-selector-and-report</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_solvers.py-also-construct-selector-and-report" title="Link to this definition"></a></dt>
+<dd><p>after running the solvers also construct the selector and generate the report</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-verifier">
+<span class="sig-name descname"><span class="pre">--verifier</span></span><span class="sig-prename descclassname"> <span class="pre">{NONE,SAT}</span></span><a class="headerlink" href="#cmdoption-run_solvers.py-verifier" title="Link to this definition"></a></dt>
+<dd><p>problem specific verifier that should be used to verify solutions found by a target algorithm</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_solvers.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_solvers.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_solvers.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+</section>
+<section id="run-parallel-portfolio-py">
+<span id="cmd-run-sparkle-parallel-portfolio"></span><h3><span class="section-number">1.8.19. </span>run_parallel_portfolio.py<a class="headerlink" href="#run-parallel-portfolio-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: run_parallel_portfolio.py [-h] --instance-paths PATH [PATH ...] [--portfolio-name PORTFOLIO_NAME] [--solvers SOLVERS [SOLVERS ...]]</span>
+<span class="go">                                 [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+<span class="go">                                 [--cutoff-time CUTOFF_TIME] [--run-on {Runner.LOCAL,Runner.SLURM}] [--settings-file SETTINGS_FILE]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-h">
+<span id="cmdoption-run_parallel_portfolio.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-instance-paths">
+<span class="sig-name descname"><span class="pre">--instance-paths</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;path&gt;</span></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-instance-paths" title="Link to this definition"></a></dt>
+<dd><p>Specify the instance_path(s) on which the portfolio will run. This can be a space-separated list of instances containing instance sets and/or singular instances. For example –instance-paths  Instances/PTN/Ptn-7824-b01.cnf  Instances/PTN2/</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-portfolio-name">
+<span class="sig-name descname"><span class="pre">--portfolio-name</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;portfolio_name&gt;</span></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-portfolio-name" title="Link to this definition"></a></dt>
+<dd><p>Specify a name of the portfolio. If none is given, one will be generated.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-solvers">
+<span class="sig-name descname"><span class="pre">--solvers</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;solvers&gt;</span></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-solvers" title="Link to this definition"></a></dt>
+<dd><p>Specify the list of solvers to be used. If not specifed, all solvers known in Sparkle will be used.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"> <span class="pre">{ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}</span></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-cutoff-time">
+<span class="sig-name descname"><span class="pre">--cutoff-time</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;cutoff_time&gt;</span></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-cutoff-time" title="Link to this definition"></a></dt>
+<dd><p>The duration the portfolio will run before the solvers within the portfolio will be stopped (default: 60)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_parallel_portfolio.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_parallel_portfolio.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+</section>
+<section id="run-sparkle-portfolio-selector-py">
+<span id="cmd-run-sparkle-portfolio-selector"></span><h3><span class="section-number">1.8.20. </span>run_sparkle_portfolio_selector.py<a class="headerlink" href="#run-sparkle-portfolio-selector-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: run_sparkle_portfolio_selector.py [-h] [--run-on {Runner.LOCAL,Runner.SLURM}] [--settings-file SETTINGS_FILE]</span>
+<span class="go">                                         [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+<span class="go">                                         instance_path [instance_path ...]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_sparkle_portfolio_selector.py-arg-instance_path">
+<span class="sig-name descname"><span class="pre">instance_path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_sparkle_portfolio_selector.py-arg-instance_path" title="Link to this definition"></a></dt>
+<dd><p>Path to instance or instance directory</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_sparkle_portfolio_selector.py-h">
+<span id="cmdoption-run_sparkle_portfolio_selector.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_sparkle_portfolio_selector.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_sparkle_portfolio_selector.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_sparkle_portfolio_selector.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_sparkle_portfolio_selector.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_sparkle_portfolio_selector.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_sparkle_portfolio_selector.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_sparkle_portfolio_selector.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+</section>
+<section id="run-status-py">
+<span id="cmd-run-status"></span><h3><span class="section-number">1.8.21. </span>run_status.py<a class="headerlink" href="#run-status-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: run_status.py [-h] [--verbose]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_status.py-h">
+<span id="cmdoption-run_status.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_status.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-run_status.py-verbose">
+<span id="cmdoption-run_status.py-v"></span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-run_status.py-verbose" title="Link to this definition"></a></dt>
+<dd><p>output status in verbose mode</p>
+</dd></dl>
+
+</section>
+<section id="save-snapshot-py">
+<span id="cmd-save-snapshot"></span><h3><span class="section-number">1.8.22. </span>save_snapshot.py<a class="headerlink" href="#save-snapshot-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: save_snapshot.py [-h]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-save_snapshot.py-h">
+<span id="cmdoption-save_snapshot.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-save_snapshot.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+</section>
+<section id="wait-py">
+<span id="cmd-wait"></span><h3><span class="section-number">1.8.23. </span>wait.py<a class="headerlink" href="#wait-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: wait.py [-h]</span>
+<span class="go">               [--job-id JOB_ID | --command {ABOUT,ADD_FEATURE_EXTRACTOR,ADD_INSTANCES,ADD_SOLVER,CLEANUP_CURRENT_SPARKLE_PLATFORM,CLEANUP_TEMPORARY_FILES,COMPUTE_FEATURES,COMPUTE_MARGINAL_CONTRIBUTION,CONFIGURE_SOLVER,CONFIGURE_SOLVER_CALLBACK,CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,GENERATE_REPORT,INITIALISE,LOAD_SNAPSHOT,REMOVE_FEATURE_EXTRACTOR,REMOVE_INSTANCES,REMOVE_SOLVER,RUN_ABLATION,RUN_ABLATION_VALIDATION,ABLATION_CALLBACK,ABLATION_VALIDATION_CALLBACK,RUN_SOLVERS,RUN_SPARKLE_PORTFOLIO_SELECTOR,RUN_STATUS,SAVE_SNAPSHOT,SPARKLE_WAIT,SYSTEM_STATUS,VALIDATE_CONFIGURED_VS_DEFAULT,RUN_CONFIGURED_SOLVER,RUN_PARALLEL_PORTFOLIO,CSV_MERGE,VALIDATION}]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-wait.py-h">
+<span id="cmdoption-wait.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-wait.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-wait.py-job-id">
+<span class="sig-name descname"><span class="pre">--job-id</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;job_id&gt;</span></span><a class="headerlink" href="#cmdoption-wait.py-job-id" title="Link to this definition"></a></dt>
+<dd><p>job ID to wait for</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-wait.py-command">
+<span class="sig-name descname"><span class="pre">--command</span></span><span class="sig-prename descclassname"> <span class="pre">{ABOUT,ADD_FEATURE_EXTRACTOR,ADD_INSTANCES,ADD_SOLVER,CLEANUP_CURRENT_SPARKLE_PLATFORM,CLEANUP_TEMPORARY_FILES,COMPUTE_FEATURES,COMPUTE_MARGINAL_CONTRIBUTION,CONFIGURE_SOLVER,CONFIGURE_SOLVER_CALLBACK,CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,GENERATE_REPORT,INITIALISE,LOAD_SNAPSHOT,REMOVE_FEATURE_EXTRACTOR,REMOVE_INSTANCES,REMOVE_SOLVER,RUN_ABLATION,RUN_ABLATION_VALIDATION,ABLATION_CALLBACK,ABLATION_VALIDATION_CALLBACK,RUN_SOLVERS,RUN_SPARKLE_PORTFOLIO_SELECTOR,RUN_STATUS,SAVE_SNAPSHOT,SPARKLE_WAIT,SYSTEM_STATUS,VALIDATE_CONFIGURED_VS_DEFAULT,RUN_CONFIGURED_SOLVER,RUN_PARALLEL_PORTFOLIO,CSV_MERGE,VALIDATION}</span></span><a class="headerlink" href="#cmdoption-wait.py-command" title="Link to this definition"></a></dt>
+<dd><p>command you want to run. Sparkle will wait for dependencies of this command to be completed</p>
+</dd></dl>
+
+</section>
+<section id="system-status-py">
+<span id="cmd-system-status"></span><h3><span class="section-number">1.8.24. </span>system_status.py<a class="headerlink" href="#system-status-py" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: system_status.py [-h] [--verbose]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-system_status.py-h">
+<span id="cmdoption-system_status.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-system_status.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-system_status.py-verbose">
+<span id="cmdoption-system_status.py-v"></span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-system_status.py-verbose" title="Link to this definition"></a></dt>
+<dd><p>output status in verbose mode</p>
+</dd></dl>
+
+</section>
+<section id="validate-configured-vs-default-py">
+<span id="cmd-validate-configured-vs-default"></span><h3><span class="section-number">1.8.25. </span>validate_configured_vs_default.py<a class="headerlink" href="#validate-configured-vs-default-py" title="Link to this heading"></a></h3>
+<p>Test the performance of the configured solver and the default solver by doing validation experiments on the training and test sets.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: validate_configured_vs_default.py [-h] --solver SOLVER --instance-set-train INSTANCE_SET_TRAIN [--instance-set-test INSTANCE_SET_TEST] [--configurator CONFIGURATOR]</span>
+<span class="go">                                         [--performance-measure {ERR,RUNTIME,QUALITY_ABSOLUTE,QUALITY_ABSOLUTE_MINIMISATION,QUALITY_ABSOLUTE_MAXIMISATION}]</span>
+<span class="go">                                         [--target-cutoff-time TARGET_CUTOFF_TIME] [--settings-file SETTINGS_FILE] [--run-on {Runner.LOCAL,Runner.SLURM}]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-h">
+<span id="cmdoption-validate_configured_vs_default.py-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-h" title="Link to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-solver">
+<span class="sig-name descname"><span class="pre">--solver</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;solver&gt;</span></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-solver" title="Link to this definition"></a></dt>
+<dd><p>path to solver</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-instance-set-train">
+<span class="sig-name descname"><span class="pre">--instance-set-train</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_train&gt;</span></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-instance-set-train" title="Link to this definition"></a></dt>
+<dd><p>path to training instance set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-instance-set-test">
+<span class="sig-name descname"><span class="pre">--instance-set-test</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;instance_set_test&gt;</span></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-instance-set-test" title="Link to this definition"></a></dt>
+<dd><p>path to test instance set (only for validating)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-configurator">
+<span class="sig-name descname"><span class="pre">--configurator</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;configurator&gt;</span></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-configurator" title="Link to this definition"></a></dt>
+<dd><p>path to configurator</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-performance-measure">
+<span class="sig-name descname"><span class="pre">--performance-measure</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-performance-measure" title="Link to this definition"></a></dt>
+<dd><p>the performance measure, e.g. runtime</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-target-cutoff-time">
+<span class="sig-name descname"><span class="pre">--target-cutoff-time</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-target-cutoff-time" title="Link to this definition"></a></dt>
+<dd><p>cutoff time per target algorithm run in seconds</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-settings-file">
+<span class="sig-name descname"><span class="pre">--settings-file</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-settings-file" title="Link to this definition"></a></dt>
+<dd><p>Specify the settings file to use in case you want to use one other than the default</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-validate_configured_vs_default.py-run-on">
+<span class="sig-name descname"><span class="pre">--run-on</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-validate_configured_vs_default.py-run-on" title="Link to this definition"></a></dt>
+<dd><p>On which computer or cluster environment to execute the calculation.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="sparkle-settings">
+<span id="settings"></span><h2><span class="section-number">1.9. </span>Sparkle settings<a class="headerlink" href="#sparkle-settings" title="Link to this heading"></a></h2>
+<p>Most settings can be controlled through
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_settings.ini</span></code>. Possible settings are summarised per
+category in <code class="xref std std-numref docutils literal notranslate"><span class="pre">settings-details</span></code>. For any settings
+that are not provided the defaults will be used. Meaning, in the extreme
+case, that if the settings file is empty (and nothing is set through the
+command line) everything will run with default values.</p>
+<p>For convenience after every command <code class="docutils literal notranslate"><span class="pre">Settings/latest.ini</span></code> is written
+with the used settings. This can, for instance, be used to provide the
+same settings to the next command in a chain. E.g. for
+<code class="docutils literal notranslate"><span class="pre">validate_configured_vs_default</span></code> after <code class="docutils literal notranslate"><span class="pre">configure_solver</span></code>. The used
+settings are also recorded in the relevant <code class="docutils literal notranslate"><span class="pre">Output/</span></code> subdirectory.
+Note that when writing settings Sparkle always uses the name, and not an
+alias.</p>
+<section id="example-sparkle-settings-ini">
+<h3><span class="section-number">1.9.1. </span>Example <code class="docutils literal notranslate"><span class="pre">sparkle_settings.ini</span></code><a class="headerlink" href="#example-sparkle-settings-ini" title="Link to this heading"></a></h3>
+<p>This is a short example to show the format, see the settings file in
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_settings.ini</span></code> for more.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">general</span><span class="p">]</span>
+<span class="n">performance_measure</span> <span class="o">=</span> <span class="n">RUNTIME</span>
+<span class="n">target_cutoff_time</span> <span class="o">=</span> <span class="mi">60</span>
+
+<span class="p">[</span><span class="n">configuration</span><span class="p">]</span>
+<span class="n">number_of_runs</span> <span class="o">=</span> <span class="mi">25</span>
+
+<span class="p">[</span><span class="n">slurm</span><span class="p">]</span>
+<span class="n">number_of_runs_in_parallel</span> <span class="o">=</span> <span class="mi">25</span>
+</pre></div>
+</div>
+</section>
+<section id="names-and-possible-values">
+<span id="settings-details"></span><h3><span class="section-number">1.9.2. </span>Names and possible values<a class="headerlink" href="#names-and-possible-values" title="Link to this heading"></a></h3>
+<p><strong>[general]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">performance_measure</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_run_obj</span></code></p>
+<p>values: <code class="docutils literal notranslate"><span class="pre">{RUNTIME,</span> <span class="pre">QUALITY_ABSOLUTE</span></code> (also: <code class="docutils literal notranslate"><span class="pre">QUALITY}</span></code>)</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">RUNTIME</span></code> focuses on runtime the solver requires,</p>
+<p><code class="docutils literal notranslate"><span class="pre">QUALITY_ABSOLUTE</span></code> and <code class="docutils literal notranslate"><span class="pre">QUALITY</span></code> focuses on the average absolute improvements on the instances</p>
+</div></blockquote>
+<p>description: The type of performance measure that sparkle uses.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">target_cutoff_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_each_run_cutoff_time</span></code>, <code class="docutils literal notranslate"><span class="pre">cutoff_time_each_performance_computation</span></code></p>
+<p>values: integer</p>
+<p>description: The time a solver is allowed to run before it is terminated.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">extractor_cutoff_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">cutoff_time_each_feature_computation</span></code></p>
+<p>values: integer</p>
+<p>description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature extractors this budget is divided equally.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">penalty_multiplier</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">penalty_number</span></code></p>
+<p>values: integer</p>
+<p>description: In case of not solving an instance within the cutoff time the runtime is set to be the <code class="docutils literal notranslate"><span class="pre">penalty_multiplier</span> <span class="pre">*</span> <span class="pre">cutoff_time</span></code>.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">solution_verifier</span></code></p>
+<blockquote>
+<div><p>aliases: N/A</p>
+<p>values: <code class="docutils literal notranslate"><span class="pre">{NONE,</span> <span class="pre">SAT}</span></code></p>
+<p>note: Only available for SAT solving.</p>
+</div></blockquote>
+<p><strong>[configuration]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">wallclock_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_whole_time_budget</span></code></p>
+<p>values: integer</p>
+<p>description: The wallclock time one configuration run is allowed to use for finding configurations.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">cpu_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_cpu_time_budget</span></code></p>
+<p>values: integer</p>
+<p>description: The cpu time one configuration run is allowed to use for finding configurations.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">solver_calls</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_solver_calls_budget</span></code></p>
+<p>values: integer</p>
+<p>description: The number of solver calls one configuration run is allowed to use for finding configurations.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">number_of_runs</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">num_of_smac_runs</span></code></p>
+<p>values: integer</p>
+<p>description: The number of separate configurations runs.</p>
+</div></blockquote>
+<p><strong>[smac]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">target_cutoff_length</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_each_run_cutoff_length</span></code></p>
+<p>values: <code class="docutils literal notranslate"><span class="pre">{max}</span></code> (other values: whatever is allowed by SMAC)</p>
+</div></blockquote>
+<p><strong>[ablation]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">racing</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">ablation_racing</span></code></p>
+<p>values: boolean</p>
+<p>description: Use racing when performing the ablation analysis between the default and configured parameters</p>
+</div></blockquote>
+<p><strong>[slurm]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">number_of_runs_in_parallel</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_run_obj</span></code></p>
+<p>values: integer</p>
+<p>description: The number of configuration runs that can run in parallel.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">max_parallel_runs_per_node</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">clis_per_node</span></code></p>
+<p>values: integer</p>
+<p>note: Not really a Slurm option, will likely be moved to another section.</p>
+<p>description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the <code class="docutils literal notranslate"><span class="pre">max_parallel_runs_per_node</span></code> is at most 16.</p>
+</div></blockquote>
+</section>
+<section id="priorities">
+<h3><span class="section-number">1.9.3. </span>Priorities<a class="headerlink" href="#priorities" title="Link to this heading"></a></h3>
+<p>Sparkle has a large flexibility with passing along settings. Settings provided through different channels have different priorities
+as follows:</p>
+<ul class="simple">
+<li><p>Default –- Default values will be overwritten if a value is given
+through any other mechanism;</p></li>
+<li><p>File –- Settings form the <code class="docutils literal notranslate"><span class="pre">Settings/sparkle_settings.ini</span></code> overwrite
+default values, but are overwritten by settings given through the
+command line;</p></li>
+<li><p>Command line file -– Settings files provided through the command line,
+overwrite default values and other settings files.</p></li>
+<li><p>Command line –- Settings given through the command line overwrite all
+other settings, including settings files provided through the command
+line.</p></li>
+</ul>
+</section>
+<section id="slurm-focused-on-grace">
+<h3><span class="section-number">1.9.4. </span>Slurm (focused on Grace)<a class="headerlink" href="#slurm-focused-on-grace" title="Link to this heading"></a></h3>
+<p>Slurm settings can be specified in the
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_slurm_settings.txt</span></code> file. Currently these settings
+are inserted <em>as is</em> in any <code class="docutils literal notranslate"><span class="pre">srun</span></code> or <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> calls done by
+Sparkle. This means that any options exclusive to one or the other
+currently should not be used (see
+<code class="xref std std-numref docutils literal notranslate"><span class="pre">slurm-disallowed</span></code>).</p>
+<p>To overwrite the default settings specific to the cluster Grace in Leiden, you should set the option “–partition” with a valid value on your cluster.
+Also, you might have to adapt “–mem-per-cpu” to your system.</p>
+<section id="tested-options">
+<h4><span class="section-number">1.9.4.1. </span>Tested options<a class="headerlink" href="#tested-options" title="Link to this heading"></a></h4>
+<p>Below a list of tested Slurm options for <code class="docutils literal notranslate"><span class="pre">srun</span></code> and <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> is
+included. Most other options for these commands should also be safe to
+use (given they are valid), but have not been explicitly tested. Note
+that any options related to commands other than <code class="docutils literal notranslate"><span class="pre">srun</span></code> and <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>
+should not be used with Sparkle, and should not be included in
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_slurm_settings.txt</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-–partition</span> <span class="pre">/</span> <span class="pre">-p</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–exclude</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–nodelist</span></code></p></li>
+</ul>
+</section>
+<section id="disallowed-options">
+<span id="slurm-disallowed"></span><h4><span class="section-number">1.9.4.2. </span>Disallowed options<a class="headerlink" href="#disallowed-options" title="Link to this heading"></a></h4>
+<p>The options below are exclusive to <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> and are thus disallowed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-–array</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–clusters</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–wrap</span></code></p></li>
+</ul>
+<p>The options below are exclusive to <code class="docutils literal notranslate"><span class="pre">srun</span></code> and are thus disallowed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-–label</span></code></p></li>
+</ul>
+</section>
+<section id="nested-srun-calls">
+<h4><span class="section-number">1.9.4.3. </span>Nested <code class="docutils literal notranslate"><span class="pre">srun</span></code> calls<a class="headerlink" href="#nested-srun-calls" title="Link to this heading"></a></h4>
+<p>A number of Sparkle commands internally call the <code class="docutils literal notranslate"><span class="pre">srun</span></code> command, and
+for those commands the provided settings need to match the restrictions
+of your call to a Sparkle command. Take for instance the following
+command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">srun</span> <span class="o">-</span><span class="n">N1</span> <span class="o">-</span><span class="n">n1</span> <span class="o">-</span><span class="n">p</span> <span class="n">graceTST</span> <span class="n">CLI</span><span class="o">/</span><span class="n">configure_solver</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">solver</span> <span class="n">Solvers</span><span class="o">/</span><span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT</span><span class="o">-</span><span class="n">Generic</span> <span class="o">--</span><span class="n">instances</span><span class="o">-</span><span class="n">train</span> <span class="n">Instances</span><span class="o">/</span><span class="n">PTN</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>This call restricts itself to the <code class="docutils literal notranslate"><span class="pre">graceTST</span></code> partition (the
+<code class="docutils literal notranslate"><span class="pre">graceTST</span></code> partition only consists of node 22). So if the settings
+file contains the setting <code class="docutils literal notranslate"><span class="pre">–exclude=ethnode22</span></code>, all available nodes
+are excluded, and the command cannot execute any internal <code class="docutils literal notranslate"><span class="pre">srun</span></code>
+commands it may have.</p>
+<p>Finally, Slurm ignores nested partition settings for <code class="docutils literal notranslate"><span class="pre">srun</span></code>, but not
+for <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>. This means that if you specify the <code class="docutils literal notranslate"><span class="pre">graceTST</span></code>
+partition (as above) in your command, but the <code class="docutils literal notranslate"><span class="pre">graceADA</span></code> partition in
+the settings file, Slurm will still execute any nested <code class="docutils literal notranslate"><span class="pre">srun</span></code> commands
+on the <code class="docutils literal notranslate"><span class="pre">graceTST</span></code> partition only.</p>
+</section>
+</section>
+</section>
+<section id="required-packages">
+<h2><span class="section-number">1.10. </span>Required packages<a class="headerlink" href="#required-packages" title="Link to this heading"></a></h2>
+<section id="sparkle-on-grace">
+<h3><span class="section-number">1.10.1. </span>Sparkle on Grace<a class="headerlink" href="#sparkle-on-grace" title="Link to this heading"></a></h3>
+<p>Grace is the computing cluster of the ADA group <a class="footnote-reference brackets" href="#id5" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> at LIACS, Leiden
+University. Since not all packages required by Sparkle are installed on
+the system, some have to be installed local to the user.</p>
+<section id="making-your-algorithm-run-on-grace">
+<span id="solver-grace"></span><h4><span class="section-number">1.10.1.1. </span>Making your algorithm run on Grace<a class="headerlink" href="#making-your-algorithm-run-on-grace" title="Link to this heading"></a></h4>
+<p>Shell and Python scripts should work as is. If a compiled binary does
+not work, you may have to compile it on Grace and manually install
+packages on Grace that are needed by your algorithm.</p>
+</section>
+<section id="general-requirements">
+<h4><span class="section-number">1.10.1.2. </span>General requirements<a class="headerlink" href="#general-requirements" title="Link to this heading"></a></h4>
+<p>Other software used by Sparkle:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pdflatex</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">latex</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bibtex</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gnuplot</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gnuplot-x11</span></code></p></li>
+</ul>
+<p>To manually install <code class="docutils literal notranslate"><span class="pre">gnuplot</span></code> see for instance the instructions on
+their website <a class="reference external" href="http://www.gnuplot.info/development/">http://www.gnuplot.info/development/</a></p>
+</section>
+</section>
+</section>
+<section id="installation-and-compilation-of-examples">
+<h2><span class="section-number">1.11. </span>Installation and compilation of examples<a class="headerlink" href="#installation-and-compilation-of-examples" title="Link to this heading"></a></h2>
+<section id="solvers">
+<h3><span class="section-number">1.11.1. </span>Solvers<a class="headerlink" href="#solvers" title="Link to this heading"></a></h3>
+<section id="csccsat">
+<h4><span class="section-number">1.11.1.1. </span>CSCCSat<a class="headerlink" href="#csccsat" title="Link to this heading"></a></h4>
+<p>CSCCSat can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/CSCCSat/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">src</span><span class="o">/</span><span class="n">CSCCSat_source_codes</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">CSCCSat</span> <span class="o">../../</span>
+</pre></div>
+</div>
+</section>
+<section id="minisat">
+<h4><span class="section-number">1.11.1.2. </span>MiniSAT<a class="headerlink" href="#minisat" title="Link to this heading"></a></h4>
+<p>MiniSAT can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/MiniSAT/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">minisat</span><span class="o">-</span><span class="n">master</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">build</span><span class="o">/</span><span class="n">release</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">minisat</span> <span class="o">../</span>
+</pre></div>
+</div>
+</section>
+<section id="pbo-ccsat">
+<h4><span class="section-number">1.11.1.3. </span>PbO-CCSAT<a class="headerlink" href="#pbo-ccsat" title="Link to this heading"></a></h4>
+<p>PbO-CCSAT can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/PbO-CCSAT-Generic/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT</span><span class="o">-</span><span class="n">master</span><span class="o">/</span><span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT_process_oriented_version_source_code</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT</span> <span class="o">../../</span>
+</pre></div>
+</div>
+</section>
+<section id="tca-and-fastca">
+<h4><span class="section-number">1.11.1.4. </span>TCA and FastCA<a class="headerlink" href="#tca-and-fastca" title="Link to this heading"></a></h4>
+<p>The TCA and FastCA solvers, require <code class="docutils literal notranslate"><span class="pre">GLIBCXX_3.4.21</span></code>. This library
+comes with <code class="docutils literal notranslate"><span class="pre">GCC</span> <span class="pre">5.1.0</span></code> (or greater). Following installation you may
+have to update environment variables such as
+<code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH,</span> <span class="pre">LD_RUN_PATH,</span> <span class="pre">CPATH</span></code> to point to your installation
+directory.</p>
+<p>TCA can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/CCAG/Solvers/TCA/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">TCA</span><span class="o">-</span><span class="n">master</span><span class="o">/</span>
+<span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">TCA</span> <span class="o">../</span>
+</pre></div>
+</div>
+<p>FastCA can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/CCAG/Solvers/FastCA/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">fastca</span><span class="o">-</span><span class="n">master</span><span class="o">/</span><span class="n">fastCA</span><span class="o">/</span>
+<span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">FastCA</span> <span class="o">../../</span>
+</pre></div>
+</div>
+</section>
+<section id="vrp-sisrs">
+<h4><span class="section-number">1.11.1.5. </span>VRP_SISRs<a class="headerlink" href="#vrp-sisrs" title="Link to this heading"></a></h4>
+<p>VRP_SISRs can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/CVRP/Solvers/VRP_SISRs/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">src</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">VRP_SISRs</span> <span class="o">../</span>
+</pre></div>
+</div>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>See: <a class="reference external" href="http://aclib.net/cssc2014/pcs-format.pdf">http://aclib.net/cssc2014/pcs-format.pdf</a></p>
+</aside>
+<aside class="footnote brackets" id="id5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="http://ada.liacs.nl/">http://ada.liacs.nl/</a></p>
+</aside>
+</aside>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Sparkle’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../examples/examples.html" class="btn btn-neutral float-right" title="2. Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, ADA Research Group, LIACS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

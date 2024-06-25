@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-gb" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sparkle’s documentation! &mdash; Sparkle 0.8.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=67d9a984"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1. Sparkle user guide" href="userguide/userguide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Sparkle
+          </a>
+              <div class="version">
+                0.8.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="userguide/userguide.html">1. Sparkle user guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">2. Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Sparkle</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Sparkle’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sparkle-s-documentation">
+<h1>Sparkle’s documentation!<a class="headerlink" href="#sparkle-s-documentation" title="Link to this heading"></a></h1>
+</section>
+<section id="sparkle-user-guide">
+<h1>Sparkle user guide<a class="headerlink" href="#sparkle-user-guide" title="Link to this heading"></a></h1>
+<section id="quick-start">
+<h2>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sparkle currently relies on <a class="reference external" href="https://slurm.schedmd.com/">Slurm</a>, but in some cases works locally as well.
+Sparkle also relies on <a class="reference external" href="http://www.cril.univ-artois.fr/~roussel/runsolver/">RunSolver</a>, which is a Linux based program. Thus Sparkle can only run on Linux based systems in many cases.</p>
+</div>
+<p>Follow these steps:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#quick-install"><span class="std std-ref">Install Sparkle</span></a></p></li>
+<li><p>Prepare an <a class="reference internal" href="#quick-config-environment"><span class="std std-ref">algorithm configuration</span></a> or an <a class="reference internal" href="#quick-select-environment"><span class="std std-ref">algorithm selection</span></a>.</p></li>
+<li><p><a class="reference internal" href="#quick-execute-commands"><span class="std std-ref">Execute commands</span></a></p></li>
+</ol>
+</section>
+<section id="installing-sparkle">
+<span id="quick-install"></span><h2>Installing Sparkle<a class="headerlink" href="#installing-sparkle" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The installation process use the <code class="docutils literal notranslate"><span class="pre">conda</span></code> command available in <a class="reference external" href="https://www.anaconda.com/">Anaconda</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> to manage some dependencies.</p>
+</div>
+<section id="get-a-copy-of-sparkle">
+<h3>Get a copy of Sparkle<a class="headerlink" href="#get-a-copy-of-sparkle" title="Link to this heading"></a></h3>
+<p>To get a copy of Sparkle you can clone the repository.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">git</span></code> is available on your system, this will clone the Sparkle repository and create a subdirectory named <code class="docutils literal notranslate"><span class="pre">sparkle</span></code> :</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ADA-research/Sparkle
+</pre></div>
+</div>
+<p>You can also download the stable version here:</p>
+</section>
+<section id="install-dependencies">
+<h3>Install dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading"></a></h3>
+<p>Sparkle depends on Python 3.9+, swig 3.0, gnuplot, LaTeX, and multiple Python packages. An easy way to install most of what is needed is to use the <code class="docutils literal notranslate"><span class="pre">conda</span></code> package manager (<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>LaTeX is used to create the reports and the documentation and must be installed manually on the system. If you don’t plan to use the reports or recreate the documentations, you can skip it.</p>
+</div>
+<p>You can install the base requirements with</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+</pre></div>
+</div>
+<p>This will create an environment named <code class="docutils literal notranslate"><span class="pre">sparkle</span></code> that contains everything needed to run Sparkle, except LaTeX that needs to be installed manually.</p>
+<p>To activate the environment in the current shell, execute:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>sparkle
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You will need to reactivate the environment every time you log in, before using Sparkle.</p>
+</div>
+<p>The file <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> contains a tested list of Python packages with fixed versions required to execute Sparkle. We recommended using it.</p>
+<p>The file <code class="docutils literal notranslate"><span class="pre">environment-dev.txt</span></code> contains unpinned packages and the dependencies are not resolved. It is used for development and may cause problems.</p>
+<p>The two environments can be created in parallel since one is named <code class="docutils literal notranslate"><span class="pre">sparkle</span></code> and the other <code class="docutils literal notranslate"><span class="pre">sparkle-dev</span></code>. If you want to update an environment it is better to do a clean installation by removing and recreating it. For example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>deactivate
+$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>-n<span class="w"> </span>sparkle
+$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
+$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>sparkle
+</pre></div>
+</div>
+<p>This should be fast as both <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code> use local cache for the packages.</p>
+</section>
+<section id="configure-sparkle-slurm">
+<h3>Configure Sparkle/Slurm<a class="headerlink" href="#configure-sparkle-slurm" title="Link to this heading"></a></h3>
+<p>Before running Sparkle, you probably want to have a look at the settings described in <code class="xref std std-numref docutils literal notranslate"><span class="pre">settings</span></code>.
+In particular, the default Slurm settings are set to work with the Grace cluster in Leiden University and should be adapted to your specific cluster.</p>
+</section>
+</section>
+<section id="algorithm-configuration">
+<span id="quick-config-environment"></span><h2>Algorithm Configuration<a class="headerlink" href="#algorithm-configuration" title="Link to this heading"></a></h2>
+<p>Configuring an algorithm has the following minimal requirements for the
+algorithm (for an example of a solver directory see <code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-solvers</span></code>):</p>
+<ul class="simple">
+<li><p>A working solver executable</p></li>
+<li><p>An algorithm wrapper called <code class="docutils literal notranslate"><span class="pre">sprakle_smac_wrapper.py</span></code></p></li>
+<li><p>A PCS (parameter configuration space) file</p></li>
+</ul>
+<p>Further, training and testing instance sets are needed (for an example
+of an instances directory see <code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-instances</span></code>). For
+the purpose of testing whether your configuration setup works with
+Sparkle, it is advised to primarily use instances that are solved
+(relatively) quickly even with the default parameters.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See the <a class="reference internal" href="examples/configuration.html"><span class="doc">example</span></a> page for a walk-through on how to perform configuration with Sparkle.</p>
+</div>
+<section id="creating-a-wrapper-for-your-algorithm">
+<span id="quick-config-wrapper"></span><h3>Creating a wrapper for your algorithm<a class="headerlink" href="#creating-a-wrapper-for-your-algorithm" title="Link to this heading"></a></h3>
+<p>A template for the wrapper that connects your algorithm with Sparkle is
+available at <code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/template/sparkle_smac_wrapper.py</span></code>. Within
+this template a number of <code class="docutils literal notranslate"><span class="pre">TODO</span></code>s are indicated where you are likely
+to need to make changes for your specific algorithm. You can also
+compare the different example solvers to get an idea for what kind of
+changes are needed.</p>
+</section>
+<section id="parameter-configuration-space-pcs-file">
+<span id="quick-pcs-file"></span><h3>Parameter configuration space (PCS) file<a class="headerlink" href="#parameter-configuration-space-pcs-file" title="Link to this heading"></a></h3>
+<p>The PCS (parameter configuration space) format <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> is used to pass the
+possible parameter ranges of an algorithm to Sparkle in a <code class="docutils literal notranslate"><span class="pre">.pcs</span></code> file.
+For an example see e.g.
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test.pcs</span></code>.</p>
+<p>In this file you should enter all configurable parameters of your
+algorithm. Note that parameters such as the random seed used by the
+algorithm should not be configured and therefore should also not be
+included in the PCS file.</p>
+</section>
+</section>
+<section id="algorithm-selection">
+<span id="quick-select-environment"></span><h2>Algorithm Selection<a class="headerlink" href="#algorithm-selection" title="Link to this heading"></a></h2>
+<p>Creating a portfolio selector requires multiple algorithms with the
+following minimal requirements (for an example of a solver directory see
+<code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-solvers-selection</span></code>):</p>
+<ul class="simple">
+<li><p>A working solver executable</p></li>
+<li><p>An algorithm wrapper called <code class="docutils literal notranslate"><span class="pre">sparkle_run_default_wrapper.py</span></code></p></li>
+</ul>
+<p>Further, training and testing instance sets are needed (for an example
+of an instances directory see <code class="xref std std-numref docutils literal notranslate"><span class="pre">dir-instances</span></code>). For
+the purpose of testing whether your selection setup works with Sparkle,
+it is advised to primarily use instances that are solved (relatively)
+quickly.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See the <a class="reference internal" href="examples/selection.html"><span class="doc">example</span></a> page for a walk-through on how to perform selection with Sparkle.</p>
+</div>
+<section id="quick-select-wrapper">
+<span id="id2"></span><h3>Creating a wrapper for your algorithm<a class="headerlink" href="#quick-select-wrapper" title="Link to this heading"></a></h3>
+<p>A template for the wrapper that connects your algorithm with Sparkle is
+available at
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/template/sparkle_run_default_wrapper.py</span></code>.
+Within this template a number of <code class="docutils literal notranslate"><span class="pre">TODO</span></code>s are indicated where you are
+likely to need to make changes for your specific algorithm. You can also
+compare the different example solvers to get an idea for what kind of
+changes are needed.</p>
+</section>
+</section>
+<section id="executing-commands">
+<span id="quick-execute-commands"></span><h2>Executing commands<a class="headerlink" href="#executing-commands" title="Link to this heading"></a></h2>
+<p>Executing commands in Sparkle is as simple as running them in the top
+directory of Sparkle, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CLI</span><span class="o">/</span><span class="n">initialise</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Do note that when running on a cluster additional arguments may be
+needed, for instance under the Slurm workload manager the above command would change to
+something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">srun</span> <span class="o">-</span><span class="n">N1</span> <span class="o">-</span><span class="n">n1</span> <span class="o">-</span><span class="n">c1</span> <span class="n">CLI</span><span class="o">/</span><span class="n">initialise</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>In the <code class="docutils literal notranslate"><span class="pre">Examples/</span></code> directory a number of common command sequences are
+given. For instance, for configuration with specified training and
+testing sets see e.g. <code class="docutils literal notranslate"><span class="pre">Examples/configuration.md</span></code> for an example of a
+sequence of commands to execute. Note that some command run in the
+background and need time to complete before the next command is
+executed. To see whether a command is still running the Slurm command
+<code class="docutils literal notranslate"><span class="pre">squeue</span></code> can be used.</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">Output/</span></code> directory paths to generated scripts and logs are
+gathered per executed command.</p>
+</section>
+<section id="file-structure">
+<h2>File structure<a class="headerlink" href="#file-structure" title="Link to this heading"></a></h2>
+<section id="a-typical-instance-directory">
+<span id="dir-instances"></span><h3>A typical instance directory<a class="headerlink" href="#a-typical-instance-directory" title="Link to this heading"></a></h3>
+<p>An instance directory should look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Instances</span><span class="o">/</span>
+  <span class="n">Example_Instance_Set</span><span class="o">/</span>
+    <span class="n">instance_a</span><span class="o">.</span><span class="n">cnf</span>
+    <span class="n">instance_b</span><span class="o">.</span><span class="n">cnf</span>
+    <span class="o">...</span>        <span class="o">...</span>
+    <span class="n">instance_z</span><span class="o">.</span><span class="n">cnf</span>
+</pre></div>
+</div>
+<p>This directory simply contains a collection of instances, as example
+here SAT instances in the CNF format are given.</p>
+<p>For instances consisting of multiple files one additional file called <code class="docutils literal notranslate"><span class="pre">sparkle_instance_list.txt</span></code> should be
+included in the <code class="docutils literal notranslate"><span class="pre">Example_Instance_Set</span></code> directory, describing which
+files together form an instance. The format is a single instance per
+line with each file separated by a space, as shown below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">instance_a_part_one</span><span class="o">.</span><span class="n">abc</span> <span class="n">instance_a_part_two</span><span class="o">.</span><span class="n">xyz</span>
+<span class="n">instance_b_part_one</span><span class="o">.</span><span class="n">abc</span> <span class="n">instance_b_part_two</span><span class="o">.</span><span class="n">xyz</span>
+<span class="o">...</span>                     <span class="o">...</span>
+<span class="n">instance_z_part_one</span><span class="o">.</span><span class="n">abc</span> <span class="n">instance_z_part_two</span><span class="o">.</span><span class="n">xyz</span>
+</pre></div>
+</div>
+</section>
+<section id="a-typical-solver-directory-configuration">
+<span id="dir-solvers"></span><h3>A typical solver directory (configuration)<a class="headerlink" href="#a-typical-solver-directory-configuration" title="Link to this heading"></a></h3>
+<p>A solver directory should look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Solver</span><span class="o">/</span>
+  <span class="n">Example_Solver</span><span class="o">/</span>
+    <span class="n">solver</span>
+    <span class="n">sparkle_smac_wrapper</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">parameters</span><span class="o">.</span><span class="n">pcs</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">solver</span></code> is a binary executable of the solver that is to be
+configured. The <code class="docutils literal notranslate"><span class="pre">sprakle_smac_wrapper.py</span></code> is a wrapper that Sparkle
+should call to run the solver with specific settings, and then returns a
+result for the configurator. In <code class="docutils literal notranslate"><span class="pre">parameters.pcs</span></code> the configurable
+parameters are described in the PCS format. Finally, when importing your
+Solver into Sparkle, a binary executable of the runsolver tool <code class="docutils literal notranslate"><span class="pre">runsolver</span></code> is added.
+This allows Sparkle to make fair time measurements for all configuration experiments.</p>
+</section>
+<section id="a-typical-solver-directory-selection">
+<span id="dir-solvers-selection"></span><h3>A typical solver directory (selection)<a class="headerlink" href="#a-typical-solver-directory-selection" title="Link to this heading"></a></h3>
+<p>A solver directory should look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Solver</span><span class="o">/</span>
+  <span class="n">Example_Solver</span><span class="o">/</span>
+    <span class="n">solver</span>
+    <span class="n">sparkle_run_default_wrapper</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">solver</span></code> is a binary executable of a solver that is to be
+included in a portfolio selector. The <code class="docutils literal notranslate"><span class="pre">sprakle_run_default_wrapper.py</span></code>
+is a wrapper that Sparkle should call to run the solver on a specific
+instance.</p>
+</section>
+<section id="the-output-directory">
+<h3>The output directory<a class="headerlink" href="#the-output-directory" title="Link to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section describes a desirable behaviour but has not been implemented fully yet.</p>
+</div>
+<p>The output directory is located at the root of the Sparkle directory. Its structure is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Output</span><span class="o">/</span>
+  <span class="n">Logs</span><span class="o">/</span>
+  <span class="n">Common</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+  <span class="n">Configuration</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+      <span class="n">run_</span><span class="o">&lt;</span><span class="n">alias</span><span class="o">&gt;/</span>
+        <span class="n">related</span> <span class="n">files</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+  <span class="n">Parallel_Portfolio</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+      <span class="n">run_</span><span class="o">&lt;</span><span class="n">alias</span><span class="o">&gt;/</span>
+        <span class="n">related</span> <span class="n">files</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+  <span class="n">Selection</span><span class="o">/</span>
+    <span class="n">Raw_Data</span><span class="o">/</span>
+      <span class="n">run_</span><span class="o">&lt;</span><span class="n">alias</span><span class="o">&gt;/</span>
+        <span class="n">related</span> <span class="n">files</span>
+    <span class="n">Analysis</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">alias</span></code> is based on the command and a timestamp.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Logs</span></code> directory should contain the history of commands and their output such that one can easily know what has been done in which order and find enough pointers to debug unwanted behaviour.</p>
+<p>Other directories are cut into two subdirectories: <code class="docutils literal notranslate"><span class="pre">Raw_Data</span></code> contains the data produced by the main command, often time consuming to generate, handle with care; <code class="docutils literal notranslate"><span class="pre">Analysis</span></code> contains information extracted from the raw data, easy to generate, plots and reports.</p>
+<p>For each type of task run by Sparkle, the <code class="docutils literal notranslate"><span class="pre">related</span> <span class="pre">files</span></code> differ. The aim is always to have all required files for reproducibility. A copy of the sparkle configuration file at the time of the run and of all files relevant to the run, a copy of any log or error file that could help with debugging or a link to it, and the output of the executed task.</p>
+<p><em>For configuration</em> the configuration trajectory if available, the training and testing sets, the default configuration and the final found configuration. The performance of those will be in the Analysis folder.</p>
+<p><em>For parallel portfolio</em> the resulting portfolio and its components. The performance of the portfolio will be in the Analysis folder.</p>
+<p><em>For selection</em> the algorithms and their performance on the training set, the model(s) generated if available and the resulting selector. The performance evaluation of the selector will be in the Analysis folder.</p>
+<p><em>For analysis</em> a link to the folder on which the analysis was performed (configuration, portfolio or selection), the performance evaluation from it and the report if it was generated.</p>
+</section>
+</section>
+<section id="wrappers">
+<h2>Wrappers<a class="headerlink" href="#wrappers" title="Link to this heading"></a></h2>
+<section id="sparkle-run-default-wrapper-py">
+<h3><code class="docutils literal notranslate"><span class="pre">sparkle_run_default_wrapper.py</span></code><a class="headerlink" href="#sparkle-run-default-wrapper-py" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">sparkle_run_default_wrapper.py</span></code> has two functions that need to be
+implemented for each algorithm:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">print_command(instance_file,</span> <span class="pre">seed_str:</span> <span class="pre">str,</span> <span class="pre">cutoff_time_str:</span> <span class="pre">str)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">print_output(terminal_output_file:</span> <span class="pre">str)</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">print_command(...)</span></code> should print a command line call that Sparkle can
+use to run the algorithm on a given instance file. Ideally, for
+reproducibility purposes, the seed provided by Sparkle should also be
+passed to the algorithm. If the algorithm requires this, the cutoff time
+can also be passed to the algorithm. However, in this case the cutoff
+time should be made very large. For instance by multiplying by ten with:
+<code class="docutils literal notranslate"><span class="pre">cutoff_time_str</span> <span class="pre">=</span> <span class="pre">str(int(cutoff_time_str)</span> <span class="pre">*</span> <span class="pre">10)</span></code>. This is necessary
+to ensure Sparkle stops the algorithm after the cutoff time, rather than
+the algorithm itself. By doing this it is ensured runtime measurements
+are always done by Sparkle, and thus consistent between algorithms that
+might measure time differently.</p>
+<p><code class="docutils literal notranslate"><span class="pre">print_output(...)</span></code> should process the algorithm output. If the
+performance measure is <code class="docutils literal notranslate"><span class="pre">RUNTIME</span></code>, this function only needs to output
+the algorithm status. For all <code class="docutils literal notranslate"><span class="pre">QUALITY</span></code> performance measures both the
+algorithm status and the solution quality have to be given. Sparkle
+internally measures <code class="docutils literal notranslate"><span class="pre">RUNTIME</span></code>, while it can be overwritten by the user
+if desired, for consistent runtime measurements between solvers this is
+not recommended. The output should be printed and formatted as in the
+example below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">quality</span> <span class="mi">8734</span>
+<span class="n">status</span> <span class="n">SUCCESS</span>
+</pre></div>
+</div>
+<p>Status can hold the following values <code class="docutils literal notranslate"><span class="pre">{SUCCESS,</span> <span class="pre">TIMEOUT,</span> <span class="pre">CRASHED}</span></code>. If
+the status is not known, reporting <code class="docutils literal notranslate"><span class="pre">SUCCESS</span></code> will allow Sparkle to
+continue, but may mean that Sparkle does not know when the algorithm
+crashed, and continues with faulty results.</p>
+</section>
+</section>
+<section id="commands">
+<h2>Commands<a class="headerlink" href="#commands" title="Link to this heading"></a></h2>
+<p>Currently the commands below are available in Sparkle (listed
+alphabetically). Every command can be called with the <code class="docutils literal notranslate"><span class="pre">–help</span></code> option
+to get a description of the required arguments and other options.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Arguments in [square brackets] are optional, arguments without brackets
+are mandatory. Input in &lt;chevrons&gt; indicate required text input, {curly
+brackets} indicate a set of inputs to choose from.</p>
+</div>
+</section>
+<section id="sparkle-settings">
+<span id="settings"></span><h2>Sparkle settings<a class="headerlink" href="#sparkle-settings" title="Link to this heading"></a></h2>
+<p>Most settings can be controlled through
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_settings.ini</span></code>. Possible settings are summarised per
+category in <code class="xref std std-numref docutils literal notranslate"><span class="pre">settings-details</span></code>. For any settings
+that are not provided the defaults will be used. Meaning, in the extreme
+case, that if the settings file is empty (and nothing is set through the
+command line) everything will run with default values.</p>
+<p>For convenience after every command <code class="docutils literal notranslate"><span class="pre">Settings/latest.ini</span></code> is written
+with the used settings. This can, for instance, be used to provide the
+same settings to the next command in a chain. E.g. for
+<code class="docutils literal notranslate"><span class="pre">validate_configured_vs_default</span></code> after <code class="docutils literal notranslate"><span class="pre">configure_solver</span></code>. The used
+settings are also recorded in the relevant <code class="docutils literal notranslate"><span class="pre">Output/</span></code> subdirectory.
+Note that when writing settings Sparkle always uses the name, and not an
+alias.</p>
+<section id="example-sparkle-settings-ini">
+<h3>Example <code class="docutils literal notranslate"><span class="pre">sparkle_settings.ini</span></code><a class="headerlink" href="#example-sparkle-settings-ini" title="Link to this heading"></a></h3>
+<p>This is a short example to show the format, see the settings file in
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_settings.ini</span></code> for more.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">general</span><span class="p">]</span>
+<span class="n">performance_measure</span> <span class="o">=</span> <span class="n">RUNTIME</span>
+<span class="n">target_cutoff_time</span> <span class="o">=</span> <span class="mi">60</span>
+
+<span class="p">[</span><span class="n">configuration</span><span class="p">]</span>
+<span class="n">number_of_runs</span> <span class="o">=</span> <span class="mi">25</span>
+
+<span class="p">[</span><span class="n">slurm</span><span class="p">]</span>
+<span class="n">number_of_runs_in_parallel</span> <span class="o">=</span> <span class="mi">25</span>
+</pre></div>
+</div>
+</section>
+<section id="names-and-possible-values">
+<span id="settings-details"></span><h3>Names and possible values<a class="headerlink" href="#names-and-possible-values" title="Link to this heading"></a></h3>
+<p><strong>[general]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">performance_measure</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_run_obj</span></code></p>
+<p>values: <code class="docutils literal notranslate"><span class="pre">{RUNTIME,</span> <span class="pre">QUALITY_ABSOLUTE</span></code> (also: <code class="docutils literal notranslate"><span class="pre">QUALITY}</span></code>)</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">RUNTIME</span></code> focuses on runtime the solver requires,</p>
+<p><code class="docutils literal notranslate"><span class="pre">QUALITY_ABSOLUTE</span></code> and <code class="docutils literal notranslate"><span class="pre">QUALITY</span></code> focuses on the average absolute improvements on the instances</p>
+</div></blockquote>
+<p>description: The type of performance measure that sparkle uses.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">target_cutoff_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_each_run_cutoff_time</span></code>, <code class="docutils literal notranslate"><span class="pre">cutoff_time_each_performance_computation</span></code></p>
+<p>values: integer</p>
+<p>description: The time a solver is allowed to run before it is terminated.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">extractor_cutoff_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">cutoff_time_each_feature_computation</span></code></p>
+<p>values: integer</p>
+<p>description: The time a feature extractor is allowed to run before it is terminated. In case of multiple feature extractors this budget is divided equally.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">penalty_multiplier</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">penalty_number</span></code></p>
+<p>values: integer</p>
+<p>description: In case of not solving an instance within the cutoff time the runtime is set to be the <code class="docutils literal notranslate"><span class="pre">penalty_multiplier</span> <span class="pre">*</span> <span class="pre">cutoff_time</span></code>.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">solution_verifier</span></code></p>
+<blockquote>
+<div><p>aliases: N/A</p>
+<p>values: <code class="docutils literal notranslate"><span class="pre">{NONE,</span> <span class="pre">SAT}</span></code></p>
+<p>note: Only available for SAT solving.</p>
+</div></blockquote>
+<p><strong>[configuration]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">wallclock_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_whole_time_budget</span></code></p>
+<p>values: integer</p>
+<p>description: The wallclock time one configuration run is allowed to use for finding configurations.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">cpu_time</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_cpu_time_budget</span></code></p>
+<p>values: integer</p>
+<p>description: The cpu time one configuration run is allowed to use for finding configurations.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">solver_calls</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_solver_calls_budget</span></code></p>
+<p>values: integer</p>
+<p>description: The number of solver calls one configuration run is allowed to use for finding configurations.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">number_of_runs</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">num_of_smac_runs</span></code></p>
+<p>values: integer</p>
+<p>description: The number of separate configurations runs.</p>
+</div></blockquote>
+<p><strong>[smac]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">target_cutoff_length</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_each_run_cutoff_length</span></code></p>
+<p>values: <code class="docutils literal notranslate"><span class="pre">{max}</span></code> (other values: whatever is allowed by SMAC)</p>
+</div></blockquote>
+<p><strong>[ablation]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">racing</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">ablation_racing</span></code></p>
+<p>values: boolean</p>
+<p>description: Use racing when performing the ablation analysis between the default and configured parameters</p>
+</div></blockquote>
+<p><strong>[slurm]</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">number_of_runs_in_parallel</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">smac_run_obj</span></code></p>
+<p>values: integer</p>
+<p>description: The number of configuration runs that can run in parallel.</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">max_parallel_runs_per_node</span></code></p>
+<blockquote>
+<div><p>aliases: <code class="docutils literal notranslate"><span class="pre">clis_per_node</span></code></p>
+<p>values: integer</p>
+<p>note: Not really a Slurm option, will likely be moved to another section.</p>
+<p>description: The number of parallel processes that can be run on one compute node. In case a node has 32 cores and each solver uses 2 cores, the <code class="docutils literal notranslate"><span class="pre">max_parallel_runs_per_node</span></code> is at most 16.</p>
+</div></blockquote>
+</section>
+<section id="priorities">
+<h3>Priorities<a class="headerlink" href="#priorities" title="Link to this heading"></a></h3>
+<p>Sparkle has a large flexibility with passing along settings. Settings provided through different channels have different priorities
+as follows:</p>
+<ul class="simple">
+<li><p>Default –- Default values will be overwritten if a value is given
+through any other mechanism;</p></li>
+<li><p>File –- Settings form the <code class="docutils literal notranslate"><span class="pre">Settings/sparkle_settings.ini</span></code> overwrite
+default values, but are overwritten by settings given through the
+command line;</p></li>
+<li><p>Command line file -– Settings files provided through the command line,
+overwrite default values and other settings files.</p></li>
+<li><p>Command line –- Settings given through the command line overwrite all
+other settings, including settings files provided through the command
+line.</p></li>
+</ul>
+</section>
+<section id="slurm-focused-on-grace">
+<h3>Slurm (focused on Grace)<a class="headerlink" href="#slurm-focused-on-grace" title="Link to this heading"></a></h3>
+<p>Slurm settings can be specified in the
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_slurm_settings.txt</span></code> file. Currently these settings
+are inserted <em>as is</em> in any <code class="docutils literal notranslate"><span class="pre">srun</span></code> or <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> calls done by
+Sparkle. This means that any options exclusive to one or the other
+currently should not be used (see
+<code class="xref std std-numref docutils literal notranslate"><span class="pre">slurm-disallowed</span></code>).</p>
+<p>To overwrite the default settings specific to the cluster Grace in Leiden, you should set the option “–partition” with a valid value on your cluster.
+Also, you might have to adapt “–mem-per-cpu” to your system.</p>
+<section id="tested-options">
+<h4>Tested options<a class="headerlink" href="#tested-options" title="Link to this heading"></a></h4>
+<p>Below a list of tested Slurm options for <code class="docutils literal notranslate"><span class="pre">srun</span></code> and <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> is
+included. Most other options for these commands should also be safe to
+use (given they are valid), but have not been explicitly tested. Note
+that any options related to commands other than <code class="docutils literal notranslate"><span class="pre">srun</span></code> and <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>
+should not be used with Sparkle, and should not be included in
+<code class="docutils literal notranslate"><span class="pre">Settings/sparkle_slurm_settings.txt</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-–partition</span> <span class="pre">/</span> <span class="pre">-p</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–exclude</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–nodelist</span></code></p></li>
+</ul>
+</section>
+<section id="disallowed-options">
+<span id="slurm-disallowed"></span><h4>Disallowed options<a class="headerlink" href="#disallowed-options" title="Link to this heading"></a></h4>
+<p>The options below are exclusive to <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> and are thus disallowed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-–array</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–clusters</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-–wrap</span></code></p></li>
+</ul>
+<p>The options below are exclusive to <code class="docutils literal notranslate"><span class="pre">srun</span></code> and are thus disallowed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-–label</span></code></p></li>
+</ul>
+</section>
+<section id="nested-srun-calls">
+<h4>Nested <code class="docutils literal notranslate"><span class="pre">srun</span></code> calls<a class="headerlink" href="#nested-srun-calls" title="Link to this heading"></a></h4>
+<p>A number of Sparkle commands internally call the <code class="docutils literal notranslate"><span class="pre">srun</span></code> command, and
+for those commands the provided settings need to match the restrictions
+of your call to a Sparkle command. Take for instance the following
+command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">srun</span> <span class="o">-</span><span class="n">N1</span> <span class="o">-</span><span class="n">n1</span> <span class="o">-</span><span class="n">p</span> <span class="n">graceTST</span> <span class="n">CLI</span><span class="o">/</span><span class="n">configure_solver</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">solver</span> <span class="n">Solvers</span><span class="o">/</span><span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT</span><span class="o">-</span><span class="n">Generic</span> <span class="o">--</span><span class="n">instances</span><span class="o">-</span><span class="n">train</span> <span class="n">Instances</span><span class="o">/</span><span class="n">PTN</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>This call restricts itself to the <code class="docutils literal notranslate"><span class="pre">graceTST</span></code> partition (the
+<code class="docutils literal notranslate"><span class="pre">graceTST</span></code> partition only consists of node 22). So if the settings
+file contains the setting <code class="docutils literal notranslate"><span class="pre">–exclude=ethnode22</span></code>, all available nodes
+are excluded, and the command cannot execute any internal <code class="docutils literal notranslate"><span class="pre">srun</span></code>
+commands it may have.</p>
+<p>Finally, Slurm ignores nested partition settings for <code class="docutils literal notranslate"><span class="pre">srun</span></code>, but not
+for <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>. This means that if you specify the <code class="docutils literal notranslate"><span class="pre">graceTST</span></code>
+partition (as above) in your command, but the <code class="docutils literal notranslate"><span class="pre">graceADA</span></code> partition in
+the settings file, Slurm will still execute any nested <code class="docutils literal notranslate"><span class="pre">srun</span></code> commands
+on the <code class="docutils literal notranslate"><span class="pre">graceTST</span></code> partition only.</p>
+</section>
+</section>
+</section>
+<section id="required-packages">
+<h2>Required packages<a class="headerlink" href="#required-packages" title="Link to this heading"></a></h2>
+<section id="sparkle-on-grace">
+<h3>Sparkle on Grace<a class="headerlink" href="#sparkle-on-grace" title="Link to this heading"></a></h3>
+<p>Grace is the computing cluster of the ADA group <a class="footnote-reference brackets" href="#id5" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> at LIACS, Leiden
+University. Since not all packages required by Sparkle are installed on
+the system, some have to be installed local to the user.</p>
+<section id="making-your-algorithm-run-on-grace">
+<span id="solver-grace"></span><h4>Making your algorithm run on Grace<a class="headerlink" href="#making-your-algorithm-run-on-grace" title="Link to this heading"></a></h4>
+<p>Shell and Python scripts should work as is. If a compiled binary does
+not work, you may have to compile it on Grace and manually install
+packages on Grace that are needed by your algorithm.</p>
+</section>
+<section id="general-requirements">
+<h4>General requirements<a class="headerlink" href="#general-requirements" title="Link to this heading"></a></h4>
+<p>Other software used by Sparkle:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pdflatex</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">latex</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bibtex</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gnuplot</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gnuplot-x11</span></code></p></li>
+</ul>
+<p>To manually install <code class="docutils literal notranslate"><span class="pre">gnuplot</span></code> see for instance the instructions on
+their website <a class="reference external" href="http://www.gnuplot.info/development/">http://www.gnuplot.info/development/</a></p>
+</section>
+</section>
+</section>
+<section id="installation-and-compilation-of-examples">
+<h2>Installation and compilation of examples<a class="headerlink" href="#installation-and-compilation-of-examples" title="Link to this heading"></a></h2>
+<section id="solvers">
+<h3>Solvers<a class="headerlink" href="#solvers" title="Link to this heading"></a></h3>
+<section id="csccsat">
+<h4>CSCCSat<a class="headerlink" href="#csccsat" title="Link to this heading"></a></h4>
+<p>CSCCSat can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/CSCCSat/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">src</span><span class="o">/</span><span class="n">CSCCSat_source_codes</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">CSCCSat</span> <span class="o">../../</span>
+</pre></div>
+</div>
+</section>
+<section id="minisat">
+<h4>MiniSAT<a class="headerlink" href="#minisat" title="Link to this heading"></a></h4>
+<p>MiniSAT can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/MiniSAT/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">minisat</span><span class="o">-</span><span class="n">master</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">build</span><span class="o">/</span><span class="n">release</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">minisat</span> <span class="o">../</span>
+</pre></div>
+</div>
+</section>
+<section id="pbo-ccsat">
+<h4>PbO-CCSAT<a class="headerlink" href="#pbo-ccsat" title="Link to this heading"></a></h4>
+<p>PbO-CCSAT can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/Solvers/PbO-CCSAT-Generic/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT</span><span class="o">-</span><span class="n">master</span><span class="o">/</span><span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT_process_oriented_version_source_code</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">PbO</span><span class="o">-</span><span class="n">CCSAT</span> <span class="o">../../</span>
+</pre></div>
+</div>
+</section>
+<section id="tca-and-fastca">
+<h4>TCA and FastCA<a class="headerlink" href="#tca-and-fastca" title="Link to this heading"></a></h4>
+<p>The TCA and FastCA solvers, require <code class="docutils literal notranslate"><span class="pre">GLIBCXX_3.4.21</span></code>. This library
+comes with <code class="docutils literal notranslate"><span class="pre">GCC</span> <span class="pre">5.1.0</span></code> (or greater). Following installation you may
+have to update environment variables such as
+<code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH,</span> <span class="pre">LD_RUN_PATH,</span> <span class="pre">CPATH</span></code> to point to your installation
+directory.</p>
+<p>TCA can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/CCAG/Solvers/TCA/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">TCA</span><span class="o">-</span><span class="n">master</span><span class="o">/</span>
+<span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">TCA</span> <span class="o">../</span>
+</pre></div>
+</div>
+<p>FastCA can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/CCAG/Solvers/FastCA/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">fastca</span><span class="o">-</span><span class="n">master</span><span class="o">/</span><span class="n">fastCA</span><span class="o">/</span>
+<span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">FastCA</span> <span class="o">../../</span>
+</pre></div>
+</div>
+</section>
+<section id="vrp-sisrs">
+<h4>VRP_SISRs<a class="headerlink" href="#vrp-sisrs" title="Link to this heading"></a></h4>
+<p>VRP_SISRs can be recompiled as follows in the
+<code class="docutils literal notranslate"><span class="pre">Examples/Resources/CVRP/Solvers/VRP_SISRs/</span></code> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="n">src</span><span class="o">.</span><span class="n">zip</span>
+<span class="n">cd</span> <span class="n">src</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">cp</span> <span class="n">VRP_SISRs</span> <span class="o">../</span>
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>See: <a class="reference external" href="http://aclib.net/cssc2014/pcs-format.pdf">http://aclib.net/cssc2014/pcs-format.pdf</a></p>
+</aside>
+<aside class="footnote brackets" id="id5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="http://ada.liacs.nl/">http://ada.liacs.nl/</a></p>
+</aside>
+</aside>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="userguide/userguide.html" class="btn btn-neutral float-right" title="1. Sparkle user guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, ADA Research Group, LIACS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
