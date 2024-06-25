@@ -33,10 +33,6 @@ sparkle_slurm_settings_path = Path("Settings/sparkle_slurm_settings.txt")
 
 sparkle_global_output_dir = Path("Output")
 
-
-
-
-
 # Log that keeps track of which commands were executed and where output details can be
 # found
 sparkle_global_log_dir = Path("Log")

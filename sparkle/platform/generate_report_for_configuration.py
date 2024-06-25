@@ -70,9 +70,10 @@ def get_dict_instance_to_performance(results: list[list[str]],
     """Return a dictionary of instance names and their performance.
 
     Args:
-        results_file: Name of the result file
+        results: Results from CSV
         cutoff: Cutoff value
         penalty: The penalty to assign those cutoff
+        objective: The Sparkle Objective we are converting for
     Returns:
         A dictionary containing the performance for each instance
     """
@@ -410,10 +411,11 @@ def configuration_report_variables(target_dir: Path,
         full_dict["ablationBool"] = "\\ablationfalse"
 
     if full_dict["featuresBool"] == "\\featurestrue":
-        full_dict["numFeatureExtractors"] = str(len([p for p in extractor_dir.iterdir()]))
-        full_dict["featureExtractorList"] = sgfs.get_feature_extractor_list(extractor_dir)
-        full_dict["featureComputationCutoffTime"] =\
-            str(extractor_cuttoff)
+        full_dict["numFeatureExtractors"] =\
+            str(len([p for p in extractor_dir.iterdir()]))
+        full_dict["featureExtractorList"] =\
+            sgfs.get_feature_extractor_list(extractor_dir)
+        full_dict["featureComputationCutoffTime"] = str(extractor_cuttoff)
 
     return full_dict
 
@@ -514,14 +516,17 @@ def get_dict_variable_to_value_test(target_dir: Path,
     """Return a dict matching test set specific latex variables with their values.
 
     Args:
+        target_dir: Path to where output should go
         solver: The solver object
-        instance_set_train_name: Name of the instance set for training
-        instance_set_test_name: Name of the instance set for testing
+        configurator: Configurator for which the report is generated
+        validator: Validator that provided the data set results
+        instance_set_train: Path of the instance set for training
+        instance_set_test: Path of the instance set for testing
+        penalty_multiplier: Penalty factor for TIMEOUT
 
     Returns:
         A dictionary containting the variables and their values
     """
-
     _, config = configurator.get_optimal_configuration(solver, instance_set_train)
     res_default = validator.get_validation_results(
         solver, instance_set_test, config="")
@@ -580,12 +585,18 @@ def generate_report_for_configuration(solver: Solver,
 
     Args:
         solver: Object representation of the solver
+        configurator: Configurator for the report
+        validator: Validator that validated the configurator
+        extractor_dir: Path to the extractor used
         target_path: Where the report files will be placed.
+        latex_template_path: Path to the template to use for the report
+        bibliography_path: The bib corresponding to the latex template
         instance_set_train: Path of the instance set for training
+        penalty_multiplier: Penalty factor for timeout
+        extractor_cuttoff: Cut off for extractor
         instance_set_test: Path of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
-    #extractor cutoff time
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
         target_path, solver, configurator, validator, extractor_dir, bibliography_path,
