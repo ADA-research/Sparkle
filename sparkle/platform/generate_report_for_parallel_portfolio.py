@@ -3,10 +3,9 @@
 """Helper functions for parallel portfolio report generation."""
 from pathlib import Path
 
-import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import generate_report_for_selection as sgfs
-from sparkle.types.objective import PerformanceMeasure
+from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
 def get_solver_list_latex(solver_list: list[str]) -> str:
@@ -38,7 +37,9 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
 def get_dict_sbs_penalty_time_on_each_instance(
         solver_list: list[str],
         instance_list: list[str],
-        results: dict[list[str, str]]) -> tuple[dict[str, float], str, dict[str, float]]:
+        results: dict[list[str, str]],
+        cutoff: int,
+        penalised_time: int) -> tuple[dict[str, float], str, dict[str, float]]:
     """Return the penalised run time for the single best solver and per solver.
 
     Args:
@@ -53,8 +54,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
             A second dict containing penalised averaged run time per solver.
     """
     penalised_averaged_runtime = {solver: 0.0 for solver in solver_list}
-    cutoff = gv.settings.get_general_target_cutoff_time()
-    penalised_time = float(gv.settings.get_penalised_time())
+    penalised_time = float(penalised_time)
     for instance in results:
         for (solver, status, runtime) in results[instance]:
             # Those that did not finish or exceed the thresh get the penalty
@@ -83,7 +83,9 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
         instance_list: list[str],
-        results: dict[str, list[str]]) -> dict[str, float]:
+        results: dict[str, list[str]],
+        cutoff_time: int,
+        penalised_time: int) -> dict[str, float]:
     """Returns the instance names and corresponding penalised running times of the PaP.
 
     Args:
@@ -94,8 +96,7 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
     """
     instance_penalty_dict = {}
 
-    cutoff_time = gv.settings.get_general_target_cutoff_time()
-    default_penalty = float(gv.settings.get_penalised_time())
+    default_penalty = float(penalised_time)
 
     for instance in instance_list:
         instance_name = Path(instance).name
@@ -118,7 +119,12 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
 
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
         target_directory: Path,
-        solver_list: list[str], instances: list[str], results: list[str]) -> tuple[
+        solver_list: list[str],
+        instances: list[str],
+        results: list[str],
+        objective: SparkleObjective,
+        cutoff: int,
+        penalised_time: int) -> tuple[
         str, dict[str, float], dict[str, float]]:
     """Generate PaP vs SBS figure and return a string to include it in LaTeX.
 
@@ -136,10 +142,13 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
                 instance names and the penalised running time of the PaP.
     """
     dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers =\
-        get_dict_sbs_penalty_time_on_each_instance(solver_list, instances, results)
+        get_dict_sbs_penalty_time_on_each_instance(solver_list, instances, results,
+                                                   cutoff, penalised_time)
     dict_actual_parallel_portfolio_penalty_time_on_each_instance =\
         get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances,
-                                                                         results)
+                                                                         results,
+                                                                         cutoff,
+                                                                         penalised_time)
 
     figure_filename = "figure_parallel_portfolio_sparkle_vs_sbs"
     data_filename = "data_parallel_portfolio_sparkle_vs_sbs.dat"
@@ -152,12 +161,9 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
                 dict_actual_parallel_portfolio_penalty_time_on_each_instance[instance])
             outfile.write(str(sbs_penalty_time) + " " + str(sparkle_penalty_time) + "\n")
 
-    penalised_time_str = str(gv.settings.get_penalised_time())
-    performance_metric_str = gv.settings.get_performance_metric_for_report()
-
-    generate_figure(target_directory, data_filename, penalised_time_str,
+    generate_figure(target_directory, data_filename, float(penalised_time),
                     f"SBS ({sgfs.underscore_for_latex(sbs_solver)})",
-                    "Parallel-Portfolio", figure_filename, performance_metric_str)
+                    "Parallel-Portfolio", figure_filename, objective.metric)
     latex_include = f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
     return (latex_include, dict_all_solvers,
             dict_actual_parallel_portfolio_penalty_time_on_each_instance)
@@ -167,7 +173,8 @@ def get_results_table(results: dict[str, str, str],
                       dict_all_solvers: dict[str, float], parallel_portfolio_path: Path,
                       dict_portfolio: dict[str, float],
                       solver_with_solutions: dict[str, int],
-                      n_unsolved_instances: int, n_instances: int) -> str:
+                      n_unsolved_instances: int, n_instances: int,
+                      performance_metric: str) -> str:
     """Returns a LaTeX table with the portfolio results.
 
     Args:
@@ -186,7 +193,6 @@ def get_results_table(results: dict[str, str, str],
         A string containing LaTeX code for a table with the portfolio results.
     """
     portfolio_par = 0.0
-    performance_metric_str = gv.settings.get_performance_metric_for_report()
     for instance in dict_portfolio:
         portfolio_par += dict_portfolio[instance]
     portfolio_par = portfolio_par / n_instances
@@ -200,7 +206,7 @@ def get_results_table(results: dict[str, str, str],
     table_string += "\\begin{tabular}{rrrrr}"
     table_string += (
         "\\textbf{Portfolio nickname} & \\textbf{"
-        f"{performance_metric_str}"
+        f"{performance_metric}"
         "} & \\textbf{\\#Timeouts} & "
         "\\textbf{\\#Cancelled} & \\textbf{\\# Solved} \\\\ \\hline ")
     table_string += (
@@ -219,7 +225,7 @@ def get_results_table(results: dict[str, str, str],
         if i == 0:
             table_string += (
                 "\\textbf{Solver} & \\textbf{"
-                f"{performance_metric_str}"
+                f"{performance_metric}"
                 "} & \\textbf{\\#Timeouts} & "
                 "\\textbf{\\#Cancelled} & \\textbf{\\#Best solver} \\\\ \\hline ")
 
@@ -243,19 +249,24 @@ def get_results_table(results: dict[str, str, str],
 
 def parallel_report_variables(target_directory: Path,
                               parallel_portfolio_path: Path,
+                              bibliograpghy_path: Path,
+                              objective: SparkleObjective,
+                              cutoff: int,
+                              penalised_time: int,
                               instances: list[str]) -> dict[str, str]:
     """Returns a mapping between LaTeX report variables and their values.
 
     Args:
         target_directory: Path to where to place the generated files.
         parallel_portfolio_path: Parallel portfolio path.
+        bibliograpghy_path: Path to the bib file
         instances: List of instances.
 
     Returns:
         A dictionary that maps variables used in the LaTeX report to values.
     """
     variables_dict = {"bibliographypath":
-                      str(gv.sparkle_report_bibliography_path.absolute())}
+                      str(bibliograpghy_path.absolute())}
     # Get the results data
     csv_data = [line.split(",") for line in
                 (parallel_portfolio_path / "results.csv").open("r").readlines()]
@@ -269,8 +280,8 @@ def parallel_report_variables(target_directory: Path,
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
     variables_dict["numInstanceClasses"] = str(len(set(
         [Path(instance_path).parent.name for instance_path in instances])))
-    variables_dict["cutoffTime"] = str(gv.settings.get_general_target_cutoff_time())
-    variables_dict["performanceMetric"] = gv.settings.get_performance_metric_for_report()
+    variables_dict["cutoffTime"] = str(cutoff)
+    variables_dict["performanceMetric"] = objective.metric
     variables_dict["instanceClassList"] = sgfs.get_instance_set_count_list(instances)
 
     # Produce some statistics on the parallel portfolio
@@ -295,19 +306,19 @@ def parallel_report_variables(target_directory: Path,
     variables_dict["solversWithSolution"] = "\n".join(inst_succes)
 
     (figure_name, dict_all_solvers,
-        dict_actual_parallel_portfolio_penalty_time_on_each_instance) = (
-        get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory,
-                                                     solver_list, instances, results))
+        dict_actual_parallel_portfolio_penalty_time_on_each_instance) =\
+        get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory, solver_list,
+                                                     instances, results, objective, 
+                                                     cutoff, penalised_time)
 
     variables_dict["figure-parallel-portfolio-sparkle-vs-sbs"] = figure_name
 
     variables_dict["resultsTable"] = get_results_table(
         results, dict_all_solvers, parallel_portfolio_path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
-        solvers_solutions, unsolved_instances, len(instances))
+        solvers_solutions, unsolved_instances, len(instances), objective.metric)
 
-    if (gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-            == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION):
+    if objective.PerformanceMeasure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         variables_dict["decisionBool"] = "\\decisionfalse"
     else:
         variables_dict["decisionBool"] = "\\decisiontrue"
@@ -320,7 +331,7 @@ def generate_figure(
         figure_parallel_portfolio_sparkle_vs_sbs_filename: str,
         performance_measure: str) -> None:
     """Generates image for parallel portfolio report."""
-    upper_bound = float(penalty_time) * 1.5
+    upper_bound = penalty_time * 1.5
     lower_bound = 0.01
 
     output_eps_file =\
@@ -364,25 +375,27 @@ def generate_figure(
 
 def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
                                        target_path: Path,
+                                       latex_template: Path,
+                                       bibliograpghy_path: Path,
+                                       objective: SparkleObjective,
+                                       cutoff: int,
+                                       penalised_time: int,
                                        instances: list[str]) -> None:
     """Generate a report for a parallel algorithm portfolio.
 
     Args:
         parallel_portfolio_path: Parallel portfolio path.
         target_path: Where the report data will be placed.
+        latex_template: Path to the latex template path used
+        bibliograpghy_path: Path to the bib file
         instances: List of instances.
     """
-    # cutoff = gv.settings.get_general_target_cutoff_time()
-    # penalised_time = float(gv.settings.get_penalised_time())
-    # performance_metric_str = gv.settings.get_performance_metric_for_report()
-    # gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    # gv.sparkle_report_bibliography_path.absolute()
-    # gv.sparkle_latex_dir
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = parallel_report_variables(
-        target_path, parallel_portfolio_path, instances)
+        target_path, parallel_portfolio_path, bibliograpghy_path, objective,
+        cutoff, penalised_time, instances)
 
-    sgfs.generate_report(gv.sparkle_latex_dir,
+    sgfs.generate_report(latex_template,
                          "template-Sparkle-for-parallel-portfolio.tex",
                          target_path,
                          "Sparkle_Report_Parallel_Portfolio",

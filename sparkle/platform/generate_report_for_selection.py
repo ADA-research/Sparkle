@@ -353,18 +353,20 @@ def get_test_actual_par(test_case_directory: str) -> str:
 
 
 def selection_report_variables(target_dir: Path,
+                               bibliograpghy_path: Path,
                                test_case_directory: str = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
+        target_dir: Output path
+        bibliography_path: Path to the bib file
         test_case_directory: Path to the test case directory.
 
     Returns:
         A dict matching str variables in the LaTeX template with their value str.
     """
     latex_dict = {"bibliographypath":
-                  str(gv.sparkle_report_bibliography_path.absolute())}
-    latex_dict["bibpath"] = str(gv.sparkle_report_bibliography_path.absolute())
+                  str(bibliograpghy_path.absolute())}
     latex_dict["numSolvers"] = str(len(gv.solver_list))
     latex_dict["solverList"] = get_solver_list_latex()
     latex_dict["numFeatureExtractors"] = str(len(gv.extractor_list))
@@ -614,6 +616,7 @@ def generate_comparison_plot(points: list,
 
 
 def generate_report_selection(target_path: Path,
+                              bibliograpghy_path: Path,
                               test_case_directory: str = None) -> None:
     """Generate a report for algorithm selection.
 
@@ -636,6 +639,7 @@ def generate_report_selection(target_path: Path,
         latex_report_filename = Path("Sparkle_Report")
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = selection_report_variables(target_path,
+                                                        bibliograpghy_path,
                                                         test_case_directory)
 
     generate_report(gv.sparkle_latex_dir,

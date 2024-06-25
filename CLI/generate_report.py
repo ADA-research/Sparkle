@@ -138,6 +138,7 @@ if __name__ == "__main__":
         status_info.set_report_type(th.ReportType.ALGORITHM_SELECTION)
         status_info.save()
         sgfs.generate_report_selection(gv.selection_output_analysis,
+                                       gv.sparkle_report_bibliography_path,
                                        test_case_directory)
         if test_case_directory is None:
             print("Report generated ...")
@@ -154,6 +155,11 @@ if __name__ == "__main__":
         sgrfpph.generate_report_parallel_portfolio(
             parallel_portfolio_path,
             gv.parallel_portfolio_output_analysis,
+            gv.sparkle_latex_dir,
+            gv.sparkle_report_bibliography_path,
+            gv.settings.get_general_sparkle_objectives()[0],
+            gv.settings.get_general_target_cutoff_time(),
+            gv.settings.get_penalised_time(),
             pap_instance_list)
         print("Parallel portfolio report generated ...")
         status_info.delete()
