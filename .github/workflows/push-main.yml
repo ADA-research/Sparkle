@@ -15,8 +15,7 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Install dependencies
         run: |
-          conda activate sparkle
-          pip install sphinx sphinx_rtd_theme myst_parser 
+          pip install sphinx sphinx_rtd_theme sphinxcontrib-autoprogram
       - name: Build Documentation
         run: |
           cd Documentation
