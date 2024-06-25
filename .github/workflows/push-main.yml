@@ -13,6 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          conda install -y python=3.9 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
+          conda env update --file environment.yml --name base
       - name: Install dependencies
         run: |
           pip install sphinx sphinx_rtd_theme myst_parser sphinxcontrib-autoprogram
