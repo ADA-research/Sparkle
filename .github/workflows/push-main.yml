@@ -28,13 +28,10 @@ jobs:
         run: |
           cd Documentation
           make html
-      - name: Check Path
-        run: |
-          ls
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build
+          path: Documentation/build/html
   deploy:
     needs: build
     runs-on: ubuntu-latest
