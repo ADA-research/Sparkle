@@ -308,7 +308,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path) -> str:
     return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
 
 
-def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
+def get_num_instance_in_test_instance_class(test_case_directory: Path) -> str:
     """Return the number of instances in a test instance set.
 
     Args:
@@ -318,11 +318,11 @@ def get_num_instance_in_test_instance_class(test_case_directory: str) -> str:
         The number of instances in a test instance set as string.
     """
     performance_data_csv = PerformanceDataFrame(
-        f"{test_case_directory}sparkle_performance_data.csv")
+        test_case_directory / "sparkle_performance_data.csv")
     return str(performance_data_csv.get_num_instances())
 
 
-def get_test_actual_par(test_case_directory: str) -> str:
+def get_test_actual_par(test_case_directory: Path) -> str:
     """Return the true PAR (Penalised Average Runtime) score on a test set.
 
     Args:
@@ -332,7 +332,7 @@ def get_test_actual_par(test_case_directory: str) -> str:
         PAR score (Penalised Average Runtime) as string.
     """
     performance_data_csv =\
-        PerformanceDataFrame(f"{test_case_directory}sparkle_performance_data.csv")
+        PerformanceDataFrame(test_case_directory / "sparkle_performance_data.csv")
     # Why is it selecting the first solver?
     solver = performance_data_csv.dataframe.columns[0]
 
@@ -354,7 +354,7 @@ def get_test_actual_par(test_case_directory: str) -> str:
 
 def selection_report_variables(target_dir: Path,
                                bibliograpghy_path: Path,
-                               test_case_directory: str = None) -> dict[str, str]:
+                               test_case_directory: Path = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
@@ -391,7 +391,7 @@ def selection_report_variables(target_dir: Path,
 
     # Train and test
     if test_case_directory is not None:
-        latex_dict["testInstanceClass"] = f"\\textbf{ {Path(test_case_directory).name} }"
+        latex_dict["testInstanceClass"] = f"\\textbf{ {test_case_directory.name} }"
         latex_dict["numInstanceInTestInstanceClass"] =\
             get_num_instance_in_test_instance_class(test_case_directory)
         latex_dict["testActualPAR"] = get_test_actual_par(test_case_directory)
@@ -617,7 +617,7 @@ def generate_comparison_plot(points: list,
 
 def generate_report_selection(target_path: Path,
                               bibliography_path: Path,
-                              test_case_directory: str = None) -> None:
+                              test_case_directory: Path = None) -> None:
     """Generate a report for algorithm selection.
 
     Args:
@@ -626,18 +626,10 @@ def generate_report_selection(target_path: Path,
         test_case_directory: Path to the test case directory. Defaults to None.
     """
     # Include results on the test set if a test case directory is given
+    latex_report_filename = Path("Sparkle_Report")
     if test_case_directory is not None:
-        if not Path(test_case_directory).exists():
-            print("ERROR: The given directory", test_case_directory, "does not exist!")
-            sys.exit(-1)
-
-        if test_case_directory[-1] != "/":
-            test_case_directory += "/"
-
         latex_report_filename = Path("Sparkle_Report_for_Test")
-    # Only look at the training instance set(s)
-    else:
-        latex_report_filename = Path("Sparkle_Report")
+
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = selection_report_variables(target_path,
                                                         bibliography_path,

@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     selection = args.selection
-    test_case_directory = args.test_case_directory
+    test_case_dir = args.test_case_directory
 
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping, gv.solver_dir)
@@ -98,13 +98,12 @@ if __name__ == "__main__":
             args.performance_measure, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
-    if not selection and test_case_directory is None and solver_path is None:
+    if not selection and test_case_dir is None and solver_path is None:
         scenario = gv.latest_scenario().get_latest_scenario()
         if scenario == Scenario.SELECTION:
             selection = True
-            test_case_directory = (
-                gv.latest_scenario().get_selection_test_case_directory()
-            )
+            test_case_dir = gv.latest_scenario().get_selection_test_case_directory()
+            test_case_path = Path(test_case_dir) if test_case_dir is not None else None
         elif scenario == Scenario.CONFIGURATION:
             solver = Solver(gv.latest_scenario().get_config_solver())
             instance_set_train = gv.latest_scenario().get_config_instance_set_train()
@@ -118,7 +117,7 @@ if __name__ == "__main__":
     flag_instance_set_test = instance_set_test is not None
 
     # Reporting for algorithm selection
-    if selection or test_case_directory is not None:
+    if selection or test_case_path is not None:
         performance_measure =\
             gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
@@ -139,8 +138,8 @@ if __name__ == "__main__":
         status_info.save()
         sgfs.generate_report_selection(gv.selection_output_analysis,
                                        gv.sparkle_report_bibliography_path,
-                                       test_case_directory)
-        if test_case_directory is None:
+                                       test_case_path)
+        if test_case_path is None:
             print("Report generated ...")
         else:
             print("Report for test generated ...")
