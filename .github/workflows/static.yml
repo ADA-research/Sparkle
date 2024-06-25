@@ -36,6 +36,8 @@ jobs:
       - name: Where am I?
         run: |
           ls
+          cd Documentation/build/html
+          ls
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
