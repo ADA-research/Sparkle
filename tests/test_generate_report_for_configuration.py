@@ -24,14 +24,13 @@ train_instance = "train-instance"
 test_instance = "test-instance"
 configurator_path = configurator.configurator_path
 configurator.scenario =\
-        ConfigurationScenario(solver, Path(train_instance))
+    ConfigurationScenario(solver, Path(train_instance))
 configurator.scenario._set_paths(configurator_path)
 validator = Validator(Path())
 test_objective_runtime = SparkleObjective("RUNTIME:PAR10")
 test_objective_quality = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
 test_objective_err = SparkleObjective("ERR:ERR")
 test_objective_err.PerformanceMeasure = PerformanceMeasure.ERR
-    
 
 
 def test_get_par_performance(mocker: MockFixture) -> None:
@@ -265,7 +264,8 @@ def test_get_figure_configure_vs_default_par(mocker: MockFixture) -> None:
                                                           10,
                                                           test_objective_runtime)
 
-    mock_data.assert_called_once_with(configured_dir, default_dir, cutoff, 10, test_objective_runtime)
+    mock_data.assert_called_once_with(configured_dir, default_dir, cutoff, 10,
+                                      test_objective_runtime)
     mock_plot.assert_called_once_with(points, filename, **plot_params)
     assert figure_string == f"\\includegraphics[width=0.6\\textwidth]{{{filename}}}"
 
@@ -350,8 +350,8 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
         gv.configuration_output_analysis, solver, configurator, validator, Path(),
         Path(), train_instance, 1, 1, test_instance, ablation)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(), train_instance,
-                                        test_instance, output_dir, 1)
+    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
+                                        train_instance, test_instance, output_dir, 1)
     mock_test.assert_called_once_with(output_dir, solver, configurator, validator,
                                       train_instance, test_instance, 1)
     assert full_dict == {
@@ -383,8 +383,8 @@ def test_configuration_report_variables_without_test(mocker: MockFixture) -> Non
         output_dir, solver, configurator, validator, Path(),
         Path(), train_instance, 1, 1, test_instance, ablation)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(), train_instance,
-                                        test_instance, output_dir, 1)
+    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
+                                        train_instance, test_instance, output_dir, 1)
     assert full_dict == {
         "testBool": r"\testfalse",
         "ablationBool": r"\ablationfalse"
@@ -421,8 +421,8 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
         output_dir, solver, configurator, validator, Path(),
         Path(), train_instance, 1, 1, test_instance, ablation)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(), train_instance,
-                                        test_instance, output_dir, 1)
+    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
+                                        train_instance, test_instance, output_dir, 1)
     mock_test.assert_called_once_with(output_dir, solver, configurator, validator,
                                       train_instance, test_instance, 1)
     assert full_dict == {
@@ -466,8 +466,8 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
         output_dir, solver, configurator, validator, extractor_dir,
         Path(), train_instance, 1, 1, test_instance, ablation)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(), train_instance,
-                                        test_instance, output_dir, 1)
+    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
+                                        train_instance, test_instance, output_dir, 1)
     mock_test.assert_called_once_with(output_dir, solver, configurator, validator,
                                       train_instance, test_instance, 1)
     mock_iterdir.assert_called_once()
@@ -532,9 +532,9 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
         solver, configurator, validator, bib_path, train_instance, test_instance,
         report_dir, 1)
 
-    mock_figure.assert_called_once_with(solver, train_instance.name,
-                                        validation_data, validation_data, report_dir,
-                                        "QUALITY", float(cutoff), 1, test_objective_quality)
+    mock_figure.assert_called_once_with(solver, train_instance.name, validation_data,
+                                        validation_data, report_dir, "QUALITY",
+                                        float(cutoff), 1, test_objective_quality)
     mock_timeouts.assert_called_once_with(
         solver, train_instance, configurator, validator, float(cutoff), 60)
     mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
@@ -615,9 +615,10 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       test_instance,
                                                       1)
 
-    mock_figure.assert_called_once_with(solver, test_instance.name,
-                                        validation_data, validation_data, gv.configuration_output_analysis,
-                                        "QUALITY", float(cutoff), 1, test_objective_quality, data_type="test")
+    mock_figure.assert_called_once_with(
+        solver, test_instance.name, validation_data, validation_data,
+        gv.configuration_output_analysis, "QUALITY", float(cutoff), 1,
+        test_objective_quality, data_type="test")
     mock_timeouts.assert_called_once_with(
         solver, test_instance, configurator, validator, float(cutoff), 60)
     mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
