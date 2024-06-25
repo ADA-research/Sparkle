@@ -5,10 +5,14 @@
 
 # Sparkle's documentation!
 
+``` {include} userguide/userguide.md
+```
+
 ```{toctree}
 :caption: 'Contents:'
 :maxdepth: 3
 :numbered:
+:hidden:
 
 userguide/userguide
 examples/examples
