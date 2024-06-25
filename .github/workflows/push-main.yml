@@ -21,8 +21,6 @@ jobs:
         run: |
           conda install -y python=3.9 # https://github.com/conda/conda/issues/13560#issuecomment-1992720842
           conda env update --file environment.yml --name base
-      - name: Install dependencies
-        run: |
           pip install sphinx sphinx_rtd_theme myst_parser sphinxcontrib-autoprogram
       - name: Build Documentation
         run: |
@@ -39,7 +37,7 @@ jobs:
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_PAGES_PAT }}
           publish_dir: ./Documentation/build/html
 
 
