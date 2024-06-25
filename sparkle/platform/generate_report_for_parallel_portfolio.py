@@ -308,7 +308,7 @@ def parallel_report_variables(target_directory: Path,
     (figure_name, dict_all_solvers,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance) =\
         get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory, solver_list,
-                                                     instances, results, objective, 
+                                                     instances, results, objective,
                                                      cutoff, penalised_time)
 
     variables_dict["figure-parallel-portfolio-sparkle-vs-sbs"] = figure_name
@@ -388,6 +388,9 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
         target_path: Where the report data will be placed.
         latex_template: Path to the latex template path used
         bibliograpghy_path: Path to the bib file
+        objective: The objective of the portfolio
+        cutoff: The cutoff time for each solver
+        penalised_time: The penalty for TIMEOUT solvers
         instances: List of instances.
     """
     target_path.mkdir(parents=True, exist_ok=True)

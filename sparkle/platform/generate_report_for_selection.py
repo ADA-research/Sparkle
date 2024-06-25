@@ -616,12 +616,13 @@ def generate_comparison_plot(points: list,
 
 
 def generate_report_selection(target_path: Path,
-                              bibliograpghy_path: Path,
+                              bibliography_path: Path,
                               test_case_directory: str = None) -> None:
     """Generate a report for algorithm selection.
 
     Args:
         target_path: Path where the outputfiles will be placed.
+        bibliography_path: Path to the bib file.
         test_case_directory: Path to the test case directory. Defaults to None.
     """
     # Include results on the test set if a test case directory is given
@@ -639,7 +640,7 @@ def generate_report_selection(target_path: Path,
         latex_report_filename = Path("Sparkle_Report")
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = selection_report_variables(target_path,
-                                                        bibliograpghy_path,
+                                                        bibliography_path,
                                                         test_case_directory)
 
     generate_report(gv.sparkle_latex_dir,
