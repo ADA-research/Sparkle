@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 
 import global_variables as gv
 import tools.general as tg
+from sparkle.platform import tex_help as th
 
 
 class StatusInfoType(str, Enum):
@@ -298,7 +299,7 @@ class GenerateReportStatusInfo(StatusInfo):
     job_path = StatusInfoType.GENERATE_REPORT
     report_type_key = "Report Type"
 
-    def set_report_type(self: GenerateReportStatusInfo, report_type: gv.ReportType)\
+    def set_report_type(self: GenerateReportStatusInfo, report_type: th.ReportType)\
             -> None:
         """Set the report type."""
         self.data[self.report_type_key] = report_type

@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Helper functions for LaTeX and bibTeX."""
+"""Helper classes/method for LaTeX and bibTeX."""
 from shutil import which
 from pathlib import Path
 import subprocess
+from enum import Enum
+
+
+class ReportType(str, Enum):
+    """enum for separating different types of reports."""
+    ALGORITHM_SELECTION = "algorithm_selection"
+    ALGORITHM_CONFIGURATION = "algorithm_configuration"
+    PARALLEL_PORTFOLIO = "parallel_portfolio"
 
 
 def check_tex_commands_exist(latex_directory_path: Path) -> None:

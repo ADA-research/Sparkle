@@ -8,17 +8,43 @@ from pathlib import Path
 import math
 
 import sparkle_logging as sl
-import global_variables as gv
 from sparkle.platform import generate_report_for_selection as sgfs
 from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
+from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.configurator.implementations import SMAC2
+from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.platform.generate_report_for_selection import generate_comparison_plot
 from sparkle import about
 
 
-def get_par_performance(results: list[list[str]], cutoff: int) -> float:
+def get_features_bool(configurator_scenario: ConfigurationScenario,
+                      solver_name: str, instance_set_train_name: str) -> str:
+    """Return a bool string for latex indicating whether features were used.
+
+    True if a feature file is given in the scenario file, false otherwise.
+
+    Args:
+        solver_name: Name of the solver
+        instance_set_train_name: Name of the instance set used for training
+
+    Returns:
+        A string describing whether features are used
+    """
+    scenario_file = configurator_scenario.directory \
+        / f"{solver_name}_{instance_set_train_name}_scenario.txt"
+
+    for line in scenario_file.open("r").readlines():
+        if line.split(" ")[0] == "feature_file":
+            return "\\featurestrue"
+    return "\\featuresfalse"
+
+
+def get_par_performance(results: list[list[str]],
+                        cutoff: int,
+                        penalty: float,
+                        objective: SparkleObjective) -> float:
     """Return the PAR score for a given results file and cutoff time.
 
     Args:
@@ -29,51 +55,51 @@ def get_par_performance(results: list[list[str]], cutoff: int) -> float:
         PAR performance value
     """
     instance_per_dict = get_dict_instance_to_performance(results,
-                                                         float(cutoff))
+                                                         float(cutoff),
+                                                         penalty,
+                                                         objective)
     num_instances = len(instance_per_dict.keys())
     sum_par = sum(float(instance_per_dict[instance]) for instance in instance_per_dict)
     return float(sum_par / num_instances)
 
 
 def get_dict_instance_to_performance(results: list[list[str]],
-                                     cutoff: int) -> dict[str, float]:
+                                     cutoff: int,
+                                     penalty: float,
+                                     objective: SparkleObjective) -> dict[str, float]:
     """Return a dictionary of instance names and their performance.
 
     Args:
         results_file: Name of the result file
         cutoff: Cutoff value
-
+        penalty: The penalty to assign those cutoff
     Returns:
         A dictionary containing the performance for each instance
     """
     value_column = -1  # Last column is runtime
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
-    if smac_run_obj != "RUNTIME":
+    if objective.PerformanceMeasure != PerformanceMeasure.RUNTIME:
         # Quality column
         value_column = -2
-    penalty = gv.settings.get_general_penalty_multiplier()
-    out_dict = {}
+    results_per_instance = {}
     for row in results:
         value = float(row[value_column])
         if value > cutoff or math.isnan(value):
-            value = cutoff * penalty
-        out_dict[Path(row[3]).name] = float(value)
-    return out_dict
+            value = penalty
+        results_per_instance[Path(row[3]).name] = float(value)
+    return results_per_instance
 
 
-def get_performance_measure() -> str:
+def get_performance_measure(objective: SparkleObjective,
+                            penalty_multiplier: int) -> str:
     """Return the performance measure as LaTeX string.
 
     Returns:
         A string containing the performance measure
     """
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
+    smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
 
     if smac_run_obj == "RUNTIME":
-        penalty = gv.settings.get_general_penalty_multiplier()
-        return f"PAR{penalty}"
+        return f"PAR{penalty_multiplier}"
     elif smac_run_obj == "QUALITY":
         return "performance"
 
@@ -97,7 +123,9 @@ def get_ablation_bool(solver: Solver, instance_train_name: str,
 
 def get_data_for_plot(configured_results: list[list[str]],
                       default_results: list[list[str]],
-                      smac_each_run_cutoff_time: float) -> list:
+                      run_cutoff_time: float,
+                      penalty: float,
+                      objective: SparkleObjective) -> list:
     """Return the required data to plot.
 
     Creates a nested list of performance values algorithm runs with default and
@@ -106,15 +134,15 @@ def get_data_for_plot(configured_results: list[list[str]],
     Args:
         configured_results_dir: Directory of results for configured solver
         default_results_dir: Directory of results for default solver
-        smac_each_run_cutoff_time: Cutoff time
+        run_cutoff_time: Cutoff time
 
     Returns:
         A list of lists containing data points
     """
     dict_instance_to_par_default = get_dict_instance_to_performance(
-        default_results, smac_each_run_cutoff_time)
+        default_results, run_cutoff_time, penalty, objective)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
-        configured_results, smac_each_run_cutoff_time)
+        configured_results, run_cutoff_time, penalty, objective)
 
     instances = (dict_instance_to_par_default.keys()
                  & dict_instance_to_par_configured.keys())
@@ -135,7 +163,10 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
                                     default_results: list[list[str]],
                                     target_directory: Path,
                                     figure_filename: str,
-                                    smac_each_run_cutoff_time: float) -> str:
+                                    performance_measure: str,
+                                    run_cutoff_time: float,
+                                    penalty_multiplier: int,
+                                    objective: SparkleObjective) -> str:
     """Create a figure comparing the configured and default solver.
 
     Base function to create a comparison plot of a given instance set between the default
@@ -146,15 +177,16 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         default_results_dir: Directory of results for default solver
         target_directory: Directory for the configuration reports
         figure_filename: Filename for the figure
-        smac_each_run_cutoff_time: Cutoff time
+        run_cutoff_time: Cutoff time
+        penalty_multiplier: Penalty factor
 
     Returns:
         A string containing the latex command to include the figure
     """
     points = get_data_for_plot(configured_results, default_results,
-                               smac_each_run_cutoff_time)
-
-    performance_measure = get_performance_measure()
+                               run_cutoff_time,
+                               run_cutoff_time * penalty_multiplier,
+                               objective)
 
     plot_params = {"xlabel": f"Default parameters [{performance_measure}]",
                    "ylabel": f"Configured parameters [{performance_measure}]",
@@ -170,7 +202,7 @@ def get_figure_configure_vs_default(configured_results: list[list[str]],
         plot_params["limit_min"] = 0.25
         plot_params["limit_max"] = 0.25
         plot_params["limit"] = "magnitude"
-        plot_params["penalty_time"] = gv.settings.get_penalised_time()
+        plot_params["penalty_time"] = run_cutoff_time * penalty_multiplier
         plot_params["replace_zeros"] = True
 
     generate_comparison_plot(points,
@@ -185,7 +217,10 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
                                                      res_default: list[list[str]],
                                                      res_conf: list[list[str]],
                                                      target_directory: Path,
-                                                     smac_each_run_cutoff_time: float,
+                                                     smac_objective: str,
+                                                     run_cutoff_time: float,
+                                                     penalty_multiplier: int,
+                                                     objective: SparkleObjective,
                                                      data_type: str = "train") -> str:
     """Create a figure comparing the configured and default solver on the training set.
 
@@ -197,7 +232,8 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
         solver: The solver object
         instance_set_train_name: Name of the instance set for training
         configuration_reports_directory: Directory to the configuration reports
-        smac_each_run_cutoff_time: Cutoff time
+        run_cutoff_time: Cutoff time
+        penalty_multiplier: Penatly factor
 
     Returns:
         A string containing the latex comand to include the figure
@@ -207,12 +243,18 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
     return get_figure_configure_vs_default(
         res_conf, res_default, target_directory,
         data_plot_configured_vs_default_on_instance_set_filename,
-        smac_each_run_cutoff_time)
+        smac_objective,
+        run_cutoff_time,
+        penalty_multiplier,
+        objective)
 
 
 def get_timeouts_instanceset(solver: Solver,
                              instance_set_path: Path,
-                             cutoff: int) -> tuple[int, int, int]:
+                             configurator: Configurator,
+                             validator: Validator,
+                             cutoff: int,
+                             penalty: float) -> tuple[int, int, int]:
     """Return the number of timeouts by configured, default and both on the testing set.
 
     Args:
@@ -223,9 +265,8 @@ def get_timeouts_instanceset(solver: Solver,
     Returns:
         A tuple containing the number of timeouts for the different configurations
     """
-    _, config = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver, instance_set_path)
-    validator = Validator(gv.validation_output_general)
+    objective = configurator.scenario.sparkle_objective
+    _, config = configurator.get_optimal_configuration(solver, instance_set_path)
     res_default = validator.get_validation_results(solver,
                                                    instance_set_path,
                                                    config="")
@@ -233,17 +274,17 @@ def get_timeouts_instanceset(solver: Solver,
                                                 instance_set_path,
                                                 config=config)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
-        res_conf, cutoff)
+        res_conf, cutoff, penalty, objective)
     dict_instance_to_par_default = get_dict_instance_to_performance(
-        res_default, cutoff)
+        res_default, cutoff, penalty, objective)
 
     return get_timeouts(dict_instance_to_par_configured,
-                        dict_instance_to_par_default, cutoff)
+                        dict_instance_to_par_default, penalty)
 
 
 def get_timeouts(instance_to_par_configured: dict,
                  instance_to_par_default: dict,
-                 cutoff: int) -> tuple[int, int, int]:
+                 timeout_value: float) -> tuple[int, int, int]:
     """Return the number of timeouts for given dicts.
 
     Args:
@@ -254,9 +295,6 @@ def get_timeouts(instance_to_par_configured: dict,
     Returns:
         A tuple containing timeout values
     """
-    penalty = gv.settings.get_general_penalty_multiplier()
-    timeout_value = cutoff * penalty
-
     configured_timeouts = 0
     default_timeouts = 0
     overlapping_timeouts = 0
@@ -324,8 +362,15 @@ def get_ablation_table(solver: Solver, instance_set_train_name: str,
     return table_string
 
 
-def configuration_report_variables(target_dir: Path, solver: Solver,
+def configuration_report_variables(target_dir: Path,
+                                   solver: Solver,
+                                   configurator: Configurator,
+                                   validator: Validator,
+                                   extractor_dir: Path,
+                                   bib_path: Path,
                                    instance_set_train: Path,
+                                   penalty_multiplier: float,
+                                   extractor_cuttoff: int,
                                    instance_set_test: Path = None,
                                    ablation: bool = True) -> dict:
     """Return a dict matching LaTeX variables and their values.
@@ -342,14 +387,22 @@ def configuration_report_variables(target_dir: Path, solver: Solver,
     has_test = instance_set_test is not None
 
     full_dict = get_dict_variable_to_value_common(solver,
+                                                  configurator,
+                                                  validator,
+                                                  bib_path,
                                                   instance_set_train,
                                                   instance_set_test,
-                                                  target_dir)
+                                                  target_dir,
+                                                  penalty_multiplier)
 
     if has_test:
-        test_dict = get_dict_variable_to_value_test(target_dir, solver,
+        test_dict = get_dict_variable_to_value_test(target_dir,
+                                                    solver,
+                                                    configurator,
+                                                    validator,
                                                     instance_set_train,
-                                                    instance_set_test)
+                                                    instance_set_test,
+                                                    penalty_multiplier)
         full_dict.update(test_dict)
     full_dict["testBool"] = f"\\test{str(has_test).lower()}"
 
@@ -357,17 +410,22 @@ def configuration_report_variables(target_dir: Path, solver: Solver,
         full_dict["ablationBool"] = "\\ablationfalse"
 
     if full_dict["featuresBool"] == "\\featurestrue":
-        full_dict["numFeatureExtractors"] = str(len(gv.extractor_list))
-        full_dict["featureExtractorList"] = sgfs.get_feature_extractor_list()
+        full_dict["numFeatureExtractors"] = str(len([p for p in extractor_dir.iterdir()]))
+        full_dict["featureExtractorList"] = sgfs.get_feature_extractor_list(extractor_dir)
         full_dict["featureComputationCutoffTime"] =\
-            str(gv.settings.get_general_extractor_cutoff_time())
+            str(extractor_cuttoff)
 
     return full_dict
 
 
-def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
+def get_dict_variable_to_value_common(solver: Solver,
+                                      configurator: Configurator,
+                                      validator: Validator,
+                                      bibliography_path: Path,
+                                      instance_set_train: Path,
                                       instance_set_test: Path,
-                                      target_directory: Path) -> dict:
+                                      target_directory: Path,
+                                      penalty_multiplier: int) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
 
     Args:
@@ -379,20 +437,18 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
     Returns:
         A dictionary containing the variables and values
     """
-    _, config = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver, instance_set_train)
-    validator = Validator(gv.validation_output_general)
+    objective = configurator.scenario.sparkle_objective
+    _, opt_config = configurator.get_optimal_configuration(solver, instance_set_train)
     res_default = validator.get_validation_results(
         solver, instance_set_train, config="")
     res_conf = validator.get_validation_results(
-        solver, instance_set_train, config=config)
+        solver, instance_set_train, config=opt_config)
     instance_names = set([res[3] for res in res_default])
 
-    latex_dict = {"bibliographypath":
-                  str(gv.sparkle_report_bibliography_path.absolute())}
-    latex_dict["performanceMeasure"] = get_performance_measure()
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
+    latex_dict = {"bibliographypath": str(bibliography_path.absolute())}
+    latex_dict["performanceMeasure"] = get_performance_measure(objective,
+                                                               penalty_multiplier)
+    smac_run_obj = SMAC2.get_smac_run_obj(objective.PerformanceMeasure)
 
     if smac_run_obj == "RUNTIME":
         latex_dict["runtimeBool"] = "\\runtimetrue"
@@ -404,34 +460,32 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
     latex_dict["sparkleVersion"] = about.version
     latex_dict["numInstanceInTrainingInstanceSet"] = str(len(instance_names))
 
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
-    smac_whole_time_budget = gv.settings.get_config_wallclock_time()
-    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
-    num_of_smac_run_str = gv.settings.get_config_number_of_runs()
-
-    latex_dict["numSmacRuns"] = str(num_of_smac_run_str)
+    run_cutoff_time = configurator.scenario.cutoff_time
+    penalty = penalty_multiplier * run_cutoff_time
+    latex_dict["numSmacRuns"] = str(configurator.scenario.number_of_runs)
     latex_dict["smacObjective"] = str(smac_run_obj)
-    latex_dict["smacWholeTimeBudget"] = str(smac_whole_time_budget)
-    latex_dict["smacEachRunCutoffTime"] = str(smac_each_run_cutoff_time)
-    _, optimised_configuration_str = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver, instance_set_train)
-    latex_dict["optimisedConfiguration"] = str(optimised_configuration_str)
-    str_value = get_par_performance(res_conf, smac_each_run_cutoff_time)
+    latex_dict["smacWholeTimeBudget"] = str(configurator.scenario.wallclock_time)
+    latex_dict["smacEachRunCutoffTime"] = str(run_cutoff_time)
+    latex_dict["optimisedConfiguration"] = str(opt_config)
+    str_value = get_par_performance(res_conf,
+                                    run_cutoff_time,
+                                    penalty,
+                                    objective)
     latex_dict["optimisedConfigurationTrainingPerformancePAR"] = str(str_value)
-    str_value = get_par_performance(res_default,
-                                    smac_each_run_cutoff_time)
+    str_value = get_par_performance(res_default, run_cutoff_time,
+                                    penalty,
+                                    objective)
     latex_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
 
     str_value = get_figure_configured_vs_default_on_instance_set(
         solver, instance_set_train.name, res_default, res_conf, target_directory,
-        float(smac_each_run_cutoff_time))
+        smac_run_obj, float(run_cutoff_time), penalty_multiplier, objective)
     latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
-    configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train = (
-        get_timeouts_instanceset(solver, instance_set_train,
-                                 float(smac_each_run_cutoff_time)))
+    configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train =\
+        get_timeouts_instanceset(solver, instance_set_train, configurator, validator,
+                                 float(run_cutoff_time), penalty)
 
     latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
     latex_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
@@ -444,18 +498,19 @@ def get_dict_variable_to_value_common(solver: Solver, instance_set_train: Path,
                                                    ablation_validation_name)
     latex_dict["ablationPath"] = get_ablation_table(
         solver, instance_set_train.name, ablation_validation_name)
-    scenario = gv.settings.get_general_sparkle_configurator().scenario
-    if scenario.use_features:
-        latex_dict["featuresBool"] = "\\featurestrue"
-    else:
-        latex_dict["featuresBool"] = "\\featuresfalse"
+    latex_dict["featuresBool"] = get_features_bool(
+        configurator.scenario, solver.name, instance_set_train.name)
 
     return latex_dict
 
 
-def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
+def get_dict_variable_to_value_test(target_dir: Path,
+                                    solver: Solver,
+                                    configurator: Configurator,
+                                    validator: Validator,
                                     instance_set_train: Path,
-                                    instance_set_test: Path) -> dict:
+                                    instance_set_test: Path,
+                                    penalty_multiplier: int) -> dict:
     """Return a dict matching test set specific latex variables with their values.
 
     Args:
@@ -466,31 +521,38 @@ def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
     Returns:
         A dictionary containting the variables and their values
     """
-    _, config = gv.settings.get_general_sparkle_configurator()\
-        .get_optimal_configuration(solver, instance_set_train)
-    validator = Validator(gv.validation_output_general)
+
+    _, config = configurator.get_optimal_configuration(solver, instance_set_train)
     res_default = validator.get_validation_results(
         solver, instance_set_test, config="")
     res_conf = validator.get_validation_results(
         solver, instance_set_test, config=config)
     instance_names = set([res[3] for res in res_default])
+    run_cutoff_time = configurator.scenario.cutoff_time
+    penalty = run_cutoff_time * penalty_multiplier
+    objective = configurator.scenario.sparkle_objective
     test_dict = {"instanceSetTest": instance_set_test.name}
     test_dict["numInstanceInTestingInstanceSet"] = str(len(instance_names))
-    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
-        str(get_par_performance(res_conf, smac_each_run_cutoff_time))
+        str(get_par_performance(res_conf, run_cutoff_time, penalty, objective))
     test_dict["defaultConfigurationTestingPerformancePAR"] =\
-        str(get_par_performance(res_default, smac_each_run_cutoff_time))
+        str(get_par_performance(res_default, run_cutoff_time, penalty, objective))
+    smac_run_obj = SMAC2.get_smac_run_obj(
+        configurator.scenario.sparkle_objective.PerformanceMeasure)
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
-        solver, instance_set_test.name, res_default, res_conf, target_dir,
-        float(smac_each_run_cutoff_time), data_type="test")
+        solver, instance_set_test.name, res_default, res_conf, target_dir, smac_run_obj,
+        float(run_cutoff_time), penalty_multiplier,
+        configurator.scenario.sparkle_objective, data_type="test")
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test =\
         get_timeouts_instanceset(solver,
                                  instance_set_test,
-                                 float(smac_each_run_cutoff_time))
+                                 configurator,
+                                 validator,
+                                 float(run_cutoff_time),
+                                 penalty)
 
     test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
     test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
@@ -503,8 +565,15 @@ def get_dict_variable_to_value_test(target_dir: Path, solver: Solver,
 
 
 def generate_report_for_configuration(solver: Solver,
+                                      configurator: Configurator,
+                                      validator: Validator,
+                                      extractor_dir: Path,
                                       target_path: Path,
+                                      latex_template_path: Path,
+                                      bibliography_path: Path,
                                       instance_set_train: Path,
+                                      penalty_multiplier: float,
+                                      extractor_cuttoff: int,
                                       instance_set_test: Path = None,
                                       ablation: bool = True) -> None:
     """Generate a report for algorithm configuration.
@@ -516,11 +585,13 @@ def generate_report_for_configuration(solver: Solver,
         instance_set_test: Path of the instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
+    #extractor cutoff time
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
-        target_path, solver, instance_set_train, instance_set_test,
+        target_path, solver, configurator, validator, extractor_dir, bibliography_path,
+        instance_set_train, penalty_multiplier, extractor_cuttoff, instance_set_test,
         ablation)
-    sgfs.generate_report(gv.sparkle_latex_dir,
+    sgfs.generate_report(latex_template_path,
                          "template-Sparkle-for-configuration.tex",
                          target_path,
                          "Sparkle_Report_for_Configuration",

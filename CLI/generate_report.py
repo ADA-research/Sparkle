@@ -10,6 +10,7 @@ import global_variables as gv
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
+from sparkle.platform import tex_help as th
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
@@ -20,6 +21,8 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.configurator.configuration_scenario import ConfigurationScenario
+
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
@@ -132,7 +135,7 @@ if __name__ == "__main__":
 
         print("Generating report for selection...")
         status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(gv.ReportType.ALGORITHM_SELECTION)
+        status_info.set_report_type(th.ReportType.ALGORITHM_SELECTION)
         status_info.save()
         sgfs.generate_report_selection(gv.selection_output_analysis,
                                        test_case_directory)
@@ -145,7 +148,7 @@ if __name__ == "__main__":
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
         status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(gv.ReportType.PARALLEL_PORTFOLIO)
+        status_info.set_report_type(th.ReportType.PARALLEL_PORTFOLIO)
         status_info.save()
 
         sgrfpph.generate_report_parallel_portfolio(
@@ -156,7 +159,7 @@ if __name__ == "__main__":
         status_info.delete()
     else:
         status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(gv.ReportType.ALGORITHM_CONFIGURATION)
+        status_info.set_report_type(th.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
         # Reporting for algorithm configuration
         if solver is None:
@@ -195,11 +198,31 @@ if __name__ == "__main__":
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
             sys.exit(-1)
-
+        # Extract config scenario data for report, but this should be read from the
+        # scenario file instead as we can't know wether features were used or not now
+        number_of_runs = gv.settings.get_config_number_of_runs()
+        solver_calls = gv.settings.get_config_solver_calls()
+        cpu_time = gv.settings.get_config_cpu_time()
+        wallclock_time = gv.settings.get_config_wallclock_time()
+        cutoff_time = gv.settings.get_general_target_cutoff_time()
+        cutoff_length = gv.settings.get_smac_target_cutoff_length()
+        sparkle_objective =\
+            gv.settings.get_general_sparkle_objectives()[0]
+        configurator = gv.settings.get_general_sparkle_configurator()
+        configurator.scenario = ConfigurationScenario(
+            solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
+            wallclock_time, cutoff_time, cutoff_length, sparkle_objective)
+        configurator.scenario._set_paths(configurator.output_path)
         sgrfch.generate_report_for_configuration(
             solver,
+            gv.settings.get_general_sparkle_configurator(),
+            Validator(gv.validation_output_general),
+            gv.extractor_dir,
             gv.configuration_output_analysis,
+            gv.sparkle_latex_dir,
+            gv.sparkle_report_bibliography_path,
             instance_set_train,
+            gv.settings.get_general_penalty_multiplier(),
             instance_set_test,
             ablation=args.flag_ablation
         )

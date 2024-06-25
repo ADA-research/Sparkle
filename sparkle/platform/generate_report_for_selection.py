@@ -30,7 +30,7 @@ def underscore_for_latex(string: str) -> str:
 
 
 def get_solver_list_latex(solver_list: list[str] = None) -> str:
-    """Get the list of solvers for use in a LaTeX document. Defaults to sgh.solver_list.
+    """Get the list of solvers for use in a LaTeX document. Defaults to gv.solver_list.
 
     Returns:
         The list of solver names as LaTeX str.
@@ -41,14 +41,14 @@ def get_solver_list_latex(solver_list: list[str] = None) -> str:
                    for solver_path in solver_list)
 
 
-def get_feature_extractor_list() -> str:
+def get_feature_extractor_list(extractor_dir: Path) -> str:
     """Get the feature extractors for use in a LaTeX document.
 
     Returns:
         The list of feature extractors as LaTeX str.
     """
     return "".join(f"\\item \\textbf{{{Path(extractor_path).name}}}\n"
-                   for extractor_path in gv.extractor_list)
+                   for extractor_path in extractor_dir.iterdir())
 
 
 def get_num_instance_classes() -> str:
@@ -368,7 +368,7 @@ def selection_report_variables(target_dir: Path,
     latex_dict["numSolvers"] = str(len(gv.solver_list))
     latex_dict["solverList"] = get_solver_list_latex()
     latex_dict["numFeatureExtractors"] = str(len(gv.extractor_list))
-    latex_dict["featureExtractorList"] = get_feature_extractor_list()
+    latex_dict["featureExtractorList"] = get_feature_extractor_list(gv.extractor_dir)
     latex_dict["numInstanceClasses"] = get_num_instance_classes()
     latex_dict["instanceClassList"] = get_instance_set_count_list()
     latex_dict["featureComputationCutoffTime"] =\

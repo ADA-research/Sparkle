@@ -4,7 +4,6 @@
 import fcntl
 import ast
 from pathlib import Path
-from enum import Enum
 
 from CLI.help.reporting_scenario import ReportingScenario
 
@@ -35,11 +34,7 @@ sparkle_slurm_settings_path = Path("Settings/sparkle_slurm_settings.txt")
 sparkle_global_output_dir = Path("Output")
 
 
-class ReportType(str, Enum):
-    """enum for separating different types of reports."""
-    ALGORITHM_SELECTION = "algorithm_selection"
-    ALGORITHM_CONFIGURATION = "algorithm_configuration"
-    PARALLEL_PORTFOLIO = "parallel_portfolio"
+
 
 
 # Log that keeps track of which commands were executed and where output details can be

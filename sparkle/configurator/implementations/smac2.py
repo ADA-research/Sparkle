@@ -123,7 +123,7 @@ class SMAC2(Configurator):
             instance_set: Path,
             performance: PerformanceMeasure = None,
             aggregate_config: Callable = mean) -> tuple[float, str]:
-        """Returns the optimal configuration string for a solver of an instance set."""
+        """Returns optimal value and configuration string of solver on instance set."""
         if self.scenario is None:
             self.set_scenario_dirs(solver, instance_set.name)
         results = self.validator.get_validation_results(
