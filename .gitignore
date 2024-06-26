@@ -36,7 +36,6 @@ Examples/Resources/CVRP/Solvers/VRP_SISRs/src/
 *.json
 
 # Generated documentation 
-# Documentation/build/
 Documentation/source/_generated/
 
 # Common IDE
