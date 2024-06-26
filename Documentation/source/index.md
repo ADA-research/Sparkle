@@ -3,12 +3,16 @@
 % You can adapt this file completely to your liking, but it should at least
 % contain the root `toctree` directive.
 
-# Sparkle's documentation!
+# Sparkle's Documentation
+
+``` {include} userguide/userguide.md
+```
 
 ```{toctree}
 :caption: 'Contents:'
 :maxdepth: 3
 :numbered:
+:hidden:
 
 userguide/userguide
 examples/examples
