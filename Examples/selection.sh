@@ -38,9 +38,9 @@ sparkle compute_features --parallel
 
 #### Run the solvers
 
-# Run the solvers on all instances; add the `--parallel` option to run in parallel
+# Run the solvers on all instances;
 
-sparkle run_solvers --parallel
+sparkle run_solvers
 
 #### Construct a portfolio selector
 
