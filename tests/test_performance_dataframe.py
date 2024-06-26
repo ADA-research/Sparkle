@@ -49,11 +49,10 @@ class TestPerformanceData(TestCase):
         result = self.pd.get_job_list(rerun=True)
         assert result == job_list
 
-    def test_get_num_instances(self: TestPerformanceData) -> None:
+    def test_num_instances(self: TestPerformanceData) -> None:
         """Test the number of instances getter method."""
         num_instances = 5
-        result = self.pd.get_num_instances()
-        assert result == num_instances
+        assert self.pd.num_instances == num_instances
 
     def test_get_list_recompute_performance_computation_job(self: TestPerformanceData)\
             -> None:
@@ -152,6 +151,6 @@ class TestPerformanceData(TestCase):
         penalty = cutoff * multiplier
         rank_list = [["AlgorithmB", 210.8], ["AlgorithmC", 216.6],
                      ["AlgorithmE", 218.8], ["AlgorithmA", 310.4], ["AlgorithmD", 313.8]]
-        result = self.pd.get_solver_penalty_time_ranking_list(cutoff_time=cutoff,
+        result = self.pd.get_solver_penalty_time_ranking(cutoff_time=cutoff,
                                                               penalty=penalty)
         assert result == rank_list

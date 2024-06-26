@@ -94,7 +94,7 @@ def get_par_ranking_list(performance_data: PerformanceDataFrame) -> str:
     cutoff_time = gv.settings.get_general_target_cutoff_time()
     penalty = gv.settings.get_general_penalty_multiplier()
     penalty_time_each_run = cutoff_time * penalty
-    solver_penalty_ranking = performance_data.get_solver_penalty_time_ranking_list(
+    solver_penalty_ranking = performance_data.get_solver_penalty_time_ranking(
         cutoff_time, penalty_time_each_run)
     return "".join(f"\\item \\textbf{{{solver}}}, PAR{penalty}: {solver_penalty}\n"
                    for solver, solver_penalty in solver_penalty_ranking)
@@ -125,6 +125,34 @@ def get_actual_par(performance_data: PerformanceDataFrame) -> str:
     return str(mean_performance)
 
 
+def get_test_actual_par(performance_data: PerformanceDataFrame) -> str:
+    """Return the true PAR (Penalised Average Runtime) score on a test set.
+
+    Args:
+        test_case_directory: Path to the test case directory.
+
+    Returns:
+        PAR score (Penalised Average Runtime) as string.
+    """
+    # Why is it selecting the first solver?
+    solver = performance_data.dataframe.columns[0]
+
+    cutoff_time_each_run = gv.settings.get_general_target_cutoff_time()
+
+    sparkle_penalty_time = 0.0
+    sparkle_penalty_time_count = 0
+
+    for instance in performance_data.instances:
+        this_run_time = performance_data.get_value(solver, instance)
+        sparkle_penalty_time_count += 1
+        if this_run_time <= cutoff_time_each_run:
+            sparkle_penalty_time += this_run_time
+        else:
+            sparkle_penalty_time += gv.settings.get_penalised_time()
+
+    return str(sparkle_penalty_time / sparkle_penalty_time_count)
+
+
 def get_dict_sbs_penalty_time_on_each_instance(
         performance_data: PerformanceDataFrame) -> dict[str, int]:
     """Returns a dictionary with the penalised performance of the Single Best Solver.
@@ -137,9 +165,9 @@ def get_dict_sbs_penalty_time_on_each_instance(
     penalty_time_each_run =\
         cutoff_time * gv.settings.get_general_penalty_multiplier()
 
-    solver_penalty_time_ranking_list = (
-        performance_data.get_solver_penalty_time_ranking_list(cutoff_time,
-                                                                  penalty_time_each_run))
+    solver_penalty_time_ranking_list =\
+        performance_data.get_solver_penalty_time_ranking(cutoff_time,
+                                                         penalty_time_each_run)
     sbs_solver = solver_penalty_time_ranking_list[0][0]
 
     for instance in performance_data.instances:
@@ -151,17 +179,6 @@ def get_dict_sbs_penalty_time_on_each_instance(
             sbs_dict[instance] = gv.settings.get_penalised_time()
 
     return sbs_dict
-
-
-def get_dict_vbs_penalty_time_on_each_instance(
-        performance_data: PerformanceDataFrame) -> dict[str, int]:
-    """Returns a dictionary with the penalised performance of the VBS on each instance.
-
-    Returns:
-        A dict that maps instance name str to their penalised performance int.
-    """
-    penalty_time = gv.settings.get_penalised_time()
-    return performance_data.get_dict_vbs_penalty_time_on_each_instance(penalty_time)
 
 
 def get_actual_portfolio_selector_performance_per_instance(
@@ -227,7 +244,7 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path,
     penalty_time_each_run =\
         cutoff_time * penalty
     solver_penalty_time_ranking_list =\
-        train_data.get_solver_penalty_time_ranking_list(cutoff_time,
+        train_data.get_solver_penalty_time_ranking(cutoff_time,
                                                         penalty_time_each_run)
     sbs_solver = Path(solver_penalty_time_ranking_list[0][0]).name
 
@@ -254,7 +271,8 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path,
     Returns:
         LaTeX str to include the comparison plot in a LaTeX report.
     """
-    vbs_penalty_time = get_dict_vbs_penalty_time_on_each_instance(train_data)
+    vbs_penalty_time = train_data.get_dict_vbs_penalty_time_on_each_instance(
+        gv.settings.get_penalised_time())
     actual_portfolio_selector_penalty =\
         get_actual_portfolio_selector_performance_per_instance(train_data)
 
@@ -287,55 +305,15 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path,
     return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
-def get_num_instance_in_test_instance_class(test_case_directory: Path) -> str:
-    """Return the number of instances in a test instance set.
-
-    Args:
-        test_case_directory: Path to the test case directory.
-
-    Returns:
-        The number of instances in a test instance set as string.
-    """
-    performance_data_csv = PerformanceDataFrame(
-        test_case_directory / "sparkle_performance_data.csv")
-    return str(performance_data_csv.get_num_instances())
 
 
-def get_test_actual_par(test_case_directory: Path) -> str:
-    """Return the true PAR (Penalised Average Runtime) score on a test set.
 
-    Args:
-        test_case_directory: Path to the test case directory.
-
-    Returns:
-        PAR score (Penalised Average Runtime) as string.
-    """
-    performance_data_csv =\
-        PerformanceDataFrame(test_case_directory / "sparkle_performance_data.csv")
-    # Why is it selecting the first solver?
-    solver = performance_data_csv.dataframe.columns[0]
-
-    cutoff_time_each_run = gv.settings.get_general_target_cutoff_time()
-
-    sparkle_penalty_time = 0.0
-    sparkle_penalty_time_count = 0
-
-    for instance in performance_data_csv.instances:
-        this_run_time = performance_data_csv.get_value(solver, instance)
-        sparkle_penalty_time_count += 1
-        if this_run_time <= cutoff_time_each_run:
-            sparkle_penalty_time += this_run_time
-        else:
-            sparkle_penalty_time += gv.settings.get_penalised_time()
-
-    return str(sparkle_penalty_time / sparkle_penalty_time_count)
-
-
-def selection_report_variables(target_dir: Path,
-                               bibliograpghy_path: Path,
-                               extractor_path: Path,
-                               train_data: PerformanceDataFrame,
-                               test_case_directory: Path = None) -> dict[str, str]:
+def selection_report_variables(
+        target_dir: Path,
+        bibliograpghy_path: Path,
+        extractor_path: Path,
+        train_data: PerformanceDataFrame,
+        test_case_data: PerformanceDataFrame = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
     Args:
@@ -349,10 +327,10 @@ def selection_report_variables(target_dir: Path,
     latex_dict = {"bibliographypath":
                   str(bibliograpghy_path.absolute())}
     
-    latex_dict["numSolvers"] = str(train_data.get_num_solvers())
+    latex_dict["numSolvers"] = str(train_data.num_solvers)
     latex_dict["solverList"] = get_solver_list_latex(train_data.solvers)
     latex_dict["numFeatureExtractors"] = str(len(
-        [p for p in extractor_path.iterdir() if p.isdir()]))
+        [p for p in extractor_path.iterdir() if p.is_dir()]))
     latex_dict["featureExtractorList"] = get_feature_extractor_list(extractor_path)
     latex_dict["numInstanceClasses"] = get_num_instance_sets(train_data.instances)
     latex_dict["instanceClassList"] = get_instance_set_count_list(train_data.instances)
@@ -375,11 +353,14 @@ def selection_report_variables(target_dir: Path,
     latex_dict["testBool"] = r"\testfalse"
 
     # Train and test
-    if test_case_directory is not None:
-        latex_dict["testInstanceClass"] = f"\\textbf{ {test_case_directory.name} }"
+    if test_case_data is not None:
+        latex_dict["testInstanceClass"] =\
+            f"\\textbf{ {test_case_data.csv_filepath.parent.name} }"
         latex_dict["numInstanceInTestInstanceClass"] =\
-            get_num_instance_in_test_instance_class(test_case_directory)
-        latex_dict["testActualPAR"] = get_test_actual_par(test_case_directory)
+            str(test_case_data.num_instances)
+        latex_dict["testActualPAR"] = get_test_actual_par(test_case_data)
+        print(latex_dict["testActualPAR"])
+        print(get_actual_par(test_case_data))
         latex_dict["testBool"] = r"\testtrue"
 
     return latex_dict
@@ -607,8 +588,8 @@ def generate_report_selection(target_path: Path,
                               extractor_path: Path,
                               train_data: PerformanceDataFrame,
                               cutoff: int,
-                              penalty_factor: int,
-                              test_case_directory: Path = None) -> None:
+                              penalty: int,
+                              test_case_data: PerformanceDataFrame = None) -> None:
     """Generate a report for algorithm selection.
 
     Args:
@@ -619,9 +600,11 @@ def generate_report_selection(target_path: Path,
     #used gvs:
     #cutoff_time = gv.settings.get_general_target_cutoff_time()
     #penalty = gv.settings.get_general_penalty_multiplier()
+    import time
+    start = time.time()
     # Include results on the test set if a test case directory is given
     latex_report_filename = Path("Sparkle_Report")
-    if test_case_directory is not None:
+    if test_case_data is not None:
         latex_report_filename = Path("Sparkle_Report_for_Test")
 
     target_path.mkdir(parents=True, exist_ok=True)
@@ -629,11 +612,12 @@ def generate_report_selection(target_path: Path,
                                                         bibliography_path,
                                                         extractor_path,
                                                         train_data,
-                                                        test_case_directory)
-
+                                                        test_case_data)
+    print(f"Created vars after: {time.time() - start}")
     generate_report(latex_dir,
                     latex_template,
                     target_path,
                     latex_report_filename,
                     dict_variable_to_value)
+    print(f"Ended after: {time.time() - start}")
     sl.add_output(str(target_path), "Sparkle portfolio selector report")

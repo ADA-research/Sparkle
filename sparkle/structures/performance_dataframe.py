@@ -248,19 +248,23 @@ class PerformanceDataFrame():
         objective, run = self.verify_indexing(objective, run)
         return self.dataframe.loc[(objective, instance, run), solver]
 
-    def get_num_objectives(self: PerformanceDataFrame) -> int:
+    @property
+    def num_objectives(self: PerformanceDataFrame) -> int:
         """Retrieve the number of objectives in the DataFrame."""
         return self.dataframe.index.levels[0].size
 
-    def get_num_instances(self: PerformanceDataFrame) -> int:
+    @property
+    def num_instances(self: PerformanceDataFrame) -> int:
         """Return the number of instances."""
         return self.dataframe.index.levels[1].size
 
-    def get_num_runs(self: PerformanceDataFrame) -> int:
+    @property
+    def num_runs(self: PerformanceDataFrame) -> int:
         """Return the number of runs."""
         return self.dataframe.index.levels[2].size
 
-    def get_num_solvers(self: PerformanceDataFrame) -> int:
+    @property
+    def num_solvers(self: PerformanceDataFrame) -> int:
         """Return the number of solvers."""
         return self.dataframe.columns.size
 
@@ -272,7 +276,7 @@ class PerformanceDataFrame():
     @property
     def solvers(self: PerformanceDataFrame) -> list[str]:
         """Return the solver present as a list of strings."""
-        return self.dataframe.columns["Solver"].tolist()
+        return self.dataframe.columns.tolist()
 
     def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
@@ -491,7 +495,7 @@ class PerformanceDataFrame():
         # Return average
         return min_instance_df.sum() / self.dataframe.index.size
 
-    def get_solver_penalty_time_ranking_list(self: PerformanceDataFrame,
+    def get_solver_penalty_time_ranking(self: PerformanceDataFrame,
                                              cutoff_time: int,
                                              penalty: int,
                                              objective: str = None,

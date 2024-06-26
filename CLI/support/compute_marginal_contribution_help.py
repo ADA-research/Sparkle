@@ -402,7 +402,7 @@ def compute_actual_selector_marginal_contribution(
             gv.sparkle_algorithm_selector_dir / f"without_{solver_name}"
             / f"{gv.sparkle_algorithm_selector_name}")
 
-        if tmp_performance_df.get_num_solvers() >= 1:
+        if tmp_performance_df.num_solvers >= 1:
             # 8. Construct the portfolio selector for this subset
             scps.construct_sparkle_portfolio_selector(
                 tmp_actual_portfolio_selector_path, tmp_performance_df_path,
@@ -506,7 +506,7 @@ def compute_marginal_contribution(
         capvalue = gv.settings.get_general_target_cutoff_time()
         minimise = True
 
-    num_of_instances = performance_data_csv.get_num_instances()
+    num_of_instances = performance_data_csv.num_instances
     if capvalue is list or capvalue is None:
         capvalue_list = capvalue
     else:
