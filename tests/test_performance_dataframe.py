@@ -1,7 +1,7 @@
 """Test public methods of sparkle performance data csv."""
 
 from __future__ import annotations
-
+import pandas
 from unittest import TestCase
 from unittest.mock import Mock, patch
 from pathlib import Path
@@ -80,14 +80,15 @@ class TestPerformanceData(TestCase):
         assert result == remaining
 
     def test_get_best_performance_per_instance(self: TestPerformanceData) -> None:
-        """Test getting the maximum performance on each instance."""
-        max_perf = [64, 87, 87, 96, 86]
-        result = self.pd.get_best_performance_per_instance()
+        """Test getting the best performance on each instance."""
+        max_perf = [64.0, 87.0, 87.0, 49.0, 86.0]
+        result = self.pd_nan.get_best_performance_per_instance(best=pandas.DataFrame.max)
         assert result == max_perf
 
-        max_perf = [64, 87.0, 87, 49, 86]
+        min_perf = [30.0, 5.0, 3.0, 8.0, 41.0]
         result = self.pd_nan.get_best_performance_per_instance()
-        assert result == max_perf
+        assert result == min_perf
+
 
     @patch("global_variables."
            "settings.get_general_penalty_multiplier")
