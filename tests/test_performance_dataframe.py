@@ -89,7 +89,6 @@ class TestPerformanceData(TestCase):
         result = self.pd_nan.get_best_performance_per_instance()
         assert result == min_perf
 
-
     @patch("global_variables."
            "settings.get_general_penalty_multiplier")
     def test_calc_portfolio_vbs_instance(self: TestPerformanceData,
