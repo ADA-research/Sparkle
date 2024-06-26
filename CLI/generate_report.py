@@ -118,7 +118,7 @@ if __name__ == "__main__":
     flag_instance_set_test = instance_set_test is not None
 
     # Reporting for algorithm selection
-    if selection or test_case_path is not None:
+    if selection or test_case_dir is not None:
         performance_measure =\
             gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
