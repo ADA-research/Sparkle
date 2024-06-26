@@ -552,8 +552,6 @@ def generate_report_selection(target_path: Path,
         penalty: The penalty for solvers TIMEOUT
         test_case_data: Path to the test case directory. Defaults to None.
     """
-    import time
-    start = time.time()
     # Include results on the test set if a test case directory is given
     latex_report_filename = Path("Sparkle_Report")
     if test_case_data is not None:
@@ -570,11 +568,9 @@ def generate_report_selection(target_path: Path,
                                                         penalty,
                                                         train_data,
                                                         test_case_data)
-    print(f"Created vars after: {time.time() - start}")
     generate_report(latex_dir,
                     latex_template,
                     target_path,
                     latex_report_filename,
                     dict_variable_to_value)
-    print(f"Ended after: {time.time() - start}")
     sl.add_output(str(target_path), "Sparkle portfolio selector report")
