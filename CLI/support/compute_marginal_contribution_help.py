@@ -208,17 +208,17 @@ def compute_actual_selector_performance(
     Returns:
       The selector performance as a single floating point number.
     """
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+    performance_data = PerformanceDataFrame(performance_data_csv_path)
     penalty_factor = gv.settings.get_general_penalty_multiplier()
     performances = []
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     capvalue = None
-    for index, instance in enumerate(performance_data_csv.get_instances()):
+    for index, instance in enumerate(performance_data.instances):
         if capvalue_list is not None:
             capvalue = capvalue_list[index]
         performance_instance, flag_success = compute_actual_performance_for_instance(
             actual_portfolio_selector_path, instance, feature_data_csv_path,
-            performance_data_csv, minimise, perf_measure, capvalue)
+            performance_data, minimise, perf_measure, capvalue)
 
         if not flag_success and capvalue is not None:
             performance_instance = capvalue * penalty_factor

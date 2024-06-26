@@ -141,6 +141,7 @@ if __name__ == "__main__":
                                        gv.sparkle_latex_dir,
                                        "template-Sparkle-for-selection.tex",
                                        gv.sparkle_report_bibliography_path,
+                                       gv.extractor_dir,
                                        PerformanceDataFrame(gv.performance_data_csv_path),
                                        test_case_path)
         if test_case_path is None:

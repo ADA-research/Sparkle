@@ -264,9 +264,15 @@ class PerformanceDataFrame():
         """Return the number of solvers."""
         return self.dataframe.columns.size
 
-    def get_instances(self: PerformanceDataFrame) -> list[str]:
+    @property
+    def instances(self: PerformanceDataFrame) -> list[str]:
         """Return the instances as a Pandas Index object."""
         return self.dataframe.index.levels[1].tolist()
+
+    @property
+    def solvers(self: PerformanceDataFrame) -> list[str]:
+        """Return the solver present as a list of strings."""
+        return self.dataframe.columns["Solver"].tolist()
 
     def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
