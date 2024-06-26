@@ -159,6 +159,7 @@ if __name__ == "__main__":
     ablation = args.ablation
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping, gv.solver_dir)
+    solver = Solver(solver_path)
     instance_set_train = resolve_object_name(args.instance_set_train,
                                              target_dir=gv.instance_dir)
     instance_set_test = args.instance_set_test
@@ -210,8 +211,7 @@ if __name__ == "__main__":
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    sah.clean_ablation_scenarios(solver_path.name, instance_set_train.name)
-    solver = Solver(solver_path)
+    sah.clean_ablation_scenarios(solver, instance_set_train.name)
 
     status_info = ConfigureSolverStatusInfo()
     status_info.set_solver(str(solver.name))

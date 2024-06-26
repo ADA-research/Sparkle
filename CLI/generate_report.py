@@ -190,7 +190,6 @@ if __name__ == "__main__":
         if solver is None:
             print("Error! No Solver found for configuration report generation.")
             sys.exit(-1)
-        solver_name = solver.name
 
         # If only the testing set is given return an error
         if not flag_instance_set_train and flag_instance_set_test:

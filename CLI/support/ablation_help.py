@@ -35,12 +35,12 @@ def get_ablation_scenario_directory(solver: Solver, instance_train_name: str,
     return scenario_dir
 
 
-def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str) -> None:
+def clean_ablation_scenarios(solver: Solver, instance_set_train_name: str) -> None:
     """Clean up ablation analysis directory."""
     ablation_scenario_dir = gv.ablation_dir / "scenarios"
     if ablation_scenario_dir.is_dir():
         for ablation_scenario in ablation_scenario_dir.glob(
-                f"{solver_name}_{instance_set_train_name}_*"):
+                f"{solver.name}_{instance_set_train_name}_*"):
             shutil.rmtree(ablation_scenario, ignore_errors=True)
     return
 
