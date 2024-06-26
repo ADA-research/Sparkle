@@ -137,16 +137,25 @@ if __name__ == "__main__":
         status_info = GenerateReportStatusInfo()
         status_info.set_report_type(th.ReportType.ALGORITHM_SELECTION)
         status_info.save()
+        train_data = PerformanceDataFrame(gv.performance_data_csv_path)
+        train_data.penalise(gv.settings.get_general_target_cutoff_time(),
+                            gv.settings.get_penalised_time())
         test_data = None
         if (test_case_path / "sparkle_performance_data.csv").exists():
             test_data = PerformanceDataFrame(
                 test_case_path / "sparkle_performance_data.csv")
+            test_data.penalise(gv.settings.get_general_target_cutoff_time(),
+                               gv.settings.get_penalised_time())
+        actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
         sgfs.generate_report_selection(gv.selection_output_analysis,
                                        gv.sparkle_latex_dir,
                                        "template-Sparkle-for-selection.tex",
                                        gv.sparkle_report_bibliography_path,
                                        gv.extractor_dir,
-                                       PerformanceDataFrame(gv.performance_data_csv_path),
+                                       actual_portfolio_selector_path,
+                                       gv.feature_data_csv_path,
+                                       train_data,
+                                       gv.settings.get_general_extractor_cutoff_time(),
                                        gv.settings.get_general_target_cutoff_time(),
                                        gv.settings.get_penalised_time(),
                                        test_data)

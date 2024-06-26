@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 from typing import Callable
-import fcntl
+import operator
 from pathlib import Path
 import sys
 import math
@@ -278,16 +278,25 @@ class PerformanceDataFrame():
         """Return the solver present as a list of strings."""
         return self.dataframe.columns.tolist()
 
-    def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
-        """Write a CSV to the given path.
+    def penalise(self: PerformanceDataFrame,
+                 threshold: float,
+                 penalty: float,
+                 objective: str = None,
+                 lower_bound: bool = False) -> None:
+        """Penalises the DataFrame values if crossing threshold by specified penalty.
+
+        Directly updates the DataFrame object held by this class.
 
         Args:
-            csv_filepath: String path to the csv file. Defaults to self.csv_filepath.
+            threshold: The threshold of performances to be met
+            penalty: The values assigned for out of bounds performances
+            lower_bound: Whether the threshold is a lower_bound. By default,
+                the threshold is treated as an upperbound for performance values.
         """
-        csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
-        with csv_filepath.open("w+") as fo:
-            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-            self.dataframe.to_csv(csv_filepath)
+        objective = self.verify_objective(objective)
+        comparison_op = operator.lt if lower_bound else operator.gt
+        self.dataframe[comparison_op(self.dataframe.loc[(objective), :],
+                                     threshold)] = penalty
 
     def get_job_list(self: PerformanceDataFrame, rerun: bool = False) \
             -> list[tuple[str, str]]:
@@ -351,16 +360,19 @@ class PerformanceDataFrame():
             self: PerformanceDataFrame,
             objective: str = None,
             run_agg: Callable = None,
-            best: Callable = pd.DataFrame.max) -> list[float]:
+            best: Callable = pd.DataFrame.min) -> list[float]:
         """Return a list with the best performance per instance.
 
         Allows user to specify how to aggregate runs together.
         Must be pandas accepted callable.
 
         Args:
-            objective: The objective over which we want the maximum
+            objective: The objective over which we want the ``best''
             run_agg: The method defining how runs are combined per Instance/solver
-            best: Callable, replace with pd.DataFrame.min to minimise
+            best: Callable, replace with pd.DataFrame.max to maximise
+
+        Returns:
+            A list of floats representing the best performance per instance
         """
         objective = self.verify_objective(objective)
         if run_agg is None:
@@ -476,46 +488,48 @@ class PerformanceDataFrame():
         return instance_penalized_runtimes
 
     def calc_vbs_penalty_time(self: PerformanceDataFrame,
-                              cutoff_time: int,
-                              penalty: int,
-                              objective: str = None,
-                              run_id: int = None) -> float:
+                              cutoff_time: int = None,
+                              penalty: int = None,
+                              objective: str = None) -> float:
         """Return the penalised performance of the VBS."""
         objective = self.verify_objective(objective)
-
+        if cutoff_time is not None and penalty is not None:
+            self.penalise(cutoff_time, penalty)
         # Calculate the minimum for the selected objective per instance
-        if run_id is not None:
-            min_instance_df =\
-                self.dataframe.loc(axis=0)[objective, :, run_id].min(axis=1)
-        else:
-            min_instance_df =\
-                self.dataframe.loc(axis=0)[objective, :, :].min(axis=1)
-        # Penalize those exceeding cutoff
-        min_instance_df[min_instance_df > cutoff_time] = penalty
+        min_instance_df = self.dataframe.loc(axis=0)[objective, :, :].min(axis=1)
         # Return average
         return min_instance_df.sum() / self.dataframe.index.size
 
     def get_solver_penalty_time_ranking(self: PerformanceDataFrame,
-                                             cutoff_time: int,
-                                             penalty: int,
-                                             objective: str = None,
-                                             ) -> list[list[float]]:
+                                        cutoff_time: int = None,
+                                        penalty: int = None,
+                                        objective: str = None,
+                                        ) -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
         objective = self.verify_objective(objective)
-        solver_penalty_time_ranking_list = []
+        if cutoff_time is not None and penalty is not None:
+            self.penalise(cutoff_time, penalty, objective)
+        solver_penalty_time_ranking = []
         num_instances = self.dataframe.index.size
         sub_df = self.dataframe.loc(axis=0)[objective, :, :]
         for solver in self.dataframe.columns:
-            masked_col = sub_df[solver]
-            masked_col[masked_col > cutoff_time] = penalty
-            this_penalty_time = masked_col.sum() / num_instances
-            solver_penalty_time_ranking_list.append([solver, this_penalty_time])
+            average_time = sub_df[solver].sum() / num_instances
+            solver_penalty_time_ranking.append([solver, average_time])
 
         # Sort the list by second value (the penalised run time)
-        solver_penalty_time_ranking_list.sort(
+        solver_penalty_time_ranking.sort(
             key=lambda this_penalty_time: this_penalty_time[1])
 
-        return solver_penalty_time_ranking_list
+        return solver_penalty_time_ranking
+
+    def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
+        """Write a CSV to the given path.
+
+        Args:
+            csv_filepath: String path to the csv file. Defaults to self.csv_filepath.
+        """
+        csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
+        self.dataframe.to_csv(csv_filepath)
 
     def clean_csv(self: PerformanceDataFrame) -> None:
         """Set all values in Performance Data to None."""

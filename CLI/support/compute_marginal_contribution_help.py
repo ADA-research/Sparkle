@@ -139,7 +139,7 @@ def compute_perfect_selector_marginal_contribution(
     return rank_list
 
 
-def get_list_predict_schedule(actual_portfolio_selector_path: str,
+def get_list_predict_schedule(actual_portfolio_selector_path: Path,
                               feature_data_csv: SparkleFeatureDataCSV,
                               instance: int) -> list[float]:
     """Return the solvers schedule suggested by the selector as a list.
@@ -229,7 +229,7 @@ def compute_actual_selector_performance(
 
 
 def compute_actual_performance_for_instance(
-        actual_portfolio_selector_path: str,
+        actual_portfolio_selector_path: Path,
         instance: str,
         feature_data_csv_path: Path,
         performance_data_csv: PerformanceDataFrame,

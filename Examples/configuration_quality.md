@@ -18,7 +18,7 @@ Add train, and optionally test, instances (in this case for the VRP) in a given 
 
 Add a configurable solver (here for vehicle routing) with a wrapper containing the executable name of the solver and a string of command line parameters, without running the solver yet
 
-The solver directory should contain the solver executable, the `sparkle_smac_wrapper` wrapper, and a `.pcs` file describing the configurable parameters
+The solver directory should contain the solver executable, the `sparkle_solver_wrapper.py` wrapper, and a `.pcs` file describing the configurable parameters
 
 `sparkle add_solver --deterministic False Examples/Resources/CVRP/Solvers/VRP_SISRs/`
 

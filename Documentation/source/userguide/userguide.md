@@ -89,7 +89,7 @@ Configuring an algorithm has the following minimal requirements for the
 algorithm (for an example of a solver directory see {numref}`dir-solvers`):
 
 - A working solver executable
-- An algorithm wrapper called `sprakle_smac_wrapper.py`
+- An algorithm wrapper called `sparkle_solver_wrapper.py`
 - A PCS (parameter configuration space) file
 
 Further, training and testing instance sets are needed (for an example
@@ -107,7 +107,7 @@ See the {doc}`example </examples/configuration>` page for a walk-through on how 
 ### Creating a wrapper for your algorithm
 
 A template for the wrapper that connects your algorithm with Sparkle is
-available at `Examples/Resources/Solvers/template/sparkle_smac_wrapper.py`. Within
+available at `Examples/Resources/Solvers/template/sparkle_solver_wrapper.py`. Within
 this template a number of `TODO`s are indicated where you are likely
 to need to make changes for your specific algorithm. You can also
 compare the different example solvers to get an idea for what kind of
@@ -232,12 +232,12 @@ A solver directory should look something like this:
 Solver/
   Example_Solver/
     solver
-    sparkle_smac_wrapper.py
+    sparkle_solver_wrapper.py
     parameters.pcs
 ```
 
 Here `solver` is a binary executable of the solver that is to be
-configured. The `sprakle_smac_wrapper.py` is a wrapper that Sparkle
+configured. The `sparkle_solver_wrapper.py` is a wrapper that Sparkle
 should call to run the solver with specific settings, and then returns a
 result for the configurator. In `parameters.pcs` the configurable
 parameters are described in the PCS format. Finally, when importing your
@@ -258,7 +258,7 @@ Solver/
 ```
 
 Here `solver` is a binary executable of a solver that is to be
-included in a portfolio selector. The `sprakle_solver_wrapper.py`
+included in a portfolio selector. The `sparkle_solver_wrapper.py`
 is a wrapper that Sparkle should call to run the solver on a specific
 instance.
 
