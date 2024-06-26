@@ -21,6 +21,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 
 from CLI.help import command_help as ch
@@ -137,7 +138,10 @@ if __name__ == "__main__":
         status_info.set_report_type(th.ReportType.ALGORITHM_SELECTION)
         status_info.save()
         sgfs.generate_report_selection(gv.selection_output_analysis,
+                                       gv.sparkle_latex_dir,
+                                       "template-Sparkle-for-selection.tex",
                                        gv.sparkle_report_bibliography_path,
+                                       PerformanceDataFrame(gv.performance_data_csv_path),
                                        test_case_path)
         if test_case_path is None:
             print("Report generated ...")

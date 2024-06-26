@@ -30,13 +30,11 @@ def underscore_for_latex(string: str) -> str:
 
 
 def get_solver_list_latex(solver_list: list[str] = None) -> str:
-    """Get the list of solvers for use in a LaTeX document. Defaults to gv.solver_list.
+    """Get the list of solvers for use in a LaTeX document.
 
     Returns:
         The list of solver names as LaTeX str.
     """
-    if solver_list is None:
-        solver_list = gv.solver_list
     return "".join(f"\\item \\textbf{{{Path(solver_path).name}}}\n"
                    for solver_path in solver_list)
 
@@ -51,24 +49,24 @@ def get_feature_extractor_list(extractor_dir: Path) -> str:
                    for extractor_path in extractor_dir.iterdir())
 
 
-def get_num_instance_classes() -> str:
+def get_num_instance_sets(instance_list: list[str]) -> str:
     """Get the number of instance sets.
+    Args:
+        instance_list: List of instances to use
 
     Returns:
         The number of instance sets as LaTeX str.
     """
     return str(len(set([Path(instance_path).parent.name
-                        for instance_path in gv.instance_list])))
+                        for instance_path in instance_list])))
 
 
 def get_instance_set_count_list(instance_list: list[str] = None) -> str:
-    """Get the instance sets for use in a LaTeX document. Defaults to sgh.instance_list.
+    """Get the instance sets for use in a LaTeX document.
 
     Returns:
         The list of instance sets as LaTeX str.
     """
-    if instance_list is None:
-        instance_list = gv.instance_list
     instance_list = [Path(instance_path).parent.name
                      for instance_path in instance_list]
     count = Counter(instance_list)
@@ -76,28 +74,13 @@ def get_instance_set_count_list(instance_list: list[str] = None) -> str:
                    "instances\n" for inst_key in count)
 
 
-def get_solver_perfect_ranking_list() -> str:
-    """Get solvers ranked by marginal contribution to the VBS (virtual best solver).
+def solver_rank_list_latex(rank_list: list[tuple[str, float]]) -> str:
+    """Convert solvers ranked by marginal contribution to latex.
 
     Returns:
         Solvers in the VBS (virtual best solver) ranked by marginal contribution as LaTeX
         str.
     """
-    # TODO: This method call is missing arguments?
-    rank_list = scmch.compute_perfect_selector_marginal_contribution()
-    return "".join(f"\\item \\textbf{ {Path(solver).name} }, marginal contribution: "
-                   f"{value}\n" for solver, value in rank_list)
-
-
-def get_solver_actual_ranking_list() -> str:
-    """Get solvers ranked by marginal contribution to the Sparkle portfolio selector.
-
-    Returns:
-        Solvers in the Sparkle portfolio selector ranked by marginal contribution as
-        LaTeX str.
-    """
-    # TODO: This method call is missing arguments?
-    rank_list = scmch.compute_actual_selector_marginal_contribution()
     return "".join(f"\\item \\textbf{ {Path(solver).name} }, marginal contribution: "
                    f"{value}\n" for solver, value in rank_list)
 
@@ -192,13 +175,11 @@ def get_dict_actual_portfolio_selector_penalty_time_on_each_instance() -> dict[s
     actual_selector_penalty = {}
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
-    minimise = True
     performance_measure = \
         gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+    minimise = (performance_measure !=
+                PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
     capvalue = gv.settings.get_general_cap_value()
-
-    if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION:
-        minimise = False
 
     for instance in performance_data_csv.get_instances():
         used_time_for_this_instance, flag_successfully_solving = \
@@ -224,8 +205,8 @@ def get_figure_portfolio_selector_sparkle_vs_sbs(output_dir: Path) -> str:
         LaTeX str to include the comparison plot in a LaTeX report.
     """
     sbs_penalty_time = get_dict_sbs_penalty_time_on_each_instance()
-    actual_portfolio_selector_penalty = (
-        get_dict_actual_portfolio_selector_penalty_time_on_each_instance())
+    actual_portfolio_selector_penalty =\
+        get_dict_actual_portfolio_selector_penalty_time_on_each_instance()
 
     instances = (sbs_penalty_time.keys()
                  & actual_portfolio_selector_penalty.keys())
@@ -290,8 +271,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path) -> str:
                  actual_portfolio_selector_penalty[instance]]
         points.append(point)
 
-    figure_filename = (
-        "figure_portfolio_selector_sparkle_vs_vbs")
+    figure_filename = "figure_portfolio_selector_sparkle_vs_vbs"
     penalty = gv.settings.get_general_penalty_multiplier()
 
     generate_comparison_plot(points,
@@ -305,7 +285,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path) -> str:
                              replace_zeros=True,
                              output_dir=output_dir)
 
-    return "\\includegraphics[width=0.6\\textwidth]{" + figure_filename + "}"
+    return f"\\includegraphics[width=0.6\\textwidth]{{{figure_filename}}}"
 
 
 def get_num_instance_in_test_instance_class(test_case_directory: Path) -> str:
@@ -354,6 +334,7 @@ def get_test_actual_par(test_case_directory: Path) -> str:
 
 def selection_report_variables(target_dir: Path,
                                bibliograpghy_path: Path,
+                               train_data: PerformanceDataFrame,
                                test_case_directory: Path = None) -> dict[str, str]:
     """Returns: a dict matching variables in the LaTeX template with their values.
 
@@ -368,17 +349,19 @@ def selection_report_variables(target_dir: Path,
     latex_dict = {"bibliographypath":
                   str(bibliograpghy_path.absolute())}
     latex_dict["numSolvers"] = str(len(gv.solver_list))
-    latex_dict["solverList"] = get_solver_list_latex()
+    latex_dict["solverList"] = get_solver_list_latex(gv.solver_list)
     latex_dict["numFeatureExtractors"] = str(len(gv.extractor_list))
     latex_dict["featureExtractorList"] = get_feature_extractor_list(gv.extractor_dir)
-    latex_dict["numInstanceClasses"] = get_num_instance_classes()
-    latex_dict["instanceClassList"] = get_instance_set_count_list()
+    latex_dict["numInstanceClasses"] = get_num_instance_sets(gv.instance_list)
+    latex_dict["instanceClassList"] = get_instance_set_count_list(gv.instance_list)
     latex_dict["featureComputationCutoffTime"] =\
         str(gv.settings.get_general_extractor_cutoff_time())
     latex_dict["performanceComputationCutoffTime"] =\
         str(gv.settings.get_general_target_cutoff_time())
-    latex_dict["solverPerfectRankingList"] = get_solver_perfect_ranking_list()
-    latex_dict["solverActualRankingList"] = get_solver_actual_ranking_list()
+    rank_list_perfect = scmch.compute_perfect_selector_marginal_contribution()
+    rank_list_actual = scmch.compute_actual_selector_marginal_contribution()
+    latex_dict["solverPerfectRankingList"] = solver_rank_list_latex(rank_list_perfect)
+    latex_dict["solverActualRankingList"] = solver_rank_list_latex(rank_list_actual)
     latex_dict["PARRankingList"] = get_par_ranking_list()
     latex_dict["VBSPAR"] = get_vbs_par()
     latex_dict["actualPAR"] = get_actual_par()
@@ -616,7 +599,10 @@ def generate_comparison_plot(points: list,
 
 
 def generate_report_selection(target_path: Path,
+                              latex_dir: Path,
+                              latex_template: Path,
                               bibliography_path: Path,
+                              train_data: PerformanceDataFrame,
                               test_case_directory: Path = None) -> None:
     """Generate a report for algorithm selection.
 
@@ -625,6 +611,12 @@ def generate_report_selection(target_path: Path,
         bibliography_path: Path to the bib file.
         test_case_directory: Path to the test case directory. Defaults to None.
     """
+    #used gvs:
+    #gv.instance_list
+    #gv.performance_data_csv_path
+    #cutoff_time = gv.settings.get_general_target_cutoff_time()
+    #penalty = gv.settings.get_general_penalty_multiplier()
+    #gv.settings.get_penalised_time()
     # Include results on the test set if a test case directory is given
     latex_report_filename = Path("Sparkle_Report")
     if test_case_directory is not None:
@@ -633,10 +625,11 @@ def generate_report_selection(target_path: Path,
     target_path.mkdir(parents=True, exist_ok=True)
     dict_variable_to_value = selection_report_variables(target_path,
                                                         bibliography_path,
+                                                        train_data,
                                                         test_case_directory)
 
-    generate_report(gv.sparkle_latex_dir,
-                    "template-Sparkle.tex",
+    generate_report(latex_dir,
+                    latex_template,
                     target_path,
                     latex_report_filename,
                     dict_variable_to_value)
