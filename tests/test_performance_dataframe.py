@@ -152,5 +152,5 @@ class TestPerformanceData(TestCase):
         rank_list = [["AlgorithmB", 210.8], ["AlgorithmC", 216.6],
                      ["AlgorithmE", 218.8], ["AlgorithmA", 310.4], ["AlgorithmD", 313.8]]
         result = self.pd.get_solver_penalty_time_ranking(cutoff_time=cutoff,
-                                                              penalty=penalty)
+                                                         penalty=penalty)
         assert result == rank_list

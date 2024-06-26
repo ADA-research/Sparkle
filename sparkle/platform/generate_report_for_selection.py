@@ -50,6 +50,7 @@ def get_feature_extractor_list(extractor_dir: Path) -> str:
 
 def get_num_instance_sets(instance_list: list[str]) -> str:
     """Get the number of instance sets.
+
     Args:
         instance_list: List of instances to use
 
@@ -116,7 +117,7 @@ def get_test_actual_par(performance_data: PerformanceDataFrame) -> str:
     Returns:
         PAR score (Penalised Average Runtime) as string.
     """
-    # Its selecting the first solver because that is in this case the Selector (only solver)
+    # Its selecting the first solver because in this case its the Selector (Only solver)
     solver = performance_data.solvers[0]
     return str(performance_data.dataframe[solver].sum() / performance_data.num_instances)
 
@@ -147,9 +148,8 @@ def get_actual_portfolio_selector_performance_per_instance(
         A dict that maps instance name str to their penalised performance int.
     """
     objective = SparkleObjective(performance_data.objective_names[0])
-    
-    minimise = (objective.PerformanceMeasure !=
-                PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+    minimise = (
+        objective.PerformanceMeasure != PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
 
     actual_selector_penalty = {}
     for instance in performance_data.instances:
@@ -229,7 +229,7 @@ def get_figure_portfolio_selector_sparkle_vs_vbs(output_dir: Path,
               "match the number of instances")
         sys.exit(-1)
     points = [[vbs_penalty_time[instance], actual_portfolio_selector_penalty[instance]]
-               for instance in instances]
+              for instance in instances]
 
     figure_filename = "figure_portfolio_selector_sparkle_vs_vbs"
 
@@ -269,13 +269,11 @@ def selection_report_variables(
         A dict matching str variables in the LaTeX template with their value str.
     """
     objective = SparkleObjective(train_data.objective_names[0])
-    actual_performance_dict =\
-        get_actual_portfolio_selector_performance_per_instance(
-            train_data, actual_portfolio_selector_path, feature_data_path, cutoff, penalty)
-    latex_dict = {"bibliographypath": str(bibliograpghy_path.absolute())}
-    
-    latex_dict["numSolvers"] = str(train_data.num_solvers)
-    latex_dict["solverList"] = get_solver_list_latex(train_data.solvers)
+    actual_performance_dict = get_actual_portfolio_selector_performance_per_instance(
+        train_data, actual_portfolio_selector_path, feature_data_path, cutoff, penalty)
+    latex_dict = {"bibliographypath": str(bibliograpghy_path.absolute()),
+                  "numSolvers": str(train_data.num_solvers),
+                  "solverList": get_solver_list_latex(train_data.solvers)}
     latex_dict["numFeatureExtractors"] = str(len(
         [p for p in extractor_path.iterdir() if p.is_dir()]))
     latex_dict["featureExtractorList"] = get_feature_extractor_list(extractor_path)
@@ -542,8 +540,17 @@ def generate_report_selection(target_path: Path,
 
     Args:
         target_path: Path where the outputfiles will be placed.
+        latex_dir: The latex dir
+        latex_template: The template for the report
         bibliography_path: Path to the bib file.
-        test_case_directory: Path to the test case directory. Defaults to None.
+        extractor_path: Path to the extractor used
+        selector_path: Path to the selector
+        feature_data_path: Path to the feature data created by extractor
+        train_data: The input data for the selector
+        extractor_cutoff: The maximum time for the selector to run
+        cutoff: The cutoff per solver
+        penalty: The penalty for solvers TIMEOUT
+        test_case_data: Path to the test case directory. Defaults to None.
     """
     import time
     start = time.time()

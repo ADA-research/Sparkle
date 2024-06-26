@@ -290,6 +290,7 @@ class PerformanceDataFrame():
         Args:
             threshold: The threshold of performances to be met
             penalty: The values assigned for out of bounds performances
+            objective: The objective that should be penalised.
             lower_bound: Whether the threshold is a lower_bound. By default,
                 the threshold is treated as an upperbound for performance values.
         """
