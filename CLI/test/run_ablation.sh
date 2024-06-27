@@ -131,4 +131,3 @@ fi
 #rm -rf $config_scenario_path # Remove test results
 #rm -rf $validation_scenario_path
 mv $smac_results_path_tmp $smac_results_path &> /dev/null # Restore user results
-mv $slurm_settings_tmp $slurm_settings_path # Restore original settings

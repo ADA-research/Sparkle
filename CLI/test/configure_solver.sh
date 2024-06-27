@@ -148,6 +148,3 @@ else
 	fi
 fi
 
-# Restore original settings
-mv $slurm_settings_tmp $slurm_settings_path
-

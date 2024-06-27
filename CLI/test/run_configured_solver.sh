@@ -78,5 +78,3 @@ fi
 # OR true to get success exit code even when no user data was stored in the tmp file
 mv $scenario_tmp $scenario_path 2> /dev/null || true
 
-# Restore original settings
-mv $slurm_settings_tmp $slurm_settings_path
