@@ -141,7 +141,8 @@ if __name__ == "__main__":
         train_data.penalise(gv.settings.get_general_target_cutoff_time(),
                             gv.settings.get_penalised_time())
         test_data = None
-        if (test_case_path / "sparkle_performance_data.csv").exists():
+        if test_case_dir is not None and (
+            test_case_path / "sparkle_performance_data.csv").exists():
             test_data = PerformanceDataFrame(
                 test_case_path / "sparkle_performance_data.csv")
             test_data.penalise(gv.settings.get_general_target_cutoff_time(),
@@ -199,13 +200,11 @@ if __name__ == "__main__":
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
         instance_set_train_name = instance_set_train.name
-        instance_set_test_name = None
         gv.settings.get_general_sparkle_configurator()\
             .set_scenario_dirs(solver, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train or flag_instance_set_test:
             # Check if there are result to generate a report from
-            instance_set_test_name = instance_set_test.name
             validator = Validator(gv.validation_output_general)
             train_res = validator.get_validation_results(
                 solver, instance_set_train)
