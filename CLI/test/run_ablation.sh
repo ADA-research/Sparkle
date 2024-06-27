@@ -54,7 +54,7 @@ cp -r $validation_test_data $validation_scenario_path
 
 # Configure solver
 output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation --run-on $slurm_available | tail -1)
-output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+output_true="Running configuration. Waiting for Slurm job(s) with id(s): "
 if ! [[ $slurm_available =~ "${slurm_true}" ]];
 then
 	output_true="Running configuration finished!"

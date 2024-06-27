@@ -167,7 +167,7 @@ if __name__ == "__main__":
         running_solvers_performance_data(gv.performance_data_csv_path,
                                          num_job_in_parallel,
                                          rerun=False, run_on=run_on)
-        print("Running solvers in parallel ...")
+        print("Running solvers...")
 
     # Write used settings to file
     gv.settings.write_used_settings()

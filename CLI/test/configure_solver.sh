@@ -35,7 +35,7 @@ CLI/add_solver.py --deterministic False $solver_src_path > /dev/null
 output_true="Running configuration finished!"
 if [[ $slurm_available =~ "${slurm_true}" ]];
 then
-	output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+	output_true="Running configuration. Waiting for Slurm job(s) with id(s): "
 fi
 
 # Configure solver
