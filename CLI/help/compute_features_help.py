@@ -16,47 +16,6 @@ from CLI.support import sparkle_job_help
 from CLI.help.command_help import CommandName
 
 
-def generate_missing_value_csv_like_feature_data_csv(
-        feature_data_csv: sfdcsv.SparkleFeatureDataCSV,
-        instance_path: Path,
-        extractor_path: Path,
-        result_path: Path) -> sfdcsv.SparkleFeatureDataCSV:
-    """Create a CSV file with missing values for a given instance and extractor pair.
-
-    Args:
-        feature_data_csv: Reference to a SparkleFeatureDataCSV object for which the
-            dimensions will be used to create a new SparkleFeatureDataCSV with the same
-            dimensions.
-        instance_path: Path to the instance, to be used for a row with missing values in
-            the new CSV file.
-        extractor_path: Path to the extractor, to be used to determine the number of
-            missing values to add for the instance.
-        result_path: The path to store the new created CSV file in.
-
-    Returns:
-        A newly created SparkleFeatureDataCSV object with missing (zero) values for the
-        provided instance_path with the same number of columns as feature_data_csv.
-    """
-    # create an empty CSV
-    sfdcsv.SparkleFeatureDataCSV.create_empty_csv(result_path)
-    zero_value_csv = sfdcsv.SparkleFeatureDataCSV(result_path,
-                                                  gv.extractor_list)
-
-    # add as many columns as feature_data_csv has
-    for column_name in feature_data_csv.list_columns():
-        zero_value_csv.add_column(column_name)
-
-    # Add missing values based on the number of features this extractor computes.
-    # WARNING: This currently does not correctly handle which columns should be set in
-    # case of multiple feature extractors.
-    length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
-    value_list = [sfdcsv.SparkleFeatureDataCSV.missing_value] * length
-
-    zero_value_csv.add_row(instance_path, value_list)
-
-    return zero_value_csv
-
-
 def computing_features_parallel(
         feature_data_csv_path: Path,
         recompute: bool,
