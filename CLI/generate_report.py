@@ -246,6 +246,7 @@ if __name__ == "__main__":
             gv.sparkle_report_bibliography_path,
             instance_set_train,
             gv.settings.get_general_penalty_multiplier(),
+            gv.settings.get_general_extractor_cutoff_time(),
             instance_set_test,
             ablation=args.flag_ablation
         )
