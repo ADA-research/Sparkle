@@ -32,11 +32,6 @@ if __name__ == "__main__":
     parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
                         default=perf_measure,
                         help="the performance measure, e.g. runtime")
-    parser.add_argument("--run-status-path", type=Path,
-                        choices=[gv.run_solvers_sbatch_tmp_path,
-                                 gv.pap_sbatch_tmp_path],
-                        default=gv.run_solvers_sbatch_tmp_path,
-                        help="set the runstatus path of the process")
     parser.add_argument("--seed", type=str, required=False,
                         help="sets the seed used for the solver")
     args = parser.parse_args()
@@ -60,7 +55,6 @@ if __name__ == "__main__":
         solver_path = subtarget
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
-    run_status_path = args.run_status_path
     key_str = f"{solver_path.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     raw_result_path = f"Tmp/{key_str}.rawres"
     start_time = time.time()
@@ -92,10 +86,6 @@ if __name__ == "__main__":
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
     sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     status_info.delete()
-
-    if run_status_path != gv.pap_sbatch_tmp_path:
-        if gv.sparkle_tmp_path in solver_path.parents:
-            shutil.rmtree(solver_path)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
         measurement = quality[0]  # TODO: Handle the multi-objective case

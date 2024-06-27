@@ -66,7 +66,6 @@ if __name__ == "__main__":
             key=str(extractor_path),
             remove=True)
 
-    
     for key in extractor_nicknames:
         if extractor_nicknames == extractor_path:
             sfh.add_remove_platform_item(

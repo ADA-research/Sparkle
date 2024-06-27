@@ -60,7 +60,6 @@ feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
 
 sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio")
-sparkle_parallel_portfolio_name = Path("sparkle_parallel_portfolio")
 
 sparkle_marginal_contribution_perfect_path =\
     sparkle_algorithm_selector_dir / "marginal_contribution_perfect.csv"
@@ -99,10 +98,8 @@ sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
 ablation_dir = Path("Components/ablationAnalysis-0.9.4/")
 
-feature_data_csv_path = Path("Feature_Data/sparkle_feature_data.csv")
-performance_data_csv_path = Path("Performance_Data/sparkle_performance_data.csv")
-pap_sbatch_tmp_path = sparkle_tmp_path / "SBATCH_Parallel_Portfolio_Jobs"
-run_solvers_sbatch_tmp_path = sparkle_tmp_path / "SBATCH_Solver_Jobs"
+feature_data_csv_path = feature_data_dir / "sparkle_feature_data.csv"
+performance_data_csv_path = performance_data_dir / "sparkle_performance_data.csv"
 
 reference_list_dir = Path("Reference_Lists")
 instance_list_postfix = "_instance_list.txt"
