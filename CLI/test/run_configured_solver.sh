@@ -35,13 +35,7 @@ scenario_test="CLI/test/test_files/Output/latest_scenario.ini"
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
 cp $scenario_test $scenario_path # Activate test scenario
 
-# Slurm settings
-slurm_settings_path="Settings/sparkle_slurm_settings.txt"
-slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
-mv $slurm_settings_path $slurm_settings_tmp # Save user settings
-cp $slurm_settings_test $slurm_settings_path # Activate test settings
-
+# Settings
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Instance and solver paths

@@ -29,8 +29,6 @@ sparkle_special_string = "__@@SPARKLE@@__"
 
 python_executable = "python3"
 
-sparkle_slurm_settings_path = Path("Settings/sparkle_slurm_settings.txt")
-
 sparkle_global_output_dir = Path("Output")
 
 # Log that keeps track of which commands were executed and where output details can be

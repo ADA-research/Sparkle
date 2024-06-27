@@ -12,13 +12,6 @@
 #SBATCH --nodes=1
 
 # Settings
-slurm_settings_path="Settings/sparkle_slurm_settings.txt"
-slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
-# Save user settings if any
-mv $slurm_settings_path $slurm_settings_tmp 2> /dev/null
-cp $slurm_settings_test $slurm_settings_path # Activate test settings
-
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
