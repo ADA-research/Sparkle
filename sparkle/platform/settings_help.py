@@ -65,7 +65,6 @@ class Settings:
 
     DEFAULT_portfolio_construction_timeout = None
 
-    
     DEFAULT_slurm_max_parallel_runs_per_node = 8
 
     DEFAULT_smac_target_cutoff_length = "max"
