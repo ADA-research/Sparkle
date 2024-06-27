@@ -100,7 +100,7 @@ class Settings:
         self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
 
-        self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
+        self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
         self.__smac_target_cutoff_length_set = SettingState.NOT_SET
@@ -182,6 +182,13 @@ class Settings:
                     self.set_general_extractor_cutoff_time(value, state)
                     file_settings.remove_option(section, option)
 
+            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_number_of_jobs_in_parallel(value, state)
+                    file_settings.remove_option(section, option)    
+
             section = "configuration"
             option_names = ("wallclock_time", "smac_whole_time_budget")
             for option in option_names:
@@ -212,15 +219,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_number_of_runs(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "slurm"
-            option_names = ("number_of_runs_in_parallel", "num_of_smac_runs_in_parallel",
-                            "num_job_in_parallel")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_number_of_jobs_in_parallel(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
@@ -640,20 +638,20 @@ class Settings:
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the number of runs Slurm can do in parallel."""
         section = "general"
-        name = "number_of_runs_in_parallel"
+        name = "number_of_jobs_in_parallel"
 
         if value is not None and self.__check_setting_state(
-                self.__slurm_number_of_runs_in_parallel_set, origin, name):
+                self.__number_of_jobs_in_parallel_set, origin, name):
             self.__init_section(section)
-            self.__slurm_number_of_runs_in_parallel_set = origin
+            self.__number_of_jobs_in_parallel_set = origin
             self.__settings[section][name] = str(value)
 
     def get_number_of_jobs_in_parallel(self: Settings) -> int:
         """Return the number of runs Slurm can do in parallel."""
-        if self.__slurm_number_of_runs_in_parallel_set == SettingState.NOT_SET:
+        if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
             self.set_number_of_jobs_in_parallel()
 
-        return int(self.__settings["slurm"]["number_of_runs_in_parallel"])
+        return int(self.__settings["slurm"]["number_of_jobs_in_parallel"])
 
     def set_slurm_max_parallel_runs_per_node(
             self: Settings,
