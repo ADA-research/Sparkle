@@ -36,8 +36,6 @@ def parser_function() -> argparse.ArgumentParser:
                               **apc.RunSolverLaterArgument.kwargs)
     parser.add_argument(*apc.NicknameInstanceSetArgument.names,
                         **apc.NicknameInstanceSetArgument.kwargs)
-    parser.add_argument(*apc.ParallelArgument.names,
-                        **apc.ParallelArgument.kwargs)
     parser.add_argument(*apc.RunOnArgument.names,
                         **apc.RunOnArgument.kwargs)
 
@@ -168,15 +166,9 @@ if __name__ == "__main__":
               f"{gv.sparkle_algorithm_selector_path} done!")
 
     if args.run_extractor_now:
-        if not args.parallel:
-            print("Start computing features ...")
-            scf.computing_features(Path(gv.feature_data_csv_path), False)
-            print(f"Feature data file {gv.feature_data_csv_path} has been updated!")
-            print("Computing features done!")
-        else:
-            scf.computing_features_parallel(
-                Path(gv.feature_data_csv_path), False)
-            print("Computing features in parallel ...")
+        print("Start computing features ...")
+        scf.computing_features_parallel(
+            Path(gv.feature_data_csv_path), False)
 
     if args.run_solver_now:
         num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()

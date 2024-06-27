@@ -5,8 +5,6 @@ import sys
 import argparse
 from pathlib import Path
 
-from runrunner.base import Runner
-
 import global_variables as gv
 from CLI.help import compute_features_help as scf
 import sparkle_logging as sl
@@ -25,38 +23,12 @@ def parser_function() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(*apc.RecomputeFeaturesArgument.names,
                         **apc.RecomputeFeaturesArgument.kwargs)
-    parser.add_argument(*apc.ParallelArgument.names,
-                        **apc.ParallelArgument.kwargs)
     parser.add_argument(*apc.SettingsFileArgument.names,
                         **apc.SettingsFileArgument.kwargs)
     parser.add_argument(*apc.RunOnArgument.names,
                         **apc.RunOnArgument.kwargs)
 
     return parser
-
-
-def compute_features_parallel(recompute: bool, run_on: Runner = Runner.SLURM) -> None:
-    """Compute features in parallel.
-
-    Args:
-        recompute: variable indicating if features should be recomputed
-        run_on: Runner
-            On which computer or cluster environment to run the solvers.
-            Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
-    """
-    runs = [scf.computing_features_parallel(Path(gv.feature_data_csv_path),
-                                            recompute, run_on=run_on)]
-    # If there are no jobs return
-    if all(run is None for run in runs):
-        print("Running solvers done!")
-        return
-
-    if run_on == Runner.LOCAL:
-        print("Waiting for the local calculations to finish.")
-        for run in runs:
-            if run is not None:
-                run.wait()
-        print("Computing Features in parallel done!")
 
 
 if __name__ == "__main__":
@@ -89,14 +61,8 @@ if __name__ == "__main__":
 
     # Start compute features
     print("Start computing features ...")
-
-    if not args.parallel:
-        scf.computing_features(gv.feature_data_csv_path, args.recompute)
-
-        print(f"Feature data file {gv.feature_data_csv_path} has been updated!")
-        print("Computing features done!")
-    else:
-        compute_features_parallel(args.recompute, run_on=args.run_on)
+    scf.computing_features_parallel(Path(gv.feature_data_csv_path),
+                                    args.recompute, run_on=args.run_on)
 
     # Write used settings to file
     gv.settings.write_used_settings()

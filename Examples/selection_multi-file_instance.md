@@ -28,7 +28,7 @@ Similarly, add a feature extractor, without immediately running it on the instan
 
 ## Compute features
 
-Compute features for all the instances; add the `--parallel` option to run in parallel
+Compute features for all the instances
 
 `sparkle compute_features`
 

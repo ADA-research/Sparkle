@@ -32,9 +32,9 @@ sparkle add_feature_extractor Examples/Resources/Extractors/SAT-features-competi
 
 #### Compute features
 
-# Compute features for all the instances; add the `--parallel` option to run in parallel
+# Compute features for all the instances;
 
-sparkle compute_features --parallel
+sparkle compute_features
 
 #### Run the solvers
 

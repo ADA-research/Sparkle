@@ -2,7 +2,6 @@
 """Sparkle command to run solvers to get their performance data."""
 from __future__ import annotations
 
-
 import sys
 import argparse
 from pathlib import PurePath, Path

@@ -43,8 +43,6 @@ def parser_function() -> argparse.ArgumentParser:
                                      **apc.RunExtractorLaterArgument.kwargs)
     parser.add_argument(*apc.NicknameFeatureExtractorArgument.names,
                         **apc.NicknameFeatureExtractorArgument.kwargs)
-    parser.add_argument(*apc.ParallelArgument.names,
-                        **apc.ParallelArgument.kwargs)
     return parser
 
 
@@ -175,14 +173,8 @@ if __name__ == "__main__":
             key=nickname_str)
 
     if args.run_extractor_now:
-        if not args.parallel:
-            print("Start computing features ...")
-            scf.computing_features(Path(gv.feature_data_csv_path), False)
-            print(f"Feature data file {gv.feature_data_csv_path} has been updated!")
-            print("Computing features done!")
-        else:
-            scf.computing_features_parallel(Path(gv.feature_data_csv_path), False)
-            print("Computing features in parallel ...")
+        print("Start computing features ...")
+        scf.computing_features_parallel(Path(gv.feature_data_csv_path), False)
 
     # Write used settings to file
     gv.settings.write_used_settings()

@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for feature data computation."""
-import subprocess
+from __future__ import annotations
 import sys
 from pathlib import Path
 
 import runrunner as rrr
-from runrunner.base import Runner
+from runrunner.base import Runner, Status
 
 import global_variables as gv
-import tools.general as tg
-from sparkle.platform import file_help as sfh
 from CLI.help import slurm_help as ssh
 from CLI.support import sparkle_job_help as sjh
 from sparkle.structures import feature_data_csv_help as sfdcsv
@@ -59,109 +57,10 @@ def generate_missing_value_csv_like_feature_data_csv(
     return zero_value_csv
 
 
-def computing_features(feature_data_csv_path: Path, recompute: bool) -> None:
-    """Compute features for all instance and feature extractor combinations.
-
-    Args:
-        feature_data_csv_path: path of feature data csv
-        recompute: boolean indicating if features should be recomputed
-
-    """
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
-                                                    gv.extractor_list)
-    list_feature_computation_job = get_feature_computation_job_list(
-        feature_data_csv, recompute)
-
-    if len(gv.extractor_list) == 0:
-        cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
-    else:
-        cutoff_time_each_extractor_run = (
-            gv.settings.get_general_extractor_cutoff_time() / len(gv.extractor_list))
-
-    print("Cutoff time for each run on computing features is set to "
-          f"{cutoff_time_each_extractor_run} seconds")
-
-    total_job_num = sparkle_job_help.get_num_of_total_job_from_list(
-        list_feature_computation_job)
-
-    # If there are no jobs, stop
-    if total_job_num < 1:
-        print("No feature computation jobs to run; stopping execution! To recompute "
-              "feature values use the --recompute flag.")
-        sys.exit()
-
-    current_job_num = 1
-    print(f"Total number of jobs to run: {total_job_num}")
-
-    for feature_job in list_feature_computation_job:
-        instance_path = Path(feature_job[0])
-        extractor_list = feature_job[1]
-
-        for extractor_str in extractor_list:
-            extractor_path = Path(extractor_str)
-            basic_part = (f"{gv.sparkle_tmp_path}/"
-                          f"{extractor_path.name}_"
-                          f"{instance_path.name}_"
-                          f"{tg.get_time_pid_random_string()}")
-            result_path = f"{basic_part}.rawres"
-            runsolver_watch_data_path = f"{basic_part}.log"
-            runsolver_values_path = result_path.replace(".rawres", ".val")
-
-            command_line = [gv.runsolver_path,
-                            "--cpu-limit", str(cutoff_time_each_extractor_run),
-                            "-w", runsolver_watch_data_path,
-                            "-v", runsolver_values_path,
-                            extractor_path / gv.sparkle_extractor_wrapper,
-                            "-extractor_dir", extractor_path,
-                            "-instance_file", instance_path,
-                            "-output_file", result_path]
-
-            print(f"Extractor {extractor_path.name} computing feature vector of instance"
-                  f" {instance_path.name} ...")
-
-            try:
-                runsolver = subprocess.run(command_line, capture_output=True)
-                with Path(runsolver_values_path).open() as file:
-                    if "TIMEOUT=true" in file.read():
-                        print(f"****** WARNING: Feature vector computation on instance "
-                              f"{instance_path} timed out! ******")
-            except Exception:
-                if not Path(result_path).exists():
-                    sfh.create_new_empty_file(result_path)
-
-            try:
-                tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path, gv.extractor_list)
-            except Exception:
-                print("****** WARNING: Feature vector computation on instance "
-                      f"{instance_path} failed! ******")
-                print("****** WARNING: The feature vector of this instance consists of "
-                      "missing values ******")
-                print(f"****** Run solver Output:\n{runsolver.stderr.decode()}")
-                Path(result_path).unlink(missing_ok=True)
-                tmp_fdcsv = generate_missing_value_csv_like_feature_data_csv(
-                    feature_data_csv, instance_path, extractor_path,
-                    Path(result_path))
-
-            feature_data_csv.combine(tmp_fdcsv)
-
-            Path(result_path).unlink(missing_ok=True)
-            Path(runsolver_watch_data_path).unlink(missing_ok=True)
-            Path(runsolver_values_path).unlink(missing_ok=True)
-
-            print(f"Executing Progress: {str(current_job_num)} out of "
-                  f"{str(total_job_num)}")
-            current_job_num += 1
-
-            feature_data_csv.save_csv()
-
-            print(f"Extractor {extractor_path.name}"
-                  " computation of feature vector of instance "
-                  f"{instance_path.name} done!\n")
-
-
-def computing_features_parallel(feature_data_csv_path: Path,
-                                recompute: bool,
-                                run_on: Runner = Runner.SLURM) -> str:
+def computing_features_parallel(
+        feature_data_csv_path: Path,
+        recompute: bool,
+        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
     """Compute features for all instance and feature extractor combinations in parallel.
 
     A sbatch job is submitted for the computation of the features. The results are then
@@ -216,6 +115,17 @@ def computing_features_parallel(feature_data_csv_path: Path,
         base_dir=gv.sparkle_tmp_path,
         sbatch_options=sbatch_options,
         srun_options=srun_options)
+
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        run.wait()
+        for job in run.jobs:
+            jobs_done = sum(j.status == Status.COMPLETED for j in run.jobs)
+            print(f"Executing Progress: {jobs_done} out of {len(run.jobs)}")
+            if jobs_done == len(run.jobs):
+                break
+            job.wait()
+        print("Computing features done!")
 
     return run
 

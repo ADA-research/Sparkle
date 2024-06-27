@@ -30,7 +30,7 @@ sparkle add_feature_extractor Examples/Resources/CCAG/Extractors/CCAG-features_s
 
 #### Compute features
 
-# Compute features for all the instances; add the `--parallel` option to run in parallel
+# Compute features for all the instances
 
 sparkle compute_features
 
