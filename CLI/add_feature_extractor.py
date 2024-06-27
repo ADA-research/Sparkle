@@ -18,16 +18,16 @@ from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
 
 
-def _check_existence_of_test_instance_list_file(extractor_directory: str) -> bool:
+def _check_existence_of_test_instance_list_file(extractor_directory: Path) -> bool:
     """Check whether a file exists with the list of test instances."""
-    if not Path(extractor_directory).is_dir():
+    if extractor_directory.is_dir():
         return False
 
     test_instance_list_file_name = "sparkle_test_instance_list.txt"
-    test_instance_list_file_path = (Path(extractor_directory)
+    test_instance_list_file_path = (extractor_directory
                                     / test_instance_list_file_name)
 
-    return Path(test_instance_list_file_path).is_file()
+    return test_instance_list_file_path.is_file()
 
 
 def parser_function() -> argparse.ArgumentParser:
