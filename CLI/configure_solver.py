@@ -19,7 +19,6 @@ from CLI.support import ablation_help as sah
 from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from CLI.help import slurm_help as ssh
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
@@ -126,13 +125,14 @@ def run_after(solver: Path,
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
-    run = rrr.add_to_queue(runner=run_on,
-                           cmd=command_line,
-                           name=command,
-                           dependencies=dependency,
-                           base_dir=gv.sparkle_tmp_path,
-                           srun_options=["-N1", "-n1"],
-                           sbatch_options=ssh.get_slurm_options_list())
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=command_line,
+        name=command,
+        dependencies=dependency,
+        base_dir=gv.sparkle_tmp_path,
+        srun_options=["-N1", "-n1"],
+        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
@@ -234,7 +234,7 @@ if __name__ == "__main__":
         wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    sbatch_options = ssh.get_slurm_options_list() if run_on == Runner.SLURM else []
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
         sbatch_options=sbatch_options,

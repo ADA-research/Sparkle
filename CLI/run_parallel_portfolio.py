@@ -86,6 +86,7 @@ def run_parallel_portfolio(instances: list[Path],
                                    raw_result_path])
 
     # Jobs are added in to the runrunner object in the same order they are provided
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
@@ -93,8 +94,8 @@ def run_parallel_portfolio(instances: list[Path],
         parallel_jobs=parallel_jobs,
         path=".",
         base_dir=gv.sparkle_tmp_path,
-        srun_options=["-N1", "-n1"] + ssh.get_slurm_options_list(),
-        sbatch_options=ssh.get_slurm_options_list()
+        srun_options=["-N1", "-n1"] + sbatch_options,
+        sbatch_options=sbatch_options
     )
     check_interval = gv.settings.get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances

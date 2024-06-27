@@ -25,5 +25,5 @@ def get_slurm_options_list(path_modifier: Path = None) -> list[str]:
     with sparkle_slurm_settings_path.open("r") as settings_file:
         slurm_options_list.extend([line.strip() for line in settings_file.readlines()
                                    if line.startswith("-")])
-
+    print(slurm_options_list)
     return slurm_options_list

@@ -22,7 +22,6 @@ from CLI.support import run_solvers_help as srs
 from CLI.help.reporting_scenario import Scenario
 from sparkle.instance import instances_help as sih
 from CLI.help.command_help import CommandName
-from CLI.help import slurm_help as ssh
 
 
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
@@ -292,7 +291,7 @@ def call_sparkle_portfolio_selector_solve_directory(
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
         base_dir=gv.sparkle_tmp_path,
         parallel_jobs=n_jobs,
-        sbatch_options=ssh.get_slurm_options_list(),
+        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1", "--exclusive"])
 
     if run_on == Runner.LOCAL:

@@ -11,7 +11,6 @@ from runrunner.base import Runner
 
 import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.help import slurm_help as ssh
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SolutionVerifier
@@ -90,8 +89,9 @@ def running_solvers_performance_data(
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
 
-    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
-    sbatch_options = ssh.get_slurm_options_list()
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    srun_options = ["-N1", "-n1"] + sbatch_options
+    
     perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     cmd_list = ["CLI/core/run_solvers_core.py "
                 f"--performance-data {performance_data_csv_path} "
@@ -150,7 +150,7 @@ def run_solvers_on_instances(
         print("Running solvers done!")
         return
 
-    sbatch_user_options = ssh.get_slurm_options_list()
+    sbatch_user_options = gv.settings.get_slurm_extra_options(as_args=True)
     if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
             runner=run_on,

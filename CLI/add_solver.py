@@ -17,7 +17,6 @@ from sparkle.solver import Solver
 import sparkle_logging as sl
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
-from CLI.help import slurm_help as ssh
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
 
@@ -147,8 +146,8 @@ if __name__ == "__main__":
             rerun=False, run_on=run_on
         )]
 
-        sbatch_options = ssh.get_slurm_options_list()
-        srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
+        sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+        srun_options = ["-N1", "-n1"] + sbatch_options
         run_construct_portfolio_selector = rrr.add_to_queue(
             cmd="CLI/construct_sparkle_portfolio_selector.py",
             name=CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,

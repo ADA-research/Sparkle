@@ -88,9 +88,8 @@ def call_solver(
                                              solver_params, runsolver_args)
         cmd_list.append(" ".join(solver_cmd))
 
-    sbatch_options = ssh.get_slurm_options_list()
-    srun_options = ["-N1", "-n1"]
-    srun_options.extend(ssh.get_slurm_options_list())
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    srun_options = ["-N1", "-n1"] + sbatch_options
     # Make sure the executable dir exists
     if outdir is None:
         outdir = solver.raw_output_directory

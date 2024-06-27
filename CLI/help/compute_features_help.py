@@ -63,8 +63,8 @@ def compute_features(
     cmd_list = [f"CLI/core/compute_features.py --instance {inst_path} "
                 f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
                 for inst_path, ex_path in total_job_list]
-    sbatch_options = ssh.get_slurm_options_list()
-    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    srun_options = ["-N1", "-n1"] + sbatch_options
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,

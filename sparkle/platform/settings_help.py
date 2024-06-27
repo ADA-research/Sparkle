@@ -268,8 +268,8 @@ class Settings:
                     # TODO: Quick fix to support partitions and excludes, but should not
                     # allow any option
                     if section == "slurm":
-                        print(f'Unrecognised SLURM option "{option}" found in '
-                              f"{str(file_path)}. Option is added to any SLURM batches")
+                        #print(f'Unrecognised SLURM option "{option}" found in '
+                        #      f"{str(file_path)}. Option is added to any SLURM batches")
                         value = file_settings.get(section, option)
                         self.add_slurm_extra_option(option, value, state)
                     else:
@@ -690,7 +690,8 @@ class Settings:
             self.__slurm_extra_options_set[name] = origin
             self.__settings[section][name] = str(value)
 
-    def get_slurm_extra_options(self: Settings) -> dict:
+    def get_slurm_extra_options(self: Settings,
+                                as_args: bool = False) -> dict | list:
         """Return a dict with additional Slurm options."""
         section = "slurm_extra"
         options = dict()
@@ -698,7 +699,8 @@ class Settings:
         if "slurm_extra" in self.__settings.sections():
             for option in self.__settings["slurm_extra"]:
                 options[option] = self.__settings.get(section, option)
-
+        if as_args:
+            return [f"--{key}={options[key]}" for key in options.keys()]
         return options
 
     # Ablation settings ###
