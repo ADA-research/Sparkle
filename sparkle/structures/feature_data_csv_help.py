@@ -23,18 +23,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
             extractor_list = []
         self.extractor_list = extractor_list
 
-    def get_list_recompute_feature_computation_job(self: SparkleFeatureDataCSV)  \
-            -> list[list[str | list[str]]]:
-        """Return a list of feature computations to re-do per instance and solver."""
-        list_recompute_feature_computation_job = []
-        list_row_name = self.list_rows()
-        for row_name in list_row_name:
-            list_item = [row_name, self.extractor_list]
-            list_recompute_feature_computation_job.append(list_item)
-
-        return list_recompute_feature_computation_job
-
-    def get_list_remaining_feature_computation_job(self: SparkleFeatureDataCSV)\
+    def get_remaining_feature_computation_job(self: SparkleFeatureDataCSV)\
             -> list[list[str, str]]:
         """Return a list of needed feature computations per instance and solver.
 

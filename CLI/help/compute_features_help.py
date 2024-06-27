@@ -40,7 +40,7 @@ def compute_features(
                                                     gv.extractor_list)
     if recompute:
         feature_data_csv.clean_csv()
-    list_feature_computation_job = feature_data_csv.get_list_remaining_feature_computation_job()
+    list_feature_computation_job = feature_data_csv.get_remaining_feature_computation_job()
     n_jobs = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
 
@@ -86,30 +86,3 @@ def compute_features(
         print("Computing features done!")
 
     return run
-
-
-def get_feature_computation_job_list(feature_data_csv: sfdcsv.SparkleFeatureDataCSV,
-                                     recompute: bool) -> list[list[list[str]]]:
-    """Computes the needed feature computation jobs.
-
-    Args:
-        feature_data_csv: the csv containing the feature data
-        recompute: variable indicating if the features need to be recomputed
-
-    Returns:
-        list_feature_computation_job: a list of feature
-            computations to do per instance and solver
-    """
-    if recompute:
-        # recompute is true, so the list of computation jobs is the list of all jobs
-        # (recomputing)
-        feature_data_csv.clean_csv()
-        list_feature_computation_job = (
-            feature_data_csv.get_list_recompute_feature_computation_job())
-    else:
-        # recompute is false, so the list of computation jobs is the list of the
-        # remaining jobs
-        list_feature_computation_job = (
-            feature_data_csv.get_list_remaining_feature_computation_job())
-
-    return list_feature_computation_job
