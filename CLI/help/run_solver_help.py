@@ -22,7 +22,6 @@ def call_solver(
         config: str | Path = None,
         seed: int | list[int] = None,
         outdir: Path = None,
-        parallel: bool = True,
         commandname: CommandName = CommandName.RUN_SOLVERS,
         dependency: rrr.SlurmRun | list[rrr.SlurmRun] = None,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
@@ -36,7 +35,6 @@ def call_solver(
             should be specified.
         seed: The seed for the solver.
         outdir: Path where to place the output files of the (run) solver logs
-        parallel: Whether or not to run the jobs in parallel (local).
         commandname: The commandname under which to run the process.
         dependency: The jobs it depends on to finish before starting.
         run_on: Whether the command is run with Slurm or not.
@@ -112,16 +110,12 @@ def call_solver(
         srun_options=srun_options)
 
     if run_on == Runner.LOCAL:
-        if parallel:
-            # Wait for all jobs to complete before printing
-            run.wait()
+        # Wait for all jobs to complete before printing
+        run.wait()
         # Jobs are sorted in the cmd list order
         for index, job in enumerate(run.jobs):
             # Run the configured solver
-            if not parallel:
-                print(f"Start running the latest configured solver to solve instance "
-                      f"{instances_list[index]} ...")
-                job.wait()
+            job.wait()
             output_log = outdir / runsolver_args_list[index][-1]
             solver_output = get_solver_output(runsolver_args_list[index],
                                               output_log.read_text(),

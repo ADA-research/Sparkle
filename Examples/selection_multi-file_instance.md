@@ -34,7 +34,7 @@ Compute features for all the instances
 
 ## Run the solvers
 
-Run the solvers on all instances; add the `--parallel` option to run in parallel. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
 
 `sparkle run_solvers --performance-measure QUALITY_ABSOLUTE`
 

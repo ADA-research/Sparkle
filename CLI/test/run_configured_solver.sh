@@ -55,13 +55,13 @@ CLI/add_solver.py --deterministic False $solver_path > /dev/null
 
 # Run configured solver on a single instance
 output_true="Running configured solver done!"
-output=$(CLI/run_configured_solver.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/run_configured_solver.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on local | tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] ($slurm_available) run_configured_solver on single instance test succeeded"
+	echo "[success] (local) run_configured_solver on single instance test succeeded"
 else
-	echo "[failure] ($slurm_available) run_configured_solver on single instance test failed with output:"
+	echo "[failure] (local) run_configured_solver on single instance test failed with output:"
 	echo $output
 fi
 
@@ -70,13 +70,13 @@ if [[ $slurm_available == $slurm_true ]];
 then
 	output_true="Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
 fi
-output=$(CLI/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --parallel --run-on $slurm_available | tail -1)
+output=$(CLI/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] ($slurm_available) run_configured_solver in parallel on instance directory test succeeded"
+	echo "[success] (slurm) run_configured_solver on instance directory test succeeded"
 else
-	echo "[failure] ($slurm_available) run_configured_solver in parallel on instance directory test failed with output:"
+	echo "[failure] (slurm) run_configured_solver on instance directory test failed with output:"
 	echo $output
 fi
 

@@ -280,10 +280,6 @@ NumberOfRunsAblationArgument = \
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
-ParallelArgument = ArgumentContainer(names=["--parallel"],
-                                     kwargs={"action": "store_true",
-                                             "help": "Run the command in parallel"})
-
 PerfectArgument = ArgumentContainer(names=["--perfect"],
                                     kwargs={"action": "store_true",
                                             "help": "compute the marginal contribution "

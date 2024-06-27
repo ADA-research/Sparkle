@@ -238,7 +238,7 @@ if __name__ == "__main__":
     dependency_job_list = configurator.configure(
         scenario=config_scenario,
         sbatch_options=sbatch_options,
-        num_parallel_jobs=gv.settings.get_slurm_number_of_runs_in_parallel(),
+        num_parallel_jobs=gv.settings.get_number_of_jobs_in_parallel(),
         run_on=run_on)
 
     # Update latest scenario

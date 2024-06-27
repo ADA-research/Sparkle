@@ -38,7 +38,7 @@ Compute features for all the instances
 
 ## Run the solvers
 
-Run the solvers on all instances; add the `--parallel` option to run in parallel
+Run the solvers on all instances
 
 `sparkle run_solvers`
 

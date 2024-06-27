@@ -98,6 +98,6 @@ Now that we have a configured solver, we can run it on a single instance to get 
 
 ## Run configured solver on an instance directory
 
-It is also possible to run a configured solver directly on an entire directory of instances in parallel.
+It is also possible to run a configured solver directly on an entire directory.
 
-`sparkle run_configured_solver Examples/Resources/Instances/PTN2 --parallel`
+`sparkle run_configured_solver Examples/Resources/Instances/PTN2`

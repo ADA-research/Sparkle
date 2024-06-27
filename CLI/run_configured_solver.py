@@ -30,8 +30,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
-    parser.add_argument(*ac.ParallelArgument.names,
-                        **ac.ParallelArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     return parser
@@ -109,7 +107,6 @@ if __name__ == "__main__":
         run = srcsh.call_solver(instances_list,
                                 solver,
                                 config=config_str,
-                                parallel=args.parallel,
                                 commandname=CommandName.RUN_CONFIGURED_SOLVER,
                                 run_on=run_on)
     else:
@@ -117,8 +114,8 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # Print result
-    if args.parallel and run_on == Runner.SLURM:
-        print(f"Running configured solver in parallel. Waiting for Slurm "
+    if run_on == Runner.SLURM:
+        print(f"Running configured solver. Waiting for Slurm "
               f"job(s) with id(s): {run.run_id}")
     else:
         print("Running configured solver done!")

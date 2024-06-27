@@ -171,7 +171,7 @@ if __name__ == "__main__":
             Path(gv.feature_data_csv_path), False)
 
     if args.run_solver_now:
-        num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
+        num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
         running_solvers_performance_data(gv.performance_data_csv_path,
                                          num_job_in_parallel,
                                          rerun=False, run_on=run_on)

@@ -98,6 +98,6 @@ sparkle wait
 sparkle run_configured_solver Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf
 
 ## Run configured solver on an instance directory
-#It is also possible to run a configured solver directly on an entire directory of instances in parallel.
+#It is also possible to run a configured solver directly on an entire directory of instances.
 
-sparkle run_configured_solver Examples/Resources/Instances/PTN2 --parallel
+sparkle run_configured_solver Examples/Resources/Instances/PTN2
