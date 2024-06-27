@@ -23,7 +23,7 @@ def create_new_empty_file(filepath: str) -> None:
     Path(filepath).write_text("")
 
 
-def get_list_all_filename_recursive(path: Path) -> list[Path]:
+def get_file_paths_recursive(path: Path) -> list[Path]:
     """Extend a given list of filenames with all files found under a path.
 
     This includes all files found in subdirectories of the given path.
@@ -32,8 +32,6 @@ def get_list_all_filename_recursive(path: Path) -> list[Path]:
       path: Target path.
       list_all_filename: List of filenames (may be empty).
     """
-    if isinstance(path, str):
-        path = Path(path)
     return [p for p in Path(path).rglob("*") if p.is_file()]
 
 

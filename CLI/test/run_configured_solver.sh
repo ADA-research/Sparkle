@@ -68,7 +68,7 @@ fi
 # Run configured solver on an instance directory
 if [[ $slurm_available == $slurm_true ]];
 then
-	output_true="Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
+	output_true="Running configured solver. Waiting for Slurm job(s) with id(s):"
 fi
 output=$(CLI/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
 

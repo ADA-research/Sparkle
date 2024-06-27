@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     print(f"Start removing solver {solver_path.name} ...")
 
-    if len(gv.solver_list) > 0:
+    if len(gv.file_storage_data_mapping[gv.solver_list_path]) > 0:
         sfh.add_remove_platform_item(
             solver_path,
             gv.solver_list_path,

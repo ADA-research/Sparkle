@@ -529,7 +529,7 @@ class Settings:
     def set_number_of_jobs_in_parallel(
             self: Settings, value: int = DEFAULT_number_of_jobs_in_parallel,
             origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the number of runs Slurm can do in parallel."""
+        """Set the number of runs Sparkle can do in parallel."""
         section = "general"
         name = "number_of_jobs_in_parallel"
 
@@ -540,7 +540,7 @@ class Settings:
             self.__settings[section][name] = str(value)
 
     def get_number_of_jobs_in_parallel(self: Settings) -> int:
-        """Return the number of runs Slurm can do in parallel."""
+        """Return the number of runs Sparkle can do in parallel."""
         if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
             self.set_number_of_jobs_in_parallel()
 

@@ -46,7 +46,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     print(f"Start removing all instances in directory {instances_path} ...")
-    list_all_filename = sfh.get_list_all_filename_recursive(instances_path)
+    list_all_filename = sfh.get_file_paths_recursive(instances_path)
     reference_list = gv.reference_list_dir / (instances_path.name
                                               + gv.instance_list_postfix)
     if reference_list.exists():
@@ -63,12 +63,6 @@ if __name__ == "__main__":
 
     for instance_path in list_all_filename:
         intended_instance = str(instance_path)
-        print(intended_instance)
-        # Remove instance records
-        sfh.add_remove_platform_item(intended_instance,
-                                     gv.instance_list_path,
-                                     gv.file_storage_data_mapping[gv.instance_list_path],
-                                     remove=True)
         if reference_list.exists():
             # In case of reference lists, we only take the last instance part
             # For the matrix rows to remove them

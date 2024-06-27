@@ -45,7 +45,7 @@ def get_instance_list_from_path(path: Path) -> list[str]:
     # Single file instances
     else:
         list_all_filename = [file.name for file in
-                             sfh.get_list_all_filename_recursive(path)]
+                             sfh.get_file_paths_recursive(path)]
 
     return list_all_filename
 

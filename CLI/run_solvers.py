@@ -175,7 +175,7 @@ def run_solvers_on_instances(
                 run.wait()
         print("Running solvers done!")
     elif run_on == Runner.SLURM:
-        print("Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+        print("Running solvers. Waiting for Slurm job(s) with id(s): "
               f'{",".join(r.run_id for r in runs if r is not None)}')
 
 

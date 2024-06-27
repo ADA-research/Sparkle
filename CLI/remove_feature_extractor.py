@@ -33,9 +33,11 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    extractor_path = resolve_object_name(args.extractor_path,
-                                         gv.extractor_nickname_mapping,
-                                         gv.extractor_dir)
+    extractor_nicknames = gv.file_storage_data_mapping[gv.extractor_nickname_list_path]
+    extractor_path = resolve_object_name(
+        args.extractor_path,
+        extractor_nicknames,
+        gv.extractor_dir)
 
     check_for_initialise(
         sys.argv,
@@ -64,16 +66,16 @@ if __name__ == "__main__":
             key=str(extractor_path),
             remove=True)
 
-    if len(gv.extractor_nickname_mapping) > 0:
-        for key in gv.extractor_nickname_mapping:
-            if gv.extractor_nickname_mapping[key] == extractor_path:
-                sfh.add_remove_platform_item(
-                    None,
-                    gv.extractor_nickname_list_path,
-                    gv.file_storage_data_mapping[gv.extractor_nickname_list_path],
-                    key=key,
-                    remove=True)
-                break
+    
+    for key in extractor_nicknames:
+        if extractor_nicknames == extractor_path:
+            sfh.add_remove_platform_item(
+                None,
+                gv.extractor_nickname_list_path,
+                extractor_nicknames,
+                key=key,
+                remove=True)
+            break
 
     if gv.feature_data_csv_path.exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
