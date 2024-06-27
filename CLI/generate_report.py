@@ -160,7 +160,7 @@ if __name__ == "__main__":
                                        gv.settings.get_general_target_cutoff_time(),
                                        gv.settings.get_penalised_time(),
                                        test_data)
-        if test_case_path is None:
+        if test_case_dir is None:
             print("Report generated ...")
         else:
             print("Report for test generated ...")
