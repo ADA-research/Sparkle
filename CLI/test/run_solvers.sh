@@ -38,7 +38,7 @@ else
 fi
 
 # Run solvers recompute and parallel
-output_true="Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+output_true="Running solvers. Waiting for Slurm job(s) with id(s): "
 output=$(CLI/run_solvers.py --run-on=slurm --settings-file $sparkle_test_settings_path --recompute | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
