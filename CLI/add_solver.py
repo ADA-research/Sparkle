@@ -36,8 +36,6 @@ def parser_function() -> argparse.ArgumentParser:
                                   **apc.RunSolverLaterArgument.kwargs)
     parser.add_argument(*apc.NicknameSolverArgument.names,
                         **apc.NicknameSolverArgument.kwargs)
-    parser.add_argument(*apc.ParallelArgument.names,
-                        **apc.ParallelArgument.kwargs)
     parser.add_argument(*apc.SolverVariationsArgument.names,
                         **apc.SolverVariationsArgument.kwargs)
     parser.add_argument(*apc.SolverPathArgument.names,
@@ -79,7 +77,6 @@ if __name__ == "__main__":
 
     deterministic = args.deterministic
     nickname_str = args.nickname
-    my_flag_parallel = args.parallel
     solver_variations = args.solver_variations
     run_on = args.run_on
 
