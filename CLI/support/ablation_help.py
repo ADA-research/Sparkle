@@ -13,7 +13,6 @@ import global_variables as gv
 from sparkle.instance import instances_help as sih
 
 from sparkle.configurator.implementations import SMAC2
-from CLI.help import slurm_help as ssh
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver
 from sparkle.solver import pcs

@@ -91,7 +91,6 @@ def running_solvers_performance_data(
 
     sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
-    
     perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     cmd_list = ["CLI/core/run_solvers_core.py "
                 f"--performance-data {performance_data_csv_path} "

@@ -9,7 +9,6 @@ import runrunner as rrr
 from runrunner.base import Runner, Status
 
 import global_variables as gv
-from CLI.help import slurm_help as ssh
 from CLI.support import sparkle_job_help as sjh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.support import sparkle_job_help

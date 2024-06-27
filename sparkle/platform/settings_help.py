@@ -265,11 +265,8 @@ class Settings:
 
             for section in sections:
                 for option in file_settings[section]:
-                    # TODO: Quick fix to support partitions and excludes, but should not
-                    # allow any option
+                    # TODO: Should check the options are valid Slurm options
                     if section == "slurm":
-                        #print(f'Unrecognised SLURM option "{option}" found in '
-                        #      f"{str(file_path)}. Option is added to any SLURM batches")
                         value = file_settings.get(section, option)
                         self.add_slurm_extra_option(option, value, state)
                     else:

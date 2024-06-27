@@ -11,7 +11,6 @@ from runrunner.base import Runner
 import global_variables as gv
 import tools.general as tg
 from CLI.help.command_help import CommandName
-from CLI.help import slurm_help as ssh
 from sparkle.solver import Solver
 from tools.runsolver_parsing import get_solver_output
 
