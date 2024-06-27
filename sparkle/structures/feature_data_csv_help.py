@@ -23,7 +23,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
             extractor_list = []
         self.extractor_list = extractor_list
 
-    def get_remaining_feature_computation_job(self: SparkleFeatureDataCSV)\
+    def remaining_feature_computation_job(self: SparkleFeatureDataCSV)\
             -> list[list[str, str]]:
         """Return a list of needed feature computations per instance and solver.
 

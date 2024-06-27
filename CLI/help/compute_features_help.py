@@ -40,7 +40,7 @@ def compute_features(
                                                     gv.extractor_list)
     if recompute:
         feature_data_csv.clean_csv()
-    list_feature_computation_job = feature_data_csv.get_remaining_feature_computation_job()
+    list_feature_computation_job = feature_data_csv.remaining_feature_computation_job()
     n_jobs = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
 

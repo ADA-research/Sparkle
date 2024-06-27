@@ -38,7 +38,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
     try:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
         list_feature_computation_job = (
-            feature_data_csv.get_remaining_feature_computation_job())
+            feature_data_csv.remaining_feature_computation_job())
     except Exception:
         list_feature_computation_job = []
     total_job_num = sparkle_job_help.get_num_of_total_job_from_list(

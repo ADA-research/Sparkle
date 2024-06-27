@@ -187,7 +187,7 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_number_of_jobs_in_parallel(value, state)
-                    file_settings.remove_option(section, option)    
+                    file_settings.remove_option(section, option)
 
             section = "configuration"
             option_names = ("wallclock_time", "smac_whole_time_budget")

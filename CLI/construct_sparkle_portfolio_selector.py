@@ -42,7 +42,7 @@ def judge_exist_remaining_jobs(feature_data_csv_path: str,
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
                                                     gv.extractor_list)
     feature_computation_jobs =\
-        feature_data_csv.get_remaining_feature_computation_job()
+        feature_data_csv.remaining_feature_computation_job()
     total_job_num = sjh.get_num_of_total_job_from_list(feature_computation_jobs)
 
     if total_job_num > 0:
