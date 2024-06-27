@@ -42,14 +42,8 @@ def parser_function() -> argparse.ArgumentParser:
                         **apc.SolverPathArgument.kwargs)
     parser.add_argument(*apc.RunOnArgument.names,
                         **apc.RunOnArgument.kwargs)
-    parser.add_argument(
-        "--skip-checks",
-        dest="run_checks",
-        default=True,
-        action="store_false",
-        help="Checks the solver's functionality by testing it on an instance "
-             "and the pcs file, when applicable."
-    )
+    parser.add_argument(*apc.SkipChecksArgument.names,
+                        **apc.SkipChecksArgument.kwargs)
     return parser
 
 

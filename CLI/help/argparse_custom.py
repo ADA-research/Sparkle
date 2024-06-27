@@ -395,6 +395,14 @@ SettingsFileArgument = \
                               "help": "Specify the settings file to use in case you want"
                                       " to use one other than the default"})
 
+SkipChecksArgument = ArgumentContainer(
+    names=["--skip-checks"],
+    kwargs={"dest": "run_checks",
+            "default": True,
+            "action": "store_false",
+            "help": "Checks the solver's functionality by testing it on an instance "
+                    "and the pcs file, when applicable."})
+
 SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                      kwargs={"metavar": "snapshot-file-path",
                                              "type": str,
