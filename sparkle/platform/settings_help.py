@@ -526,6 +526,26 @@ class Settings:
             self.set_general_extractor_cutoff_time()
         return int(self.__settings["general"]["extractor_cutoff_time"])
 
+    def set_number_of_jobs_in_parallel(
+            self: Settings, value: int = DEFAULT_number_of_jobs_in_parallel,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of runs Slurm can do in parallel."""
+        section = "general"
+        name = "number_of_jobs_in_parallel"
+
+        if value is not None and self.__check_setting_state(
+                self.__number_of_jobs_in_parallel_set, origin, name):
+            self.__init_section(section)
+            self.__number_of_jobs_in_parallel_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_number_of_jobs_in_parallel(self: Settings) -> int:
+        """Return the number of runs Slurm can do in parallel."""
+        if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
+            self.set_number_of_jobs_in_parallel()
+
+        return int(self.__settings["general"]["number_of_jobs_in_parallel"])
+
     # Configuration settings ###
 
     def set_config_wallclock_time(
@@ -632,26 +652,6 @@ class Settings:
         return self.__settings["smac"]["target_cutoff_length"]
 
     # Slurm settings ###
-
-    def set_number_of_jobs_in_parallel(
-            self: Settings, value: int = DEFAULT_number_of_jobs_in_parallel,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the number of runs Slurm can do in parallel."""
-        section = "general"
-        name = "number_of_jobs_in_parallel"
-
-        if value is not None and self.__check_setting_state(
-                self.__number_of_jobs_in_parallel_set, origin, name):
-            self.__init_section(section)
-            self.__number_of_jobs_in_parallel_set = origin
-            self.__settings[section][name] = str(value)
-
-    def get_number_of_jobs_in_parallel(self: Settings) -> int:
-        """Return the number of runs Slurm can do in parallel."""
-        if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
-            self.set_number_of_jobs_in_parallel()
-
-        return int(self.__settings["slurm"]["number_of_jobs_in_parallel"])
 
     def set_slurm_max_parallel_runs_per_node(
             self: Settings,

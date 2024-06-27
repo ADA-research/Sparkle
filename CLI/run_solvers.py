@@ -137,7 +137,7 @@ def run_solvers_on_instances(
     """
     if recompute:
         PerformanceDataFrame(gv.performance_data_csv_path).clean_csv()
-    num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
+    num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
 
     runs = [running_solvers_performance_data(
         performance_data_csv_path=gv.performance_data_csv_path,

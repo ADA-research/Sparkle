@@ -46,7 +46,7 @@ def run_parallel_portfolio(instances: list[Path],
     num_solvers, num_instances = len(solvers), len(instances)
     seeds_per_solver = gv.settings.get_parallel_portfolio_number_of_seeds_per_solver()
     num_jobs = num_solvers * num_instances * seeds_per_solver
-    parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
+    parallel_jobs = min(gv.settings.get_number_of_jobs_in_parallel(), num_jobs)
     if parallel_jobs > num_jobs:
         print("WARNING: Not all jobs will be started at the same time due to the "
               "limitation of number of Slurm jobs that can be run in parallel. Check"

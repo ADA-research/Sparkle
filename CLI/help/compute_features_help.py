@@ -38,8 +38,9 @@ def compute_features(
     """
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
                                                     gv.extractor_list)
-    list_feature_computation_job = get_feature_computation_job_list(
-        feature_data_csv, recompute)
+    if recompute:
+        feature_data_csv.clean_csv()
+    list_feature_computation_job = feature_data_csv.get_list_remaining_feature_computation_job()
     n_jobs = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
 
@@ -58,7 +59,7 @@ def compute_features(
         print("Running the solvers through Slurm")
 
     # Generate the sbatch script
-    parallel_jobs = min(n_jobs, gv.settings.get_slurm_number_of_runs_in_parallel())
+    parallel_jobs = min(n_jobs, gv.settings.get_number_of_jobs_in_parallel())
     cmd_list = [f"CLI/core/compute_features.py --instance {inst_path} "
                 f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
                 for inst_path, ex_path in total_job_list]
