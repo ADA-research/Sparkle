@@ -16,17 +16,17 @@ from CLI.support import sparkle_job_help
 from CLI.help.command_help import CommandName
 
 
-def computing_features_parallel(
+def compute_features(
         feature_data_csv_path: Path,
         recompute: bool,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
-    """Compute features for all instance and feature extractor combinations in parallel.
+    """Compute features for all instance and feature extractor combinations.
 
-    A sbatch job is submitted for the computation of the features. The results are then
-    stored in the csv file specified by feature_data_csv_path.
+    A RunRunner run is submitted for the computation of the features.
+    The results are then stored in the csv file specified by feature_data_csv_path.
 
     Args:
-        feature_data_csv_path: Create a new feature data CSV file in the path
+        feature_data_csv_path: Create or load feature data CSV file in the path
             specified by this parameter.
         recompute: Specifies if features should be recomputed.
         run_on: Runner
@@ -34,9 +34,7 @@ def computing_features_parallel(
             Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
 
     Returns:
-        The Slurm job ID of the sbatch job will be returned as a str
-        jobid: The jobid of the created slurm job
-
+        The Slurm job or Local job
     """
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
                                                     gv.extractor_list)

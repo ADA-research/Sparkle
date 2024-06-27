@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        scf.computing_features_parallel(Path(gv.feature_data_csv_path), False)
+        scf.compute_features(Path(gv.feature_data_csv_path), False)
 
     # Write used settings to file
     gv.settings.write_used_settings()

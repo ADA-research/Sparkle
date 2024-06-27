@@ -167,7 +167,7 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        scf.computing_features_parallel(
+        scf.compute_features(
             Path(gv.feature_data_csv_path), False)
 
     if args.run_solver_now:
