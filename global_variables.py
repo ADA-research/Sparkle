@@ -112,14 +112,12 @@ extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_
 extractor_list_path = reference_list_dir / "sparkle_extractor_list.txt"
 extractor_feature_dim_list_path = reference_list_dir / "extractor_feature_dim_list.txt"
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
-solver_list_path = reference_list_dir / "sparkle_solver_list.txt"
 
 working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir,
                 sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir]
 
-file_storage_data_mapping = {solver_list_path: [],
-                             solver_nickname_list_path: {},
+file_storage_data_mapping = {solver_nickname_list_path: {},
                              extractor_list_path: [],
                              extractor_nickname_list_path: {},
                              extractor_feature_dim_list_path: {}

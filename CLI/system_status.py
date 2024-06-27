@@ -4,6 +4,7 @@
 import sys
 import argparse
 
+from CLI.initialise import check_for_initialise
 import global_variables as gv
 from CLI.help import system_status as sssh
 import sparkle_logging as sl
@@ -31,10 +32,12 @@ if __name__ == "__main__":
 
     global settings
     gv.settings = settings_help.Settings()
+    check_for_initialise(sys.argv, [])
 
     print("Reporting current system status of Sparkle ...")
     sssh.print_sparkle_list([s for s in gv.solver_dir.iterdir()], "Solver", args.verbose)
-    sssh.print_sparkle_list([e for e in gv.extractor_dir.iterdir()], "Extractor", args.verbose)
+    sssh.print_sparkle_list([e for e in gv.extractor_dir.iterdir()],
+                            "Extractor", args.verbose)
     sssh.print_sparkle_list(file_help.get_file_paths_recursive(gv.instance_dir),
                             "Instance", args.verbose)
     sssh.print_list_remaining_feature_computation_job(
