@@ -296,13 +296,13 @@ class Settings:
         # Create needed directories if they don't exist
         file_dir = file_path.parents[0]
         file_dir.mkdir(parents=True, exist_ok=True)
-
-        slurm_extra_options = None
+        slurm_extra_section_options = None
         if self.__settings.has_section("slurm_extra"):
             # Slurm extra options are not written as a seperate section
-            slurm_extra_options = self.__settings["slurm_extra"]
-            for key in slurm_extra_options:
-                self.__settings["slurm"][key] = slurm_extra_options[key]
+            slurm_extra_section_options = {}
+            for key in self.__settings["slurm_extra"]:
+                self.__settings["slurm"][key] = self.__settings["slurm_extra"][key]
+                slurm_extra_section_options[key] = self.__settings["slurm_extra"][key]
             self.__settings.remove_section("slurm_extra")
         # Write the settings to file
         with file_path.open("w") as settings_file:
@@ -310,10 +310,10 @@ class Settings:
             # Log the settings file location
             slog.add_output(str(file_path), "Settings used by Sparkle for this command")
         # Rebuild slurm extra if needed
-        if slurm_extra_options is not None:
+        if slurm_extra_section_options is not None:
             self.__settings.add_section("slurm_extra")
-            for key in slurm_extra_options:
-                self.__settings["slurm_extra"][key] = slurm_extra_options[key]
+            for key in slurm_extra_section_options:
+                self.__settings["slurm_extra"][key] = slurm_extra_section_options[key]
 
     def __init_section(self: Settings, section: str) -> None:
         if section not in self.__settings:
