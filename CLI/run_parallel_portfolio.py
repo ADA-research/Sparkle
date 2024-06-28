@@ -292,8 +292,6 @@ if __name__ == "__main__":
               f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
               "use validation")
         sys.exit(-1)
-    # Write settings to file before starting, since they are used in callback scripts
-    gv.settings.write_used_settings()
 
     if args.portfolio_name is not None:  # Use a nickname
         portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
