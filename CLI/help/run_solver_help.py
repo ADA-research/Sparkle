@@ -120,8 +120,8 @@ def call_solver(
                                               solver.raw_output_directory)
             # Output results to user, including path to rawres_solver
             print(f"Execution of {solver.name} on instance {Path(instance_path).name} "
-                  f"completed with  status {solver_output['status']} in "
-                  f"{solver_output['runtime']}  seconds.")
+                  f"completed with status {solver_output['status']} in "
+                  f"{solver_output['runtime']} seconds.")
             print("Raw output can be found at: "
                   f"{solver.raw_output_directory / raw_result_path}.\n")
 
