@@ -50,8 +50,8 @@ def run_parallel_portfolio(instances: list[Path],
         print("WARNING: Not all jobs will be started at the same time due to the "
               "limitation of number of Slurm jobs that can be run in parallel. Check"
               " your Sparkle Slurm Settings.")
-    print(f"Sparkle parallel portfolio is running {seeds_per_solver} of "
-          f"{num_solvers} on {num_instances} ...")
+    print(f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) of "
+          f"{num_solvers} solvers on {num_instances} instances ...")
     cmd_list, runsolver_logs = [], []
     cutoff = gv.settings.get_general_target_cutoff_time()
     log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))

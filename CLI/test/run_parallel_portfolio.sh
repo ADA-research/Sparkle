@@ -8,7 +8,7 @@
 #SBATCH --job-name=test/run_parallel_portfolio.sh
 #SBATCH --output=Tmp/run_parallel_portfolio.sh.txt
 #SBATCH --error=Tmp/run_parallel_portfolio.sh.err
-#SBATCH --partition=graceADA
+#SBATCH --partition=Test
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
 #SBATCH --ntasks=1
