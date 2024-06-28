@@ -138,8 +138,7 @@ CutOffTimeArgument = \
 
 DeterministicArgument = ArgumentContainer(names=["--deterministic"],
                                           kwargs={"required": True,
-                                                  "type": int,
-                                                  "choices": [0, 1],
+                                                  "type": bool,
                                                   "help": "indicate whether the solver "
                                                           "is deterministic or not"})
 
@@ -281,10 +280,6 @@ NumberOfRunsAblationArgument = \
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
-ParallelArgument = ArgumentContainer(names=["--parallel"],
-                                     kwargs={"action": "store_true",
-                                             "help": "Run the command in parallel"})
-
 PerfectArgument = ArgumentContainer(names=["--perfect"],
                                     kwargs={"action": "store_true",
                                             "help": "compute the marginal contribution "
@@ -395,6 +390,14 @@ SettingsFileArgument = \
                               "action": SetByUser,
                               "help": "Specify the settings file to use in case you want"
                                       " to use one other than the default"})
+
+SkipChecksArgument = ArgumentContainer(
+    names=["--skip-checks"],
+    kwargs={"dest": "run_checks",
+            "default": True,
+            "action": "store_false",
+            "help": "Checks the solver's functionality by testing it on an instance "
+                    "and the pcs file, when applicable."})
 
 SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                      kwargs={"metavar": "snapshot-file-path",

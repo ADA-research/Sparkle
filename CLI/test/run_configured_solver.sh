@@ -35,13 +35,7 @@ scenario_test="CLI/test/test_files/Output/latest_scenario.ini"
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
 cp $scenario_test $scenario_path # Activate test scenario
 
-# Slurm settings
-slurm_settings_path="Settings/sparkle_slurm_settings.txt"
-slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
-mv $slurm_settings_path $slurm_settings_tmp # Save user settings
-cp $slurm_settings_test $slurm_settings_path # Activate test settings
-
+# Settings
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Instance and solver paths
@@ -51,32 +45,32 @@ solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 # Run commands to prepare Sparkle for the test
 
-CLI/add_solver.py --deterministic 0 $solver_path > /dev/null
+CLI/add_solver.py --deterministic False $solver_path > /dev/null
 
 # Run configured solver on a single instance
 output_true="Running configured solver done!"
-output=$(CLI/run_configured_solver.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
+output=$(CLI/run_configured_solver.py $instance_path_test --settings-file $sparkle_test_settings_path --run-on local | tail -1)
 
 if [[ $output == $output_true ]];
 then
-	echo "[success] ($slurm_available) run_configured_solver on single instance test succeeded"
+	echo "[success] (local) run_configured_solver on single instance test succeeded"
 else
-	echo "[failure] ($slurm_available) run_configured_solver on single instance test failed with output:"
+	echo "[failure] (local) run_configured_solver on single instance test failed with output:"
 	echo $output
 fi
 
 # Run configured solver on an instance directory
 if [[ $slurm_available == $slurm_true ]];
 then
-	output_true="Running configured solver in parallel. Waiting for Slurm job(s) with id(s):"
+	output_true="Running configured solver. Waiting for Slurm job(s) with id(s):"
 fi
-output=$(CLI/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --parallel --run-on $slurm_available | tail -1)
+output=$(CLI/run_configured_solver.py $instances_path_test --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] ($slurm_available) run_configured_solver in parallel on instance directory test succeeded"
+	echo "[success] (slurm) run_configured_solver on instance directory test succeeded"
 else
-	echo "[failure] ($slurm_available) run_configured_solver in parallel on instance directory test failed with output:"
+	echo "[failure] (slurm) run_configured_solver on instance directory test failed with output:"
 	echo $output
 fi
 
@@ -84,5 +78,3 @@ fi
 # OR true to get success exit code even when no user data was stored in the tmp file
 mv $scenario_tmp $scenario_path 2> /dev/null || true
 
-# Restore original settings
-mv $slurm_settings_tmp $slurm_settings_path

@@ -57,7 +57,7 @@ CLI/test/construct_sparkle_portfolio_selector.sh
 CLI/test/run_sparkle_portfolio_selector.sh
 
 # Test generate report (selection)
-CLI/test/generate_report.sh
+CLI/test/generate_report_selection.sh
 
 # Test generate report (selection) for test set
 CLI/test/generate_report_for_test.sh

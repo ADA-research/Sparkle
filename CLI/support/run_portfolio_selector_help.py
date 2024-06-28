@@ -15,13 +15,13 @@ from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
 import global_variables as gv
+import tools.general as tg
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 from CLI.help.reporting_scenario import Scenario
 from sparkle.instance import instances_help as sih
 from CLI.help.command_help import CommandName
-from sparkle.platform import slurm_help as ssh
 
 
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
@@ -57,13 +57,15 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
         sfh.create_new_empty_file(result_path)
 
     try:
-        sfdcsv.SparkleFeatureDataCSV(result_path)
+        sfdcsv.SparkleFeatureDataCSV(result_path,
+                                     gv.extractor_list)
     except Exception:
         print(f"****** WARNING: Feature vector computing on instance {instance_path}"
               " failed! ******")
         print("****** WARNING: The feature vector of this instance will be imputed as "
               "the mean value of all other non-missing values! ******")
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                                        gv.extractor_list)
         list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
     else:
         fin = Path(result_path).open("r+")
@@ -136,6 +138,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
                 performance_dataframe.set_value(cpu_time_penalised, solver_name,
                                                 Path(instance_path).name)
                 performance_dataframe.save_csv()
+            lock.release()
         except Timeout:
             print(f"ERROR: Cannot acquire File Lock on {performance_data_csv}.")
     else:
@@ -190,7 +193,7 @@ def call_sparkle_portfolio_selector_solve_instance(
         print(f"Extractor {extractor_name} computing "
               f"features of instance {instance_files_str} ...")
         result_path = (f"Tmp/{extractor_name}_{instance_files_str_}_"
-                       f"{gv.get_time_pid_random_string()}.rawres")
+                       f"{tg.get_time_pid_random_string()}.rawres")
 
         list_feature_vector = list_feature_vector + get_list_feature_vector(
             extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
@@ -200,16 +203,16 @@ def call_sparkle_portfolio_selector_solve_instance(
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = ("Tmp/predict_schedule_"
-                                    f"{gv.get_time_pid_random_string()}"
+                                    f"{tg.get_time_pid_random_string()}"
                                     ".predres")
     print("Sparkle portfolio selector predicting ...")
-    cmd_list = [gv.python_executable, gv.autofolio_path, "--load",
+    cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
                 gv.sparkle_algorithm_selector_path, "--feature_vec",
                 " ".join(map(str, list_feature_vector))]
 
     process = subprocess.run(cmd_list,
                              stdout=Path(predict_schedule_result_path).open("w+"),
-                             stderr=Path(gv.sparkle_err_path).open("w+"))
+                             stderr=gv.sparkle_err_path.open("w+"))
 
     if process.returncode != 0:
         # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"
@@ -288,7 +291,7 @@ def call_sparkle_portfolio_selector_solve_directory(
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
         base_dir=gv.sparkle_tmp_path,
         parallel_jobs=n_jobs,
-        sbatch_options=ssh.get_slurm_options_list(),
+        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1", "--exclusive"])
 
     if run_on == Runner.LOCAL:

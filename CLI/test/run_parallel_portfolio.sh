@@ -8,7 +8,7 @@
 #SBATCH --job-name=test/run_parallel_portfolio.sh
 #SBATCH --output=Tmp/run_parallel_portfolio.sh.txt
 #SBATCH --error=Tmp/run_parallel_portfolio.sh.err
-#SBATCH --partition=graceADA
+#SBATCH --partition=Test
 #SBATCH --mem-per-cpu=3gb
 #SBATCH --exclude=
 #SBATCH --ntasks=1
@@ -28,9 +28,9 @@ slurm_available=$(detect_slurm)
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverC_path > /dev/null
+CLI/add_solver.py --deterministic False $solverA_path > /dev/null
+CLI/add_solver.py --deterministic False $solverB_path > /dev/null
+CLI/add_solver.py --deterministic False $solverC_path > /dev/null
 
 # Run sparkle parallel portfolio on a single instance
 output_true="Running Sparkle parallel portfolio is done!"

@@ -4,31 +4,26 @@
 from __future__ import annotations
 import sys
 import numpy as np
+import math
+from pathlib import Path
 
-import global_variables as gv
 from sparkle.structures import csv_help as scsv
 
 
 class SparkleFeatureDataCSV(scsv.SparkleCSV):
     """Class to manage feature data CSV files and common operations on them."""
+    sparkle_special_string = "__@@SPARKLE@@__"  # No idea who came up with this baloney
+    missing_value = math.nan
 
-    def __init__(self: SparkleFeatureDataCSV, csv_filepath: str) -> None:
+    def __init__(self: SparkleFeatureDataCSV, csv_filepath: Path,
+                 extractor_list: list[str] = None) -> None:
         """Initialise a SparkleFeatureDataCSV object."""
         scsv.SparkleCSV.__init__(self, csv_filepath)
-        self.extractor_list = gv.extractor_list
+        if extractor_list is None:
+            extractor_list = []
+        self.extractor_list = extractor_list
 
-    def get_list_recompute_feature_computation_job(self: SparkleFeatureDataCSV)  \
-            -> list[list[str | list[str]]]:
-        """Return a list of feature computations to re-do per instance and solver."""
-        list_recompute_feature_computation_job = []
-        list_row_name = self.list_rows()
-        for row_name in list_row_name:
-            list_item = [row_name, self.extractor_list]
-            list_recompute_feature_computation_job.append(list_item)
-
-        return list_recompute_feature_computation_job
-
-    def get_list_remaining_feature_computation_job(self: SparkleFeatureDataCSV)\
+    def remaining_feature_computation_job(self: SparkleFeatureDataCSV)\
             -> list[list[str, str]]:
         """Return a list of needed feature computations per instance and solver.
 
@@ -63,7 +58,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
     def get_extractor_path_from_feature(self: SparkleFeatureDataCSV,
                                         given_column_name: str) -> str:
         """Return the path to the feature extractor for a given feature."""
-        sparkle_special_string = gv.sparkle_special_string
+        sparkle_special_string = SparkleFeatureDataCSV.sparkle_special_string
         index = given_column_name.find(sparkle_special_string)
         length = len(sparkle_special_string)
         extractor_name = given_column_name[index + length:]
@@ -141,13 +136,13 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
 
         for row_name in self.list_rows():
             tmp_value = self.get_value(row_name, column_name)
-            if tmp_value != gv.sparkle_missing_value:
+            if tmp_value != SparkleFeatureDataCSV.missing_value:
                 num += 1
                 sum_value += tmp_value
 
         if num == 0:
             # all values are missing value
-            return gv.sparkle_missing_value
+            return SparkleFeatureDataCSV.missing_value
 
         return sum_value / num
 

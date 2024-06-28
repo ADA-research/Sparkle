@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Class to handle all activities around configuration scenarios."""
-
-
 from __future__ import annotations
 import shutil
 from pathlib import Path
@@ -10,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 
 
 class ConfigurationScenario:
@@ -118,7 +116,7 @@ class ConfigurationScenario:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"
                        f"execdir = {self.tmp.absolute()}/\n"
-                       f"deterministic = {self.solver.is_deterministic()}\n"
+                       f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {self._get_performance_measure()}\n"
                        f"cutoffTime = {self.cutoff_time}\n"
                        f"cutoff_length = {self.cutoff_length}\n"

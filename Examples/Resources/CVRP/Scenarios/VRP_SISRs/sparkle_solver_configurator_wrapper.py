@@ -2,22 +2,12 @@
 # -*- coding: UTF-8 -*-
 #Sparkle SMAC wrapper VRP_heuristic_Jan_MkII_Sparkle
 
-import os
-import time
-import random
 import sys
 import ast
 import subprocess
 from pathlib import Path
+from tools.general import get_time_pid_random_string
 
-def get_time_pid_random_string():
-	my_time_str = time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(time.time()))
-	my_pid = os.getpid()
-	my_pid_str = str(my_pid)
-	my_random = random.randint(1, sys.maxsize)
-	my_random_str = str(my_random)
-	my_time_pid_random_str = my_time_str + '_' + my_pid_str + '_' + my_random_str
-	return my_time_pid_random_str
 
 # Convert the argument of the target_algorithm script to dictionary
 args = ast.literal_eval(sys.argv[1])

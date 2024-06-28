@@ -15,12 +15,6 @@
 #SBATCH --nodes=1
 
 # Settings
-slurm_settings_path="Settings/sparkle_slurm_settings.txt"
-slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
-mv $slurm_settings_path $slurm_settings_tmp # Save user settings
-cp $slurm_settings_test $slurm_settings_path # Activate test settings
-
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
@@ -40,7 +34,7 @@ config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenar
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
 CLI/add_instances.py $instances_src_path_test > /dev/null
-CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/add_solver.py --deterministic False $solver_src_path > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
 mkdir -p $config_scenario_path
@@ -91,7 +85,4 @@ else
 		kill_started_jobs_slurm
 	fi
 fi
-
-# Restore original settings
-mv $slurm_settings_tmp $slurm_settings_path
 

@@ -18,9 +18,9 @@ sparkle add_instances Examples/Resources/CCAG/Instances/CCAG/
 
 # Each solver directory should contain the solver executable and a wrapper
 
-sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/TCA/
+sparkle add_solver --deterministic False Examples/Resources/CCAG/Solvers/TCA/
 
-sparkle add_solver --deterministic 0 Examples/Resources/CCAG/Solvers/FastCA/
+sparkle add_solver --deterministic False Examples/Resources/CCAG/Solvers/FastCA/
 
 #### Add feature extractor
 
@@ -30,13 +30,13 @@ sparkle add_feature_extractor Examples/Resources/CCAG/Extractors/CCAG-features_s
 
 #### Compute features
 
-# Compute features for all the instances; add the `--parallel` option to run in parallel
+# Compute features for all the instances
 
 sparkle compute_features
 
 #### Run the solvers
 
-# Run the solvers on all instances; add the `--parallel` option to run in parallel. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
+# Run the solvers on all instances. For the CCAG (Constrained Covering Array Generation) problem we measure the absolute quality performance by setting the `--performance-measure` option, to avoid needing this for every command it can also be set in `Settings/sparkle_settings.ini`.
 
 sparkle run_solvers --performance-measure QUALITY_ABSOLUTE
 

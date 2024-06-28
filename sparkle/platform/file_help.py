@@ -12,7 +12,6 @@ import fcntl
 from pathlib import Path
 
 import sparkle_logging as sl
-import global_variables as gv
 
 
 def create_new_empty_file(filepath: str) -> None:
@@ -24,46 +23,7 @@ def create_new_empty_file(filepath: str) -> None:
     Path(filepath).write_text("")
 
 
-def get_instance_list_from_reference(instances_path: Path) -> list[str]:
-    """Return a list of instances read from a file.
-
-    Args:
-      instances_path: Path object pointing to the directory where the instances
-        are stored.
-
-    Returns:
-      List of instances file paths.
-    """
-    # Read instances from reference file
-    with gv.instance_list_path.open("r") as infile:
-        instance_list = [x.strip() for x in infile.readlines()
-                         if x.startswith(str(instances_path))]
-
-    return instance_list
-
-
-def get_solver_list_from_parallel_portfolio(portfolio_path: Path) -> list[str]:
-    """Return a list of solvers for a parallel portfolio specified by its path.
-
-    Args:
-      portfolio_path: Path object pointing to the directory where solvers
-        are stored.
-
-    Returns:
-      List of solvers.
-    """
-    portfolio_solver_list = []
-    solvers_path_str = str(gv.solver_dir)
-
-    # Read the included solvers (or solver instances) from file
-    with (portfolio_path / "solvers.txt").open("r") as infile:
-        portfolio_solver_list = [line.strip() for line in infile.readlines()
-                                 if line.strip().startswith(solvers_path_str)]
-
-    return portfolio_solver_list
-
-
-def get_list_all_filename_recursive(path: Path) -> list[Path]:
+def get_file_paths_recursive(path: Path) -> list[Path]:
     """Extend a given list of filenames with all files found under a path.
 
     This includes all files found in subdirectories of the given path.
@@ -72,8 +32,6 @@ def get_list_all_filename_recursive(path: Path) -> list[Path]:
       path: Target path.
       list_all_filename: List of filenames (may be empty).
     """
-    if isinstance(path, str):
-        path = Path(path)
     return [p for p in Path(path).rglob("*") if p.is_file()]
 
 
@@ -95,15 +53,15 @@ def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
 
 def add_remove_platform_item(item: any,
                              file_target: Path,
-                             target: list | dict = None,
+                             target: list | dict,
                              key: str = None,
                              remove: bool = False) -> None:
     """Add/remove item from a list or dictionary of the platform that must saved to disk.
 
     Args:
         item: The item to be added to the data structure.
-        target: Either a list or dictionary to add the item to.
         file_target: Path to the file where we want to keep the disk storage.
+        target: Either a list or dictionary to add the item to.
         key: Optional string, in case we use a dictionary.
         remove: If true, remove the item from platform.
                 If the target is a dict, the key is used to remove the entry.
@@ -113,9 +71,6 @@ def add_remove_platform_item(item: any,
         item = str(item)
     if isinstance(file_target, str):
         file_target = Path(file_target)
-    # Determine object if not present
-    if target is None:
-        target = gv.file_storage_data_mapping[file_target]
     # Add/Remove item to/from object
     if isinstance(target, dict):
         if remove:
@@ -205,9 +160,6 @@ def create_temporary_directories() -> None:
     if not tmp_path.exists():
         tmp_path.mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
-    Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
-    Path("Performance_Data/Tmp/").mkdir(parents=True, exist_ok=True)
-    gv.pap_performance_data_tmp_path.mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
 
 
@@ -218,8 +170,6 @@ def remove_temporary_files() -> None:
         shutil.rmtree(sparkle_help_path.joinpath(filename))
     shutil.rmtree(Path("Tmp/"), ignore_errors=True)
     shutil.rmtree(Path("Feature_Data/Tmp/"), ignore_errors=True)
-    shutil.rmtree(Path("Performance_Data/Tmp/"), ignore_errors=True)
-    shutil.rmtree(gv.pap_performance_data_tmp_path, ignore_errors=True)
     shutil.rmtree(Path("Log/"), ignore_errors=True)
 
     for filename in Path("../../CLI/sparkle_help").glob("slurm-*"):

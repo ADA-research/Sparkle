@@ -18,11 +18,11 @@ sparkle add_instances Examples/Resources/Instances/PTN/
 
 # Each solver directory should contain the solver executable and a wrapper
 
-sparkle add_solver --deterministic 0 Examples/Resources/Solvers/CSCCSat/
+sparkle add_solver --deterministic False Examples/Resources/Solvers/CSCCSat/
 
-sparkle add_solver --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add_solver --deterministic False Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
-sparkle add_solver --deterministic 0 Examples/Resources/Solvers/MiniSAT/
+sparkle add_solver --deterministic False Examples/Resources/Solvers/MiniSAT/
 
 #### Add feature extractor
 
@@ -32,13 +32,13 @@ sparkle add_feature_extractor Examples/Resources/Extractors/SAT-features-competi
 
 #### Compute features
 
-# Compute features for all the instances; add the `--parallel` option to run in parallel
+# Compute features for all the instances;
 
 sparkle compute_features
 
 #### Run the solvers
 
-# Run the solvers on all instances; add the `--parallel` option to run in parallel
+# Run the solvers on all instances;
 
 sparkle run_solvers
 

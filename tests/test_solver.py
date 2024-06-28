@@ -6,9 +6,7 @@ import shutil
 
 from unittest import TestCase
 from pathlib import Path
-from sparkle.solver.solver import Solver
-from unittest.mock import patch
-from unittest.mock import Mock
+from sparkle.solver import Solver
 
 
 class TestSolver(TestCase):
@@ -41,9 +39,7 @@ class TestSolver(TestCase):
     def test_pcs_file_none(self: TestSolver) -> None:
         """Test for SystemExit if get_pcs_file() is called, but file doesn't exist."""
         solver = Solver(self.solver_path)
-
-        with self.assertRaises(SystemExit):
-            solver.get_pcs_file()
+        assert solver.get_pcs_file() is None
 
     def test_pcs_file_multiple(self: TestSolver) -> None:
         """Test for SystemExit if get_pcs_file() is called, but multiple files exist."""
@@ -51,22 +47,14 @@ class TestSolver(TestCase):
         (self.solver_path / "paramfile2.pcs").open("a").close()
 
         solver = Solver(self.solver_path)
+        assert solver.get_pcs_file() is None
 
-        with self.assertRaises(SystemExit):
-            solver.get_pcs_file()
-
-    @patch.object(Solver, "get_solver_list")
-    def test_is_deterministic_false(self: TestSolver,
-                                    solver_fixture: Mock) -> None:
+    def test_is_deterministic_false(self: TestSolver) -> None:
         """Test if is_deterministic() correctly returns False."""
-        solver_fixture.return_value = ["Solvers/test_solver 0 1"]
         solver = Solver(self.solver_path)
-        self.assertEqual(solver.is_deterministic(), "0")
+        self.assertEqual(solver.deterministic, False)
 
-    @patch.object(Solver, "get_solver_list")
-    def test_is_deterministic_true(self: TestSolver,
-                                   solver_fixture: Mock) -> None:
+    def test_is_deterministic_true(self: TestSolver) -> None:
         """Test if is_deterministic() correctly returns True."""
-        solver_fixture.return_value = ["Solvers/test_solver 1 1"]
-        solver = Solver(self.solver_path)
-        self.assertEqual(solver.is_deterministic(), "1")
+        solver = Solver(self.solver_path, deterministic=True)
+        self.assertEqual(solver.deterministic, True)

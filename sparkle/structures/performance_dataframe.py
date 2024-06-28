@@ -5,26 +5,24 @@
 
 from __future__ import annotations
 from typing import Callable
-import fcntl
+import operator
 from pathlib import Path
 import sys
-
+import math
 from statistics import mean
 import pandas as pd
-import global_variables as gv
-from sparkle.platform import settings_help
 
-global settings
-gv.settings = settings_help.Settings()
+from sparkle.types.objective import SparkleObjective
 
 
 class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
+    missing_value = math.nan
 
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
                  solvers: list[str] = [],
-                 objectives: list[str | settings_help.SparkleObjective] = None,
+                 objectives: list[str | SparkleObjective] = None,
                  instances: list[str] = [],
                  n_runs: int = 1,
                  init_df: bool = True) -> None:
@@ -33,9 +31,9 @@ class PerformanceDataFrame():
         Consists of:
             - Columns representing the Solvers
             - Rows representing the result by multi-index in order of:
-                * Objective (Static, from settings)
+                * Objective (Static, given in constructor or read from file)
                 * Instance
-                * Runs (Static, given in constructor)
+                * Runs (Static, given in constructor or read from file)
 
         Args:
             csv_filepath: If path exists, load from Path.
@@ -55,41 +53,48 @@ class PerformanceDataFrame():
         self.multi_dim_names = ["Objective", "Instance", "Run"]
         # Objectives is a ``static'' dimension
         if objectives is None:
-            objectives = gv.settings.get_general_sparkle_objectives()
-        self.objective_names =\
-            [o.name if isinstance(o, settings_help.SparkleObjective) else o
-             for o in objectives]
+            # Set default objective names if the user does not specify any
+            self.objective_names = ["DEFAULT:UNKNOWN"]
+        else:
+            self.objective_names =\
+                [o.name if isinstance(o, SparkleObjective) else o
+                 for o in objectives]
         self.multi_objective = len(self.objective_names) > 1
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
-        self.run_ids = list(range(1, self.n_runs + 1))
+        self.run_ids = list(range(1, self.n_runs + 1))  # We count runs from 1
         if init_df:
             if self.csv_filepath.exists():
-                self.dataframe = pd.read_csv(csv_filepath, index_col=0)
-                # Enforce dimensions
-                if self.multi_dim_names[0] not in self.dataframe.columns:
-                    # No Objective, cast column
-                    self.objective_names = [self.multi_dim_names[0]]
+                self.dataframe = pd.read_csv(csv_filepath)
+                has_rows = len(self.dataframe.index) > 0
+                if self.multi_dim_names[0] not in self.dataframe.columns or not has_rows:
+                    # No objective present, force into column
                     self.dataframe[self.multi_dim_names[0]] = self.objective_names[0]
-                    self.multi_objective = False
-                if self.multi_dim_names[2] not in self.dataframe.columns:
-                    # No runs column
+                else:
+                    # Objectives are present, extract names
+                    self.objective_names =\
+                        self.dataframe[self.multi_dim_names[0]].unique().tolist()
+                if self.multi_dim_names[2] not in self.dataframe.columns or not has_rows:
+                    # No runs column present, force into column
                     self.n_runs = 1
                     self.dataframe[self.multi_dim_names[2]] = self.n_runs
                     self.run_ids = [self.n_runs]
+                else:
+                    # Runs are present, determine run ids
+                    self.run_ids =\
+                        self.dataframe[self.multi_dim_names[2]].unique().tolist()
                 if self.multi_dim_names[1] not in self.dataframe.columns:
                     # Instances are listed as rows, force into column
                     self.dataframe = self.dataframe.reset_index().rename(
                         columns={"index": self.multi_dim_names[1]})
-
-                # Cast Columns to multi dim
+                # Now we can cast the columns into multi dim
                 self.dataframe = self.dataframe.set_index(self.multi_dim_names)
             else:
                 # Initialize empty DataFrame
                 midx = pd.MultiIndex.from_product(
                     [self.objective_names, instances, self.run_ids],
                     names=self.multi_dim_names)
-                self.dataframe = pd.DataFrame(gv.sparkle_missing_value,
+                self.dataframe = pd.DataFrame(PerformanceDataFrame.missing_value,
                                               index=midx,
                                               columns=solvers)
                 self.save_csv()
@@ -181,7 +186,7 @@ class PerformanceDataFrame():
             self.dataframe = pd.DataFrame(initial_value, index=midx, columns=solvers)
         else:
             if instance_name in self.dataframe.index.levels[1]:
-                print(f"WARNING: Tried adding already existing solver {instance_name} "
+                print(f"WARNING: Tried adding already existing instance {instance_name} "
                       f"to Performance DataFrame: {self.csv_filepath}")
                 return
             # Create the missing indices
@@ -190,12 +195,11 @@ class PerformanceDataFrame():
                       self.dataframe.index.levels[2].tolist()]
             emidx = pd.MultiIndex(levels, names=self.multi_dim_names)
             # Create the missing column values
-            edf = pd.DataFrame(gv.sparkle_missing_value,
+            edf = pd.DataFrame(PerformanceDataFrame.missing_value,
                                index=emidx,
                                columns=self.dataframe.columns)
             # Concatenate the original and new dataframe together
             self.dataframe = pd.concat([self.dataframe, edf])
-        return
 
     # Can we make this handle a sequence of inputs instead of just 1?
     def set_value(self: PerformanceDataFrame,
@@ -232,47 +236,68 @@ class PerformanceDataFrame():
                     objective: str = None,
                     run: int = None) -> None:
         """Reset a value in the dataframe."""
-        self.set_value(gv.sparkle_missing_value, solver, instance, objective, run)
+        self.set_value(PerformanceDataFrame.missing_value,
+                       solver, instance, objective, run)
 
     def get_value(self: PerformanceDataFrame,
                   solver: str,
                   instance: str,
                   objective: str = None,
-                  run: int = None) -> None:
+                  run: int = None) -> float:
         """Index a value of the DataFrame and return it."""
         objective, run = self.verify_indexing(objective, run)
         return self.dataframe.loc[(objective, instance, run), solver]
 
-    def get_num_objectives(self: PerformanceDataFrame) -> int:
+    @property
+    def num_objectives(self: PerformanceDataFrame) -> int:
         """Retrieve the number of objectives in the DataFrame."""
         return self.dataframe.index.levels[0].size
 
-    def get_num_instances(self: PerformanceDataFrame) -> int:
+    @property
+    def num_instances(self: PerformanceDataFrame) -> int:
         """Return the number of instances."""
         return self.dataframe.index.levels[1].size
 
-    def get_num_runs(self: PerformanceDataFrame) -> int:
+    @property
+    def num_runs(self: PerformanceDataFrame) -> int:
         """Return the number of runs."""
         return self.dataframe.index.levels[2].size
 
-    def get_num_solvers(self: PerformanceDataFrame) -> int:
+    @property
+    def num_solvers(self: PerformanceDataFrame) -> int:
         """Return the number of solvers."""
         return self.dataframe.columns.size
 
-    def get_instances(self: PerformanceDataFrame) -> list[str]:
+    @property
+    def instances(self: PerformanceDataFrame) -> list[str]:
         """Return the instances as a Pandas Index object."""
         return self.dataframe.index.levels[1].tolist()
 
-    def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
-        """Write a CSV to the given path.
+    @property
+    def solvers(self: PerformanceDataFrame) -> list[str]:
+        """Return the solver present as a list of strings."""
+        return self.dataframe.columns.tolist()
+
+    def penalise(self: PerformanceDataFrame,
+                 threshold: float,
+                 penalty: float,
+                 objective: str = None,
+                 lower_bound: bool = False) -> None:
+        """Penalises the DataFrame values if crossing threshold by specified penalty.
+
+        Directly updates the DataFrame object held by this class.
 
         Args:
-            csv_filepath: String path to the csv file. Defaults to self.csv_filepath.
+            threshold: The threshold of performances to be met
+            penalty: The values assigned for out of bounds performances
+            objective: The objective that should be penalised.
+            lower_bound: Whether the threshold is a lower_bound. By default,
+                the threshold is treated as an upperbound for performance values.
         """
-        csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
-        with csv_filepath.open("w+") as fo:
-            fcntl.flock(fo.fileno(), fcntl.LOCK_EX)
-            self.dataframe.to_csv(csv_filepath)
+        objective = self.verify_objective(objective)
+        comparison_op = operator.lt if lower_bound else operator.gt
+        self.dataframe[comparison_op(self.dataframe.loc[(objective), :],
+                                     threshold)] = penalty
 
     def get_job_list(self: PerformanceDataFrame, rerun: bool = False) \
             -> list[tuple[str, str]]:
@@ -336,16 +361,19 @@ class PerformanceDataFrame():
             self: PerformanceDataFrame,
             objective: str = None,
             run_agg: Callable = None,
-            best: Callable = pd.DataFrame.max) -> list[float]:
+            best: Callable = pd.DataFrame.min) -> list[float]:
         """Return a list with the best performance per instance.
 
         Allows user to specify how to aggregate runs together.
         Must be pandas accepted callable.
 
         Args:
-            objective: The objective over which we want the maximum
+            objective: The objective over which we want the ``best''
             run_agg: The method defining how runs are combined per Instance/solver
-            best: Callable, replace with pd.DataFrame.min to minimise
+            best: Callable, replace with pd.DataFrame.max to maximise
+
+        Returns:
+            A list of floats representing the best performance per instance
         """
         objective = self.verify_objective(objective)
         if run_agg is None:
@@ -361,6 +389,7 @@ class PerformanceDataFrame():
             minimise: bool,
             objective: str = None,
             capvalue: float = None,
+            penalty: float = None,
             run_aggregator: Callable = mean) -> float:
         """Return the VBS performance for a specific instance.
 
@@ -376,12 +405,14 @@ class PerformanceDataFrame():
             The virtual best solver performance for this instance.
         """
         objective = self.verify_objective(objective)
-        penalty_factor = gv.settings.get_general_penalty_multiplier()
         if capvalue is None:
             capvalue = sys.float_info.max
             if not minimise:
                 capvalue = capvalue * -1
-        penalty = penalty_factor * capvalue
+        if penalty is None:
+            penalty = sys.float_info.max
+            if not minimise:
+                penalty = penalty * -1
         virtual_best_score = None
         for solver in self.dataframe.columns:
             if isinstance(instance, str):
@@ -411,6 +442,7 @@ class PerformanceDataFrame():
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
             capvalue_list: list[float],
+            penalty_list: list[float],
             objective: str = None) -> float:
         """Return the overall VBS performance of the portfolio.
 
@@ -425,82 +457,84 @@ class PerformanceDataFrame():
         objective = self.verify_objective(objective)
         virtual_best = []
         capvalue = None
+        penalty = None
         for idx, instance in enumerate(self.dataframe.index):
             if capvalue_list is not None:
                 capvalue = capvalue_list[idx]
-
+            if penalty_list is not None:
+                penalty = penalty_list[idx]
             virtual_best_score = (
                 self.calc_portfolio_vbs_instance(
-                    instance, minimise, objective, capvalue))
+                    instance, minimise, objective, capvalue, penalty))
             virtual_best.append(virtual_best_score)
 
         return aggregation_function(virtual_best)
 
     def get_dict_vbs_penalty_time_on_each_instance(
             self: PerformanceDataFrame,
+            penalised_time: int,
             objective: str = None,
             run_id: int = None) -> dict:
         """Return a dictionary of penalised runtimes and instances for the VBS."""
         objective = self.verify_objective(objective)
         instance_penalized_runtimes = {}
-        vbs_penalty_time = gv.settings.get_penalised_time()
         for instance in self.dataframe.index.levels[1]:
             if run_id is None:
                 runtime = self.dataframe.loc[(objective, instance), :].min(axis=None)
             else:
                 runtime =\
                     self.dataframe.loc[(objective, instance, run_id), :].min(axis=None)
-            instance_penalized_runtimes[instance] = min(vbs_penalty_time, runtime)
+            instance_penalized_runtimes[instance] = min(penalised_time, runtime)
 
         return instance_penalized_runtimes
 
     def calc_vbs_penalty_time(self: PerformanceDataFrame,
-                              objective: str = None,
-                              run_id: int = None) -> float:
+                              cutoff_time: int = None,
+                              penalty: int = None,
+                              objective: str = None) -> float:
         """Return the penalised performance of the VBS."""
         objective = self.verify_objective(objective)
-        cutoff_time = gv.settings.get_general_target_cutoff_time()
-        penalty_multiplier = gv.settings.get_general_penalty_multiplier()
-        penalty_time_each_run = cutoff_time * penalty_multiplier
-
+        if cutoff_time is not None and penalty is not None:
+            self.penalise(cutoff_time, penalty)
         # Calculate the minimum for the selected objective per instance
-        if run_id is not None:
-            min_instance_df =\
-                self.dataframe.loc(axis=0)[objective, :, run_id].min(axis=1)
-        else:
-            min_instance_df =\
-                self.dataframe.loc(axis=0)[objective, :, :].min(axis=1)
-        # Penalize those exceeding cutoff
-        min_instance_df[min_instance_df > cutoff_time] = penalty_time_each_run
+        min_instance_df = self.dataframe.loc(axis=0)[objective, :, :].min(axis=1)
         # Return average
         return min_instance_df.sum() / self.dataframe.index.size
 
-    def get_solver_penalty_time_ranking_list(self: PerformanceDataFrame,
-                                             objective: str = None) -> list[list[float]]:
+    def get_solver_penalty_time_ranking(self: PerformanceDataFrame,
+                                        cutoff_time: int = None,
+                                        penalty: int = None,
+                                        objective: str = None,
+                                        ) -> list[list[float]]:
         """Return a list with solvers ranked by penalised runtime."""
         objective = self.verify_objective(objective)
-        cutoff_time = gv.settings.get_general_target_cutoff_time()
-
-        solver_penalty_time_ranking_list = []
-        penalty_time_each_run =\
-            cutoff_time * gv.settings.get_general_penalty_multiplier()
+        if cutoff_time is not None and penalty is not None:
+            self.penalise(cutoff_time, penalty, objective)
+        solver_penalty_time_ranking = []
         num_instances = self.dataframe.index.size
         sub_df = self.dataframe.loc(axis=0)[objective, :, :]
         for solver in self.dataframe.columns:
-            masked_col = sub_df[solver]
-            masked_col[masked_col > cutoff_time] = penalty_time_each_run
-            this_penalty_time = masked_col.sum() / num_instances
-            solver_penalty_time_ranking_list.append([solver, this_penalty_time])
+            average_time = sub_df[solver].sum() / num_instances
+            solver_penalty_time_ranking.append([solver, average_time])
 
         # Sort the list by second value (the penalised run time)
-        solver_penalty_time_ranking_list.sort(
+        solver_penalty_time_ranking.sort(
             key=lambda this_penalty_time: this_penalty_time[1])
 
-        return solver_penalty_time_ranking_list
+        return solver_penalty_time_ranking
+
+    def save_csv(self: PerformanceDataFrame, csv_filepath: Path = None) -> None:
+        """Write a CSV to the given path.
+
+        Args:
+            csv_filepath: String path to the csv file. Defaults to self.csv_filepath.
+        """
+        csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
+        self.dataframe.to_csv(csv_filepath)
 
     def clean_csv(self: PerformanceDataFrame) -> None:
         """Set all values in Performance Data to None."""
-        self.dataframe[:] = gv.sparkle_missing_value
+        self.dataframe[:] = PerformanceDataFrame.missing_value
         self.save_csv()
 
     def copy(self: PerformanceDataFrame,

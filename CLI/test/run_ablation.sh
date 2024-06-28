@@ -20,12 +20,6 @@
 # - Added solver
 
 # Settings
-slurm_settings_path="Settings/sparkle_slurm_settings.txt"
-slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
-mv $slurm_settings_path $slurm_settings_tmp # Save user settings
-cp $slurm_settings_test $slurm_settings_path # Activate test settings
-
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
@@ -48,7 +42,7 @@ validation_test_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PT
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
 CLI/add_instances.py $instances_src_path_test > /dev/null
-CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/add_solver.py --deterministic False $solver_src_path > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
 # Prepare configuration scenario output files
@@ -60,7 +54,7 @@ cp -r $validation_test_data $validation_scenario_path
 
 # Configure solver
 output=$(CLI/configure_solver.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --ablation --run-on $slurm_available | tail -1)
-output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+output_true="Running configuration. Waiting for Slurm job(s) with id(s): "
 if ! [[ $slurm_available =~ "${slurm_true}" ]];
 then
 	output_true="Running configuration finished!"
@@ -137,4 +131,3 @@ fi
 #rm -rf $config_scenario_path # Remove test results
 #rm -rf $validation_scenario_path
 mv $smac_results_path_tmp $smac_results_path &> /dev/null # Restore user results
-mv $slurm_settings_tmp $slurm_settings_path # Restore original settings

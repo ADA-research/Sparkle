@@ -28,13 +28,13 @@ solver_src_path="${examples_path}${solver_path}"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/add_solver.py --deterministic False $solver_src_path > /dev/null
 
 # Set up output validation
 output_true="Running configuration finished!"
 if [[ $slurm_available =~ "${slurm_true}" ]];
 then
-    output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+    output_true="Running configuration. Waiting for Slurm job(s) with id(s): "
 fi
 
 # Configure solver

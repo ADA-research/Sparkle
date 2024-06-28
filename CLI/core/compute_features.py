@@ -7,11 +7,12 @@ import time
 import argparse
 from pathlib import Path
 from pathlib import PurePath
+from filelock import FileLock
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle.instance import compute_features_help as scf
 
 if __name__ == "__main__":
     # Initialise settings
@@ -36,9 +37,6 @@ if __name__ == "__main__":
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-    runsolver_path = gv.runsolver_path
-
     if len(gv.extractor_list) == 0:
         cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
     else:
@@ -50,12 +48,11 @@ if __name__ == "__main__":
     # TODO: Handle multi-file instances
     key_str = (f"{extractor_path.name}_"
                f"{instance_path.name}_"
-               f"{gv.get_time_pid_random_string()}")
-    result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
-    basic_part = "Tmp/" + key_str
-    runsolver_watch_data_path = basic_part + ".log"
+               f"{tg.get_time_pid_random_string()}")
+    result_path = Path(f"Feature_Data/{key_str}.csv")
+    runsolver_watch_data_path = f"{result_path}.log"
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
-    command_line = (f"{runsolver_path} {cutoff_time_each_run_option} "
+    command_line = (f"{gv.runsolver_path} {cutoff_time_each_run_option} "
                     f"{runsolver_watch_data_path_option} {extractor_path}/"
                     f"{gv.sparkle_extractor_wrapper} "
                     f"-extractor_dir {extractor_path} "
@@ -83,19 +80,31 @@ if __name__ == "__main__":
         if not Path(result_path).exists():
             sfh.create_new_empty_file(result_path)
 
+    # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
+    lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
-        tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path)
+        tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path,
+                                                 gv.extractor_list)
+        with lock.acquire(timeout=60):
+            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+            feature_data_csv.combine(tmp_fdcsv)
+            feature_data_csv.save_csv()
         result_string = "Successful"
     except Exception:
         print(f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
         print("****** WARNING: The feature vector of this instace consists of missing "
               "values ******")
-
-        result_path.unlink(missing_ok=True)
-        tmp_fdcsv = scf.generate_missing_value_csv_like_feature_data_csv(
-            feature_data_csv, instance_path, extractor_path, result_path)
+        length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
+        missing_values_row = [sfdcsv.SparkleFeatureDataCSV.missing_value] * length
+        with lock.acquire(timeout=60):
+            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+                                                            gv.extractor_list)
+            feature_data_csv.add_row(instance_path, missing_values_row)
+            feature_data_csv.save_csv()
         result_string = "Failed -- using missing value instead"
+    lock.release()
+    result_path.unlink(missing_ok=True)
 
     # TODO: Handle multi-file instances
     description_str = (
@@ -112,5 +121,4 @@ if __name__ == "__main__":
     log_str = (f"{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, "
                f"{result_string_str}")
     sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
-    tmp_fdcsv.save_csv(result_path)
     sfh.rmfiles([task_run_status_path, runsolver_watch_data_path])

@@ -7,9 +7,10 @@ from pathlib import Path, PurePath
 
 from CLI.help.status_info import GenerateReportStatusInfo
 import global_variables as gv
-from sparkle.platform import generate_report_help as sgrh
+from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
+from sparkle.platform import tex_help as th
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
@@ -18,6 +19,11 @@ from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
+from sparkle.solver import Solver
+from sparkle.solver.validator import Validator
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.configurator.configuration_scenario import ConfigurationScenario
+
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
@@ -70,10 +76,11 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     selection = args.selection
-    test_case_directory = args.test_case_directory
+    test_case_dir = args.test_case_directory
 
-    solver = resolve_object_name(args.solver,
-                                 gv.solver_nickname_mapping, gv.solver_dir)
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping, gv.solver_dir)
+    solver = Solver(solver_path) if solver_path is not None else None
     instance_set_train = resolve_object_name(args.instance_set_train,
                                              target_dir=gv.instance_dir)
     instance_set_test = resolve_object_name(args.instance_set_test,
@@ -92,15 +99,13 @@ if __name__ == "__main__":
             args.performance_measure, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
-    if not selection and test_case_directory is None and solver is None:
+    if not selection and test_case_dir is None and solver_path is None:
         scenario = gv.latest_scenario().get_latest_scenario()
         if scenario == Scenario.SELECTION:
             selection = True
-            test_case_directory = (
-                gv.latest_scenario().get_selection_test_case_directory()
-            )
+            test_case_dir = gv.latest_scenario().get_selection_test_case_directory()
         elif scenario == Scenario.CONFIGURATION:
-            solver = str(gv.latest_scenario().get_config_solver())
+            solver = Solver(gv.latest_scenario().get_config_solver())
             instance_set_train = gv.latest_scenario().get_config_instance_set_train()
             instance_set_test = gv.latest_scenario().get_config_instance_set_test()
         elif scenario == Scenario.PARALLEL_PORTFOLIO:
@@ -112,7 +117,7 @@ if __name__ == "__main__":
     flag_instance_set_test = instance_set_test is not None
 
     # Reporting for algorithm selection
-    if selection or test_case_directory is not None:
+    if selection or test_case_dir is not None:
         performance_measure =\
             gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
@@ -129,10 +134,33 @@ if __name__ == "__main__":
 
         print("Generating report for selection...")
         status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(gv.ReportType.ALGORITHM_SELECTION)
+        status_info.set_report_type(th.ReportType.ALGORITHM_SELECTION)
         status_info.save()
-        sgrh.generate_report_selection(test_case_directory)
-        if test_case_directory is None:
+        train_data = PerformanceDataFrame(gv.performance_data_csv_path)
+        train_data.penalise(gv.settings.get_general_target_cutoff_time(),
+                            gv.settings.get_penalised_time())
+        test_data = None
+        test_case_path = Path(test_case_dir) if test_case_dir is not None else None
+        if test_case_dir is not None and (test_case_path
+                                          / "sparkle_performance_data.csv").exists():
+            test_data = PerformanceDataFrame(
+                test_case_path / "sparkle_performance_data.csv")
+            test_data.penalise(gv.settings.get_general_target_cutoff_time(),
+                               gv.settings.get_penalised_time())
+        actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
+        sgfs.generate_report_selection(gv.selection_output_analysis,
+                                       gv.sparkle_latex_dir,
+                                       "template-Sparkle-for-selection.tex",
+                                       gv.sparkle_report_bibliography_path,
+                                       gv.extractor_dir,
+                                       actual_portfolio_selector_path,
+                                       gv.feature_data_csv_path,
+                                       train_data,
+                                       gv.settings.get_general_extractor_cutoff_time(),
+                                       gv.settings.get_general_target_cutoff_time(),
+                                       gv.settings.get_penalised_time(),
+                                       test_data)
+        if test_case_dir is None:
             print("Report generated ...")
         else:
             print("Report for test generated ...")
@@ -141,65 +169,86 @@ if __name__ == "__main__":
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
         status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(gv.ReportType.PARALLEL_PORTFOLIO)
+        status_info.set_report_type(th.ReportType.PARALLEL_PORTFOLIO)
         status_info.save()
 
         sgrfpph.generate_report_parallel_portfolio(
-            parallel_portfolio_path, pap_instance_list)
+            parallel_portfolio_path,
+            gv.parallel_portfolio_output_analysis,
+            gv.sparkle_latex_dir,
+            gv.sparkle_report_bibliography_path,
+            gv.settings.get_general_sparkle_objectives()[0],
+            gv.settings.get_general_target_cutoff_time(),
+            gv.settings.get_penalised_time(),
+            pap_instance_list)
         print("Parallel portfolio report generated ...")
         status_info.delete()
     else:
         status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(gv.ReportType.ALGORITHM_CONFIGURATION)
+        status_info.set_report_type(th.ReportType.ALGORITHM_CONFIGURATION)
         status_info.save()
         # Reporting for algorithm configuration
         if solver is None:
             print("Error! No Solver found for configuration report generation.")
             sys.exit(-1)
-        elif isinstance(solver, str):
-            solver = Path(solver)
-        solver_name = solver.name
-
-        # If no instance set(s) is/are given, try to retrieve them from the last run of
-        # validate_configured_vs_default
-        if not flag_instance_set_train and not flag_instance_set_test:
-            (
-                instance_set_train,
-                instance_set_test,
-                flag_instance_set_train,
-                flag_instance_set_test,
-            ) = sgrfch.get_most_recent_test_run()
 
         # If only the testing set is given return an error
-        elif not flag_instance_set_train and flag_instance_set_test:
+        if not flag_instance_set_train and flag_instance_set_test:
             print("Argument Error! Only a testing set was provided, please also "
                   "provide a training set")
             print(f"Usage: {sys.argv[0]} --solver <solver> [--instance-set-train "
                   "<instance-set-train>] [--instance-set-test <instance-set-test>]")
             sys.exit(-1)
-
         instance_set_train_name = instance_set_train.name
-        instance_set_test_name = None
         gv.settings.get_general_sparkle_configurator()\
-            .set_scenario_dirs(solver_name, instance_set_train_name)
+            .set_scenario_dirs(solver, instance_set_train_name)
         # Generate a report depending on which instance sets are provided
-        if flag_instance_set_train and flag_instance_set_test:
-            instance_set_test_name = instance_set_test.name
-            sgrfch.check_results_exist(
-                solver_name, instance_set_train_name, instance_set_test_name
-            )
-        elif flag_instance_set_train:
-            sgrfch.check_results_exist(solver_name, instance_set_train_name)
+        if flag_instance_set_train or flag_instance_set_test:
+            # Check if there are result to generate a report from
+            validator = Validator(gv.validation_output_general)
+            train_res = validator.get_validation_results(
+                solver, instance_set_train)
+            if instance_set_test is not None:
+                test_res = validator.get_validation_results(solver,
+                                                            instance_set_test)
+            if len(train_res) == 0 or (instance_set_test is not None
+                                       and len(test_res) == 0):
+                print("Error: Results not found for the given solver and instance set(s)"
+                      ' combination. Make sure the "configure_solver" and "validate_'
+                      'configured_vs_default" commands were correctly executed. ')
+                sys.exit(-1)
         else:
             print("Error: No results from validate_configured_vs_default found that "
                   "can be used in the report!")
             sys.exit(-1)
-
+        # Extract config scenario data for report, but this should be read from the
+        # scenario file instead as we can't know wether features were used or not now
+        number_of_runs = gv.settings.get_config_number_of_runs()
+        solver_calls = gv.settings.get_config_solver_calls()
+        cpu_time = gv.settings.get_config_cpu_time()
+        wallclock_time = gv.settings.get_config_wallclock_time()
+        cutoff_time = gv.settings.get_general_target_cutoff_time()
+        cutoff_length = gv.settings.get_smac_target_cutoff_length()
+        sparkle_objective =\
+            gv.settings.get_general_sparkle_objectives()[0]
+        configurator = gv.settings.get_general_sparkle_configurator()
+        configurator.scenario = ConfigurationScenario(
+            solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
+            wallclock_time, cutoff_time, cutoff_length, sparkle_objective)
+        configurator.scenario._set_paths(configurator.output_path)
         sgrfch.generate_report_for_configuration(
-            solver_name,
-            instance_set_train_name,
-            instance_set_test_name,
-            ablation=args.flag_ablation,
+            solver,
+            gv.settings.get_general_sparkle_configurator(),
+            Validator(gv.validation_output_general),
+            gv.extractor_dir,
+            gv.configuration_output_analysis,
+            gv.sparkle_latex_dir,
+            gv.sparkle_report_bibliography_path,
+            instance_set_train,
+            gv.settings.get_general_penalty_multiplier(),
+            gv.settings.get_general_extractor_cutoff_time(),
+            instance_set_test,
+            ablation=args.flag_ablation
         )
 
         status_info.delete()

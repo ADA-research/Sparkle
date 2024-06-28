@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from pathlib import Path
 
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.implementations import SMAC2
@@ -34,6 +34,8 @@ class TestConfigurator():
             executable_path=exec_path,
             settings_path=None,
             configurator_target=None,
+            base_dir=Path(),
+            tmp_path=Path(),
             objectives=[SparkleObjective("RUNTIME:PAR10")])
 
         assert configurator.executable_path == exec_path

@@ -49,20 +49,20 @@ if __name__ == "__main__":
 
     print(f"Start removing solver {solver_path.name} ...")
 
-    if len(gv.solver_list) > 0:
-        sfh.add_remove_platform_item(str(solver_path),
-                                     gv.solver_list_path)
-
     solver_nickname_mapping = gv.solver_nickname_mapping
     if len(solver_nickname_mapping):
+        nickname = None
         for key in solver_nickname_mapping:
             if solver_nickname_mapping[key] == str(solver_path):
-                output = solver_nickname_mapping.pop(key)
+                nickname = key
                 break
-        gv.write_data_to_file(gv.solver_nickname_list_path,
-                              gv.solver_nickname_mapping)
+        sfh.add_remove_platform_item(
+            nickname,
+            gv.solver_nickname_list_path,
+            gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+            remove=True)
 
-    if Path(gv.performance_data_csv_path).exists():
+    if gv.performance_data_csv_path.exists():
         performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
         if solver_path.name in performance_data.dataframe.columns:
             performance_data.remove_solver(solver_path.name)
@@ -74,9 +74,5 @@ if __name__ == "__main__":
         shutil.rmtree(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
-
-    if Path(gv.sparkle_report_path).exists():
-        shutil.rmtree(gv.sparkle_report_path)
-        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     print(f"Removing solver {solver_path.name} done!")

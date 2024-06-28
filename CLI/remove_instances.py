@@ -11,7 +11,6 @@ from sparkle.platform import file_help as sfh
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 import sparkle_logging as sl
-from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -47,7 +46,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     print(f"Start removing all instances in directory {instances_path} ...")
-    list_all_filename = sfh.get_list_all_filename_recursive(instances_path)
+    list_all_filename = sfh.get_file_paths_recursive(instances_path)
     reference_list = gv.reference_list_dir / (instances_path.name
                                               + gv.instance_list_postfix)
     if reference_list.exists():
@@ -58,15 +57,12 @@ if __name__ == "__main__":
             list_all_filename[i] = " ".join([f"{instances_path / fname}"
                                              for fname in file_names])
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
+    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                                    gv.extractor_list)
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
 
     for instance_path in list_all_filename:
         intended_instance = str(instance_path)
-        print(intended_instance)
-        # Remove instance records
-        sfh.add_remove_platform_item(intended_instance,
-                                     gv.instance_list_path, remove=True)
         if reference_list.exists():
             # In case of reference lists, we only take the last instance part
             # For the matrix rows to remove them
@@ -82,7 +78,9 @@ if __name__ == "__main__":
         print(f"Warning: Path {instances_path} did not exist. Continuing")
 
     # Remove instance reference list (for multi-file instances)
-    sih.remove_reference_instance_list(instances_path.name)
+    instance_list_path = Path(gv.reference_list_dir
+                              / Path(instances_path.name + gv.instance_list_postfix))
+    sfh.rmfiles(instance_list_path)
 
     feature_data_csv.save_csv()
     performance_data_csv.save_csv()
@@ -91,9 +89,5 @@ if __name__ == "__main__":
         shutil.rmtree(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
-
-    if Path(gv.sparkle_report_path).exists():
-        shutil.rmtree(gv.sparkle_report_path)
-        print(f"Removing Sparkle report {gv.sparkle_report_path} done!")
 
     print(f"Removing instances in directory {instances_path} done!")

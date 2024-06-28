@@ -2,15 +2,17 @@
 # -*- coding: UTF-8 -*-
 """Run a solver on an instance, only for internal calls from Sparkle."""
 import time
-import fcntl
+from filelock import FileLock
 import argparse
 import shutil
 from pathlib import Path
 
 import global_variables as gv
+import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from CLI.support import run_solvers_help as srs
 from sparkle.types.objective import PerformanceMeasure
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help.status_info import SolverRunStatusInfo
 
 
@@ -22,25 +24,21 @@ if __name__ == "__main__":
     perf_measure = gv.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument("--performance-data", required=True, type=Path,
+                        help="path to the performance dataframe")
     parser.add_argument("--instance", required=False, type=str, nargs="+",
                         help="path to instance to run on")
-    parser.add_argument("--solver", required=True, type=str, help="path to solver")
+    parser.add_argument("--solver", required=True, type=Path, help="path to solver")
     parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
                         default=perf_measure,
                         help="the performance measure, e.g. runtime")
-    parser.add_argument("--run-status-path", type=Path,
-                        choices=[gv.run_solvers_sbatch_tmp_path,
-                                 gv.pap_sbatch_tmp_path],
-                        default=gv.run_solvers_sbatch_tmp_path,
-                        help="set the runstatus path of the process")
     parser.add_argument("--seed", type=str, required=False,
                         help="sets the seed used for the solver")
     args = parser.parse_args()
 
     # Process command line arguments
     # Turn multiple instance files into a space separated string
-    # NOTE: I am not sure who made this ``change'' for multiple instance_paths
-    # But in all code hereafter, it seems to be treated as a single instance.
+    # NOTE: Multiple instance files here means ``multiple files for a single instance''
     instance_path = " ".join(args.instance)
     instance_name = Path(instance_path).name
     if Path(instance_path).is_file():
@@ -57,10 +55,7 @@ if __name__ == "__main__":
         solver_path = subtarget
 
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
-    run_status_path = args.run_status_path
-    key_str = (f"{solver_path.name}_"
-               f"{instance_name}_"
-               f"{gv.get_time_pid_random_string()}")
+    key_str = f"{solver_path.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     raw_result_path = f"Tmp/{key_str}.rawres"
     start_time = time.time()
     # create statusinfo file
@@ -83,38 +78,27 @@ if __name__ == "__main__":
                     f"{time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))}]")
     run_time_str = "[Actual Run Time (wall clock): " + str(wc_time) + " second(s)]"
     recorded_run_time_str = ("[Recorded Run Time (CPU PAR"
-                             f"{str(gv.settings.get_general_penalty_multiplier())}): "
-                             f"{str(cpu_time_penalised)} second(s)]")
-    status_str = "[Run Status: " + status + "]"
+                             f"{gv.settings.get_general_penalty_multiplier()}): "
+                             f"{cpu_time_penalised} second(s)]")
+    status_str = f"[Run Status: {status}]"
 
     log_str = (f"{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, "
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
     sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     status_info.delete()
 
-    if run_status_path != gv.pap_sbatch_tmp_path:
-        if gv.sparkle_tmp_path in solver_path.parents:
-            shutil.rmtree(solver_path)
-
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
-        obj_str = str(quality[0])  # TODO: Handle the multi-objective case
+        measurement = quality[0]  # TODO: Handle the multi-objective case
     elif performance_measure == PerformanceMeasure.RUNTIME:
-        obj_str = str(cpu_time_penalised)
+        measurement = cpu_time_penalised
     else:
         print(f"*** ERROR: Unknown performance measure detected: {performance_measure}")
-    processed_result_path = gv.performance_data_dir / "Tmp" / f"{key_str}.result"
-    with Path(processed_result_path).open("w+") as fout:
-        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-        fout.write(f"{instance_path}\n"
-                   f"{solver_path}\n"
-                   f"{obj_str}\n")
-
-    pap_result_path = gv.pap_performance_data_tmp_path / f"{key_str}.result"
-    with pap_result_path.open("w+") as fout:
-        fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
-        fout.write(f"{instance_path}\n"
-                   f"{solver_path}\n"
-                   f"{obj_str}\n")
-
-    # TODO: Make removal conditional on a success status (SUCCESS, SAT or UNSAT)
-    # sfh.rmfiles(raw_result_path)
+    # Now that we have all the results, we can add them to the performance dataframe
+    lock = FileLock(f"{args.performance_data}.lock")  # Lock the file
+    with lock.acquire(timeout=60):
+        performance_dataframe = PerformanceDataFrame(Path(args.performance_data))
+        performance_dataframe.set_value(measurement,
+                                        solver=str(solver_path),
+                                        instance=str(instance_path))
+        performance_dataframe.save_csv()
+    lock.release()

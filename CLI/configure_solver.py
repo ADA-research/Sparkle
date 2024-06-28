@@ -15,16 +15,15 @@ from CLI.help.status_info import ConfigureSolverStatusInfo
 import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.configurator import ablation as sah
+from CLI.support import ablation_help as sah
 from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle.platform import slurm_help as ssh
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.help.nicknames import resolve_object_name
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -126,13 +125,14 @@ def run_after(solver: Path,
     if instance_set_test is not None:
         command_line += f" --instance-set-test {instance_set_test}"
 
-    run = rrr.add_to_queue(runner=run_on,
-                           cmd=command_line,
-                           name=command,
-                           dependencies=dependency,
-                           base_dir=gv.sparkle_tmp_path,
-                           srun_options=["-N1", "-n1"],
-                           sbatch_options=ssh.get_slurm_options_list())
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=command_line,
+        name=command,
+        dependencies=dependency,
+        base_dir=gv.sparkle_tmp_path,
+        srun_options=["-N1", "-n1"],
+        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
@@ -159,6 +159,7 @@ if __name__ == "__main__":
     ablation = args.ablation
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping, gv.solver_dir)
+    solver = Solver(solver_path)
     instance_set_train = resolve_object_name(args.instance_set_train,
                                              target_dir=gv.instance_dir)
     instance_set_test = args.instance_set_test
@@ -177,7 +178,8 @@ if __name__ == "__main__":
 
     feature_data_df = None
     if use_features:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                                        gv.extractor_list)
 
         if not Path(instance_set_train).is_dir():  # Path has to be a directory
             print("Given training set path is not an existing directory")
@@ -209,8 +211,7 @@ if __name__ == "__main__":
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    sah.clean_ablation_scenarios(solver_path.name, instance_set_train.name)
-    solver = Solver(solver_path)
+    sah.clean_ablation_scenarios(solver, instance_set_train.name)
 
     status_info = ConfigureSolverStatusInfo()
     status_info.set_solver(str(solver.name))
@@ -233,7 +234,12 @@ if __name__ == "__main__":
         wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    dependency_job_list = configurator.configure(scenario=config_scenario, run_on=run_on)
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    dependency_job_list = configurator.configure(
+        scenario=config_scenario,
+        sbatch_options=sbatch_options,
+        num_parallel_jobs=gv.settings.get_number_of_jobs_in_parallel(),
+        run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver.directory)
@@ -263,7 +269,7 @@ if __name__ == "__main__":
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
-        print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+        print(f"Running configuration. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
     else:
         print("Running configuration finished!")

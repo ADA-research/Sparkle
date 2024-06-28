@@ -10,7 +10,7 @@ from unittest.mock import Mock
 from pathlib import Path
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.platform import settings_help
 import global_variables as gv
 
@@ -65,10 +65,8 @@ class TestConfigurationScenario(TestCase):
         self.assertEqual(self.scenario.name,
                          f"{self.solver.name}_{self.instance_directory.name}")
 
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_scenario_directory(
-        self: TestConfigurationScenario,
-        mock_deterministic: Mock
+        self: TestConfigurationScenario
     ) -> None:
         """Test if create_scenario() correctly creates the scenario directory."""
         self.scenario.create_scenario(self.parent_directory)
@@ -79,32 +77,26 @@ class TestConfigurationScenario(TestCase):
                          True)
         self.assertTrue((self.scenario.directory / "tmp").is_dir())
 
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_result_directory(
         self: TestConfigurationScenario,
-        mock_deterministic: Mock
     ) -> None:
         """Test if create_scenario() creates the result directory."""
         self.scenario.create_scenario(self.parent_directory)
 
         self.assertTrue(self.scenario.result_directory.is_dir())
 
-    @patch.object(Solver, "is_deterministic")
     def test_configuration_scenario_check_instance_directory(
-        self: TestConfigurationScenario,
-        mock_deterministic: Mock
+        self: TestConfigurationScenario
     ) -> None:
         """Test if create_scenario() creates the instance directory."""
         self.scenario.create_scenario(self.parent_directory)
 
         self.assertTrue(self.scenario.instance_directory.is_dir())
 
-    @patch.object(Solver, "is_deterministic")
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(
         self: TestConfigurationScenario,
-        mock_abs_path: Mock,
-        mock_deterministic: Mock
+        mock_abs_path: Mock
     ) -> None:
         """Test if create_scenario() correctly creates the scenario file."""
         inst_list_path = Path("tests/test_files/test_configurator/scenarios/instances/"
@@ -116,7 +108,6 @@ class TestConfigurationScenario(TestCase):
                                      inst_list_path,
                                      Path(),
                                      Path()]
-        mock_deterministic.return_value = "0"
         self.scenario.create_scenario(self.parent_directory)
 
         reference_scenario_file = Path("tests", "test_files", "reference_files",

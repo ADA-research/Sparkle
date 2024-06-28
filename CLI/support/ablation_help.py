@@ -13,13 +13,12 @@ import global_variables as gv
 from sparkle.instance import instances_help as sih
 
 from sparkle.configurator.implementations import SMAC2
-from sparkle.platform import slurm_help as ssh
 from CLI.help.command_help import CommandName
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from sparkle.solver import pcs
 
 
-def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
+def get_ablation_scenario_directory(solver: Solver, instance_train_name: str,
                                     instance_test_name: str, exec_path: str = False)\
         -> str:
     """Return the directory where ablation analysis is executed.
@@ -29,35 +28,32 @@ def get_ablation_scenario_directory(solver_name: str, instance_train_name: str,
     instance_test_name = (
         f"_{instance_test_name}" if instance_test_name is not None else "")
 
-    ablation_scenario_dir = "" if exec_path else gv.ablation_dir
-    ablation_scenario_dir += (
-        f"scenarios/{solver_name}_"
-        f"{instance_train_name}{instance_test_name}/"
-    )
-    return ablation_scenario_dir
+    ablation_scenario_dir = "" if exec_path else f"{gv.ablation_dir / 'scenarios'}/"
+    scenario_dir = f"{ablation_scenario_dir}"\
+                   f"{solver.name}_{instance_train_name}{instance_test_name}/"
+    return scenario_dir
 
 
-def clean_ablation_scenarios(solver_name: str, instance_set_train_name: str) -> None:
+def clean_ablation_scenarios(solver: Solver, instance_set_train_name: str) -> None:
     """Clean up ablation analysis directory."""
-    ablation_scenario_dir = Path(gv.ablation_dir + "scenarios/")
+    ablation_scenario_dir = gv.ablation_dir / "scenarios"
     if ablation_scenario_dir.is_dir():
         for ablation_scenario in ablation_scenario_dir.glob(
-                f"{solver_name}_{instance_set_train_name}_*"):
+                f"{solver.name}_{instance_set_train_name}_*"):
             shutil.rmtree(ablation_scenario, ignore_errors=True)
     return
 
 
-def prepare_ablation_scenario(solver_name: str, instance_train_name: str,
+def prepare_ablation_scenario(solver: Solver, instance_train_name: str,
                               instance_test_name: str) -> str:
     """Prepare directories and files for ablation analysis."""
-    ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
+    ablation_scenario_dir = get_ablation_scenario_directory(solver,
                                                             instance_train_name,
                                                             instance_test_name)
 
     ablation_scenario_solver_dir = Path(ablation_scenario_dir, "solver/")
     # Copy solver
-    solver_directory = "Solvers/" + solver_name
-    shutil.copytree(solver_directory, ablation_scenario_solver_dir, dirs_exist_ok=True)
+    shutil.copytree(solver.directory, ablation_scenario_solver_dir, dirs_exist_ok=True)
     return ablation_scenario_dir
 
 
@@ -68,24 +64,24 @@ def print_ablation_help() -> None:
     print(process.stdout)
 
 
-def create_configuration_file(solver_name: str, instance_train_name: str,
-                              instance_test_name: str) -> None:
+def create_configuration_file(solver: Solver, instance_train: Path,
+                              instance_test: Path) -> None:
     """Create a configuration file for ablation analysis.
 
     Args:
-        solver_name: Name of the solver
+        solver: Solver object
         instance_train_name: The training instance
         instance_test_name: The test instance
 
     Returns:
         None
     """
-    ablation_scenario_dir = get_ablation_scenario_directory(solver_name,
-                                                            instance_train_name,
-                                                            instance_test_name)
+    ablation_scenario_dir = get_ablation_scenario_directory(solver,
+                                                            instance_train.name,
+                                                            instance_test.name)
     configurator = gv.settings.get_general_sparkle_configurator()
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver_name, instance_train_name)
+        solver, instance_train)
     if "-init_solution" not in opt_config_str:
         opt_config_str = "-init_solution '1' " + opt_config_str
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
@@ -103,9 +99,8 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
                    f'{Path(ablation_scenario_dir).absolute()}/solver"\n'
                    "execdir = ./solver/\n"
                    "experimentDir = ./\n")
-        solver = Solver.get_solver_by_name(solver_name)
         # USER SETTINGS
-        fout.write(f"deterministic = {solver.is_deterministic()}\n"
+        fout.write(f"deterministic = {1 if solver.deterministic else 0}\n"
                    f"run_obj = {smac_run_obj}\n")
         objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
         fout.write(f"overall_obj = {objective_str}\n"
@@ -115,8 +110,7 @@ def create_configuration_file(solver_name: str, instance_train_name: str,
                    f"useRacing = {ablation_racing}\n"
                    "seed = 1234\n")
         # Get PCS file name from solver directory
-        solver_directory = Path("Solvers/", solver_name)
-        pcs_file_name = pcs.get_pcs_file_from_solver_directory(solver_directory)
+        pcs_file_name = pcs.get_pcs_file_from_solver_directory(solver.directory)
         pcs_file_path = "./solver/" + str(pcs_file_name)
         fout.write(f"paramfile = {pcs_file_path}\n"
                    "instance_file = instances_train.txt\n"
@@ -132,12 +126,12 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
     file_suffix = "_train.txt"
     if test:
         file_suffix = "_test.txt"
-
+    instances_directory = Path(instances_directory)
     # We give the Ablation script directly the paths of the instances (no copying)
-    list_all_path = sih.get_list_all_path(instances_directory)
+    list_all_path = [f for f in instances_directory.rglob("*") if f.is_file()]
     file_instance_path = ablation_scenario_dir + "instances" + file_suffix
 
-    instance_set_name = Path(instances_directory).name
+    instance_set_name = instances_directory.name
 
     # If a reference list does not exist this is a single-file instance
     if not sih.check_existence_of_reference_instance_list(instance_set_name):
@@ -154,10 +148,10 @@ def create_instance_file(instances_directory: str, ablation_scenario_dir: str,
     return
 
 
-def check_for_ablation(solver_name: str, instance_train_name: str,
+def check_for_ablation(solver: Solver, instance_train_name: str,
                        instance_test_name: str) -> bool:
     """Run a solver on an instance, only for internal calls from Sparkle."""
-    scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name,
+    scenario_dir = get_ablation_scenario_directory(solver, instance_train_name,
                                                    instance_test_name, exec_path=False)
     table_file = Path(scenario_dir, "ablationValidation.txt")
     if not table_file.is_file():
@@ -168,13 +162,13 @@ def check_for_ablation(solver_name: str, instance_train_name: str,
     return True
 
 
-def read_ablation_table(solver_name: str, instance_train_name: str,
+def read_ablation_table(solver: Solver, instance_train_name: str,
                         instance_test_name: str) -> list[list[str]]:
     """Read from ablation table of a scenario."""
-    if not check_for_ablation(solver_name, instance_train_name, instance_test_name):
+    if not check_for_ablation(solver, instance_train_name, instance_test_name):
         # No ablation table exists for this solver-instance pair
         return []
-    scenario_dir = get_ablation_scenario_directory(solver_name, instance_train_name,
+    scenario_dir = get_ablation_scenario_directory(solver, instance_train_name,
                                                    instance_test_name, exec_path=False)
     table_file = Path(scenario_dir) / "ablationValidation.txt"
 
@@ -220,7 +214,7 @@ def submit_ablation(ablation_scenario_dir: str,
     cmd = "../../ablationAnalysis --optionFile ablation_config.txt"
     srun_options = ["-N1", "-n1", f"-c{clis}"]
     sbatch_options = [f"--cpus-per-task={clis}"] +\
-        ssh.get_slurm_options_list()
+        gv.settings.get_slurm_extra_options(as_args=True)
 
     run_ablation = rrr.add_to_queue(
         runner=run_on,

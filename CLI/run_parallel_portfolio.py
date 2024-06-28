@@ -20,14 +20,14 @@ import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
-from sparkle.platform import slurm_help as ssh
 from sparkle.platform.settings_help import SettingState, Settings
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
 from CLI.help.command_help import CommandName
 from tools.runsolver_parsing import get_runtime, get_status
+from CLI.help.nicknames import resolve_object_name
 
 
 def run_parallel_portfolio(instances: list[Path],
@@ -45,13 +45,13 @@ def run_parallel_portfolio(instances: list[Path],
     num_solvers, num_instances = len(solvers), len(instances)
     seeds_per_solver = gv.settings.get_parallel_portfolio_number_of_seeds_per_solver()
     num_jobs = num_solvers * num_instances * seeds_per_solver
-    parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
+    parallel_jobs = min(gv.settings.get_number_of_jobs_in_parallel(), num_jobs)
     if parallel_jobs > num_jobs:
         print("WARNING: Not all jobs will be started at the same time due to the "
               "limitation of number of Slurm jobs that can be run in parallel. Check"
               " your Sparkle Slurm Settings.")
-    print(f"Sparkle parallel portfolio is running {seeds_per_solver} of "
-          f"{num_solvers} on {num_instances} ...")
+    print(f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) of "
+          f"{num_solvers} solvers on {num_instances} instances ...")
     cmd_list, runsolver_logs = [], []
     cutoff = gv.settings.get_general_target_cutoff_time()
     log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
@@ -85,6 +85,7 @@ def run_parallel_portfolio(instances: list[Path],
                                    raw_result_path])
 
     # Jobs are added in to the runrunner object in the same order they are provided
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
@@ -92,8 +93,8 @@ def run_parallel_portfolio(instances: list[Path],
         parallel_jobs=parallel_jobs,
         path=".",
         base_dir=gv.sparkle_tmp_path,
-        srun_options=["-N1", "-n1"] + ssh.get_slurm_options_list(),
-        sbatch_options=ssh.get_slurm_options_list()
+        srun_options=["-N1", "-n1"] + sbatch_options,
+        sbatch_options=sbatch_options
     )
     check_interval = gv.settings.get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
@@ -225,16 +226,17 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     if args.solvers is not None:
-        solver_names = ["".join(s) for s in args.solvers]
-        solvers = [Solver.get_solver_by_name(solver) for solver in solver_names]
-        if None in solvers:
+        solver_paths = [resolve_object_name("".join(s), target_dir=gv.solver_dir)
+                        for s in args.solvers]
+        if None in solver_paths:
             print("Some solvers not recognised! Check solver names:")
-            for i, name in enumerate(solver_names):
-                if solvers[i] is None:
-                    print(f'\t- "{solver_names[i]}" ')
+            for i, name in enumerate(solver_paths):
+                if solver_paths[i] is None:
+                    print(f'\t- "{solver_paths[i]}" ')
             sys.exit(-1)
+        solvers = [Solver(p) for p in solver_paths]
     else:
-        solvers = [Solver.get_solver_by_name(p) for p in gv.solver_dir.iterdir()]
+        solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
 
     check_for_initialise(
         sys.argv,
@@ -290,8 +292,6 @@ if __name__ == "__main__":
               f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
               "use validation")
         sys.exit(-1)
-    # Write settings to file before starting, since they are used in callback scripts
-    gv.settings.write_used_settings()
 
     if args.portfolio_name is not None:  # Use a nickname
         portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name

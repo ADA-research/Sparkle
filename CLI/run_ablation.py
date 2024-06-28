@@ -8,11 +8,12 @@ from pathlib import PurePath
 
 from runrunner.base import Runner
 
-from sparkle.configurator import ablation as sah
+from CLI.support import ablation_help as sah
 import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.solver import Solver
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
@@ -69,7 +70,9 @@ if __name__ == "__main__":
         sah.print_ablation_help()
         sys.exit()
 
-    solver = resolve_object_name(args.solver, gv.solver_nickname_mapping, gv.solver_dir)
+    solver_path = resolve_object_name(args.solver,
+                                      gv.solver_nickname_mapping, gv.solver_dir)
+    solver = Solver(solver_path)
     instance_set_train = resolve_object_name(args.instance_set_train,
                                              target_dir=gv.instance_dir)
     instance_set_test = resolve_object_name(args.instance_set_test,
@@ -109,10 +112,9 @@ if __name__ == "__main__":
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings, prev_settings)
 
-    solver_name = solver.name
     instance_set_train_name = instance_set_train.name
     configurator = gv.settings.get_general_sparkle_configurator()
-    configurator.set_scenario_dirs(solver_name, instance_set_train_name)
+    configurator.set_scenario_dirs(solver, instance_set_train_name)
     if instance_set_test is not None:
         instance_set_test_name = instance_set_test.name
     else:
@@ -129,17 +131,17 @@ if __name__ == "__main__":
 
     # REMOVE SCENARIO
     ablation_scenario_dir = sah.get_ablation_scenario_directory(
-        solver_name, instance_set_train_name, instance_set_test_name
+        solver, instance_set_train_name, instance_set_test_name
     )
-    if sah.check_for_ablation(solver_name, instance_set_train_name,
+    if sah.check_for_ablation(solver, instance_set_train_name,
                               instance_set_test_name):
         print("Warning: found existing ablation scenario for this combination. "
               "This will be removed.")
-        shutil.rmtree(gv.ablation_dir + ablation_scenario_dir)
+        shutil.rmtree(gv.ablation_dir / ablation_scenario_dir)
 
     # Prepare ablation scenario directory
     ablation_scenario_dir = sah.prepare_ablation_scenario(
-        solver_name, instance_set_train_name, instance_set_test_name
+        solver, instance_set_train_name, instance_set_test_name
     )
 
     # Instances
@@ -150,12 +152,11 @@ if __name__ == "__main__":
         # TODO: check if needed
         sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=True)
 
-    print("Create config file")
     # Configurations
     sah.create_configuration_file(
-        solver_name, instance_set_train_name, instance_set_test_name
+        solver, instance_set_train, instance_set_test
     )
-    print("Submit ablation run")
+    print("Submiting ablation run...")
     runs = sah.submit_ablation(
         ablation_scenario_dir=ablation_scenario_dir,
         instance_set_test=instance_set_test,

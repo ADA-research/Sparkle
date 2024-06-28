@@ -7,6 +7,7 @@ from pathlib import Path
 import zipfile
 
 import global_variables as gv
+from tools.general import get_time_pid_random_string
 from sparkle.platform import file_help as sfh
 
 
@@ -27,7 +28,7 @@ def detect_current_sparkle_platform_exists(check_all_dirs: bool) -> bool:
 
 def save_current_sparkle_platform() -> None:
     """Store the current Sparkle platform in a .zip file."""
-    suffix = gv.get_time_pid_random_string()
+    suffix = get_time_pid_random_string()
     snapshot_filename = f"{gv.snapshot_dir}/My_Snapshot_{suffix}"
     for working_dir in gv.working_dirs:
         if working_dir.exists():
@@ -44,9 +45,8 @@ def remove_current_sparkle_platform() -> None:
     for working_dir in gv.working_dirs:
         shutil.rmtree(working_dir, ignore_errors=True)
 
-    ablation_scenario_dir = f"{gv.ablation_dir}scenarios/"
-    shutil.rmtree(Path(ablation_scenario_dir), ignore_errors=True)
-    Path("Components/Sparkle-latex-generator/Sparkle_Report.pdf").unlink(missing_ok=True)
+    ablation_scenario_dir = gv.ablation_dir / "scenarios"
+    shutil.rmtree(ablation_scenario_dir, ignore_errors=True)
     print("Existing Sparkle platform cleaned!")
 
 
@@ -57,7 +57,7 @@ def extract_sparkle_snapshot(my_snapshot_filename: str) -> None:
       my_snapshot_filename: File path to the file where the current Sparkle
         platform should be stored.
     """
-    my_suffix = gv.get_time_pid_random_string()
+    my_suffix = get_time_pid_random_string()
     my_tmp_directory = f"tmp_directory_{my_suffix}"
 
     Path(gv.sparkle_tmp_path).mkdir(exist_ok=True)
