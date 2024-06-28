@@ -24,6 +24,7 @@ from sparkle.instance import instances_help as sih
 from CLI.help.command_help import CommandName
 
 
+# Only called in call_sparkle_portfolio_selector_solve_instance
 def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
                             cutoff_time_each_extractor_run: float) -> list[str]:
     """Return the feature vector for an instance as a list."""
@@ -31,17 +32,18 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
     runsolver_watch_data_path = result_path.replace(".rawres", ".log")
     runsolver_value_data_path = result_path.replace(".rawres", ".val")
 
-    cmd_list_runsolver = [gv.runsolver_path,
+    cmd_list_extractor = [gv.runsolver_path,
                           "--cpu-limit", str(cutoff_time_each_extractor_run),
                           "-w", runsolver_watch_data_path,  # Set log path
-                          "-v", runsolver_value_data_path]  # Set information path
-    cmd_list_extractor = [f"{extractor_path}/{gv.sparkle_extractor_wrapper}",
-                          f"{extractor_path}/", instance_path, result_path]
+                          "-v", runsolver_value_data_path,  # Set information path
+                          f"{extractor_path}/{gv.sparkle_extractor_wrapper}",
+                          "-extractor_dir", f"{extractor_path}/",
+                          "-instance_file", instance_path,
+                          "-output_file", result_path]
 
-    runsolver = subprocess.run(cmd_list_runsolver, capture_output=True)
     extractor = subprocess.run(cmd_list_extractor, capture_output=True)
 
-    if runsolver.returncode < 0 or extractor.returncode < 0:
+    if extractor.returncode != 0:
         print("Possible issue with runsolver or extractor.")
 
     if Path(runsolver_value_data_path).exists():
@@ -80,7 +82,7 @@ def get_list_feature_vector(extractor_path: str, instance_path: str, result_path
                 runsolver_watch_data_path, runsolver_value_data_path])
     return list_feature_vector
 
-
+# Only called in call_sparkle_portfolio_selector_solve_instance
 def print_predict_schedule(predict_schedule_result_path: str) -> None:
     """Print the predicted algorithm schedule."""
     with Path(predict_schedule_result_path).open("r+") as fin:
@@ -89,6 +91,8 @@ def print_predict_schedule(predict_schedule_result_path: str) -> None:
         print(line)
 
 
+# Called in call_sparkle_portfolio_selector_solve_instance
+# Called in compute_marginal_contribution_help
 def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> list:
     """Return the predicted algorithm schedule as a list."""
     prefix_string = "Selected Schedule [(algorithm, budget)]: "
@@ -112,6 +116,7 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
     return ast.literal_eval(predict_schedule_string)
 
 
+# Only called in call_sparkle_portfolio_selector_solve_instance
 def call_solver_solve_instance_within_cutoff(solver_path: str,
                                              instance_path: str,
                                              cutoff_time: int,
@@ -152,6 +157,7 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
     return flag_solved
 
 
+# Only called in portfolio_core and run_sparkle_portfolio_selector
 def call_sparkle_portfolio_selector_solve_instance(
         instance_path: str,
         performance_data_csv_path: str = None) -> None:
@@ -185,8 +191,7 @@ def call_sparkle_portfolio_selector_solve_instance(
         print("ERROR: No feature extractor added to Sparkle.")
         sys.exit(-1)
 
-    cutoff_time_each_extractor_run = (
-        gv.settings.get_general_extractor_cutoff_time() / len(gv.extractor_list))
+    cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
 
     for extractor_path in gv.extractor_list:
         extractor_name = Path(extractor_path).name
@@ -196,7 +201,7 @@ def call_sparkle_portfolio_selector_solve_instance(
                        f"{tg.get_time_pid_random_string()}.rawres")
 
         list_feature_vector = list_feature_vector + get_list_feature_vector(
-            extractor_path, instance_path, result_path, cutoff_time_each_extractor_run)
+            extractor_path, instance_path, result_path, cutoff_extractor)
         print(f"Extractor {extractor_name} computing "
               f"features of instance {instance_files_str} done!")
 
@@ -242,6 +247,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     return
 
 
+# Only called in run_sparkle_portfolio_selector
 def call_sparkle_portfolio_selector_solve_directory(
         instance_directory_path: str,
         run_on: Runner = Runner.SLURM) -> None:
@@ -308,3 +314,7 @@ def check_selector_status(solver_name: str) -> None:
         print("ERROR: The portfolio selector could not be found. Please make sure to "
               "first construct a portfolio selector.")
         sys.exit(-1)
+
+
+def call_selector_on_instances() -> None:
+    return
