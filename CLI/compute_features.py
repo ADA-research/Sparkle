@@ -3,7 +3,6 @@
 
 import sys
 import argparse
-from pathlib import Path
 
 import global_variables as gv
 from CLI.help import compute_features_help as scf
@@ -61,7 +60,7 @@ if __name__ == "__main__":
 
     # Start compute features
     print("Start computing features ...")
-    scf.compute_features(Path(gv.feature_data_csv_path),
+    scf.compute_features(gv.feature_data_csv_path,
                          args.recompute, run_on=args.run_on)
 
     # Write used settings to file

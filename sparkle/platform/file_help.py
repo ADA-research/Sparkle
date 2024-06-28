@@ -160,7 +160,6 @@ def create_temporary_directories() -> None:
     if not tmp_path.exists():
         tmp_path.mkdir()
         sl.add_output("Tmp/", "Directory with temporary files")
-    Path("Feature_Data/Tmp/").mkdir(parents=True, exist_ok=True)
     Path("Log/").mkdir(exist_ok=True)
 
 

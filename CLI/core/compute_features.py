@@ -49,9 +49,8 @@ if __name__ == "__main__":
     key_str = (f"{extractor_path.name}_"
                f"{instance_path.name}_"
                f"{tg.get_time_pid_random_string()}")
-    result_path = Path(f"Feature_Data/Tmp/{key_str}.csv")
-    basic_part = "Tmp/" + key_str
-    runsolver_watch_data_path = basic_part + ".log"
+    result_path = Path(f"Feature_Data/{key_str}.csv")
+    runsolver_watch_data_path = f"{result_path}.log"
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
     command_line = (f"{gv.runsolver_path} {cutoff_time_each_run_option} "
                     f"{runsolver_watch_data_path_option} {extractor_path}/"

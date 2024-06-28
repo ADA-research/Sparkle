@@ -57,7 +57,6 @@ def initialise_sparkle(argv: list[str]) -> None:
     print("Start initialising Sparkle platform ...")
 
     gv.snapshot_dir.mkdir(exist_ok=True)
-
     if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
@@ -67,11 +66,9 @@ def initialise_sparkle(argv: list[str]) -> None:
 
     # Log command call
     sl.log_command(argv)
-
     sfh.create_temporary_directories()
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
-
     (gv.ablation_dir / "scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(gv.feature_data_csv_path)
     # Initialise the Performance DF with the static dimensions
