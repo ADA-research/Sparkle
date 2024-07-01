@@ -49,11 +49,10 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     run_on = args.run_on
-    
     instance_set = resolve_object_name(
-            args.instance_path,
-            gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.instance_dir, Instances)
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, Instances)
     if instance_set is None:
         instance_path = Path(args.instance_path)
 

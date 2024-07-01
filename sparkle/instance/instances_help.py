@@ -33,5 +33,3 @@ def _get_list_instance(instances_source: str) -> list[str]:
             list_instance.append(line.strip())
 
     return list_instance
-
-

@@ -149,8 +149,8 @@ ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                                   })
 
 InstancePath = ArgumentContainer(names=["instance_path"],
-                                kwargs={"type": Path,
-                                        "help": "Path to an instance (set)"})
+                                 kwargs={"type": Path,
+                                         "help": "Path to an instance (set)"})
 
 InstancePathRunConfiguredSolverArgument = \
     ArgumentContainer(names=["instance_path"],
