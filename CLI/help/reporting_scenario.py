@@ -6,6 +6,7 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+from sparkle.solver import Solver
 from sparkle.instance import Instances
 
 
@@ -328,9 +329,12 @@ class ReportingScenario:
         name = "solver"
         self.path_setter(section, name, value)
 
-    def get_config_solver(self: ReportingScenario) -> Path:
+    def get_config_solver(self: ReportingScenario) -> Solver:
         """Return the path to the solver that was configured."""
-        return self.none_if_empty_path(Path(self.__scenario["configuration"]["solver"]))
+        path = self.none_if_empty_path(Path(self.__scenario["configuration"]["solver"]))
+        if path is not None:
+            return Solver(path)
+        return None
 
     def set_config_instance_set_train(
             self: ReportingScenario, value: Path = DEFAULT_config_instance_set_train)\

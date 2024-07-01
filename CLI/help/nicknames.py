@@ -33,6 +33,9 @@ def resolve_object_name(name: str | Path,
     elif (target_dir / name).exists():
         path = (target_dir / name)
     # Finally, attempt to construct the object from the Path
-    if class_name is not None and path is not None:
-        return class_name(path)
+    try:
+        if class_name is not None and path is not None:
+            return class_name(path)
+    except Exception:
+        return None
     return path
