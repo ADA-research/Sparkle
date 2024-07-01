@@ -26,6 +26,6 @@ class Instances:
                 self.instance_paths.append((self.directory / file) for file
                                            in line[1:])
         else:
-            self.instance_paths = [self.directory / p for p in self.directory.iterdir()]
+            self.instance_paths = [p for p in self.directory.iterdir()]
             self.instance_names = [p.name for p in self.instance_paths]
         return
