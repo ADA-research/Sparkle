@@ -22,6 +22,7 @@ from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
 from sparkle.platform.settings_help import SettingState, Settings
 from sparkle.solver import Solver
+from sparkle.instance import Instances
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -30,7 +31,7 @@ from tools.runsolver_parsing import get_runtime, get_status
 from CLI.help.nicknames import resolve_object_name
 
 
-def run_parallel_portfolio(instances: list[Path],
+def run_parallel_portfolio(instances: Instances,
                            portfolio_path: Path,
                            solvers: list[Solver],
                            run_on: Runner = Runner.SLURM) -> None:
@@ -42,7 +43,7 @@ def run_parallel_portfolio(instances: list[Path],
         solvers: List of solvers to run on the instances.
         run_on: Currently only supports Slurm.
     """
-    num_solvers, num_instances = len(solvers), len(instances)
+    num_solvers, num_instances = len(solvers), len(instances.instance_paths)
     seeds_per_solver = gv.settings.get_parallel_portfolio_number_of_seeds_per_solver()
     num_jobs = num_solvers * num_instances * seeds_per_solver
     parallel_jobs = min(gv.settings.get_number_of_jobs_in_parallel(), num_jobs)
@@ -58,7 +59,7 @@ def run_parallel_portfolio(instances: list[Path],
     log_path = portfolio_path / "run-status-path"
     log_path.mkdir()
     # Create a command for each instance-solver-seed combination
-    for instance, solver in itertools.product(instances, solvers):
+    for instance, solver in itertools.product(instances.instance_paths, solvers):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             runsolver_watch_log =\
@@ -99,12 +100,12 @@ def run_parallel_portfolio(instances: list[Path],
     check_interval = gv.settings.get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance
-    job_output_dict = {instance.name: {solver.name: {"killed": False,
+    job_output_dict = {instance_name: {solver.name: {"killed": False,
                                                      "cpu-time": float(sys.maxsize),
                                                      "wc-time": float(sys.maxsize),
                                                      "status": "UNKNOWN"}
                                        for solver in solvers}
-                       for instance in instances}
+                       for instance_name in instances.instance_names}
     n_instance_jobs = num_solvers * seeds_per_solver
     while not all(instances_done):
         time.sleep(check_interval)
@@ -136,7 +137,7 @@ def run_parallel_portfolio(instances: list[Path],
     for index, solver_logs in enumerate(runsolver_logs):
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
         solver_name = solvers[solver_index].name
-        instance_name = instances[int(index / n_instance_jobs)].name
+        instance_name = instances.instance_names[int(index / n_instance_jobs)]
         if not solver_logs[1].exists():
             # NOTE: Runsolver is still wrapping up, not a pretty solution
             time.sleep(5)
@@ -238,6 +239,8 @@ if __name__ == "__main__":
     else:
         solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
 
+
+
     check_for_initialise(
         sys.argv,
         sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_PARALLEL_PORTFOLIO]
@@ -258,7 +261,8 @@ if __name__ == "__main__":
         print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")
         sys.exit(-1)
 
-    # Create list of instance paths
+    # Retrieve instance set
+    
     instance_paths = []
 
     for instance in args.instance_paths:
