@@ -28,9 +28,9 @@ slurm_available=$(detect_slurm)
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null
-CLI/add_solver.py --deterministic False $solverA_path > /dev/null
-CLI/add_solver.py --deterministic False $solverB_path > /dev/null
-CLI/add_solver.py --deterministic False $solverC_path > /dev/null
+CLI/add_solver.py $solverA_path > /dev/null
+CLI/add_solver.py $solverB_path > /dev/null
+CLI/add_solver.py $solverC_path > /dev/null
 
 # Run sparkle parallel portfolio on a single instance
 output_true="Running Sparkle parallel portfolio is done!"

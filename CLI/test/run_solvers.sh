@@ -23,7 +23,7 @@ solver_path="Examples/Resources/Solvers/CSCCSat/"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null
-CLI/add_solver.py --deterministic False $solver_path > /dev/null
+CLI/add_solver.py $solver_path > /dev/null
 
 # Run solvers
 output_true="Running solvers done!"

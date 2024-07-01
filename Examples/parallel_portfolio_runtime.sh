@@ -22,9 +22,9 @@ sparkle add_instances Examples/Resources/Instances/PTN/
 # If needed solvers can also include additional files or scripts in their directory, but try to keep additional files to a minimum as it speeds up copying.
 # Use the --solver-variations option to set the default number of solver variations of a solver which will be used when a portfolio is constructed. E.g. '--solver-variations 5'
 
-sparkle add_solver --deterministic False Examples/Resources/Solvers/CSCCSat/
-sparkle add_solver --deterministic False Examples/Resources/Solvers/MiniSAT/
-sparkle add_solver --deterministic False Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add_solver Examples/Resources/Solvers/CSCCSat/
+sparkle add_solver Examples/Resources/Solvers/MiniSAT/
+sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
 #### Run the portfolio 
 

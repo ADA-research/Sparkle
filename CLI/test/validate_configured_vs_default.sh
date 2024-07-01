@@ -34,7 +34,7 @@ config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenar
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
 CLI/add_instances.py $instances_src_path_test > /dev/null
-CLI/add_solver.py --deterministic False $solver_src_path > /dev/null
+CLI/add_solver.py $solver_src_path > /dev/null
 
 # Copy configuration results and other files to simulate the configuration command
 mkdir -p $config_scenario_path

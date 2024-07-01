@@ -18,11 +18,11 @@ sparkle add_instances Examples/Resources/Instances/PTN/
 
 # Each solver directory should contain the solver executable and a wrapper
 
-sparkle add_solver --deterministic False Examples/Resources/Solvers/CSCCSat/
+sparkle add_solver Examples/Resources/Solvers/CSCCSat/
 
-sparkle add_solver --deterministic False Examples/Resources/Solvers/PbO-CCSAT-Generic/
+sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
 
-sparkle add_solver --deterministic False Examples/Resources/Solvers/MiniSAT/
+sparkle add_solver Examples/Resources/Solvers/MiniSAT/
 
 #### Add feature extractor
 

@@ -60,6 +60,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     solver_source = Path(args.solver_path)
+    deterministic = args.deterministic
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_SOLVER])
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit(-1)
 
-    deterministic = args.deterministic
+    
     nickname = args.nickname
     solver_variations = args.solver_variations
     run_on = args.run_on

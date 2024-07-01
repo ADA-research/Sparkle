@@ -19,7 +19,7 @@ sparkle add_instances Examples/Resources/CVRP/Instances/X-11-20/
 
 # The solver directory should contain the solver executable, the `sparkle_solver_wrapper` wrapper, and a `.pcs` file describing the configurable parameters
 
-sparkle add_solver --deterministic False Examples/Resources/CVRP/Solvers/VRP_SISRs/
+sparkle add_solver Examples/Resources/CVRP/Solvers/VRP_SISRs/
 
 # If needed solvers can also include additional files or scripts in their directory, but keeping additional files to a minimum speeds up copying.
 

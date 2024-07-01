@@ -45,7 +45,7 @@ solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 # Run commands to prepare Sparkle for the test
 
-CLI/add_solver.py --deterministic False $solver_path > /dev/null
+CLI/add_solver.py $solver_path > /dev/null
 
 # Run configured solver on a single instance
 output_true="Running configured solver done!"
