@@ -27,7 +27,7 @@ from sparkle.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -98,8 +98,8 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
 
 
 def run_after(solver: Path,
-              train_set: Instances,
-              test_set: Instances,
+              train_set: InstanceSet,
+              test_set: InstanceSet,
               dependency: list[rrr.SlurmRun | rrr.LocalRun],
               command: CommandName,
               run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
@@ -165,13 +165,13 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, Instances)
+        gv.instance_dir, InstanceSet)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
         instance_set_test = resolve_object_name(
             args.instance_set_test,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.instance_dir, Instances)
+            gv.instance_dir, InstanceSet)
     use_features = args.use_features
     run_on = args.run_on
     if args.configurator is not None:

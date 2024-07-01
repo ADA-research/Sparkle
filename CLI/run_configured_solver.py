@@ -12,7 +12,7 @@ import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import run_solver_help as srcsh
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         instance_set = resolve_object_name(
             instance_arg,
             gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.instance_dir, Instances)
+            gv.instance_dir, InstanceSet)
         if instance_set is not None:
             instances_list = instance_set.instance_paths
         elif Path(instance_arg).exists():

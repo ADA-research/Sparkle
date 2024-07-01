@@ -14,7 +14,7 @@ import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
 from sparkle.solver import Solver
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
@@ -77,11 +77,11 @@ if __name__ == "__main__":
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, Instances)
+        gv.instance_dir, InstanceSet)
     instance_set_test = resolve_object_name(
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, Instances)
+        gv.instance_dir, InstanceSet)
     run_on = args.run_on
 
     check_for_initialise(sys.argv,

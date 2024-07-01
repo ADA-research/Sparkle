@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
 from sparkle.solver import Solver
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 
 
 class Scenario(str, Enum):
@@ -344,13 +344,13 @@ class ReportingScenario:
         name = "instance_set_train"
         self.path_setter(section, name, value)
 
-    def get_config_instance_set_train(self: ReportingScenario) -> Instances:
+    def get_config_instance_set_train(self: ReportingScenario) -> InstanceSet:
         """Return the path to the training instance set used for configuration."""
         path = self.none_if_empty_path(
             Path(self.__scenario["configuration"]["instance_set_train"]))
         if path is None:
             return None
-        return Instances(path)
+        return InstanceSet(path)
 
     def set_config_instance_set_test(
             self: ReportingScenario, value: Path = DEFAULT_config_instance_set_test)\
@@ -360,10 +360,10 @@ class ReportingScenario:
         name = "instance_set_test"
         self.path_setter(section, name, value)
 
-    def get_config_instance_set_test(self: ReportingScenario) -> Instances:
+    def get_config_instance_set_test(self: ReportingScenario) -> InstanceSet:
         """Return the path to the testing instance set used for configuration."""
         path = self.none_if_empty_path(
             Path(self.__scenario["configuration"]["instance_set_test"]))
         if path is None:
             return None
-        return Instances(path)
+        return InstanceSet(path)

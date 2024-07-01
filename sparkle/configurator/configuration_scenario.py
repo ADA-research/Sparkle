@@ -9,12 +9,12 @@ import pandas as pd
 
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.solver import Solver
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 
 
 class ConfigurationScenario:
     """Class to handle all activities around configuration scenarios."""
-    def __init__(self: ConfigurationScenario, solver: Solver, instance_set: Instances,
+    def __init__(self: ConfigurationScenario, solver: Solver, instance_set: InstanceSet,
                  number_of_runs: int = None, solver_calls: int = None,
                  cpu_time: int = None, wallclock_time: int = None,
                  cutoff_time: int = None, cutoff_length: int = None,

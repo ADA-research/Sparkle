@@ -17,7 +17,7 @@ from CLI.help import command_help as ch
 from CLI.help.reporting_scenario import Scenario
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
-        gv.instance_dir, Instances)
+        gv.instance_dir, InstanceSet)
     if instance_set is None:
         instance_path = Path(args.instance_path)
 

@@ -11,7 +11,7 @@ from runrunner import SlurmRun, LocalRun
 
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 from CLI.help import run_solver_help as rcsh
 from tools.runsolver_parsing import get_solver_output, get_solver_args
 
@@ -25,7 +25,7 @@ class Validator():
     def validate(self: Validator,
                  solvers: list[Path] | list[Solver] | Solver | Path,
                  configurations: list[str] | str | Path,
-                 instance_sets: list[Instances],
+                 instance_sets: list[InstanceSet],
                  subdir: Path = None,
                  dependency: list[SlurmRun | LocalRun] | SlurmRun | LocalRun = None,
                  run_on: Runner = Runner.SLURM) -> list[SlurmRun | LocalRun]:
@@ -81,7 +81,7 @@ class Validator():
 
     def retrieve_raw_results(self: Validator,
                              solver: Solver,
-                             instance_sets: Instances | list[Instances],
+                             instance_sets: InstanceSet | list[InstanceSet],
                              subdir: Path = None,
                              log_dir: Path = None) -> None:
         """Checks the raw results of a given solver for a specific instance_set.
@@ -96,7 +96,7 @@ class Validator():
             log_dir: The directory to search for log files. If none, defaults to
                 the log directory of the Solver.
         """
-        if isinstance(instance_sets, Instances):
+        if isinstance(instance_sets, InstanceSet):
             instance_sets = [instance_sets]
         if log_dir is None:
             log_dir = solver.raw_output_directory
@@ -140,7 +140,7 @@ class Validator():
 
     def get_validation_results(self: Validator,
                                solver: Solver,
-                               instance_set: Instances,
+                               instance_set: InstanceSet,
                                source_dir: Path = None,
                                subdir: Path = None,
                                config: str = None) -> list[list[str]]:
@@ -179,7 +179,7 @@ class Validator():
     def append_entry_to_csv(self: Validator,
                             solver: str,
                             config_str: str,
-                            instance_set: Instances,
+                            instance_set: InstanceSet,
                             instance: str,
                             status: str,
                             quality: str,

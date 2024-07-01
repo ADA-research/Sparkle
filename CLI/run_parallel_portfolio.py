@@ -22,7 +22,7 @@ from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
 from sparkle.platform.settings_help import SettingState, Settings
 from sparkle.solver import Solver
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
@@ -31,7 +31,7 @@ from tools.runsolver_parsing import get_runtime, get_status
 from CLI.help.nicknames import resolve_object_name
 
 
-def run_parallel_portfolio(instances: Instances,
+def run_parallel_portfolio(instances: InstanceSet,
                            portfolio_path: Path,
                            solvers: list[Solver],
                            run_on: Runner = Runner.SLURM) -> None:
@@ -262,7 +262,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # Retrieve instance set
-    
+
     instance_paths = []
 
     for instance in args.instance_paths:

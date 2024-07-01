@@ -20,7 +20,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
@@ -121,7 +121,7 @@ class SMAC2(Configurator):
     def get_optimal_configuration(
             self: Configurator,
             solver: Solver,
-            instance_set: Instances,
+            instance_set: InstanceSet,
             performance: PerformanceMeasure = None,
             aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns optimal value and configuration string of solver on instance set."""
@@ -184,7 +184,7 @@ class SMAC2(Configurator):
                 break
 
     def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set: Instances) -> None:
+                          solver: Solver, instance_set: InstanceSet) -> None:
         """Patching method to allow the rebuilding of configuratio scenario."""
         self.scenario = ConfigurationScenario(solver, instance_set)
         self.scenario._set_paths(self.output_path)

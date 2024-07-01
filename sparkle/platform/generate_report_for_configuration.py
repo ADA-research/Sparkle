@@ -13,7 +13,7 @@ from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.platform.generate_report_for_selection import generate_comparison_plot
@@ -21,7 +21,7 @@ from sparkle import about
 
 
 def get_features_bool(configurator_scenario: ConfigurationScenario,
-                      solver_name: str, train_set: Instances) -> str:
+                      solver_name: str, train_set: InstanceSet) -> str:
     """Return a bool string for latex indicating whether features were used.
 
     True if a feature file is given in the scenario file, false otherwise.
@@ -106,8 +106,8 @@ def get_performance_measure(objective: SparkleObjective,
         return "performance"
 
 
-def get_ablation_bool(solver: Solver, train_set: Instances,
-                      test_set: Instances) -> str:
+def get_ablation_bool(solver: Solver, train_set: InstanceSet,
+                      test_set: InstanceSet) -> str:
     """Return the ablation bool as LaTeX string.
 
     Args:
@@ -252,7 +252,7 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
 
 
 def get_timeouts_instanceset(solver: Solver,
-                             instance_set: Instances,
+                             instance_set: InstanceSet,
                              configurator: Configurator,
                              validator: Validator,
                              cutoff: int,
@@ -313,8 +313,8 @@ def get_timeouts(instance_to_par_configured: dict,
     return configured_timeouts, default_timeouts, overlapping_timeouts
 
 
-def get_ablation_table(solver: Solver, train_set: Instances,
-                       test_set: Instances = None) -> str:
+def get_ablation_table(solver: Solver, train_set: InstanceSet,
+                       test_set: InstanceSet = None) -> str:
     """Generate a LaTeX table of the ablation path.
 
     This is the result of the ablation analysis to determine the parameter importance.
@@ -369,10 +369,10 @@ def configuration_report_variables(target_dir: Path,
                                    validator: Validator,
                                    extractor_dir: Path,
                                    bib_path: Path,
-                                   instance_set_train: Instances,
+                                   instance_set_train: InstanceSet,
                                    penalty_multiplier: float,
                                    extractor_cuttoff: int,
-                                   instance_set_test: Instances = None,
+                                   instance_set_test: InstanceSet = None,
                                    ablation: bool = True) -> dict:
     """Return a dict matching LaTeX variables and their values.
 
@@ -424,8 +424,8 @@ def get_dict_variable_to_value_common(solver: Solver,
                                       configurator: Configurator,
                                       validator: Validator,
                                       bibliography_path: Path,
-                                      train_set: Instances,
-                                      test_set: Instances,
+                                      train_set: InstanceSet,
+                                      test_set: InstanceSet,
                                       target_directory: Path,
                                       penalty_multiplier: int) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
@@ -504,8 +504,8 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                     solver: Solver,
                                     configurator: Configurator,
                                     validator: Validator,
-                                    train_set: Instances,
-                                    test_set: Instances,
+                                    train_set: InstanceSet,
+                                    test_set: InstanceSet,
                                     penalty_multiplier: int) -> dict:
     """Return a dict matching test set specific latex variables with their values.
 

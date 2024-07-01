@@ -14,11 +14,11 @@ import global_variables as gv
 from sparkle.configurator.implementations import SMAC2
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver
-from sparkle.instance import Instances
+from sparkle.instance import InstanceSet
 
 
-def get_ablation_scenario_directory(solver: Solver, train_set: Instances,
-                                    test_set: Instances, exec_path: str = False)\
+def get_ablation_scenario_directory(solver: Solver, train_set: InstanceSet,
+                                    test_set: InstanceSet, exec_path: str = False)\
         -> str:
     """Return the directory where ablation analysis is executed.
 
@@ -32,7 +32,7 @@ def get_ablation_scenario_directory(solver: Solver, train_set: Instances,
     return scenario_dir
 
 
-def clean_ablation_scenarios(solver: Solver, train_set: Instances) -> None:
+def clean_ablation_scenarios(solver: Solver, train_set: InstanceSet) -> None:
     """Clean up ablation analysis directory."""
     ablation_scenario_dir = gv.ablation_dir / "scenarios"
     if ablation_scenario_dir.is_dir():
@@ -42,8 +42,8 @@ def clean_ablation_scenarios(solver: Solver, train_set: Instances) -> None:
     return
 
 
-def prepare_ablation_scenario(solver: Solver, train_set: Instances,
-                              test_set: Instances) -> Path:
+def prepare_ablation_scenario(solver: Solver, train_set: InstanceSet,
+                              test_set: InstanceSet) -> Path:
     """Prepare directories and files for ablation analysis."""
     ablation_scenario_dir = get_ablation_scenario_directory(solver,
                                                             train_set,
@@ -62,8 +62,8 @@ def print_ablation_help() -> None:
     print(process.stdout)
 
 
-def create_configuration_file(solver: Solver, train_set: Instances,
-                              test_set: Instances) -> None:
+def create_configuration_file(solver: Solver, train_set: InstanceSet,
+                              test_set: InstanceSet) -> None:
     """Create a configuration file for ablation analysis.
 
     Args:
@@ -117,7 +117,7 @@ def create_configuration_file(solver: Solver, train_set: Instances,
     return
 
 
-def create_instance_file(instance_set: Instances, ablation_scenario_dir: str,
+def create_instance_file(instance_set: InstanceSet, ablation_scenario_dir: str,
                          test: bool = False) -> None:
     """Create an instance file for ablation analysis."""
     file_suffix = "_train.txt"
@@ -136,8 +136,8 @@ def create_instance_file(instance_set: Instances, ablation_scenario_dir: str,
     return
 
 
-def check_for_ablation(solver: Solver, train_set: Instances,
-                       test_set: Instances) -> bool:
+def check_for_ablation(solver: Solver, train_set: InstanceSet,
+                       test_set: InstanceSet) -> bool:
     """Run a solver on an instance, only for internal calls from Sparkle."""
     scenario_dir = get_ablation_scenario_directory(solver, train_set,
                                                    test_set, exec_path=False)
@@ -147,8 +147,8 @@ def check_for_ablation(solver: Solver, train_set: Instances,
     return path.open().readline().strip() == "Ablation analysis validation complete."
 
 
-def read_ablation_table(solver: Solver, train_set: Instances,
-                        test_set: Instances) -> list[list[str]]:
+def read_ablation_table(solver: Solver, train_set: InstanceSet,
+                        test_set: InstanceSet) -> list[list[str]]:
     """Read from ablation table of a scenario."""
     if not check_for_ablation(solver, train_set, test_set):
         # No ablation table exists for this solver-instance pair
@@ -178,7 +178,7 @@ def read_ablation_table(solver: Solver, train_set: Instances,
 
 
 def submit_ablation(ablation_scenario_dir: Path,
-                    test_set: Instances = None,
+                    test_set: InstanceSet = None,
                     run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun]:
     """Submit an ablation job.
 
