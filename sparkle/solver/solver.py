@@ -10,33 +10,31 @@ from pathlib import Path
 import subprocess
 from tools import runsolver_parsing
 import pcsparser
+from sparkle.types import SparkleCallable
 
 
-class Solver:
+class Solver(SparkleCallable):
     """Class to handle a solver and its directories."""
     meta_data = "solver_meta.txt"
     wrapper = "sparkle_solver_wrapper.py"
 
     def __init__(self: Solver,
-                 solver_directory: Path,
+                 directory: Path,
                  raw_output_directory: Path = None,
                  runsolver_exec: Path = None,
                  deterministic: bool = None) -> None:
         """Initialize solver.
 
         Args:
-            solver_directory: Directory of the solver.
+            directory: Directory of the solver.
             raw_output_directory: Directory where solver will write its raw output.
-                Defaults to solver_directory / tmp
+                Defaults to directory / tmp
             runsolver_exec: Path to the runsolver executable.
-                By default, runsolver in solver_directory.
+                By default, runsolver in directory.
             deterministic: Bool indicating determinism of the algorithm.
                 Defaults to False.
         """
-        self.directory = solver_directory
-        self.name = solver_directory.name
-        self.raw_output_directory = raw_output_directory
-        self.runsolver_exec = runsolver_exec
+        super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
         self.meta_data_file = self.directory / Solver.meta_data
 
@@ -88,8 +86,8 @@ class Solver:
             pass
         return False
 
-    def build_solver_cmd(self: Solver, instance: str, configuration: dict = None,
-                         runsolver_configuration: list[str] = None) -> list[str]:
+    def build_cmd(self: Solver, instance: str, configuration: dict = None,
+                  runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):
             configuration = Solver.config_str_to_dict(configuration)
@@ -120,10 +118,10 @@ class Solver:
                        str(configuration)]
         return solver_cmd
 
-    def run_solver(self: Solver, instance: str,
-                   configuration: dict = None,
-                   runsolver_configuration: list[str] = None,
-                   cwd: Path = None) -> dict[str, str]:
+    def run(self: Solver, instance: str,
+            configuration: dict = None,
+            runsolver_configuration: list[str] = None,
+            cwd: Path = None) -> dict[str, str]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
@@ -138,9 +136,9 @@ class Solver:
         """
         if cwd is None:
             cwd = self.raw_output_directory
-        solver_cmd = self.build_solver_cmd(instance,
-                                           configuration,
-                                           runsolver_configuration)
+        solver_cmd = self.build_cmd(instance,
+                                    configuration,
+                                    runsolver_configuration)
         process = subprocess.run(solver_cmd,
                                  cwd=cwd,
                                  capture_output=True)

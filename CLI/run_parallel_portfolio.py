@@ -67,7 +67,7 @@ def run_parallel_portfolio(instances: list[Path],
                 log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.var"
             raw_result_path =\
                 log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.raw"
-            solver_call_list = solver.build_solver_cmd(
+            solver_call_list = solver.build_cmd(
                 str(instance),
                 configuration={"specifics": "",
                                "seed": seed,

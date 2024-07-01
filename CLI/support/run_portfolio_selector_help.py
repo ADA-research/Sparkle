@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a portfolio selector."""
-
-import pathlib
 import subprocess
 import sys
 import fcntl
@@ -14,81 +12,13 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
+from sparkle.solver import Extractor
 import global_variables as gv
 import tools.general as tg
-from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
-from CLI.help.reporting_scenario import Scenario
-from sparkle.instance import instances_help as sih
+
 from CLI.help.command_help import CommandName
-
-
-# Only called in call_sparkle_portfolio_selector_solve_instance
-def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: str,
-                            cutoff_time_each_extractor_run: float) -> list[str]:
-    """Return the feature vector for an instance as a list."""
-    err_path = result_path.replace(".rawres", ".err")
-    runsolver_watch_data_path = result_path.replace(".rawres", ".log")
-    runsolver_value_data_path = result_path.replace(".rawres", ".val")
-
-    cmd_list_extractor = [gv.runsolver_path,
-                          "--cpu-limit", str(cutoff_time_each_extractor_run),
-                          "-w", runsolver_watch_data_path,  # Set log path
-                          "-v", runsolver_value_data_path,  # Set information path
-                          f"{extractor_path}/{gv.sparkle_extractor_wrapper}",
-                          "-extractor_dir", f"{extractor_path}/",
-                          "-instance_file", instance_path,
-                          "-output_file", result_path]
-
-    extractor = subprocess.run(cmd_list_extractor, capture_output=True)
-
-    if extractor.returncode != 0:
-        print("Possible issue with runsolver or extractor.")
-
-    if Path(runsolver_value_data_path).exists():
-        with Path(runsolver_value_data_path).open() as file:
-            if "TIMEOUT=true" in file.read():
-                print(f"****** WARNING: Feature vector computing on instance "
-                      f"{instance_path} timed out! ******")
-
-    if not Path(result_path).exists():
-        # TODO: This protocol seems to make no sense. Why create an empty file?
-        # Needs to be fixed
-        print(f"WARNING: Result file {result_path} does not exist.")
-        sfh.create_new_empty_file(result_path)
-
-    try:
-        sfdcsv.SparkleFeatureDataCSV(result_path,
-                                     gv.extractor_list)
-    except Exception:
-        print(f"****** WARNING: Feature vector computing on instance {instance_path}"
-              " failed! ******")
-        print("****** WARNING: The feature vector of this instance will be imputed as "
-              "the mean value of all other non-missing values! ******")
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                                        gv.extractor_list)
-        list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
-    else:
-        fin = Path(result_path).open("r+")
-        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-        myline = fin.readline().strip()
-        myline = fin.readline().strip()
-        list_feature_vector = myline.split(",")
-        del list_feature_vector[0]
-        fin.close()
-
-    sfh.rmfiles([result_path, err_path,
-                runsolver_watch_data_path, runsolver_value_data_path])
-    return list_feature_vector
-
-# Only called in call_sparkle_portfolio_selector_solve_instance
-def print_predict_schedule(predict_schedule_result_path: str) -> None:
-    """Print the predicted algorithm schedule."""
-    with Path(predict_schedule_result_path).open("r+") as fin:
-        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-        line = fin.readline().strip()
-        print(line)
 
 
 # Called in call_sparkle_portfolio_selector_solve_instance
@@ -133,7 +63,6 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
     if performance_data_csv is not None:
         performance_data_csv_path = Path(performance_data_csv)
         solver_name = "Sparkle_Portfolio_Selector"
-        check_selector_status(solver_name)
         print(f"Trying to write: {cpu_time_penalised}, {solver_name}, {instance_path}")
         try:
             # Creating a seperate locked file for writing
@@ -194,29 +123,36 @@ def call_sparkle_portfolio_selector_solve_instance(
     cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
 
     for extractor_path in gv.extractor_list:
-        extractor_name = Path(extractor_path).name
-        print(f"Extractor {extractor_name} computing "
-              f"features of instance {instance_files_str} ...")
-        result_path = (f"Tmp/{extractor_name}_{instance_files_str_}_"
-                       f"{tg.get_time_pid_random_string()}.rawres")
-
-        list_feature_vector = list_feature_vector + get_list_feature_vector(
-            extractor_path, instance_path, result_path, cutoff_extractor)
-        print(f"Extractor {extractor_name} computing "
-              f"features of instance {instance_files_str} done!")
-
+        extractor = Extractor(Path(extractor_path),
+                              gv.runsolver_path,
+                              Path("Tmp"))
+        result_path = Path(f"{extractor.name}_{instance_files_str_}_"
+                           f"{tg.get_time_pid_random_string()}.rawres")
+        err_path = result_path.with_suffix(".err")
+        runsolver_watch_data_path = result_path.with_suffix(".log")
+        runsolver_value_data_path = result_path.with_suffix(".val")
+        run = extractor.run(instance, result_path,
+                            runsolver_args=["--cpu-limit", str(cutoff_extractor),
+                                            "-w", runsolver_watch_data_path,
+                                            "-v", runsolver_value_data_path],
+                            run_options=["EXTRACT_FEATURES", [], []],
+                            run_on=Runner.LOCAL)
+        run.wait()
+        list_feature_vector += extractor.get_feature_vector(result_path,
+                                                            runsolver_value_data_path)
+        sfh.rmfiles([result_path, err_path, runsolver_watch_data_path,
+                     runsolver_value_data_path])
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
-    predict_schedule_result_path = ("Tmp/predict_schedule_"
-                                    f"{tg.get_time_pid_random_string()}"
-                                    ".predres")
+    predict_schedule_result_path = Path(
+        f"Tmp/predict_schedule_{tg.get_time_pid_random_string()}.predres")
+
     print("Sparkle portfolio selector predicting ...")
     cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
                 gv.sparkle_algorithm_selector_path, "--feature_vec",
                 " ".join(map(str, list_feature_vector))]
-
     process = subprocess.run(cmd_list,
-                             stdout=Path(predict_schedule_result_path).open("w+"),
+                             stdout=predict_schedule_result_path.open("w+"),
                              stderr=gv.sparkle_err_path.open("w+"))
 
     if process.returncode != 0:
@@ -225,7 +161,7 @@ def call_sparkle_portfolio_selector_solve_instance(
         sys.exit(process.returncode)
     print("Predicting done!")
 
-    print_predict_schedule(predict_schedule_result_path)
+    print(predict_schedule_result_path.open("r").read())
     list_predict_schedule = get_list_predict_schedule_from_file(
         predict_schedule_result_path)
     sfh.rmfiles([predict_schedule_result_path, gv.sparkle_err_path])
@@ -240,81 +176,52 @@ def call_sparkle_portfolio_selector_solve_instance(
         print(f"Calling solver {Path(solver_path).name} done!")
 
         if flag_solved:
-            break
+            return
         else:
             print("The instance is not solved in this call")
 
-    return
-
 
 # Only called in run_sparkle_portfolio_selector
-def call_sparkle_portfolio_selector_solve_directory(
-        instance_directory_path: str,
+def run_portfolio_selector_on_instances(
+        instances: list[Path],
+        performance_data: PerformanceDataFrame,
+        portfolio_selector: Path,
         run_on: Runner = Runner.SLURM) -> None:
     """Call the Sparkle portfolio selector to solve all instances in a directory.
 
     Args:
-        instance_directory_path: The path to the directory of instances.
+        instances: The paths to the instances.
+        performance_data: The dataframe to store the results in.
+        portfolio_selector: Path to the selector.
         run_on: Whether to run with Slurm or Local.
     """
-    instance_directory_path = Path(instance_directory_path)
-    instance_directory_name = instance_directory_path.name
+    for instance_path in instances:
+        performance_data.add_instance(instance_path.name)
 
-    test_case_path = Path("Test_Cases") / instance_directory_name
-    test_case_path.mkdir(parents=True, exist_ok=True)
-    # Update latest scenario
-    gv.latest_scenario().set_selection_test_case_directory(
-        test_case_path)
-    gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
-    # Write used scenario to file
-    gv.latest_scenario().write_scenario_ini()
+    performance_data.add_solver(portfolio_selector.name)
 
-    test_performance_data_path = test_case_path / "sparkle_performance_data.csv"
-    test_performance_data_csv = PerformanceDataFrame(test_performance_data_path)
+    performance_data.save_csv()
 
-    total_job_list = []
+    # TODO: Instead of using run_sparkle_portfolio_core.py, we should do here:
+    # 1. Get feature data for every feature extractor
+    # 2. Use autofolio call to predict the solver per instance with
+    #    a dependency on run object of 1
+    # 3. Run the solver and place the results in the performance dataframe w dependency
+    #    (Difficult, which solver is determined by 2)
 
-    list_all_filename = sih.get_instance_list_from_path(instance_directory_path)
-
-    for filename in list_all_filename:
-        test_performance_data_csv.add_instance(str(filename))
-        total_job_list.append([str(filename)])
-
-    solver_name = "Sparkle_Portfolio_Selector"
-    check_selector_status(solver_name)
-    test_performance_data_csv.add_solver(solver_name)
-
-    test_performance_data_csv.save_csv()
-
-    n_jobs = len(total_job_list)
-    target_call = "python CLI/core/run_sparkle_portfolio_core.py" +\
-                  f" --performance-data-csv {test_performance_data_path}"
-    cmd_list = [f"{target_call} --instance {instance_directory_path / job_instance[0]}"
-                for job_instance in total_job_list]
+    cmd_list = ["python CLI/core/run_sparkle_portfolio_core.py "
+                f"--performance-data-csv {performance_data.csv_filepath} "
+                f"--instance {instance_path}" for instance_path in instances]
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
         name=CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR,
         base_dir=gv.sparkle_tmp_path,
-        parallel_jobs=n_jobs,
         sbatch_options=gv.settings.get_slurm_extra_options(as_args=True),
         srun_options=["-N1", "-n1", "--exclusive"])
 
     if run_on == Runner.LOCAL:
         run.wait()
-
-
-def check_selector_status(solver_name: str) -> None:
-    """Check if there is a selector at the given path.
-
-    If it does not exist the function will terminate the whole program.
-    """
-    selector = pathlib.Path(f"{solver_name}/sparkle_portfolio_selector__@@SPARKLE@@__")
-    if not selector.exists() or not selector.is_file():
-        print("ERROR: The portfolio selector could not be found. Please make sure to "
-              "first construct a portfolio selector.")
-        sys.exit(-1)
-
-
-def call_selector_on_instances() -> None:
-    return
+        print("Running Sparkle portfolio selector done!")
+    else:
+        print("Sparkle portfolio selector is running ...")

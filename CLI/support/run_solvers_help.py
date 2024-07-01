@@ -34,7 +34,7 @@ def run_solver_on_instance_and_process_results(
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
     raw_result_path_option = f"{raw_result_path}"
     solver = Solver(Path(solver_path))
-    solver_output = solver.run_solver(
+    solver_output = solver.run(
         instance_path,
         configuration={"seed": seed_str,
                        "cutoff_time": custom_cutoff,

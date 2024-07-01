@@ -83,8 +83,8 @@ def call_solver(
                 solver_params["seed"] = seed
         runsolver_args_list.append(runsolver_args)
         solver_params_list.append(solver_params)
-        solver_cmd = solver.build_solver_cmd(instance_path.absolute(),
-                                             solver_params, runsolver_args)
+        solver_cmd = solver.build_cmd(instance_path.absolute(),
+                                      solver_params, runsolver_args)
         cmd_list.append(" ".join(solver_cmd))
 
     sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
