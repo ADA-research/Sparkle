@@ -56,6 +56,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_source = Path(args.instances_path)
+    instances_directory = gv.instance_dir / instances_source.name
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
@@ -65,14 +66,12 @@ if __name__ == "__main__":
         print(f'Instance set path "{instances_source}" does not exist!')
         sys.exit(-1)
 
-    nickname_str = args.nickname
+    nickname = args.nickname
+    if nickname is not None:
+        sfh.add_remove_platform_item(instances_directory,
+                                     gv.instances_nickname_path, key=nickname)
 
     print(f"Start adding all instances in directory {instances_source} ...")
-
-    if nickname_str is not None:
-        instances_directory = gv.instance_dir / nickname_str
-    else:
-        instances_directory = gv.instance_dir / instances_source.name
 
     if not instances_directory.exists():
         instances_directory.mkdir(parents=True, exist_ok=True)

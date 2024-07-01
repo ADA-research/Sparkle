@@ -27,6 +27,7 @@ from sparkle.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from sparkle.instance import Instances
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -97,8 +98,8 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
 
 
 def run_after(solver: Path,
-              instance_set_train: Path,
-              instance_set_test: Path,
+              train_set: Instances,
+              test_set: Instances,
               dependency: list[rrr.SlurmRun | rrr.LocalRun],
               command: CommandName,
               run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
@@ -106,8 +107,8 @@ def run_after(solver: Path,
 
     Args:
       solver: Path (object) to solver.
-      instance_set_train: Path (object) to instances used for training.
-      instance_set_test: Path (object) to instances used for testing.
+      train_set: Instances used for training.
+      test_set: Instances used for testing.
       dependency: String of job dependencies.
       command: The command to run. Currently supported: Validation and Ablation.
       run_on: Whether the job is executed on Slurm or locally.
@@ -120,10 +121,10 @@ def run_after(solver: Path,
         cmd_file = "run_ablation.py"
 
     command_line = f"./CLI/{cmd_file} --settings-file Settings/latest.ini "\
-                   f"--solver {solver.name} --instance-set-train {instance_set_train}"\
+                   f"--solver {solver.name} --instance-set-train {train_set.directory}"\
                    f" --run-on {run_on}"
-    if instance_set_test is not None:
-        command_line += f" --instance-set-test {instance_set_test}"
+    if test_set is not None:
+        command_line += f" --instance-set-test {test_set.directory}"
 
     run = rrr.add_to_queue(
         runner=run_on,
@@ -157,14 +158,20 @@ if __name__ == "__main__":
 
     validate = args.validate
     ablation = args.ablation
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping, gv.solver_dir)
-    solver = Solver(solver_path)
-    instance_set_train = resolve_object_name(args.instance_set_train,
-                                             target_dir=gv.instance_dir)
+    solver = resolve_object_name(
+        args.solver,
+        gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+        gv.solver_dir, class_name=Solver)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, Instances)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
-        instance_set_test = Path(instance_set_test)
+        instance_set_test = resolve_object_name(
+            args.instance_set_test,
+            gv.file_storage_data_mapping[gv.instances_nickname_path],
+            gv.instance_dir, Instances)
     use_features = args.use_features
     run_on = args.run_on
     if args.configurator is not None:
@@ -180,10 +187,6 @@ if __name__ == "__main__":
     if use_features:
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
                                                         gv.extractor_list)
-
-        if not Path(instance_set_train).is_dir():  # Path has to be a directory
-            print("Given training set path is not an existing directory")
-            sys.exit(-1)
 
         data_dict = {}
         feature_data_df = feature_data_csv.dataframe
@@ -214,10 +217,9 @@ if __name__ == "__main__":
     sah.clean_ablation_scenarios(solver, instance_set_train.name)
 
     status_info = ConfigureSolverStatusInfo()
-    status_info.set_solver(str(solver.name))
-    status_info.set_instance_set_train(str(instance_set_train.name))
-    ins_t_str = instance_set_test.name if instance_set_test is not None else "_"
-    status_info.set_instance_set_test(str(instance_set_test))
+    status_info.set_solver(solver.name)
+    status_info.set_instance_set_train(instance_set_train.name)
+    status_info.set_instance_set_test(instance_set_test.name)
     status_info.save()
 
     number_of_runs = gv.settings.get_config_number_of_runs()
@@ -243,7 +245,7 @@ if __name__ == "__main__":
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver.directory)
-    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:

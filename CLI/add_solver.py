@@ -69,7 +69,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     deterministic = args.deterministic
-    nickname_str = args.nickname
+    nickname = args.nickname
     solver_variations = args.solver_variations
     run_on = args.run_on
 
@@ -135,9 +135,9 @@ if __name__ == "__main__":
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 
-    if nickname_str is not None:
+    if nickname is not None:
         sfh.add_remove_platform_item(solver_directory,
-                                     gv.solver_nickname_list_path, key=nickname_str)
+                                     gv.solver_nickname_list_path, key=nickname)
 
     if args.run_solver_now:
         num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()

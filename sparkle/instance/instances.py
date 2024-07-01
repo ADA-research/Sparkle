@@ -11,6 +11,7 @@ class Instances:
     def __init__(self: Instances, directory: Path) -> None:
         """Initialise an Instances object from a directory."""
         self.directory = directory
+        self.name = directory.name
         self.multi_file = False
         self.instance_names = []
         self.instance_paths = []
