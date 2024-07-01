@@ -81,7 +81,6 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
         else:
             print(f"Solver {solver_path} failed to solve the instance with status "
                   f"{status}")
-    print("done!")
     sfh.rmfiles(raw_result_path)
     return flag_solved
 
@@ -198,7 +197,7 @@ def run_portfolio_selector_on_instances(
     for instance_path in instances:
         performance_data.add_instance(instance_path.name)
 
-    performance_data.add_solver(portfolio_selector.name)
+    performance_data.add_solver(portfolio_selector.parent)
 
     performance_data.save_csv()
 

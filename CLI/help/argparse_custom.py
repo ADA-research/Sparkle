@@ -148,6 +148,10 @@ ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                                           "feature extractor"
                                                   })
 
+InstancePath = ArgumentContainer(names=["instance_path"],
+                                kwargs={"type": Path,
+                                        "help": "Path to an instance (set)"})
+
 InstancePathRunConfiguredSolverArgument = \
     ArgumentContainer(names=["instance_path"],
                       kwargs={"type": Path,
@@ -155,12 +159,6 @@ InstancePathRunConfiguredSolverArgument = \
                               "help": "Path(s) to instance file(s) (when multiple files "
                                       "are given, it is assumed this is a multi-file "
                                       "instance) or instance directory."})
-
-InstancePathRunPortfolioSelectorArgument = \
-    ArgumentContainer(names=["instance_path"],
-                      kwargs={"type": str,
-                              "nargs": "+",
-                              "help": "Path to instance or instance directory"})
 
 InstancePathsRunParallelPortfolioArgument = \
     ArgumentContainer(names=["--instance-paths"],
