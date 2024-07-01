@@ -492,11 +492,8 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
     latex_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
     latex_dict["timeoutsTrainOverlap"] = str(overlapping_timeouts_train)
-
-    latex_dict["ablationBool"] = get_ablation_bool(solver, train_set,
-                                                   test_set)
-    latex_dict["ablationPath"] = get_ablation_table(
-        solver, train_set, test_set)
+    latex_dict["ablationBool"] = get_ablation_bool(solver, train_set, test_set)
+    latex_dict["ablationPath"] = get_ablation_table(solver, train_set, test_set)
     latex_dict["featuresBool"] = get_features_bool(
         configurator.scenario, solver.name, train_set)
 

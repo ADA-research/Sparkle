@@ -144,9 +144,7 @@ def check_for_ablation(solver: Solver, train_set: Instances,
     table_file = Path(scenario_dir, "ablationValidation.txt")
     if not table_file.is_file():
         return False
-    if table_file.open().readline() != "Ablation analysis validation complete.":
-        return False
-    return True
+    return table_file.open().readline().strip() == "Ablation analysis validation complete."
 
 
 def read_ablation_table(solver: Solver, train_set: Instances,
