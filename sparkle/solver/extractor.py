@@ -27,13 +27,24 @@ class Extractor(SparkleCallable):
                 Defaults to directory / tmp
         """
         super().__init__(directory, runsolver_exec, raw_output_directory)
-        self.output_dimension = 1 #This needs to be set to the output dim of the extractor
-        
+        self.output_dimension = 1  # TODO: Set to the output dim of the extractor
+
     def build_cmd(self: Extractor,
                   instance: Path,
                   output_file: Path,
                   runsolver_args: list[str | Path] = None,
                   ) -> list[str]:
+        """Builds a command line string seperated by space.
+
+        Args:
+            instance: The instance to run on
+            outputfile: Target output file
+            runsolver_args: The arguments for runsolver. If not present,
+                will run the extractor without runsolver.
+
+        Returns:
+            The command seperated per item in the list.
+        """
         cmd_list_extractor = []
         if runsolver_args is not None:
             # Ensure stringification of runsolver configuration is done correctly
@@ -41,9 +52,9 @@ class Extractor(SparkleCallable):
             cmd_list_extractor += [str(runsolver_config) for runsolver_config
                                    in runsolver_args]
         cmd_list_extractor += [f"{self.directory / Extractor.wrapper}",
-                                "-extractor_dir", f"{self.directory}/",
-                                "-instance_file", str(instance),
-                                "-output_file", str(output_file)]
+                               "-extractor_dir", f"{self.directory}/",
+                               "-instance_file", str(instance),
+                               "-output_file", str(output_file)]
         return cmd_list_extractor
 
     def run(self: Extractor,
@@ -64,7 +75,8 @@ class Extractor(SparkleCallable):
             run_on: Platform to run on
 
         Returns:
-            Local- or SlurmRun."""
+            Local- or SlurmRun.
+        """
         cmd_extractor = self.build_cmd(instance, output_file, runsolver_args)
         return rrr.add_to_queue(
             runner=run_on,
@@ -85,7 +97,8 @@ class Extractor(SparkleCallable):
             runsolver_values: The output of runsolver.
 
         Returns:
-            A list of features."""
+            A list of features.
+        """
         features = [SparkleFeatureDataCSV.missing_value] * self.output_dimension
         if result.exists() and get_status(runsolver_values, None) != "TIMEOUT":
             # Last line contains feature vector:

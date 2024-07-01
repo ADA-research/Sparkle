@@ -137,8 +137,8 @@ class Solver(SparkleCallable):
         if cwd is None:
             cwd = self.raw_output_directory
         solver_cmd = self.build_cmd(instance,
-                                           configuration,
-                                           runsolver_configuration)
+                                    configuration,
+                                    runsolver_configuration)
         process = subprocess.run(solver_cmd,
                                  cwd=cwd,
                                  capture_output=True)
