@@ -206,7 +206,7 @@ if __name__ == "__main__":
             sys.exit(-1)
         instance_set_train_name = instance_set_train.name
         gv.settings.get_general_sparkle_configurator()\
-            .set_scenario_dirs(solver, instance_set_train_name)
+            .set_scenario_dirs(solver, instance_set_train)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train or flag_instance_set_test:
             # Check if there are result to generate a report from

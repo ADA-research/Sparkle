@@ -214,7 +214,7 @@ if __name__ == "__main__":
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    sah.clean_ablation_scenarios(solver, instance_set_train.name)
+    sah.clean_ablation_scenarios(solver, instance_set_train)
 
     status_info = ConfigureSolverStatusInfo()
     status_info.set_solver(solver.name)

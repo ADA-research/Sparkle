@@ -13,6 +13,7 @@ from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
+from sparkle.instance import Instances
 from sparkle.configurator.implementations import SMAC2
 from sparkle.types.objective import SparkleObjective, PerformanceMeasure
 from sparkle.platform.generate_report_for_selection import generate_comparison_plot
@@ -20,7 +21,7 @@ from sparkle import about
 
 
 def get_features_bool(configurator_scenario: ConfigurationScenario,
-                      solver_name: str, instance_set_train_name: str) -> str:
+                      solver_name: str, train_set: Instances) -> str:
     """Return a bool string for latex indicating whether features were used.
 
     True if a feature file is given in the scenario file, false otherwise.
@@ -33,7 +34,7 @@ def get_features_bool(configurator_scenario: ConfigurationScenario,
         A string describing whether features are used
     """
     scenario_file = configurator_scenario.directory \
-        / f"{solver_name}_{instance_set_train_name}_scenario.txt"
+        / f"{solver_name}_{train_set.name}_scenario.txt"
 
     for line in scenario_file.open("r").readlines():
         if line.split(" ")[0] == "feature_file":
@@ -105,8 +106,8 @@ def get_performance_measure(objective: SparkleObjective,
         return "performance"
 
 
-def get_ablation_bool(solver: Solver, instance_train_name: str,
-                      instance_test_name: str) -> str:
+def get_ablation_bool(solver: Solver, train_set: Instances,
+                      test_set: Instances) -> str:
     """Return the ablation bool as LaTeX string.
 
     Args:
@@ -117,7 +118,7 @@ def get_ablation_bool(solver: Solver, instance_train_name: str,
     Returns:
         A string describing whether ablation was run or not
     """
-    if sah.check_for_ablation(solver, instance_train_name, instance_test_name):
+    if sah.check_for_ablation(solver, train_set, test_set):
         return "\\ablationtrue"
     return "\\ablationfalse"
 
@@ -251,7 +252,7 @@ def get_figure_configured_vs_default_on_instance_set(solver: Solver,
 
 
 def get_timeouts_instanceset(solver: Solver,
-                             instance_set_path: Path,
+                             instance_set: Instances,
                              configurator: Configurator,
                              validator: Validator,
                              cutoff: int,
@@ -267,12 +268,12 @@ def get_timeouts_instanceset(solver: Solver,
         A tuple containing the number of timeouts for the different configurations
     """
     objective = configurator.scenario.sparkle_objective
-    _, config = configurator.get_optimal_configuration(solver, instance_set_path)
+    _, config = configurator.get_optimal_configuration(solver, instance_set)
     res_default = validator.get_validation_results(solver,
-                                                   instance_set_path,
+                                                   instance_set,
                                                    config="")
     res_conf = validator.get_validation_results(solver,
-                                                instance_set_path,
+                                                instance_set,
                                                 config=config)
     dict_instance_to_par_configured = get_dict_instance_to_performance(
         res_conf, cutoff, penalty, objective)
@@ -312,8 +313,8 @@ def get_timeouts(instance_to_par_configured: dict,
     return configured_timeouts, default_timeouts, overlapping_timeouts
 
 
-def get_ablation_table(solver: Solver, instance_set_train_name: str,
-                       instance_set_test_name: str = None) -> str:
+def get_ablation_table(solver: Solver, train_set: Instances,
+                       test_set: Instances = None) -> str:
     """Generate a LaTeX table of the ablation path.
 
     This is the result of the ablation analysis to determine the parameter importance.
@@ -326,8 +327,7 @@ def get_ablation_table(solver: Solver, instance_set_train_name: str,
     Returns:
         A string containing the LaTeX table code of the ablation path
     """
-    results = sah.read_ablation_table(solver, instance_set_train_name,
-                                      instance_set_test_name)
+    results = sah.read_ablation_table(solver, train_set, test_set)
     table_string = r"\begin{tabular}{rp{0.25\linewidth}rrr}"
     # "Round", "Flipped parameter", "Source value", "Target value", "Validation result"
     for i, line in enumerate(results):
@@ -369,10 +369,10 @@ def configuration_report_variables(target_dir: Path,
                                    validator: Validator,
                                    extractor_dir: Path,
                                    bib_path: Path,
-                                   instance_set_train: Path,
+                                   instance_set_train: Instances,
                                    penalty_multiplier: float,
                                    extractor_cuttoff: int,
-                                   instance_set_test: Path = None,
+                                   instance_set_test: Instances = None,
                                    ablation: bool = True) -> dict:
     """Return a dict matching LaTeX variables and their values.
 
@@ -424,8 +424,8 @@ def get_dict_variable_to_value_common(solver: Solver,
                                       configurator: Configurator,
                                       validator: Validator,
                                       bibliography_path: Path,
-                                      instance_set_train: Path,
-                                      instance_set_test: Path,
+                                      train_set: Instances,
+                                      test_set: Instances,
                                       target_directory: Path,
                                       penalty_multiplier: int) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
@@ -440,11 +440,11 @@ def get_dict_variable_to_value_common(solver: Solver,
         A dictionary containing the variables and values
     """
     objective = configurator.scenario.sparkle_objective
-    _, opt_config = configurator.get_optimal_configuration(solver, instance_set_train)
+    _, opt_config = configurator.get_optimal_configuration(solver, train_set)
     res_default = validator.get_validation_results(
-        solver, instance_set_train, config="")
+        solver, train_set, config="")
     res_conf = validator.get_validation_results(
-        solver, instance_set_train, config=opt_config)
+        solver, train_set, config=opt_config)
     instance_names = set([res[3] for res in res_default])
 
     latex_dict = {"bibliographypath": str(bibliography_path.absolute())}
@@ -458,7 +458,7 @@ def get_dict_variable_to_value_common(solver: Solver,
         latex_dict["runtimeBool"] = "\\runtimefalse"
 
     latex_dict["solver"] = solver.name
-    latex_dict["instanceSetTrain"] = instance_set_train.name
+    latex_dict["instanceSetTrain"] = train_set.name
     latex_dict["sparkleVersion"] = about.version
     latex_dict["numInstanceInTrainingInstanceSet"] = str(len(instance_names))
 
@@ -480,28 +480,25 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["defaultConfigurationTrainingPerformancePAR"] = str(str_value)
 
     str_value = get_figure_configured_vs_default_on_instance_set(
-        solver, instance_set_train.name, res_default, res_conf, target_directory,
+        solver, train_set.name, res_default, res_conf, target_directory,
         smac_run_obj, float(run_cutoff_time), penalty_multiplier, objective)
     latex_dict["figure-configured-vs-default-train"] = str_value
 
     # Retrieve timeout numbers for the training instances
     configured_timeouts_train, default_timeouts_train, overlapping_timeouts_train =\
-        get_timeouts_instanceset(solver, instance_set_train, configurator, validator,
+        get_timeouts_instanceset(solver, train_set, configurator, validator,
                                  float(run_cutoff_time), penalty)
 
     latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
     latex_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
     latex_dict["timeoutsTrainOverlap"] = str(overlapping_timeouts_train)
 
-    ablation_validation_name = instance_set_train.name
-    if instance_set_test is not None:
-        ablation_validation_name = instance_set_test.name
-    latex_dict["ablationBool"] = get_ablation_bool(solver, instance_set_train.name,
-                                                   ablation_validation_name)
+    latex_dict["ablationBool"] = get_ablation_bool(solver, train_set,
+                                                   test_set)
     latex_dict["ablationPath"] = get_ablation_table(
-        solver, instance_set_train.name, ablation_validation_name)
+        solver, train_set, test_set)
     latex_dict["featuresBool"] = get_features_bool(
-        configurator.scenario, solver.name, instance_set_train.name)
+        configurator.scenario, solver.name, train_set)
 
     return latex_dict
 
@@ -510,8 +507,8 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                     solver: Solver,
                                     configurator: Configurator,
                                     validator: Validator,
-                                    instance_set_train: Path,
-                                    instance_set_test: Path,
+                                    train_set: Instances,
+                                    test_set: Instances,
                                     penalty_multiplier: int) -> dict:
     """Return a dict matching test set specific latex variables with their values.
 
@@ -520,23 +517,23 @@ def get_dict_variable_to_value_test(target_dir: Path,
         solver: The solver object
         configurator: Configurator for which the report is generated
         validator: Validator that provided the data set results
-        instance_set_train: Path of the instance set for training
-        instance_set_test: Path of the instance set for testing
+        train_set: Instance set for training
+        test_set: Instance set for testing
         penalty_multiplier: Penalty factor for TIMEOUT
 
     Returns:
         A dictionary containting the variables and their values
     """
-    _, config = configurator.get_optimal_configuration(solver, instance_set_train)
+    _, config = configurator.get_optimal_configuration(solver, train_set)
     res_default = validator.get_validation_results(
-        solver, instance_set_test, config="")
+        solver, test_set, config="")
     res_conf = validator.get_validation_results(
-        solver, instance_set_test, config=config)
+        solver, test_set, config=config)
     instance_names = set([res[3] for res in res_default])
     run_cutoff_time = configurator.scenario.cutoff_time
     penalty = run_cutoff_time * penalty_multiplier
     objective = configurator.scenario.sparkle_objective
-    test_dict = {"instanceSetTest": instance_set_test.name}
+    test_dict = {"instanceSetTest": test_set.name}
     test_dict["numInstanceInTestingInstanceSet"] = str(len(instance_names))
     test_dict["optimisedConfigurationTestingPerformancePAR"] =\
         str(get_par_performance(res_conf, run_cutoff_time, penalty, objective))
@@ -546,14 +543,14 @@ def get_dict_variable_to_value_test(target_dir: Path,
         configurator.scenario.sparkle_objective.PerformanceMeasure)
     test_dict["figure-configured-vs-default-test"] =\
         get_figure_configured_vs_default_on_instance_set(
-        solver, instance_set_test.name, res_default, res_conf, target_dir, smac_run_obj,
+        solver, test_set.name, res_default, res_conf, target_dir, smac_run_obj,
         float(run_cutoff_time), penalty_multiplier,
         configurator.scenario.sparkle_objective, data_type="test")
 
     # Retrieve timeout numbers for the testing instances
     configured_timeouts_test, default_timeouts_test, overlapping_timeouts_test =\
         get_timeouts_instanceset(solver,
-                                 instance_set_test,
+                                 test_set,
                                  configurator,
                                  validator,
                                  float(run_cutoff_time),
@@ -562,10 +559,8 @@ def get_dict_variable_to_value_test(target_dir: Path,
     test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
     test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
     test_dict["timeoutsTestOverlap"] = str(overlapping_timeouts_test)
-    test_dict["ablationBool"] = get_ablation_bool(solver, instance_set_train.name,
-                                                  instance_set_test.name)
-    test_dict["ablationPath"] = get_ablation_table(solver, instance_set_train.name,
-                                                   instance_set_test.name)
+    test_dict["ablationBool"] = get_ablation_bool(solver, train_set, test_set)
+    test_dict["ablationPath"] = get_ablation_table(solver, train_set, test_set)
     return test_dict
 
 

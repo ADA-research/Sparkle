@@ -184,9 +184,9 @@ class SMAC2(Configurator):
                 break
 
     def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set_name: str) -> None:
+                          solver: Solver, instance_set: Instances) -> None:
         """Patching method to allow the rebuilding of configuratio scenario."""
-        self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
+        self.scenario = ConfigurationScenario(solver, instance_set)
         self.scenario._set_paths(self.output_path)
 
     @staticmethod
