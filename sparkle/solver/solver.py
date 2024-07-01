@@ -28,13 +28,13 @@ class Solver(SparkleCallable):
         Args:
             directory: Directory of the solver.
             raw_output_directory: Directory where solver will write its raw output.
-                Defaults to solver_directory / tmp
+                Defaults to directory / tmp
             runsolver_exec: Path to the runsolver executable.
-                By default, runsolver in solver_directory.
+                By default, runsolver in directory.
             deterministic: Bool indicating determinism of the algorithm.
                 Defaults to False.
         """
-        super.__init__(directory, runsolver_exec, raw_output_directory)
+        super().__init__(directory, runsolver_exec, raw_output_directory)
         self.deterministic = deterministic
         self.meta_data_file = self.directory / Solver.meta_data
 

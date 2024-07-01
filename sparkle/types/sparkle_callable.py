@@ -29,7 +29,7 @@ class SparkleCallable:
         if self.runsolver_exec is None:
             self.runsolver_exec = self.directory / "runsolver"
 
-    def build_cmd(self: SparkleCallable) -> None:
+    def build_cmd(self: SparkleCallable) -> list[str | Path]:
         """A method that builds the commandline call string."""
         return NotImplementedError
 

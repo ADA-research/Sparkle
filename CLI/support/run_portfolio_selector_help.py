@@ -14,62 +14,14 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
+from sparkle.solver import Extractor
 import global_variables as gv
 import tools.general as tg
-from sparkle.structures import feature_data_csv_help as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from CLI.support import run_solvers_help as srs
 
-
 from CLI.help.command_help import CommandName
-
-
-# Only called in call_sparkle_portfolio_selector_solve_instance
-def get_list_feature_vector(extractor_path: str, instance_path: str, result_path: Path,
-                            cutoff_time_each_extractor_run: float) -> list[str]:
-    """Return the feature vector for an instance as a list."""
-    err_path = result_path.with_suffix(".err")
-    runsolver_watch_data_path = result_path.with_suffix(".log")
-    runsolver_value_data_path = result_path.with_suffix(".val")
-    cmd_list_extractor = [gv.runsolver_path,
-                          "--cpu-limit", str(cutoff_time_each_extractor_run),
-                          "-w", runsolver_watch_data_path,  # Set log path
-                          "-v", runsolver_value_data_path,  # Set information path
-                          f"{extractor_path}/{gv.sparkle_extractor_wrapper}",
-                          "-extractor_dir", f"{extractor_path}/",
-                          "-instance_file", instance_path,
-                          "-output_file", result_path]
-
-    extractor = subprocess.run(cmd_list_extractor, capture_output=True)
-
-    if extractor.returncode != 0:
-        print("Possible issue with runsolver or extractor.")
-
-    if runsolver_value_data_path.exists():
-        with runsolver_value_data_path.open() as file:
-            if "TIMEOUT=true" in file.read():
-                print(f"****** WARNING: Feature vector computing on instance "
-                      f"{instance_path} timed out! ******")
-
-    if not result_path.exists():
-        print(f"WARNING: Result file {result_path} does not exist.")
-
-    try:
-        # Extract the feature vector from the output csv
-        list_feature_vector = result_path.open().readlines()[-1].strip().split(",")[1:]
-    except Exception:
-        print(f"****** WARNING: Feature vector computing on instance {instance_path}"
-              " failed! ******")
-        print("****** WARNING: The feature vector of this instance will be imputed as "
-              "the mean value of all other non-missing values! ******")
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                                        gv.extractor_list)
-        list_feature_vector = feature_data_csv.generate_mean_value_feature_vector()
-
-    sfh.rmfiles([result_path, err_path, runsolver_watch_data_path,
-                 runsolver_value_data_path])
-    return list_feature_vector
 
 
 # Called in call_sparkle_portfolio_selector_solve_instance
@@ -175,16 +127,26 @@ def call_sparkle_portfolio_selector_solve_instance(
     cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
 
     for extractor_path in gv.extractor_list:
-        extractor_name = Path(extractor_path).name
-        print(f"Extractor {extractor_name} computing "
-              f"features of instance {instance_files_str} ...")
-        result_path = Path(f"Tmp/{extractor_name}_{instance_files_str_}_"
+        extractor = Extractor(Path(extractor_path),
+                              gv.runsolver_path,
+                              Path("Tmp"))
+        result_path = Path(f"{extractor.name}_{instance_files_str_}_"
                        f"{tg.get_time_pid_random_string()}.rawres")
+        err_path = result_path.with_suffix(".err")
+        runsolver_watch_data_path = result_path.with_suffix(".log")
+        runsolver_value_data_path = result_path.with_suffix(".val")
+        run = extractor.run(instance, result_path,
+                            runsolver_args=["--cpu-limit", str(cutoff_extractor),
+                                            "-w", runsolver_watch_data_path,
+                                            "-v", runsolver_value_data_path],
+                            run_options=["EXTRACT_FEATURES", [],[]],
+                            run_on=Runner.LOCAL)
+        run.wait()
+        list_feature_vector += extractor.get_feature_vector(result_path,
+                                                            runsolver_value_data_path)
+        sfh.rmfiles([result_path, err_path, runsolver_watch_data_path,
+                     runsolver_value_data_path])
         
-        list_feature_vector = list_feature_vector + get_list_feature_vector(
-            extractor_path, instance_path, result_path, cutoff_extractor)
-        print(f"Extractor {extractor_name} computing "
-              f"features of instance {instance_files_str} done!")
 
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
@@ -195,8 +157,6 @@ def call_sparkle_portfolio_selector_solve_instance(
     cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
                 gv.sparkle_algorithm_selector_path, "--feature_vec",
                 " ".join(map(str, list_feature_vector))]
-    print()
-    print(" ".join([str(c) for c in cmd_list]))
     process = subprocess.run(cmd_list,
                              stdout=predict_schedule_result_path.open("w+"),
                              stderr=gv.sparkle_err_path.open("w+"))

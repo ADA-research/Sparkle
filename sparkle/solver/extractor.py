@@ -4,10 +4,13 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner import Runner
 from sparkle.types import SparkleCallable
+from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
+from tools.runsolver_parsing import get_status
 
 
 class Extractor(SparkleCallable):
     """Extractor base class for extracting features from instances."""
+    wrapper = "sparkle_extractor_wrapper.py"
 
     def __init__(self: Extractor,
                  directory: Path,
@@ -18,97 +21,75 @@ class Extractor(SparkleCallable):
 
         Args:
             directory: Directory of the solver.
-            raw_output_directory: Directory where solver will write its raw output.
-                Defaults to solver_directory / tmp
             runsolver_exec: Path to the runsolver executable.
-                By default, runsolver in solver_directory.
-            deterministic: Bool indicating determinism of the algorithm.
-                Defaults to False.
+                By default, runsolver in directory.
+            raw_output_directory: Directory where solver will write its raw output.
+                Defaults to directory / tmp
         """
-        super.__init__(directory, runsolver_exec, raw_output_directory)
+        super().__init__(directory, runsolver_exec, raw_output_directory)
+        self.output_dimension = 1 #This needs to be set to the output dim of the extractor
         
-    def build_cmd(self: SparkleCallable) -> None:
-        return super().build_cmd()
+    def build_cmd(self: Extractor,
+                  instance: Path,
+                  output_file: Path,
+                  runsolver_args: list[str | Path] = None,
+                  ) -> list[str]:
+        cmd_list_extractor = []
+        if runsolver_args is not None:
+            # Ensure stringification of runsolver configuration is done correctly
+            cmd_list_extractor += [str(self.runsolver_exec.absolute())]
+            cmd_list_extractor += [str(runsolver_config) for runsolver_config
+                                   in runsolver_args]
+        cmd_list_extractor += [f"{self.directory / Extractor.wrapper}",
+                                "-extractor_dir", f"{self.directory}/",
+                                "-instance_file", str(instance),
+                                "-output_file", str(output_file)]
+        return cmd_list_extractor
 
-    def run(extractor_path: Path,
-                   instance: Path,
-                   output_file: Path,
-                   runsolver_args: list[int | Path] = None,
-                   run_options: list[any] = None,
-                   run_on: Runner = Runner.SLURM) -> rrr.LocalRun | rrr.SlurmRun:
+    def run(self: Extractor,
+            instance: Path,
+            output_file: Path,
+            runsolver_args: list[str | Path] = None,
+            run_options: list[any] = None,
+            run_on: Runner = Runner.SLURM) -> rrr.LocalRun | rrr.SlurmRun:
         """Runs an extractor job with Runrunner.
 
         Args:
             extractor_path: Path to the executable
             instance: Path to the instance to run on
             output_file: Target output
-            runsolver_args: List of CPU-limit, runsolver executable path, log path
-                and variable path. If none, no runsolver is used.
-            run_options: The RunRunner options list of job name, base_dir, sbatch
-                options list, srun options list.
+            runsolver_args: List of run solver args, each word a seperate item.
+            run_options: The RunRunner options list of job name, sbatch options list
+                and srun options list.
             run_on: Platform to run on
 
         Returns:
             Local- or SlurmRun."""
-        cmd_list_extractor = []
-        if runsolver_args is not None:
-            cmd_list_extractor = [runsolver_args[0],
-                                    "--cpu-limit", str(runsolver_args[1]),
-                                    "-w", runsolver_args[2],  # Set log path
-                                    "-v", runsolver_args[3]]  # Set information path
-        cmd_list_extractor += [f"{extractor_path}",
-                                "-extractor_dir", f"{extractor_path.parent}/",
-                                "-instance_file", instance,
-                                "-output_file", output_file]
-        run_options = [] if run_options is None else run_options
-
+        cmd_extractor = self.build_cmd(instance, output_file, runsolver_args)
         return rrr.add_to_queue(
             runner=run_on,
-            cmd=cmd_list_extractor,
+            cmd=" ".join(cmd_extractor),
             name=run_options[0],
-            base_dir=run_options[1],
-            sbatch_options=run_options[2],
-            srun_options=run_options[3]
-            )
-
-# NOTE: This file should be a class like Solver and share a base class with Solver
-def call_extractor(extractor_path: Path,
-                   instance: Path,
-                   output_file: Path,
-                   runsolver_args: list[int | Path] = None,
-                   run_options: list[any] = None,
-                   run_on: Runner = Runner.SLURM) -> rrr.LocalRun | rrr.SlurmRun:
-    """Runs an extractor job with Runrunner.
-
-    Args:
-        extractor_path: Path to the executable
-        instance: Path to the instance to run on
-        output_file: Target output
-        runsolver_args: List of CPU-limit, runsolver executable path, log path
-            and variable path. If none, no runsolver is used.
-        run_options: The RunRunner options list of job name, base_dir, sbatch
-            options list, srun options list.
-        run_on: Platform to run on
-
-    Returns:
-        Local- or SlurmRun."""
-    cmd_list_extractor = []
-    if runsolver_args is not None:
-        cmd_list_extractor = [runsolver_args[0],
-                              "--cpu-limit", str(runsolver_args[1]),
-                              "-w", runsolver_args[2],  # Set log path
-                              "-v", runsolver_args[3]]  # Set information path
-    cmd_list_extractor += [f"{extractor_path}",
-                          "-extractor_dir", f"{extractor_path.parent}/",
-                          "-instance_file", instance,
-                          "-output_file", output_file]
-    run_options = [] if run_options is None else run_options
-
-    return rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd_list_extractor,
-        name=run_options[0],
-        base_dir=run_options[1],
-        sbatch_options=run_options[2],
-        srun_options=run_options[3]
+            base_dir=self.raw_output_directory,
+            sbatch_options=run_options[1],
+            srun_options=run_options[2]
         )
+
+    def get_feature_vector(self: Extractor,
+                           result: Path,
+                           runsolver_values: Path = None) -> list[str]:
+        """Extracts feature vector from output, vector of missing values upon failure.
+
+        Args:
+            result: The raw output of the extractor
+            runsolver_values: The output of runsolver.
+
+        Returns:
+            A list of features."""
+        features = [SparkleFeatureDataCSV.missing_value] * self.output_dimension
+        if result.exists() and get_status(runsolver_values, None) != "TIMEOUT":
+            # Last line contains feature vector:
+            feature_line = result.open().readlines()[-1]
+            # Trim instance name and white space from features
+            features = feature_line.strip().split(",")[1:]
+        return features

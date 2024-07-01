@@ -45,6 +45,8 @@ def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> str:
             if line.strip() == "TIMEOUT=true":
                 return "TIMEOUT"
             break
+    if runsolver_raw_path is None:
+        return "UNKNOWN"
     if not runsolver_raw_path.exists():
         # Runsolver log was not created, job was stopped ''incorrectly''
         return "KILLED"
