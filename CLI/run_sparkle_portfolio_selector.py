@@ -5,8 +5,6 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
-from runrunner.base import Runner
-
 import global_variables as gv
 from CLI.support import run_portfolio_selector_help as srpsh
 import sparkle_logging as sl
@@ -14,9 +12,13 @@ from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from CLI.help import command_help as ch
+from CLI.help.reporting_scenario import Scenario
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
+from sparkle.instance import instances_help as sih
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -48,7 +50,8 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     run_on = args.run_on
-    # NOTE: I don't think the code below actually works for the rest of Sparkle - T.S.
+    # NOTE: I don't think the code below actually works for the rest of Sparkle, 
+    # should be resolved by instance object - T.S.
     instance_path = " ".join(
         args.instance_path
     )  # Turn multiple instance files into a space separated string
@@ -84,12 +87,23 @@ if __name__ == "__main__":
 
     # Directory
     if Path(instance_path).is_dir():
-        srpsh.call_sparkle_portfolio_selector_solve_directory(
-            instance_path, run_on=run_on)
-        if run_on == Runner.LOCAL:
-            print("Running Sparkle portfolio selector done!")
-        else:
-            print("Sparkle portfolio selector is running ...")
+        instance_path = Path(instance_path)
+        test_case_path = Path("Test_Cases") / instance_path.name
+        test_case_path.mkdir(parents=True, exist_ok=True)
+        # Update latest scenario
+        gv.latest_scenario().set_selection_test_case_directory(test_case_path)
+        gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
+        # Write used scenario to file
+        gv.latest_scenario().write_scenario_ini()
+        test_performance_data = PerformanceDataFrame(
+            test_case_path / "sparkle_performance_data.csv")
+        test_feature_data = SparkleFeatureDataCSV(
+            test_case_path / "sparkle_feature_data.csv")
+        all_filename = sih.get_instance_list_from_path(instance_path)
+        srpsh.run_portfolio_selector_on_instances(
+            [instance_path / filename for filename in all_filename],
+            test_performance_data, test_feature_data,
+            Path("FILL_ME_WITH_SELECTOR_PATH"), run_on=run_on)
     # Single instance (single-file or multi-file)
     elif Path(instance_path).is_file() or Path(instance_path.split()[0]).is_file():
         srpsh.call_sparkle_portfolio_selector_solve_instance(instance_path)
