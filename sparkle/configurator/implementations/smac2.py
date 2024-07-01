@@ -20,6 +20,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.instance import Instances
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
@@ -107,7 +108,7 @@ class SMAC2(Configurator):
             validate_jobs = self.validator.validate(
                 [scenario.solver] * self.scenario.number_of_runs,
                 Path(output_csv.name),
-                [scenario.instance_directory],
+                [scenario.instance_set.directory],
                 subdir=Path(),
                 dependency=configuration_run,
                 run_on=run_on)
@@ -120,12 +121,12 @@ class SMAC2(Configurator):
     def get_optimal_configuration(
             self: Configurator,
             solver: Solver,
-            instance_set: Path,
+            instance_set: Instances,
             performance: PerformanceMeasure = None,
             aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns optimal value and configuration string of solver on instance set."""
         if self.scenario is None:
-            self.set_scenario_dirs(solver, instance_set.name)
+            self.set_scenario_dirs(solver, instance_set)
         results = self.validator.get_validation_results(
             solver,
             instance_set,

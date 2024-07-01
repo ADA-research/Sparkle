@@ -21,6 +21,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.instance import Instances
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 
@@ -81,10 +82,14 @@ if __name__ == "__main__":
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping, gv.solver_dir)
     solver = Solver(solver_path) if solver_path is not None else None
-    instance_set_train = resolve_object_name(args.instance_set_train,
-                                             target_dir=gv.instance_dir)
-    instance_set_test = resolve_object_name(args.instance_set_test,
-                                            target_dir=gv.instance_dir)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, Instances)
+    instance_set_test = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, Instances)
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])

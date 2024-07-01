@@ -14,6 +14,7 @@ from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
+from sparkle.instance import Instances
 from CLI.help import command_help as ch
 from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise
@@ -57,13 +58,16 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping, gv.solver_dir)
-    solver = Solver(solver_path)
-    instance_set_train = resolve_object_name(args.instance_set_train,
-                                             target_dir=gv.instance_dir)
-    instance_set_test = resolve_object_name(args.instance_set_test,
-                                            target_dir=gv.instance_dir)
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping, gv.solver_dir, Solver)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, Instances)
+    instance_set_test = resolve_object_name(
+        args.instance_set_test,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, Instances)
     run_on = args.run_on
 
     check_for_initialise(
@@ -113,11 +117,11 @@ if __name__ == "__main__":
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver.directory)
-    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()

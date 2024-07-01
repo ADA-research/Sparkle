@@ -11,6 +11,7 @@ from pathlib import Path
 
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
+from sparkle.instance import Instances
 from sparkle.platform import settings_help
 import global_variables as gv
 
@@ -25,7 +26,8 @@ class TestConfigurationScenario(TestCase):
         self.solver_path = Path("tests", "test_files", "Solvers", "Test-Solver")
         self.solver = Solver(self.solver_path)
 
-        self.instance_directory = Path("tests/test_files/Instances/Test-Instance-Set")
+        self.instance_set = Instances(
+            Path("tests/test_files/Instances/Test-Instance-Set"))
         self.run_number = 2
 
         self.parent_directory = Path("tests/test_files/test_configurator")
@@ -42,7 +44,7 @@ class TestConfigurationScenario(TestCase):
         self.configurator = gv.settings.get_general_sparkle_configurator()
         self.scenario = ConfigurationScenario(
             solver=self.solver,
-            instance_directory=self.instance_directory,
+            instance_set=self.instance_set,
             number_of_runs=self.run_number,
             wallclock_time=self.wallclock_time,
             cutoff_time=self.cutoff_time,
@@ -58,12 +60,12 @@ class TestConfigurationScenario(TestCase):
     def test_configuration_scenario_init(self: TestConfigurationScenario) -> None:
         """Test if all variables that are set in the init are correct."""
         self.assertEqual(self.scenario.solver, self.solver)
-        self.assertEqual(self.scenario.instance_directory,
-                         self.instance_directory)
+        self.assertEqual(self.scenario.instance_set.directory,
+                         self.instance_set.directory)
         self.assertFalse(self.scenario.use_features)
         self.assertEqual(self.scenario.feature_data, None)
         self.assertEqual(self.scenario.name,
-                         f"{self.solver.name}_{self.instance_directory.name}")
+                         f"{self.solver.name}_{self.instance_set.name}")
 
     def test_configuration_scenario_check_scenario_directory(
         self: TestConfigurationScenario
@@ -90,8 +92,7 @@ class TestConfigurationScenario(TestCase):
     ) -> None:
         """Test if create_scenario() creates the instance directory."""
         self.scenario.create_scenario(self.parent_directory)
-
-        self.assertTrue(self.scenario.instance_directory.is_dir())
+        self.assertTrue(self.scenario.instance_set.directory.is_dir())
 
     @patch("pathlib.Path.absolute")
     def test_configuration_scenario_check_scenario_file(

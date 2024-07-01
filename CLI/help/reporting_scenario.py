@@ -6,6 +6,7 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+from sparkle.instance import Instances
 
 
 class Scenario(str, Enum):
@@ -229,8 +230,7 @@ class ReportingScenario:
             None if the given path is empty, the given Path value otherwise.
         """
         if str(path) == "" or str(path) == ".":
-            path = None
-
+            return None
         return path
 
     # Latest settings ###
@@ -340,10 +340,13 @@ class ReportingScenario:
         name = "instance_set_train"
         self.path_setter(section, name, value)
 
-    def get_config_instance_set_train(self: ReportingScenario) -> Path:
+    def get_config_instance_set_train(self: ReportingScenario) -> Instances:
         """Return the path to the training instance set used for configuration."""
-        return self.none_if_empty_path(
+        path = self.none_if_empty_path(
             Path(self.__scenario["configuration"]["instance_set_train"]))
+        if path is None:
+            return None
+        return Instances(path)
 
     def set_config_instance_set_test(
             self: ReportingScenario, value: Path = DEFAULT_config_instance_set_test)\
@@ -353,7 +356,10 @@ class ReportingScenario:
         name = "instance_set_test"
         self.path_setter(section, name, value)
 
-    def get_config_instance_set_test(self: ReportingScenario) -> Path:
+    def get_config_instance_set_test(self: ReportingScenario) -> Instances:
         """Return the path to the testing instance set used for configuration."""
-        return self.none_if_empty_path(
+        path = self.none_if_empty_path(
             Path(self.__scenario["configuration"]["instance_set_test"]))
+        if path is None:
+            return None
+        return Instances(path)

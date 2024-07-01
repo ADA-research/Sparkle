@@ -219,7 +219,8 @@ if __name__ == "__main__":
     status_info = ConfigureSolverStatusInfo()
     status_info.set_solver(solver.name)
     status_info.set_instance_set_train(instance_set_train.name)
-    status_info.set_instance_set_test(instance_set_test.name)
+    status_info.set_instance_set_test(
+        instance_set_test.name if instance_set_test is not None else None)
     status_info.save()
 
     number_of_runs = gv.settings.get_config_number_of_runs()
@@ -249,7 +250,7 @@ if __name__ == "__main__":
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()

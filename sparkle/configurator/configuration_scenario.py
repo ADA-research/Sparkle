@@ -138,10 +138,9 @@ class ConfigurationScenario:
 
     def _prepare_instances(self: ConfigurationScenario) -> None:
         """Create instance list file."""
-        source_instance_list = self.instance_set.instance_names
         self.instance_file_path.parent.mkdir(exist_ok=True, parents=True)
         with self.instance_file_path.open("w+") as file:
-            for instance_path in source_instance_list:
+            for instance_path in self.instance_set.instance_paths:
                 file.write(f"{instance_path.absolute()}\n")
 
     def _get_performance_measure(self: ConfigurationScenario) -> str:
