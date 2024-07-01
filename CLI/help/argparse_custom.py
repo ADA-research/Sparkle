@@ -136,10 +136,10 @@ CutOffTimeArgument = \
                                       "(default: "
                                       f"{Settings.DEFAULT_general_target_cutoff_time})"})
 
-DeterministicArgument = ArgumentContainer(names=["--deterministic"],
-                                          kwargs={"action": "store_true",
-                                                  "help": "Flag indicating the solver is "
-                                                          "deterministic"})
+DeterministicArgument =\
+    ArgumentContainer(names=["--deterministic"],
+                      kwargs={"action": "store_true",
+                              "help": "Flag indicating the solver is deterministic"})
 
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                           kwargs={"metavar": "extractor-path",

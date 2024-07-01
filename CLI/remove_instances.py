@@ -58,9 +58,10 @@ if __name__ == "__main__":
                                              for fname in file_names])
     instances_nicknames = gv.file_storage_data_mapping[gv.instances_nickname_path]
     for key in instances_nicknames:
-        if instances_nicknames[key] == instances_path:    
+        if instances_nicknames[key] == instances_path:
             sfh.add_remove_platform_item(instances_path,
-                                        gv.instances_nickname_path, key=key, remove=True)
+                                         gv.instances_nickname_path,
+                                         key=key, remove=True)
             break
 
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,

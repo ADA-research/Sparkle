@@ -141,10 +141,10 @@ def check_for_ablation(solver: Solver, train_set: Instances,
     """Run a solver on an instance, only for internal calls from Sparkle."""
     scenario_dir = get_ablation_scenario_directory(solver, train_set,
                                                    test_set, exec_path=False)
-    table_file = Path(scenario_dir, "ablationValidation.txt")
-    if not table_file.is_file():
+    path = Path(scenario_dir, "ablationValidation.txt")
+    if not path.is_file():
         return False
-    return table_file.open().readline().strip() == "Ablation analysis validation complete."
+    return path.open().readline().strip() == "Ablation analysis validation complete."
 
 
 def read_ablation_table(solver: Solver, train_set: Instances,

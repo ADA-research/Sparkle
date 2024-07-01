@@ -69,7 +69,6 @@ if __name__ == "__main__":
         print(f'Solver path "{solver_source}" does not exist!')
         sys.exit(-1)
 
-    
     nickname = args.nickname
     solver_variations = args.solver_variations
     run_on = args.run_on

@@ -91,7 +91,7 @@ class Validator():
 
         Args:
             solver: The solver for which to check the raw result path
-            instance_set: The set of instances for which to retrieve the results
+            instance_sets: The set of instances for which to retrieve the results
             subdir: Subdir where the CSV is to be placed, passed to the append method.
             log_dir: The directory to search for log files. If none, defaults to
                 the log directory of the Solver.
@@ -127,13 +127,13 @@ class Validator():
                         ["-o", res.name, "-v", res.with_suffix(".val").name],
                         "", log_dir)
                     self.append_entry_to_csv(solver.name,
-                                            solver_args,
-                                            instance_set,
-                                            instance_path.name,
-                                            out_dict["status"],
-                                            out_dict["quality"],
-                                            out_dict["runtime"],
-                                            subdir=subdir)
+                                             solver_args,
+                                             instance_set,
+                                             instance_path.name,
+                                             out_dict["status"],
+                                             out_dict["quality"],
+                                             out_dict["runtime"],
+                                             subdir=subdir)
                     res.unlink()
                     res.with_suffix(".val").unlink(missing_ok=True)
                     res.with_suffix(".log").unlink(missing_ok=True)

@@ -94,8 +94,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     # Get optimised configuration
     configurator = gv.settings.get_general_sparkle_configurator()
-    _, config_str = configurator.get_optimal_configuration(solver,
-                                                            train_set)
+    _, config_str = configurator.get_optimal_configuration(solver, train_set)
 
     # Call the configured solver
     run = srcsh.call_solver(instances_list,

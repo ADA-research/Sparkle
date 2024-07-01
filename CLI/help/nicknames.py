@@ -15,7 +15,7 @@ def resolve_object_name(name: str | Path,
         target_dir: The location where the file object should exist
         class_name: If passed, will attempt to return an object
             that is constructed from this Path.
-        
+
     Returns:
         Path to the object, None if unresolvable.
     """
