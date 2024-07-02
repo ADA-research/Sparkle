@@ -85,17 +85,16 @@ if __name__ == "__main__":
     # Refresh the instance set as the target instance set
     instance_set = InstanceSet(instances_target)
 
-    # Add the instances to the Feature Data
+    # Add the instances to the Feature Data / Performance Data
     feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
                                              gv.extractor_list)
-    feature_data_csv.add_instanceset(instance_set)
-
-    # Add the instances to the Performance Data
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
         gv.performance_data_csv_path,
         objectives=gv.settings.get_general_sparkle_objectives())
-    performance_data.add_instanceset(instance_set)
+    for path in instance_set.instance_paths:
+        feature_data_csv.add_row(str(path))
+        performance_data.add_instance(str(path))
 
     """if sih._check_existence_of_instance_list_file(instances_source):
         # Copy the reference list to the reference list dir of Sparkle
@@ -169,8 +168,7 @@ if __name__ == "__main__":
         feature_data_csv.save_csv()
         performance_data.save_csv()"""
 
-    print("\nAdding instance set "
-          f"{instances_set.name} done!")
+    print(f"\nAdding instance set {instance_set.name} done!")
 
     if Path(gv.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(gv.sparkle_algorithm_selector_path)
