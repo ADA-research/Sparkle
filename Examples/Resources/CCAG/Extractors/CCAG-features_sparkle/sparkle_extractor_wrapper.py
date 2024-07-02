@@ -2,7 +2,6 @@
 from pathlib import Path
 import argparse
 
-global sparkle_special_string
 sparkle_special_string = r"__@@SPARKLE@@__"
 
 class CCAGInstanceFeature:
