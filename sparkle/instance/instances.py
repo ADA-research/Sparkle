@@ -37,6 +37,7 @@ class InstanceSet:
                 self.instance_paths.append((self.directory / file) for file
                                            in line[1:])
         else:
+            # Default situation, treat each file in the directory as an instance
             self.instance_paths = [p for p in self.directory.iterdir()]
             self.instance_names = [p.name for p in self.instance_paths]
 

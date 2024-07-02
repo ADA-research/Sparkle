@@ -53,8 +53,6 @@ if __name__ == "__main__":
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.instance_dir, InstanceSet)
-    if instance_set is None:
-        instance_path = Path(args.instance_path)
 
     check_for_initialise(
         sys.argv,
@@ -89,7 +87,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # Multipe
-    if instance_set is not None:
+    if instance_set.size > 1:
         test_case_path = Path("Test_Cases") / instance_set.name
         test_case_path.mkdir(parents=True, exist_ok=True)
         # Update latest scenario
@@ -103,8 +101,8 @@ if __name__ == "__main__":
             instance_set.instance_paths, test_performance_data, selector_path,
             run_on=run_on)
     # Single instance
-    elif instance_path.is_file():
-        srpsh.call_sparkle_portfolio_selector_solve_instance(instance_path)
+    elif instance_set.size == 1:
+        srpsh.call_sparkle_portfolio_selector_solve_instance(instance_set.instance_paths[0])
         print("Running Sparkle portfolio selector done!")
     else:
         print("Input instance or instance directory error!")
