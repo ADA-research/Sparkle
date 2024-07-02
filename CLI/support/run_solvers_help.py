@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions to run solvers."""
+from __future__ import annotations
 from pathlib import Path
 
 import global_variables as gv
@@ -12,15 +13,17 @@ from tools.runsolver_parsing import handle_timeouts
 
 
 def run_solver_on_instance_and_process_results(
-        solver_path: str, instance_path: str, seed_str: str = None,
+        solver_path: str, instance_path: str | list[str], seed_str: str = None,
         custom_cutoff: int = None) -> tuple[float, float, float, list[float], str, str]:
     """Prepare and run a given the solver and instance, and process output."""
     # Prepare paths
-    # TODO: Fix result path for multi-file instances (only a single file is part of the
-    # result path)
+    if isinstance(instance_path, list):
+        instance_name = Path(instance_path[0]).name
+    else:
+        instance_name = Path(instance_path).name
     raw_result_path = (f"{gv.sparkle_tmp_path}/"
                        f"{Path(solver_path).name}_"
-                       f"{Path(instance_path).name}_"
+                       f"{instance_name}_"
                        f"{tg.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
 

@@ -11,6 +11,7 @@ import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from CLI.support import run_solvers_help as srs
+from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help.status_info import SolverRunStatusInfo
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--performance-data", required=True, type=Path,
                         help="path to the performance dataframe")
-    parser.add_argument("--instance", required=False, type=str, nargs="+",
+    parser.add_argument("--instance", required=True, type=str,
                         help="path to instance to run on")
     parser.add_argument("--solver", required=True, type=Path, help="path to solver")
     parser.add_argument("--performance-measure", choices=PerformanceMeasure.__members__,
@@ -37,12 +38,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    # Turn multiple instance files into a space separated string
-    # NOTE: Multiple instance files here means ``multiple files for a single instance''
-    instance_path = " ".join(args.instance)
-    instance_name = Path(instance_path).name
-    if Path(instance_path).is_file():
-        instance_name = Path(instance_path).parent.name
+    # Resolve possible multi-file instance
+    instance_path = Path(args.instance)
+    instance_name = instance_path.name
+    instance_key = instance_path
+    has_instance_set = False
+    if not instance_path.exists():
+        # If its an instance name (Multi-file instance), retrieve path list
+        instance_set = InstanceSet(instance_path.parent)
+        instance_path = instance_set.get_path_by_name(instance_name)
+        has_instance_set = True
+        instance_key = instance_name
+    
     solver_path = Path(args.solver)
     if args.seed is not None:
         # Creating a new directory for the solver to facilitate running several
@@ -99,6 +106,6 @@ if __name__ == "__main__":
         performance_dataframe = PerformanceDataFrame(Path(args.performance_data))
         performance_dataframe.set_value(measurement,
                                         solver=str(solver_path),
-                                        instance=str(instance_path))
+                                        instance=str(instance_key))
         performance_dataframe.save_csv()
     lock.release()
