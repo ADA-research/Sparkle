@@ -175,7 +175,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
         print(f"\n{index_str}{instance_name} yielded the following Solver results:")
         for sindex in range(index * num_solvers, (index + 1) * num_solvers):
             solver_name = solvers[sindex % num_solvers].name
-            job_info = job_output_dict[instance.name][solver_name]
+            job_info = job_output_dict[instance_name][solver_name]
             print(f"\t- {solver_name} ended with status {job_info['status']} in "
                   f"{job_info['cpu-time']}s CPU-Time ({job_info['wc-time']}s WC-Time)")
 
