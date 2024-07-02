@@ -91,9 +91,10 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(
         gv.performance_data_csv_path,
         objectives=gv.settings.get_general_sparkle_objectives())
-    for path in instance_set.instance_paths:
-        feature_data_csv.add_row(str(path))
-        performance_data.add_instance(str(path))
+    for name in instance_set.instance_names:
+        # Construct a name path due to multi-file instances
+        feature_data_csv.add_row(str(instance_set.directory / name))
+        performance_data.add_instance(str(instance_set.directory / name))
 
     feature_data_csv.save_csv()
     performance_data.save_csv()

@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance", required=False, type=str, nargs="+",
+    parser.add_argument("--instance", required=True, type=str,
                         help="path to instance file(s) to run on")
     parser.add_argument("--extractor", required=True, type=str,
                         help="path to feature extractor")
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    instance_path = Path(parser.instance)
+    instance_path = Path(args.instance)
     instance_name = instance_path.name
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
@@ -58,22 +58,21 @@ if __name__ == "__main__":
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
     # Ensure stringifcation of path objects
     if isinstance(instance_path, list):
-        instance_path = [str(filepath) for filepath in instance_path]
+        instance_path = " ".join([str(filepath) for filepath in instance_path])
     cmd = [gv.runsolver_path, cutoff_time_each_run_option,
            runsolver_watch_data_path_option,
            extractor_path / gv.sparkle_extractor_wrapper,
            "-extractor_dir", extractor_path,
            "-instance_file", instance_path,
            "-output_file", result_path]
-
+    print(" ".join([str(c) for c in cmd]))
+    start_time = time.time()
     try:
         task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
         status_info_str = (
             "Status: Running\nExtractor: "
             f"{extractor_path.name}\n"
             f"Instance: {instance_path.name}\n")
-
-        start_time = time.time()
         status_info_str += (
             "Start Time: "
             f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}\n")
@@ -81,42 +80,43 @@ if __name__ == "__main__":
         cutoff_str = f"Cutoff Time: {str(cutoff_time_each_extractor_run)} second(s)\n"
         status_info_str += cutoff_str
         sfh.write_string_to_file(task_run_status_path, status_info_str)
-        subprocess.run(cmd)
-        end_time = time.time()
+        r = subprocess.run(cmd, capture_output=True)
+        print(r.stderr.decode())
+        print(r.stdout.decode())
     except Exception:
         if not Path(result_path).exists():
             sfh.create_new_empty_file(result_path)
+    end_time = time.time()
 
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
         tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path,
                                                  gv.extractor_list)
+        feature_vector = tmp_fdcsv.get_value(tmp_fdcsv.list_rows()[0])
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
-            feature_data_csv.combine(tmp_fdcsv)
+            #feature_data_csv.combine(tmp_fdcsv)
+            feature_data_csv.set_value(instance_name, None, feature_vector)
             feature_data_csv.save_csv()
         result_string = "Successful"
     except Exception:
         print(f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
-        print("****** WARNING: The feature vector of this instace consists of missing "
-              "values ******")
+        print(f"****** WARNING: The feature vector in {result_path} of this instance "
+              "consists of missing values ******")
         length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
         missing_values_row = [sfdcsv.SparkleFeatureDataCSV.missing_value] * length
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
                                                             gv.extractor_list)
-            feature_data_csv.add_row(instance_path, missing_values_row)
+            feature_data_csv.set_value(instance_name, None, missing_values_row)
             feature_data_csv.save_csv()
         result_string = "Failed -- using missing value instead"
     lock.release()
     result_path.unlink(missing_ok=True)
 
-    # TODO: Handle multi-file instances
-    description_str = (
-        f"[Extractor: {extractor_path.name},"
-        f" Instance: {instance_path.name}]")
+    description_str = f"[Extractor: {extractor_path.name}, Instance: {instance_name}]"
     start_time_str = (
         "[Start Time: "
         f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}]")
