@@ -43,8 +43,6 @@ if __name__ == "__main__":
 
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
-
-    
     cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
 
     key_str = (f"{extractor_path.name}_"
@@ -57,12 +55,12 @@ if __name__ == "__main__":
         instance_list = [str(filepath) for filepath in instance_path]
     else:
         instance_list = [instance_path]
-    #cmd = #[gv.runsolver_path,
-           #"--cpu-limit", str(cutoff_time_each_extractor_run),
-           #"-w", runsolver_watch_data_path,
-    cmd= [extractor_path / gv.sparkle_extractor_wrapper,
-          "-extractor_dir", extractor_path,
-          "-instance_file"] + instance_list + ["-output_file", result_path]
+    cmd = [gv.runsolver_path,
+           "--cpu-limit", str(cutoff_time_each_extractor_run),
+           "-w", runsolver_watch_data_path,
+           extractor_path / gv.sparkle_extractor_wrapper,
+           "-extractor_dir", extractor_path,
+           "-instance_file"] + instance_list + ["-output_file", result_path]
     start_time = time.time()
 
     task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
@@ -86,21 +84,16 @@ if __name__ == "__main__":
     try:
         tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path,
                                                  gv.extractor_list)
-        #feature_vector = tmp_fdcsv.get_value(tmp_fdcsv.list_rows()[0])
-        #feature_vector = tmp_fdcsv.dataframe.to_numpy().tolist()
         # rename row
         if not has_instance_set:
             tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
                 [str(instance_path)], axis=0)
         else:
             tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
-            [instance_set.directory / instance_name], axis=0)
-        #tmp_fdcsv.dataframe
-        #print(feature_vector)
+                [instance_set.directory / instance_name], axis=0)
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
             feature_data_csv.combine(tmp_fdcsv)
-            #feature_data_csv.set_value(instance_name, None, feature_vector)
             feature_data_csv.save_csv()
         result_string = "Successful"
     except Exception as ex:
