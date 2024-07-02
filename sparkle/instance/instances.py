@@ -6,7 +6,7 @@ import csv
 
 class InstanceSet:
     """Object representation of a set of instances."""
-    instance_list = "instances.csv"
+    instance_csv = "instances.csv"
 
     def __init__(self: InstanceSet, directory: Path) -> None:
         """Initialise an Instances object from a directory.
@@ -27,15 +27,14 @@ class InstanceSet:
             self.instance_paths = [self.directory]
             self.instance_names = [self.directory.name]
             self.directory = self.directory.parent
-        elif (self.directory / InstanceSet.instance_list).exists():
+        elif (self.directory / InstanceSet.instance_csv).exists():
             # Dealing with multiple files per instance
             self.multi_file = True
             # A multi instance file describes per line: InstanceName, File1, File2, ...
             # where each file is present in the self.directory
-            for line in csv.reader((self.directory / InstanceSet.instance_list).open()):
+            for line in csv.reader((self.directory / InstanceSet.instance_csv).open()):
                 self.instance_names.append(line[0])
-                self.instance_paths.append((self.directory / file) for file
-                                           in line[1:])
+                self.instance_paths.append([(self.directory / f) for f in line[1:]])
         else:
             # Default situation, treat each file in the directory as an instance
             self.instance_paths = [p for p in self.directory.iterdir()]
