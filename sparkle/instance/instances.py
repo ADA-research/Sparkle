@@ -6,7 +6,7 @@ import csv
 
 class InstanceSet:
     """Object representation of a set of instances."""
-    instance_list = "instance_list.csv"
+    instance_list = "instances.csv"
 
     def __init__(self: InstanceSet, directory: Path) -> None:
         """Initialise an Instances object from a directory.
