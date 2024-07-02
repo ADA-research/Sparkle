@@ -44,3 +44,11 @@ class InstanceSet:
     def size(self: InstanceSet) -> int:
         """Returns the number of instances in the set."""
         return len(self.instance_paths)
+
+    @property
+    def all_paths(self: InstanceSet) -> list[Path]:
+        """Returns all file paths in the instance set as a flat list."""
+        if self.multi_file:
+            return [p for instance in self.instance_paths for p  in instance] + [
+                self.directory / InstanceSet.instance_csv]
+        return self.instance_paths

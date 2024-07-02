@@ -8,6 +8,7 @@ import shutil
 
 import global_variables as gv
 from sparkle.platform import file_help as sfh, settings_help
+from sparkle.instance import InstanceSet
 from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help import compute_features_help as scf
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     instances_source = Path(args.instances_path)
-    instances_directory = gv.instance_dir / instances_source.name
+    instances_target = gv.instance_dir / instances_source.name
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
@@ -68,15 +69,35 @@ if __name__ == "__main__":
 
     nickname = args.nickname
     if nickname is not None:
-        sfh.add_remove_platform_item(instances_directory,
+        sfh.add_remove_platform_item(instances_target,
                                      gv.instances_nickname_path, key=nickname)
 
     print(f"Start adding all instances in directory {instances_source} ...")
+    instance_set = InstanceSet(instances_source)
 
-    if not instances_directory.exists():
-        instances_directory.mkdir(parents=True, exist_ok=True)
+    if not instances_target.exists():
+        instances_target.mkdir(parents=True, exist_ok=True)
+    print("Copying files...")
+    for instance_path_source in instance_set.all_paths:
+        print(f"Copying {instance_path_source} to {instances_target}...", end="\r")
+        shutil.copy(instance_path_source, instances_target)
+    print("Copying done!")
+    # Refresh the instance set as the target instance set
+    instance_set = InstanceSet(instances_target)
 
-    if sih._check_existence_of_instance_list_file(instances_source):
+    # Add the instances to the Feature Data
+    feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                             gv.extractor_list)
+    feature_data_csv.add_instanceset(instance_set)
+
+    # Add the instances to the Performance Data
+    # When adding instances, an empty performance DF has no objectives yet
+    performance_data = PerformanceDataFrame(
+        gv.performance_data_csv_path,
+        objectives=gv.settings.get_general_sparkle_objectives())
+    performance_data.add_instanceset(instance_set)
+
+    """if sih._check_existence_of_instance_list_file(instances_source):
         # Copy the reference list to the reference list dir of Sparkle
         instance_list_path = instances_source / Path(sih._instance_list_file)
         target_path = gv.reference_list_dir / (
@@ -146,10 +167,10 @@ if __name__ == "__main__":
             print(f"{added}/{num_inst} instances of {instances_source} have been added!")
 
         feature_data_csv.save_csv()
-        performance_data.save_csv()
+        performance_data.save_csv()"""
 
     print("\nAdding instance set "
-          f"{instances_directory.name} done!")
+          f"{instances_set.name} done!")
 
     if Path(gv.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(gv.sparkle_algorithm_selector_path)
@@ -158,8 +179,7 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        scf.compute_features(
-            Path(gv.feature_data_csv_path), False)
+        scf.compute_features(Path(gv.feature_data_csv_path), False)
 
     if args.run_solver_now:
         num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()

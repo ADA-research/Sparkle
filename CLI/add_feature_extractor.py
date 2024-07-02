@@ -114,8 +114,7 @@ if __name__ == "__main__":
                                       / gv.sparkle_extractor_wrapper),
             "-extractor_dir", str(extractor_target_path),
             "-instance_file", str(instance_path),
-            "-output_file", result_path
-        ]
+            "-output_file", result_path]
 
         subprocess.run(command_line)
 
