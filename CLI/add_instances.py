@@ -14,7 +14,6 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help import compute_features_help as scf
 from CLI.run_solvers import running_solvers_performance_data
 import sparkle_logging as sl
-from sparkle.instance import instances_help as sih
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
@@ -95,6 +94,9 @@ if __name__ == "__main__":
     for path in instance_set.instance_paths:
         feature_data_csv.add_row(str(path))
         performance_data.add_instance(str(path))
+
+    feature_data_csv.save_csv()
+    performance_data.save_csv()
 
     """if sih._check_existence_of_instance_list_file(instances_source):
         # Copy the reference list to the reference list dir of Sparkle
