@@ -23,8 +23,8 @@ from sparkle.instance import InstanceSet
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*ac.InstancePath.names,
-                        **ac.InstancePath.kwargs)
+    parser.add_argument(*ac.InstancePathPositional.names,
+                        **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -102,7 +102,8 @@ if __name__ == "__main__":
             run_on=run_on)
     # Single instance
     elif instance_set.size == 1:
-        srpsh.call_sparkle_portfolio_selector_solve_instance(instance_set.instance_paths[0])
+        srpsh.call_sparkle_portfolio_selector_solve_instance(
+            instance_set.instance_paths[0])
         print("Running Sparkle portfolio selector done!")
     else:
         print("Input instance or instance directory error!")

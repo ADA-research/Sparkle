@@ -6,6 +6,7 @@ from pathlib import Path
 import sparkle_logging as sl
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.instance import InstanceSet
 
 
 def get_solver_list_latex(solver_list: list[str]) -> str:
@@ -380,7 +381,7 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
                                        objective: SparkleObjective,
                                        cutoff: int,
                                        penalised_time: int,
-                                       instances: list[str]) -> None:
+                                       instances: InstanceSet) -> None:
     """Generate a report for a parallel algorithm portfolio.
 
     Args:
