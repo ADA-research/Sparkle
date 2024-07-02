@@ -5,14 +5,14 @@
 import subprocess
 import time
 import argparse
-from pathlib import Path
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from filelock import FileLock
 
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.instance import InstanceSet
 
 if __name__ == "__main__":
     # Initialise settings
@@ -32,8 +32,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    # Turn multiple instance files into a space separated string
-    instance_path = Path(" ".join(args.instance))
+    instance_path = Path(parser.instance)
+    instance_name = instance_path.name
+    if not instance_path.exists():
+        # If its an instance name (Multi-file instance), retrieve path list
+        instance_set = InstanceSet(instance_path.parent)
+        instance_path = instance_set.get_path_by_name(instance_name)
+
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
 
@@ -45,19 +50,21 @@ if __name__ == "__main__":
 
     cutoff_time_each_run_option = "--cpu-limit " + str(cutoff_time_each_extractor_run)
 
-    # TODO: Handle multi-file instances
     key_str = (f"{extractor_path.name}_"
-               f"{instance_path.name}_"
+               f"{instance_name}_"
                f"{tg.get_time_pid_random_string()}")
     result_path = Path(f"Feature_Data/{key_str}.csv")
     runsolver_watch_data_path = f"{result_path}.log"
     runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
-    command_line = (f"{gv.runsolver_path} {cutoff_time_each_run_option} "
-                    f"{runsolver_watch_data_path_option} {extractor_path}/"
-                    f"{gv.sparkle_extractor_wrapper} "
-                    f"-extractor_dir {extractor_path} "
-                    f"-instance_file {instance_path} "
-                    f"-output_file {result_path}")
+    # Ensure stringifcation of path objects
+    if isinstance(instance_path, list):
+        instance_path = [str(filepath) for filepath in instance_path]
+    cmd = [gv.runsolver_path, cutoff_time_each_run_option,
+           runsolver_watch_data_path_option,
+           extractor_path / gv.sparkle_extractor_wrapper,
+           "-extractor_dir", extractor_path,
+           "-instance_file", instance_path,
+           "-output_file", result_path]
 
     try:
         task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
@@ -74,7 +81,7 @@ if __name__ == "__main__":
         cutoff_str = f"Cutoff Time: {str(cutoff_time_each_extractor_run)} second(s)\n"
         status_info_str += cutoff_str
         sfh.write_string_to_file(task_run_status_path, status_info_str)
-        subprocess.run(command_line.split(" "))
+        subprocess.run(cmd)
         end_time = time.time()
     except Exception:
         if not Path(result_path).exists():

@@ -52,3 +52,10 @@ class InstanceSet:
             return [p for instance in self.instance_paths for p  in instance] + [
                 self.directory / InstanceSet.instance_csv]
         return self.instance_paths
+
+    def get_path_by_name(self: InstanceSet, name: str) -> Path | list[Path]:
+        """Retrieves an instance paths by its name. Returns None upon failure."""
+        for idx, instance_name in enumerate(self.instance_names):
+            if instance_name == name:
+                return self.instance_paths[idx]
+        return None
