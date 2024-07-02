@@ -302,11 +302,6 @@ if __name__ == "__main__":
     gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
     gv.latest_scenario().set_parallel_portfolio_instance_list(
         instance_set.instance_paths)
-    # NOTE: Patching code to make sure generate report still works
-    solvers_file = portfolio_path / "solvers.txt"
-    with solvers_file.open("w") as fout:
-        for solver in solvers:
-            fout.write(f"{solver.directory}\n")
     print("Running Sparkle parallel portfolio is done!")
 
     # Write used settings to file
