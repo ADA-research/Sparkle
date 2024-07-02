@@ -1,0 +1,10 @@
+Banking,Banking2.model,Banking2.constraints
+Concurrency,Concurrency.model,Concurrency.constraints
+Healthcare2,Healthcare2.model,Healthcare2.constraints
+Healthcare4,Healthcare4.model,Healthcare4.constraints
+NetworkMgmt,NetworkMgmt.model,NetworkMgmt.constraints
+ProcessorComm2,ProcessorComm2.model,ProcessorComm2.constraints
+Services,Services.model,Services.constraints
+Storage2,Storage2.model,Storage2.constraints
+Storage4,Storage4.model,Storage4.constraints
+Telecom,Telecom.model,Telecom.constraints
