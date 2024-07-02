@@ -13,7 +13,7 @@ class InstanceSet:
 
         Args:
             directory: Path to the instances directory. If it contains an instance list
-                for multi file instances, will read from instance_list.csv. If the path 
+                for multi file instances, will read from instance_list.csv. If the path
                 is a file, will create an Instance set of size one.
         """
         self.directory = directory
@@ -42,4 +42,5 @@ class InstanceSet:
 
     @property
     def size(self: InstanceSet) -> int:
+        """Returns the number of instances in the set."""
         return len(self.instance_paths)
