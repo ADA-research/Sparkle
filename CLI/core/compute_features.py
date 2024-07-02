@@ -34,10 +34,12 @@ if __name__ == "__main__":
     # Process command line arguments
     instance_path = Path(args.instance)
     instance_name = instance_path.name
+    has_instance_set = False
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
         instance_set = InstanceSet(instance_path.parent)
         instance_path = instance_set.get_path_by_name(instance_name)
+        has_instance_set = True
 
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
@@ -61,7 +63,6 @@ if __name__ == "__main__":
     cmd= [extractor_path / gv.sparkle_extractor_wrapper,
           "-extractor_dir", extractor_path,
           "-instance_file"] + instance_list + ["-output_file", result_path]
-    print(cmd)
     start_time = time.time()
 
     task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
@@ -88,7 +89,11 @@ if __name__ == "__main__":
         #feature_vector = tmp_fdcsv.get_value(tmp_fdcsv.list_rows()[0])
         #feature_vector = tmp_fdcsv.dataframe.to_numpy().tolist()
         # rename row
-        tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
+        if not has_instance_set:
+            tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
+                [str(instance_path)], axis=0)
+        else:
+            tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
             [instance_set.directory / instance_name], axis=0)
         #tmp_fdcsv.dataframe
         #print(feature_vector)
@@ -113,7 +118,7 @@ if __name__ == "__main__":
             feature_data_csv.save_csv()
         result_string = "Failed -- using missing value instead"
     lock.release()
-    #result_path.unlink(missing_ok=True)
+    result_path.unlink(missing_ok=True)
 
     description_str = f"[Extractor: {extractor_path.name}, Instance: {instance_name}]"
     start_time_str = (
