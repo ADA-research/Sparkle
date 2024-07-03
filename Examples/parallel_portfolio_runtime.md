@@ -28,10 +28,10 @@ By running the portfolio a list of jobs will be created which will be executed b
 Use the `--cutoff-time` option to specify the maximal time for which the portfolio is allowed to run.
 add `--portfolio-name` to specify a portfolio otherwise it will select the last constructed portfolio
 
-The `--instance-paths` option must be followed by a space separated list of paths to an instance or an instance set.
-For example `--instance-paths Instances/Instance_Set_Name/Single_Instance Instances/Other_Instance_Set_Name`
+The --instance-path option must be a path to a single instance file or an instance set directory.
+For example --instance-path Instances/Instance_Set_Name/Single_Instance
 
-`sparkle run_parallel_portfolio --instance-paths Instances/PTN/ --portfolio-name runtime_experiment`
+`sparkle run_parallel_portfolio --instance-path Instances/PTN/ --portfolio-name runtime_experiment`
 
 ## Generate the report
 

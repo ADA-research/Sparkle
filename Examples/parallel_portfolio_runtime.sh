@@ -35,8 +35,8 @@ sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/
 # The --solvers option must be followed by a space sepearted list of Solver paths/names. If none are specified,
 # the know list of solvers for Sparkle will be used. 
 
-# The --instance-paths option must be followed by a space separated list of paths to an instance or an instance set.
-# For example --instance-paths Instances/Instance_Set_Name/Single_Instance Instances/Other_Instance_Set_Name
+# The --instance-path option must be a path to a single instance file or an instance set directory.
+# For example --instance-path Instances/Instance_Set_Name/Single_Instance
 
 sparkle run_parallel_portfolio --instance-path Instances/PTN/ --portfolio-name runtime_experiment
 

@@ -26,7 +26,7 @@ CLI/add_instances.py $instances_path > /dev/null
 CLI/add_solver.py $solverA_path > /dev/null
 CLI/add_solver.py $solverB_path > /dev/null
 CLI/add_solver.py $solverC_path > /dev/null
-CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-paths $instance_path > /dev/null
+CLI/run_parallel_portfolio.py --settings-file $sparkle_test_settings_path --instance-path $instance_path > /dev/null
 
 # Generate report for parallel portfolio on a single instance
 output_true="Parallel portfolio report generated ..."

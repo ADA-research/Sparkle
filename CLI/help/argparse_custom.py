@@ -165,18 +165,6 @@ InstancePathRunConfiguredSolverArgument = \
                                       "are given, it is assumed this is a multi-file "
                                       "instance) or instance directory."})
 
-InstancePathsRunParallelPortfolioArgument = \
-    ArgumentContainer(names=["--instance-paths"],
-                      kwargs={"metavar": "PATH",
-                              "nargs": "+",
-                              "type": str,
-                              "required": True,
-                              "help": "Specify the instance_path(s) on which the "
-                                      "portfolio will run. This can be a space-separated"
-                                      " list of instances containing instance sets "
-                                      "and/or singular instances. For example "
-                                      "--instance-paths  Instances/PTN/Ptn-7824-b01.cnf "
-                                      " Instances/PTN2/"})
 
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
