@@ -21,6 +21,7 @@ from sparkle.platform import \
     generate_report_for_parallel_portfolio as sgrfpph
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.instance import InstanceSet
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 
@@ -78,13 +79,17 @@ if __name__ == "__main__":
     selection = args.selection
     test_case_dir = args.test_case_directory
 
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping, gv.solver_dir)
-    solver = Solver(solver_path) if solver_path is not None else None
-    instance_set_train = resolve_object_name(args.instance_set_train,
-                                             target_dir=gv.instance_dir)
-    instance_set_test = resolve_object_name(args.instance_set_test,
-                                            target_dir=gv.instance_dir)
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping,
+                                 gv.solver_dir, Solver)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
+    instance_set_test = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.GENERATE_REPORT])
@@ -99,19 +104,19 @@ if __name__ == "__main__":
             args.performance_measure, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
-    if not selection and test_case_dir is None and solver_path is None:
+    if not selection and test_case_dir is None and solver is None:
         scenario = gv.latest_scenario().get_latest_scenario()
         if scenario == Scenario.SELECTION:
             selection = True
             test_case_dir = gv.latest_scenario().get_selection_test_case_directory()
         elif scenario == Scenario.CONFIGURATION:
-            solver = Solver(gv.latest_scenario().get_config_solver())
+            solver = gv.latest_scenario().get_config_solver()
             instance_set_train = gv.latest_scenario().get_config_instance_set_train()
             instance_set_test = gv.latest_scenario().get_config_instance_set_test()
         elif scenario == Scenario.PARALLEL_PORTFOLIO:
             parallel_portfolio_path = gv.latest_scenario().get_parallel_portfolio_path()
-            pap_instance_list = (
-                gv.latest_scenario().get_parallel_portfolio_instance_list())
+            pap_instance_set =\
+                gv.latest_scenario().get_parallel_portfolio_instance_set()
 
     flag_instance_set_train = instance_set_train is not None
     flag_instance_set_test = instance_set_test is not None
@@ -180,7 +185,7 @@ if __name__ == "__main__":
             gv.settings.get_general_sparkle_objectives()[0],
             gv.settings.get_general_target_cutoff_time(),
             gv.settings.get_penalised_time(),
-            pap_instance_list)
+            pap_instance_set)
         print("Parallel portfolio report generated ...")
         status_info.delete()
     else:
@@ -201,7 +206,7 @@ if __name__ == "__main__":
             sys.exit(-1)
         instance_set_train_name = instance_set_train.name
         gv.settings.get_general_sparkle_configurator()\
-            .set_scenario_dirs(solver, instance_set_train_name)
+            .set_scenario_dirs(solver, instance_set_train)
         # Generate a report depending on which instance sets are provided
         if flag_instance_set_train or flag_instance_set_test:
             # Check if there are result to generate a report from

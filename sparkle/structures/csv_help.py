@@ -52,6 +52,13 @@ class SparkleCSV:
 
     def set_value(self: SparkleCSV, row: str, column: str, value: str) -> None:
         """Set a value by name."""
+        if column is None and isinstance(value, list):
+            if len(value) != self.dataframe.columns.size:
+                print("Error! Column dimensions do not match.")
+                return
+            for idx, col in enumerate(self.dataframe.columns):
+                self.dataframe.at[row, col] = value[idx]
+            return
         self.dataframe.at[row, column] = value
 
     def list_columns(self: SparkleCSV) -> None:

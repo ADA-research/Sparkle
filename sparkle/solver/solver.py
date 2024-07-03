@@ -86,7 +86,7 @@ class Solver(SparkleCallable):
             pass
         return False
 
-    def build_cmd(self: Solver, instance: str, configuration: dict = None,
+    def build_cmd(self: Solver, instance: str | list[str], configuration: dict = None,
                   runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a configuration."""
         if isinstance(configuration, str):
@@ -118,14 +118,14 @@ class Solver(SparkleCallable):
                        str(configuration)]
         return solver_cmd
 
-    def run(self: Solver, instance: str,
+    def run(self: Solver, instance: str | list[str],
             configuration: dict = None,
             runsolver_configuration: list[str] = None,
             cwd: Path = None) -> dict[str, str]:
         """Run the solver on an instance with a certain configuration.
 
         Args:
-            instance: The instance to run the solver on
+            instance: The instance to run the solver on, list in case of multi-file
             configuration: The solver configuration to use. Can be empty.
             runsolver_configuration: The runsolver configuration to wrap the solver
                 with. If None (default), runsolver will not be used.

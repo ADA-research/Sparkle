@@ -6,6 +6,7 @@ from pathlib import Path
 import sparkle_logging as sl
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
+from sparkle.instance import InstanceSet
 
 
 def get_solver_list_latex(solver_list: list[str]) -> str:
@@ -36,7 +37,7 @@ def get_solver_list_latex(solver_list: list[str]) -> str:
 
 def get_dict_sbs_penalty_time_on_each_instance(
         solver_list: list[str],
-        instance_list: list[str],
+        instance_set: InstanceSet,
         results: dict[list[str, str]],
         cutoff: int,
         penalised_time: int) -> tuple[dict[str, float], str, dict[str, float]]:
@@ -60,12 +61,12 @@ def get_dict_sbs_penalty_time_on_each_instance(
             # Those that did not finish or exceed the thresh get the penalty
             if float(runtime) >= cutoff or status.lower() != "success":
                 runtime = penalised_time
-            penalised_averaged_runtime[solver] += (float(runtime) / len(instance_list))
+            penalised_averaged_runtime[solver] += (float(runtime) / instance_set.size)
 
     # Find the single best solver (SBS)
     sbs_name = min(penalised_averaged_runtime, key=penalised_averaged_runtime.get)
     sbs_name = Path(sbs_name).name
-    sbs_dict = {Path(instance).name: penalised_time for instance in instance_list}
+    sbs_dict = {name: penalised_time for name in instance_set._instance_names}
 
     for instance in results:
         instance_name = Path(instance).name
@@ -82,7 +83,7 @@ def get_dict_sbs_penalty_time_on_each_instance(
 
 
 def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
-        instance_list: list[str],
+        instance_set: InstanceSet,
         results: dict[str, list[str]],
         cutoff_time: int,
         penalised_time: int) -> dict[str, float]:
@@ -98,8 +99,7 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
 
     default_penalty = float(penalised_time)
 
-    for instance in instance_list:
-        instance_name = Path(instance).name
+    for instance_name in instance_set._instance_names:
         if instance_name in results:
             selected_value = results[instance_name][0]
             for solver in results[instance_name]:
@@ -120,7 +120,7 @@ def get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(
 def get_figure_parallel_portfolio_sparkle_vs_sbs(
         target_directory: Path,
         solver_list: list[str],
-        instances: list[str],
+        instance_set: InstanceSet,
         results: list[str],
         objective: SparkleObjective,
         cutoff: int,
@@ -142,10 +142,10 @@ def get_figure_parallel_portfolio_sparkle_vs_sbs(
                 instance names and the penalised running time of the PaP.
     """
     dict_sbs_penalty_time_on_each_instance, sbs_solver, dict_all_solvers =\
-        get_dict_sbs_penalty_time_on_each_instance(solver_list, instances, results,
+        get_dict_sbs_penalty_time_on_each_instance(solver_list, instance_set, results,
                                                    cutoff, penalised_time)
     dict_actual_parallel_portfolio_penalty_time_on_each_instance =\
-        get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instances,
+        get_dict_actual_parallel_portfolio_penalty_time_on_each_instance(instance_set,
                                                                          results,
                                                                          cutoff,
                                                                          penalised_time)
@@ -253,7 +253,7 @@ def parallel_report_variables(target_directory: Path,
                               objective: SparkleObjective,
                               cutoff: int,
                               penalised_time: int,
-                              instances: list[str]) -> dict[str, str]:
+                              instance_set: InstanceSet) -> dict[str, str]:
     """Returns a mapping between LaTeX report variables and their values.
 
     Args:
@@ -271,28 +271,28 @@ def parallel_report_variables(target_directory: Path,
     csv_data = [line.split(",") for line in
                 (parallel_portfolio_path / "results.csv").open("r").readlines()]
     solver_list = list(set([line[1] for line in csv_data]))  # Unique set of solvers
-    results = {Path(instance).name: [] for instance in instances}
+    results = {name: [] for name in instance_set._instance_names}
     for row in csv_data:
         if row[0] in results.keys():
             results[row[0]].append([row[1], row[2], row[3]])
 
     variables_dict["numSolvers"] = str(len(solver_list))
     variables_dict["solverList"] = get_solver_list_latex(solver_list)
-    variables_dict["numInstanceClasses"] = str(len(set(
-        [Path(instance_path).parent.name for instance_path in instances])))
+    variables_dict["numInstanceClasses"] = "1"  # We currently do not support multi sets
     variables_dict["cutoffTime"] = str(cutoff)
     variables_dict["performanceMetric"] = objective.metric
-    variables_dict["instanceClassList"] = sgfs.get_instance_set_count_list(instances)
+    variables_dict["instanceClassList"] =\
+        sgfs.get_instance_set_count_list(instance_set.instance_paths)
 
     # Produce some statistics on the parallel portfolio
     solvers_solutions = {solver: 0 for solver in solver_list}
-    instances_copy = [Path(instance).name for instance in instances]
+    instance_names_copy = instance_set._instance_names.copy()
     for line in csv_data:
-        if line[0] in instances_copy and line[2].lower() == "success":
+        if line[0] in instance_names_copy and line[2].lower() == "success":
             solvers_solutions[line[1]] += 1
-            instances_copy.remove(line[0])
-    unsolved_instances = len(instances) - sum([solvers_solutions[key]
-                                               for key in solvers_solutions])
+            instance_names_copy.remove(line[0])
+    unsolved_instances = instance_set.size - sum([solvers_solutions[key]
+                                                  for key in solvers_solutions])
     inst_succes = []
     for solver in solvers_solutions:
         inst_succes.append("\\item Solver "
@@ -308,7 +308,7 @@ def parallel_report_variables(target_directory: Path,
     (figure_name, dict_all_solvers,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance) =\
         get_figure_parallel_portfolio_sparkle_vs_sbs(target_directory, solver_list,
-                                                     instances, results, objective,
+                                                     instance_set, results, objective,
                                                      cutoff, penalised_time)
 
     variables_dict["figure-parallel-portfolio-sparkle-vs-sbs"] = figure_name
@@ -316,7 +316,7 @@ def parallel_report_variables(target_directory: Path,
     variables_dict["resultsTable"] = get_results_table(
         results, dict_all_solvers, parallel_portfolio_path,
         dict_actual_parallel_portfolio_penalty_time_on_each_instance,
-        solvers_solutions, unsolved_instances, len(instances), objective.metric)
+        solvers_solutions, unsolved_instances, instance_set.size, objective.metric)
 
     if objective.PerformanceMeasure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         variables_dict["decisionBool"] = "\\decisionfalse"
@@ -380,7 +380,7 @@ def generate_report_parallel_portfolio(parallel_portfolio_path: Path,
                                        objective: SparkleObjective,
                                        cutoff: int,
                                        penalised_time: int,
-                                       instances: list[str]) -> None:
+                                       instances: InstanceSet) -> None:
     """Generate a report for a parallel algorithm portfolio.
 
     Args:

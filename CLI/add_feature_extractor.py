@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to add a feature extractor to the Sparkle platform."""
-
+import os
 import sys
 import shutil
 import subprocess
@@ -10,6 +10,7 @@ from pathlib import Path
 from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
 import tools.general as tg
+from sparkle.instance import InstanceSet
 from sparkle.structures import feature_data_csv_help as sfdcsv
 from CLI.help import compute_features_help as scf
 import sparkle_logging as sl
@@ -79,10 +80,9 @@ if __name__ == "__main__":
     extractor_target_path.mkdir()
     shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
 
-    # Set execution permissions for wrapper
+    # Check execution permissions for wrapper
     extractor_wrapper = extractor_target_path / gv.sparkle_extractor_wrapper
-    if not extractor_wrapper.is_file() or not \
-       sfh.check_file_is_executable(extractor_wrapper):
+    if not extractor_wrapper.is_file() or not os.access(extractor_wrapper, os.X_OK):
         print(f"The file {extractor_wrapper} does not exist or is \
               not executable.")
         sys.exit(-1)
@@ -93,48 +93,28 @@ if __name__ == "__main__":
         gv.file_storage_data_mapping[gv.extractor_list_path])
 
     # pre-run the feature extractor on a testing instance, to obtain the feature names
-    if _check_existence_of_test_instance_list_file(extractor_target_path):
-        test_instance_list_file_name = "sparkle_test_instance_list.txt"
-        test_instance_list_file_path = (extractor_target_path
-                                        / test_instance_list_file_name)
-        with test_instance_list_file_path.open("r") as infile:
-            model_file, constraint_file = infile.readline().strip().split()
-
-        result_path = (
-            "Tmp/"
-            + test_instance_list_file_path.name
-            + "_"
-            + Path(model_file).name
-            + "_"
-            + tg.get_time_pid_random_string()
-            + ".rawres"
-        )
-        command_line = [extractor_target_path / gv.sparkle_extractor_wrapper,
-                        f"{extractor_target_path}/",
-                        extractor_target_path / model_file,
-                        extractor_target_path / constraint_file,
-                        result_path]
-        subprocess.run(command_line)
+    if (extractor_target_path / InstanceSet.instance_csv).exists():
+        testing_set = InstanceSet(extractor_target_path)
+        result_path = f"Tmp/{testing_set.name}_{tg.get_time_pid_random_string()}.rawres"
+        command_line =\
+            [extractor_target_path / gv.sparkle_extractor_wrapper,
+             "-extractor_dir", f"{extractor_target_path}/", "-instance_file"] +\
+            testing_set.instance_paths[0] + ["-output_file", result_path]
+        subprocess.run(command_line, capture_output=True)
     else:
         instance_path = extractor_target_path / "sparkle_test_instance.cnf"
         if not instance_path.is_file():
             instance_path = extractor_target_path / "sparkle_test_instance.txt"
         result_path = (
-            "Tmp/"
-            + extractor_target_path.name
-            + "_"
-            + instance_path.name
-            + "_"
-            + tg.get_time_pid_random_string()
-            + ".rawres"
+            f"Tmp/{extractor_target_path.name}_{instance_path.name}_"
+            f"{tg.get_time_pid_random_string()}.rawres"
         )
         command_line = [
             gv.python_executable, str(extractor_target_path
                                       / gv.sparkle_extractor_wrapper),
             "-extractor_dir", str(extractor_target_path),
             "-instance_file", str(instance_path),
-            "-output_file", result_path
-        ]
+            "-output_file", result_path]
 
         subprocess.run(command_line)
 

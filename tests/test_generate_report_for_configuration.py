@@ -12,6 +12,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
 import csv
 
 global settings
@@ -537,10 +538,10 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                         float(cutoff), 1, test_objective_quality)
     mock_timeouts.assert_called_once_with(
         solver, train_instance, configurator, validator, float(cutoff), 60)
-    mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
-                                               test_instance.name)
-    mock_ablation_table.assert_called_once_with(solver, train_instance.name,
-                                                test_instance.name)
+    mock_ablation_bool.assert_called_once_with(solver, train_instance,
+                                               test_instance)
+    mock_ablation_table.assert_called_once_with(solver, train_instance,
+                                                test_instance)
 
     assert common_dict == {
         "performanceMeasure": "performance",
@@ -573,8 +574,8 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
     Test that all needed functions are called to retrieve values and that these
     values are added to the common dictionary.
     """
-    train_instance = Path("train-instance")
-    test_instance = Path("test-instance")
+    train_set = InstanceSet(Path("tests/test_files/Instances/Train-Instance-Set"))
+    test_set = InstanceSet(Path("tests/test_files/Instances/Test-Instance-Set"))
     validation_data = [
         ["SolverName", "{}", "InstanceSetName", "InstanceName", "STATUS", "0", "25.323"]]
     cutoff = "60"
@@ -611,22 +612,22 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       solver,
                                                       configurator,
                                                       validator,
-                                                      train_instance,
-                                                      test_instance,
+                                                      train_set,
+                                                      test_set,
                                                       1)
 
     mock_figure.assert_called_once_with(
-        solver, test_instance.name, validation_data, validation_data,
+        solver, test_set.name, validation_data, validation_data,
         gv.configuration_output_analysis, "QUALITY", float(cutoff), 1,
         test_objective_quality, data_type="test")
     mock_timeouts.assert_called_once_with(
-        solver, test_instance, configurator, validator, float(cutoff), 60)
-    mock_ablation_bool.assert_called_once_with(solver, train_instance.name,
-                                               test_instance.name)
-    mock_ablation_table.assert_called_once_with(solver, train_instance.name,
-                                                test_instance.name)
+        solver, test_set, configurator, validator, float(cutoff), 60)
+    mock_ablation_bool.assert_called_once_with(solver, train_set,
+                                               test_set)
+    mock_ablation_table.assert_called_once_with(solver, train_set,
+                                                test_set)
     assert test_dict == {
-        "instanceSetTest": test_instance.name,
+        "instanceSetTest": test_set.name,
         "numInstanceInTestingInstanceSet": "1",
         "optimisedConfigurationTestingPerformancePAR": "42.1",
         "defaultConfigurationTestingPerformancePAR": "42.2",

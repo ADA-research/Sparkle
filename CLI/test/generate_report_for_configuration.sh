@@ -36,7 +36,7 @@ validation_test_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PT
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
 CLI/add_instances.py $instances_src_path_test > /dev/null
-CLI/add_solver.py --deterministic False $solver_src_path > /dev/null
+CLI/add_solver.py $solver_src_path > /dev/null
 
 # Copy scenario to simulate configuration
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user data (if any)

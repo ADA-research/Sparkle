@@ -12,6 +12,7 @@ from runrunner import Runner
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
@@ -79,7 +80,7 @@ class Configurator:
     @abstractmethod
     def get_optimal_configuration(self: Configurator,
                                   solver: Solver,
-                                  instance_set: Path,
+                                  instance_set: InstanceSet,
                                   performance: PerformanceMeasure) -> tuple[float, str]:
         """Returns the optimal configuration string for a solver of an instance set."""
         raise NotImplementedError
@@ -90,7 +91,7 @@ class Configurator:
         raise NotImplementedError
 
     def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set_name: str) -> None:
+                          solver: Solver, instance_set: InstanceSet) -> None:
         """Patching method to allow the rebuilding of configuration scenario."""
         raise NotImplementedError
 

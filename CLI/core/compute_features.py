@@ -5,14 +5,14 @@
 import subprocess
 import time
 import argparse
-from pathlib import Path
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from filelock import FileLock
 
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.instance import InstanceSet
 
 if __name__ == "__main__":
     # Initialise settings
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Define command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--instance", required=False, type=str, nargs="+",
+    parser.add_argument("--instance", required=True, type=str,
                         help="path to instance file(s) to run on")
     parser.add_argument("--extractor", required=True, type=str,
                         help="path to feature extractor")
@@ -32,84 +32,87 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process command line arguments
-    # Turn multiple instance files into a space separated string
-    instance_path = Path(" ".join(args.instance))
+    instance_path = Path(args.instance)
+    instance_name = instance_path.name
+    has_instance_set = False
+    if not instance_path.exists():
+        # If its an instance name (Multi-file instance), retrieve path list
+        instance_set = InstanceSet(instance_path.parent)
+        instance_path = instance_set.get_path_by_name(instance_name)
+        has_instance_set = True
+
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
+    cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
 
-    if len(gv.extractor_list) == 0:
-        cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
-    else:
-        cutoff_time_each_extractor_run = (
-            gv.settings.get_general_extractor_cutoff_time() / len(gv.extractor_list))
-
-    cutoff_time_each_run_option = "--cpu-limit " + str(cutoff_time_each_extractor_run)
-
-    # TODO: Handle multi-file instances
     key_str = (f"{extractor_path.name}_"
-               f"{instance_path.name}_"
+               f"{instance_name}_"
                f"{tg.get_time_pid_random_string()}")
     result_path = Path(f"Feature_Data/{key_str}.csv")
     runsolver_watch_data_path = f"{result_path}.log"
-    runsolver_watch_data_path_option = "-w " + runsolver_watch_data_path
-    command_line = (f"{gv.runsolver_path} {cutoff_time_each_run_option} "
-                    f"{runsolver_watch_data_path_option} {extractor_path}/"
-                    f"{gv.sparkle_extractor_wrapper} "
-                    f"-extractor_dir {extractor_path} "
-                    f"-instance_file {instance_path} "
-                    f"-output_file {result_path}")
+    # Ensure stringifcation of path objects
+    if isinstance(instance_path, list):
+        instance_list = [str(filepath) for filepath in instance_path]
+    else:
+        instance_list = [instance_path]
+    cmd = [gv.runsolver_path,
+           "--cpu-limit", str(cutoff_time_each_extractor_run),
+           "-w", runsolver_watch_data_path,
+           extractor_path / gv.sparkle_extractor_wrapper,
+           "-extractor_dir", extractor_path,
+           "-instance_file"] + instance_list + ["-output_file", result_path]
+    start_time = time.time()
 
-    try:
-        task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
-        status_info_str = (
-            "Status: Running\nExtractor: "
-            f"{extractor_path.name}\n"
-            f"Instance: {instance_path.name}\n")
-
-        start_time = time.time()
-        status_info_str += (
-            "Start Time: "
-            f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}\n")
-        status_info_str += "Start Timestamp: " + str(start_time) + "\n"
-        cutoff_str = f"Cutoff Time: {str(cutoff_time_each_extractor_run)} second(s)\n"
-        status_info_str += cutoff_str
-        sfh.write_string_to_file(task_run_status_path, status_info_str)
-        subprocess.run(command_line.split(" "))
-        end_time = time.time()
-    except Exception:
-        if not Path(result_path).exists():
-            sfh.create_new_empty_file(result_path)
+    task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
+    status_info_str = (
+        "Status: Running\nExtractor: "
+        f"{extractor_path.name}\n"
+        f"Instance: {instance_name}\n")
+    status_info_str += (
+        "Start Time: "
+        f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}\n")
+    status_info_str += "Start Timestamp: " + str(start_time) + "\n"
+    cutoff_str = f"Cutoff Time: {cutoff_time_each_extractor_run} second(s)\n"
+    status_info_str += cutoff_str
+    cmd_str = " ".join([str(c) for c in cmd])
+    subprocess.run(cmd, capture_output=True)
+    end_time = time.time()
 
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
         tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path,
                                                  gv.extractor_list)
+        # rename row
+        if not has_instance_set:
+            tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
+                [str(instance_path)], axis=0)
+        else:
+            tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
+                [instance_set.directory / instance_name], axis=0)
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
             feature_data_csv.combine(tmp_fdcsv)
             feature_data_csv.save_csv()
         result_string = "Successful"
-    except Exception:
+    except Exception as ex:
+        print(f"EXCEPTION during retrieving extractor results: {ex}")
         print(f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
-        print("****** WARNING: The feature vector of this instace consists of missing "
-              "values ******")
+        print(f"****** WARNING: The feature vector in {result_path} of this instance "
+              "consists of missing values ******")
         length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
         missing_values_row = [sfdcsv.SparkleFeatureDataCSV.missing_value] * length
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
                                                             gv.extractor_list)
-            feature_data_csv.add_row(instance_path, missing_values_row)
+            feature_data_csv.set_value(instance_name, None, missing_values_row)
             feature_data_csv.save_csv()
         result_string = "Failed -- using missing value instead"
     lock.release()
     result_path.unlink(missing_ok=True)
 
-    # TODO: Handle multi-file instances
-    description_str = (
-        f"[Extractor: {extractor_path.name},"
-        f" Instance: {instance_path.name}]")
+    description_str = f"[Extractor: {extractor_path.name}, Instance: {instance_name}]"
     start_time_str = (
         "[Start Time: "
         f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}]")
@@ -120,5 +123,4 @@ if __name__ == "__main__":
 
     log_str = (f"{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, "
                f"{result_string_str}")
-    sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     sfh.rmfiles([task_run_status_path, runsolver_watch_data_path])

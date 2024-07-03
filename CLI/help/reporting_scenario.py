@@ -6,6 +6,8 @@ import configparser
 from enum import Enum
 from pathlib import Path
 from pathlib import PurePath
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
 
 
 class Scenario(str, Enum):
@@ -69,7 +71,7 @@ class ReportingScenario:
             self.set_selection_portfolio_path()
             self.set_selection_test_case_directory()
             self.set_parallel_portfolio_path()
-            self.set_parallel_portfolio_instance_list()
+            self.set_parallel_portfolio_instance_path()
             self.set_config_solver()
             self.set_config_instance_set_train()
             self.set_config_instance_set_test()
@@ -136,13 +138,11 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "parallel_portfolio"
-            option_names = ("instance_list",)  # Comma to make it a tuple
+            option_names = ("instance_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = file_scenario.get(section, option)
-                    # Convert to list
-                    value = value.split(",")
-                    self.set_parallel_portfolio_instance_list(value)
+                    self.set_parallel_portfolio_instance_path(value)
                     file_scenario.remove_option(section, option)
 
             # Report on any unknown settings that were read
@@ -200,23 +200,6 @@ class ReportingScenario:
             self.__init_section(section)
             self.__scenario[section][name] = str(value)
 
-    def list_setter(self: ReportingScenario, section: str, name: str, value: list[str])\
-            -> None:
-        """Set a generic lists for the scenario.
-
-        Args:
-            section: Name of the section.
-            name: Name of the list element.
-            value: Value of the list given.
-        """
-        if value is not None:
-            self.__init_section(section)
-            # Convert to string
-            value = ",".join(str(element) for element in value)
-            self.__scenario[section][name] = value
-
-        self.write_scenario_ini()
-
     # Generic getters ###
 
     def none_if_empty_path(self: ReportingScenario, path: Path) -> Path:
@@ -229,8 +212,7 @@ class ReportingScenario:
             None if the given path is empty, the given Path value otherwise.
         """
         if str(path) == "" or str(path) == ".":
-            path = None
-
+            return None
         return path
 
     # Latest settings ###
@@ -295,29 +277,22 @@ class ReportingScenario:
         """Return the path to the parallel portfolio."""
         return Path(self.__scenario["parallel_portfolio"]["portfolio_path"])
 
-    def set_parallel_portfolio_instance_list(
+    def set_parallel_portfolio_instance_path(
             self: ReportingScenario,
-            value: list[str] = DEFAULT_parallel_portfolio_instance_list) -> None:
-        """Set the instance list used with the parallel portfolio."""
+            value: Path = None) -> None:
+        """Set the instance path used with the parallel portfolio."""
         section = "parallel_portfolio"
-        name = "instance_list"
-        self.list_setter(section, name, value)
+        name = "instance_path"
+        self.path_setter(section, name, value)
 
-    def get_parallel_portfolio_instance_list(self: ReportingScenario) -> list[str]:
+    def get_parallel_portfolio_instance_set(self: ReportingScenario) -> InstanceSet:
         """Return the instance list used with the parallel portfolio.
 
-        If instance list is empty return an empty list.
+        If instance list is empty return None.
         """
-        if self.__scenario["parallel_portfolio"]["instance_list"] == "":
-            instance_list = []
-        else:
-            try:
-                instance_list = (
-                    self.__scenario["parallel_portfolio"]["instance_list"].split(","))
-            except KeyError:
-                instance_list = []
-
-        return instance_list
+        if self.__scenario["parallel_portfolio"]["instance_path"] is None:
+            return None
+        return InstanceSet(Path(self.__scenario["parallel_portfolio"]["instance_path"]))
 
     # Configuration settings ###
 
@@ -328,9 +303,12 @@ class ReportingScenario:
         name = "solver"
         self.path_setter(section, name, value)
 
-    def get_config_solver(self: ReportingScenario) -> Path:
+    def get_config_solver(self: ReportingScenario) -> Solver:
         """Return the path to the solver that was configured."""
-        return self.none_if_empty_path(Path(self.__scenario["configuration"]["solver"]))
+        path = self.none_if_empty_path(Path(self.__scenario["configuration"]["solver"]))
+        if path is not None:
+            return Solver(path)
+        return None
 
     def set_config_instance_set_train(
             self: ReportingScenario, value: Path = DEFAULT_config_instance_set_train)\
@@ -340,10 +318,13 @@ class ReportingScenario:
         name = "instance_set_train"
         self.path_setter(section, name, value)
 
-    def get_config_instance_set_train(self: ReportingScenario) -> Path:
+    def get_config_instance_set_train(self: ReportingScenario) -> InstanceSet:
         """Return the path to the training instance set used for configuration."""
-        return self.none_if_empty_path(
+        path = self.none_if_empty_path(
             Path(self.__scenario["configuration"]["instance_set_train"]))
+        if path is None:
+            return None
+        return InstanceSet(path)
 
     def set_config_instance_set_test(
             self: ReportingScenario, value: Path = DEFAULT_config_instance_set_test)\
@@ -353,7 +334,10 @@ class ReportingScenario:
         name = "instance_set_test"
         self.path_setter(section, name, value)
 
-    def get_config_instance_set_test(self: ReportingScenario) -> Path:
+    def get_config_instance_set_test(self: ReportingScenario) -> InstanceSet:
         """Return the path to the testing instance set used for configuration."""
-        return self.none_if_empty_path(
+        path = self.none_if_empty_path(
             Path(self.__scenario["configuration"]["instance_set_test"]))
+        if path is None:
+            return None
+        return InstanceSet(path)

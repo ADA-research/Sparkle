@@ -220,7 +220,7 @@ class PerformanceDataFrame():
                 Optional in case of doing single run results.
         """
         objective, run = self.verify_indexing(objective, run)
-        self.dataframe.loc[(objective, instance, run), solver] = value
+        self.dataframe.at[(objective, instance, run), solver] = value
 
     def remove_solver(self: PerformanceDataFrame, solver_name: str) -> None:
         """Drop a solver from the Dataframe."""

@@ -28,7 +28,6 @@ if __name__ == "__main__":
     args["run_length"] = int(sys.argv[5])
     args["seed"] = int(sys.argv[6])
     cutoff_time = int(args["cutoff_time"])+1
-
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
     log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))

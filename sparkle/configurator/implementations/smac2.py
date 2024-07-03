@@ -20,6 +20,7 @@ from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
+from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
@@ -106,8 +107,8 @@ class SMAC2(Configurator):
             self.validator.out_dir = output_csv.parent
             validate_jobs = self.validator.validate(
                 [scenario.solver] * self.scenario.number_of_runs,
-                Path(output_csv.name),
-                [scenario.instance_directory],
+                output_csv.absolute(),
+                [scenario.instance_set],
                 subdir=Path(),
                 dependency=configuration_run,
                 run_on=run_on)
@@ -120,12 +121,12 @@ class SMAC2(Configurator):
     def get_optimal_configuration(
             self: Configurator,
             solver: Solver,
-            instance_set: Path,
+            instance_set: InstanceSet,
             performance: PerformanceMeasure = None,
             aggregate_config: Callable = mean) -> tuple[float, str]:
         """Returns optimal value and configuration string of solver on instance set."""
         if self.scenario is None:
-            self.set_scenario_dirs(solver, instance_set.name)
+            self.set_scenario_dirs(solver, instance_set)
         results = self.validator.get_validation_results(
             solver,
             instance_set,
@@ -183,9 +184,9 @@ class SMAC2(Configurator):
                 break
 
     def set_scenario_dirs(self: Configurator,
-                          solver: Solver, instance_set_name: str) -> None:
+                          solver: Solver, instance_set: InstanceSet) -> None:
         """Patching method to allow the rebuilding of configuratio scenario."""
-        self.scenario = ConfigurationScenario(solver, Path(instance_set_name))
+        self.scenario = ConfigurationScenario(solver, instance_set)
         self.scenario._set_paths(self.output_path)
 
     @staticmethod
