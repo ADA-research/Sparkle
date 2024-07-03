@@ -5,9 +5,11 @@ from __future__ import annotations
 
 from pathlib import Path
 import time
+import json
 
 from runrunner import SlurmRun
 from runrunner.base import Status
+from tabulate import tabulate
 
 from CLI.help.command_help import CommandName
 from CLI.help.command_help import COMMAND_DEPENDENCIES
@@ -145,17 +147,46 @@ def get_running_jobs() -> list[SlurmRun]:
             if run.status == Status.WAITING or run.status == Status.RUNNING]
 
 
+def get_dependencies(jobs: list[SlurmRun]) -> list[SlurmRun]:
+    """Adds Dependencies. Should be removed once RunRunner provides this feature"""
+    for job in jobs:
+        with open(job.json_filepath, 'r') as file:
+            data = json.load(file)
+        if len(data["dependencies"]) > 0:
+            job_ids = [dep["run_id"] for dep in data["dependencies"]]
+        else:
+            job_ids = []
+        job.dependencies = job_ids
+    return jobs
+
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
-    running_jobs = get_running_jobs()
-    prev_jobs = len(running_jobs) + 1
-    while len(running_jobs) > 0:
-        if len(running_jobs) < prev_jobs:
-            print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
-        time.sleep(10.0)
-        prev_jobs = len(running_jobs)
-        running_jobs = [run for run in running_jobs
+    jobs = get_running_jobs()
+    jobs = get_dependencies(jobs)
+    running_jobs = [run for run in jobs
                         if run.status == Status.WAITING or run.status == Status.RUNNING]
+    while len(running_jobs) > 0:
+        # Information to be printed to the table
+        information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
+        running_jobs = [run for run in running_jobs
+                if run.status == Status.WAITING or run.status == Status.RUNNING]
+        for job in running_jobs:
+            finished_jobs_count = sum(1 for status in job.all_status if status == Status.COMPLETED)
+            information.append(
+                [job.run_id, 
+                 job.name, 
+                 job.status, 
+                 "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies), 
+                 f"{finished_jobs_count}/{len(job.all_status)}"])
+            
+        # Print the table
+        table = tabulate(information, headers="firstrow", tablefmt="grid")
+        print(table)
+        time.sleep(3.0)
+        # Clears the table for the new table to be printed
+        lines = table.count('\n') + 1
+        print(f"\033[{lines}A", end='')
+        print("\033[J", end='')
 
     print("All jobs done!")
 
