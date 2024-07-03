@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to add a feature extractor to the Sparkle platform."""
-
+import os
 import sys
 import shutil
 import subprocess
@@ -80,10 +80,9 @@ if __name__ == "__main__":
     extractor_target_path.mkdir()
     shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
 
-    # Set execution permissions for wrapper
+    # Check execution permissions for wrapper
     extractor_wrapper = extractor_target_path / gv.sparkle_extractor_wrapper
-    if not extractor_wrapper.is_file() or not \
-       sfh.check_file_is_executable(extractor_wrapper):
+    if not extractor_wrapper.is_file() or not os.access(extractor_wrapper, os.X_OK):
         print(f"The file {extractor_wrapper} does not exist or is \
               not executable.")
         sys.exit(-1)

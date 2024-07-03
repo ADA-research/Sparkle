@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
         configurator_wrapper_path = solver_source / gv.sparkle_solver_wrapper
         if not (configurator_wrapper_path.is_file()
-                and sfh.check_file_is_executable(configurator_wrapper_path)):
+                and os.access(configurator_wrapper_path, os.X_OK)):
             print(f"WARNING: Solver {solver_source.name} does not have a solver wrapper "
                   f"(Missing file {gv.sparkle_solver_wrapper}) or is not executable. ")
 

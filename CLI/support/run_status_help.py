@@ -5,13 +5,28 @@ from pathlib import Path
 
 import global_variables as gv
 from CLI.support import sparkle_job_help as sjh
-from sparkle.platform import file_help as sfh
 from CLI.help.status_info import (SolverRunStatusInfo,
                                   StatusInfoType,
                                   ConfigureSolverStatusInfo,
                                   ConstructPortfolioSelectorStatusInfo,
                                   GenerateReportStatusInfo)
 from CLI.help.command_help import CommandName
+
+
+def get_list_all_extensions(filepath: Path, suffix: str) -> list[str]:
+    """Return a list of files with a certain suffix in a given path.
+
+    Args:
+      filepath: Target path.
+
+    Returns:
+      List of result files.
+    """
+    if not suffix.startswith("."):
+        suffix = f".{suffix}"
+    if not filepath.exists():
+        return []
+    return [str(x) for x in Path.iterdir(filepath) if x.suffix == suffix]
 
 
 def get_jobs_for_command(jobs: list[dict[str, str, str]], command: CommandName) \
@@ -50,7 +65,7 @@ def print_running_solver_jobs() -> None:
     command = CommandName.RUN_SOLVERS
     command_jobs_ids = get_running_jobs_for_command(command)
     tmp_directory = f"{gv.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
-    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
+    statusinfo_files = get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
               f"with job IDs {command_jobs_ids}")
@@ -74,7 +89,7 @@ def print_running_configuration_jobs() -> None:
     command = CommandName.CONFIGURE_SOLVER
     command_jobs_ids = get_running_jobs_for_command(command)
     tmp_directory = f"{gv.sparkle_tmp_path}/{StatusInfoType.CONFIGURE_SOLVER}/"
-    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
+    statusinfo_files = get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
               f"with job IDs {command_jobs_ids}")
@@ -99,7 +114,7 @@ def print_running_portfolio_selector_construction_jobs() -> None:
     command_jobs_ids = get_running_jobs_for_command(command)
     tmp_directory = (f"{gv.sparkle_tmp_path}/"
                      f"{StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR}/")
-    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
+    statusinfo_files = get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(command_jobs_ids) > 0:
         print(f"The command {command} is running "
               f"with job IDs {command_jobs_ids}")
@@ -126,7 +141,7 @@ def print_running_generate_report_jobs() -> None:
     """Print a list of currently active generate report jobs."""
     tmp_directory = (f"{gv.sparkle_tmp_path}/"
                      f"{StatusInfoType.GENERATE_REPORT}/")
-    statusinfo_files = sfh.get_list_all_extensions(Path(tmp_directory), ".statusinfo")
+    statusinfo_files = get_list_all_extensions(Path(tmp_directory), ".statusinfo")
     if len(statusinfo_files) > 0:
         print("Running generate report jobs:")
         for statusinfo_filename in statusinfo_files:

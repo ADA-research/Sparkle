@@ -74,7 +74,6 @@ if __name__ == "__main__":
     status_info_str += "Start Timestamp: " + str(start_time) + "\n"
     cutoff_str = f"Cutoff Time: {cutoff_time_each_extractor_run} second(s)\n"
     status_info_str += cutoff_str
-    sfh.write_string_to_file(task_run_status_path, status_info_str)
     cmd_str = " ".join([str(c) for c in cmd])
     subprocess.run(cmd, capture_output=True)
     end_time = time.time()
@@ -124,5 +123,4 @@ if __name__ == "__main__":
 
     log_str = (f"{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, "
                f"{result_string_str}")
-    sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     sfh.rmfiles([task_run_status_path, runsolver_watch_data_path])

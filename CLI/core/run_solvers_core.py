@@ -9,7 +9,7 @@ from pathlib import Path
 
 import global_variables as gv
 import tools.general as tg
-from sparkle.platform import file_help as sfh, settings_help
+from sparkle.platform import file_help as settings_help
 from CLI.support import run_solvers_help as srs
 from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure
@@ -91,7 +91,6 @@ if __name__ == "__main__":
 
     log_str = (f"{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, "
                f"{run_time_str}, {recorded_run_time_str}, {status_str}")
-    sfh.write_string_to_file(gv.sparkle_system_log_path, log_str, append=True)
     status_info.delete()
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
