@@ -281,7 +281,8 @@ def parallel_report_variables(target_directory: Path,
     variables_dict["numInstanceClasses"] = "1"  # We currently do not support multi sets
     variables_dict["cutoffTime"] = str(cutoff)
     variables_dict["performanceMetric"] = objective.metric
-    variables_dict["instanceClassList"] = str(instance_set.size)
+    variables_dict["instanceClassList"] =\
+        sgfs.get_instance_set_count_list(instance_set.instance_paths)
 
     # Produce some statistics on the parallel portfolio
     solvers_solutions = {solver: 0 for solver in solver_list}
