@@ -71,7 +71,7 @@ class ReportingScenario:
             self.set_selection_portfolio_path()
             self.set_selection_test_case_directory()
             self.set_parallel_portfolio_path()
-            self.set_parallel_portfolio_instance_list()
+            self.set_parallel_portfolio_instance_path()
             self.set_config_solver()
             self.set_config_instance_set_train()
             self.set_config_instance_set_test()
@@ -138,13 +138,11 @@ class ReportingScenario:
                     file_scenario.remove_option(section, option)
 
             section = "parallel_portfolio"
-            option_names = ("instance_list",)  # Comma to make it a tuple
+            option_names = ("instance_path",)  # Comma to make it a tuple
             for option in option_names:
                 if file_scenario.has_option(section, option):
                     value = file_scenario.get(section, option)
-                    # Convert to list
-                    value = value.split(",")
-                    self.set_parallel_portfolio_instance_list(value)
+                    self.set_parallel_portfolio_instance_path(value)
                     file_scenario.remove_option(section, option)
 
             # Report on any unknown settings that were read
@@ -296,29 +294,22 @@ class ReportingScenario:
         """Return the path to the parallel portfolio."""
         return Path(self.__scenario["parallel_portfolio"]["portfolio_path"])
 
-    def set_parallel_portfolio_instance_list(
+    def set_parallel_portfolio_instance_path(
             self: ReportingScenario,
-            value: list[str] = DEFAULT_parallel_portfolio_instance_list) -> None:
-        """Set the instance list used with the parallel portfolio."""
+            value: Path = None) -> None:
+        """Set the instance path used with the parallel portfolio."""
         section = "parallel_portfolio"
-        name = "instance_list"
+        name = "instance_path"
         self.list_setter(section, name, value)
 
-    def get_parallel_portfolio_instance_list(self: ReportingScenario) -> list[str]:
+    def get_parallel_portfolio_instance_set(self: ReportingScenario) -> InstanceSet:
         """Return the instance list used with the parallel portfolio.
 
-        If instance list is empty return an empty list.
+        If instance list is empty return None.
         """
-        if self.__scenario["parallel_portfolio"]["instance_list"] == "":
-            instance_list = []
-        else:
-            try:
-                instance_list = (
-                    self.__scenario["parallel_portfolio"]["instance_list"].split(","))
-            except KeyError:
-                instance_list = []
-
-        return instance_list
+        if self.__scenario["parallel_portfolio"]["instance_path"] is None:
+            return None
+        return InstanceSet(self.__scenario["parallel_portfolio"]["instance_path"])
 
     # Configuration settings ###
 

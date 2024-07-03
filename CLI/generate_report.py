@@ -110,13 +110,13 @@ if __name__ == "__main__":
             selection = True
             test_case_dir = gv.latest_scenario().get_selection_test_case_directory()
         elif scenario == Scenario.CONFIGURATION:
-            solver = Solver(gv.latest_scenario().get_config_solver())
+            solver = gv.latest_scenario().get_config_solver()
             instance_set_train = gv.latest_scenario().get_config_instance_set_train()
             instance_set_test = gv.latest_scenario().get_config_instance_set_test()
         elif scenario == Scenario.PARALLEL_PORTFOLIO:
             parallel_portfolio_path = gv.latest_scenario().get_parallel_portfolio_path()
-            pap_instance_list = (
-                gv.latest_scenario().get_parallel_portfolio_instance_list())
+            pap_instance_set =\
+                gv.latest_scenario().get_parallel_portfolio_instance_set()
 
     flag_instance_set_train = instance_set_train is not None
     flag_instance_set_test = instance_set_test is not None
@@ -185,7 +185,7 @@ if __name__ == "__main__":
             gv.settings.get_general_sparkle_objectives()[0],
             gv.settings.get_general_target_cutoff_time(),
             gv.settings.get_penalised_time(),
-            pap_instance_list)
+            pap_instance_set)
         print("Parallel portfolio report generated ...")
         status_info.delete()
     else:

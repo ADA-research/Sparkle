@@ -300,8 +300,7 @@ if __name__ == "__main__":
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
     gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
-    gv.latest_scenario().set_parallel_portfolio_instance_list(
-        instance_set.instance_paths)
+    gv.latest_scenario().set_parallel_portfolio_instance_path(instance_set.directory)
     print("Running Sparkle parallel portfolio is done!")
 
     # Write used settings to file

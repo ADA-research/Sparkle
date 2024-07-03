@@ -107,7 +107,7 @@ class SMAC2(Configurator):
             self.validator.out_dir = output_csv.parent
             validate_jobs = self.validator.validate(
                 [scenario.solver] * self.scenario.number_of_runs,
-                Path(output_csv.name),
+                output_csv.absolute(),
                 [scenario.instance_set],
                 subdir=Path(),
                 dependency=configuration_run,
