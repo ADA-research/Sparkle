@@ -14,6 +14,7 @@ from tabulate import tabulate
 from CLI.help.command_help import CommandName
 from CLI.help.command_help import COMMAND_DEPENDENCIES
 import global_variables as gv
+from sparkle.platform.cli_types import VerbosityLevel
 
 
 def get_num_of_total_job_from_list(list_jobs: list) -> int:
@@ -163,6 +164,13 @@ def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     jobs = get_running_jobs()
     jobs = get_dependencies(jobs)
+    print(jobs[0])
+    print(jobs[0].sbatch_options)
+    verbosity_setting = gv.settings.get_output_verbosity()
+    if verbosity_setting == VerbosityLevel.STANDARD:
+        wait_for_all_jobs_standard(jobs)
+
+def wait_for_all_jobs_standard(jobs) -> None:
     running_jobs = [run for run in jobs
                         if run.status == Status.WAITING or run.status == Status.RUNNING]
     while len(running_jobs) > 0:
@@ -183,9 +191,13 @@ def wait_for_all_jobs() -> None:
         table = tabulate(information, headers="firstrow", tablefmt="grid")
         print(table)
         time.sleep(3.0)
+
         # Clears the table for the new table to be printed
         lines = table.count('\n') + 1
+        # \033 is the escape character (ESC) in ASCII
+        # [{lines}A is the escape sequence that moves the cursor up.
         print(f"\033[{lines}A", end='')
+        # [J is the exape sequence that clears the console from the cursor down
         print("\033[J", end='')
 
     print("All jobs done!")

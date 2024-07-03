@@ -14,6 +14,7 @@ import global_variables as gv
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
+from sparkle.platform.cli_types import VerbosityLevel
 
 
 class SolutionVerifier(Enum):
@@ -75,6 +76,8 @@ class Settings:
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
 
+    DEFAULT_output_verbosity = VerbosityLevel.STANDARD
+
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
         # Settings 'dictionary' in configparser format
@@ -103,6 +106,8 @@ class Settings:
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
         self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
+
+        self.__output_verbosity_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -257,6 +262,14 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = int(file_settings.get(section, option))
                     self.set_parallel_portfolio_number_of_seeds_per_solver(value, state)
+                    file_settings.remove_option(section, option)
+
+            section = "output"
+            option_names = ("verbosity", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = VerbosityLevel.from_string(file_settings.get(section, option))
+                    self.set_output_verbosity(value, state)
                     file_settings.remove_option(section, option)
 
             # TODO: Report on any unknown settings that were read
@@ -861,3 +874,29 @@ class Settings:
                           f"to '{cur_val}'")
 
         return not printed_warning
+    
+
+    # Output settings ###
+    def set_output_verbosity(
+            self: Settings, value: VerbosityLevel = DEFAULT_output_verbosity,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the output verbosity to use."""
+        section = "output"
+        name = "verbosity"
+
+        if value is not None and self.__check_setting_state(
+                self.__output_verbosity_set, origin, name):
+            self.__init_section(section)
+            self.__output_verbosity_set = origin
+            self.__settings[section][name] = value.name
+
+        return
+
+    def get_output_verbosity(self: Settings) -> VerbosityLevel:
+        """Return the output verbosity."""
+        if self.__output_verbosity_set == SettingState.NOT_SET:
+            self.set_output_verbosity()
+
+        return VerbosityLevel.from_string(
+            self.__settings["output"]["verbosity"])
+
