@@ -19,13 +19,13 @@ class InstanceSet:
         self.directory = directory
         self.name = directory.name
         self.multi_file = False
-        self.instance_names = []
+        self._instance_names = []
         self.instance_paths = []
 
         if self.directory.is_file():
             # Single instance set
             self.instance_paths = [self.directory]
-            self.instance_names = [self.directory.name]
+            self._instance_names = [self.directory.name]
             self.directory = self.directory.parent
         elif (self.directory / InstanceSet.instance_csv).exists():
             # Dealing with multiple files per instance
@@ -33,12 +33,12 @@ class InstanceSet:
             # A multi instance file describes per line: InstanceName, File1, File2, ...
             # where each file is present in the self.directory
             for line in csv.reader((self.directory / InstanceSet.instance_csv).open()):
-                self.instance_names.append(line[0])
+                self._instance_names.append(line[0])
                 self.instance_paths.append([(self.directory / f) for f in line[1:]])
         else:
             # Default situation, treat each file in the directory as an instance
             self.instance_paths = [p for p in self.directory.iterdir()]
-            self.instance_names = [p.name for p in self.instance_paths]
+            self._instance_names = [p.name for p in self.instance_paths]
 
     @property
     def size(self: InstanceSet) -> int:
@@ -53,9 +53,16 @@ class InstanceSet:
                 self.directory / InstanceSet.instance_csv]
         return self.instance_paths
 
+    @property
+    def get_instance_paths(self: InstanceSet) -> list[Path]:
+        """Get processed instance paths for multi-file instances."""
+        if self.multi_file:
+            return [self.directory / name for name in self._instance_names]
+        return self.instance_paths
+
     def get_path_by_name(self: InstanceSet, name: str) -> Path | list[Path]:
         """Retrieves an instance paths by its name. Returns None upon failure."""
-        for idx, instance_name in enumerate(self.instance_names):
+        for idx, instance_name in enumerate(self._instance_names):
             if instance_name == name:
                 return self.instance_paths[idx]
         return None

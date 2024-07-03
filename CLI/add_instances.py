@@ -91,85 +91,13 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(
         gv.performance_data_csv_path,
         objectives=gv.settings.get_general_sparkle_objectives())
-    for name in instance_set.instance_names:
+    for instance_path in instance_set.get_instance_paths:
         # Construct a name path due to multi-file instances
-        feature_data_csv.add_row(str(instance_set.directory / name))
-        performance_data.add_instance(str(instance_set.directory / name))
+        feature_data_csv.add_row(str(instance_path))
+        performance_data.add_instance(str(instance_path))
 
     feature_data_csv.save_csv()
     performance_data.save_csv()
-
-    """if sih._check_existence_of_instance_list_file(instances_source):
-        # Copy the reference list to the reference list dir of Sparkle
-        instance_list_path = instances_source / Path(sih._instance_list_file)
-        target_path = gv.reference_list_dir / (
-            instances_source.name + gv.instance_list_postfix)
-        shutil.copy(instance_list_path, target_path)
-        list_instance = sih._get_list_instance(instances_source)
-
-        feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                                 gv.extractor_list)
-        # When adding instances, an empty performance DF has no objectives yet
-        performance_data = PerformanceDataFrame(
-            gv.performance_data_csv_path,
-            objectives=gv.settings.get_general_sparkle_objectives())
-
-        print(f"Number of instances to be added: {len(list_instance)}")
-
-        for instance_line in list_instance:
-            instance_related_files = instance_line.strip().split()
-            intended_instance_line = ""
-
-            for related_file_name in instance_related_files:
-                source_file_path = instances_source / related_file_name
-                target_file_path = instances_directory / related_file_name
-                shutil.copy(source_file_path, target_file_path)
-                intended_instance_line += str(target_file_path) + " "
-
-            intended_instance_line = intended_instance_line.strip()
-            target_instance = instances_directory / Path(intended_instance_line).name
-            feature_data_csv.add_row(target_instance)
-            performance_data.add_instance(target_instance)
-
-            print(f"Instance {instance_line} has been added!\n")
-
-        feature_data_csv.save_csv()
-        performance_data.save_csv()
-    else:
-        list_source_all_filename = sfh.get_file_paths_recursive(instances_source)
-        target_all_filename = sfh.get_file_paths_recursive(instances_directory)
-
-        feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                                 gv.extractor_list)
-        # When adding instances, an empty performance DF has no objectives yet
-        performance_data = PerformanceDataFrame(
-            gv.performance_data_csv_path,
-            objectives=gv.settings.get_general_sparkle_objectives())
-
-        num_inst = len(list_source_all_filename)
-        added = 0
-        print(f"Number of instances to be added: {num_inst}")
-        for i, intended_filepath in enumerate(list_source_all_filename):
-            intended_filename = intended_filepath.name
-            print(f"Adding {intended_filename} ... "
-                  f"({i + 1} out of {num_inst})", end="\r")
-            if intended_filename in target_all_filename:
-                print(f"Instance {intended_filename} already exists in Directory "
-                      f"{instances_directory}")
-                print(f"Ignore adding file {intended_filename}")
-            else:
-                shutil.copy(intended_filepath, instances_directory)
-                feature_data_csv.add_row(instances_directory / intended_filename)
-                performance_data.add_instance(
-                    str(instances_directory / intended_filename))
-                added += 1
-        if added == num_inst:
-            print(f"All instances of {instances_source} have been added!")
-        else:
-            print(f"{added}/{num_inst} instances of {instances_source} have been added!")
-
-        feature_data_csv.save_csv()
-        performance_data.save_csv()"""
 
     print(f"\nAdding instance set {instance_set.name} done!")
 

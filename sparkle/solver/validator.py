@@ -122,7 +122,7 @@ class Validator():
                         del solver_args[def_arg]
             solver_args = str(solver_args).replace('"', "'")
             for instance_set in instance_sets:
-                if instance_path.name in instance_set.instance_names:
+                if instance_path.name in instance_set._instance_names:
                     out_dict = get_solver_output(
                         ["-o", res.name, "-v", res.with_suffix(".val").name],
                         "", log_dir)

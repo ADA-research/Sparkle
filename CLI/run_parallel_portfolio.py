@@ -105,7 +105,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
                                                      "wc-time": float(sys.maxsize),
                                                      "status": "UNKNOWN"}
                                        for solver in solvers}
-                       for instance_name in instances_set.instance_names}
+                       for instance_name in instances_set._instance_names}
     n_instance_jobs = num_solvers * seeds_per_solver
     while not all(instances_done):
         time.sleep(check_interval)
@@ -137,7 +137,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
     for index, solver_logs in enumerate(runsolver_logs):
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
         solver_name = solvers[solver_index].name
-        instance_name = instances_set.instance_names[int(index / n_instance_jobs)]
+        instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
         if not solver_logs[1].exists():
             # NOTE: Runsolver is still wrapping up, not a pretty solution
             time.sleep(5)
@@ -165,7 +165,7 @@ def run_parallel_portfolio(instances_set: InstanceSet,
             job_output_dict[instance][solver]["cpu-time"] = min_time + cutoff
             job_output_dict[instance][solver]["wc-time"] = min_time + cutoff
 
-    for index, instance_name in enumerate(instances_set.instance_names):
+    for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
         instance_output = job_output_dict[instance_name]
         if all([instance_output[k]["status"] == "TIMEOUT"
