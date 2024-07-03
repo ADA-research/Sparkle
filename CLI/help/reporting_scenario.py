@@ -200,23 +200,6 @@ class ReportingScenario:
             self.__init_section(section)
             self.__scenario[section][name] = str(value)
 
-    def list_setter(self: ReportingScenario, section: str, name: str, value: list[str])\
-            -> None:
-        """Set a generic lists for the scenario.
-
-        Args:
-            section: Name of the section.
-            name: Name of the list element.
-            value: Value of the list given.
-        """
-        if value is not None:
-            self.__init_section(section)
-            # Convert to string
-            value = ",".join(str(element) for element in value)
-            self.__scenario[section][name] = value
-
-        self.write_scenario_ini()
-
     # Generic getters ###
 
     def none_if_empty_path(self: ReportingScenario, path: Path) -> Path:
@@ -300,7 +283,7 @@ class ReportingScenario:
         """Set the instance path used with the parallel portfolio."""
         section = "parallel_portfolio"
         name = "instance_path"
-        self.list_setter(section, name, value)
+        self.path_setter(section, name, value)
 
     def get_parallel_portfolio_instance_set(self: ReportingScenario) -> InstanceSet:
         """Return the instance list used with the parallel portfolio.
