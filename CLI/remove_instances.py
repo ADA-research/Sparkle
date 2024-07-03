@@ -41,14 +41,15 @@ if __name__ == "__main__":
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.REMOVE_INSTANCES])
 
-    if instances_path is None or not instances_path.exists() or not instances_path.is_dir():
+    if instances_path is None or not instances_path.exists() or not\
+            instances_path.is_dir():
         print(f'Could not resolve instances path arg "{args.instances_path}"!')
         print("Check that the path or nickname is spelled correctly.")
         sys.exit(-1)
 
     print(f"Start removing all instances in directory {instances_path} ...")
     instance_set = InstanceSet(instances_path)
-    #Remove from feature data and performance data
+    # Remove from feature data and performance data
     feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
                                                     gv.extractor_list)
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
                                          key=key, remove=True)
             break
 
-    #Remove all files
+    # Remove the directory and all its files
     shutil.rmtree(instances_path)
 
     if Path(gv.sparkle_algorithm_selector_path).exists():

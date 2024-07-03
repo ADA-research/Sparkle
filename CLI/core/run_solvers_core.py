@@ -49,7 +49,7 @@ if __name__ == "__main__":
         instance_path = instance_set.get_path_by_name(instance_name)
         has_instance_set = True
         instance_key = instance_name
-    
+
     solver_path = Path(args.solver)
     if args.seed is not None:
         # Creating a new directory for the solver to facilitate running several
