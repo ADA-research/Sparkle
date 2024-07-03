@@ -300,7 +300,7 @@ if __name__ == "__main__":
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
     gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
-    gv.latest_scenario().set_parallel_portfolio_instance_path(instance_set.directory)
+    gv.latest_scenario().set_parallel_portfolio_instance_path(args.instance_path)
     # Write used scenario to file
     gv.latest_scenario().write_scenario_ini()
     # Write used settings to file
