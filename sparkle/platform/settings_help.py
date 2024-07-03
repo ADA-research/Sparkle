@@ -795,22 +795,22 @@ class Settings:
         cur_dict = cur_settings.__settings._sections
         prev_dict = prev_settings.__settings._sections
 
-        sections_removed = [section for section in prev_dict.keys()
-                            if section not in cur_dict.keys()]
-        if len(sections_removed) > 0:
+        cur_set = set(cur_dict.keys())
+        prev_set = set(prev_dict.keys())
+
+        sections_removed = prev_set - cur_set
+        if sections_removed:
             print("Warning: the following sections have been removed:")
             for section in sections_removed:
-                print(f"\t- Section '{section}'")
+                print(f"  - Section '{section}'")
 
-        sections_added = [section for section in cur_dict.keys()
-                          if section not in prev_dict.keys()]
-        if len(sections_added) > 0:
+        sections_added = cur_set - prev_set
+        if sections_added:
             print("Warning: the following sections have been added:")
             for section in sections_added:
-                print(f"\t- Section '{section}'")
+                print(f"  - Section '{section}'")
 
-        sections_remained = [section for section in cur_dict.keys()
-                             if section in prev_dict.keys()]
+        sections_remained = cur_set & prev_set
         option_changed = False
         for section in sections_remained:
             printed_section = False
@@ -827,11 +827,10 @@ class Settings:
 
                     # do we have yet to print the section?
                     if not printed_section:
-                        print(f"\t- In the section '{section}':")
+                        print(f"  - In the section '{section}':")
                         printed_section = True
 
                     # print actual change
-                    print(f"\t\t- '{name}' changed from '{prev_val}' "
-                          f"to '{cur_val}'")
+                    print(f"    · '{name}' changed from '{prev_val}' to '{cur_val}'")
 
         return not (sections_removed or sections_added or option_changed)
