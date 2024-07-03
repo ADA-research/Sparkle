@@ -13,7 +13,7 @@ from tools.runsolver_parsing import handle_timeouts
 
 
 def run_solver_on_instance_and_process_results(
-        solver_path: str, instance_path: str | list[str], seed_str: str = None,
+        solver: Solver, instance_path: str | list[str], seed_str: str = None,
         custom_cutoff: int = None) -> tuple[float, float, float, list[float], str, str]:
     """Prepare and run a given the solver and instance, and process output."""
     # Prepare paths
@@ -22,7 +22,7 @@ def run_solver_on_instance_and_process_results(
     else:
         instance_name = Path(instance_path).name
     raw_result_path = (f"{gv.sparkle_tmp_path}/"
-                       f"{Path(solver_path).name}_"
+                       f"{solver.name}_"
                        f"{instance_name}_"
                        f"{tg.get_time_pid_random_string()}.rawres")
     runsolver_values_path = raw_result_path.replace(".rawres", ".val")
@@ -36,7 +36,6 @@ def run_solver_on_instance_and_process_results(
     runsolver_values_log = f"{runsolver_values_path}"
     runsolver_watch_data_path = runsolver_values_log.replace("val", "log")
     raw_result_path_option = f"{raw_result_path}"
-    solver = Solver(Path(solver_path))
     solver_output = solver.run(
         instance_path,
         configuration={"seed": seed_str,
@@ -54,7 +53,7 @@ def run_solver_on_instance_and_process_results(
                         solver_output["status"],
                         custom_cutoff,
                         gv.settings.get_penalised_time(custom_cutoff))
-    status = verify(instance_path, raw_result_path, solver_path, status)
+    status = verify(instance_path, raw_result_path, solver.directory, status)
     return (solver_output["cpu_time"], solver_output["wc_time"],
             cpu_time_penalised, solver_output["quality"], status, raw_result_path)
 

@@ -12,7 +12,7 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 from sparkle.platform import file_help as sfh
-from sparkle.solver import Extractor
+from sparkle.solver import Extractor, Solver
 import global_variables as gv
 import tools.general as tg
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
@@ -47,14 +47,14 @@ def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> li
 
 
 # Only called in call_sparkle_portfolio_selector_solve_instance
-def call_solver_solve_instance_within_cutoff(solver_path: str,
+def call_solver_solve_instance_within_cutoff(solver: Solver,
                                              instance_path: str,
                                              cutoff_time: int,
                                              performance_data_csv: str = None)\
         -> bool:
     """Call the Sparkle portfolio selector to solve a single instance with a cutoff."""
     _, _, cpu_time_penalised, _, status, raw_result_path = (
-        srs.run_solver_on_instance_and_process_results(solver_path, instance_path,
+        srs.run_solver_on_instance_and_process_results(solver, instance_path,
                                                        custom_cutoff=cutoff_time))
     flag_solved = False
     if status == "SUCCESS" or status == "SAT" or status == "UNSAT":
@@ -77,9 +77,9 @@ def call_solver_solve_instance_within_cutoff(solver_path: str,
             print(f"ERROR: Cannot acquire File Lock on {performance_data_csv}.")
     else:
         if flag_solved:
-            print(f"Instance solved by solver {solver_path}")
+            print(f"Instance solved by solver {solver.name}")
         else:
-            print(f"Solver {solver_path} failed to solve the instance with status "
+            print(f"Solver {solver.name} failed to solve the instance with status "
                   f"{status}")
     sfh.rmfiles(raw_result_path)
     return flag_solved
@@ -166,13 +166,13 @@ def call_sparkle_portfolio_selector_solve_instance(
     sfh.rmfiles([predict_schedule_result_path, gv.sparkle_err_path])
 
     for pred in list_predict_schedule:
-        solver_path = pred[0]
+        solver = Solver(Path(pred[0]))
         cutoff_time = pred[1]
-        print(f"Calling solver {Path(solver_path).name} with "
-              f"time budget {str(cutoff_time)} for solving ...")
+        print(f"Calling solver {solver.name} with "
+              f"time budget {cutoff_time} for solving ...")
         flag_solved = call_solver_solve_instance_within_cutoff(
-            solver_path, instance_path, cutoff_time, performance_data_csv_path)
-        print(f"Calling solver {Path(solver_path).name} done!")
+            solver, instance_path, cutoff_time, performance_data_csv_path)
+        print(f"Calling solver {solver.name} done!")
 
         if flag_solved:
             return
