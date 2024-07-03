@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Run a solver on an instance, only for internal calls from Sparkle."""
-import time
 from filelock import FileLock
 import argparse
-import shutil
 from pathlib import Path
 
 import global_variables as gv
 import tools.general as tg
-from sparkle.platform import file_help as settings_help
+from sparkle.platform import settings_help
 from CLI.support import run_solvers_help as srs
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.help.status_info import SolverRunStatusInfo
 
 
 if __name__ == "__main__":
@@ -52,47 +49,13 @@ if __name__ == "__main__":
         instance_key = instance_name
 
     solver = Solver(Path(args.solver))
-    if args.seed is not None:
-        # Creating a new directory for the solver to facilitate running several
-        # solver_instances in parallel.
-        new_solver_directory_path = Path(
-            f"{gv.sparkle_tmp_path}{solver.name}_"
-            f"seed_{args.seed}_{instance_name}")
-        subtarget = new_solver_directory_path / solver.name
-        shutil.copytree(solver.directory, subtarget, dirs_exist_ok=True)
-        solver_path = subtarget
-
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     raw_result_path = f"Tmp/{key_str}.rawres"
-    start_time = time.time()
-    # create statusinfo file
-    status_info = SolverRunStatusInfo()
-    status_info.set_solver(solver.name)
-    status_info.set_instance(instance_name)
+    
     cutoff_str = str(gv.settings.get_general_target_cutoff_time())
-    status_info.set_cutoff_time(f"{cutoff_str}"
-                                f" second(s)")
-    status_info.save()
-    cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path = (
-        srs.run_solver_on_instance_and_process_results(solver, instance_path,
-                                                       args.seed))
-
-    description_str = (f"[Solver: {solver_path.name}, "
-                       f"Instance: {instance_name}]")
-    start_time_str = (
-        f"[Start Time: {time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time))}]")
-    end_time_str = ("[End Time (after completing run time + processing time): "
-                    f"{time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))}]")
-    run_time_str = "[Actual Run Time (wall clock): " + str(wc_time) + " second(s)]"
-    recorded_run_time_str = ("[Recorded Run Time (CPU PAR"
-                             f"{gv.settings.get_general_penalty_multiplier()}): "
-                             f"{cpu_time_penalised} second(s)]")
-    status_str = f"[Run Status: {status}]"
-
-    log_str = (f"{description_str}, {cutoff_str}, {start_time_str}, {end_time_str}, "
-               f"{run_time_str}, {recorded_run_time_str}, {status_str}")
-    status_info.delete()
+    cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path =\
+        srs.run_solver_on_instance_and_process_results(solver, instance_path, args.seed)
 
     if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE:
         measurement = quality[0]  # TODO: Handle the multi-objective case
@@ -105,7 +68,7 @@ if __name__ == "__main__":
     with lock.acquire(timeout=60):
         performance_dataframe = PerformanceDataFrame(Path(args.performance_data))
         performance_dataframe.set_value(measurement,
-                                        solver=str(solver_path),
-                                        instance=str(instance_key))
+                                        solver=str(args.solver),
+                                        instance=str(args.instance))
         performance_dataframe.save_csv()
     lock.release()
