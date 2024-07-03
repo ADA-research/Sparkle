@@ -156,16 +156,6 @@ InstancePath = ArgumentContainer(names=["--instance-path"],
                                  kwargs={"type": Path,
                                          "help": "Path to an instance (set)"})
 
-
-InstancePathRunConfiguredSolverArgument = \
-    ArgumentContainer(names=["instance_path"],
-                      kwargs={"type": Path,
-                              "nargs": "+",
-                              "help": "Path(s) to instance file(s) (when multiple files "
-                                      "are given, it is assumed this is a multi-file "
-                                      "instance) or instance directory."})
-
-
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
                       kwargs={"required": False,

@@ -3,7 +3,7 @@
 
 import sys
 import argparse
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 from runrunner.base import Runner
 
@@ -23,8 +23,8 @@ from CLI.help.command_help import CommandName
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*ac.InstancePathRunConfiguredSolverArgument.names,
-                        **ac.InstancePathRunConfiguredSolverArgument.kwargs)
+    parser.add_argument(*ac.InstancePathPositional.names,
+                        **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
@@ -49,25 +49,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Try to resolve the instance path (Dir or list instance paths)
-    instance_arg = args.instance_path
-    if isinstance(instance_arg, list) and len(instance_arg) > 1:
-        instances_list = [Path(instance) for instance in args.instance_path]
-        if any([not p.exists() for p in instances_list]):
-            print(f"Could not resolve all instances: {args.instance_path}! Exiting...")
-    else:
-        if isinstance(instance_arg, list):
-            instance_arg = instance_arg[0]
-        instance_set = resolve_object_name(
-            instance_arg,
-            gv.file_storage_data_mapping[gv.instances_nickname_path],
-            gv.instance_dir, InstanceSet)
-        if instance_set is not None:
-            instances_list = instance_set.instance_paths
-        elif Path(instance_arg).exists():
-            instances_list = [Path(instance_arg)]
-        else:
-            print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
-            sys.exit(-1)
+    instance_set = resolve_object_name(
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
+    if instance_set is None:
+        print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
+        sys.exit(-1)
     run_on = args.run_on
 
     check_for_initialise(sys.argv,
@@ -97,7 +85,7 @@ if __name__ == "__main__":
     _, config_str = configurator.get_optimal_configuration(solver, train_set)
 
     # Call the configured solver
-    run = srcsh.call_solver(instances_list,
+    run = srcsh.call_solver(instance_set,
                             solver,
                             config=config_str,
                             commandname=CommandName.RUN_CONFIGURED_SOLVER,

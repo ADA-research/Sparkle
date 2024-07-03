@@ -39,12 +39,13 @@ cp $scenario_test $scenario_path # Activate test scenario
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Instance and solver paths
+instances_path_train="Examples/Resources/Instances/PTN"
 instances_path_test="Examples/Resources/Instances/PTN2"
 instance_path_test="Examples/Resources/Instances/PTN2/Ptn-7824-b20.cnf"
 solver_path="Examples/Resources/Solvers/PbO-CCSAT-Generic/"
 
 # Run commands to prepare Sparkle for the test
-
+CLI/add_instances.py $instances_path_train > /dev/null
 CLI/add_solver.py $solver_path > /dev/null
 
 # Run configured solver on a single instance

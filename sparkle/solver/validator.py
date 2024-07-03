@@ -63,12 +63,11 @@ class Validator():
                 config = ""
 
             for instance_set in instance_sets:
-                instance_path_list = [p.absolute() for p in instance_set.instance_paths]
                 if subdir is None:
                     out_path = self.out_dir / f"{solver.name}_{instance_set.name}"
                 else:
                     out_path = self.out_dir / subdir
-                run = rcsh.call_solver(instance_path_list,
+                run = rcsh.call_solver(instance_set,
                                        solver,
                                        config=config,
                                        seed=index if use_seed else None,

@@ -12,11 +12,12 @@ import global_variables as gv
 import tools.general as tg
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
 from tools.runsolver_parsing import get_solver_output
 
 
 def call_solver(
-        instances_list: list[list[Path]],
+        instance_set: InstanceSet,
         solver: Solver,
         config: str | Path = None,
         seed: int | list[int] = None,
@@ -41,20 +42,13 @@ def call_solver(
     Returns:
         str: The Slurm job id str, SlurmJob if RunRunner Slurm or empty string if local
     """
-    # Create an instance list[str] keeping in mind possible multi-file instances
-    for index, value in enumerate(instances_list):
-        # Flatten the second dimension
-        if isinstance(value, list):
-            instances_list[index] = " ".join([str(path) for path in value])
-
-    num_jobs = len(instances_list)
+    num_jobs = instance_set.size
     custom_cutoff = gv.settings.get_general_target_cutoff_time()
     cmd_list = []
     runsolver_args_list = []
     solver_params_list = []
-    for index, instance_path in enumerate(instances_list):
-        instance_path = Path(instance_path)
-        raw_result_path = Path(f"{solver.name}_{instance_path.name}"
+    for index, instance_path in enumerate(instance_set.instance_paths):
+        raw_result_path = Path(f"{solver.name}_{instance_set._instance_names[index]}"
                                f"_{tg.get_time_pid_random_string()}.rawres")
         runsolver_watch_data_path = raw_result_path.with_suffix(".log")
         runsolver_values_path = raw_result_path.with_suffix(".val")
@@ -83,7 +77,9 @@ def call_solver(
                 solver_params["seed"] = seed
         runsolver_args_list.append(runsolver_args)
         solver_params_list.append(solver_params)
-        solver_cmd = solver.build_cmd(instance_path.absolute(),
+        if isinstance(instance_path, list):
+            instance_path = [str(p) for p in instance_path]
+        solver_cmd = solver.build_cmd(instance_path,
                                       solver_params, runsolver_args)
         cmd_list.append(" ".join(solver_cmd))
 
@@ -95,7 +91,7 @@ def call_solver(
     outdir.mkdir(exist_ok=True, parents=True)
 
     if run_on == Runner.LOCAL:
-        print(f"\nStart running solver on {len(instances_list)} instances...")
+        print(f"\nStart running solver on {instance_set.size} instances...")
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
