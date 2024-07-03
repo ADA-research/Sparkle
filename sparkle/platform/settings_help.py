@@ -795,22 +795,22 @@ class Settings:
         cur_dict = cur_settings.__settings._sections
         prev_dict = prev_settings.__settings._sections
 
-        cur_set = set(cur_dict.keys())
-        prev_set = set(prev_dict.keys())
+        cur_sections_set = set(cur_dict.keys())
+        prev_sections_set = set(prev_dict.keys())
 
-        sections_removed = prev_set - cur_set
+        sections_removed = prev_sections_set - cur_sections_set
         if sections_removed:
             print("Warning: the following sections have been removed:")
             for section in sections_removed:
                 print(f"  - Section '{section}'")
 
-        sections_added = cur_set - prev_set
+        sections_added = cur_sections_set - prev_sections_set
         if sections_added:
             print("Warning: the following sections have been added:")
             for section in sections_added:
                 print(f"  - Section '{section}'")
 
-        sections_remained = cur_set & prev_set
+        sections_remained = cur_sections_set & prev_sections_set
         option_changed = False
         for section in sections_remained:
             printed_section = False
