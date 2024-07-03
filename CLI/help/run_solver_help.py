@@ -78,7 +78,9 @@ def call_solver(
         runsolver_args_list.append(runsolver_args)
         solver_params_list.append(solver_params)
         if isinstance(instance_path, list):
-            instance_path = [str(p) for p in instance_path]
+            instance_path = [p.absolute() for p in instance_path]
+        else:
+            instance_path = instance_path.absolute()
         solver_cmd = solver.build_cmd(instance_path,
                                       solver_params, runsolver_args)
         cmd_list.append(" ".join(solver_cmd))

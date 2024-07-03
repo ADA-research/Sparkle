@@ -79,9 +79,9 @@ if __name__ == "__main__":
     selection = args.selection
     test_case_dir = args.test_case_directory
 
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping, gv.solver_dir)
-    solver = Solver(solver_path) if solver_path is not None else None
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping,
+                                 gv.solver_dir, Solver)
     instance_set_train = resolve_object_name(
         args.instance_set_train,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
@@ -104,7 +104,7 @@ if __name__ == "__main__":
             args.performance_measure, SettingState.CMD_LINE)
 
     # If no arguments are set get the latest scenario
-    if not selection and test_case_dir is None and solver_path is None:
+    if not selection and test_case_dir is None and solver is None:
         scenario = gv.latest_scenario().get_latest_scenario()
         if scenario == Scenario.SELECTION:
             selection = True
