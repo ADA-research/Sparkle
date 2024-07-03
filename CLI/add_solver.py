@@ -35,8 +35,6 @@ def parser_function() -> argparse.ArgumentParser:
                                   **apc.RunSolverLaterArgument.kwargs)
     parser.add_argument(*apc.NicknameSolverArgument.names,
                         **apc.NicknameSolverArgument.kwargs)
-    parser.add_argument(*apc.SolverVariationsArgument.names,
-                        **apc.SolverVariationsArgument.kwargs)
     parser.add_argument(*apc.SolverPathArgument.names,
                         **apc.SolverPathArgument.kwargs)
     parser.add_argument(*apc.RunOnArgument.names,
@@ -70,14 +68,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     nickname = args.nickname
-    solver_variations = args.solver_variations
     run_on = args.run_on
-
-    if solver_variations < 1:
-        print("ERROR: Invalid number of solver variations given "
-              f"({str(solver_variations)}), "
-              "a postive integer must be used. Stopping execution.")
-        sys.exit(-1)
 
     if args.run_checks:
         print("Running checks...")
@@ -101,8 +92,8 @@ if __name__ == "__main__":
 
     # Start add solver
     solver_directory = gv.solver_dir / solver_source.name
-    if not Path(solver_directory).exists():
-        Path(solver_directory).mkdir(parents=True, exist_ok=True)
+    if not solver_directory.exists():
+        solver_directory.mkdir(parents=True, exist_ok=True)
     else:
         print(f"ERROR: Solver {solver_source.name} already exists! "
               "Can not add new solver.")
@@ -114,11 +105,11 @@ if __name__ == "__main__":
 
     # Add RunSolver executable to the solver
     runsolver_path = gv.runsolver_path
-    if runsolver_path.name in [file.name for file in Path(solver_directory).iterdir()]:
+    if runsolver_path.name in [file.name for file in solver_directory.iterdir()]:
         print("Warning! RunSolver executable detected in Solver "
-              f"{Path(solver_source).name}. This will be replaced with "
+              f"{solver_source.name}. This will be replaced with "
               f"Sparkle's version of RunSolver. ({runsolver_path})")
-    runsolver_target = Path(solver_directory) / runsolver_path.name
+    runsolver_target = solver_directory / runsolver_path.name
     shutil.copyfile(runsolver_path, runsolver_target)
     runsolver_target.chmod(os.stat(runsolver_target).st_mode | stat.S_IEXEC)
 

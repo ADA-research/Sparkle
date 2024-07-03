@@ -413,32 +413,12 @@ SolverPathArgument = ArgumentContainer(names=["solver_path"],
                                                "type": str,
                                                "help": "path to the solver"})
 
-SolverPortfolioArgument = \
-    ArgumentContainer(names=["--solver"],
-                      kwargs={"required": False,
-                              "nargs": "+",
-                              "type": str,
-                              "help": "Specify the list of solvers, add "
-                              '\",<#solver_variations>\" to the end of a path to add '
-                              "multiple instances of a single solver. For example "
-                              "--solver Solver/PbO-CCSAT-Generic,25 to construct a "
-                              "portfolio containing 25 variations of "
-                              "PbO-CCSAT-Generic."})
-
 SolverReportArgument = ArgumentContainer(names=["--solver"],
                                          kwargs={"required": False,
                                                  "type": str,
                                                  "default": None,
                                                  "help": "path to solver for an "
                                                  "algorithm configuration report"})
-
-SolverVariationsArgument = \
-    ArgumentContainer(names=["--solver-variations"],
-                      kwargs={"default": 1,
-                              "type": int,
-                              "help": "Use this option to add multiple variations of the"
-                                      " solver by using a different random seed for each"
-                                      " varation."})
 
 TargetCutOffTimeAblationArgument = \
     ArgumentContainer(names=["--target-cutoff-time"],
