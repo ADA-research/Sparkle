@@ -23,9 +23,9 @@ Otherwise, you should create a new issue.
   - Make a suggestion on how to fix the issue if you have one.
 - **Type**
   - Most issues will either be a `bug` or a `task`. A bug should fix an error, whereas a task should be an improvement.
-  - `epic` and `story` are reserved for overarching issue management and should only be used in agreement with lead developers. 
+  - `epic` and `story` are reserved for overarching issue management and should only be used in agreement with lead developers.
 - **Priority**
-  - Assign bugs as high priority and improvements as medium. 
+  - Assign bugs as high priority and improvements as medium.
 - **Assign**
   - If the issue is related and isolated to the part of Sparkle you are working on, feel free to assign the issue to yourself. Otherwise, leave it unassigned.
 
@@ -38,8 +38,9 @@ When ready, create a pull request towards the `main` branch, clearly indicating 
 Make sure to also update the `CHANGELOG.md` and the version number with a minor version (after the dot) when ready to merge to main. E.g., 0.4.1 changes to 0.4.2.
 
 ### All other development
-The development is done on the `development` branch. 
+The development is done on the `development` branch.
 To make changes to Sparkle, please create a branch from `development` and add your code there.
+If, during testing, you need to clean up local files, please do so using the custom git command `git sparkle-clean` as this preserves certain untracked files that are necessary to run Sparkle (and which would be removed when simply running `git clean -dxf`). To make this command locally available, run `git config alias.sparkle-clean "clean -dxf -e SparkleAI.egg-info"` once.
 When ready, create a pull request towards the `development` branch.
 
 ## Pull requests, review, and merge protocol
@@ -92,7 +93,7 @@ When releasing a new version (including bugfix versions) of Sparkle to the `main
 
 ## CHANGELOG
 
-The file `CHANGELOG.md` aims to track changes between versions. 
+The file `CHANGELOG.md` aims to track changes between versions.
 When making changes, please add a short description in the `[Unreleased]` section, under a relevant subsection (`Added`, `Changed`, `Fixed`, `Removed` or `Deprecated`).
 
 ## Tests
@@ -100,20 +101,20 @@ Sparkle has a variety of tests to make sure our changes impact the code base in 
 
 ### Unit tests
 
-Sparkle aims to have an extensive test coverage of the functionalities. 
-We use the `pytest` platform to automate the testing. 
-When writing new code you should create relevant tests in the `tests` directory. 
+Sparkle aims to have an extensive test coverage of the functionalities.
+We use the `pytest` platform to automate the testing.
+When writing new code you should create relevant tests in the `tests` directory.
 To see a simple example of the tests, you can check the file `tests/test_about.py`.
 You should also read the [pytest documentation](https://docs.pytest.org).
 
-To run the test you can simply run 
+To run the test you can simply run
 ```
 $ pytest
 ```
-pytest is installed with the base requirements of Sparkle and is run automatically on pull request. 
+pytest is installed with the base requirements of Sparkle and is run automatically on pull request.
 
 ### Integration tests
 
 In addition to the unit tests, Sparkle also has a series of integration tests verifying that the commands run without errors.
-These tests are in `CLI/test/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux/MacOS. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm. 
+These tests are in `CLI/test/*`. In general these have been designed to run on a Slurm cluster, however some have been made available to run locally on Linux/MacOS. It is imperative that it functions on Slurm, and ideally has the same behaviour locally/without Slurm.
 
