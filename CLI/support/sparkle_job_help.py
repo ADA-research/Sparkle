@@ -160,19 +160,6 @@ def get_dependencies(jobs: list[SlurmRun]) -> list[SlurmRun]:
         job.dependencies = job_ids
     return jobs
 
-def get_partition(jobs: list[SlurmRun]) -> dict:
-    """Adds partition. Should be removed once RunRunner provides this feature"""
-    partitions = {}
-    for job in jobs:
-        for arg in job.sbatch_options:
-            if arg.startswith('-p'):
-                partition = arg.split('=')[1] if '=' in arg else arg.split()[1]
-                partitions[job.name] = partition
-            elif arg.startswith('--partition='):
-                partition = arg.split('=')[1]
-                partitions[job.name] = partition
-    return partitions
-
 def clear_console(lines) -> None:
     # \033 is the escape character (ESC) in ASCII
     # [{lines}A is the escape sequence that moves the cursor up.
@@ -183,41 +170,50 @@ def clear_console(lines) -> None:
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     jobs = get_running_jobs()
-    jobs = get_dependencies(jobs)
-    partitions = get_partition(jobs)
     verbosity_setting = gv.settings.get_output_verbosity()
-    if verbosity_setting == VerbosityLevel.STANDARD:
-        wait_for_all_jobs_standard(jobs, partitions)
-
-def wait_for_all_jobs_standard(jobs, partitions) -> None:
-    running_jobs = [run for run in jobs
+    # If verbosity is quiet there is no need for further information
+    if verbosity_setting == VerbosityLevel.QUIET:
+        running_jobs = [run for run in jobs
                         if run.status == Status.WAITING or run.status == Status.RUNNING]
-    while len(running_jobs) > 0:
-        # Information to be printed to the table
-        information = [["RunId", "Name", "Status", "Partition", "Dependencies", "Finished Jobs"]]
-        running_jobs = [run for run in running_jobs
-                if run.status == Status.WAITING or run.status == Status.RUNNING]
-        for job in running_jobs:
-            finished_jobs_count = sum(1 for status in job.all_status if status == Status.COMPLETED)
-            information.append(
-                [job.run_id, 
-                 job.name, 
-                 job.status,
-                 partitions[job.name], 
-                 "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies), 
-                 f"{finished_jobs_count}/{len(job.all_status)}"])
-            
-        # Print the table
-        table = tabulate(information, headers="firstrow", tablefmt="grid")
-        print(table)
-        time.sleep(3.0)
+        prev_jobs = len(running_jobs) + 1
+        while len(running_jobs) > 0:
+            if len(running_jobs) < prev_jobs:
+                print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
+            time.sleep(3.0)
+            prev_jobs = len(running_jobs)
+            running_jobs = [run for run in running_jobs
+                            if run.status == Status.WAITING or run.status == Status.RUNNING]
+    # If verbosity is standard the command will print a terminal with relevant information
+    elif verbosity_setting == VerbosityLevel.STANDARD:
+        # Collect dependencies and partitions for each job
+        jobs = get_dependencies(jobs)
+        running_jobs = [run for run in jobs
+                        if run.status == Status.WAITING or run.status == Status.RUNNING]
+        while len(running_jobs) > 0:
+            # Information to be printed to the table
+            information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
+            running_jobs = [run for run in running_jobs
+                    if run.status == Status.WAITING or run.status == Status.RUNNING]
+            for job in running_jobs:
+                finished_jobs_count = sum(1 for status in job.all_status if status == Status.COMPLETED)
+                information.append(
+                    [job.run_id, 
+                    job.name, 
+                    job.status,
+                    "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies), 
+                    f"{finished_jobs_count}/{len(job.all_status)}"])
+                
+            # Print the table
+            table = tabulate(information, headers="firstrow", tablefmt="grid")
+            print(table)
+            time.sleep(3.0)
 
-        # Clears the table for the new table to be printed
-        lines = table.count('\n') + 1
-        clear_console(lines)
+            # Clears the table for the new table to be printed
+            lines = table.count('\n') + 1
+            clear_console(lines)
 
     print("All jobs done!")
-
+    
 
 def get_active_jobs() -> list[dict[str, str, str]]:
     """Get active jobs from file and return them as list of [job_id, command, status].
