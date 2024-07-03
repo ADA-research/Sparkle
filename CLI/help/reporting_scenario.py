@@ -292,7 +292,7 @@ class ReportingScenario:
         """
         if self.__scenario["parallel_portfolio"]["instance_path"] is None:
             return None
-        return InstanceSet(self.__scenario["parallel_portfolio"]["instance_path"])
+        return InstanceSet(Path(self.__scenario["parallel_portfolio"]["instance_path"]))
 
     # Configuration settings ###
 
