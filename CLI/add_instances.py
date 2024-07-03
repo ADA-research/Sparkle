@@ -65,17 +65,18 @@ if __name__ == "__main__":
     if not instances_source.exists():
         print(f'Instance set path "{instances_source}" does not exist!')
         sys.exit(-1)
-
-    nickname = args.nickname
-    if nickname is not None:
+    if instances_target.exists():
+        print(f'Instance set "{instances_source.name}" already exists in Sparkle! '
+              "Exiting...")
+        sys.exit(-1)
+    if args.nickname is not None:
         sfh.add_remove_platform_item(instances_target,
-                                     gv.instances_nickname_path, key=nickname)
+                                     gv.instances_nickname_path, key=args.nickname)
 
     print(f"Start adding all instances in directory {instances_source} ...")
     instance_set = InstanceSet(instances_source)
 
-    if not instances_target.exists():
-        instances_target.mkdir(parents=True, exist_ok=True)
+    instances_target.mkdir(parents=True)
     print("Copying files...")
     for instance_path_source in instance_set.all_paths:
         print(f"Copying {instance_path_source} to {instances_target}...", end="\r")

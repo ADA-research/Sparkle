@@ -54,7 +54,7 @@ if __name__ == "__main__":
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     for instance in instance_set.get_instance_paths:
         feature_data_csv.delete_row(str(instance))
-        performance_data_csv.remove_instance((instance))
+        performance_data_csv.remove_instance(str(instance))
 
     feature_data_csv.save_csv()
     performance_data_csv.save_csv()
