@@ -792,12 +792,27 @@ class Settings:
         Returns:
           True iff there are no changes.
         """
-        printed_warning = False
-
         cur_dict = cur_settings.__settings._sections
         prev_dict = prev_settings.__settings._sections
 
-        for section in cur_dict.keys():
+        sections_removed = [section for section in prev_dict.keys()
+                            if section not in cur_dict.keys()]
+        if len(sections_removed) > 0:
+            print("Warning: the following sections have been removed:")
+            for section in sections_removed:
+                print(f"\t- Section '{section}'")
+
+        sections_added = [section for section in cur_dict.keys()
+                          if section not in prev_dict.keys()]
+        if len(sections_added) > 0:
+            print("Warning: the following sections have been added:")
+            for section in sections_added:
+                print(f"\t- Section '{section}'")
+
+        sections_remained = [section for section in cur_dict.keys()
+                             if section in prev_dict.keys()]
+        option_changed = False
+        for section in sections_remained:
             printed_section = False
             names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
             for name in names:
@@ -806,17 +821,17 @@ class Settings:
                 prev_val = prev_dict[section].get(name, None)
                 if cur_val != prev_val:
                     # do we have yet to print the initial warning?
-                    if not printed_warning:
+                    if not option_changed:
                         print("Warning: The following attributes/options have changed:")
-                        printed_warning = True
+                        option_changed = True
 
                     # do we have yet to print the section?
                     if not printed_section:
-                        print(f"In the section '{section}':")
+                        print(f"\t- In the section '{section}':")
                         printed_section = True
 
                     # print actual change
-                    print(f"  - '{name}' changed from '{prev_val}' "
+                    print(f"\t\t- '{name}' changed from '{prev_val}' "
                           f"to '{cur_val}'")
 
-        return not printed_warning
+        return not (sections_removed or sections_added or option_changed)
