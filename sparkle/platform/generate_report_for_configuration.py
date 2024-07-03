@@ -568,10 +568,10 @@ def generate_report_for_configuration(solver: Solver,
                                       target_path: Path,
                                       latex_template_path: Path,
                                       bibliography_path: Path,
-                                      instance_set_train: Path,
+                                      train_set: InstanceSet,
                                       penalty_multiplier: float,
                                       extractor_cuttoff: int,
-                                      instance_set_test: Path = None,
+                                      test_set: InstanceSet = None,
                                       ablation: bool = True) -> None:
     """Generate a report for algorithm configuration.
 
@@ -583,16 +583,16 @@ def generate_report_for_configuration(solver: Solver,
         target_path: Where the report files will be placed.
         latex_template_path: Path to the template to use for the report
         bibliography_path: The bib corresponding to the latex template
-        instance_set_train: Path of the instance set for training
+        train_set: Instance set for training
         penalty_multiplier: Penalty factor for timeout
         extractor_cuttoff: Cut off for extractor
-        instance_set_test: Path of the instance set for testing
+        test_set: Instance set for testing
         ablation: Whether or not ablation is used. Defaults to True.
     """
     target_path.mkdir(parents=True, exist_ok=True)
     variables_dict = configuration_report_variables(
         target_path, solver, configurator, validator, extractor_dir, bibliography_path,
-        instance_set_train, penalty_multiplier, extractor_cuttoff, instance_set_test,
+        train_set, penalty_multiplier, extractor_cuttoff, test_set,
         ablation)
     sgfs.generate_report(latex_template_path,
                          "template-Sparkle-for-configuration.tex",
