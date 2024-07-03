@@ -52,7 +52,6 @@ if __name__ == "__main__":
     performance_measure = PerformanceMeasure.from_str(args.performance_measure)
     key_str = f"{solver.name}_{instance_name}_{tg.get_time_pid_random_string()}"
     raw_result_path = f"Tmp/{key_str}.rawres"
-    
     cutoff_str = str(gv.settings.get_general_target_cutoff_time())
     cpu_time, wc_time, cpu_time_penalised, quality, status, raw_result_path =\
         srs.run_solver_on_instance_and_process_results(solver, instance_path, args.seed)
