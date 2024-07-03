@@ -160,22 +160,41 @@ def get_dependencies(jobs: list[SlurmRun]) -> list[SlurmRun]:
         job.dependencies = job_ids
     return jobs
 
+def get_partition(jobs: list[SlurmRun]) -> dict:
+    """Adds partition. Should be removed once RunRunner provides this feature"""
+    partitions = {}
+    for job in jobs:
+        for arg in job.sbatch_options:
+            if arg.startswith('-p'):
+                partition = arg.split('=')[1] if '=' in arg else arg.split()[1]
+                partitions[job.name] = partition
+            elif arg.startswith('--partition='):
+                partition = arg.split('=')[1]
+                partitions[job.name] = partition
+    return partitions
+
+def clear_console(lines) -> None:
+    # \033 is the escape character (ESC) in ASCII
+    # [{lines}A is the escape sequence that moves the cursor up.
+    print(f"\033[{lines}A", end='')
+    # [J is the exape sequence that clears the console from the cursor down
+    print("\033[J", end='')
+        
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     jobs = get_running_jobs()
     jobs = get_dependencies(jobs)
-    print(jobs[0])
-    print(jobs[0].sbatch_options)
+    partitions = get_partition(jobs)
     verbosity_setting = gv.settings.get_output_verbosity()
     if verbosity_setting == VerbosityLevel.STANDARD:
-        wait_for_all_jobs_standard(jobs)
+        wait_for_all_jobs_standard(jobs, partitions)
 
-def wait_for_all_jobs_standard(jobs) -> None:
+def wait_for_all_jobs_standard(jobs, partitions) -> None:
     running_jobs = [run for run in jobs
                         if run.status == Status.WAITING or run.status == Status.RUNNING]
     while len(running_jobs) > 0:
         # Information to be printed to the table
-        information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
+        information = [["RunId", "Name", "Status", "Partition", "Dependencies", "Finished Jobs"]]
         running_jobs = [run for run in running_jobs
                 if run.status == Status.WAITING or run.status == Status.RUNNING]
         for job in running_jobs:
@@ -183,7 +202,8 @@ def wait_for_all_jobs_standard(jobs) -> None:
             information.append(
                 [job.run_id, 
                  job.name, 
-                 job.status, 
+                 job.status,
+                 partitions[job.name], 
                  "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies), 
                  f"{finished_jobs_count}/{len(job.all_status)}"])
             
@@ -194,11 +214,7 @@ def wait_for_all_jobs_standard(jobs) -> None:
 
         # Clears the table for the new table to be printed
         lines = table.count('\n') + 1
-        # \033 is the escape character (ESC) in ASCII
-        # [{lines}A is the escape sequence that moves the cursor up.
-        print(f"\033[{lines}A", end='')
-        # [J is the exape sequence that clears the console from the cursor down
-        print("\033[J", end='')
+        clear_console(lines)
 
     print("All jobs done!")
 
