@@ -44,6 +44,11 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
 
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
+
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.COMPUTE_FEATURES])
 
@@ -61,7 +66,7 @@ if __name__ == "__main__":
     # Start compute features
     print("Start computing features ...")
     scf.compute_features(gv.feature_data_csv_path,
-                         args.recompute, run_on=args.run_on)
+                         args.recompute, run_on=run_on)
 
     # Write used settings to file
     gv.settings.write_used_settings()

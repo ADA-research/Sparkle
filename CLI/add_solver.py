@@ -19,6 +19,7 @@ from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
+from sparkle.platform.settings_help import SettingState
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -68,7 +69,11 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     nickname = args.nickname
-    run_on = args.run_on
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     if args.run_checks:
         print("Running checks...")

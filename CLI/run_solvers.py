@@ -205,9 +205,14 @@ if __name__ == "__main__":
         gv.settings.set_general_solution_verifier(
             SolutionVerifier.from_str(args.verifier), SettingState.CMD_LINE)
 
-    if args.target_cutoff_time:
+    if args.target_cutoff_time is not None:
         gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
@@ -224,4 +229,4 @@ if __name__ == "__main__":
     run_solvers_on_instances(
         recompute=args.recompute,
         also_construct_selector_and_report=args.also_construct_selector_and_report,
-        run_on=args.run_on)
+        run_on=run_on)

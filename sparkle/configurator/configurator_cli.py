@@ -19,5 +19,6 @@ if __name__ == "__main__":
     # 3a. Make sure the output file exists
     output_target.open("a").close()
     # 3b. Have the configurator implementation organise the output
-    configurator.organise_output(output_source, output_target)
+    configurator.organise_output(output_source=output_source,
+                                 output_target=output_target)
     print(f"Organising done! See {output_target}")
