@@ -9,7 +9,6 @@ import ast
 from statistics import mean
 import operator
 import fcntl
-import shutil
 import glob
 
 import runrunner as rrr
@@ -41,15 +40,15 @@ class SMAC2(Configurator):
             output_path: The path where the output will be placed.
         """
         output_path = output_path / SMAC2.__name__
+        output_path.mkdir(parents=True, exist_ok=True)
         return super().__init__(
             validator=Validator(out_dir=output_path),
             output_path=output_path,
             executable_path=SMAC2.configurator_path / "smac",
-            settings_path=Path("Settings/sparkle_smac_settings.txt"),
             configurator_target=SMAC2.configurator_path / SMAC2.target_algorithm,
             objectives=objectives,
             base_dir=base_dir,
-            tmp_path=SMAC2.configurator_path / "tmp",
+            tmp_path=output_path / "tmp",
             multi_objective_support=False)
 
     def configure(self: Configurator,
@@ -70,10 +69,6 @@ class SMAC2(Configurator):
         Returns:
             A RunRunner Run object.
         """
-        if self.output_path.exists():
-            # Clear the output dir
-            shutil.rmtree(self.output_path)
-        self.output_path.mkdir(parents=True)
         self.scenario = scenario
         self.scenario.create_scenario(parent_directory=self.output_path)
         output_csv = self.scenario.validation / "configurations.csv"
@@ -88,8 +83,10 @@ class SMAC2(Configurator):
                 f"--seed {seed} "
                 f"--execdir {self.scenario.tmp.absolute()}"
                 for seed in range(self.scenario.number_of_runs)]
-        parallel_jobs = max(num_parallel_jobs,
-                            self.scenario.number_of_runs)
+        parallel_jobs = self.scenario.number_of_runs
+        if num_parallel_jobs is not None:
+            parallel_jobs = max(num_parallel_jobs,
+                                self.scenario.number_of_runs)
 
         configuration_run = rrr.add_to_queue(
             runner=run_on,
@@ -101,22 +98,22 @@ class SMAC2(Configurator):
             parallel_jobs=parallel_jobs,
             sbatch_options=sbatch_options,
             srun_options=["-N1", "-n1"])
-        jobs = [configuration_run]
+        runs = [configuration_run]
 
         if validate_after:
             self.validator.out_dir = output_csv.parent
-            validate_jobs = self.validator.validate(
+            validate_runs = self.validator.validate(
                 [scenario.solver] * self.scenario.number_of_runs,
                 output_csv.absolute(),
                 [scenario.instance_set],
                 subdir=Path(),
                 dependency=configuration_run,
                 run_on=run_on)
-            jobs += validate_jobs
+            runs += validate_runs
         if run_on == Runner.LOCAL:
-            for job in jobs:
-                job.wait()
-        return jobs
+            for run in runs:
+                run.wait()
+        return runs
 
     def get_optimal_configuration(
             self: Configurator,
