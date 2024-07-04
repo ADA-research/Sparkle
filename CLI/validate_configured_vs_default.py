@@ -101,10 +101,11 @@ if __name__ == "__main__":
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings.get_general_sparkle_configurator()
     configurator.set_scenario_dirs(solver, instance_set_train)
-
+    objective = gv.settings.get_general_sparkle_objectives()[0]
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver, instance_set_train)
+        solver, instance_set_train, objective.PerformanceMeasure)
+
     pcs.write_configuration_pcs(solver, opt_config_str,
                                 gv.sparkle_tmp_path)
 

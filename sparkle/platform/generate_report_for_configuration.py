@@ -440,7 +440,8 @@ def get_dict_variable_to_value_common(solver: Solver,
         A dictionary containing the variables and values
     """
     objective = configurator.scenario.sparkle_objective
-    _, opt_config = configurator.get_optimal_configuration(solver, train_set)
+    _, opt_config = configurator.get_optimal_configuration(
+        solver, train_set, objective.PerformanceMeasure)
     res_default = validator.get_validation_results(
         solver, train_set, config="")
     res_conf = validator.get_validation_results(
@@ -521,7 +522,8 @@ def get_dict_variable_to_value_test(target_dir: Path,
     Returns:
         A dictionary containting the variables and their values
     """
-    _, config = configurator.get_optimal_configuration(solver, train_set)
+    _, config = configurator.get_optimal_configuration(
+        solver, train_set, configurator.scenario.sparkle_objective.PerformanceMeasure)
     res_default = validator.get_validation_results(
         solver, test_set, config="")
     res_conf = validator.get_validation_results(

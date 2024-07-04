@@ -17,6 +17,7 @@ Output/*
 Snapshots/*
 Test_Cases/*
 Settings/latest.ini
+tests/test_files/tmp
 Components/smac-v2.10.03-master-778/log*.txt
 Components/smac-v2.10.03-master-778/results/*
 Components/smac-v2.10.03-master-778/tmp/*

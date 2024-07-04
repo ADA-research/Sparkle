@@ -75,7 +75,6 @@ class ConfigurationScenario:
             parent_directory: Directory in which the scenario should be created.
         """
         self._set_paths(parent_directory)
-
         self._prepare_scenario_directory()
         self._prepare_result_directory()
         self._prepare_instances()
