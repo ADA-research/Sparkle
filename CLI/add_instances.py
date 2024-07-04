@@ -17,6 +17,7 @@ import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
+from sparkle.platform.settings_help import SettingState
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -57,7 +58,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     instances_source = Path(args.instances_path)
     instances_target = gv.instance_dir / instances_source.name
-    run_on = args.run_on
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.ADD_INSTANCES])

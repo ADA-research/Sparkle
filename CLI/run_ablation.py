@@ -82,7 +82,11 @@ if __name__ == "__main__":
         args.instance_set_test,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
         gv.instance_dir, InstanceSet)
-    run_on = args.run_on
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_ABLATION])

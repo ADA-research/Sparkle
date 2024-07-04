@@ -95,6 +95,9 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.number_of_runs is not None:
         gv.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
 
 
 def run_after(solver: Path,
@@ -173,7 +176,7 @@ if __name__ == "__main__":
             gv.file_storage_data_mapping[gv.instances_nickname_path],
             gv.instance_dir, InstanceSet)
     use_features = args.use_features
-    run_on = args.run_on
+    run_on = gv.settings.get_run_on()
     if args.configurator is not None:
         gv.settings.set_general_sparkle_configurator(
             value=getattr(Configurator, args.configurator),
