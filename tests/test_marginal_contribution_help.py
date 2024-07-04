@@ -5,7 +5,7 @@ from unittest import TestCase
 from pathlib import Path
 
 from CLI.support import compute_marginal_contribution_help as scmch
-from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.structures.feature_data_csv_help import FeatureDataFrame
 import global_variables as gv
 from sparkle.platform import settings_help
 
@@ -85,7 +85,7 @@ class TestMarginalContribution(TestCase):
               "sparkle_portfolio_selector"
         file = "CLI/test/test_files/Feature_Data/"\
                "test_construct_sparkle_portfolio_selector.csv"
-        featurecsv = SparkleFeatureDataCSV(file)
+        featurecsv = FeatureDataFrame(file)
         prefix = "Instances/PTN/"
         instance_ids = [prefix + "Ptn-7824-b03.cnf", prefix + "Ptn-7824-b15.cnf",
                         prefix + "Ptn-7824-b05.cnf", prefix + "Ptn-7824-b13.cnf",

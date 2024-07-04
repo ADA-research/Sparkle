@@ -35,7 +35,7 @@ def compute_features(
     Returns:
         The Slurm job or Local job
     """
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+    feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
                                                     gv.extractor_list)
     if recompute:
         feature_data_csv.clean_csv()

@@ -36,7 +36,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
         verbose: Indicating, if output should be verbose
     """
     try:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+        feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path)
         list_feature_computation_job = (
             feature_data_csv.remaining_feature_computation_job())
     except Exception:

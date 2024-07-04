@@ -39,7 +39,7 @@ def parser_function() -> argparse.ArgumentParser:
 def judge_exist_remaining_jobs(feature_data_csv_path: str,
                                performance_data_csv_path: str) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+    feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
                                                     gv.extractor_list)
     feature_computation_jobs =\
         feature_data_csv.remaining_feature_computation_job()

@@ -118,10 +118,10 @@ if __name__ == "__main__":
 
         subprocess.run(command_line)
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+    feature_data_csv = sfdcsv.FeatureDataFrame(gv.feature_data_csv_path,
                                                     gv.extractor_list)
 
-    tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path,
+    tmp_fdcsv = sfdcsv.FeatureDataFrame(result_path,
                                              gv.extractor_list)
     list_columns = tmp_fdcsv.list_columns()
 

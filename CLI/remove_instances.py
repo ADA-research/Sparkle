@@ -50,7 +50,7 @@ if __name__ == "__main__":
     print(f"Start removing all instances in directory {instances_path} ...")
     instance_set = InstanceSet(instances_path)
     # Remove from feature data and performance data
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+    feature_data_csv = sfdcsv.FeatureDataFrame(gv.feature_data_csv_path,
                                                     gv.extractor_list)
     performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
     for instance in instance_set.get_instance_paths:

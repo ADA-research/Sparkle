@@ -77,7 +77,7 @@ if __name__ == "__main__":
             break
 
     if gv.feature_data_csv_path.exists():
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+        feature_data_csv = sfdcsv.FeatureDataFrame(gv.feature_data_csv_path,
                                                         gv.extractor_list)
         #TODO: Remove the feature extractor's feature columns from the CSV
     shutil.rmtree(extractor_path)

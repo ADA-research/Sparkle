@@ -4,7 +4,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner import Runner
 from sparkle.types import SparkleCallable
-from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.structures.feature_data_csv_help import FeatureDataFrame
 from tools.runsolver_parsing import get_status
 
 
@@ -99,7 +99,7 @@ class Extractor(SparkleCallable):
         Returns:
             A list of features.
         """
-        features = [SparkleFeatureDataCSV.missing_value] * self.output_dimension
+        features = [FeatureDataFrame.missing_value] * self.output_dimension
         if result.exists() and get_status(runsolver_values, None) != "TIMEOUT":
             # Last line contains feature vector:
             feature_line = result.open().readlines()[-1]

@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
-        tmp_fdcsv = sfdcsv.SparkleFeatureDataCSV(result_path,
+        tmp_fdcsv = sfdcsv.FeatureDataFrame(result_path,
                                                  gv.extractor_list)
         # rename row
         if not has_instance_set:
@@ -91,7 +91,7 @@ if __name__ == "__main__":
             tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
                 [instance_set.directory / instance_name], axis=0)
         with lock.acquire(timeout=60):
-            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path)
+            feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path)
             feature_data_csv.combine(tmp_fdcsv)
             feature_data_csv.save_csv()
         result_string = "Successful"
@@ -102,9 +102,9 @@ if __name__ == "__main__":
         print(f"****** WARNING: The feature vector in {result_path} of this instance "
               "consists of missing values ******")
         length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
-        missing_values_row = [sfdcsv.SparkleFeatureDataCSV.missing_value] * length
+        missing_values_row = [sfdcsv.FeatureDataFrame.missing_value] * length
         with lock.acquire(timeout=60):
-            feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+            feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
                                                             gv.extractor_list)
             feature_data_csv.set_value(instance_name, None, missing_values_row)
             feature_data_csv.save_csv()

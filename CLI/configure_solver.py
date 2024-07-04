@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     feature_data_df = None
     if use_features:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+        feature_data_csv = sfdcsv.FeatureDataFrame(gv.feature_data_csv_path,
                                                         gv.extractor_list)
 
         data_dict = {}

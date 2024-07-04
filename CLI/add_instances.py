@@ -9,7 +9,7 @@ import shutil
 import global_variables as gv
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.instance import InstanceSet
-from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.structures.feature_data_csv_help import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help import compute_features_help as scf
 from CLI.run_solvers import running_solvers_performance_data
@@ -86,8 +86,7 @@ if __name__ == "__main__":
     instance_set = InstanceSet(instances_target)
 
     # Add the instances to the Feature Data / Performance Data
-    feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                             gv.extractor_list)
+    feature_data_csv = FeatureDataFrame(gv.feature_data_csv_path)
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
         gv.performance_data_csv_path,

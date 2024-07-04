@@ -76,14 +76,6 @@ class SparkleCSV:
             value_list = [None] * len(self.dataframe.index)
         self.dataframe[column_name] = value_list
 
-    def delete_column(self: SparkleCSV, column_name: str) -> None:
-        """Delete a specified column."""
-        if column_name not in self.list_columns():
-            print("Column " + column_name + " does not exist!")
-            print("Nothing changed!")
-            return
-        self.dataframe = self.dataframe.drop(column_name, axis=1)
-
     def list_rows(self: SparkleCSV) -> list[str]:
         """Return a list of rows."""
         return self.dataframe.index.tolist()

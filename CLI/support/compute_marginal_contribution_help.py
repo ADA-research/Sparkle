@@ -19,7 +19,7 @@ from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import run_portfolio_selector_help as srps
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.structures.feature_data_csv_help import FeatureDataFrame
 
 
 def read_marginal_contribution_csv(path: Path) -> list[tuple[str, float]]:
@@ -140,7 +140,7 @@ def compute_perfect_selector_marginal_contribution(
 
 
 def get_list_predict_schedule(actual_portfolio_selector_path: Path,
-                              feature_data_csv: SparkleFeatureDataCSV,
+                              feature_data_csv: FeatureDataFrame,
                               instance: int) -> list[float]:
     """Return the solvers schedule suggested by the selector as a list.
 
@@ -254,7 +254,7 @@ def compute_actual_performance_for_instance(
       within the cutoff time (Runtime) or at least one solver performance
       did not exceed capvalue
     """
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
+    feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
                                                     gv.extractor_list)
     # Get the prediction of the selector over the solvers
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
