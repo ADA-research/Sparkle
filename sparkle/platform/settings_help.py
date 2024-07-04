@@ -803,7 +803,7 @@ class Settings:
 
     def get_run_on(self: Settings) -> Runner:
         """Return the compute on which to run."""
-        return self.__settings["general"]["run_on"]
+        return Runner(self.__settings["general"]["run_on"])
 
     @staticmethod
     def check_settings_changes(cur_settings: Settings, prev_settings: Settings) -> bool:
