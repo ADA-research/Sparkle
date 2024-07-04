@@ -22,10 +22,7 @@ gv.settings = settings_help.Settings()
 class TestConfigurator():
     """Class bundling all tests regarding Configurator."""
 
-    def test_init(self: TestConfigurator,
-                  mocker: MockerFixture,
-                  scenario_fixture: MockerFixture,
-                  configurator_path: MockerFixture) -> None:
+    def test_init(self: TestConfigurator) -> None:
         """Test that Configurator initialization calls create_scenario() correctly."""
         exec_path = Path("dir/exec.exe")
         configurator = Configurator(
