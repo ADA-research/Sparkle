@@ -84,7 +84,7 @@ class Configurator:
         raise NotImplementedError
 
     @staticmethod
-    def organise_output(output_source: Path, output_path: Path) -> None:
+    def organise_output(output_source: Path, output_target: Path) -> None | str:
         """Method to restructure and clean up after a single configurator call."""
         raise NotImplementedError
 

@@ -130,12 +130,12 @@ class SMAC2(Configurator):
             source_dir=self.scenario.validation,
             subdir=self.scenario.validation.relative_to(self.validator.out_dir))
         # Group the results per configuration
-        configs = set(row[1] for row in results)
-        config_scores = []
+        configurations = list(set(row[1] for row in results))
         column = -2  # Quality column
+        config_scores = []
         if performance == PerformanceMeasure.RUNTIME:
             column = -1
-        for config in configs:
+        for config in configurations:
             values = [float(row[column]) for row in results if row[1] == config]
             config_scores.append(aggregate_config(values))
         # Now determine which is the best based on the perf measure
@@ -157,17 +157,17 @@ class SMAC2(Configurator):
         for i, score in enumerate(config_scores):
             if comparison(score, current_optimal):
                 min_index, current_optimal = i, score
-        config_str = results[min_index][1].strip(" ")
 
-        # Check if we need to convert the dict to a string
+        # Return the optimal configuration dictionary as commandline args
+        config_str = configurations[min_index].strip(" ")
         if config_str.startswith("{"):
             config = ast.literal_eval(config_str)
             config_str = " ".join([f"-{key} '{config[key]}'" for key in config])
         return current_optimal, config_str
 
     @staticmethod
-    def organise_output(output_source: Path, output_target: Path) -> None:
-        """Cleans up irrelevant SMAC files and collects output."""
+    def organise_output(output_source: Path, output_target: Path = None) -> None | str:
+        """Retrieves configurations from SMAC files and places them in output."""
         call_key = SMAC2.target_algorithm
         # Last line describing a call is the best found configuration
         for line in reversed(output_source.open("r").readlines()):
@@ -175,6 +175,8 @@ class SMAC2(Configurator):
                 call_str = line.split(call_key, maxsplit=1)[1].strip()
                 # The Configuration appears after the first 7 arguments
                 configuration = call_str.split(" ", 8)[-1]
+                if output_target is None:
+                    return configuration
                 with output_target.open("a") as fout:
                     fcntl.flock(fout.fileno(), fcntl.LOCK_EX)
                     fout.write(configuration + "\n")
