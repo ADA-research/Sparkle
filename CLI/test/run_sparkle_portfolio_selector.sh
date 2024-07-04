@@ -16,9 +16,9 @@
 #SBATCH --cpus-per-task=1
 
 ## Data
-selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
-selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
-selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
+selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
+selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
 # Save user data if any
 mv $selector_path $selector_tmp 2> /dev/null

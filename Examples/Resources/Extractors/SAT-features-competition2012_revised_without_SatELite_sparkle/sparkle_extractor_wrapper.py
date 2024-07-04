@@ -7,9 +7,6 @@ import argparse
 import subprocess
 from pathlib import Path
 
-global sparkle_special_string
-sparkle_special_string = r"__@@SPARKLE@@__"
-
 parser = argparse.ArgumentParser(description="Handle I/O for the extractor.")
 parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
 parser.add_argument("-instance_file", type=str, help="Path to the instance file")
@@ -43,7 +40,7 @@ with open(output_file, "w") as out_file:
     if len(raw_lines) >= 2:
         features = raw_lines[-2].strip().split(",")
         values = raw_lines[-1].strip()
-        out_file.write(",".join(f"{feature}{sparkle_special_string}{extractor_dir.name}"
+        out_file.write(",".join(f"{feature}_{extractor_dir.name}"
                                 for feature in features) + "\n")
         out_file.write(f"{instance_path},{values}\n")
 

@@ -24,9 +24,6 @@ def latest_scenario() -> ReportingScenario:
         _latest_scenario = ReportingScenario()
     return _latest_scenario
 
-
-sparkle_special_string = "__@@SPARKLE@@__"
-
 python_executable = "python3"
 
 sparkle_global_output_dir = Path("Output")
@@ -45,7 +42,7 @@ sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
 snapshot_dir = Path("Snapshots")
 sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
 
-sparkle_algorithm_selector_name = f"sparkle_portfolio_selector{sparkle_special_string}"
+sparkle_algorithm_selector_name = "sparkle_portfolio_selector"
 
 sparkle_algorithm_selector_path =\
     sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name

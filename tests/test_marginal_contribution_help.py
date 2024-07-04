@@ -82,7 +82,7 @@ class TestMarginalContribution(TestCase):
         # TODO: Fix with mocker commands. There is a ticket for this.
         return
         pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
-              "sparkle_portfolio_selector__@@SPARKLE@@__"
+              "sparkle_portfolio_selector"
         file = "CLI/test/test_files/Feature_Data/"\
                "test_construct_sparkle_portfolio_selector.csv"
         featurecsv = SparkleFeatureDataCSV(file)
@@ -105,7 +105,7 @@ class TestMarginalContribution(TestCase):
             self: TestCase, patch_perf_for_instance: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
         pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
-              "sparkle_portfolio_selector__@@SPARKLE@@__"
+              "sparkle_portfolio_selector"
         perf_path = "CLI/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "CLI/test/test_files/Feature_Data/"\

@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 
-import os
 import sys
-import random
-import time
-import pandas as pd
-import numpy as np
+from pathlib import Path
 
-global sparkle_special_string
-sparkle_special_string = r'__@@SPARKLE@@__'
 
 def get_last_level_directory_name(filepath):
 	if filepath[-1] == r'/': filepath = filepath[0:-1]
@@ -28,14 +22,14 @@ class MinVCInstanceFeature:
         return
     
     def save_minvc_features(self, result_feature_file_name):
-        extractor_directory_last_level = get_last_level_directory_name(self.relative_path)
+        extractor_directory_last_level = Path(self.relative_path).name
         
         list_feature_names = ['num_vertex', 'num_edge', 'density', 'max_degree', 'min_degree', 'avg_degree']
         list_feature_values = [self.num_vertex, self.num_edge, self.density, self.max_degree, self.min_degree, self.avg_degree]
 
         fout = open(result_feature_file_name, 'w+')
         for feature_name in list_feature_names:
-            fout.write(',%s' % (feature_name + sparkle_special_string + extractor_directory_last_level))
+            fout.write(',%s' % (feature_name + extractor_directory_last_level))
         fout.write('\n')
 
         fout.write('%s' % self.minvc_instance_file_name)

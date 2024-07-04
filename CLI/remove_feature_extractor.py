@@ -79,19 +79,12 @@ if __name__ == "__main__":
     if gv.feature_data_csv_path.exists():
         feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
                                                         gv.extractor_list)
-        for column_name in feature_data_csv.list_columns():
-            tmp_extractor_path = feature_data_csv.get_extractor_path_from_feature(
-                column_name
-            )
-            if extractor_path == tmp_extractor_path:
-                feature_data_csv.delete_column(column_name)
-        feature_data_csv.save_csv()
-        shutil.rmtree(extractor_path)
+        #TODO: Remove the feature extractor's feature columns from the CSV
+    shutil.rmtree(extractor_path)
 
     if Path(gv.sparkle_algorithm_selector_path).exists():
         shutil.rmtree(gv.sparkle_algorithm_selector_path)
         print("Removing Sparkle portfolio selector "
               f"{gv.sparkle_algorithm_selector_path} done!")
 
-    print("Removing feature extractor "
-          f"{Path(extractor_path).name} done!")
+    print(f"Removing feature extractor {Path(extractor_path).name} done!")

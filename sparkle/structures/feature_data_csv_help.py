@@ -12,7 +12,6 @@ from sparkle.structures import csv_help as scsv
 
 class SparkleFeatureDataCSV(scsv.SparkleCSV):
     """Class to manage feature data CSV files and common operations on them."""
-    sparkle_special_string = "__@@SPARKLE@@__"  # No idea who came up with this baloney
     missing_value = math.nan
 
     def __init__(self: SparkleFeatureDataCSV, csv_filepath: Path,
@@ -58,6 +57,7 @@ class SparkleFeatureDataCSV(scsv.SparkleCSV):
     def get_extractor_path_from_feature(self: SparkleFeatureDataCSV,
                                         given_column_name: str) -> str:
         """Return the path to the feature extractor for a given feature."""
+        #This one actually uses the special str, lets rework
         sparkle_special_string = SparkleFeatureDataCSV.sparkle_special_string
         index = given_column_name.find(sparkle_special_string)
         length = len(sparkle_special_string)

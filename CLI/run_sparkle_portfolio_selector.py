@@ -80,7 +80,7 @@ if __name__ == "__main__":
         )
         sys.exit(-1)
     selector_path = Path("Sparkle_Portfolio_Selector",
-                         "sparkle_portfolio_selector__@@SPARKLE@@__")
+                         "sparkle_portfolio_selector")
     if not selector_path.exists() or not selector_path.is_file():
         print("ERROR: The portfolio selector could not be found. Please make sure to "
               "first construct a portfolio selector.")

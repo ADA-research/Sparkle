@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse
 
-sparkle_special_string = r"__@@SPARKLE@@__"
+sparkle_special_string = r""
 
 class CCAGInstanceFeature:
     def __init__(self, relative_path, ccag_model_file_path, ccag_constraint_file_path):
