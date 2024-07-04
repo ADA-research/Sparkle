@@ -112,7 +112,6 @@ class ConfigurationScenario:
     def _create_scenario_file(self: ConfigurationScenario) -> None:
         """Create a file with the configuration scenario."""
         self.scenario_file_path = self.directory / f"{self.name}_scenario.txt"
-        #print(self.solver.directory, type(self.solver.directory))
         with self.scenario_file_path.open("w") as file:
             file.write(f"algo = {self.configurator_target.absolute()} "
                        f"{self.solver.directory.absolute()}\n"

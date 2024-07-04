@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 from unittest.mock import Mock, ANY
 import csv
 from pathlib import Path
@@ -36,7 +37,7 @@ conf_scenario = ConfigurationScenario(
     sparkle_objective=sparkle_objective,
     use_features=False,
     configurator_target=(
-    SMAC2.configurator_path / SMAC2.target_algorithm))
+        SMAC2.configurator_path / SMAC2.target_algorithm))
 
 
 class TestConfigurator():
@@ -57,7 +58,7 @@ class TestConfigurator():
         assert configurator.executable_path == exec_path
 
     def test_smac2_init(self: TestConfigurator) -> None:
-        
+        """Testing SMAC2 configurator initialisation."""
         conf = SMAC2(objectives, base_dir, output)
         assert conf.base_dir == base_dir
         assert conf.output_path == output / SMAC2.__name__
@@ -65,7 +66,8 @@ class TestConfigurator():
         assert conf.multiobjective is False
         assert conf.tmp_path == output / SMAC2.__name__ / "tmp"
 
-    def test_smac2_configure(self: TestConfigurator, monkeypatch) -> None:
+    def test_smac2_configure(self: TestConfigurator,
+                             monkeypatch: pytest.fixture) -> None:
         """Testing configure call of SMAC2."""
         # Testing without validation afterwards
         mock_runrunner_conf = Mock(return_value=None)
@@ -91,7 +93,7 @@ class TestConfigurator():
         # TODO: Test with validation_after=True
 
     def test_smac2_get_optimal_configuration(self: TestConfigurator,
-                                             mocker) -> None:
+                                             mocker: Mock) -> None:
         """Tests the retrieval of the optimal configuration from SMAC2 run."""
         # Mock the validator call
         csv_file = Path("tests/test_files/Validator/validation_configuration.csv")
@@ -99,7 +101,7 @@ class TestConfigurator():
         mocker.patch("sparkle.solver.validator.Validator.get_validation_results",
                      return_value=csv_lines)
         opt_conf = smac2_conf.get_optimal_configuration(
-            solver, train_set,performance=PerformanceMeasure.RUNTIME)
+            solver, train_set, performance=PerformanceMeasure.RUNTIME)
 
         expect_conf = (25.87506525, "-init_solution '1' -p_swt '0.3' -perform_aspiration"
                        " '1' -perform_clause_weight '1' -perform_double_cc '1' "
@@ -125,6 +127,6 @@ class TestConfigurator():
         assert SMAC2.organise_output(raw_out) == expected
 
     def test_smac2_get_status_from_logs(self: TestConfigurator) -> None:
-        """Testing the log status"""
+        """Testing status retrievel from logs."""
         # TODO: Write test
         return
