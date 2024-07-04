@@ -97,7 +97,7 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
             args.number_of_runs, SettingState.CMD_LINE)
     if args.run_on is not None:
         gv.settings.set_run_on(
-            args.run_on, SettingState.CMD_LINE)
+            args.run_on.value, SettingState.CMD_LINE)
 
 
 def run_after(solver: Path,

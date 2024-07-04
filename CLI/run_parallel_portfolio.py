@@ -256,7 +256,7 @@ if __name__ == "__main__":
 
     if args.run_on is not None:
         gv.settings.set_run_on(
-            args.run_on, SettingState.CMD_LINE)
+            args.run_on.value, SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
     if run_on == Runner.LOCAL:
