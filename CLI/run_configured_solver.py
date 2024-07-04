@@ -56,7 +56,11 @@ if __name__ == "__main__":
     if instance_set is None:
         print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
         sys.exit(-1)
-    run_on = args.run_on
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])

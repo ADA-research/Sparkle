@@ -337,7 +337,6 @@ RunExtractorLaterArgument = \
 
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
-                                          "default": Runner.SLURM,
                                           "choices": [Runner.LOCAL,
                                                       Runner.SLURM],
                                           "action": EnumAction,

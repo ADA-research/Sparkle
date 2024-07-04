@@ -14,6 +14,8 @@ from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
 
+from runrunner import Runner
+
 
 class SolutionVerifier(Enum):
     """Possible solution verifiers."""
@@ -100,6 +102,7 @@ class Settings:
         self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
 
+        self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
@@ -187,6 +190,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_number_of_jobs_in_parallel(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("run_on", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_run_on(value, state)
                     file_settings.remove_option(section, option)
 
             section = "configuration"
@@ -778,6 +788,22 @@ class Settings:
 
         return int(
             self.__settings["parallel_portfolio"]["num_seeds_per_solver"])
+
+    def set_run_on(self: Settings, value: Runner = Runner.SLURM,
+                   origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the compute on which to run."""
+        section = "general"
+        name = "run_on"
+
+        if value is not None and self.__check_setting_state(
+                self.__run_on_set, origin, name):
+            self.__init_section(section)
+            self.__run_on_set = origin
+            self.__settings[section][name] = value
+
+    def get_run_on(self: Settings) -> Runner:
+        """Return the compute on which to run."""
+        return self.__settings["general"]["run_on"]
 
     @staticmethod
     def check_settings_changes(cur_settings: Settings, prev_settings: Settings) -> bool:

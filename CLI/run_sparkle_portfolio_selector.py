@@ -48,7 +48,12 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    run_on = args.run_on
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
+
     instance_set = resolve_object_name(
         args.instance_path,
         gv.file_storage_data_mapping[gv.instances_nickname_path],
