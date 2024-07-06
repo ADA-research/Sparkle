@@ -12,53 +12,67 @@ from pathlib import Path
 class FeatureDataFrame:
     """Class to manage feature data CSV files and common operations on them."""
     missing_value = math.nan
+    multi_dim_names = ["FeatureGroup", "FeatureName", "Extractor"]
 
     def __init__(self: FeatureDataFrame,
                  csv_filepath: Path,
-                 extractors: list[str],
                  instances: list[str],
-                 extractor_features: dict[str, list[str]]
+                 extractor_data: dict[str, list[tuple[str, str]]]
                  ) -> None:
-        """Initialise a SparkleFeatureDataCSV object."""
+        """Initialise a SparkleFeatureDataCSV object.
+
+        Arguments:
+            csv_filepath: The Path for the CSV storage. If it does not exist,
+                a new DataFrame will be initialised and stored here.
+            instances: The list of instances (Columns) to be added to the DataFrame.
+            extractors: A dictionary with extractor names as key, and a list of tuples
+                ordered as [(feature_group, feature_name), ...] as value.
+        """
         self.csv_filepath = csv_filepath
         #Create a multi-index dataframe
         #Columns are the Instances
         #Indices are (FeatureName, Extractor)
         #Because every instance wants every combination of Extractor/featurename to have a result, but it doesn't have to have one
         #But Extractors may share features, therefore, first group by FeatureName so that it could then have multiple results for the same feature/instance combination by Extractor key.
-        #Maybe we also need a FeatureGroup?
-        self.multi_dim_names = ["FeatureName", "Extractor"]
-        
+        # Each feature belongs to a feature group which is for example recognised by autofolio
         if self.csv_filepath.exists():
             # Read from file
             self.dataframe = pd.read_csv(self.csv_filepath)
             return
-        # The feature names are possibly shared over multiple extractors
-        self.feature_names = set([feature for extractor in extractor_features
-                                  for feature in extractor_features[extractor]])
-        
+        # Unfold the extractor_data into lists
+        multi_index_lists = [[], [], []]
+        for extractor in extractor_data:
+            for group, feature_name in extractor_data[extractor]:
+                multi_index_lists[0].append(group)
+                multi_index_lists[1].append(feature_name)
+                multi_index_lists[2].append(extractor)
         # Initialise new dataframe
-        midx = pd.MultiIndex.from_product(
-            [self.feature_names, extractors],
-            names=self.multi_dim_names)
         self.dataframe = pd.DataFrame(FeatureDataFrame.missing_value,
-                                      index=midx,
+                                      index=multi_index_lists,
                                       columns=instances)
+        self.dataframe.index.names = FeatureDataFrame.multi_dim_names
         self.save_csv()
 
     def add_extractor(self: FeatureDataFrame,
                       extractor: str,
-                      extractor_features: list[str]) -> None:
+                      extractor_features: list[tuple[str, str]],
+                      values: list[list[float]] = None) -> None:
         """Add an extractor and its feature names to the dataframe."""
+        
+        #Unfold to indices
+        #Check if: Values is not none, whether the shapes of the new indices and colums overlap with the values list list
+        if values is None:
+            values = FeatureDataFrame.missing_value
         return
 
     def add_instance(self: FeatureDataFrame,
                      instance: str,
-                     features: list[float] = None) -> None:
+                     values: list[float] = None) -> None:
         """Add an instance to the dataframe."""
-        if features is None:
-            features = FeatureDataFrame.missing_value
-        self.dataframe[instance] = features
+        #features need to be the correct size
+        if values is None:
+            values = FeatureDataFrame.missing_value
+        self.dataframe[instance] = values
 
     def remove_extractor(self: FeatureDataFrame,
                          extractor: str) -> None:
@@ -69,6 +83,10 @@ class FeatureDataFrame:
                         instance: str) -> None:
         """Remove an instance from the dataframe."""
         self.dataframe.drop(instance, axis=1, inplace=True)
+
+    def sort(self: FeatureDataFrame) -> None:
+        """Sorts the DataFrame by Multi-Index for readability."""
+        self.dataframe.sort_index(level=FeatureDataFrame.multi_dim_names)
 
     def save_csv(self: FeatureDataFrame, csv_filepath: Path = None) -> None:
         """Write a CSV to the given path.
