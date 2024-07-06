@@ -8,7 +8,7 @@ from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 import global_variables as gv
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_dataframe as sfdcsv
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise

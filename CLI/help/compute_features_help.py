@@ -10,7 +10,7 @@ from runrunner.base import Runner, Status
 
 import global_variables as gv
 from CLI.support import sparkle_job_help as sjh
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_dataframe as sfdcsv
 from CLI.support import sparkle_job_help
 from CLI.help.command_help import CommandName
 

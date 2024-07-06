@@ -18,7 +18,7 @@ from sparkle.platform import settings_help
 from CLI.support import ablation_help as sah
 from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_dataframe as sfdcsv
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario

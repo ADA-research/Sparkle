@@ -4,7 +4,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner import Runner
 from sparkle.types import SparkleCallable
-from sparkle.structures.feature_data_csv_help import FeatureDataFrame
+from sparkle.structures.feature_dataframe import FeatureDataFrame
 from tools.runsolver_parsing import get_status
 
 

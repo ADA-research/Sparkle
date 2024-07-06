@@ -8,7 +8,7 @@ from pathlib import Path
 from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
 import global_variables as gv
 from sparkle.platform import settings_help
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_dataframe as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import compute_marginal_contribution_help as scmch

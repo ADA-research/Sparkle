@@ -9,7 +9,7 @@ import shutil
 import global_variables as gv
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.instance import InstanceSet
-from sparkle.structures.feature_data_csv_help import FeatureDataFrame
+from sparkle.structures.feature_dataframe import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help import compute_features_help as scf
 from CLI.run_solvers import running_solvers_performance_data

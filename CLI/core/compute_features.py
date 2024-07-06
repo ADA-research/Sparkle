@@ -11,7 +11,7 @@ from filelock import FileLock
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_dataframe as sfdcsv
 from sparkle.instance import InstanceSet
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 """Helper functions to inform about Sparkle's system status."""
 from pathlib import Path
 
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import feature_dataframe as sfdcsv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import sparkle_job_help
 

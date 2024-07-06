@@ -57,19 +57,29 @@ class FeatureDataFrame:
                       extractor: str,
                       extractor_features: list[tuple[str, str]],
                       values: list[list[float]] = None) -> None:
-        """Add an extractor and its feature names to the dataframe."""
-        
-        #Unfold to indices
-        #Check if: Values is not none, whether the shapes of the new indices and colums overlap with the values list list
+        """Add an extractor and its feature names to the dataframe.
+
+        Arguments:
+            extractor: Name of the extractor
+            extractor_features: Tuples of [FeatureGroup, FeatureName]
+            values: Initial values of the Extractor per instance in the dataframe.
+                Defaults to FeatureDataFrame.missing_value.
+        """
+        #Format sanity checks? value size
         if values is None:
-            values = FeatureDataFrame.missing_value
+            values = [FeatureDataFrame.missing_value
+                      for _ in range(len(extractor_features))]
+        # Unfold to indices to lists
+        for index, pair in enumerate(extractor_features):
+            feature_group, feature_name = pair
+            self.dataframe[(feature_group, feature_name, extractor)] = values[index]
         return
 
     def add_instance(self: FeatureDataFrame,
                      instance: str,
                      values: list[float] = None) -> None:
         """Add an instance to the dataframe."""
-        #features need to be the correct size
+        #Sanity check? features need to be the correct size
         if values is None:
             values = FeatureDataFrame.missing_value
         self.dataframe[instance] = values
@@ -77,6 +87,7 @@ class FeatureDataFrame:
     def remove_extractor(self: FeatureDataFrame,
                          extractor: str) -> None:
         """Remove an extractor from the dataframe."""
+        self.dataframe.drop(extractor, axis=0, level="Extractor", inplace=True)
         return
 
     def remove_instance(self: FeatureDataFrame,
