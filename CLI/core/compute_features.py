@@ -83,15 +83,6 @@ if __name__ == "__main__":
     lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
         feature_values = ast.literal_eval(extractor_run.stdout.decode())
-        """tmp_fdcsv = sfdcsv.FeatureDataFrame(result_path,
-                                            gv.extractor_list)
-        # rename row
-        if not has_instance_set:
-            tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
-                [str(instance_path)], axis=0)
-        else:
-            tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
-                [instance_set.directory / instance_name], axis=0)"""
         with lock.acquire(timeout=60):
             feature_data = FeatureDataFrame(feature_data_csv_path)
             for feature_group, feature_name, value in feature_values:
@@ -105,13 +96,6 @@ if __name__ == "__main__":
         print(f"EXCEPTION during retrieving extractor results: {ex}")
         print(f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
-        """length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
-        missing_values_row = [FeatureDataFrame.missing_value] * length
-        with lock.acquire(timeout=60):
-            feature_data_csv = FeatureDataFrame(feature_data_csv_path,
-                                                gv.extractor_list)
-            feature_data_csv.set_value(instance_name, None, missing_values_row)
-            feature_data_csv.save_csv()"""
         result_string = "Failed"
     lock.release()
     result_path.unlink(missing_ok=True)

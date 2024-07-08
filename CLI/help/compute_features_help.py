@@ -35,8 +35,7 @@ def compute_features(
     Returns:
         The Slurm job or Local job
     """
-    feature_dataframe = FeatureDataFrame(feature_data_csv_path,
-                                         gv.extractor_list)
+    feature_dataframe = FeatureDataFrame(feature_data_csv_path)
     if recompute:
         feature_dataframe.reset_dataframe()
     list_feature_computation_job = feature_dataframe.remaining_feature_computation_job()

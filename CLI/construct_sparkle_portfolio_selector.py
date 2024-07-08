@@ -8,7 +8,7 @@ from pathlib import Path
 from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
 import global_variables as gv
 from sparkle.platform import settings_help
-from sparkle.structures import feature_dataframe as sfdcsv
+from sparkle.structures import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import compute_marginal_contribution_help as scmch
@@ -39,8 +39,7 @@ def parser_function() -> argparse.ArgumentParser:
 def judge_exist_remaining_jobs(feature_data_csv_path: str,
                                performance_data_csv_path: str) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
-    feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
-                                                    gv.extractor_list)
+    feature_data_csv = FeatureDataFrame(feature_data_csv_path)
     feature_computation_jobs =\
         feature_data_csv.remaining_feature_computation_job()
     total_job_num = sjh.get_num_of_total_job_from_list(feature_computation_jobs)

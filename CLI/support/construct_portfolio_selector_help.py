@@ -9,7 +9,7 @@ from pathlib import Path
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh
-from sparkle.structures import feature_dataframe as sfdcsv
+from sparkle.structures import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
@@ -74,8 +74,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     if not Path("Tmp").exists():
         Path("Tmp").mkdir()
 
-    feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
-                                                    gv.extractor_list)
+    feature_data_csv = FeatureDataFrame(feature_data_csv_path)
     bool_exists_missing_value = feature_data_csv.has_missing_value()
 
     if bool_exists_missing_value:
