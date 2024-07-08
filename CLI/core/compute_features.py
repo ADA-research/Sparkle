@@ -5,13 +5,14 @@
 import subprocess
 import time
 import argparse
+import ast
 from pathlib import Path, PurePath
 from filelock import FileLock
 
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
-from sparkle.structures import feature_dataframe as sfdcsv
+from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet
 
 if __name__ == "__main__":
@@ -60,7 +61,7 @@ if __name__ == "__main__":
            "-w", runsolver_watch_data_path,
            extractor_path / gv.sparkle_extractor_wrapper,
            "-extractor_dir", extractor_path,
-           "-instance_file"] + instance_list + ["-output_file", result_path]
+           "-instance_file"] + instance_list
     start_time = time.time()
 
     task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
@@ -75,13 +76,14 @@ if __name__ == "__main__":
     cutoff_str = f"Cutoff Time: {cutoff_time_each_extractor_run} second(s)\n"
     status_info_str += cutoff_str
     cmd_str = " ".join([str(c) for c in cmd])
-    subprocess.run(cmd, capture_output=True)
+    extractor_run = subprocess.run(cmd, capture_output=True)
     end_time = time.time()
 
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
-        tmp_fdcsv = sfdcsv.FeatureDataFrame(result_path,
+        feature_values = ast.literal_eval(extractor_run.stdout.decode())
+        """tmp_fdcsv = sfdcsv.FeatureDataFrame(result_path,
                                             gv.extractor_list)
         # rename row
         if not has_instance_set:
@@ -89,27 +91,28 @@ if __name__ == "__main__":
                 [str(instance_path)], axis=0)
         else:
             tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
-                [instance_set.directory / instance_name], axis=0)
+                [instance_set.directory / instance_name], axis=0)"""
         with lock.acquire(timeout=60):
-            feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path)
-            for index in tmp_fdcsv.dataframe.index:
-                feature_data_csv[instance_name, index] = tmp_fdcsv[instance_name, index]
-            feature_data_csv.save_csv()
+            feature_data = FeatureDataFrame(feature_data_csv_path)
+            for feature_group, feature_name, value in feature_values:
+                feature_data.set_value(str(instance_path), str(extractor_path),
+                                       feature_group, feature_name, float(value))
+            #for index in tmp_fdcsv.dataframe.index:
+            #    feature_data[instance_name, index] = tmp_fdcsv[instance_name, index]
+            feature_data.save_csv()
         result_string = "Successful"
     except Exception as ex:
         print(f"EXCEPTION during retrieving extractor results: {ex}")
         print(f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
-        print(f"****** WARNING: The feature vector in {result_path} of this instance "
-              "consists of missing values ******")
-        length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
-        missing_values_row = [sfdcsv.FeatureDataFrame.missing_value] * length
+        """length = int(gv.extractor_feature_vector_size_mapping[str(extractor_path)])
+        missing_values_row = [FeatureDataFrame.missing_value] * length
         with lock.acquire(timeout=60):
-            feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
-                                                            gv.extractor_list)
+            feature_data_csv = FeatureDataFrame(feature_data_csv_path,
+                                                gv.extractor_list)
             feature_data_csv.set_value(instance_name, None, missing_values_row)
-            feature_data_csv.save_csv()
-        result_string = "Failed -- using missing value instead"
+            feature_data_csv.save_csv()"""
+        result_string = "Failed"
     lock.release()
     result_path.unlink(missing_ok=True)
 

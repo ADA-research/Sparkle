@@ -102,6 +102,15 @@ class FeatureDataFrame:
 
         return
 
+    def set_value(self: FeatureDataFrame,
+                  instance: str,
+                  extractor: str,
+                  feature_group: str,
+                  feature_name: str,
+                  value: float) -> None:
+        """Set a value in the dataframe."""
+        self.dataframe.loc[(feature_group, feature_name, extractor), instance] = value
+
     def remaining_feature_computation_job(self: FeatureDataFrame)\
             -> list[list[str, str]]:
         """Return a list of needed feature computations per instance and solver.
@@ -111,18 +120,16 @@ class FeatureDataFrame:
             name and a str column name.
         """
         indices, columns = self.get_nan_locs()
+        remaining_jobs = {}
         # For now we just return the feature extractors and instance combinations
         # With [[instance_name, extractor1, extractor2, ...]]
-        return [[instance] + [extractor for _, _, extractor in indices[i]]
-                for i, instance in enumerate(columns)]
-
-    def get_bool_in_rows(self: FeatureDataFrame, given_row_name: str) -> bool:
-        """Return whether a row with a given name exists."""
-        return given_row_name in self.list_rows()
-
-    def get_bool_in_columns(self: FeatureDataFrame, given_column_name: str) -> bool:
-        """Return whether a column with a given name exists."""
-        return given_column_name in self.list_columns()
+        for i, instance in enumerate(columns):
+            _, _, extractor = indices[i]
+            if instance not in remaining_jobs:
+                remaining_jobs[instance] = [extractor]
+            else:
+                remaining_jobs[instance].append(extractor)
+        return [[key, remaining_jobs[key]] for key in remaining_jobs.keys()]
 
     def get_instance(self: FeatureDataFrame, instance: str) -> list:
         """Return the feature vector of an instance."""
@@ -139,6 +146,10 @@ class FeatureDataFrame:
     def has_missing_value(self: FeatureDataFrame) -> bool:
         """Return whether there are missing values in the feature data."""
         return self.dataframe.isnull().any().any()
+
+    def reset_dataframe(self: FeatureDataFrame) -> bool:
+        """Resets all values to FeatureDataFrame.missing_value."""
+        self.dataframe[:,:] = FeatureDataFrame.missing_value
 
     def sort(self: FeatureDataFrame) -> None:
         """Sorts the DataFrame by Multi-Index for readability."""

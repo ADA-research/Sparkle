@@ -65,8 +65,7 @@ if __name__ == "__main__":
 
     # Start compute features
     print("Start computing features ...")
-    scf.compute_features(gv.feature_data_csv_path,
-                         args.recompute, run_on=run_on)
+    scf.compute_features(gv.feature_data_csv_path, args.recompute, run_on=run_on)
 
     # Write used settings to file
     gv.settings.write_used_settings()
