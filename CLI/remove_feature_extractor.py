@@ -58,14 +58,6 @@ if __name__ == "__main__":
             gv.file_storage_data_mapping[gv.extractor_list_path],
             remove=True)
 
-    if len(gv.extractor_feature_vector_size_mapping) > 0:
-        sfh.add_remove_platform_item(
-            None,
-            gv.extractor_feature_dim_list_path,
-            gv.file_storage_data_mapping[gv.extractor_feature_dim_list_path],
-            key=str(extractor_path),
-            remove=True)
-
     for key in extractor_nicknames:
         if extractor_nicknames == extractor_path:
             sfh.add_remove_platform_item(

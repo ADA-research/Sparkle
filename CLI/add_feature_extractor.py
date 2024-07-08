@@ -88,13 +88,6 @@ if __name__ == "__main__":
     feature_dataframe.add_extractor(str(extractor_target_path), extractor_features)
     feature_dataframe.save_csv()
 
-    #I think this is also redundant
-    sfh.add_remove_platform_item(
-        len(extractor_features),
-        gv.extractor_feature_dim_list_path,
-        gv.file_storage_data_mapping[gv.extractor_feature_dim_list_path],
-        key=str(extractor_target_path))
-
     print(f"Adding feature extractor {extractor_target_path.name} done!")
 
     if Path(gv.sparkle_algorithm_selector_path).exists():
