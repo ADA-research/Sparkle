@@ -76,14 +76,14 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
 
     feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path,
                                                     gv.extractor_list)
-    bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()
+    bool_exists_missing_value = feature_data_csv.has_missing_value()
 
     if bool_exists_missing_value:
         print("****** WARNING: There are missing values in the feature data, and all "
               "missing values will be imputed as the mean value of all other non-missing"
               " values! ******")
         print("Imputing all missing values starts ...")
-        feature_data_csv.impute_missing_value_of_all_columns()
+        feature_data_csv.impute_missing_values()
         print("Imputing all missing values done!")
         impute_feature_data_csv_path = Path(
             f"{feature_data_csv_path}_{tg.get_time_pid_random_string()}"

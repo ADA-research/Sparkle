@@ -11,7 +11,7 @@ from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
 import tools.general as tg
 from sparkle.instance import InstanceSet
-from sparkle.structures import feature_dataframe as sfdcsv
+from sparkle.structures import FeatureDataFrame
 from CLI.help import compute_features_help as scf
 import sparkle_logging as sl
 from CLI.help import command_help as ch
@@ -92,6 +92,7 @@ if __name__ == "__main__":
         gv.extractor_list_path,
         gv.file_storage_data_mapping[gv.extractor_list_path])
 
+    #This needs to be removed and directly read from the wrapper
     # pre-run the feature extractor on a testing instance, to obtain the feature names
     if (extractor_target_path / InstanceSet.instance_csv).exists():
         testing_set = InstanceSet(extractor_target_path)
@@ -118,11 +119,9 @@ if __name__ == "__main__":
 
         subprocess.run(command_line)
 
-    feature_data_csv = sfdcsv.FeatureDataFrame(gv.feature_data_csv_path,
-                                                    gv.extractor_list)
+    feature_data_csv = FeatureDataFrame(gv.feature_data_csv_path, gv.extractor_list)
 
-    tmp_fdcsv = sfdcsv.FeatureDataFrame(result_path,
-                                             gv.extractor_list)
+    tmp_fdcsv = FeatureDataFrame(result_path, gv.extractor_list)
     list_columns = tmp_fdcsv.list_columns()
 
     for column_name in list_columns:

@@ -1,15 +1,8 @@
+"""Extractor wrapper for MinVC."""
 #!/usr/bin/env python3
-
-import sys
+import argparse
 from pathlib import Path
 
-
-def get_last_level_directory_name(filepath):
-	if filepath[-1] == r'/': filepath = filepath[0:-1]
-	right_index = filepath.rfind(r'/')
-	if right_index<0: pass
-	else: filepath = filepath[right_index+1:]
-	return filepath
 
 class MinVCInstanceFeature:
     def __init__(self, relative_path, minvc_instance_file_name):
@@ -46,7 +39,8 @@ class MinVCInstanceFeature:
         fin = open(self.minvc_instance_file_name, 'r')
         while True:
             myline = fin.readline()
-            if not myline: break
+            if not myline:
+                break
             mylist = myline.strip().split()
             if len(mylist) == 4 and mylist[0] == 'p' and mylist[1] == 'edge':
                 num_vertex = int(mylist[2])
@@ -60,7 +54,8 @@ class MinVCInstanceFeature:
         fin = open(self.minvc_instance_file_name, 'r')
         while True:
             myline = fin.readline()
-            if not myline: break
+            if not myline:
+                break
             mylist = myline.strip().split()
             if len(mylist) == 3 and mylist[0] == 'e':
                 temp_v1 = int(mylist[1])
@@ -91,11 +86,16 @@ class MinVCInstanceFeature:
         avg_degree = sum(list_vertex_degree) / len(list_vertex_degree)
         return max_degree, min_degree, avg_degree
 
+parser = argparse.ArgumentParser(description="Process some integers.")
+parser.add_argument('-extractor_dir', type=str, help='Path to the extractor directory')
+parser.add_argument('-instance_file', type=str, help='Path to the instance file')
+parser.add_argument('-output_file', type=str, help='Path to the output file')
+args = parser.parse_args()
 
 
-relative_path = sys.argv[1]
-minvc_instance_file_name = sys.argv[2]
-result_feature_file_name = sys.argv[3]
+relative_path = args.extractor_dir
+minvc_instance_file_name = args.instance_file
+result_feature_file_name = args.output_file
 
 minvc_instance_feature = MinVCInstanceFeature(relative_path, minvc_instance_file_name)
 minvc_instance_feature.save_minvc_features(result_feature_file_name)

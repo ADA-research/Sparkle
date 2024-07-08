@@ -141,13 +141,13 @@ def compute_perfect_selector_marginal_contribution(
 
 def get_list_predict_schedule(actual_portfolio_selector_path: Path,
                               feature_data_csv: FeatureDataFrame,
-                              instance: int) -> list[float]:
+                              instance: str) -> list[float]:
     """Return the solvers schedule suggested by the selector as a list.
 
     Args:
       actual_portfolio_selector_path: Path to portfolio selector.
       feature_data_csv: SparkleFeatureDataCSV object with the feature data.
-      instance: Instance ID, i.e., the number of the instance.
+      instance: Instance name.
 
     Returns:
       List of floating point numbers.
@@ -156,7 +156,8 @@ def get_list_predict_schedule(actual_portfolio_selector_path: Path,
     python_executable = gv.python_executable
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
-    feature_vector_string = feature_data_csv.get_feature_vector_string(instance)
+    feature_vector = feature_data_csv.get_instance(instance)
+    feature_vector_string = " ".join(feature_vector)
 
     pred_sched_file = ("predict_schedule_"
                        f"{tg.get_time_pid_random_string()}.predres")

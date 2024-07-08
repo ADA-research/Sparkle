@@ -82,7 +82,7 @@ if __name__ == "__main__":
     lock = FileLock(f"{feature_data_csv_path}.lock")
     try:
         tmp_fdcsv = sfdcsv.FeatureDataFrame(result_path,
-                                                 gv.extractor_list)
+                                            gv.extractor_list)
         # rename row
         if not has_instance_set:
             tmp_fdcsv.dataframe = tmp_fdcsv.dataframe.set_axis(
@@ -92,7 +92,8 @@ if __name__ == "__main__":
                 [instance_set.directory / instance_name], axis=0)
         with lock.acquire(timeout=60):
             feature_data_csv = sfdcsv.FeatureDataFrame(feature_data_csv_path)
-            feature_data_csv.combine(tmp_fdcsv)
+            for index in tmp_fdcsv.dataframe.index:
+                feature_data_csv[instance_name, index] = tmp_fdcsv[instance_name, index]
             feature_data_csv.save_csv()
         result_string = "Successful"
     except Exception as ex:
