@@ -8,7 +8,7 @@ from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 import global_variables as gv
-from sparkle.structures import feature_dataframe as sfdcsv
+from sparkle.structures import FeatureDataFrame
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
@@ -77,8 +77,9 @@ if __name__ == "__main__":
             break
 
     if gv.feature_data_csv_path.exists():
-        feature_data_csv = sfdcsv.FeatureDataFrame(gv.feature_data_csv_path,
-                                                        gv.extractor_list)
+        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+        feature_data.remove_extractor(str(extractor_path))
+        feature_data.save_csv()
         #TODO: Remove the feature extractor's feature columns from the CSV
     shutil.rmtree(extractor_path)
 

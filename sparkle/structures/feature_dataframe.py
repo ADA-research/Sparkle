@@ -71,8 +71,7 @@ class FeatureDataFrame:
         # Unfold to indices to lists
         for index, pair in enumerate(extractor_features):
             feature_group, feature_name = pair
-            self.dataframe[(feature_group, feature_name, extractor)] = values[index]
-        return
+            self.dataframe.loc[(feature_group, feature_name, extractor), :] = values[index]
 
     def add_instance(self: FeatureDataFrame,
                      instance: str,

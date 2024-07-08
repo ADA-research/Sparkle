@@ -84,8 +84,8 @@ if __name__ == "__main__":
                                         extractor_target_path / gv.sparkle_extractor_wrapper,
                                         "-features"], capture_output=True)
     extractor_features = ast.literal_eval(extractor_process.stdout.decode())
-    feature_dataframe = FeatureDataFrame(gv.feature_data_csv_path, gv.extractor_list)
-    feature_dataframe.add_extractor(extractor_target_path, extractor_features)
+    feature_dataframe = FeatureDataFrame(gv.feature_data_csv_path)
+    feature_dataframe.add_extractor(str(extractor_target_path), extractor_features)
     feature_dataframe.save_csv()
 
     #I think this is also redundant
