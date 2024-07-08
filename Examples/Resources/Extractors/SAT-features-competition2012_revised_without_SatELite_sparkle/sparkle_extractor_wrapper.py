@@ -2,8 +2,6 @@
 # -*- coding: UTF-8 -*-
 """Template for users to create Feature Extractor wrappers."""
 import sys
-import time
-import random
 import argparse
 from enum import Enum
 import subprocess
@@ -82,35 +80,39 @@ if args.features:
 
 extractor_dir = Path(args.extractor_dir)
 instance_path = Path(args.instance_file)
-output_file = Path(args.output_file)
+output_file = Path(args.output_file) if args.output_file else None
 
 extractor_name = "SATFeatureCompetition2012"
-
 executable_name = "features"
 executable = extractor_dir / executable_name
 
-raw_result_file_name = Path(f"{extractor_dir}{executable_name}_" \
-                            f"{instance_path.name}_{time.strftime('%Y%m%d-%H%M%S')}" \
-                            f"_{int(random.getrandbits(32))}.rawres")
-tmp_output = Path("TMP") / raw_result_file_name
-
-subprocess.run([extractor_dir / executable_name,
-                instance_path,
-                tmp_output],
-                stdout=raw_result_file_name.open("w+"))
+extractor = subprocess.run([extractor_dir / executable_name,
+                            instance_path],
+                            capture_output=True)
 
 # Read all lines from the input file
-raw_lines = Path(raw_result_file_name).read_text().splitlines()
+raw_lines = extractor.stdout.decode().splitlines()
 
 # Process raw result file and write to the final result file
-with open(output_file, "w") as out_file:
-    if len(raw_lines) >= 2:
-        features = raw_lines[-2].strip().split(",")
-        values = raw_lines[-1].strip()
-        out_file.write(",".join(f"{feature}_{extractor_dir.name}"
-                                for feature in features) + "\n")
-        out_file.write(f"{instance_path},{values}\n")
+# First, we need to map each feature_name to its standardised name
+if len(raw_lines) >= 2:
+    features = raw_lines[-2].strip().split(",")
+    values = raw_lines[-1].strip().split(",")
+    processed_features = []
+    for i, feature in enumerate(features):
+        feature_group, feature_name = feature_mapping[feature]
+        if isinstance(feature_name, Enum):
+             feature_name = feature_name.value
+        processed_features.append([feature_group.value, feature_name, values[i]])
+        
+else:
+    # Failed to compute features
+    sys.exit(extractor.stdout.decode())
 
-# Deletes temporary files
-raw_result_file_name.unlink(missing_ok=True)
-
+if output_file is not None:
+    with open(output_file, "w") as out_file:
+            for line in processed_features:
+                group, feature, value = line
+                out_file.write(f"{group},{feature},{value}")
+else:
+     print(processed_features)
