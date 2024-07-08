@@ -1,7 +1,6 @@
 """Extractor wrapper for MinVC."""
 #!/usr/bin/env python3
 import argparse
-from pathlib import Path
 
 
 class MinVCInstanceFeature:
@@ -12,17 +11,15 @@ class MinVCInstanceFeature:
         self.density = 2*self.num_edge / (self.num_vertex*(self.num_vertex-1))
         self.map_adj_matrix = self._get_map_adj_matrix()
         self.max_degree, self.min_degree, self.avg_degree = self._get_degree_related_info()
+        self.list_feature_names = ['num_vertex', 'num_edge', 'density', 'max_degree', 'min_degree', 'avg_degree']
         return
     
     def save_minvc_features(self, result_feature_file_name):
-        extractor_directory_last_level = Path(self.relative_path).name
-        
-        list_feature_names = ['num_vertex', 'num_edge', 'density', 'max_degree', 'min_degree', 'avg_degree']
         list_feature_values = [self.num_vertex, self.num_edge, self.density, self.max_degree, self.min_degree, self.avg_degree]
 
         fout = open(result_feature_file_name, 'w+')
-        for feature_name in list_feature_names:
-            fout.write(',%s' % (feature_name + extractor_directory_last_level))
+        for feature_name in self.list_feature_names:
+            fout.write(',%s' % (feature_name))
         fout.write('\n')
 
         fout.write('%s' % self.minvc_instance_file_name)

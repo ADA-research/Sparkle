@@ -3,32 +3,17 @@
 import os
 import sys
 import shutil
-import subprocess
 import argparse
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
-import tools.general as tg
-from sparkle.instance import InstanceSet
 from sparkle.structures import FeatureDataFrame
 from CLI.help import compute_features_help as scf
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
-
-
-def _check_existence_of_test_instance_list_file(extractor_directory: Path) -> bool:
-    """Check whether a file exists with the list of test instances."""
-    if extractor_directory.is_dir():
-        return False
-
-    test_instance_list_file_name = "sparkle_test_instance_list.txt"
-    test_instance_list_file_path = (extractor_directory
-                                    / test_instance_list_file_name)
-
-    return test_instance_list_file_path.is_file()
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -94,7 +79,7 @@ if __name__ == "__main__":
 
     #This needs to be removed and directly read from the wrapper
     # pre-run the feature extractor on a testing instance, to obtain the feature names
-    if (extractor_target_path / InstanceSet.instance_csv).exists():
+    """if (extractor_target_path / InstanceSet.instance_csv).exists():
         testing_set = InstanceSet(extractor_target_path)
         result_path = f"Tmp/{testing_set.name}_{tg.get_time_pid_random_string()}.rawres"
         command_line =\
@@ -117,27 +102,22 @@ if __name__ == "__main__":
             "-instance_file", str(instance_path),
             "-output_file", result_path]
 
-        subprocess.run(command_line)
+        subprocess.run(command_line)"""
 
-    feature_data_csv = FeatureDataFrame(gv.feature_data_csv_path, gv.extractor_list)
+    #TODO: Get the extractor features from the wrapper
+    extractor_features = ...
+    feature_dataframe = FeatureDataFrame(gv.feature_data_csv_path, gv.extractor_list)
+    feature_dataframe.add_extractor(extractor_target_path, extractor_features)
+    feature_dataframe.save_csv()
 
-    tmp_fdcsv = FeatureDataFrame(result_path, gv.extractor_list)
-    list_columns = tmp_fdcsv.list_columns()
-
-    for column_name in list_columns:
-        feature_data_csv.add_column(column_name)
-
-    feature_data_csv.save_csv()
+    #I think this is also redundant
     sfh.add_remove_platform_item(
-        len(list_columns),
+        len(extractor_features),
         gv.extractor_feature_dim_list_path,
         gv.file_storage_data_mapping[gv.extractor_feature_dim_list_path],
         key=str(extractor_target_path))
 
-    sfh.rmfiles(Path(result_path))
-
-    print("Adding feature extractor "
-          f"{extractor_target_path.name} done!")
+    print(f"Adding feature extractor {extractor_target_path.name} done!")
 
     if Path(gv.sparkle_algorithm_selector_path).exists():
         sfh.rmfiles(Path(gv.sparkle_algorithm_selector_path))

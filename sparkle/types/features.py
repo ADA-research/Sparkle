@@ -1,0 +1,65 @@
+"""Types definition for features to unify extractors across the Sparkle platform."""
+from __future__ import annotations
+from enum import Enum
+
+class FeatureGroup(str, Enum):
+    """Various feature groups."""
+    BASE = "base"
+    PRE = "pre"
+    DIAMETER = "diameter"
+    LOBJOIS = "lobjois"
+    UNIT = "UNIT"
+    SP = "sp"
+    LS = "ls"
+    LP = "lp"
+
+class FeatureSubgroup(str, Enum):
+    """Various feature subgroups. Only used for embedding in with feature names."""
+    VCG = "Variable-Clause-Graph"
+    POSNEG = "Postive-Negative-Literals"
+    HORNY = "Horn-Formula"
+    VG = "Variable-Graph"
+    KLB = "Kevin-Leyton-Brown"
+    CG = "Clause-Graph"
+
+class FeatureType(str, Enum):
+    """Various feature types."""
+    #nvarsOrig,nclausesOrig,nvars,nclauses,reducedVars,reducedClauses,
+    # Pre-featuretime,vars-clauses-ratio,POSNEG-RATIO-CLAUSE-mean,POSNEG-RATIO-CLAUSE-coeff-variation,POSNEG-RATIO-CLAUSE-min,POSNEG-RATIO-CLAUSE-max,POSNEG-RATIO-CLAUSE-entropy,VCG-CLAUSE-mean,VCG-CLAUSE-coeff-variation,VCG-CLAUSE-min,VCG-CLAUSE-max,VCG-CLAUSE-entropy,UNARY,BINARY+,TRINARY+,Basic-featuretime,VCG-VAR-mean,VCG-VAR-coeff-variation,VCG-VAR-min,VCG-VAR-max,VCG-VAR-entropy,POSNEG-RATIO-VAR-mean,POSNEG-RATIO-VAR-stdev,POSNEG-RATIO-VAR-min,POSNEG-RATIO-VAR-max,POSNEG-RATIO-VAR-entropy,HORNY-VAR-mean,HORNY-VAR-coeff-variation,HORNY-VAR-min,HORNY-VAR-max,HORNY-VAR-entropy,horn-clauses-fraction,VG-mean,VG-coeff-variation,VG-min,VG-max,KLB-featuretime,CG-mean,CG-coeff-variation,CG-min,CG-max,CG-entropy,cluster-coeff-mean,cluster-coeff-coeff-variation,cluster-coeff-min,cluster-coeff-max,cluster-coeff-entropy,CG-featuretime
+    NUMBER_OF_VARS_ORIGINAL = "n_vars_original"
+    NUMBER_OF_CLAUSES_ORIGINAL = "n_clauses_original"
+    NUMBER_OF_VARS = "n_vars"
+    NUMBER_OF_CLAUSES = "n_clauses"
+    REDUCED_VARS = "reduced_vars"
+    REDUCED_CLAUSES = "reduced_clauses"
+    PRE_FEATURE_TIME = "pre_featuretime"
+    VARS_CLAUSES_RATIO = "vars_clauses_ratio"
+    CLAUSE_RATIO_MEAN = "clause_ratio_mean"
+    CLAUSE_RATIO_MINIMUM = "clause_ratio_minimum"
+    CLAUSE_RATIO_MAXIMUM = "clause_ratio_maximum"
+    CLAUSE_RATIO_ENTROPY = "clause_ratio_entropy"
+    CLAUSE_MEAN = "clause_mean"
+    CLAUSE_MIN = "clause_min"
+    CLAUSE_MAX = "clause_max"
+    CLAUSE_FRACTION = "clauses_fraction"
+    CLAUSE_ENTROPY = "clause_entropy"
+    CLAUSE_COEFFICIENT_VARIATION = "clause_coefficient_of_variation"
+    VAR_MEAN = "variable_mean"
+    VAR_MIN = "variable_min"
+    VAR_MAX = "variable_max"
+    VAR_STD = "variable_standard_deviation"
+    VAR_ENTROPY = "variable_entropy"
+    VAR_COEFFICIENT_VARIATION = "variable_coefficient_of_variation"
+    CLUSTER_COEFFICIENT_MEAN = "cluster_coefficient_mean"
+    CLUSTER_COEFFICIENT_VARIATION = "cluster_coefficient_of_variation"
+    CLUSTER_COEFFICIENT_MIN = "cluster_coefficient_min"
+    CLUSTER_COEFFICIENT_MAX = "cluster_coefficient_max"
+    CLUSTER_COEFFICIENT_ENTROPY = "cluster_coefficient_entropy"
+    UNARY = "unary"
+    BINARY = "binary"
+    TRINARY = "trinary"
+    FEATURE_TIME = "feature_time"
+
+    def with_subgroup(subgroup: FeatureSubgroup, feature: FeatureType) -> str:
+        """Return a standardised string with a subgroup embedded."""
+        return f"{subgroup}_{feature}"

@@ -97,6 +97,11 @@ class FeatureDataFrame:
         subdataframe = self.dataframe[self.dataframe.isnull()]
         return subdataframe.index.to_list(), subdataframe.columns.to_list()
 
+    def get_num_features(self: FeatureDataFrame, extractor: str) -> int:
+        """Returns the number of features for an extractor."""
+        
+        return
+
     def remaining_feature_computation_job(self: FeatureDataFrame)\
             -> list[list[str, str]]:
         """Return a list of needed feature computations per instance and solver.
