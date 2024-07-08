@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-features",  action="store_true")
+parser.add_argument("-features",  action="store_true", help="Only print features and their groups as a list of tuples.")
 parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
 parser.add_argument("-instance_file", type=str, help="Path to the instance file")
 parser.add_argument("-output_file", type=str, help="Path to the output file")

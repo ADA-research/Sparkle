@@ -4,6 +4,8 @@ import os
 import sys
 import shutil
 import argparse
+import subprocess
+import ast
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh, settings_help
@@ -105,7 +107,10 @@ if __name__ == "__main__":
         subprocess.run(command_line)"""
 
     #TODO: Get the extractor features from the wrapper
-    extractor_features = ...
+    extractor_process = subprocess.run([gv.python_executable,
+                                        extractor_target_path / gv.sparkle_extractor_wrapper,
+                                        "-features"], capture_output=True)
+    extractor_features = ast.literal_eval(extractor_process.stdout.decode())
     feature_dataframe = FeatureDataFrame(gv.feature_data_csv_path, gv.extractor_list)
     feature_dataframe.add_extractor(extractor_target_path, extractor_features)
     feature_dataframe.save_csv()

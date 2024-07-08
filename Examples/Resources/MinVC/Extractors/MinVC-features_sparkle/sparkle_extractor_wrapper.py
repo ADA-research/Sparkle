@@ -1,9 +1,13 @@
 """Extractor wrapper for MinVC."""
 #!/usr/bin/env python3
 import argparse
+import sys
+from sparkle.types import FeatureGroup
 
 
 class MinVCInstanceFeature:
+    feature_names = ['num_vertex', 'num_edge', 'density', 'max_degree', 'min_degree', 'avg_degree']
+
     def __init__(self, relative_path, minvc_instance_file_name):
         self.relative_path = relative_path
         self.minvc_instance_file_name = minvc_instance_file_name
@@ -11,14 +15,12 @@ class MinVCInstanceFeature:
         self.density = 2*self.num_edge / (self.num_vertex*(self.num_vertex-1))
         self.map_adj_matrix = self._get_map_adj_matrix()
         self.max_degree, self.min_degree, self.avg_degree = self._get_degree_related_info()
-        self.list_feature_names = ['num_vertex', 'num_edge', 'density', 'max_degree', 'min_degree', 'avg_degree']
-        return
     
     def save_minvc_features(self, result_feature_file_name):
         list_feature_values = [self.num_vertex, self.num_edge, self.density, self.max_degree, self.min_degree, self.avg_degree]
 
         fout = open(result_feature_file_name, 'w+')
-        for feature_name in self.list_feature_names:
+        for feature_name in MinVCInstanceFeature.feature_names:
             fout.write(',%s' % (feature_name))
         fout.write('\n')
 
@@ -84,10 +86,16 @@ class MinVCInstanceFeature:
         return max_degree, min_degree, avg_degree
 
 parser = argparse.ArgumentParser(description="Process some integers.")
+parser.add_argument("-features",  action="store_true", help="Only print features and their groups as a list of tuples.")
 parser.add_argument('-extractor_dir', type=str, help='Path to the extractor directory')
 parser.add_argument('-instance_file', type=str, help='Path to the instance file')
 parser.add_argument('-output_file', type=str, help='Path to the output file')
 args = parser.parse_args()
+
+if args.features:
+    # Return a list of feature names and their feature groups as [(feature_group, feature_name), ...]
+    print([(FeatureGroup.BASE.value, name) for name in MinVCInstanceFeature.feature_names])
+    sys.exit()
 
 
 relative_path = args.extractor_dir

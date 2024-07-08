@@ -62,4 +62,4 @@ class FeatureType(str, Enum):
 
     def with_subgroup(subgroup: FeatureSubgroup, feature: FeatureType) -> str:
         """Return a standardised string with a subgroup embedded."""
-        return f"{subgroup}_{feature}"
+        return f"{subgroup.value}_{feature.value}"

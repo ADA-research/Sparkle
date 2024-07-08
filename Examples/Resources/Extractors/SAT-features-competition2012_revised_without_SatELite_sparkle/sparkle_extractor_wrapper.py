@@ -5,6 +5,7 @@ import sys
 import time
 import random
 import argparse
+from enum import Enum
 import subprocess
 from sparkle.types import FeatureGroup, FeatureSubgroup, FeatureType
 from pathlib import Path
@@ -74,8 +75,9 @@ feature_mapping = {
 
 
 if args.features:
-    # Print the features and the group they belong to
-    print([feature_mapping[key] for key in feature_mapping.keys()])
+    # Print the stringified features and the group they belong to
+    print([(feature_mapping[key][0].value, feature_mapping[key][1].value if isinstance(feature_mapping[key][1], Enum) else feature_mapping[key][1])
+           for key in feature_mapping.keys()])
     sys.exit()
 
 extractor_dir = Path(args.extractor_dir)
