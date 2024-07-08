@@ -10,8 +10,7 @@ from CLI.help.command_help import CommandName
 from CLI.help import snapshot_help as srh
 from CLI.help import snapshot_help as snh
 from sparkle.platform import settings_help
-from sparkle.structures import csv_help as scsv
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 import global_variables as gv
 import sparkle_logging as sl
 
@@ -70,7 +69,10 @@ def initialise_sparkle(argv: list[str]) -> None:
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
     (gv.ablation_dir / "scenarios/").mkdir(exist_ok=True)
-    scsv.SparkleCSV.create_empty_csv(gv.feature_data_csv_path)
+    #scsv.SparkleCSV.create_empty_csv(gv.feature_data_csv_path)
+    # Initialise the FeatureDataFrame
+    FeatureDataFrame(gv.feature_data_csv_path)
+
     # Initialise the Performance DF with the static dimensions
     # TODO: We have many sparkle settings values regarding ``number of runs''
     # E.g. configurator, parallel portfolio, and here too. Should we unify this more, or

@@ -79,34 +79,7 @@ if __name__ == "__main__":
         gv.extractor_list_path,
         gv.file_storage_data_mapping[gv.extractor_list_path])
 
-    #This needs to be removed and directly read from the wrapper
-    # pre-run the feature extractor on a testing instance, to obtain the feature names
-    """if (extractor_target_path / InstanceSet.instance_csv).exists():
-        testing_set = InstanceSet(extractor_target_path)
-        result_path = f"Tmp/{testing_set.name}_{tg.get_time_pid_random_string()}.rawres"
-        command_line =\
-            [extractor_target_path / gv.sparkle_extractor_wrapper,
-             "-extractor_dir", f"{extractor_target_path}/", "-instance_file"] +\
-            testing_set.instance_paths[0] + ["-output_file", result_path]
-        subprocess.run(command_line, capture_output=True)
-    else:
-        instance_path = extractor_target_path / "sparkle_test_instance.cnf"
-        if not instance_path.is_file():
-            instance_path = extractor_target_path / "sparkle_test_instance.txt"
-        result_path = (
-            f"Tmp/{extractor_target_path.name}_{instance_path.name}_"
-            f"{tg.get_time_pid_random_string()}.rawres"
-        )
-        command_line = [
-            gv.python_executable, str(extractor_target_path
-                                      / gv.sparkle_extractor_wrapper),
-            "-extractor_dir", str(extractor_target_path),
-            "-instance_file", str(instance_path),
-            "-output_file", result_path]
-
-        subprocess.run(command_line)"""
-
-    #TODO: Get the extractor features from the wrapper
+    # Get the extractor features groups and names from the wrapper
     extractor_process = subprocess.run([gv.python_executable,
                                         extractor_target_path / gv.sparkle_extractor_wrapper,
                                         "-features"], capture_output=True)

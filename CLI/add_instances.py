@@ -91,17 +91,16 @@ if __name__ == "__main__":
     instance_set = InstanceSet(instances_target)
 
     # Add the instances to the Feature Data / Performance Data
-    feature_data_csv = FeatureDataFrame(gv.feature_data_csv_path)
+    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
         gv.performance_data_csv_path,
         objectives=gv.settings.get_general_sparkle_objectives())
     for instance_path in instance_set.get_instance_paths:
         # Construct a name path due to multi-file instances
-        feature_data_csv.add_row(str(instance_path))
+        feature_data.add_instance(str(instance_path))
         performance_data.add_instance(str(instance_path))
-
-    feature_data_csv.save_csv()
+    feature_data.save_csv()
     performance_data.save_csv()
 
     print(f"\nAdding instance set {instance_set.name} done!")

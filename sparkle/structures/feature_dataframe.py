@@ -14,8 +14,8 @@ class FeatureDataFrame:
 
     def __init__(self: FeatureDataFrame,
                  csv_filepath: Path,
-                 instances: list[str],
-                 extractor_data: dict[str, list[tuple[str, str]]]
+                 instances: list[str] = [],
+                 extractor_data: dict[str, list[tuple[str, str]]] = {}
                  ) -> None:
         """Initialise a SparkleFeatureDataCSV object.
 
@@ -35,7 +35,8 @@ class FeatureDataFrame:
         # Each feature belongs to a feature group which is for example recognised by autofolio
         if self.csv_filepath.exists():
             # Read from file
-            self.dataframe = pd.read_csv(self.csv_filepath)
+            self.dataframe = pd.read_csv(self.csv_filepath,
+                                         index_col=FeatureDataFrame.multi_dim_names)
             return
         # Unfold the extractor_data into lists
         multi_index_lists = [[], [], []]
@@ -99,7 +100,7 @@ class FeatureDataFrame:
 
     def get_num_features(self: FeatureDataFrame, extractor: str) -> int:
         """Returns the number of features for an extractor."""
-        
+
         return
 
     def remaining_feature_computation_job(self: FeatureDataFrame)\
