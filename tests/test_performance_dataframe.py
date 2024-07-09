@@ -69,14 +69,14 @@ class TestPerformanceData(TestCase):
         """Test get remaining performance computation job getter."""
         remaining = [["Instance1", []], ["Instance2", []], ["Instance3", []],
                      ["Instance4", []], ["Instance5", []]]
-        result = self.pd.get_list_remaining_performance_computation_job()
+        result = self.pd.remaining_jobs()
         assert result == remaining
 
         remaining = [["Instance1", ["AlgorithmA"]], ["Instance2", ["AlgorithmA"]],
                      ["Instance3", ["AlgorithmA", "AlgorithmC"]],
                      ["Instance4", ["AlgorithmA", "AlgorithmE"]],
                      ["Instance5", ["AlgorithmA"]]]
-        result = self.pd_nan.get_list_remaining_performance_computation_job()
+        result = self.pd_nan.remaining_jobs()
         assert result == remaining
 
     def test_get_best_performance_per_instance(self: TestPerformanceData) -> None:

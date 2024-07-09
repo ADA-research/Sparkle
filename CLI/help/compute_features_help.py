@@ -9,9 +9,7 @@ import runrunner as rrr
 from runrunner.base import Runner, Status
 
 import global_variables as gv
-from CLI.support import sparkle_job_help as sjh
 from sparkle.structures import FeatureDataFrame
-from CLI.support import sparkle_job_help
 from CLI.help.command_help import CommandName
 
 
@@ -38,28 +36,25 @@ def compute_features(
     feature_dataframe = FeatureDataFrame(feature_data_csv_path)
     if recompute:
         feature_dataframe.reset_dataframe()
-    list_feature_computation_job = feature_dataframe.remaining_feature_computation_job()
-    n_jobs = sparkle_job_help.get_num_of_total_job_from_list(
-        list_feature_computation_job)
+    jobs = feature_dataframe.remaining_jobs()
 
     # If there are no jobs, stop
-    if n_jobs < 1:
+    if jobs == {}:
         print("No feature computation jobs to run; stopping execution! To recompute "
               "feature values use the --recompute flag.")
         sys.exit()
+    cmd_list = [f"CLI/core/compute_features.py --instance {inst_path} "
+                f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
+                for inst_path in jobs.keys() for ex_path in jobs[inst_path]]
 
-    print("The number of total running jobs: " + str(n_jobs))
-    total_job_list = sjh.expand_total_job_from_list(list_feature_computation_job)
+    print(f"The number of total running jobs: {len(cmd_list)}")
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
 
     # Generate the sbatch script
-    parallel_jobs = min(n_jobs, gv.settings.get_number_of_jobs_in_parallel())
-    cmd_list = [f"CLI/core/compute_features.py --instance {inst_path} "
-                f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
-                for inst_path, ex_path in total_job_list]
+    parallel_jobs = min(len(cmd_list), gv.settings.get_number_of_jobs_in_parallel())
     sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
     srun_options = ["-N1", "-n1"] + sbatch_options
     run = rrr.add_to_queue(

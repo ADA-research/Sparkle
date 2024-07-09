@@ -97,27 +97,36 @@ class FeatureDataFrame:
         """Set a value in the dataframe."""
         self.dataframe.loc[(feature_group, feature_name, extractor), instance] = value
 
-    def remaining_feature_computation_job(self: FeatureDataFrame)\
-            -> list[list[str, str]]:
+    def has_missing_vectors(self: FeatureDataFrame) -> bool:
+        """Returns True if there are any Extractors still to be run on any instance."""
+        for instance in self.dataframe.columns:
+            for extractor in self.get_extractors():
+                extractor_features = self.dataframe.xs(extractor, level=2,
+                                                       drop_level=False)
+                if extractor_features.loc[:, instance].isnull().all():
+                    return True
+        return False
+
+    def remaining_jobs(self: FeatureDataFrame)\
+            -> dict[str: list[str]]:
         """Return a needed feature computations per instance/extractor combination.
 
         Returns:
-            A list of feature computation jobs. Each job is a list containing a str row
-            name and a str column name.
+            A dictionary with instances as key, and a list of extractors as value that
+            still need to compute their vectors for the instance.
         """
         remaining_jobs = {}
         for instance in self.dataframe.columns:
-            # A job is remaining iff each value for one extractor/instance are null
+            # A job is remaining iff for one extractor each value on the instance is null
             for extractor in self.get_extractors():
-                subset = self.dataframe.xs(extractor, level=2, drop_level=False)
-                if subset.loc[:, instance].isnull().all():
+                extractor_features = self.dataframe.xs(extractor, level=2,
+                                                       drop_level=False)
+                if extractor_features.loc[:, instance].isnull().all():
                     if instance not in remaining_jobs:
                         remaining_jobs[instance] = [extractor]
                     else:
                         remaining_jobs[instance].append(extractor)
-        # For now we just return the feature extractors and instance combinations
-        # With [[instance_name, extractor1, extractor2, ...]]
-        return [[key, remaining_jobs[key]] for key in remaining_jobs.keys()]
+        return remaining_jobs
 
     def get_instance(self: FeatureDataFrame, instance: str) -> list[float]:
         """Return the feature vector of an instance."""

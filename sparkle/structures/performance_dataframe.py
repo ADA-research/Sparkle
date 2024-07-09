@@ -335,27 +335,23 @@ class PerformanceDataFrame():
 
         return list_recompute_performance_computation_job
 
-    def get_list_remaining_performance_computation_job(self: PerformanceDataFrame) \
-            -> list[list[list]]:
-        """Return a list of needed performance computations per instance and solver.
+    def has_missing_performance(self: PerformanceDataFrame) -> bool:
+        """Returns True if there are any missing values in the dataframe."""
+        return self.dataframe.isnull().any().any()
 
-        This will return any objective/instance/run combination.
-        """
-        list_remaining_performance_computation_job = []
-        bool_array_isnull = self.dataframe.isnull()
-        for row_name in self.dataframe.index:
-            current_solver_list = []
-            for column_name in self.dataframe.columns:
-                flag_value_is_null = bool_array_isnull.at[row_name, column_name]
-                if flag_value_is_null:
-                    current_solver_list.append(column_name)
-            if not self.multi_objective and self.n_runs == 1:
-                # Simplification for unused dimensions
-                list_item = [row_name[1], current_solver_list]
-            else:
-                list_item = [row_name, current_solver_list]
-            list_remaining_performance_computation_job.append(list_item)
-        return list_remaining_performance_computation_job
+    def remaining_jobs(self: PerformanceDataFrame) -> dict[str: list[str]]:
+        """Return a dictionary of empty values per instance and solver combination."""
+        remaining_jobs = {}
+        null_df = self.dataframe.isnull()
+        for row in self.dataframe.index:
+            instance = row[1]
+            for solver in self.dataframe.columns:
+                if null_df.at[row, solver]:
+                    if instance not in remaining_jobs:
+                        remaining_jobs[instance] = set(solver)
+                    else:
+                        remaining_jobs[instance].add(solver)
+        return remaining_jobs
 
     def get_best_performance_per_instance(
             self: PerformanceDataFrame,
