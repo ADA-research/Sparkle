@@ -137,7 +137,7 @@ class FeatureDataFrame:
         # With [[instance_name, extractor1, extractor2, ...]]
         return [[key, remaining_jobs[key]] for key in remaining_jobs.keys()]
 
-    def get_instance(self: FeatureDataFrame, instance: str) -> list:
+    def get_instance(self: FeatureDataFrame, instance: str) -> list[float]:
         """Return the feature vector of an instance."""
         return self.dataframe[instance].tolist()
 
@@ -169,3 +169,14 @@ class FeatureDataFrame:
         """
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
         self.dataframe.to_csv(csv_filepath)
+
+    def to_autofolio(self: FeatureDataFrame) -> Path:
+        """Port the data to a format acceptable for AutoFolio."""
+        autofolio_df = self.dataframe.copy()
+        # Reduce Multi-Index by unifying into one
+        autofolio_df.index = autofolio_df.index.map("_".join)
+        # Autofolio expects features as columns, rows as instances
+        autofolio_df = autofolio_df.T
+        path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
+        autofolio_df.to_csv(path)
+        return path

@@ -1,6 +1,7 @@
 """Methods regarding feature extractors."""
 from __future__ import annotations
 from pathlib import Path
+import ast
 import runrunner as rrr
 from runrunner import Runner
 from sparkle.types import SparkleCallable
@@ -53,13 +54,14 @@ class Extractor(SparkleCallable):
                                    in runsolver_args]
         cmd_list_extractor += [f"{self.directory / Extractor.wrapper}",
                                "-extractor_dir", f"{self.directory}/",
-                               "-instance_file", str(instance),
-                               "-output_file", str(output_file)]
+                               "-instance_file", str(instance)]
+        if output_file is not None:
+            cmd_list_extractor += ["-output_file", str(output_file)]
         return cmd_list_extractor
 
     def run(self: Extractor,
             instance: Path,
-            output_file: Path,
+            output_file: Path = None,
             runsolver_args: list[str | Path] = None,
             run_options: list[any] = None,
             run_on: Runner = Runner.SLURM) -> rrr.LocalRun | rrr.SlurmRun:
@@ -68,7 +70,7 @@ class Extractor(SparkleCallable):
         Args:
             extractor_path: Path to the executable
             instance: Path to the instance to run on
-            output_file: Target output
+            output_file: Target output. If 
             runsolver_args: List of run solver args, each word a seperate item.
             run_options: The RunRunner options list of job name, sbatch options list
                 and srun options list.
@@ -99,10 +101,8 @@ class Extractor(SparkleCallable):
         Returns:
             A list of features.
         """
-        features = [FeatureDataFrame.missing_value] * self.output_dimension
         if result.exists() and get_status(runsolver_values, None) != "TIMEOUT":
-            # Last line contains feature vector:
-            feature_line = result.open().readlines()[-1]
-            # Trim instance name and white space from features
-            features = feature_line.strip().split(",")[1:]
-        return features
+            print(result.read_text())
+            feature_values = ast.literal_eval(result.read_text())
+            return [str(value) for _, _, value in feature_values]
+        return [FeatureDataFrame.missing_value] * self.output_dimension

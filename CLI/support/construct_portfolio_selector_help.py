@@ -95,17 +95,14 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     log_path_str = str(Path(sl.caller_log_dir / log_file))
     err_path_str = str(Path(sl.caller_log_dir / err_file))
     performance_data = PerformanceDataFrame(performance_data_csv_path)
-    pf_data_autofolio_path = performance_data.to_autofolio()
-    if selector_timeout is None:
-        cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
-                    str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
-                    objective_function, "--save", str(selector_path)]
-    else:
-        cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
-                    str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
-                    objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
-                    "--save", str(selector_path), "--wallclock_limit",
-                    str(selector_timeout)]
+    p_data_autofolio_path = performance_data.to_autofolio()
+    f_data_autofolio_path = feature_data.to_autofolio()
+    cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
+                p_data_autofolio_path, "--feature_csv", f_data_autofolio_path,
+                objective_function, "--save", str(selector_path)]
+    if selector_timeout is not None:
+        cmd_list += ["--runtime_cutoff", cutoff_time_str, "--tune",
+                     "--wallclock_limit", str(selector_timeout)]
     # Write command line to log
     print("Running command below:\n", " ".join([str(c) for c in cmd_list]),
           file=open(log_path_str, "a+"))
@@ -131,5 +128,6 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         sys.exit(-1)
 
     # Remove the data copy for AutoFolio
-    pf_data_autofolio_path.unlink()
+    p_data_autofolio_path.unlink()
+    f_data_autofolio_path.unlink()
     return True

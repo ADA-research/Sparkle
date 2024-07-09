@@ -86,8 +86,7 @@ extractor_name = "SATFeatureCompetition2012"
 executable_name = "features"
 executable = extractor_dir / executable_name
 
-extractor = subprocess.run([extractor_dir / executable_name,
-                            instance_path],
+extractor = subprocess.run([extractor_dir / executable_name, instance_path],
                             capture_output=True)
 
 # Read all lines from the input file
@@ -102,7 +101,7 @@ if len(raw_lines) >= 2:
     for i, feature in enumerate(features):
         feature_group, feature_name = feature_mapping[feature]
         if isinstance(feature_name, Enum):
-             feature_name = feature_name.value
+            feature_name = feature_name.value
         processed_features.append([feature_group.value, feature_name, values[i]])
         
 else:
@@ -111,8 +110,6 @@ else:
 
 if output_file is not None:
     with open(output_file, "w") as out_file:
-            for line in processed_features:
-                group, feature, value = line
-                out_file.write(f"{group},{feature},{value}\n")
+        out_file.write(str(processed_features))
 else:
-     print(processed_features)
+    print(processed_features)

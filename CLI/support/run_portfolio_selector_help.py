@@ -124,7 +124,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     for extractor_path in gv.extractor_list:
         extractor = Extractor(Path(extractor_path),
                               gv.runsolver_path,
-                              Path("Tmp"))
+                              gv.sparkle_tmp_path)
         result_path = Path(f"{extractor.name}_{instance_files_str_}_"
                            f"{tg.get_time_pid_random_string()}.rawres")
         err_path = result_path.with_suffix(".err")
