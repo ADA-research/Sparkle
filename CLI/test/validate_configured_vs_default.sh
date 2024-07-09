@@ -30,6 +30,8 @@ solver_src_path="${examples_path}${solver_path}"
 
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
 config_test_data="CLI/test/test_files/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN"
+latest_ini="CLI/test/test_files/Output/latest_scenario.ini"
+latest_ini_target="Output/"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
@@ -39,6 +41,7 @@ CLI/add_solver.py $solver_src_path > /dev/null
 # Copy configuration results and other files to simulate the configuration command
 mkdir -p $config_scenario_path
 cp -r $config_test_data $config_scenario_path
+cp $latest_ini $latest_ini_target
 
 # Test configured solver and default solver with both train and test sets
 output=$(CLI/validate_configured_vs_default.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
