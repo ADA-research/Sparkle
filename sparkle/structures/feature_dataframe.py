@@ -125,6 +125,7 @@ class FeatureDataFrame:
         """
         remaining_jobs = {}
         for instance in self.dataframe.columns:
+            # A job is remaining iff each value for one extractor/instance are null
             for extractor in self.get_extractors():
                 subset = self.dataframe.xs(extractor, level=2, drop_level=False)
                 if subset.loc[:, instance].isnull().all():
