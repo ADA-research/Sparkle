@@ -120,10 +120,15 @@ def call_sparkle_portfolio_selector_solve_instance(
         extractor = Extractor(Path(extractor_path),
                               gv.runsolver_path,
                               gv.sparkle_tmp_path)
-        features = extractor.run(instance,
-                                 runsolver_args=["--cpu-limit", str(cutoff_extractor)])
+        # We create a watch log to filter out runsolver output
+        runsolver_watch_path =\
+            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance_path}.wlog"
+        features = extractor.run(instance_path_list,
+                                 runsolver_args=["--cpu-limit", str(cutoff_extractor),
+                                                 "-w", runsolver_watch_path])
         for _, _, value in features:
             feature_vector.append(value)
+        runsolver_watch_path.unlink(missing_ok=True)
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = Path(
