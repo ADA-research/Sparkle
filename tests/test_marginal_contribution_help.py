@@ -140,10 +140,10 @@ class TestMarginalContribution(TestCase):
                                                            ) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
         # Test does not work on Mac
-        performance_csv_path = Path("CLI/test/test_files/Performance_Data/"\
+        performance_csv_path = Path("CLI/test/test_files/Performance_Data/"
                                     "test_construct_sparkle_portfolio_selector.csv")
-        feature_csv_path = Path(
-            "CLI/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv")
+        feature_csv_path = Path("CLI/test/test_files/Feature_Data/"
+                                "test_construct_sparkle_portfolio_selector.csv")
         mock_actual_performance.side_effect = [526.805294,
                                                526.805294,
                                                732.0]

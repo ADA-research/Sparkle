@@ -88,8 +88,6 @@ if __name__ == "__main__":
             for feature_group, feature_name, value in feature_values:
                 feature_data.set_value(str(instance_path), str(extractor_path),
                                        feature_group, feature_name, float(value))
-            #for index in tmp_fdcsv.dataframe.index:
-            #    feature_data[instance_name, index] = tmp_fdcsv[instance_name, index]
             feature_data.save_csv()
         result_string = "Successful"
     except Exception as ex:

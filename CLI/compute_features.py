@@ -58,7 +58,7 @@ if __name__ == "__main__":
         )  # Do first, so other command line options can override settings from the file
 
     # Check if there are any feature extractors registered
-    if not gv.extractor_list:
+    if not any([p.is_dir() for p in gv.extractor_dir.iterdir()]):
         print("No feature extractors present! Add feature extractors to Sparkle "
               "by using the add_feature_extractor command.")
         sys.exit()

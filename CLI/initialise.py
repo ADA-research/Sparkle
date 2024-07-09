@@ -69,7 +69,7 @@ def initialise_sparkle(argv: list[str]) -> None:
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
     (gv.ablation_dir / "scenarios/").mkdir(exist_ok=True)
-    #scsv.SparkleCSV.create_empty_csv(gv.feature_data_csv_path)
+
     # Initialise the FeatureDataFrame
     FeatureDataFrame(gv.feature_data_csv_path)
 

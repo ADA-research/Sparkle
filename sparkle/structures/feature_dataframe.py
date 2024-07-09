@@ -23,8 +23,8 @@ class FeatureDataFrame:
             csv_filepath: The Path for the CSV storage. If it does not exist,
                 a new DataFrame will be initialised and stored here.
             instances: The list of instances (Columns) to be added to the DataFrame.
-            extractors: A dictionary with extractor names as key, and a list of tuples
-                ordered as [(feature_group, feature_name), ...] as value.
+            extractor_data: A dictionary with extractor names as key, and a list of
+                tuples ordered as [(feature_group, feature_name), ...] as value.
         """
         self.csv_filepath = csv_filepath
         if self.csv_filepath.exists():
@@ -63,14 +63,13 @@ class FeatureDataFrame:
                       for _ in range(len(extractor_features))]
         # Unfold to indices to lists
         for index, pair in enumerate(extractor_features):
-            feature_group, feature_name = pair
-            self.dataframe.loc[(feature_group, feature_name, extractor), :] = values[index]
+            feature_group, feature = pair
+            self.dataframe.loc[(feature_group, feature, extractor), :] = values[index]
 
     def add_instance(self: FeatureDataFrame,
                      instance: str,
                      values: list[float] = None) -> None:
         """Add an instance to the dataframe."""
-        #Sanity check? features need to be the correct size
         if values is None:
             values = FeatureDataFrame.missing_value
         self.dataframe[instance] = values
@@ -138,7 +137,7 @@ class FeatureDataFrame:
 
     def reset_dataframe(self: FeatureDataFrame) -> bool:
         """Resets all values to FeatureDataFrame.missing_value."""
-        self.dataframe[:,:] = FeatureDataFrame.missing_value
+        self.dataframe[:, :] = FeatureDataFrame.missing_value
 
     def sort(self: FeatureDataFrame) -> None:
         """Sorts the DataFrame by Multi-Index for readability."""

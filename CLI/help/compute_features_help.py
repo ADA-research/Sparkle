@@ -41,8 +41,7 @@ def compute_features(
     list_feature_computation_job = feature_dataframe.remaining_feature_computation_job()
     n_jobs = sparkle_job_help.get_num_of_total_job_from_list(
         list_feature_computation_job)
-    #print(len(list_feature_computation_job))
-    #input()
+
     # If there are no jobs, stop
     if n_jobs < 1:
         print("No feature computation jobs to run; stopping execution! To recompute "
@@ -51,8 +50,6 @@ def compute_features(
 
     print("The number of total running jobs: " + str(n_jobs))
     total_job_list = sjh.expand_total_job_from_list(list_feature_computation_job)
-    #print(total_job_list)
-    #input()
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:

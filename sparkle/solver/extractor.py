@@ -70,7 +70,7 @@ class Extractor(SparkleCallable):
         Args:
             extractor_path: Path to the executable
             instance: Path to the instance to run on
-            output_file: Target output. If 
+            output_file: Target output. If None, piped to the RunRunner job.
             runsolver_args: List of run solver args, each word a seperate item.
             run_options: The RunRunner options list of job name, sbatch options list
                 and srun options list.

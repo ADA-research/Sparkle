@@ -48,15 +48,7 @@ if __name__ == "__main__":
         print(f'Feature extractor path "{extractor_path}" does not exist!')
         sys.exit(-1)
 
-    print("Starting removing feature extractor "
-          f"{Path(extractor_path).name} ...")
-
-    if len(gv.extractor_list) > 0:
-        sfh.add_remove_platform_item(
-            extractor_path,
-            gv.extractor_list_path,
-            gv.file_storage_data_mapping[gv.extractor_list_path],
-            remove=True)
+    print(f"Starting removing feature extractor {Path(extractor_path).name} ...")
 
     for key in extractor_nicknames:
         if extractor_nicknames == extractor_path:
@@ -72,7 +64,6 @@ if __name__ == "__main__":
         feature_data = FeatureDataFrame(gv.feature_data_csv_path)
         feature_data.remove_extractor(str(extractor_path))
         feature_data.save_csv()
-        #TODO: Remove the feature extractor's feature columns from the CSV
     shutil.rmtree(extractor_path)
 
     if Path(gv.sparkle_algorithm_selector_path).exists():

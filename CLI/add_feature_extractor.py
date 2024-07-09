@@ -74,15 +74,11 @@ if __name__ == "__main__":
               not executable.")
         sys.exit(-1)
 
-    sfh.add_remove_platform_item(
-        extractor_target_path,
-        gv.extractor_list_path,
-        gv.file_storage_data_mapping[gv.extractor_list_path])
-
     # Get the extractor features groups and names from the wrapper
-    extractor_process = subprocess.run([gv.python_executable,
-                                        extractor_target_path / gv.sparkle_extractor_wrapper,
-                                        "-features"], capture_output=True)
+    extractor_process = subprocess.run(
+        [gv.python_executable,
+         extractor_target_path / gv.sparkle_extractor_wrapper,
+         "-features"], capture_output=True)
     extractor_features = ast.literal_eval(extractor_process.stdout.decode())
     feature_dataframe = FeatureDataFrame(gv.feature_data_csv_path)
     feature_dataframe.add_extractor(str(extractor_target_path), extractor_features)
