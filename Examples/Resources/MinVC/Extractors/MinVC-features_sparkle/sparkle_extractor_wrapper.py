@@ -1,62 +1,42 @@
-"""Extractor wrapper for MinVC."""
 #!/usr/bin/env python3
+"""Extractor wrapper for MinVC."""
 import argparse
 import sys
+from pathlib import Path
 from sparkle.types import FeatureGroup
 
 
 class MinVCInstanceFeature:
-    feature_names = ['num_vertex', 'num_edge', 'density', 'max_degree', 'min_degree', 'avg_degree']
+    feature_names = ["num_vertex", "num_edge", "density", "max_degree", "min_degree", "avg_degree"]
 
-    def __init__(self, relative_path, minvc_instance_file_name):
+    def __init__(self, relative_path: Path, minvc_instance_file_name: Path):
         self.relative_path = relative_path
         self.minvc_instance_file_name = minvc_instance_file_name
         self.num_vertex, self.num_edge = self._get_num_vertex_and_num_edge()
         self.density = 2*self.num_edge / (self.num_vertex*(self.num_vertex-1))
         self.map_adj_matrix = self._get_map_adj_matrix()
         self.max_degree, self.min_degree, self.avg_degree = self._get_degree_related_info()
-    
-    def save_minvc_features(self, result_feature_file_name):
-        list_feature_values = [self.num_vertex, self.num_edge, self.density, self.max_degree, self.min_degree, self.avg_degree]
 
-        fout = open(result_feature_file_name, 'w+')
-        for feature_name in MinVCInstanceFeature.feature_names:
-            fout.write(',%s' % (feature_name))
-        fout.write('\n')
-
-        fout.write('%s' % self.minvc_instance_file_name)
-        for feature_value in list_feature_values:
-            fout.write(',%s' % (str(feature_value)))
-        fout.write('\n')
-
-        fout.close()
-        return
+    def get_minvc_features(self):
+        feature_values = [self.num_vertex, self.num_edge, self.density, self.max_degree, self.min_degree, self.avg_degree]
+        return [(FeatureGroup.BASE.value, MinVCInstanceFeature.feature_names[i], value) for i, value in enumerate(feature_values)]
 
     def _get_num_vertex_and_num_edge(self):
         num_vertex = 0
         num_edge = 0
-        fin = open(self.minvc_instance_file_name, 'r')
-        while True:
-            myline = fin.readline()
-            if not myline:
-                break
+        for myline in self.minvc_instance_file_name.open().readlines():
             mylist = myline.strip().split()
-            if len(mylist) == 4 and mylist[0] == 'p' and mylist[1] == 'edge':
+            if len(mylist) == 4 and mylist[0] == "p" and mylist[1] == "edge":
                 num_vertex = int(mylist[2])
                 num_edge = int(mylist[3])
                 break
-        fin.close()
         return num_vertex, num_edge
     
     def _get_map_adj_matrix(self):
         map_adj_matrix = {}
-        fin = open(self.minvc_instance_file_name, 'r')
-        while True:
-            myline = fin.readline()
-            if not myline:
-                break
+        for myline in self.minvc_instance_file_name.open().readlines():
             mylist = myline.strip().split()
-            if len(mylist) == 3 and mylist[0] == 'e':
+            if len(mylist) == 3 and mylist[0] == "e":
                 temp_v1 = int(mylist[1])
                 temp_v2 = int(mylist[2])
                 v1 = min(temp_v1, temp_v2)
@@ -71,7 +51,6 @@ class MinVCInstanceFeature:
                     map_adj_matrix[v2].append(v1)
                 else:
                     map_adj_matrix[v2] = [v1, ]
-        fin.close()
         return map_adj_matrix
     
     def _get_degree_related_info(self):
@@ -87,9 +66,9 @@ class MinVCInstanceFeature:
 
 parser = argparse.ArgumentParser(description="Process some integers.")
 parser.add_argument("-features",  action="store_true", help="Only print features and their groups as a list of tuples.")
-parser.add_argument('-extractor_dir', type=str, help='Path to the extractor directory')
-parser.add_argument('-instance_file', type=str, help='Path to the instance file')
-parser.add_argument('-output_file', type=str, help='Path to the output file')
+parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
+parser.add_argument("-instance_file", type=str, help="Path to the instance file")
+parser.add_argument("-output_file", type=str, help="Path to the output file")
 args = parser.parse_args()
 
 if args.features:
@@ -97,10 +76,14 @@ if args.features:
     print([(FeatureGroup.BASE.value, name) for name in MinVCInstanceFeature.feature_names])
     sys.exit()
 
+relative_path = Path(args.extractor_dir)
+minvc_instance_file_name = Path(args.instance_file)
 
-relative_path = args.extractor_dir
-minvc_instance_file_name = args.instance_file
-result_feature_file_name = args.output_file
+minvc = MinVCInstanceFeature(relative_path, minvc_instance_file_name)
+features = minvc.get_minvc_features()
 
-minvc_instance_feature = MinVCInstanceFeature(relative_path, minvc_instance_file_name)
-minvc_instance_feature.save_minvc_features(result_feature_file_name)
+if args.output_file is not None:
+    output_file = Path(args.output_file)
+    output_file.open("w+").write(str(features))
+else:
+    print(features)
