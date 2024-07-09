@@ -39,17 +39,16 @@ def parser_function() -> argparse.ArgumentParser:
 def judge_exist_remaining_jobs(feature_data_csv_path: str,
                                performance_data_csv_path: str) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
-    feature_data_csv = FeatureDataFrame(feature_data_csv_path)
+    feature_data = FeatureDataFrame(feature_data_csv_path)
     feature_computation_jobs =\
-        feature_data_csv.remaining_feature_computation_job()
-    total_job_num = sjh.get_num_of_total_job_from_list(feature_computation_jobs)
+        feature_data.remaining_feature_computation_job()
 
-    if total_job_num > 0:
+    if len(feature_computation_jobs) > 0:
         return True
 
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+    performance_data = PerformanceDataFrame(performance_data_csv_path)
     performance_computation_jobs =\
-        performance_data_csv.get_list_remaining_performance_computation_job()
+        performance_data.get_list_remaining_performance_computation_job()
     total_job_num = sjh.get_num_of_total_job_from_list(performance_computation_jobs)
 
     return total_job_num > 0

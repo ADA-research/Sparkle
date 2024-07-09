@@ -74,20 +74,20 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     if not Path("Tmp").exists():
         Path("Tmp").mkdir()
 
-    feature_data_csv = FeatureDataFrame(feature_data_csv_path)
-    bool_exists_missing_value = feature_data_csv.has_missing_value()
+    feature_data = FeatureDataFrame(feature_data_csv_path)
+    bool_exists_missing_value = feature_data.has_missing_value()
 
     if bool_exists_missing_value:
         print("****** WARNING: There are missing values in the feature data, and all "
               "missing values will be imputed as the mean value of all other non-missing"
               " values! ******")
         print("Imputing all missing values starts ...")
-        feature_data_csv.impute_missing_values()
+        feature_data.impute_missing_values()
         print("Imputing all missing values done!")
         impute_feature_data_csv_path = Path(
             f"{feature_data_csv_path}_{tg.get_time_pid_random_string()}"
             "_impute.csv")
-        feature_data_csv.save_csv(impute_feature_data_csv_path)
+        feature_data.save_csv(impute_feature_data_csv_path)
         feature_data_csv_path = impute_feature_data_csv_path
 
     log_file = selector_path.parent.name + "_autofolio.out"

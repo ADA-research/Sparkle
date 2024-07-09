@@ -92,6 +92,10 @@ class FeatureDataFrame:
         """Remove an instance from the dataframe."""
         self.dataframe.drop(instance, axis=1, inplace=True)
 
+    def get_extractors(self: FeatureDataFrame) -> list[str]:
+        """Returns all unique extractors in the DataFrame."""
+        return self.dataframe.index.get_level_values("Extractor").unique().to_list()
+
     def get_nan_locs(self: FeatureDataFrame) -> tuple[list[tuple[str]], list[str]]:
         """Retrieves the index and column combinations that have NaN values."""
         subdataframe = self.dataframe[self.dataframe.isnull()]
@@ -99,7 +103,7 @@ class FeatureDataFrame:
 
     def get_num_features(self: FeatureDataFrame, extractor: str) -> int:
         """Returns the number of features for an extractor."""
-
+        #TODO
         return
 
     def set_value(self: FeatureDataFrame,
@@ -113,22 +117,23 @@ class FeatureDataFrame:
 
     def remaining_feature_computation_job(self: FeatureDataFrame)\
             -> list[list[str, str]]:
-        """Return a list of needed feature computations per instance and solver.
+        """Return a needed feature computations per instance/extractor combination.
 
         Returns:
             A list of feature computation jobs. Each job is a list containing a str row
             name and a str column name.
         """
-        indices, columns = self.get_nan_locs()
         remaining_jobs = {}
+        for instance in self.dataframe.columns:
+            for extractor in self.get_extractors():
+                subset = self.dataframe.xs(extractor, level=2, drop_level=False)
+                if subset.loc[:, instance].isnull().all():
+                    if instance not in remaining_jobs:
+                        remaining_jobs[instance] = [extractor]
+                    else:
+                        remaining_jobs[instance].append(extractor)
         # For now we just return the feature extractors and instance combinations
         # With [[instance_name, extractor1, extractor2, ...]]
-        for i, instance in enumerate(columns):
-            _, _, extractor = indices[i]
-            if instance not in remaining_jobs:
-                remaining_jobs[instance] = [extractor]
-            else:
-                remaining_jobs[instance].append(extractor)
         return [[key, remaining_jobs[key]] for key in remaining_jobs.keys()]
 
     def get_instance(self: FeatureDataFrame, instance: str) -> list:
