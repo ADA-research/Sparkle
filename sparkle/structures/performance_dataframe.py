@@ -348,7 +348,7 @@ class PerformanceDataFrame():
             for solver in self.dataframe.columns:
                 if null_df.at[row, solver]:
                     if instance not in remaining_jobs:
-                        remaining_jobs[instance] = set(solver)
+                        remaining_jobs[instance] = set([solver])
                     else:
                         remaining_jobs[instance].add(solver)
         return remaining_jobs
