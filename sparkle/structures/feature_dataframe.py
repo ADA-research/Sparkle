@@ -107,13 +107,12 @@ class FeatureDataFrame:
                     return True
         return False
 
-    def remaining_jobs(self: FeatureDataFrame)\
-            -> dict[str: list[str]]:
-        """Return a needed feature computations per instance/extractor combination.
+    def remaining_jobs(self: FeatureDataFrame) -> dict[str, list[str]]:
+        """Determines needed feature computations per instance/extractor combination.
 
         Returns:
-            A dictionary with instances as key, and a list of extractors as value that
-            still need to compute their vectors for the instance.
+            dict: With instances as key, and a list of extractors as value that
+                still need to compute their vectors for the instance.
         """
         remaining_jobs = {}
         for instance in self.dataframe.columns:

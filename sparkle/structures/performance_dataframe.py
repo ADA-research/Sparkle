@@ -323,8 +323,8 @@ class PerformanceDataFrame():
         """Returns True if there are any missing values in the dataframe."""
         return self.dataframe.isnull().any().any()
 
-    def remaining_jobs(self: PerformanceDataFrame) -> dict[str: list[str]]:
-        """Return a dictionary of empty values per instance and solver combination."""
+    def remaining_jobs(self: PerformanceDataFrame) -> dict[str, list[str]]:
+        """Return a dictionary for empty values per instance and solver combination."""
         remaining_jobs = {}
         null_df = self.dataframe.isnull()
         for row in self.dataframe.index:
