@@ -319,22 +319,6 @@ class PerformanceDataFrame():
             df.index = df.index.droplevel(["Run"])
         return df.index.tolist()
 
-    def get_list_recompute_performance_computation_job(self: PerformanceDataFrame)\
-            -> list[list[list]]:
-        """Return column-row combinations in the dataframe as [[row, all_columns]]."""
-        list_recompute_performance_computation_job = []
-        list_column_name = self.dataframe.columns.to_list()
-
-        for row_name in self.dataframe.index:
-            if not self.multi_objective and self.n_runs == 1:
-                # Simplification for unused dimensions
-                list_item = [row_name[1], list_column_name]
-            else:
-                list_item = [row_name, list_column_name]
-            list_recompute_performance_computation_job.append(list_item)
-
-        return list_recompute_performance_computation_job
-
     def has_missing_performance(self: PerformanceDataFrame) -> bool:
         """Returns True if there are any missing values in the dataframe."""
         return self.dataframe.isnull().any().any()

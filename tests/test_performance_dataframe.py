@@ -54,16 +54,6 @@ class TestPerformanceData(TestCase):
         num_instances = 5
         assert self.pd.num_instances == num_instances
 
-    def test_remaining_jobs_recompute(self: TestPerformanceData)\
-            -> None:
-        """Test the list creator for which algorithm should be computed per instance."""
-        algs = ["AlgorithmA", "AlgorithmB", "AlgorithmC", "AlgorithmD", "AlgorithmE"]
-        list_recompute =\
-            [["Instance1", algs], ["Instance2", algs], ["Instance3", algs],
-             ["Instance4", algs], ["Instance5", algs]]
-        result = self.pd.get_list_recompute_performance_computation_job()
-        assert result == list_recompute
-
     def test_get_list_remaining_performance_computation_job(self: TestPerformanceData)\
             -> None:
         """Test get remaining performance computation job getter."""
