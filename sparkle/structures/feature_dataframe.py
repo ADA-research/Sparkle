@@ -163,10 +163,8 @@ class FeatureDataFrame:
     def to_autofolio(self: FeatureDataFrame) -> Path:
         """Port the data to a format acceptable for AutoFolio."""
         autofolio_df = self.dataframe.copy()
-        # Reduce Multi-Index by unifying into one
-        autofolio_df.index = autofolio_df.index.map("_".join)
-        # Autofolio expects features as columns, rows as instances
-        autofolio_df = autofolio_df.T
+        autofolio_df.index = autofolio_df.index.map("_".join)  # Reduce Multi-Index
+        autofolio_df = autofolio_df.T  # Autofolio has feature columns and instance rows
         path = self.csv_filepath.parent / f"autofolio_{self.csv_filepath.name}"
         autofolio_df.to_csv(path)
         return path
