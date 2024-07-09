@@ -27,12 +27,6 @@ class FeatureDataFrame:
                 ordered as [(feature_group, feature_name), ...] as value.
         """
         self.csv_filepath = csv_filepath
-        #Create a multi-index dataframe
-        #Columns are the Instances
-        #Indices are (FeatureName, Extractor)
-        #Because every instance wants every combination of Extractor/featurename to have a result, but it doesn't have to have one
-        #But Extractors may share features, therefore, first group by FeatureName so that it could then have multiple results for the same feature/instance combination by Extractor key.
-        # Each feature belongs to a feature group which is for example recognised by autofolio
         if self.csv_filepath.exists():
             # Read from file
             self.dataframe = pd.read_csv(self.csv_filepath,
@@ -64,7 +58,6 @@ class FeatureDataFrame:
             values: Initial values of the Extractor per instance in the dataframe.
                 Defaults to FeatureDataFrame.missing_value.
         """
-        #Format sanity checks? value size
         if values is None:
             values = [FeatureDataFrame.missing_value
                       for _ in range(len(extractor_features))]
@@ -95,16 +88,6 @@ class FeatureDataFrame:
     def get_extractors(self: FeatureDataFrame) -> list[str]:
         """Returns all unique extractors in the DataFrame."""
         return self.dataframe.index.get_level_values("Extractor").unique().to_list()
-
-    def get_nan_locs(self: FeatureDataFrame) -> tuple[list[tuple[str]], list[str]]:
-        """Retrieves the index and column combinations that have NaN values."""
-        subdataframe = self.dataframe[self.dataframe.isnull()]
-        return subdataframe.index.to_list(), subdataframe.columns.to_list()
-
-    def get_num_features(self: FeatureDataFrame, extractor: str) -> int:
-        """Returns the number of features for an extractor."""
-        #TODO
-        return
 
     def set_value(self: FeatureDataFrame,
                   instance: str,
