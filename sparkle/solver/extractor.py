@@ -2,8 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import ast
-import runrunner as rrr
-from runrunner import Runner
+import subprocess
 from sparkle.types import SparkleCallable
 from sparkle.structures import FeatureDataFrame
 from tools.runsolver_parsing import get_status
@@ -31,7 +30,7 @@ class Extractor(SparkleCallable):
         self.output_dimension = 1  # TODO: Set to the output dim of the extractor
 
     def build_cmd(self: Extractor,
-                  instance: Path,
+                  instance: Path | list[Path],
                   output_file: Path,
                   runsolver_args: list[str | Path] = None,
                   ) -> list[str]:
@@ -47,6 +46,8 @@ class Extractor(SparkleCallable):
             The command seperated per item in the list.
         """
         cmd_list_extractor = []
+        if not isinstance(instance, list):
+            instance = [instance]
         if runsolver_args is not None:
             # Ensure stringification of runsolver configuration is done correctly
             cmd_list_extractor += [str(self.runsolver_exec.absolute())]
@@ -54,17 +55,15 @@ class Extractor(SparkleCallable):
                                    in runsolver_args]
         cmd_list_extractor += [f"{self.directory / Extractor.wrapper}",
                                "-extractor_dir", f"{self.directory}/",
-                               "-instance_file", str(instance)]
+                               "-instance_file"] + [str(file) for file in instance]
         if output_file is not None:
             cmd_list_extractor += ["-output_file", str(output_file)]
         return cmd_list_extractor
 
     def run(self: Extractor,
-            instance: Path,
+            instance: Path | list[Path],
             output_file: Path = None,
-            runsolver_args: list[str | Path] = None,
-            run_options: list[any] = None,
-            run_on: Runner = Runner.SLURM) -> rrr.LocalRun | rrr.SlurmRun:
+            runsolver_args: list[str | Path] = None) -> list | None:
         """Runs an extractor job with Runrunner.
 
         Args:
@@ -72,22 +71,19 @@ class Extractor(SparkleCallable):
             instance: Path to the instance to run on
             output_file: Target output. If None, piped to the RunRunner job.
             runsolver_args: List of run solver args, each word a seperate item.
-            run_options: The RunRunner options list of job name, sbatch options list
-                and srun options list.
-            run_on: Platform to run on
 
         Returns:
-            Local- or SlurmRun.
+            The features or None if an output file is used, or features can not be found.
         """
         cmd_extractor = self.build_cmd(instance, output_file, runsolver_args)
-        return rrr.add_to_queue(
-            runner=run_on,
-            cmd=" ".join(cmd_extractor),
-            name=run_options[0],
-            base_dir=self.raw_output_directory,
-            sbatch_options=run_options[1],
-            srun_options=run_options[2]
-        )
+        extractor = subprocess.run(cmd_extractor, capture_output=True)
+        if output_file is None:
+            try:
+                features = ast.literal_eval(extractor.stdout.decode())
+                return features
+            except Exception:
+                return None
+        return None
 
     def get_feature_vector(self: Extractor,
                            result: Path,
@@ -102,7 +98,6 @@ class Extractor(SparkleCallable):
             A list of features.
         """
         if result.exists() and get_status(runsolver_values, None) != "TIMEOUT":
-            print(result.read_text())
             feature_values = ast.literal_eval(result.read_text())
             return [str(value) for _, _, value in feature_values]
         return [FeatureDataFrame.missing_value] * self.output_dimension

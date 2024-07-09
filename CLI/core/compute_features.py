@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Compute features for an instance, only for internal calls from Sparkle."""
-
-import subprocess
-import time
 import argparse
-import ast
 from pathlib import Path, PurePath
 from filelock import FileLock
 
@@ -14,6 +10,8 @@ import tools.general as tg
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet
+from sparkle.solver import Extractor
+
 
 if __name__ == "__main__":
     # Initialise settings
@@ -44,7 +42,7 @@ if __name__ == "__main__":
 
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
-    cutoff_time_each_extractor_run = gv.settings.get_general_extractor_cutoff_time()
+    cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
 
     key_str = (f"{extractor_path.name}_"
                f"{instance_name}_"
@@ -56,57 +54,28 @@ if __name__ == "__main__":
         instance_list = [str(filepath) for filepath in instance_path]
     else:
         instance_list = [instance_path]
-    cmd = [gv.runsolver_path,
-           "--cpu-limit", str(cutoff_time_each_extractor_run),
-           "-w", runsolver_watch_data_path,
-           extractor_path / gv.sparkle_extractor_wrapper,
-           "-extractor_dir", extractor_path,
-           "-instance_file"] + instance_list
-    start_time = time.time()
-
-    task_run_status_path = f"Tmp/SBATCH_Extractor_Jobs/{key_str}.statusinfo"
-    status_info_str = (
-        "Status: Running\nExtractor: "
-        f"{extractor_path.name}\n"
-        f"Instance: {instance_name}\n")
-    status_info_str += (
-        "Start Time: "
-        f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}\n")
-    status_info_str += "Start Timestamp: " + str(start_time) + "\n"
-    cutoff_str = f"Cutoff Time: {cutoff_time_each_extractor_run} second(s)\n"
-    status_info_str += cutoff_str
-    cmd_str = " ".join([str(c) for c in cmd])
-    extractor_run = subprocess.run(cmd, capture_output=True)
-    end_time = time.time()
+    extractor = Extractor(extractor_path, gv.runsolver_path, gv.sparkle_tmp_path)
+    
+    features = extractor.run(instance_list,
+                             runsolver_args=["--cpu-limit", str(cutoff_extractor),
+                                             "-w", runsolver_watch_data_path])
 
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
-    try:
-        feature_values = ast.literal_eval(extractor_run.stdout.decode())
+    if features is not None:
         with lock.acquire(timeout=60):
             feature_data = FeatureDataFrame(feature_data_csv_path)
-            for feature_group, feature_name, value in feature_values:
+            for feature_group, feature_name, value in features:
                 feature_data.set_value(str(instance_path), str(extractor_path),
                                        feature_group, feature_name, float(value))
             feature_data.save_csv()
         result_string = "Successful"
-    except Exception as ex:
-        print(f"EXCEPTION during retrieving extractor results: {ex}")
-        print(f"****** WARNING: Feature vector computation on instance {instance_path}"
+    else:
+        print("EXCEPTION during retrieving extractor results.\n"
+              f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
         result_string = "Failed"
     lock.release()
     result_path.unlink(missing_ok=True)
 
-    description_str = f"[Extractor: {extractor_path.name}, Instance: {instance_name}]"
-    start_time_str = (
-        "[Start Time: "
-        f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}]")
-    end_time_str = (
-        f"[End Time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}]")
-    run_time_str = f"[Actual Run Time: {end_time - start_time} second(s)]"
-    result_string_str = f"[Result String: {result_string}]"
-
-    log_str = (f"{description_str}, {start_time_str}, {end_time_str}, {run_time_str}, "
-               f"{result_string_str}")
-    sfh.rmfiles([task_run_status_path, runsolver_watch_data_path])
+    sfh.rmfiles(runsolver_watch_data_path)
