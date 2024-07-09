@@ -15,22 +15,9 @@ class CCAGInstanceFeature:
         self.num_way, self.num_option, self.average_option_value = self._get_model_features()
         self.num_constraint, self.average_constraint_length = self._get_constraint_features()
 
-    def save_ccag_features(self, result_feature_file_name):
-        
-        list_feature_values = [self.num_way, self.num_option, self.average_option_value, self.num_constraint, self.average_constraint_length]
-
-        fout = open(result_feature_file_name, "w+")
-        for feature_name in CCAGInstanceFeature.feature_names:
-            fout.write(",%s"% (feature_name))
-        fout.write("\n")
-
-        fout.write("%s %s"% (self.ccag_model_file_path, self.ccag_constraint_file_path))
-        for feature_value in list_feature_values:
-            fout.write(",%s"% (str(feature_value)))
-        fout.write("\n")
-
-        fout.close()
-        return
+    def get_ccag_features(self):
+        feature_values = [self.num_way, self.num_option, self.average_option_value, self.num_constraint, self.average_constraint_length]
+        return [(FeatureGroup.BASE.value, CCAGInstanceFeature.feature_names[i], str(value)) for i, value in enumerate(feature_values)]
 
     def _get_model_features(self):
         num_way = -1
@@ -98,6 +85,10 @@ if args.features:
 
 ccag_model_file_path = Path(args.instance_file[0])
 ccag_constraint_file_path = Path(args.instance_file[1])
-
-ccag_instance_feature = CCAGInstanceFeature(Path(args.extractor_dir), ccag_model_file_path, ccag_constraint_file_path)
-ccag_instance_feature.save_ccag_features(args.output_file)
+ccag = CCAGInstanceFeature(Path(args.extractor_dir), ccag_model_file_path, ccag_constraint_file_path)
+features = ccag.get_ccag_features()
+if args.output_file is not None:
+    output_file = Path(args.output_file)
+    output_file.open("w+").write(str(features))
+else:
+    print(features)

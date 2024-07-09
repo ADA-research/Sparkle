@@ -26,11 +26,11 @@ if __name__ == "__main__":
 
     # Process command line arguments
     instance_path = Path(args.instance)
-    instance_name = instance_path.name
+    instance_name = instance_path
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
         instance_set = InstanceSet(instance_path.parent)
-        instance_path = instance_set.get_path_by_name(instance_name)
+        instance_path = instance_set.get_path_by_name(Path(instance_name).name)
 
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
@@ -46,6 +46,7 @@ if __name__ == "__main__":
     # We are not interested in the runsolver log, but create the file to filter it 
     # from the extractor call output
     runsolver_watch_path = gv.sparkle_tmp_path / f"{instance_path}_{extractor_path}.wlog"
+    
     features = extractor.run(instance_list,
                              runsolver_args=["--cpu-limit", cutoff_extractor,
                                              "-w", runsolver_watch_path])
@@ -56,7 +57,7 @@ if __name__ == "__main__":
         with lock.acquire(timeout=60):
             feature_data = FeatureDataFrame(feature_data_csv_path)
             for feature_group, feature_name, value in features:
-                feature_data.set_value(str(instance_path), str(extractor_path),
+                feature_data.set_value(str(instance_name), str(extractor_path),
                                        feature_group, feature_name, float(value))
             feature_data.save_csv()
         lock.release()
