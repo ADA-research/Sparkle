@@ -39,7 +39,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
 
     feature_data_csv = FeatureDataFrame(feature_data_csv_path)
     jobs = feature_data_csv.remaining_jobs()
-    total_job_num = sum([len(jobs[instance] for instance in jobs.keys())])
+    total_job_num = sum([len(jobs[instance]) for instance in jobs.keys()])
 
     print(f"\nCurrently Sparkle has {total_job_num} remaining feature computation "
           "jobs that need to be performed before creating an algorithm selector"
@@ -69,7 +69,7 @@ def print_list_remaining_performance_computation_job(performance_data_csv_path: 
         return
     performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
     jobs = performance_data_csv.remaining_jobs()
-    total_job_num = sum([len(jobs[instance] for instance in jobs.keys())])
+    total_job_num = sum([len(jobs[instance]) for instance in jobs.keys()])
 
     print(f"\nCurrently Sparkle has {total_job_num} remaining performance computation"
           " jobs that need to be performed before creating an algorithm selector"
