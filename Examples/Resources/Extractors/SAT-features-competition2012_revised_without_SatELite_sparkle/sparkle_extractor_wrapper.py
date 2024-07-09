@@ -113,6 +113,6 @@ if output_file is not None:
     with open(output_file, "w") as out_file:
             for line in processed_features:
                 group, feature, value = line
-                out_file.write(f"{group},{feature},{value}")
+                out_file.write(f"{group},{feature},{value}\n")
 else:
      print(processed_features)
