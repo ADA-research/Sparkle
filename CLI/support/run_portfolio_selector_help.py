@@ -87,7 +87,7 @@ def call_solver_solve_instance_within_cutoff(solver: Solver,
 
 # Only called in portfolio_core and run_sparkle_portfolio_selector
 def call_sparkle_portfolio_selector_solve_instance(
-        instance_path: str,
+        instance_path: Path,
         performance_data_csv_path: str = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance.
 
@@ -105,9 +105,8 @@ def call_sparkle_portfolio_selector_solve_instance(
         instance_file_list.append(Path(instance).name)
 
     instance_files_str = " ".join(instance_file_list)
-    instance_files_str_ = "_".join(instance_file_list)
 
-    print("Start running Sparkle portfolio selector on solving instance "
+    print("Running Sparkle portfolio selector on solving instance "
           f"{instance_files_str} ...")
 
     cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
@@ -121,18 +120,10 @@ def call_sparkle_portfolio_selector_solve_instance(
         extractor = Extractor(Path(extractor_path),
                               gv.runsolver_path,
                               gv.sparkle_tmp_path)
-        result_path = Path(f"{extractor.name}_{instance_files_str_}_"
-                           f"{tg.get_time_pid_random_string()}.rawres")
-        
-        runsolver_watch_data_path = result_path.with_suffix(".log")
-        runsolver_value_data_path = result_path.with_suffix(".val")
         features = extractor.run(instance,
-                                 runsolver_args=["--cpu-limit", str(cutoff_extractor),
-                                                 "-w", runsolver_watch_data_path,
-                                                 "-v", runsolver_value_data_path])
+                                 runsolver_args=["--cpu-limit", str(cutoff_extractor)])
         for _, _, value in features:
             feature_vector.append(value)
-        sfh.rmfiles([result_path, runsolver_watch_data_path, runsolver_value_data_path])
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = Path(

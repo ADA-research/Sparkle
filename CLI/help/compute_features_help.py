@@ -43,8 +43,12 @@ def compute_features(
         print("No feature computation jobs to run; stopping execution! To recompute "
               "feature values use the --recompute flag.")
         sys.exit()
-    cmd_list = [f"CLI/core/compute_features.py --instance {inst_path} "
-                f"--extractor {ex_path} --feature-csv {feature_data_csv_path}"
+    cutoff = gv.settings.get_general_extractor_cutoff_time()
+    cmd_list = ["CLI/core/compute_features.py "
+                f"--instance {inst_path} "
+                f"--extractor {ex_path} "
+                f"--feature-csv {feature_data_csv_path}"
+                f"--cutoff {cutoff}"
                 for inst_path in jobs.keys() for ex_path in jobs[inst_path]]
 
     print(f"The number of total running jobs: {len(cmd_list)}")
