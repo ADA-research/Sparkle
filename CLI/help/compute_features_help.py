@@ -47,7 +47,7 @@ def compute_features(
     cmd_list = ["CLI/core/compute_features.py "
                 f"--instance {inst_path} "
                 f"--extractor {ex_path} "
-                f"--feature-csv {feature_data_csv_path}"
+                f"--feature-csv {feature_data_csv_path} "
                 f"--cutoff {cutoff}"
                 for inst_path in jobs.keys() for ex_path in jobs[inst_path]]
 

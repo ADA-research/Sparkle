@@ -27,12 +27,10 @@ if __name__ == "__main__":
     # Process command line arguments
     instance_path = Path(args.instance)
     instance_name = instance_path.name
-    has_instance_set = False
     if not instance_path.exists():
         # If its an instance name (Multi-file instance), retrieve path list
         instance_set = InstanceSet(instance_path.parent)
         instance_path = instance_set.get_path_by_name(instance_name)
-        has_instance_set = True
 
     extractor_path = Path(args.extractor)
     feature_data_csv_path = Path(args.feature_csv)
@@ -45,8 +43,12 @@ if __name__ == "__main__":
         instance_list = [instance_path]
 
     extractor = Extractor(extractor_path, gv.runsolver_path, gv.sparkle_tmp_path)
+    # We are not interested in the runsolver log, but create the file to filter it 
+    # from the extractor call output
+    runsolver_watch_path = gv.sparkle_tmp_path / f"{instance_path}_{extractor_path}.wlog"
     features = extractor.run(instance_list,
-                             runsolver_args=["--cpu-limit", cutoff_extractor])
+                             runsolver_args=["--cpu-limit", cutoff_extractor,
+                                             "-w", runsolver_watch_path])
 
     # Now that we have our result, we write it to the FeatureDataCSV with a FileLock
     lock = FileLock(f"{feature_data_csv_path}.lock")
@@ -62,3 +64,4 @@ if __name__ == "__main__":
         print("EXCEPTION during retrieving extractor results.\n"
               f"****** WARNING: Feature vector computation on instance {instance_path}"
               " failed! ******")
+    runsolver_watch_path.unlink(missing_ok=True)
