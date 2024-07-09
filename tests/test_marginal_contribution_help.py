@@ -140,10 +140,10 @@ class TestMarginalContribution(TestCase):
                                                            ) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
         # Test does not work on Mac
-        perf_path = "CLI/test/test_files/Performance_Data/"\
-                    "test_construct_sparkle_portfolio_selector.csv"
-        feature_csv_path = "CLI/test/test_files/Feature_Data/"\
-                           "test_construct_sparkle_portfolio_selector.csv"
+        performance_csv_path = Path("CLI/test/test_files/Performance_Data/"\
+                                    "test_construct_sparkle_portfolio_selector.csv")
+        feature_csv_path = Path(
+            "CLI/test/test_files/Feature_Data/test_construct_sparkle_portfolio_selector.csv")
         mock_actual_performance.side_effect = [526.805294,
                                                526.805294,
                                                732.0]
@@ -154,7 +154,7 @@ class TestMarginalContribution(TestCase):
             aggregation_function=sum,
             capvalue_list=None,
             minimise=True,
-            performance_data_csv_path=perf_path,
+            performance_data_csv_path=performance_csv_path,
             feature_data_csv_path=feature_csv_path,
             flag_recompute=True,
             selector_timeout=60
