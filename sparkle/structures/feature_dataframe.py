@@ -145,7 +145,7 @@ class FeatureDataFrame:
 
     def reset_dataframe(self: FeatureDataFrame) -> bool:
         """Resets all values to FeatureDataFrame.missing_value."""
-        self.dataframe[:, :] = FeatureDataFrame.missing_value
+        self.dataframe.loc[:, :] = FeatureDataFrame.missing_value
 
     def sort(self: FeatureDataFrame) -> None:
         """Sorts the DataFrame by Multi-Index for readability."""
