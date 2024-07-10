@@ -14,7 +14,7 @@ from tabulate import tabulate
 from CLI.help.command_help import CommandName
 from CLI.help.command_help import COMMAND_DEPENDENCIES
 import global_variables as gv
-from sparkle.platform.cli_types import VerbosityLevel
+from sparkle.platform.cli_types import VerbosityLevel, TEXT
 
 
 def get_num_of_total_job_from_list(list_jobs: list) -> int:
@@ -185,12 +185,16 @@ def wait_for_all_jobs() -> None:
                             or run.status == Status.RUNNING]
             sorted_jobs = sorted(jobs, key=lambda job: priority[job.status])
             for job in sorted_jobs:
+                # Count number of jobs that have finished
                 finished_jobs_count = sum(1 for status in job.all_status
                                           if status == Status.COMPLETED)
+                # Format job.status
+                status_text = TEXT.format([TEXT.BOLD], job.status) if job.status == Status.RUNNING else (
+                    TEXT.format([TEXT.ITALIC], job.status) if job.status == Status.COMPLETED else job.status)
                 information.append(
                     [job.run_id,
                      job.name,
-                     job.status,
+                     status_text,
                      "None" if len(job.dependencies) == 0
                         else ", ".join(job.dependencies),
                      f"{finished_jobs_count}/{len(job.all_status)}"])
