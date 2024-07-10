@@ -9,7 +9,7 @@ from pathlib import Path
 from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
 from sparkle.structures import FeatureDataFrame
-from CLI.help import compute_features_help as scf
+from CLI.compute_features import compute_features
 import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        scf.compute_features(gv.feature_data_csv_path, False)
+        compute_features(gv.feature_data_csv_path, False)
 
     # Write used settings to file
     gv.settings.write_used_settings()

@@ -65,14 +65,16 @@ class Extractor(SparkleCallable):
 
     def build_cmd(self: Extractor,
                   instance: Path | list[Path],
-                  output_file: Path,
+                  feature_group: str = None,
+                  output_file: Path = None,
                   runsolver_args: list[str | Path] = None,
                   ) -> list[str]:
         """Builds a command line string seperated by space.
 
         Args:
             instance: The instance to run on
-            outputfile: Target output file
+            feature_group: The optional feature group to run the extractor for.
+            outputfile: Optional file to write the output to.
             runsolver_args: The arguments for runsolver. If not present,
                 will run the extractor without runsolver.
 
@@ -90,6 +92,8 @@ class Extractor(SparkleCallable):
         cmd_list_extractor += [f"{self.directory / Extractor.wrapper}",
                                "-extractor_dir", f"{self.directory}/",
                                "-instance_file"] + [str(file) for file in instance]
+        if feature_group is not None:
+            cmd_list_extractor += ["-feature_group", feature_group]
         if output_file is not None:
             cmd_list_extractor += ["-output_file", str(output_file)]
         return cmd_list_extractor
@@ -112,7 +116,10 @@ class Extractor(SparkleCallable):
         Returns:
             The features or None if an output file is used, or features can not be found.
         """
-        cmd_extractor = self.build_cmd(instance, output_file, runsolver_args)
+        if feature_group is not None and not self.groupwise_computation:
+            # This extractor cannot handle groups, compute all features
+            feature_group = None
+        cmd_extractor = self.build_cmd(instance, feature_group, output_file, runsolver_args)
         extractor = subprocess.run(cmd_extractor, capture_output=True)
         if output_file is None:
             try:
@@ -125,14 +132,14 @@ class Extractor(SparkleCallable):
     def get_feature_vector(self: Extractor,
                            result: Path,
                            runsolver_values: Path = None) -> list[str]:
-        """Extracts feature vector from output, vector of missing values upon failure.
+        """Extracts feature vector from an output file.
 
         Args:
             result: The raw output of the extractor
             runsolver_values: The output of runsolver.
 
         Returns:
-            A list of features.
+            A list of features. Vector of missing values upon failure.
         """
         if result.exists() and get_status(runsolver_values, None) != "TIMEOUT":
             feature_values = ast.literal_eval(result.read_text())

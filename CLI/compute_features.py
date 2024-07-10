@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """Sparkle command to compute features for instances."""
-
 import sys
 import argparse
+from pathlib import Path
 
+import runrunner as rrr
+from runrunner.base import Runner, Status
+
+from sparkle.solver import Extractor
 import global_variables as gv
-from CLI.help import compute_features_help as scf
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac
-from CLI.help import command_help as ch
+from CLI.help.command_help import COMMAND_DEPENDENCIES, CommandName
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
+from sparkle.structures import FeatureDataFrame
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -28,6 +32,86 @@ def parser_function() -> argparse.ArgumentParser:
                         **apc.RunOnArgument.kwargs)
 
     return parser
+
+
+def compute_features(
+        feature_data_csv_path: Path,
+        recompute: bool,
+        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+    """Compute features for all instance and feature extractor combinations.
+
+    A RunRunner run is submitted for the computation of the features.
+    The results are then stored in the csv file specified by feature_data_csv_path.
+
+    Args:
+        feature_data_csv_path: Create or load feature data CSV file in the path
+            specified by this parameter.
+        recompute: Specifies if features should be recomputed.
+        run_on: Runner
+            On which computer or cluster environment to run the solvers.
+            Available: Runner.LOCAL, Runner.SLURM. Default: Runner.SLURM
+
+    Returns:
+        The Slurm job or Local job
+    """
+    feature_dataframe = FeatureDataFrame(feature_data_csv_path)
+    if recompute:
+        feature_dataframe.reset_dataframe()
+    jobs = feature_dataframe.remaining_jobs()
+
+    # If there are no jobs, stop
+    if jobs == {}:
+        print("No feature computation jobs to run; stopping execution! To recompute "
+              "feature values use the --recompute flag.")
+        sys.exit()
+    cutoff = gv.settings.get_general_extractor_cutoff_time()
+    cmd_list = []
+    for inst_path in jobs.keys():
+        for ex_path in jobs[inst_path]:
+            cmd = ["CLI/core/compute_features.py "
+                   f"--instance {inst_path} "
+                   f"--extractor {ex_path} "
+                   f"--feature-csv {feature_data_csv_path} "
+                   f"--cutoff {cutoff}"]
+            extractor = Extractor(ex_path)
+            if extractor.groupwise_computation:
+                # Extractor job can be parallelised
+                cmd_list.extend([cmd + ["-feature_group", group]
+                                 for group in extractor.feature_groups])
+            else:
+                cmd_list.extend(cmd)
+
+    print(f"The number of total running jobs: {len(cmd_list)}")
+    if run_on == Runner.LOCAL:
+        print("Running the solvers locally")
+    elif run_on == Runner.SLURM:
+        print("Running the solvers through Slurm")
+
+    # Generate the sbatch script
+    parallel_jobs = min(len(cmd_list), gv.settings.get_number_of_jobs_in_parallel())
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    srun_options = ["-N1", "-n1"] + sbatch_options
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=cmd_list,
+        name=CommandName.COMPUTE_FEATURES,
+        parallel_jobs=parallel_jobs,
+        base_dir=gv.sparkle_tmp_path,
+        sbatch_options=sbatch_options,
+        srun_options=srun_options)
+
+    if run_on == Runner.LOCAL:
+        print("Waiting for the local calculations to finish.")
+        run.wait()
+        for job in run.jobs:
+            jobs_done = sum(j.status == Status.COMPLETED for j in run.jobs)
+            print(f"Executing Progress: {jobs_done} out of {len(run.jobs)}")
+            if jobs_done == len(run.jobs):
+                break
+            job.wait()
+        print("Computing features done!")
+
+    return run
 
 
 if __name__ == "__main__":
@@ -50,7 +134,7 @@ if __name__ == "__main__":
     run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,
-                         ch.COMMAND_DEPENDENCIES[ch.CommandName.COMPUTE_FEATURES])
+                         COMMAND_DEPENDENCIES[CommandName.COMPUTE_FEATURES])
 
     if ac.set_by_user(args, "settings_file"):
         gv.settings.read_settings_ini(
@@ -65,7 +149,7 @@ if __name__ == "__main__":
 
     # Start compute features
     print("Start computing features ...")
-    scf.compute_features(gv.feature_data_csv_path, args.recompute, run_on=run_on)
+    compute_features(gv.feature_data_csv_path, args.recompute, run_on=run_on)
 
     # Write used settings to file
     gv.settings.write_used_settings()

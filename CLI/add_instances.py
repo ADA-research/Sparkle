@@ -11,7 +11,7 @@ from sparkle.platform import file_help as sfh, settings_help
 from sparkle.instance import InstanceSet
 from sparkle.structures.feature_dataframe import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.help import compute_features_help as scf
+from CLI.compute_features import compute_features
 from CLI.run_solvers import running_solvers_performance_data
 import sparkle_logging as sl
 from CLI.help import command_help as ch
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        scf.compute_features(Path(gv.feature_data_csv_path), False)
+        compute_features(Path(gv.feature_data_csv_path), False)
 
     if args.run_solver_now:
         num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
