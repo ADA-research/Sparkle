@@ -1,0 +1,26 @@
+[INFO ] Logging to: /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/log-run21.txt
+[INFO ] Version of SMAC is v2.10.03-master-778 (3ee628ef9bf2), running on OpenJDK 64-Bit Server VM (1.8.0_402) and Linux 5.14.0-362.24.1.el9_3.0.1.x86_64 (amd64) 
+[INFO ] Call String: smac --scenario-file /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/PbO-CCSAT-Generic_PTN_scenario.txt --seed 21 --execdir /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp 
+[INFO ] SMAC started at: 10-Jul-2024 09:30:45. Minimizing penalized average runtime (PAR10).
+[INFO ] First incumbent: config 1 (internal ID: 0x0009), with penalized average runtime (PAR10): 2.32272; estimate based on 1 runs.
+[INFO ] Sample call for new incumbent config 1 (internal ID: 0x0009): 
+cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b21.cnf 0 60.0 2147483647 1360984 -init_solution '1' -p_swt '0.3' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '0' -perform_pac '0' -q_swt '0.0' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '2' -sel_var_div '3' -threshold_swt '300'  
+[WARN ] Algorithm Run Result reported a runtime of 61.1023 (secs) that exceeded it's cutoff time of 60.0 (secs) by 1.1022999999999996 (secs). Next warning at 2.1022999999999996 (secs)  
+[WARN ] Algorithm Run Result reported wallclock time of 70.582 (secs) that exceeded it's cutoff time of 60.0 (secs) by 10.581999999999994 (secs). Next warning at 11.581999999999994 (secs)  
+[INFO ] Incumbent changed to: config 2 (internal ID: 0x4193), with penalized average runtime (PAR10): 300.10220749999996; estimate based on 2 runs.
+[INFO ] Sample call for new incumbent config 2 (internal ID: 0x4193): 
+cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b11.cnf 0 60.0 2147483647 1549762 -beta_hscore '23843' -d_hscore '1' -init_solution '1' -p_swt '0.20126782700218826' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '0' -perform_first_div '1' -perform_pac '1' -prob_first_div '0.005630842625899843' -prob_pac '0.010123882011366728' -q_swt '0.9903375748789518' -sel_clause_div '2' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '3' -sel_var_div '2' -threshold_swt '484'  
+[INFO ] 
+=======================================================================================
+SMAC has finished. Reason: wall-clock time limit (662.421 s) has been reached.   
+Total number of runs performed: 13, total configurations tried: 4.
+Total CPU time used: 558 s, total wallclock time used: 662 s.
+SMAC's final incumbent: config 2 (internal ID: 0x4193), with estimated penalized average runtime (PAR10): 480.040883, based on 5 run(s) on 5 training instance(s).
+Sample call for this final incumbent:
+cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b11.cnf 0 60.0 2147483647 1549762 -beta_hscore '23843' -d_hscore '1' -init_solution '1' -p_swt '0.20126782700218826' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '0' -perform_first_div '1' -perform_pac '1' -prob_first_div '0.005630842625899843' -prob_pac '0.010123882011366728' -q_swt '0.9903375748789518' -sel_clause_div '2' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '3' -sel_var_div '2' -threshold_swt '484'
+=======================================================================================
+[INFO ] 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Additional information about run 21 in:/home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Organising done! See /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/validation/configurations.csv
