@@ -117,7 +117,6 @@ class Settings:
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
         self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
 
-
         self.__general_sparkle_configurator = None
 
         if file_path is None:
@@ -587,8 +586,8 @@ class Settings:
         return int(self.__settings["general"]["number_of_jobs_in_parallel"])
 
     def set_general_verbosity(
-        self: Settings, value: VerbosityLevel = DEFAULT_general_verbosity,
-        origin: SettingState = SettingState.DEFAULT) -> None:
+            self: Settings, value: VerbosityLevel = DEFAULT_general_verbosity,
+            origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the general verbosity to use."""
         section = "general"
         name = "verbosity"
@@ -607,7 +606,7 @@ class Settings:
             self.set_general_verbosity()
 
         return VerbosityLevel.from_string(
-                self.__settings["general"]["verbosity"])
+            self.__settings["general"]["verbosity"])
 
     def set_general_check_interval(
             self: Settings,
