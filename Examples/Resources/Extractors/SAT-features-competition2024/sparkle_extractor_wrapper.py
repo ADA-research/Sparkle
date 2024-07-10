@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Extractor wrapper for SAT2012."""
+"""Extractor wrapper for SAT2024."""
 import sys
 import argparse
 from enum import Enum
@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description="Handle I/O for the extractor.")
 parser.add_argument("-features",  action="store_true")
 parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
 parser.add_argument("-instance_file", type=str, help="Path to the instance file")
+parser.add_argument("-feature_group", type=str, help="The feature group to compute for this instance. If not present, all will be computed.")
 parser.add_argument("-output_file", type=str, help="Path to the output file")
 args = parser.parse_args()
 

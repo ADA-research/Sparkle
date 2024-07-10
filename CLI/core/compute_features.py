@@ -22,6 +22,10 @@ if __name__ == "__main__":
                         help="path to feature data CSV file")
     parser.add_argument("--cutoff", required=True, type=str,
                         help="the maximum CPU time for the extractor.")
+    parser.add_argument("--feature-group", required=False, type=str,
+                        help="the group of features to compute, if available for the "
+                             "extractor. If not available or provided, all groups will"
+                             " be computed.")
     args = parser.parse_args()
 
     # Process command line arguments

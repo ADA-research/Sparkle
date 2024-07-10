@@ -27,7 +27,41 @@ class Extractor(SparkleCallable):
                 Defaults to directory / tmp
         """
         super().__init__(directory, runsolver_exec, raw_output_directory)
-        self.output_dimension = 1  # TODO: Set to the output dim of the extractor
+        self._features = None
+        self._feature_groups = None
+        self._output_dimension = None
+        self._groupwise_computation = None #Needs to be set
+
+    @property
+    def features(self: Extractor) -> list[tuple[str, str]]:
+        """Determines the features of the extractor."""
+        if self._features is None:
+            extractor_process = subprocess.run(
+                [self.directory / Extractor.wrapper, "-features"], capture_output=True)
+            self._features = ast.literal_eval(extractor_process.stdout.decode())
+        return self._features
+
+    @property
+    def feature_groups(self: Extractor) -> list[str]:
+        """Returns the various feature groups the Extractor has."""
+        if self._feature_groups is None:
+            self._feature_groups = list(set([group for group, _ in self.features]))
+        return self._feature_groups
+
+    @property
+    def output_dimension(self: Extractor) -> int:
+        """The size of the output vector of the extractor."""
+        return len(self.features)
+
+    @property
+    def groupwise_computation(self: Extractor) -> bool:
+        """Determines if you can call the extractor per group for parallelisation."""
+        if self._groupwise_computation is None:
+            extractor_help = subprocess.run([self.directory / Extractor.wrapper, "-h"], capture_output=True)
+            # Not the cleanest / most precise way to determine this
+            self._groupwise_computation = "-feature_group" in extractor_help.stdout.decode()
+        return self._groupwise_computation
+        
 
     def build_cmd(self: Extractor,
                   instance: Path | list[Path],
@@ -62,6 +96,7 @@ class Extractor(SparkleCallable):
 
     def run(self: Extractor,
             instance: Path | list[Path],
+            feature_group: str | None,
             output_file: Path = None,
             runsolver_args: list[str | Path] = None) -> list | None:
         """Runs an extractor job with Runrunner.
@@ -69,6 +104,8 @@ class Extractor(SparkleCallable):
         Args:
             extractor_path: Path to the executable
             instance: Path to the instance to run on
+            feature_group: The feature group to compute. Must be supported by the
+                extractor to use.
             output_file: Target output. If None, piped to the RunRunner job.
             runsolver_args: List of run solver args, each word a seperate item.
 

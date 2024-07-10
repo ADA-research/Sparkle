@@ -4,8 +4,6 @@ import os
 import sys
 import shutil
 import argparse
-import subprocess
-import ast
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh, settings_help
@@ -16,6 +14,7 @@ import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
+from sparkle.solver import Extractor
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -68,20 +67,16 @@ if __name__ == "__main__":
     shutil.copytree(extractor_source, extractor_target_path, dirs_exist_ok=True)
 
     # Check execution permissions for wrapper
-    extractor_wrapper = extractor_target_path / gv.sparkle_extractor_wrapper
+    extractor_wrapper = extractor_target_path / Extractor.wrapper
     if not extractor_wrapper.is_file() or not os.access(extractor_wrapper, os.X_OK):
         print(f"The file {extractor_wrapper} does not exist or is \
               not executable.")
         sys.exit(-1)
 
     # Get the extractor features groups and names from the wrapper
-    extractor_process = subprocess.run(
-        [gv.python_executable,
-         extractor_target_path / gv.sparkle_extractor_wrapper,
-         "-features"], capture_output=True)
-    extractor_features = ast.literal_eval(extractor_process.stdout.decode())
+    extractor = Extractor(extractor_target_path)
     feature_dataframe = FeatureDataFrame(gv.feature_data_csv_path)
-    feature_dataframe.add_extractor(str(extractor_target_path), extractor_features)
+    feature_dataframe.add_extractor(str(extractor_target_path), extractor.features)
     feature_dataframe.save_csv()
 
     print(f"Adding feature extractor {extractor_target_path.name} done!")
