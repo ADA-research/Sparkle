@@ -7,12 +7,13 @@ class FeatureGroup(str, Enum):
     """Various feature groups."""
     BASE = "base"
     PRE = "pre"
-    DIAMETER = "diameter"
+    DIAMETER = "dia"
     LOBJOIS = "lobjois"
-    UNIT = "UNIT"
+    UNIT = "unit"
     SP = "sp"
     LS = "ls"
     LP = "lp"
+    CL = "cl"
 
 
 class FeatureSubgroup(str, Enum):

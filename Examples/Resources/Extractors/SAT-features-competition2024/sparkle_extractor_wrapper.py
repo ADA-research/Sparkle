@@ -87,7 +87,12 @@ extractor_name = "SATFeatureCompetition2024"
 executable_name = "features"
 executable = extractor_dir / executable_name
 
-extractor = subprocess.run([extractor_dir / executable_name, instance_path],
+#Feature group options: [-all] [-base] |[-sp] [-Dia] [-Cl] [-unit] [-ls] [-lobjois] (lowercase)
+options = ["-all"]
+if args.feature_group is not None:
+    options = ["-" + args.feature_group]
+
+extractor = subprocess.run([extractor_dir / executable_name, instance_path] + options,
                             capture_output=True)
 
 # Read all lines from the input file
