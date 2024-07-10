@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Sparkle command to compute features for instances."""
+from __future__ import annotations
 import sys
 import argparse
 from pathlib import Path
@@ -66,6 +67,8 @@ def compute_features(
         sys.exit()
     cutoff = gv.settings.get_general_extractor_cutoff_time()
     cmd_list = []
+    extractors = {}
+    # We create a job for each instance/extractor combination
     for inst_path in jobs.keys():
         for ex_path in jobs[inst_path]:
             cmd = ["CLI/core/compute_features.py "
@@ -73,9 +76,13 @@ def compute_features(
                    f"--extractor {ex_path} "
                    f"--feature-csv {feature_data_csv_path} "
                    f"--cutoff {cutoff}"]
-            extractor = Extractor(ex_path)
+            if ex_path in extractors:
+                extractor = extractors[ex_path]
+            else:
+                extractor = Extractor(Path(ex_path))
+                extractors[ex_path] = extractor
             if extractor.groupwise_computation:
-                # Extractor job can be parallelised
+                # Extractor job can be parallelised, thus creating i * e * g jobs
                 cmd_list.extend([cmd + ["-feature_group", group]
                                  for group in extractor.feature_groups])
             else:

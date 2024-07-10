@@ -100,7 +100,7 @@ class Extractor(SparkleCallable):
 
     def run(self: Extractor,
             instance: Path | list[Path],
-            feature_group: str | None,
+            feature_group: str = None,
             output_file: Path = None,
             runsolver_args: list[str | Path] = None) -> list | None:
         """Runs an extractor job with Runrunner.
