@@ -83,7 +83,7 @@ extractor_dir = Path(args.extractor_dir)
 instance_path = Path(args.instance_file)
 output_file = Path(args.output_file) if args.output_file else None
 
-extractor_name = "SATFeatureCompetition2012"
+extractor_name = "SATFeatureCompetition2024"
 executable_name = "features"
 executable = extractor_dir / executable_name
 
