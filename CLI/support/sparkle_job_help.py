@@ -141,8 +141,8 @@ def get_dependencies(jobs: list[SlurmRun]) -> list[SlurmRun]:
     return jobs
 
 
-def clear_console(lines: int) -> None:
-    """Clears console for updated table to be printed."""
+def clear_console_lines(lines: int) -> None:
+    """Clears the last lines of the console."""
     # \033 is the escape character (ESC) in ASCII
     # [{lines}A is the escape sequence that moves the cursor up.
     print(f"\033[{lines}A", end="")
@@ -173,6 +173,8 @@ def wait_for_all_jobs() -> None:
     elif verbosity_setting == VerbosityLevel.STANDARD:
         # Collect dependencies and partitions for each job
         jobs = get_dependencies(jobs)
+        # Interval at which to refresh the table
+        check_interval = gv.settings.get_general_check_interval()
         while len(running_jobs) > 0:
             # Information to be printed to the table
             information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
@@ -192,11 +194,11 @@ def wait_for_all_jobs() -> None:
             # Print the table
             table = tabulate(information, headers="firstrow", tablefmt="grid")
             print(table)
-            time.sleep(3)
+            time.sleep(check_interval)
 
             # Clears the table for the new table to be printed
             lines = table.count("\n") + 1
-            clear_console(lines)
+            clear_console_lines(lines)
 
     print("All jobs done!")
 

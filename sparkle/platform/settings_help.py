@@ -61,6 +61,7 @@ class Settings:
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
+    DEFAULT_general_check_interval = 3
 
     DEFAULT_config_wallclock_time = 600
     DEFAULT_config_cpu_time = None
@@ -98,6 +99,8 @@ class Settings:
         self.__general_penalty_multiplier_set = SettingState.NOT_SET
         self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
+        self.__general_verbosity_set = SettingState.NOT_SET
+        self.__general_check_interval_set = SettingState.NOT_SET
 
         self.__config_wallclock_time_set = SettingState.NOT_SET
         self.__config_cpu_time_set = SettingState.NOT_SET
@@ -114,7 +117,6 @@ class Settings:
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
         self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
 
-        self.__general_verbosity_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -209,6 +211,13 @@ class Settings:
                     value = VerbosityLevel.from_string(
                         file_settings.get(section, option))
                     self.set_general_verbosity(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("check_interval", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = int(file_settings.get(section, option))
+                    self.set_general_check_interval(value, state)
                     file_settings.remove_option(section, option)
 
             section = "configuration"
@@ -599,6 +608,28 @@ class Settings:
 
         return VerbosityLevel.from_string(
                 self.__settings["general"]["verbosity"])
+
+    def set_general_check_interval(
+            self: Settings,
+            value: int = DEFAULT_general_check_interval,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general check interval."""
+        section = "general"
+        name = "check_interval"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_check_interval_set, origin, name):
+            self.__init_section(section)
+            self.__general_check_interval_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_general_check_interval(self: Settings) -> int:
+        """Return the general check interval."""
+        if self.__general_check_interval_set == SettingState.NOT_SET:
+            self.set_general_check_interval()
+
+        return int(
+            self.__settings["general"]["check_interval"])
 
     # Configuration settings ###
 
