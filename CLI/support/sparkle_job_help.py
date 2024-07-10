@@ -6,7 +6,6 @@ from __future__ import annotations
 from pathlib import Path
 import time
 import json
-import sys
 
 from runrunner import SlurmRun
 from runrunner.base import Status
@@ -150,9 +149,9 @@ def get_running_jobs() -> list[SlurmRun]:
 
 
 def get_dependencies(jobs: list[SlurmRun]) -> list[SlurmRun]:
-    """Adds Dependencies. Should be removed once RunRunner provides this feature"""
+    """Adds Dependencies. Should be removed once RunRunner provides this feature."""
     for job in jobs:
-        with open(job.json_filepath, 'r') as file:
+        with job.json_filepath.open() as file:
             data = json.load(file)
         if len(data["dependencies"]) > 0:
             job_ids = [dep["run_id"] for dep in data["dependencies"]]
@@ -161,13 +160,16 @@ def get_dependencies(jobs: list[SlurmRun]) -> list[SlurmRun]:
         job.dependencies = job_ids
     return jobs
 
-def clear_console(lines) -> None:
+
+def clear_console(lines: int) -> None:
+    """Clears console for updated table to be printed."""
     # \033 is the escape character (ESC) in ASCII
     # [{lines}A is the escape sequence that moves the cursor up.
-    print(f"\033[{lines}A", end='')
+    print(f"\033[{lines}A", end="")
     # [J is the exape sequence that clears the console from the cursor down
-    print("\033[J", end='')
-        
+    print("\033[J", end="")
+
+
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     jobs = get_running_jobs()
@@ -184,9 +186,10 @@ def wait_for_all_jobs() -> None:
             time.sleep(3.0)
             prev_jobs = len(running_jobs)
             running_jobs = [run for run in running_jobs
-                            if run.status == Status.WAITING or run.status == Status.RUNNING]
-            
-    # If verbosity is standard the command will print a terminal with relevant information
+                            if run.status == Status.WAITING
+                            or run.status == Status.RUNNING]
+
+    # If verbosity is standard the command will print a table with relevant information
     elif verbosity_setting == VerbosityLevel.STANDARD:
         # Collect dependencies and partitions for each job
         jobs = get_dependencies(jobs)
@@ -194,26 +197,29 @@ def wait_for_all_jobs() -> None:
             # Information to be printed to the table
             information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
             running_jobs = [run for run in running_jobs
-                    if run.status == Status.WAITING or run.status == Status.RUNNING]
+                            if run.status == Status.WAITING
+                            or run.status == Status.RUNNING]
             for job in jobs:
-                finished_jobs_count = sum(1 for status in job.all_status if status == Status.COMPLETED)
+                finished_jobs_count = sum(1 for status in job.all_status
+                                          if status == Status.COMPLETED)
                 information.append(
-                    [job.run_id, 
-                    job.name, 
-                    job.status,
-                    "None" if len(job.dependencies) == 0 else ", ".join(job.dependencies), 
-                    f"{finished_jobs_count}/{len(job.all_status)}"])
+                    [job.run_id,
+                     job.name,
+                     job.status,
+                     "None" if len(job.dependencies) == 0
+                        else ", ".join(job.dependencies),
+                     f"{finished_jobs_count}/{len(job.all_status)}"])
             # Print the table
             table = tabulate(information, headers="firstrow", tablefmt="grid")
             print(table)
             time.sleep(3)
-            
+
             # Clears the table for the new table to be printed
-            lines = table.count('\n') + 1
+            lines = table.count("\n") + 1
             clear_console(lines)
 
     print("All jobs done!")
-    
+
 
 def get_active_jobs() -> list[dict[str, str, str]]:
     """Get active jobs from file and return them as list of [job_id, command, status].

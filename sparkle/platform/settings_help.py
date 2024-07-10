@@ -268,7 +268,8 @@ class Settings:
             option_names = ("verbosity", )
             for option in option_names:
                 if file_settings.has_option(section, option):
-                    value = VerbosityLevel.from_string(file_settings.get(section, option))
+                    value = VerbosityLevel.from_string(
+                        file_settings.get(section, option))
                     self.set_output_verbosity(value, state)
                     file_settings.remove_option(section, option)
 
@@ -874,7 +875,6 @@ class Settings:
                           f"to '{cur_val}'")
 
         return not printed_warning
-    
 
     # Output settings ###
     def set_output_verbosity(
@@ -899,4 +899,3 @@ class Settings:
 
         return VerbosityLevel.from_string(
             self.__settings["output"]["verbosity"])
-
