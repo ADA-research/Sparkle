@@ -96,6 +96,7 @@ raw_lines = extractor.stdout.decode().splitlines()
 # Process raw result file and write to the final result file
 # First, we need to map each feature_name to its standardised name
 if len(raw_lines) >= 2:
+    # Remove the last feature
     features = raw_lines[-2].strip().split(",")
     values = raw_lines[-1].strip().split(",")
     processed_features = []
