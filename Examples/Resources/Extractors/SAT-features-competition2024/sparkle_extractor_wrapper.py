@@ -96,9 +96,12 @@ raw_lines = extractor.stdout.decode().splitlines()
 # Process raw result file and write to the final result file
 # First, we need to map each feature_name to its standardised name
 if len(raw_lines) >= 2:
-    # Remove the last feature
     features = raw_lines[-2].strip().split(",")
     values = raw_lines[-1].strip().split(",")
+    # Remove the solved feature
+    if features[-1] == "solved":
+        features = features[:-1]
+        values = values[:-1]
     processed_features = []
     for i, feature in enumerate(features):
         feature_group, feature_name = feature_mapping[feature]
