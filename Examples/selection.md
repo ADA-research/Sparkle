@@ -50,7 +50,7 @@ To make sure feature computation and solver performance computation are done bef
 
 Construct a portfolio selector, using the previously computed features and the results of running the solvers
 
-`sparkle construct_sparkle_portfolio_selector`
+`sparkle construct_sparkle_portfolio_selector --selector-timeout 1000`
 
 ## Generate a report
 
@@ -84,3 +84,36 @@ Generate an experimental report that includes the results on the test set, and a
 
 By default the `generate_report` command will create a report for the most recent instance set. To generate a report for an older instance set, the desired instance set can be specified with: `--test-case-directory Test_Cases/PTN2/`
 
+## Comparing against SATZilla 2024
+
+If you wish to compare two feature extractors against one another, you need to remove the previous extractor from the platform (Or create a new platform from scratch) by running:
+
+`sparkle remove_feature_extractor SAT-features-competition2012_revised_without_SatELite_sparkle`
+
+Otherwise, Sparkle will interpret adding the other feature extractor as creating a combined feature vector per instance from all present extractors in Sparkle. Now we can add SATZilla 2024 from the Examples directory
+
+`sparkle add_feature_extractor Examples/Resources/Extractors/SAT-features-competition2024`
+
+We compute the features for the new extractor.
+
+`sparkle compute_features`
+
+And wait for it to complete before continueing.
+
+`sparkle wait`
+
+Now we can train a selector based on these features.
+
+`sparkle construct_sparkle_portfolio_selector --selector-timeout 1000`
+
+Run it against the test instance set.
+
+`sparkle run_sparkle_portfolio_selector Examples/Resources/Instances/PTN2/`
+
+Wait for the computation to be done.
+
+`sparkle wait`
+
+And generate the report to compare the two reports.
+
+`sparkle generate_report`
