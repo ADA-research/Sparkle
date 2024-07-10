@@ -2,7 +2,7 @@
 """Sparkle command to save the current Sparkle platform in a .zip file."""
 import sys
 
-from sparkle.platform import snapshot_help
+from CLI.help import snapshot_help
 import sparkle_logging as sl
 import argparse
 

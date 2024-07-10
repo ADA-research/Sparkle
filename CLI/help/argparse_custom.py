@@ -136,12 +136,10 @@ CutOffTimeArgument = \
                                       "(default: "
                                       f"{Settings.DEFAULT_general_target_cutoff_time})"})
 
-DeterministicArgument = ArgumentContainer(names=["--deterministic"],
-                                          kwargs={"required": True,
-                                                  "type": int,
-                                                  "choices": [0, 1],
-                                                  "help": "indicate whether the solver "
-                                                          "is deterministic or not"})
+DeterministicArgument =\
+    ArgumentContainer(names=["--deterministic"],
+                      kwargs={"action": "store_true",
+                              "help": "Flag indicating the solver is deterministic"})
 
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                           kwargs={"metavar": "extractor-path",
@@ -150,32 +148,13 @@ ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                                           "feature extractor"
                                                   })
 
-InstancePathRunConfiguredSolverArgument = \
-    ArgumentContainer(names=["instance_path"],
-                      kwargs={"type": Path,
-                              "nargs": "+",
-                              "help": "Path(s) to instance file(s) (when multiple files "
-                                      "are given, it is assumed this is a multi-file "
-                                      "instance) or instance directory."})
+InstancePathPositional = ArgumentContainer(names=["instance_path"],
+                                           kwargs={"type": Path,
+                                                   "help": "Path to an instance (set)"})
 
-InstancePathRunPortfolioSelectorArgument = \
-    ArgumentContainer(names=["instance_path"],
-                      kwargs={"type": str,
-                              "nargs": "+",
-                              "help": "Path to instance or instance directory"})
-
-InstancePathsRunParallelPortfolioArgument = \
-    ArgumentContainer(names=["--instance-paths"],
-                      kwargs={"metavar": "PATH",
-                              "nargs": "+",
-                              "type": str,
-                              "required": True,
-                              "help": "Specify the instance_path(s) on which the "
-                                      "portfolio will run. This can be a space-separated"
-                                      " list of instances containing instance sets "
-                                      "and/or singular instances. For example "
-                                      "--instance-paths  Instances/PTN/Ptn-7824-b01.cnf "
-                                      " Instances/PTN2/"})
+InstancePath = ArgumentContainer(names=["--instance-path"],
+                                 kwargs={"type": Path,
+                                         "help": "Path to an instance (set)"})
 
 InstanceSetTestArgument = \
     ArgumentContainer(names=["--instance-set-test"],
@@ -281,10 +260,6 @@ NumberOfRunsAblationArgument = \
                               "action": SetByUser,
                               "help": "Number of configuration runs to execute"})
 
-ParallelArgument = ArgumentContainer(names=["--parallel"],
-                                     kwargs={"action": "store_true",
-                                             "help": "Run the command in parallel"})
-
 PerfectArgument = ArgumentContainer(names=["--perfect"],
                                     kwargs={"action": "store_true",
                                             "help": "compute the marginal contribution "
@@ -362,7 +337,6 @@ RunExtractorLaterArgument = \
 
 RunOnArgument = ArgumentContainer(names=["--run-on"],
                                   kwargs={"type": Runner,
-                                          "default": Runner.SLURM,
                                           "choices": [Runner.LOCAL,
                                                       Runner.SLURM],
                                           "action": EnumAction,
@@ -395,6 +369,14 @@ SettingsFileArgument = \
                               "action": SetByUser,
                               "help": "Specify the settings file to use in case you want"
                                       " to use one other than the default"})
+
+SkipChecksArgument = ArgumentContainer(
+    names=["--skip-checks"],
+    kwargs={"dest": "run_checks",
+            "default": True,
+            "action": "store_false",
+            "help": "Checks the solver's functionality by testing it on an instance "
+                    "and the pcs file, when applicable."})
 
 SnapshotArgument = ArgumentContainer(names=["snapshot_file_path"],
                                      kwargs={"metavar": "snapshot-file-path",
@@ -430,32 +412,12 @@ SolverPathArgument = ArgumentContainer(names=["solver_path"],
                                                "type": str,
                                                "help": "path to the solver"})
 
-SolverPortfolioArgument = \
-    ArgumentContainer(names=["--solver"],
-                      kwargs={"required": False,
-                              "nargs": "+",
-                              "type": str,
-                              "help": "Specify the list of solvers, add "
-                              '\",<#solver_variations>\" to the end of a path to add '
-                              "multiple instances of a single solver. For example "
-                              "--solver Solver/PbO-CCSAT-Generic,25 to construct a "
-                              "portfolio containing 25 variations of "
-                              "PbO-CCSAT-Generic."})
-
 SolverReportArgument = ArgumentContainer(names=["--solver"],
                                          kwargs={"required": False,
                                                  "type": str,
                                                  "default": None,
                                                  "help": "path to solver for an "
                                                  "algorithm configuration report"})
-
-SolverVariationsArgument = \
-    ArgumentContainer(names=["--solver-variations"],
-                      kwargs={"default": 1,
-                              "type": int,
-                              "help": "Use this option to add multiple variations of the"
-                                      " solver by using a different random seed for each"
-                                      " varation."})
 
 TargetCutOffTimeAblationArgument = \
     ArgumentContainer(names=["--target-cutoff-time"],

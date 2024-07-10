@@ -1,6 +1,7 @@
 """Methods to deal with Parameter Configuration Space files."""
 
 from pathlib import Path
+from sparkle.solver import Solver
 
 import sparkle_logging as sl
 
@@ -25,11 +26,11 @@ def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     return ""
 
 
-def write_configuration_pcs(solver_name: str, config_str: str, tmp_path: Path) -> None:
+def write_configuration_pcs(solver: Solver, config_str: str, tmp_path: Path) -> None:
     """Write configuration to a new PCS file.
 
     Args:
-        solver_name: Name of the solver
+        solver: Solver object
         config_str: Configuration to write
         tmp_path: Path to leave the latest configuration pcs
     """
@@ -46,9 +47,8 @@ def write_configuration_pcs(solver_name: str, config_str: str, tmp_path: Path) -
             optimised_configuration_list[i + 1].strip(" '"))
 
     # Read existing PCS file and create output content
-    solver_directory = Path("Solvers", solver_name)
-    pcs_file = solver_directory / get_pcs_file_from_solver_directory(
-        solver_directory)
+    pcs_file = solver.directory / get_pcs_file_from_solver_directory(
+        solver.directory)
     pcs_file_out = []
 
     with pcs_file.open("r") as infile:

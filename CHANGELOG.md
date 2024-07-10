@@ -2,7 +2,17 @@
 
 Notable changes to Sparkle will be documented in this file.
 
-## [0.8.2] - 2024/06/2?
+## [0.8.3] - 2024/??/??
+
+### Changed
+- The use of --parallel arguments is now deprecrated and all related functionality is now controlled by the settings file general number of jobs parallel setting. [SPRK-275]
+- The slurm_settings are now handled by the general sparkle settings, where the user can add any unknown options to the Slurm settings
+
+### Added
+
+### Fixed
+
+## [0.8.2] - 2024/06/19
 
 ### Changed
 - Nickname system has been re-evaluated and is now available in any command. CLI now supports nickname, directory name and path as inputs for Instances/Solvers/Extractors. [SPRK-55]

@@ -10,10 +10,11 @@ import builtins
 import statistics
 
 import sparkle_logging as slog
-import global_variables as gv
 from sparkle.types.objective import SparkleObjective
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
+
+from runrunner import Runner
 from sparkle.platform.cli_types import VerbosityLevel
 
 
@@ -58,6 +59,7 @@ class Settings:
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
+    DEFAULT_number_of_jobs_in_parallel = 25
 
     DEFAULT_config_wallclock_time = 600
     DEFAULT_config_cpu_time = None
@@ -66,7 +68,6 @@ class Settings:
 
     DEFAULT_portfolio_construction_timeout = None
 
-    DEFAULT_slurm_number_of_runs_in_parallel = 25
     DEFAULT_slurm_max_parallel_runs_per_node = 8
 
     DEFAULT_smac_target_cutoff_length = "max"
@@ -75,6 +76,12 @@ class Settings:
 
     DEFAULT_parallel_portfolio_check_interval = 4
     DEFAULT_parallel_portfolio_num_seeds_per_solver = 1
+
+    # Default Pathing
+    DEFAULT_output = Path("Output")
+    DEFAULT_tmp_output = Path("Tmp")
+    DEFAULT_configuration_output = DEFAULT_output / "Configuration"
+    DEFAULT_configuration_output_raw = DEFAULT_configuration_output / "Raw_Data"
 
     DEFAULT_output_verbosity = VerbosityLevel.STANDARD
 
@@ -98,7 +105,8 @@ class Settings:
         self.__config_solver_calls_set = SettingState.NOT_SET
         self.__config_number_of_runs_set = SettingState.NOT_SET
 
-        self.__slurm_number_of_runs_in_parallel_set = SettingState.NOT_SET
+        self.__run_on_set = SettingState.NOT_SET
+        self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
         self.__smac_target_cutoff_length_set = SettingState.NOT_SET
@@ -117,8 +125,6 @@ class Settings:
         else:
             # Initialise settings from a given file path
             self.read_settings_ini(file_path)
-
-        return
 
     def read_settings_ini(self: Settings, file_path: PurePath = DEFAULT_settings_path,
                           state: SettingState = SettingState.FILE) -> None:
@@ -184,6 +190,20 @@ class Settings:
                     self.set_general_extractor_cutoff_time(value, state)
                     file_settings.remove_option(section, option)
 
+            option_names = ("number_of_jobs_in_parallel", "num_job_in_parallel")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.getint(section, option)
+                    self.set_number_of_jobs_in_parallel(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("run_on", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_run_on(value, state)
+                    file_settings.remove_option(section, option)
+
             section = "configuration"
             option_names = ("wallclock_time", "smac_whole_time_budget")
             for option in option_names:
@@ -214,15 +234,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_number_of_runs(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "slurm"
-            option_names = ("number_of_runs_in_parallel", "num_of_smac_runs_in_parallel",
-                            "num_job_in_parallel")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.getint(section, option)
-                    self.set_slurm_number_of_runs_in_parallel(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
@@ -278,11 +289,8 @@ class Settings:
 
             for section in sections:
                 for option in file_settings[section]:
-                    # TODO: Quick fix to support partitions and excludes, but should not
-                    # allow any option
+                    # TODO: Should check the options are valid Slurm options
                     if section == "slurm":
-                        print(f'Unrecognised SLURM option "{option}" found in '
-                              f"{str(file_path)}. Option is added to any SLURM batches")
                         value = file_settings.get(section, option)
                         self.add_slurm_extra_option(option, value, state)
                     else:
@@ -296,12 +304,10 @@ class Settings:
                   " than INI. Settings from different sources will be used (e.g. default"
                   " values).")
 
-        return
-
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
         # Write to general output directory
-        file_path_output = PurePath(gv.sparkle_global_output_dir / slog.caller_out_dir
+        file_path_output = PurePath(Settings.DEFAULT_output / slog.caller_out_dir
                                     / self.__settings_dir / self.__settings_file)
         self.write_settings_ini(Path(file_path_output))
 
@@ -309,28 +315,33 @@ class Settings:
         file_path_latest = PurePath(self.__settings_dir / "latest.ini")
         self.write_settings_ini(Path(file_path_latest))
 
-        return
-
     def write_settings_ini(self: Settings, file_path: Path) -> None:
         """Write the settings to an INI file."""
         # Create needed directories if they don't exist
         file_dir = file_path.parents[0]
         file_dir.mkdir(parents=True, exist_ok=True)
-
+        slurm_extra_section_options = None
+        if self.__settings.has_section("slurm_extra"):
+            # Slurm extra options are not written as a seperate section
+            slurm_extra_section_options = {}
+            for key in self.__settings["slurm_extra"]:
+                self.__settings["slurm"][key] = self.__settings["slurm_extra"][key]
+                slurm_extra_section_options[key] = self.__settings["slurm_extra"][key]
+            self.__settings.remove_section("slurm_extra")
         # Write the settings to file
-        with Path(str(file_path)).open("w") as settings_file:
+        with file_path.open("w") as settings_file:
             self.__settings.write(settings_file)
-
             # Log the settings file location
             slog.add_output(str(file_path), "Settings used by Sparkle for this command")
-
-        return
+        # Rebuild slurm extra if needed
+        if slurm_extra_section_options is not None:
+            self.__settings.add_section("slurm_extra")
+            for key in slurm_extra_section_options:
+                self.__settings["slurm_extra"][key] = slurm_extra_section_options[key]
 
     def __init_section(self: Settings, section: str) -> None:
         if section not in self.__settings:
             self.__settings[section] = {}
-
-        return
 
     @staticmethod
     def __check_setting_state(current_state: SettingState,
@@ -369,8 +380,6 @@ class Settings:
             self.__general_sparkle_objective_set = origin
             self.__settings[section][name] = value
 
-        return
-
     def get_general_sparkle_objectives(self: Settings) -> list[SparkleObjective]:
         """Return the performance measure."""
         if self.__general_sparkle_objective_set == SettingState.NOT_SET:
@@ -392,8 +401,6 @@ class Settings:
             self.__general_sparkle_configurator_set = origin
             self.__settings[section][name] = value
 
-        return
-
     def get_general_sparkle_configurator(self: Settings) -> Configurator:
         """Return the configurator init method."""
         if self.__general_sparkle_configurator_set == SettingState.NOT_SET:
@@ -402,7 +409,10 @@ class Settings:
             configurator_subclass =\
                 cim.resolve_configurator(self.__settings["general"]["configurator"])
             if configurator_subclass is not None:
-                self.__general_sparkle_configurator = configurator_subclass()
+                self.__general_sparkle_configurator = configurator_subclass(
+                    objectives=self.get_general_sparkle_objectives(),
+                    base_dir=Settings.DEFAULT_tmp_output,
+                    output_path=Settings.DEFAULT_configuration_output_raw)
             else:
                 print("WARNING: Configurator class name not recognised:"
                       f'{self.__settings["general"]["configurator"]}. '
@@ -429,8 +439,6 @@ class Settings:
             self.__general_cap_value_set = origin
             self.__settings[section][name] = float(value)
 
-        return
-
     def get_general_cap_value(self: Settings) -> float:
         """Get the general cap value."""
         if self.__general_cap_value_set == SettingState.NOT_SET:
@@ -438,8 +446,7 @@ class Settings:
 
         if "cap_value" in self.__settings["general"]:
             return self.__settings["general"]["cap_value"]
-        else:
-            return None
+        return None
 
     def set_general_penalty_multiplier(
             self: Settings, value: int = DEFAULT_general_penalty_multiplier,
@@ -453,8 +460,6 @@ class Settings:
             self.__init_section(section)
             self.__general_penalty_multiplier_set = origin
             self.__settings[section][name] = str(value)
-
-        return
 
     def get_general_penalty_multiplier(self: Settings) -> int:
         """Return the penalty multiplier."""
@@ -476,8 +481,6 @@ class Settings:
             self.__general_metric_aggregation_function_set = origin
             self.__settings[section][name] = value
 
-        return
-
     def get_general_metric_aggregation_function(self: Settings) -> Callable:
         """Set the general aggregation function of performance measure."""
         if self.__general_metric_aggregation_function_set == SettingState.NOT_SET:
@@ -496,14 +499,8 @@ class Settings:
     def get_penalised_time(self: Settings, custom_cutoff: int = None) -> int:
         """Return the penalised time associated with the cutoff time."""
         if custom_cutoff is None:
-            cutoff_time = self.get_general_target_cutoff_time()
-        else:
-            cutoff_time = custom_cutoff
-
-        penalty_multiplier = self.get_general_penalty_multiplier()
-        penalised_time = cutoff_time * penalty_multiplier
-
-        return penalised_time
+            custom_cutoff = self.get_general_target_cutoff_time()
+        return custom_cutoff * self.get_general_penalty_multiplier()
 
     def set_general_solution_verifier(
             self: Settings, value: SolutionVerifier = DEFAULT_general_solution_verifier,
@@ -518,13 +515,10 @@ class Settings:
             self.__general_solution_verifier_set = origin
             self.__settings[section][name] = value.name
 
-        return
-
     def get_general_solution_verifier(self: Settings) -> SolutionVerifier:
         """Return the solution verifier to use."""
         if self.__general_solution_verifier_set == SettingState.NOT_SET:
             self.set_general_solution_verifier()
-
         return SolutionVerifier.from_str(self.__settings["general"]["solution_verifier"])
 
     def set_general_target_cutoff_time(
@@ -540,13 +534,10 @@ class Settings:
             self.__general_target_cutoff_time_set = origin
             self.__settings[section][name] = str(value)
 
-        return
-
     def get_general_target_cutoff_time(self: Settings) -> int:
         """Return the cutoff time in seconds for target algorithms."""
         if self.__general_target_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_target_cutoff_time()
-
         return int(self.__settings["general"]["target_cutoff_time"])
 
     def set_general_extractor_cutoff_time(
@@ -562,14 +553,31 @@ class Settings:
             self.__general_extractor_cutoff_time_set = origin
             self.__settings[section][name] = str(value)
 
-        return
-
     def get_general_extractor_cutoff_time(self: Settings) -> int:
         """Return the cutoff time in seconds for feature extraction."""
         if self.__general_extractor_cutoff_time_set == SettingState.NOT_SET:
             self.set_general_extractor_cutoff_time()
-
         return int(self.__settings["general"]["extractor_cutoff_time"])
+
+    def set_number_of_jobs_in_parallel(
+            self: Settings, value: int = DEFAULT_number_of_jobs_in_parallel,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the number of runs Sparkle can do in parallel."""
+        section = "general"
+        name = "number_of_jobs_in_parallel"
+
+        if value is not None and self.__check_setting_state(
+                self.__number_of_jobs_in_parallel_set, origin, name):
+            self.__init_section(section)
+            self.__number_of_jobs_in_parallel_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_number_of_jobs_in_parallel(self: Settings) -> int:
+        """Return the number of runs Sparkle can do in parallel."""
+        if self.__number_of_jobs_in_parallel_set == SettingState.NOT_SET:
+            self.set_number_of_jobs_in_parallel()
+
+        return int(self.__settings["general"]["number_of_jobs_in_parallel"])
 
     # Configuration settings ###
 
@@ -586,13 +594,10 @@ class Settings:
             self.__config_wallclock_time_set = origin
             self.__settings[section][name] = str(value)
 
-        return
-
     def get_config_wallclock_time(self: Settings) -> int:
         """Return the budget per configuration run in seconds (wallclock)."""
         if self.__config_wallclock_time_set == SettingState.NOT_SET:
             self.set_config_wallclock_time()
-
         return int(self.__settings["configuration"]["wallclock_time"])
 
     def set_config_cpu_time(
@@ -607,8 +612,6 @@ class Settings:
             self.__init_section(section)
             self.__config_cpu_time_set = origin
             self.__settings[section][name] = str(value)
-
-        return
 
     def get_config_cpu_time(self: Settings) -> int | None:
         """Return the budget per configuration run in seconds (cpu)."""
@@ -631,8 +634,6 @@ class Settings:
             self.__config_solver_calls_set = origin
             self.__settings[section][name] = str(value)
 
-        return
-
     def get_config_solver_calls(self: Settings) -> int | None:
         """Return the number of solver calls."""
         if self.__config_solver_calls_set == SettingState.NOT_SET:
@@ -653,8 +654,6 @@ class Settings:
             self.__init_section(section)
             self.__config_number_of_runs_set = origin
             self.__settings[section][name] = str(value)
-
-        return
 
     def get_config_number_of_runs(self: Settings) -> int:
         """Return the number of configuration runs."""
@@ -678,8 +677,6 @@ class Settings:
             self.__smac_target_cutoff_length_set = origin
             self.__settings[section][name] = str(value)
 
-        return
-
     def get_smac_target_cutoff_length(self: Settings) -> str:
         """Return the target algorithm cutoff length."""
         if self.__smac_target_cutoff_length_set == SettingState.NOT_SET:
@@ -688,28 +685,6 @@ class Settings:
         return self.__settings["smac"]["target_cutoff_length"]
 
     # Slurm settings ###
-
-    def set_slurm_number_of_runs_in_parallel(
-            self: Settings, value: int = DEFAULT_slurm_number_of_runs_in_parallel,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the number of runs Slurm can do in parallel."""
-        section = "slurm"
-        name = "number_of_runs_in_parallel"
-
-        if value is not None and self.__check_setting_state(
-                self.__slurm_number_of_runs_in_parallel_set, origin, name):
-            self.__init_section(section)
-            self.__slurm_number_of_runs_in_parallel_set = origin
-            self.__settings[section][name] = str(value)
-
-        return
-
-    def get_slurm_number_of_runs_in_parallel(self: Settings) -> int:
-        """Return the number of runs Slurm can do in parallel."""
-        if self.__slurm_number_of_runs_in_parallel_set == SettingState.NOT_SET:
-            self.set_slurm_number_of_runs_in_parallel()
-
-        return int(self.__settings["slurm"]["number_of_runs_in_parallel"])
 
     def set_slurm_max_parallel_runs_per_node(
             self: Settings,
@@ -724,8 +699,6 @@ class Settings:
             self.__init_section(section)
             self.__slurm_max_parallel_runs_per_node_set = origin
             self.__settings[section][name] = str(value)
-
-        return
 
     def get_slurm_max_parallel_runs_per_node(self: Settings) -> int:
         """Return the number of algorithms Slurm can run in parallel per node."""
@@ -750,7 +723,8 @@ class Settings:
             self.__slurm_extra_options_set[name] = origin
             self.__settings[section][name] = str(value)
 
-    def get_slurm_extra_options(self: Settings) -> dict:
+    def get_slurm_extra_options(self: Settings,
+                                as_args: bool = False) -> dict | list:
         """Return a dict with additional Slurm options."""
         section = "slurm_extra"
         options = dict()
@@ -758,7 +732,8 @@ class Settings:
         if "slurm_extra" in self.__settings.sections():
             for option in self.__settings["slurm_extra"]:
                 options[option] = self.__settings.get(section, option)
-
+        if as_args:
+            return [f"--{key}={options[key]}" for key in options.keys()]
         return options
 
     # Ablation settings ###
@@ -774,8 +749,6 @@ class Settings:
             self.__init_section(section)
             self.__ablation_racing_flag_set = origin
             self.__settings[section][name] = str(value)
-
-        return
 
     def get_ablation_racing_flag(self: Settings) -> bool:
         """Return a bool indicating whether the racing flag is set for ablation."""
@@ -800,8 +773,6 @@ class Settings:
             self.__parallel_portfolio_check_interval_set = origin
             self.__settings[section][name] = str(value)
 
-        return
-
     def get_parallel_portfolio_check_interval(self: Settings) -> int:
         """Return the parallel portfolio check interval."""
         if self.__parallel_portfolio_check_interval_set == SettingState.NOT_SET:
@@ -824,8 +795,6 @@ class Settings:
             self.__parallel_portfolio_check_interval_set = origin
             self.__settings[section][name] = str(value)
 
-        return
-
     def get_parallel_portfolio_number_of_seeds_per_solver(self: Settings) -> int:
         """Return the parallel portfolio seeds per solver to start."""
         if self.__parallel_portfolio_num_seeds_per_solver_set == SettingState.NOT_SET:
@@ -833,6 +802,22 @@ class Settings:
 
         return int(
             self.__settings["parallel_portfolio"]["num_seeds_per_solver"])
+
+    def set_run_on(self: Settings, value: Runner = str,
+                   origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the compute on which to run."""
+        section = "general"
+        name = "run_on"
+
+        if value is not None and self.__check_setting_state(
+                self.__run_on_set, origin, name):
+            self.__init_section(section)
+            self.__run_on_set = origin
+            self.__settings[section][name] = value
+
+    def get_run_on(self: Settings) -> Runner:
+        """Return the compute on which to run."""
+        return Runner(self.__settings["general"]["run_on"])
 
     @staticmethod
     def check_settings_changes(cur_settings: Settings, prev_settings: Settings) -> bool:
@@ -847,12 +832,27 @@ class Settings:
         Returns:
           True iff there are no changes.
         """
-        printed_warning = False
-
         cur_dict = cur_settings.__settings._sections
         prev_dict = prev_settings.__settings._sections
 
-        for section in cur_dict.keys():
+        cur_sections_set = set(cur_dict.keys())
+        prev_sections_set = set(prev_dict.keys())
+
+        sections_removed = prev_sections_set - cur_sections_set
+        if sections_removed:
+            print("Warning: the following sections have been removed:")
+            for section in sections_removed:
+                print(f"  - Section '{section}'")
+
+        sections_added = cur_sections_set - prev_sections_set
+        if sections_added:
+            print("Warning: the following sections have been added:")
+            for section in sections_added:
+                print(f"  - Section '{section}'")
+
+        sections_remained = cur_sections_set & prev_sections_set
+        option_changed = False
+        for section in sections_remained:
             printed_section = False
             names = set(cur_dict[section].keys()) | set(prev_dict[section].keys())
             for name in names:
@@ -861,20 +861,19 @@ class Settings:
                 prev_val = prev_dict[section].get(name, None)
                 if cur_val != prev_val:
                     # do we have yet to print the initial warning?
-                    if not printed_warning:
+                    if not option_changed:
                         print("Warning: The following attributes/options have changed:")
-                        printed_warning = True
+                        option_changed = True
 
                     # do we have yet to print the section?
                     if not printed_section:
-                        print(f"In the section '{section}':")
+                        print(f"  - In the section '{section}':")
                         printed_section = True
 
                     # print actual change
-                    print(f"  - '{name}' changed from '{prev_val}' "
-                          f"to '{cur_val}'")
+                    print(f"    · '{name}' changed from '{prev_val}' to '{cur_val}'")
 
-        return not printed_warning
+        return not (sections_removed or sections_added or option_changed)
 
     # Output settings ###
     def set_output_verbosity(

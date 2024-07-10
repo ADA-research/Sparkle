@@ -12,13 +12,6 @@
 #SBATCH --nodes=1
 
 # Settings
-slurm_settings_path="Settings/sparkle_slurm_settings.txt"
-slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
-# Save user settings if any
-mv $slurm_settings_path $slurm_settings_tmp 2> /dev/null
-cp $slurm_settings_test $slurm_settings_path # Activate test settings
-
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
@@ -43,7 +36,7 @@ validation_test_data="CLI/test/test_files/Output/Validation/PbO-CCSAT-Generic_PT
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path_train > /dev/null
 CLI/add_instances.py $instances_src_path_test > /dev/null
-CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/add_solver.py $solver_src_path > /dev/null
 
 # Copy scenario to simulate configuration
 mv $scenario_path $scenario_tmp 2> /dev/null # Save user data (if any)
@@ -84,6 +77,5 @@ rm -rf $config_scenario_path
 rm -rf $validation_scenario_path
 
 # Restore original data if any
-mv $slurm_settings_tmp $slurm_settings_path 2> /dev/null
 # OR true to get success exit code even when no user data was stored in the tmp file
 mv $scenario_tmp $scenario_path 2> /dev/null || true

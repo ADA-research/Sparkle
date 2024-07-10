@@ -3,7 +3,7 @@
 
 import sys
 import argparse
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 import global_variables as gv
 from sparkle.solver import pcs
@@ -13,6 +13,8 @@ from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
 from sparkle.solver.validator import Validator
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
 from CLI.help import command_help as ch
 from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise
@@ -56,12 +58,21 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    solver = resolve_object_name(args.solver, gv.solver_nickname_mapping, gv.solver_dir)
-    instance_set_train = resolve_object_name(args.instance_set_train,
-                                             target_dir=gv.instance_dir)
-    instance_set_test = resolve_object_name(args.instance_set_test,
-                                            target_dir=gv.instance_dir)
-    run_on = args.run_on
+    solver = resolve_object_name(args.solver,
+                                 gv.solver_nickname_mapping, gv.solver_dir, Solver)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
+    instance_set_test = resolve_object_name(
+        args.instance_set_test,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(
         sys.argv,
@@ -93,13 +104,14 @@ if __name__ == "__main__":
 
     # Make sure configuration results exist before trying to work with them
     configurator = gv.settings.get_general_sparkle_configurator()
-    configurator.set_scenario_dirs(solver.name, instance_set_train.name)
-
+    configurator.set_scenario_dirs(solver, instance_set_train)
+    objective = gv.settings.get_general_sparkle_objectives()[0]
     # Record optimised configuration
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver, instance_set_train.name)
-    pcs.write_configuration_pcs(solver.name, opt_config_str,
-                                Path(gv.sparkle_tmp_path))
+        solver, instance_set_train, objective.PerformanceMeasure)
+
+    pcs.write_configuration_pcs(solver, opt_config_str,
+                                gv.sparkle_tmp_path)
 
     validator = Validator(gv.validation_output_general)
     all_validation_instances = [instance_set_train]
@@ -109,12 +121,12 @@ if __name__ == "__main__":
                        instance_sets=all_validation_instances)
 
     # Update latest scenario
-    gv.latest_scenario().set_config_solver(solver)
-    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
+    gv.latest_scenario().set_config_solver(solver.directory)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()

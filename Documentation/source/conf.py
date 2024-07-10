@@ -117,10 +117,10 @@ html_theme_options = {
 
 html_sidebars = {
     "**": [
-        "globaltoc.html",   # Table of contents
-        "relations.html",   # Prev/Next links
+        "globaltoc.html",  # Table of contents
+        "relations.html",  # Prev/Next links
         "sourcelink.html",  # View page source link
-        "searchbox.html",   # Search box
+        "searchbox.html",  # Search box
     ]
 }
 

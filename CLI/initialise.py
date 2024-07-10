@@ -4,13 +4,14 @@ import sys
 import subprocess
 import argparse
 import shutil
-from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
-from sparkle.platform import snapshot_help as srh
-from sparkle.platform import snapshot_help as snh
+from CLI.help import snapshot_help as srh
+from CLI.help import snapshot_help as snh
+from sparkle.platform import settings_help
 from sparkle.structures import csv_help as scsv
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 import global_variables as gv
 import sparkle_logging as sl
 
@@ -56,7 +57,6 @@ def initialise_sparkle(argv: list[str]) -> None:
     print("Start initialising Sparkle platform ...")
 
     gv.snapshot_dir.mkdir(exist_ok=True)
-
     if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
         snh.remove_current_sparkle_platform()
@@ -66,20 +66,23 @@ def initialise_sparkle(argv: list[str]) -> None:
 
     # Log command call
     sl.log_command(argv)
-
     sfh.create_temporary_directories()
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
-
-    Path(f"{gv.ablation_dir}scenarios/").mkdir(exist_ok=True)
+    (gv.ablation_dir / "scenarios/").mkdir(exist_ok=True)
     scsv.SparkleCSV.create_empty_csv(gv.feature_data_csv_path)
-    scsv.SparkleCSV.create_empty_csv(gv.performance_data_csv_path)
-    gv.pap_performance_data_tmp_path.mkdir(exist_ok=True)
+    # Initialise the Performance DF with the static dimensions
+    # TODO: We have many sparkle settings values regarding ``number of runs''
+    # E.g. configurator, parallel portfolio, and here too. Should we unify this more, or
+    # just make another setting that does this specifically for performance data?
+    PerformanceDataFrame(gv.performance_data_csv_path,
+                         objectives=gv.settings.get_general_sparkle_objectives(),
+                         n_runs=1)
 
     # Check that Runsolver is compiled, otherwise, compile
-    if not Path(gv.runsolver_path).exists():
+    if not gv.runsolver_path.exists():
         print("Runsolver does not exist, trying to compile...")
-        if not Path(gv.runsolver_dir + "Makefile").exists():
+        if not (gv.runsolver_dir / "Makefile").exists():
             print("WARNING: Runsolver executable doesn't exist and cannot find makefile."
                   f" Please verify the contents of the directory: {gv.runsolver_dir}")
         else:
@@ -106,5 +109,7 @@ if __name__ == "__main__":
                      "arguments."))
     # Process command line arguments
     args = parser.parse_args()
+    global settings
+    gv.settings = settings_help.Settings()
 
     initialise_sparkle(sys.argv)

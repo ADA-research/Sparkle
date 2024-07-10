@@ -2,17 +2,15 @@
 """Sparkle command to run solvers to get their performance data."""
 from __future__ import annotations
 
-
 import sys
 import argparse
-from pathlib import PurePath
+from pathlib import PurePath, Path
 
 import runrunner as rrr
 from runrunner.base import Runner
 
 import global_variables as gv
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from sparkle.platform import slurm_help as ssh
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SolutionVerifier
@@ -21,14 +19,32 @@ from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
-from CLI.support import run_solvers_help as srs
 
-import functools
-print = functools.partial(print, flush=True)
+
+def parser_function() -> argparse.ArgumentParser:
+    """Define the command line arguments."""
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(*ac.RecomputeRunSolversArgument.names,
+                        **ac.RecomputeRunSolversArgument.kwargs)
+    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
+                        **ac.PerformanceMeasureSimpleArgument.kwargs)
+    parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
+                        **ac.TargetCutOffTimeRunSolversArgument.kwargs)
+    parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
+                        **ac.AlsoConstructSelectorAndReportArgument.kwargs)
+    parser.add_argument(*ac.VerifierArgument.names,
+                        **ac.VerifierArgument.kwargs)
+    parser.add_argument(*ac.RunOnArgument.names,
+                        **ac.RunOnArgument.kwargs)
+    parser.add_argument(*ac.SettingsFileArgument.names,
+                        **ac.SettingsFileArgument.kwargs)
+
+    return parser
 
 
 def running_solvers_performance_data(
-        performance_data_csv_path: str,
+        performance_data_csv_path: Path,
         num_job_in_parallel: int,
         rerun: bool = False,
         run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
@@ -36,7 +52,7 @@ def running_solvers_performance_data(
 
     Parameters
     ----------
-    performance_data_csv_path: str
+    performance_data_csv_path: Path
         The path to the performance data file
     num_job_in_parallel: int
         The maximum number of jobs to run in parallel
@@ -54,10 +70,9 @@ def running_solvers_performance_data(
         the run.
     """
     # Open the performance data csv file
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
-
+    performance_dataframe = PerformanceDataFrame(performance_data_csv_path)
     # List of jobs to do
-    jobs = performance_data_csv.get_job_list(rerun=rerun)
+    jobs = performance_dataframe.get_job_list(rerun=rerun)
     num_jobs = len(jobs)
 
     cutoff_time_str = str(gv.settings.get_general_target_cutoff_time())
@@ -68,20 +83,18 @@ def running_solvers_performance_data(
     # If there are no jobs, stop
     if num_jobs == 0:
         return None
-    # If there are jobs update performance data ID
-    else:
-        srs.update_performance_data_id()
 
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:
         print("Running the solvers through Slurm")
 
-    srun_options = ["-N1", "-n1"] + ssh.get_slurm_options_list()
-    sbatch_options = ssh.get_slurm_options_list()
-    cmd_base = "CLI/core/run_solvers_core.py"
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    srun_options = ["-N1", "-n1"] + sbatch_options
     perf_m = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    cmd_list = [f"{cmd_base} --instance {inst_p} --solver {solver_p} "
+    cmd_list = ["CLI/core/run_solvers_core.py "
+                f"--performance-data {performance_data_csv_path} "
+                f"--instance {inst_p} --solver {solver_p} "
                 f"--performance-measure {perf_m.name}" for inst_p, solver_p in jobs]
 
     run = rrr.add_to_queue(
@@ -93,35 +106,15 @@ def running_solvers_performance_data(
         sbatch_options=sbatch_options,
         srun_options=srun_options)
 
+    if run_on == Runner.LOCAL:
+        # TODO: It would be nice to extract some info per job and print it
+        # As the user now only sees jobs starting and completing without their results
+        run.wait()
+
     return run
 
 
-def parser_function() -> argparse.ArgumentParser:
-    """Define the command line arguments."""
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(*ac.RecomputeRunSolversArgument.names,
-                        **ac.RecomputeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.ParallelArgument.names,
-                        **ac.ParallelArgument.kwargs)
-    parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
-                        **ac.PerformanceMeasureSimpleArgument.kwargs)
-    parser.add_argument(*ac.TargetCutOffTimeRunSolversArgument.names,
-                        **ac.TargetCutOffTimeRunSolversArgument.kwargs)
-    parser.add_argument(*ac.AlsoConstructSelectorAndReportArgument.names,
-                        **ac.AlsoConstructSelectorAndReportArgument.kwargs)
-    parser.add_argument(*ac.VerifierArgument.names,
-                        **ac.VerifierArgument.kwargs)
-    parser.add_argument(*ac.RunOnArgument.names,
-                        **ac.RunOnArgument.kwargs)
-    parser.add_argument(*ac.SettingsFileArgument.names,
-                        **ac.SettingsFileArgument.kwargs)
-
-    return parser
-
-
 def run_solvers_on_instances(
-        parallel: bool = False,
         recompute: bool = False,
         run_on: Runner = Runner.SLURM,
         also_construct_selector_and_report: bool = False) -> None:
@@ -132,8 +125,6 @@ def run_solvers_on_instances(
 
     Parameters
     ----------
-    parallel: bool
-        Run the solvers in parallel or one at a time. Default: False
     recompute: bool
         If True, recompute all solver-instance pairs even if they were run before.
         Default: False
@@ -145,9 +136,7 @@ def run_solvers_on_instances(
     """
     if recompute:
         PerformanceDataFrame(gv.performance_data_csv_path).clean_csv()
-    num_job_in_parallel = 1
-    if parallel:
-        num_job_in_parallel = gv.settings.get_slurm_number_of_runs_in_parallel()
+    num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()
 
     runs = [running_solvers_performance_data(
         performance_data_csv_path=gv.performance_data_csv_path,
@@ -160,17 +149,7 @@ def run_solvers_on_instances(
         print("Running solvers done!")
         return
 
-    sbatch_user_options = ssh.get_slurm_options_list()
-
-    # Update performance data csv after the last job is done
-    runs.append(rrr.add_to_queue(
-        runner=run_on,
-        cmd="sparkle/structures/csv_merge.py",
-        name=CommandName.CSV_MERGE,
-        dependencies=runs[-1],
-        base_dir=gv.sparkle_tmp_path,
-        sbatch_options=sbatch_user_options))
-
+    sbatch_user_options = gv.settings.get_slurm_extra_options(as_args=True)
     if also_construct_selector_and_report:
         runs.append(rrr.add_to_queue(
             runner=run_on,
@@ -195,7 +174,7 @@ def run_solvers_on_instances(
                 run.wait()
         print("Running solvers done!")
     elif run_on == Runner.SLURM:
-        print("Running solvers in parallel. Waiting for Slurm job(s) with id(s): "
+        print("Running solvers. Waiting for Slurm job(s) with id(s): "
               f'{",".join(r.run_id for r in runs if r is not None)}')
 
 
@@ -226,9 +205,14 @@ if __name__ == "__main__":
         gv.settings.set_general_solution_verifier(
             SolutionVerifier.from_str(args.verifier), SettingState.CMD_LINE)
 
-    if args.target_cutoff_time:
+    if args.target_cutoff_time is not None:
         gv.settings.set_general_target_cutoff_time(
             args.target_cutoff_time, SettingState.CMD_LINE)
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,
                          sch.COMMAND_DEPENDENCIES[sch.CommandName.RUN_SOLVERS])
@@ -243,7 +227,6 @@ if __name__ == "__main__":
     gv.settings.write_used_settings()
 
     run_solvers_on_instances(
-        parallel=args.parallel,
         recompute=args.recompute,
         also_construct_selector_and_report=args.also_construct_selector_and_report,
-        run_on=args.run_on)
+        run_on=run_on)

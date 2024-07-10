@@ -5,8 +5,6 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
-from runrunner.base import Runner
-
 import global_variables as gv
 from CLI.support import run_portfolio_selector_help as srpsh
 import sparkle_logging as sl
@@ -14,16 +12,19 @@ from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
 from CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
+from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.help import command_help as ch
+from CLI.help.reporting_scenario import Scenario
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
+from sparkle.instance import InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*ac.InstancePathRunPortfolioSelectorArgument.names,
-                        **ac.InstancePathRunPortfolioSelectorArgument.kwargs)
+    parser.add_argument(*ac.InstancePathPositional.names,
+                        **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
@@ -47,14 +48,16 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    run_on = args.run_on
-    # NOTE: I don't think the code below actually works for the rest of Sparkle - T.S.
-    instance_path = " ".join(
-        args.instance_path
-    )  # Turn multiple instance files into a space separated string
-    instance_resolved = resolve_object_name(instance_path, target_dir=gv.instance_dir)
-    if instance_resolved is not None:
-        instance_path = instance_resolved
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
+
+    instance_set = resolve_object_name(
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
 
     check_for_initialise(
         sys.argv,
@@ -81,18 +84,31 @@ if __name__ == "__main__":
             " for the QUALITY_ABSOLUTE performance measure! (functionality coming soon)"
         )
         sys.exit(-1)
+    selector_path = Path("Sparkle_Portfolio_Selector",
+                         "sparkle_portfolio_selector__@@SPARKLE@@__")
+    if not selector_path.exists() or not selector_path.is_file():
+        print("ERROR: The portfolio selector could not be found. Please make sure to "
+              "first construct a portfolio selector.")
+        sys.exit(-1)
 
-    # Directory
-    if Path(instance_path).is_dir():
-        srpsh.call_sparkle_portfolio_selector_solve_directory(
-            instance_path, run_on=run_on)
-        if run_on == Runner.LOCAL:
-            print("Running Sparkle portfolio selector done!")
-        else:
-            print("Sparkle portfolio selector is running ...")
-    # Single instance (single-file or multi-file)
-    elif Path(instance_path).is_file() or Path(instance_path.split()[0]).is_file():
-        srpsh.call_sparkle_portfolio_selector_solve_instance(instance_path)
+    # Multipe
+    if instance_set.size > 1:
+        test_case_path = Path("Test_Cases") / instance_set.name
+        test_case_path.mkdir(parents=True, exist_ok=True)
+        # Update latest scenario
+        gv.latest_scenario().set_selection_test_case_directory(test_case_path)
+        gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
+        # Write used scenario to file
+        gv.latest_scenario().write_scenario_ini()
+        test_performance_data = PerformanceDataFrame(
+            test_case_path / "sparkle_performance_data.csv")
+        srpsh.run_portfolio_selector_on_instances(
+            instance_set.instance_paths, test_performance_data, selector_path,
+            run_on=run_on)
+    # Single instance
+    elif instance_set.size == 1:
+        srpsh.call_sparkle_portfolio_selector_solve_instance(
+            instance_set.instance_paths[0])
         print("Running Sparkle portfolio selector done!")
     else:
         print("Input instance or instance directory error!")

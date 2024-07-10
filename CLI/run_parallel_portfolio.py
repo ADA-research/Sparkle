@@ -20,45 +20,46 @@ import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
-from sparkle.platform import slurm_help as ssh
 from sparkle.platform.settings_help import SettingState, Settings
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
 from CLI.help.command_help import CommandName
 from tools.runsolver_parsing import get_runtime, get_status
+from CLI.help.nicknames import resolve_object_name
 
 
-def run_parallel_portfolio(instances: list[Path],
+def run_parallel_portfolio(instances_set: InstanceSet,
                            portfolio_path: Path,
                            solvers: list[Solver],
                            run_on: Runner = Runner.SLURM) -> None:
     """Run the parallel algorithm portfolio.
 
     Args:
-        instances: List of instance Paths.
+        instances_set: Set of instances to run on.
         portfolio_path: Path to the parallel portfolio.
         solvers: List of solvers to run on the instances.
         run_on: Currently only supports Slurm.
     """
-    num_solvers, num_instances = len(solvers), len(instances)
+    num_solvers, num_instances = len(solvers), len(instances_set.instance_paths)
     seeds_per_solver = gv.settings.get_parallel_portfolio_number_of_seeds_per_solver()
     num_jobs = num_solvers * num_instances * seeds_per_solver
-    parallel_jobs = min(gv.settings.get_slurm_number_of_runs_in_parallel(), num_jobs)
+    parallel_jobs = min(gv.settings.get_number_of_jobs_in_parallel(), num_jobs)
     if parallel_jobs > num_jobs:
         print("WARNING: Not all jobs will be started at the same time due to the "
               "limitation of number of Slurm jobs that can be run in parallel. Check"
               " your Sparkle Slurm Settings.")
-    print(f"Sparkle parallel portfolio is running {seeds_per_solver} of "
-          f"{num_solvers} on {num_instances} ...")
+    print(f"Sparkle parallel portfolio is running {seeds_per_solver} seed(s) per solver "
+          f"on {num_solvers} solvers for {num_instances} instances ...")
     cmd_list, runsolver_logs = [], []
     cutoff = gv.settings.get_general_target_cutoff_time()
     log_timestamp = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time()))
     log_path = portfolio_path / "run-status-path"
     log_path.mkdir()
     # Create a command for each instance-solver-seed combination
-    for instance, solver in itertools.product(instances, solvers):
+    for instance, solver in itertools.product(instances_set.instance_paths, solvers):
         for _ in range(seeds_per_solver):
             seed = int(random.getrandbits(32))
             runsolver_watch_log =\
@@ -67,7 +68,7 @@ def run_parallel_portfolio(instances: list[Path],
                 log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.var"
             raw_result_path =\
                 log_path / f"{solver.name}_{instance.name}_{seed}_{log_timestamp}.raw"
-            solver_call_list = solver.build_solver_cmd(
+            solver_call_list = solver.build_cmd(
                 str(instance),
                 configuration={"specifics": "",
                                "seed": seed,
@@ -85,6 +86,7 @@ def run_parallel_portfolio(instances: list[Path],
                                    raw_result_path])
 
     # Jobs are added in to the runrunner object in the same order they are provided
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
     run = rrr.add_to_queue(
         runner=run_on,
         cmd=cmd_list,
@@ -92,25 +94,25 @@ def run_parallel_portfolio(instances: list[Path],
         parallel_jobs=parallel_jobs,
         path=".",
         base_dir=gv.sparkle_tmp_path,
-        srun_options=["-N1", "-n1"] + ssh.get_slurm_options_list(),
-        sbatch_options=ssh.get_slurm_options_list()
+        srun_options=["-N1", "-n1"] + sbatch_options,
+        sbatch_options=sbatch_options
     )
     check_interval = gv.settings.get_parallel_portfolio_check_interval()
     instances_done = [False] * num_instances
     # We record the 'best' of all seed results per solver-instance
-    job_output_dict = {instance.name: {solver.name: {"killed": False,
+    job_output_dict = {instance_name: {solver.name: {"killed": False,
                                                      "cpu-time": float(sys.maxsize),
                                                      "wc-time": float(sys.maxsize),
                                                      "status": "UNKNOWN"}
                                        for solver in solvers}
-                       for instance in instances}
+                       for instance_name in instances_set._instance_names}
     n_instance_jobs = num_solvers * seeds_per_solver
     while not all(instances_done):
         time.sleep(check_interval)
         job_status_list = [r.status for r in run.jobs]
         job_status_completed = [status == Status.COMPLETED for status in job_status_list]
         # The jobs are sorted by instance
-        for i, instance in enumerate(instances):
+        for i, instance in enumerate(instances_set.instance_paths):
             if instances_done[i]:
                 continue
             instance_job_slice = slice(i * n_instance_jobs, (i + 1) * n_instance_jobs)
@@ -135,7 +137,7 @@ def run_parallel_portfolio(instances: list[Path],
     for index, solver_logs in enumerate(runsolver_logs):
         solver_index = int((index % n_instance_jobs) / seeds_per_solver)
         solver_name = solvers[solver_index].name
-        instance_name = instances[int(index / n_instance_jobs)].name
+        instance_name = instances_set._instance_names[int(index / n_instance_jobs)]
         if not solver_logs[1].exists():
             # NOTE: Runsolver is still wrapping up, not a pretty solution
             time.sleep(5)
@@ -163,17 +165,17 @@ def run_parallel_portfolio(instances: list[Path],
             job_output_dict[instance][solver]["cpu-time"] = min_time + cutoff
             job_output_dict[instance][solver]["wc-time"] = min_time + cutoff
 
-    for index, instance in enumerate(instances):
+    for index, instance_name in enumerate(instances_set._instance_names):
         index_str = f"[{index + 1}/{num_instances}] "
-        instance_output = job_output_dict[instance.name]
+        instance_output = job_output_dict[instance_name]
         if all([instance_output[k]["status"] == "TIMEOUT"
                 for k in instance_output.keys()]):
-            print(f"\n{index_str}{instance.name} was not solved within the cutoff-time.")
+            print(f"\n{index_str}{instance_name} was not solved within the cutoff-time.")
             continue
-        print(f"\n{index_str}{instance.name} yielded the following Solver results:")
+        print(f"\n{index_str}{instance_name} yielded the following Solver results:")
         for sindex in range(index * num_solvers, (index + 1) * num_solvers):
             solver_name = solvers[sindex % num_solvers].name
-            job_info = job_output_dict[instance.name][solver_name]
+            job_info = job_output_dict[instance_name][solver_name]
             print(f"\t- {solver_name} ended with status {job_info['status']} in "
                   f"{job_info['cpu-time']}s CPU-Time ({job_info['wc-time']}s WC-Time)")
 
@@ -195,8 +197,8 @@ def parser_function() -> argparse.ArgumentParser:
         parser: The parser with the parsed command line arguments
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument(*ac.InstancePathsRunParallelPortfolioArgument.names,
-                        **ac.InstancePathsRunParallelPortfolioArgument.kwargs)
+    parser.add_argument(*ac.InstancePath.names,
+                        **ac.InstancePath.kwargs)
     parser.add_argument(*ac.NicknamePortfolioArgument.names,
                         **ac.NicknamePortfolioArgument.kwargs)
     parser.add_argument(*ac.SolversArgument.names,
@@ -225,16 +227,17 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     if args.solvers is not None:
-        solver_names = ["".join(s) for s in args.solvers]
-        solvers = [Solver.get_solver_by_name(solver) for solver in solver_names]
-        if None in solvers:
+        solver_paths = [resolve_object_name("".join(s), target_dir=gv.solver_dir)
+                        for s in args.solvers]
+        if None in solver_paths:
             print("Some solvers not recognised! Check solver names:")
-            for i, name in enumerate(solver_names):
-                if solvers[i] is None:
-                    print(f'\t- "{solver_names[i]}" ')
+            for i, name in enumerate(solver_paths):
+                if solver_paths[i] is None:
+                    print(f'\t- "{solver_paths[i]}" ')
             sys.exit(-1)
+        solvers = [Solver(p) for p in solver_paths]
     else:
-        solvers = [Solver.get_solver_by_name(p) for p in gv.solver_dir.iterdir()]
+        solvers = [Solver(p) for p in gv.solver_dir.iterdir() if p.is_dir()]
 
     check_for_initialise(
         sys.argv,
@@ -250,32 +253,23 @@ if __name__ == "__main__":
         gv.settings.read_settings_ini(args.settings_file, SettingState.CMD_LINE)
 
     portfolio_path = args.portfolio_name
-    run_on = args.run_on
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     if run_on == Runner.LOCAL:
         print("Parallel Portfolio is not fully supported yet for Local runs. Exiting.")
         sys.exit(-1)
 
-    # Create list of instance paths
-    instance_paths = []
-
-    for instance in args.instance_paths:
-        instance_path = Path(instance)
-        if not instance_path.exists():
-            print(f'Instance "{instance}" not found, aborting the process.')
-            sys.exit(-1)
-        if instance_path.is_file():
-            print(f"Running on instance {instance}")
-            instance_paths.append(instance_path)
-        elif not instance_path.is_dir():
-            instance_path = gv.instance_dir / instance
-
-        if instance_path.is_dir():
-            items = [instance_path / p.name for p in Path(instance).iterdir()
-                     if p.is_file()]
-            print(f"Running on {len(items)} instance(s) from "
-                  f"directory {instance}")
-            instance_paths.extend(items)
+    # Retrieve instance set
+    instance_set = resolve_object_name(
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir,
+        InstanceSet)
+    print(f"Running on {instance_set.size} instance(s)...")
 
     if args.cutoff_time is not None:
         gv.settings.set_general_target_cutoff_time(args.cutoff_time,
@@ -290,8 +284,6 @@ if __name__ == "__main__":
               f"{PerformanceMeasure.RUNTIME} measurement. In all other cases, "
               "use validation")
         sys.exit(-1)
-    # Write settings to file before starting, since they are used in callback scripts
-    gv.settings.write_used_settings()
 
     if args.portfolio_name is not None:  # Use a nickname
         portfolio_path = gv.parallel_portfolio_output_raw / args.portfolio_name
@@ -307,18 +299,14 @@ if __name__ == "__main__":
             sys.exit()
         shutil.rmtree(portfolio_path)
     portfolio_path.mkdir(parents=True)
-    run_parallel_portfolio(instance_paths, portfolio_path, solvers, run_on=run_on)
+    run_parallel_portfolio(instance_set, portfolio_path, solvers, run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_parallel_portfolio_path(portfolio_path)
     gv.latest_scenario().set_latest_scenario(Scenario.PARALLEL_PORTFOLIO)
-    gv.latest_scenario().set_parallel_portfolio_instance_list(instance_paths)
-    # NOTE: Patching code to make sure generate report still works
-    solvers_file = portfolio_path / "solvers.txt"
-    with solvers_file.open("w") as fout:
-        for solver in solvers:
-            fout.write(f"{solver.directory}\n")
-    print("Running Sparkle parallel portfolio is done!")
-
+    gv.latest_scenario().set_parallel_portfolio_instance_path(args.instance_path)
+    # Write used scenario to file
+    gv.latest_scenario().write_scenario_ini()
     # Write used settings to file
     gv.settings.write_used_settings()
+    print("Running Sparkle parallel portfolio is done!")

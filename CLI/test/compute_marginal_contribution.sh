@@ -40,8 +40,8 @@ solverB_path="Examples/Resources/Solvers/MiniSAT/"
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null
 CLI/add_feature_extractor.py $extractor_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverA_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solverB_path > /dev/null
+CLI/add_solver.py $solverA_path > /dev/null
+CLI/add_solver.py $solverB_path > /dev/null
 
 # Activate test data to simulate the compute_features, run_solvers and construct_sparkle_portfolio_selector commands
 cp $feature_data_test $feature_data_path

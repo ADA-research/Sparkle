@@ -8,11 +8,16 @@ import ast
 def parse_commandline_dict(args: list[str]) -> dict:
     """Parses a commandline dictionary to the object."""
     dict_str = " ".join(args)
+    # Remove white space
+    dict_str = dict_str.replace(" ", "")
     # Remove all quotes to avoid double strings
     dict_str = dict_str.replace('"', "").replace("'", "")
     # Place the quotes only there where needed
-    dict_str = dict_str.replace("{", "{'").replace(": ", "': '")
-    dict_str = dict_str.replace(", ", "', '").replace("}", "'}")
+    dict_str = dict_str.replace("{", "{'").replace(":", "':'")
+    dict_str = dict_str.replace("[", "['").replace("]", "']")
+    dict_str = dict_str.replace(",", "','").replace("}", "'}")
+    # Undo quotes at the start and end of lists
+    dict_str = dict_str.replace("':'[", "':[").replace("]','", "],'")
     return ast.literal_eval(dict_str)
 
 

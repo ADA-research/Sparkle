@@ -4,13 +4,12 @@
 
 import time
 import sys
-import ast
 import subprocess
 from pathlib import Path
+from tools.slurm_parsing import parse_commandline_dict
 
-# Convert the argument of the target_algorithm script to dictionary
-# use the join of the argsv to prevent errors with spaces in the string
-args = ast.literal_eval(" ".join(sys.argv[1:]))
+# Convert the arguments to a dictionary
+args = parse_commandline_dict(sys.argv[1:])
 
 # Extract and delete data that needs specific formatting
 solver_dir = Path(args["solver_dir"])
@@ -25,7 +24,7 @@ del args["seed"]
 del args["specifics"]
 del args["run_length"]
 
-solver_name = "PbO-CCSAT"
+solver_name = "EXAMPLE_SOLVER"
 if solver_dir != Path("."):
     solver_exec = f"{solver_dir / solver_name}"
 else:

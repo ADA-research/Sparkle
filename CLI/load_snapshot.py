@@ -4,7 +4,7 @@
 import sys
 import argparse
 
-from sparkle.platform import snapshot_help
+from CLI.help import snapshot_help
 import sparkle_logging as sl
 from CLI.help import argparse_custom as ac
 

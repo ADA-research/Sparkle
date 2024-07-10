@@ -15,19 +15,19 @@ from CLI.help.status_info import ConfigureSolverStatusInfo
 import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
-from sparkle.configurator import ablation as sah
+from CLI.support import ablation_help as sah
 from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle.platform import slurm_help as ssh
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from CLI.help.nicknames import resolve_object_name
-from sparkle.solver.solver import Solver
+from sparkle.solver import Solver
 from CLI.help.command_help import CommandName
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
+from sparkle.instance import InstanceSet
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -95,11 +95,14 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
     if args.number_of_runs is not None:
         gv.settings.set_config_number_of_runs(
             args.number_of_runs, SettingState.CMD_LINE)
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
 
 
 def run_after(solver: Path,
-              instance_set_train: Path,
-              instance_set_test: Path,
+              train_set: InstanceSet,
+              test_set: InstanceSet,
               dependency: list[rrr.SlurmRun | rrr.LocalRun],
               command: CommandName,
               run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
@@ -107,8 +110,8 @@ def run_after(solver: Path,
 
     Args:
       solver: Path (object) to solver.
-      instance_set_train: Path (object) to instances used for training.
-      instance_set_test: Path (object) to instances used for testing.
+      train_set: Instances used for training.
+      test_set: Instances used for testing.
       dependency: String of job dependencies.
       command: The command to run. Currently supported: Validation and Ablation.
       run_on: Whether the job is executed on Slurm or locally.
@@ -121,18 +124,19 @@ def run_after(solver: Path,
         cmd_file = "run_ablation.py"
 
     command_line = f"./CLI/{cmd_file} --settings-file Settings/latest.ini "\
-                   f"--solver {solver.name} --instance-set-train {instance_set_train}"\
+                   f"--solver {solver.name} --instance-set-train {train_set.directory}"\
                    f" --run-on {run_on}"
-    if instance_set_test is not None:
-        command_line += f" --instance-set-test {instance_set_test}"
+    if test_set is not None:
+        command_line += f" --instance-set-test {test_set.directory}"
 
-    run = rrr.add_to_queue(runner=run_on,
-                           cmd=command_line,
-                           name=command,
-                           dependencies=dependency,
-                           base_dir=gv.sparkle_tmp_path,
-                           srun_options=["-N1", "-n1"],
-                           sbatch_options=ssh.get_slurm_options_list())
+    run = rrr.add_to_queue(
+        runner=run_on,
+        cmd=command_line,
+        name=command,
+        dependencies=dependency,
+        base_dir=gv.sparkle_tmp_path,
+        srun_options=["-N1", "-n1"],
+        sbatch_options=gv.settings.get_slurm_extra_options(as_args=True))
 
     if run_on == Runner.LOCAL:
         print("Waiting for the local calculations to finish.")
@@ -157,15 +161,22 @@ if __name__ == "__main__":
 
     validate = args.validate
     ablation = args.ablation
-    solver_path = resolve_object_name(args.solver,
-                                      gv.solver_nickname_mapping, gv.solver_dir)
-    instance_set_train = resolve_object_name(args.instance_set_train,
-                                             target_dir=gv.instance_dir)
+    solver = resolve_object_name(
+        args.solver,
+        gv.file_storage_data_mapping[gv.solver_nickname_list_path],
+        gv.solver_dir, class_name=Solver)
+    instance_set_train = resolve_object_name(
+        args.instance_set_train,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
     instance_set_test = args.instance_set_test
     if instance_set_test is not None:
-        instance_set_test = Path(instance_set_test)
+        instance_set_test = resolve_object_name(
+            args.instance_set_test,
+            gv.file_storage_data_mapping[gv.instances_nickname_path],
+            gv.instance_dir, InstanceSet)
     use_features = args.use_features
-    run_on = args.run_on
+    run_on = gv.settings.get_run_on()
     if args.configurator is not None:
         gv.settings.set_general_sparkle_configurator(
             value=getattr(Configurator, args.configurator),
@@ -177,11 +188,8 @@ if __name__ == "__main__":
 
     feature_data_df = None
     if use_features:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path)
-
-        if not Path(instance_set_train).is_dir():  # Path has to be a directory
-            print("Given training set path is not an existing directory")
-            sys.exit(-1)
+        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
+                                                        gv.extractor_list)
 
         data_dict = {}
         feature_data_df = feature_data_csv.dataframe
@@ -209,14 +217,13 @@ if __name__ == "__main__":
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
 
-    sah.clean_ablation_scenarios(solver_path.name, instance_set_train.name)
-    solver = Solver(solver_path)
+    sah.clean_ablation_scenarios(solver, instance_set_train)
 
     status_info = ConfigureSolverStatusInfo()
-    status_info.set_solver(str(solver.name))
-    status_info.set_instance_set_train(str(instance_set_train.name))
-    ins_t_str = instance_set_test.name if instance_set_test is not None else "_"
-    status_info.set_instance_set_test(str(instance_set_test))
+    status_info.set_solver(solver.name)
+    status_info.set_instance_set_train(instance_set_train.name)
+    status_info.set_instance_set_test(
+        instance_set_test.name if instance_set_test is not None else None)
     status_info.save()
 
     number_of_runs = gv.settings.get_config_number_of_runs()
@@ -233,15 +240,20 @@ if __name__ == "__main__":
         wallclock_time, cutoff_time, cutoff_length, sparkle_objective, use_features,
         configurator.configurator_target, feature_data_df)
 
-    dependency_job_list = configurator.configure(scenario=config_scenario, run_on=run_on)
+    sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+    dependency_job_list = configurator.configure(
+        scenario=config_scenario,
+        sbatch_options=sbatch_options,
+        num_parallel_jobs=gv.settings.get_number_of_jobs_in_parallel(),
+        run_on=run_on)
 
     # Update latest scenario
     gv.latest_scenario().set_config_solver(solver.directory)
-    gv.latest_scenario().set_config_instance_set_train(instance_set_train)
+    gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 
     if instance_set_test is not None:
-        gv.latest_scenario().set_config_instance_set_test(instance_set_test)
+        gv.latest_scenario().set_config_instance_set_test(instance_set_test.directory)
     else:
         # Set to default to overwrite possible old path
         gv.latest_scenario().set_config_instance_set_test()
@@ -263,7 +275,7 @@ if __name__ == "__main__":
 
     if run_on == Runner.SLURM:
         job_id_str = ",".join([run.run_id for run in dependency_job_list])
-        print(f"Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+        print(f"Running configuration. Waiting for Slurm job(s) with id(s): "
               f"{job_id_str}")
     else:
         print("Running configuration finished!")

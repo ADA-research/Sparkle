@@ -26,30 +26,13 @@ CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null
 CLI/add_feature_extractor.py $extractor_path > /dev/null
 
-# Compute features
-output_true="Computing features done!"
-output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path | tail -1)
 
-if [[ $output == $output_true ]];
-then
-	echo "[success] compute_features test succeeded"
-else
-	echo "[failure] compute_features test failed with output:"
-	echo $output
-fi
-
-# Compute features parallel
 output_true="RunRunner Submitted a run to Slurm "
-if ! [[ $slurm_available =~ "${slurm_true}" ]];
-then
-	output_true="Computing Features in parallel done!"
-fi
-
-output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path --parallel --recompute --run-on $slurm_available | tail -1)
+output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path --run-on slurm | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
-	echo "[success] ($slurm_available) compute_features --parallel test succeeded"
+	echo "[success] (slurm) compute_features test succeeded"
     jobid=${output//[^0-9]/}
 
 	if [[ $slurm_available =~ "${slurm_true}" ]];
@@ -57,10 +40,22 @@ then
 		scancel $jobid
 	fi
 else
-	echo "[failure] ($slurm_available) compute_features --parallel test failed with output:"
+	echo "[failure] (slurm) compute_features test failed with output:"
 	echo $output
 	if [[ $slurm_available =~ "${slurm_true}" ]];
 	then
 		kill_started_jobs_slurm
 	fi
+fi
+
+# TODO: Run the compute features locally
+output_true="Computing features done!"
+output=$(CLI/compute_features.py --settings-file $sparkle_test_settings_path --run-on local | tail -1)
+
+if [[ $output =~ "${output_true}" ]];
+then
+	echo "[success] (local) compute_features test succeeded"
+else
+	echo "[failure] (local) compute_features test failed with output:"
+	echo $output
 fi

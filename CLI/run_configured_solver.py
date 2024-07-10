@@ -3,7 +3,7 @@
 
 import sys
 import argparse
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 from runrunner.base import Runner
 
@@ -11,24 +11,24 @@ import global_variables as gv
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.platform.settings_help import SettingState, Settings
-from CLI.support import run_configured_solver_help as srcsh
+from CLI.help import run_solver_help as srcsh
+from sparkle.instance import InstanceSet
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
 from CLI.help.nicknames import resolve_object_name
+from CLI.help.command_help import CommandName
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(*ac.InstancePathRunConfiguredSolverArgument.names,
-                        **ac.InstancePathRunConfiguredSolverArgument.kwargs)
+    parser.add_argument(*ac.InstancePathPositional.names,
+                        **ac.InstancePathPositional.kwargs)
     parser.add_argument(*ac.SettingsFileArgument.names,
                         **ac.SettingsFileArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureSimpleArgument.names,
                         **ac.PerformanceMeasureSimpleArgument.kwargs)
-    parser.add_argument(*ac.ParallelArgument.names,
-                        **ac.ParallelArgument.kwargs)
     parser.add_argument(*ac.RunOnArgument.names,
                         **ac.RunOnArgument.kwargs)
     return parser
@@ -47,13 +47,20 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-    if isinstance(args.instance_path, list):
-        instance_path = [resolve_object_name(instance, target_dir=gv.instance_dir)
-                         for instance in args.instance_path]
-    else:
-        instance_path = resolve_object_name(args.instance_path,
-                                            target_dir=gv.instance_dir)
-    run_on = args.run_on
+
+    # Try to resolve the instance path (Dir or list instance paths)
+    instance_set = resolve_object_name(
+        args.instance_path,
+        gv.file_storage_data_mapping[gv.instances_nickname_path],
+        gv.instance_dir, InstanceSet)
+    if instance_set is None:
+        print(f"Could not resolve instance (set): {args.instance_path}! Exiting...")
+        sys.exit(-1)
+
+    if args.run_on is not None:
+        gv.settings.set_run_on(
+            args.run_on.value, SettingState.CMD_LINE)
+    run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,
                          ch.COMMAND_DEPENDENCIES[ch.CommandName.RUN_CONFIGURED_SOLVER])
@@ -70,36 +77,27 @@ if __name__ == "__main__":
     prev_settings = Settings(PurePath("Settings/latest.ini"))
     Settings.check_settings_changes(gv.settings, prev_settings)
 
-    # Validate input (is directory, or single instance (single-file or multi-file))
-    if ((len(instance_path) == 1 and instance_path[0].is_dir())
-            or (all([path.is_file() for path in instance_path]))):
-        # Get the name of the configured solver and the training set
-        solver_name = Path(gv.latest_scenario().get_config_solver()).name
-        instance_set_name = Path(
-            gv.latest_scenario().get_config_instance_set_train()).name
-        if solver_name is None or instance_set_name is None:
-            # Print error and stop execution
-            print("ERROR: No configured solver found! Stopping execution.")
-            sys.exit(-1)
-
-        # Get optimised configuration
-        configurator = gv.settings.get_general_sparkle_configurator()
-        _, config_str = configurator.get_optimal_configuration(solver_name,
-                                                               instance_set_name)
-
-        # Call the configured solver
-        run = srcsh.call_configured_solver(args.instance_path,
-                                           solver_name,
-                                           config_str,
-                                           args.parallel,
-                                           run_on=run_on)
-    else:
-        print("ERROR: Faulty input instance or instance directory!")
+    # Get the name of the configured solver and the training set
+    solver = gv.latest_scenario().get_config_solver()
+    train_set = gv.latest_scenario().get_config_instance_set_train()
+    if solver is None or train_set is None:
+        # Print error and stop execution
+        print("ERROR: No configured solver found! Stopping execution.")
         sys.exit(-1)
+    # Get optimised configuration
+    configurator = gv.settings.get_general_sparkle_configurator()
+    _, config_str = configurator.get_optimal_configuration(solver, train_set)
+
+    # Call the configured solver
+    run = srcsh.call_solver(instance_set,
+                            solver,
+                            config=config_str,
+                            commandname=CommandName.RUN_CONFIGURED_SOLVER,
+                            run_on=run_on)
 
     # Print result
-    if args.parallel and run_on == Runner.SLURM:
-        print(f"Running configured solver in parallel. Waiting for Slurm "
+    if run_on == Runner.SLURM:
+        print(f"Running configured solver. Waiting for Slurm "
               f"job(s) with id(s): {run.run_id}")
     else:
         print("Running configured solver done!")

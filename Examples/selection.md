@@ -18,11 +18,11 @@ Add solvers (here for SAT solving) with a wrapper containing the executable name
 
 Each solver directory should contain the solver executable and a wrapper
 
-`sparkle add_solver --deterministic 0 Examples/Resources/Solvers/CSCCSat/`
+`sparkle add_solver Examples/Resources/Solvers/CSCCSat/`
 
-`sparkle add_solver --deterministic 0 Examples/Resources/Solvers/PbO-CCSAT-Generic/`
+`sparkle add_solver Examples/Resources/Solvers/PbO-CCSAT-Generic/`
 
-`sparkle add_solver --deterministic 0 Examples/Resources/Solvers/MiniSAT/`
+`sparkle add_solver Examples/Resources/Solvers/MiniSAT/`
 
 ## Add feature extractor
 
@@ -32,13 +32,13 @@ Similarly, add a feature extractor, without immediately running it on the instan
 
 ## Compute features
 
-Compute features for all the instances; add the `--parallel` option to run in parallel
+Compute features for all the instances
 
 `sparkle compute_features`
 
 ## Run the solvers
 
-Run the solvers on all instances; add the `--parallel` option to run in parallel
+Run the solvers on all instances
 
 `sparkle run_solvers`
 

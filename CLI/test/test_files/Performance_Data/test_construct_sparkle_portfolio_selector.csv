@@ -1,4 +1,4 @@
-,Solvers/MiniSAT,Solvers/CSCCSat
+Instance,Solvers/MiniSAT,Solvers/CSCCSat
 Instances/PTN/Ptn-7824-b03.cnf,3000.0,3000.0
 Instances/PTN/Ptn-7824-b15.cnf,3000.0,28.1747
 Instances/PTN/Ptn-7824-b05.cnf,3000.0,3000.0

@@ -24,6 +24,16 @@ def get_runtime(runsolver_values_path: Path,
     return cpu_time, wc_time
 
 
+def handle_timeouts(runtime: float, status: str,
+                    cutoff_time: float, penalty: float) -> tuple[float, str]:
+    """Determines whether runtime should be penalised based on status and cutoff."""
+    if runtime > cutoff_time or status == "TIMEOUT":
+        if status == "CRASHED":
+            status = "TIMEOUT"
+        return penalty, status
+    return runtime, status
+
+
 def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> str:
     """Get run status from runsolver logs."""
     if not runsolver_values_path.exists():
@@ -35,6 +45,8 @@ def get_status(runsolver_values_path: Path, runsolver_raw_path: Path) -> str:
             if line.strip() == "TIMEOUT=true":
                 return "TIMEOUT"
             break
+    if runsolver_raw_path is None:
+        return "UNKNOWN"
     if not runsolver_raw_path.exists():
         # Runsolver log was not created, job was stopped ''incorrectly''
         return "KILLED"

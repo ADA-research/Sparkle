@@ -18,12 +18,6 @@ slurm_true="slurm"
 slurm_available=$(detect_slurm)
 
 # Settings
-slurm_settings_path="Settings/sparkle_slurm_settings.txt"
-slurm_settings_tmp="Settings/sparkle_slurm_settings.tmp"
-slurm_settings_test="CLI/test/test_files/sparkle_slurm_settings.txt"
-mv $slurm_settings_path $slurm_settings_tmp # Save user settings
-cp $slurm_settings_test $slurm_settings_path # Activate test settings
-
 sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
 
 # Prepare for test
@@ -35,13 +29,13 @@ solver_src_path="${examples_path}${solver_path}"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_src_path > /dev/null
-CLI/add_solver.py --deterministic 0 $solver_src_path > /dev/null
+CLI/add_solver.py $solver_src_path > /dev/null
 
 # Set up output conditions
 output_true="Running configuration finished!"
 if [[ $slurm_available =~ "${slurm_true}" ]];
 then
-	output_true="Running configuration in parallel. Waiting for Slurm job(s) with id(s): "
+	output_true="Running configuration. Waiting for Slurm job(s) with id(s): "
 fi
 
 # Configure solver
@@ -153,7 +147,4 @@ else
 		kill_started_jobs_slurm
 	fi
 fi
-
-# Restore original settings
-mv $slurm_settings_tmp $slurm_settings_path
 

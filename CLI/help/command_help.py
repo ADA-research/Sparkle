@@ -12,16 +12,12 @@ class CommandName(str, Enum):
     ADD_FEATURE_EXTRACTOR = "add_feature_extractor"
     ADD_INSTANCES = "add_instances"
     ADD_SOLVER = "add_solver"
-    CLEANUP_CURRENT_SPARKLE_PLATFORM = "cleanup_current_sparkle_platform"
-    CLEANUP_TEMPORARY_FILES = "cleanup_temporary_files"
     COMPUTE_FEATURES = "compute_features"
     COMPUTE_MARGINAL_CONTRIBUTION = "compute_marginal_contribution"
     CONFIGURE_SOLVER = "configure_solver"
-    CONFIGURE_SOLVER_CALLBACK = "configure_solver_callback"
     CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR = "construct_sparkle_portfolio_selector"
     GENERATE_REPORT = "generate_report"
     INITIALISE = "initialise"
-    LOAD_SNAPSHOT = "load_snapshot"
     REMOVE_FEATURE_EXTRACTOR = "remove_feature_extractor"
     REMOVE_INSTANCES = "remove_instances"
     REMOVE_SOLVER = "remove_solver"
@@ -32,13 +28,11 @@ class CommandName(str, Enum):
     RUN_SOLVERS = "run_solvers"
     RUN_SPARKLE_PORTFOLIO_SELECTOR = "run_sparkle_portfolio_selector"
     RUN_STATUS = "run_status"
-    SAVE_SNAPSHOT = "save_snapshot"
     SPARKLE_WAIT = "sparkle_wait"
     SYSTEM_STATUS = "system_status"
     VALIDATE_CONFIGURED_VS_DEFAULT = "validate_configured_vs_default"
     RUN_CONFIGURED_SOLVER = "run_configured_solver"
     RUN_PARALLEL_PORTFOLIO = "run_parallel_portfolio"
-    CSV_MERGE = "csv_merge"
     VALIDATION = "validation"
 
     @staticmethod
@@ -64,8 +58,6 @@ COMMAND_DEPENDENCIES = {
     CommandName.ADD_FEATURE_EXTRACTOR: [CommandName.INITIALISE],
     CommandName.ADD_INSTANCES: [CommandName.INITIALISE],
     CommandName.ADD_SOLVER: [CommandName.INITIALISE],
-    CommandName.CLEANUP_CURRENT_SPARKLE_PLATFORM: [],
-    CommandName.CLEANUP_TEMPORARY_FILES: [],
     CommandName.COMPUTE_FEATURES: [CommandName.INITIALISE,
                                    CommandName.ADD_FEATURE_EXTRACTOR,
                                    CommandName.ADD_INSTANCES],
@@ -85,7 +77,6 @@ COMMAND_DEPENDENCIES = {
                                   CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR,
                                   CommandName.RUN_SPARKLE_PORTFOLIO_SELECTOR],
     CommandName.INITIALISE: [],
-    CommandName.LOAD_SNAPSHOT: [],
     CommandName.REMOVE_FEATURE_EXTRACTOR: [CommandName.INITIALISE],
     CommandName.REMOVE_INSTANCES: [CommandName.INITIALISE],
     CommandName.REMOVE_SOLVER: [CommandName.INITIALISE],
@@ -98,7 +89,6 @@ COMMAND_DEPENDENCIES = {
         CommandName.INITIALISE,
         CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR],
     CommandName.RUN_STATUS: [],
-    CommandName.SAVE_SNAPSHOT: [],
     CommandName.SPARKLE_WAIT: [],
     CommandName.SYSTEM_STATUS: [],
     CommandName.VALIDATE_CONFIGURED_VS_DEFAULT: [CommandName.INITIALISE,
