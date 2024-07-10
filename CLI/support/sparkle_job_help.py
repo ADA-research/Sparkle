@@ -175,13 +175,16 @@ def wait_for_all_jobs() -> None:
         jobs = get_dependencies(jobs)
         # Interval at which to refresh the table
         check_interval = gv.settings.get_general_check_interval()
+        # Order in which to display the jobs
+        priority = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
         while len(running_jobs) > 0:
             # Information to be printed to the table
             information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
                             or run.status == Status.RUNNING]
-            for job in jobs:
+            sorted_jobs = sorted(jobs, key=lambda job: priority[job.status])
+            for job in sorted_jobs:
                 finished_jobs_count = sum(1 for status in job.all_status
                                           if status == Status.COMPLETED)
                 information.append(
