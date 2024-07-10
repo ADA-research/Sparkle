@@ -60,6 +60,7 @@ class Settings:
     DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
+    DEFAULT_general_verbosity = VerbosityLevel.STANDARD
 
     DEFAULT_config_wallclock_time = 600
     DEFAULT_config_cpu_time = None
@@ -82,8 +83,6 @@ class Settings:
     DEFAULT_tmp_output = Path("Tmp")
     DEFAULT_configuration_output = DEFAULT_output / "Configuration"
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / "Raw_Data"
-
-    DEFAULT_output_verbosity = VerbosityLevel.STANDARD
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -115,7 +114,7 @@ class Settings:
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
         self.__parallel_portfolio_num_seeds_per_solver_set = SettingState.NOT_SET
 
-        self.__output_verbosity_set = SettingState.NOT_SET
+        self.__general_verbosity_set = SettingState.NOT_SET
 
         self.__general_sparkle_configurator = None
 
@@ -204,6 +203,14 @@ class Settings:
                     self.set_run_on(value, state)
                     file_settings.remove_option(section, option)
 
+            option_names = ("verbosity", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = VerbosityLevel.from_string(
+                        file_settings.get(section, option))
+                    self.set_general_verbosity(value, state)
+                    file_settings.remove_option(section, option)
+
             section = "configuration"
             option_names = ("wallclock_time", "smac_whole_time_budget")
             for option in option_names:
@@ -273,15 +280,6 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = int(file_settings.get(section, option))
                     self.set_parallel_portfolio_number_of_seeds_per_solver(value, state)
-                    file_settings.remove_option(section, option)
-
-            section = "output"
-            option_names = ("verbosity", )
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = VerbosityLevel.from_string(
-                        file_settings.get(section, option))
-                    self.set_output_verbosity(value, state)
                     file_settings.remove_option(section, option)
 
             # TODO: Report on any unknown settings that were read
@@ -579,6 +577,29 @@ class Settings:
 
         return int(self.__settings["general"]["number_of_jobs_in_parallel"])
 
+    def set_general_verbosity(
+        self: Settings, value: VerbosityLevel = DEFAULT_general_verbosity,
+        origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general verbosity to use."""
+        section = "general"
+        name = "verbosity"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_verbosity_set, origin, name):
+            self.__init_section(section)
+            self.__general_verbosity_set = origin
+            self.__settings[section][name] = value.name
+
+        return
+
+    def get_general_verbosity(self: Settings) -> VerbosityLevel:
+        """Return the general verbosity."""
+        if self.__general_verbosity_set == SettingState.NOT_SET:
+            self.set_general_verbosity()
+
+        return VerbosityLevel.from_string(
+                self.__settings["general"]["verbosity"])
+
     # Configuration settings ###
 
     def set_config_wallclock_time(
@@ -874,27 +895,3 @@ class Settings:
                     print(f"    · '{name}' changed from '{prev_val}' to '{cur_val}'")
 
         return not (sections_removed or sections_added or option_changed)
-
-    # Output settings ###
-    def set_output_verbosity(
-            self: Settings, value: VerbosityLevel = DEFAULT_output_verbosity,
-            origin: SettingState = SettingState.DEFAULT) -> None:
-        """Set the output verbosity to use."""
-        section = "output"
-        name = "verbosity"
-
-        if value is not None and self.__check_setting_state(
-                self.__output_verbosity_set, origin, name):
-            self.__init_section(section)
-            self.__output_verbosity_set = origin
-            self.__settings[section][name] = value.name
-
-        return
-
-    def get_output_verbosity(self: Settings) -> VerbosityLevel:
-        """Return the output verbosity."""
-        if self.__output_verbosity_set == SettingState.NOT_SET:
-            self.set_output_verbosity()
-
-        return VerbosityLevel.from_string(
-            self.__settings["output"]["verbosity"])

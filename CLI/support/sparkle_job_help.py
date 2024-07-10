@@ -153,7 +153,7 @@ def clear_console(lines: int) -> None:
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     jobs = get_running_jobs()
-    verbosity_setting = gv.settings.get_output_verbosity()
+    verbosity_setting = gv.settings.get_general_verbosity()
     running_jobs = [run for run in jobs
                     if run.status == Status.WAITING or run.status == Status.RUNNING]
 
