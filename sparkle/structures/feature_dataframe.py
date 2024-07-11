@@ -91,7 +91,7 @@ class FeatureDataFrame:
     def get_feature_groups(self: FeatureDataFrame,
                            extractor: str | list[str] = None) -> list[str]:
         """Retrieve the feature groups in the dataframe.
-    
+
         Args:
             extractor: Optional. If extractor(s) are given,
                 yields only feature groups of that extractor.
@@ -141,9 +141,9 @@ class FeatureDataFrame:
                 that needs to be computed.
         """
         remaining_jobs = []
-        for extractor in self.get_extractors():          
+        for extractor in self.get_extractors():
             for group in self.get_feature_groups(extractor):
-                subset = self.dataframe.xs((group, extractor), level=(0,2))
+                subset = self.dataframe.xs((group, extractor), level=(0, 2))
                 for instance in self.dataframe.columns:
                     if subset.loc[:, instance].isnull().all():
                         remaining_jobs.append((instance, extractor, group))

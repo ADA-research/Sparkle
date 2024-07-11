@@ -47,7 +47,7 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
     if verbose:
         for i, job in enumerate(jobs):
             print(f"[{i + 1}]: Extractor: {Path(job[1]).name}, Group: {job[2]}, "
-                    f"Instance: {Path(job[0]).name}")
+                  f"Instance: {Path(job[0]).name}")
     print()
 
 

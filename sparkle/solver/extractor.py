@@ -30,7 +30,7 @@ class Extractor(SparkleCallable):
         self._features = None
         self._feature_groups = None
         self._output_dimension = None
-        self._groupwise_computation = None #Needs to be set
+        self._groupwise_computation = None
 
     @property
     def features(self: Extractor) -> list[tuple[str, str]]:
@@ -57,11 +57,12 @@ class Extractor(SparkleCallable):
     def groupwise_computation(self: Extractor) -> bool:
         """Determines if you can call the extractor per group for parallelisation."""
         if self._groupwise_computation is None:
-            extractor_help = subprocess.run([self.directory / Extractor.wrapper, "-h"], capture_output=True)
+            extractor_help = subprocess.run([self.directory / Extractor.wrapper, "-h"],
+                                            capture_output=True)
             # Not the cleanest / most precise way to determine this
-            self._groupwise_computation = "-feature_group" in extractor_help.stdout.decode()
+            self._groupwise_computation =\
+                "-feature_group" in extractor_help.stdout.decode()
         return self._groupwise_computation
-        
 
     def build_cmd(self: Extractor,
                   instance: Path | list[Path],
@@ -119,7 +120,8 @@ class Extractor(SparkleCallable):
         if feature_group is not None and not self.groupwise_computation:
             # This extractor cannot handle groups, compute all features
             feature_group = None
-        cmd_extractor = self.build_cmd(instance, feature_group, output_file, runsolver_args)
+        cmd_extractor = self.build_cmd(
+            instance, feature_group, output_file, runsolver_args)
         extractor = subprocess.run(cmd_extractor, capture_output=True)
         if output_file is None:
             try:
