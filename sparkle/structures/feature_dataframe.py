@@ -104,7 +104,7 @@ class FeatureDataFrame:
             if isinstance(extractor, str):
                 extractor = [extractor]
             indices = indices[indices.isin(extractor, level=2)]
-        return indices.get_level_values(level=0).to_list()
+        return indices.get_level_values(level=0).unique().to_list()
 
     def get_value(self: FeatureDataFrame,
                   instance: str,
@@ -143,11 +143,10 @@ class FeatureDataFrame:
         remaining_jobs = []
         for extractor in self.get_extractors():          
             for group in self.get_feature_groups(extractor):
-                    subset = self.dataframe.xs(extractor, level=2).xs(group, level=0)
-                    subset = self.dataframe.xs((group, extractor), level=(0,2), drop_level=False)
-                    for instance in self.dataframe.columns:
-                        if subset.loc[:, instance].isnull().all():
-                            remaining_jobs.append((instance, extractor, group))
+                subset = self.dataframe.xs((group, extractor), level=(0,2))
+                for instance in self.dataframe.columns:
+                    if subset.loc[:, instance].isnull().all():
+                        remaining_jobs.append((instance, extractor, group))
         return remaining_jobs
 
     def get_instance(self: FeatureDataFrame, instance: str) -> list[float]:
