@@ -39,20 +39,15 @@ def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
 
     feature_data_csv = FeatureDataFrame(feature_data_csv_path)
     jobs = feature_data_csv.remaining_jobs()
-    total_job_num = sum([len(jobs[instance]) for instance in jobs.keys()])
 
-    print(f"\nCurrently Sparkle has {total_job_num} remaining feature computation "
+    print(f"\nCurrently Sparkle has {len(jobs)} remaining feature computation "
           "jobs that need to be performed before creating an algorithm selector"
           + (":" if verbose else ""))
 
     if verbose:
-        i = 0
-        for instance in jobs.keys():
-            for extractor in jobs[instance]:
-                print(f"[{i + 1}]: Extractor: "
-                      f"{Path(extractor).name}, Instance: "
-                      f"{Path(instance).name}")
-                i += 1
+        for i, job in enumerate(jobs):
+            print(f"[{i + 1}]: Extractor: {Path(job[1]).name}, Group: {job[2]}, "
+                    f"Instance: {Path(job[0]).name}")
     print()
 
 

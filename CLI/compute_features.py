@@ -61,7 +61,7 @@ def compute_features(
     jobs = feature_dataframe.remaining_jobs()
 
     # If there are no jobs, stop
-    if jobs == {}:
+    if not jobs:
         print("No feature computation jobs to run; stopping execution! To recompute "
               "feature values use the --recompute flag.")
         sys.exit()
@@ -69,26 +69,24 @@ def compute_features(
     cmd_list = []
     extractors = {}
     # We create a job for each instance/extractor combination
-    for inst_path in jobs.keys():
-        for ex_path in jobs[inst_path]:
-            cmd = ("CLI/core/compute_features.py "
-                   f"--instance {inst_path} "
-                   f"--extractor {ex_path} "
-                   f"--feature-csv {feature_data_csv_path} "
-                   f"--cutoff {cutoff}")
-            if ex_path in extractors:
-                extractor = extractors[ex_path]
-            else:
-                extractor = Extractor(Path(ex_path))
-                extractors[ex_path] = extractor
-            if extractor.groupwise_computation:
-                # Extractor job can be parallelised, thus creating i * e * g jobs
-                cmd_list.extend([cmd + f" --feature-group {group}"
-                                 for group in extractor.feature_groups])
-            else:
-                cmd_list.extend(cmd)
+    for instance_path, extractor_path, feature_group in jobs:
+        cmd = ("CLI/core/compute_features.py "
+               f"--instance {instance_path} "
+               f"--extractor {extractor_path} "
+               f"--feature-csv {feature_data_csv_path} "
+               f"--cutoff {cutoff}")
+        if extractor_path in extractors:
+            extractor = extractors[extractor_path]
+        else:
+            extractor = Extractor(Path(extractor_path))
+            extractors[extractor_path] = extractor
+        if extractor.groupwise_computation:
+            # Extractor job can be parallelised, thus creating i * e * g jobs
+            cmd_list.append(cmd + f" --feature-group {feature_group}")
+        else:
+            cmd_list.append(cmd)
 
-    print(f"The number of total running jobs: {len(cmd_list)}")
+    print(f"The number of compute jobs: {len(cmd_list)}")
     if run_on == Runner.LOCAL:
         print("Running the solvers locally")
     elif run_on == Runner.SLURM:

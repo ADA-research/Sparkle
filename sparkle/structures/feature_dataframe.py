@@ -88,6 +88,32 @@ class FeatureDataFrame:
         """Returns all unique extractors in the DataFrame."""
         return self.dataframe.index.get_level_values("Extractor").unique().to_list()
 
+    def get_feature_groups(self: FeatureDataFrame,
+                           extractor: str | list[str] = None) -> list[str]:
+        """Retrieve the feature groups in the dataframe.
+    
+        Args:
+            extractor: Optional. If extractor(s) are given,
+                yields only feature groups of that extractor.
+
+        Returns:
+            A list of feature groups.
+        """
+        indices = self.dataframe.index
+        if extractor is not None:
+            if isinstance(extractor, str):
+                extractor = [extractor]
+            indices = indices[indices.isin(extractor, level=2)]
+        return indices.get_level_values(level=0).to_list()
+
+    def get_value(self: FeatureDataFrame,
+                  instance: str,
+                  extractor: str,
+                  feature_group: str,
+                  feature_name: str) -> None:
+        """Return a value in the dataframe."""
+        return self.dataframe.loc[(feature_group, feature_name, extractor), instance]
+
     def set_value(self: FeatureDataFrame,
                   instance: str,
                   extractor: str,
@@ -107,24 +133,21 @@ class FeatureDataFrame:
                     return True
         return False
 
-    def remaining_jobs(self: FeatureDataFrame) -> dict[str, list[str]]:
-        """Determines needed feature computations per instance/extractor combination.
+    def remaining_jobs(self: FeatureDataFrame) -> list[tuple[str, str, str]]:
+        """Determines needed feature computations per instance/extractor/group.
 
         Returns:
-            dict: With instances as key, and a list of extractors as value that
-                still need to compute their vectors for the instance.
+            list: A list of tuples representing (Extractor, Instance, Feature Group).
+                that needs to be computed.
         """
-        remaining_jobs = {}
-        for instance in self.dataframe.columns:
-            # A job is remaining iff for one extractor each value on the instance is null
-            for extractor in self.get_extractors():
-                extractor_features = self.dataframe.xs(extractor, level=2,
-                                                       drop_level=False)
-                if extractor_features.loc[:, instance].isnull().all():
-                    if instance not in remaining_jobs:
-                        remaining_jobs[instance] = [extractor]
-                    else:
-                        remaining_jobs[instance].append(extractor)
+        remaining_jobs = []
+        for extractor in self.get_extractors():          
+            for group in self.get_feature_groups(extractor):
+                    subset = self.dataframe.xs(extractor, level=2).xs(group, level=0)
+                    subset = self.dataframe.xs((group, extractor), level=(0,2), drop_level=False)
+                    for instance in self.dataframe.columns:
+                        if subset.loc[:, instance].isnull().all():
+                            remaining_jobs.append((instance, extractor, group))
         return remaining_jobs
 
     def get_instance(self: FeatureDataFrame, instance: str) -> list[float]:
@@ -132,12 +155,8 @@ class FeatureDataFrame:
         return self.dataframe[instance].tolist()
 
     def impute_missing_values(self: FeatureDataFrame) -> None:
-        """Imputes all NaN values by taking the average feature value per feature."""
-        for index in self.dataframe.index:
-            if self.dataframe[index, :].isnull().any():
-                # Compute the null indices as the average
-                self.dataframe[self.dataframe[index, :].isnull()] =\
-                    self.dataframe[index, :].mean()
+        """Imputes all NaN values by taking the average feature value."""
+        self.dataframe = self.dataframe.T.fillna(self.dataframe.mean(axis=1)).T
 
     def has_missing_value(self: FeatureDataFrame) -> bool:
         """Return whether there are missing values in the feature data."""

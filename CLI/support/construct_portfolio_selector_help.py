@@ -81,9 +81,8 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         print("****** WARNING: There are missing values in the feature data, and all "
               "missing values will be imputed as the mean value of all other non-missing"
               " values! ******")
-        print("Imputing all missing values starts ...")
+        print("Imputing all missing values...")
         feature_data.impute_missing_values()
-        print("Imputing all missing values done!")
         impute_feature_data_csv_path = Path(
             f"{feature_data_csv_path}_{tg.get_time_pid_random_string()}"
             "_impute.csv")
