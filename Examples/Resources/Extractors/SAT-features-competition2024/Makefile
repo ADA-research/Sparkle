@@ -18,7 +18,7 @@ EXECNAME = features
 
 INCLUDE =
 
-LIB = -l:liblpk5.a -lvarsat 
+LIB = -l:liblpk5.a -lvarsat -ldl  -lz
 
 LIBDIRS = -Llp_solve_5.0 -LVARSAT 
 
@@ -38,12 +38,12 @@ libubcsat.a:
 libvarsat.a:
 	cd VARSAT; make;
 
-# liblpk.a:
-# 	cd lp_solve_4.0; make liblpk.a;
+liblpk.a:
+	cd lp_solve_5.0/lpsolve5; ./ccc; cp liblpk5.a ../liblpk5.a
 
 
 allfeat : $(OBJ)
-	make libvarsat.a; g++  ${LIBDIRS} $^ ${FLAGS} $(LIB)
+	make libvarsat.a; make liblpk.a; g++  ${LIBDIRS} $^ ${FLAGS} $(LIB)
 
 feature:
 	cd obj; make all "OBJ = ${FEATOBJ}" "CPPFLAGS = -DFEATURES ${RELEASEFLAGS} ${INCLUDE}";
@@ -53,7 +53,7 @@ feature:
 .PHONY: clean depend again
 
 clean-all:
-	rm -f obj/*.o features;  cd VARSAT; make clean ; cd ../lp_solve_4.0;  make clean
+	rm -f obj/*.o features;  cd VARSAT; make clean ; cd ../lp_solve_5.0;  make clean
 
 clean:
 	rm -f obj/*.o features
