@@ -154,16 +154,16 @@ def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
     jobs = get_running_jobs()
     verbosity_setting = gv.settings.get_general_verbosity()
-    running_jobs = [run for run in jobs
-                    if run.status == Status.WAITING or run.status == Status.RUNNING]
-
+    running_jobs = jobs
+    # Interval at which to refresh the table
+    check_interval = gv.settings.get_general_check_interval()
     # If verbosity is quiet there is no need for further information
     if verbosity_setting == VerbosityLevel.QUIET:
         prev_jobs = len(running_jobs) + 1
         while len(running_jobs) > 0:
             if len(running_jobs) < prev_jobs:
                 print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
-            time.sleep(3.0)
+            time.sleep(check_interval)
             prev_jobs = len(running_jobs)
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
@@ -173,8 +173,6 @@ def wait_for_all_jobs() -> None:
     elif verbosity_setting == VerbosityLevel.STANDARD:
         # Collect dependencies and partitions for each job
         jobs = get_dependencies(jobs)
-        # Interval at which to refresh the table
-        check_interval = gv.settings.get_general_check_interval()
         # Order in which to display the jobs
         priority = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
         while len(running_jobs) > 0:
@@ -189,8 +187,11 @@ def wait_for_all_jobs() -> None:
                 finished_jobs_count = sum(1 for status in job.all_status
                                           if status == Status.COMPLETED)
                 # Format job.status
-                status_text = TEXT.format([TEXT.BOLD], job.status) if job.status == Status.RUNNING else (
-                    TEXT.format([TEXT.ITALIC], job.status) if job.status == Status.COMPLETED else job.status)
+                status_text = \
+                    TEXT.format_text([TEXT.BOLD], job.status) \
+                    if job.status == Status.RUNNING else \
+                    (TEXT.format_text([TEXT.ITALIC], job.status)
+                        if job.status == Status.COMPLETED else job.status)
                 information.append(
                     [job.run_id,
                      job.name,

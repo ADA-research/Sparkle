@@ -61,7 +61,7 @@ class Settings:
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
     DEFAULT_general_verbosity = VerbosityLevel.STANDARD
-    DEFAULT_general_check_interval = 3
+    DEFAULT_general_check_interval = 10
 
     DEFAULT_config_wallclock_time = 600
     DEFAULT_config_cpu_time = None
