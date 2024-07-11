@@ -71,11 +71,11 @@ def compute_features(
     # We create a job for each instance/extractor combination
     for inst_path in jobs.keys():
         for ex_path in jobs[inst_path]:
-            cmd = ["CLI/core/compute_features.py "
+            cmd = ("CLI/core/compute_features.py "
                    f"--instance {inst_path} "
                    f"--extractor {ex_path} "
                    f"--feature-csv {feature_data_csv_path} "
-                   f"--cutoff {cutoff}"]
+                   f"--cutoff {cutoff}")
             if ex_path in extractors:
                 extractor = extractors[ex_path]
             else:
@@ -83,7 +83,7 @@ def compute_features(
                 extractors[ex_path] = extractor
             if extractor.groupwise_computation:
                 # Extractor job can be parallelised, thus creating i * e * g jobs
-                cmd_list.extend([cmd + ["-feature_group", group]
+                cmd_list.extend([cmd + f" --feature-group {group}"
                                  for group in extractor.feature_groups])
             else:
                 cmd_list.extend(cmd)

@@ -171,14 +171,15 @@ output_file = Path(args.output_file) if args.output_file else None
 extractor_name = "SATFeatureCompetition2024"
 executable_name = "features"
 executable = extractor_dir / executable_name
-
+cmd = [extractor_dir / executable_name]
 #Feature group options: [-all] [-base] |[-sp] [-Dia] [-Cl] [-unit] [-ls] [-lp] [-lobjois] (lowercase)
-options = ["-all"]
 if args.feature_group is not None:
-    options = ["-" + args.feature_group]
+    cmd.append(f"-{args.feature_group}")
+else:
+    cmd.append("-all")
+cmd.append(instance_path)
 
-extractor = subprocess.run([extractor_dir / executable_name, instance_path] + options,
-                            capture_output=True)
+extractor = subprocess.run(cmd, capture_output=True)
 
 # Read all lines from the input file
 raw_lines = extractor.stdout.decode().splitlines()
@@ -197,7 +198,7 @@ if len(raw_lines) >= 2:
         feature_group, feature_name = feature_mapping[feature]
         if isinstance(feature_name, Enum):
             feature_name = feature_name.value
-        processed_features.append([feature_group.value, feature_name, values[i]])
+        processed_features.append((feature_group.value, feature_name, values[i]))
         
 else:
     # Failed to compute features
