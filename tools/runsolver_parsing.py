@@ -74,12 +74,11 @@ def get_solver_output(runsolver_configuration: list[str],
     """Decode solver output dictionary when called with runsolver."""
     solver_output = ""
     value_data_file = None
-    print(log_dir)
     for idx, conf in enumerate(runsolver_configuration):
-        conf = conf.strip()
         if not isinstance(conf, str):
             # Looking for arg names
             continue
+        conf = conf.strip()
         if conf == "-o" or conf == "--solver-data":
             # solver output was redirected
             solver_data_file = Path(runsolver_configuration[idx + 1])
