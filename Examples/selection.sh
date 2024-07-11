@@ -94,7 +94,16 @@ sparkle remove_feature_extractor SAT-features-competition2012_revised_without_Sa
 # Otherwise, Sparkle will interpret adding the other feature extractor as creating a combined feature vector per instance from all present extractors in Sparkle. Now we can add SATZilla 2024 from the Examples directory
 # Note that this feature extractor requires GCC (any version, tested with 13.2.0) to run.
 
+
 sparkle add_feature_extractor Examples/Resources/Extractors/SAT-features-competition2024
+
+# We can also investigate a different data set, SAT Competition 2023 for which Sparkle has a subset.
+
+sparkle remove_instances Examples/Resources/Instances/PTN/
+
+sparkle remove_instances Examples/Resources/Instances/PTN2/
+
+sparkle add_instances Examples/Resources/Instances/SATCOMP2023_SUB
 
 # We compute the features for the new extractor.
 
@@ -104,18 +113,14 @@ sparkle compute_features
 
 sparkle wait
 
-# Now we can train a selector based on these features.
+#Now we can train a selector based on these features.
 
 sparkle construct_sparkle_portfolio_selector --selector-timeout 1000
-
-# Run it against the test instance set.
-
-sparkle run_sparkle_portfolio_selector Examples/Resources/Instances/PTN2/
 
 # Wait for the computation to be done.
 
 sparkle wait
 
-# And generate the report to compare the two reports.
+# And generate the report. When running on the PTN/PTN2 data sets, you can compare the two to see the impact of different feature extractors.
 
 sparkle generate_report
