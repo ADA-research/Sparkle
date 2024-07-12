@@ -41,29 +41,6 @@ class StatusInfo(ABC):
         self.set_start_timestamp(str(start_time))
         self.path = None
 
-    def set_status(self: SolverRunStatusInfo, status: str) -> None:
-        """Sets the status attribute.
-
-        Args:
-            status: status value
-        """
-        self.data[self.status_key] = status
-
-    def set_start_time(self: SolverRunStatusInfo, start_time: str) -> None:
-        """Sets the solver attribute.
-
-        Args:
-            start_time: solver value
-        """
-        self.data[self.start_time_key] = start_time
-
-    def set_start_timestamp(self: SolverRunStatusInfo, start_timestamp: str) -> None:
-        """Sets the start timestamp attribute.
-
-        Args:
-            start_timestamp: start timestamp value
-        """
-        self.data[self.start_timestamp_key] = start_timestamp
 
     @classmethod
     def from_file(cls: Type[StatusInfo], path: Path) -> StatusInfo:
@@ -98,68 +75,6 @@ class StatusInfo(ABC):
     def delete(self: StatusInfo) -> None:
         """Deletes the status info file."""
         self.path.unlink()
-
-    def get_start_time(self: SolverRunStatusInfo) -> str:
-        """Access to start time."""
-        return self.data[self.start_time_key]
-
-    def get_start_timestamp(self: SolverRunStatusInfo) -> str:
-        """Access to start timestamp."""
-        return self.data[self.start_timestamp_key]
-
-
-class SolverRunStatusInfo(StatusInfo):
-    """Status info for solver run jobs."""
-    job_path = StatusInfoType.SOLVER_RUN
-    solver_key = "Solver"
-    instance_key = "Instance"
-    cutoff_time_key = "Cutoff Time"
-
-    def set_solver(self: SolverRunStatusInfo, solver: str) -> None:
-        """Sets the solver attribute.
-
-        Args:
-            solver: solver value
-        """
-        self.data[self.solver_key] = solver
-
-    def set_instance(self: SolverRunStatusInfo, instance: str) -> None:
-        """Sets the instance attribute.
-
-        Args:
-            instance: instance value
-        """
-        self.data[self.instance_key] = instance
-
-    def set_cutoff_time(self: SolverRunStatusInfo, cutoff_time: str) -> None:
-        """Sets the cutoff time attribute.
-
-        Args:
-            cutoff_time: cutoff time value
-        """
-        self.data[self.cutoff_time_key] = cutoff_time
-
-    def get_status(self: SolverRunStatusInfo) -> str:
-        """Access to status."""
-        return self.data[self.status_key]
-
-    def get_solver(self: SolverRunStatusInfo) -> str:
-        """Access to solver."""
-        return self.data[self.solver_key]
-
-    def get_instance(self: SolverRunStatusInfo) -> str:
-        """Access to instance."""
-        return self.data[self.instance_key]
-
-    def get_cutoff_time(self: SolverRunStatusInfo) -> str:
-        """Access to cutoff time."""
-        return self.data[self.cutoff_time_key]
-
-    def get_key_string(self: SolverRunStatusInfo) -> str:
-        """Create key string."""
-        return (f"{self.get_solver()}_"
-                f"{self.get_instance()}_"
-                f"{tg.get_time_pid_random_string()}")
 
 
 class ConfigureSolverStatusInfo(StatusInfo):
@@ -211,43 +126,6 @@ class ConfigureSolverStatusInfo(StatusInfo):
         """Create key string."""
         return (f"{self.get_solver()}_{self.get_instance_set_train()}"
                 f"_{self.get_instance_set_test()}")
-
-
-class ConstructParallelPortfolioStatusInfo(StatusInfo):
-    """Status info for construction of parallel portfolios."""
-    job_path = StatusInfoType.CONSTRUCT_PARALLEL_PORTFOLIO
-    portfolio_name_key = "Portfolio Name"
-    list_of_solvers_key = "List of Solvers"
-
-    def set_portfolio_name(self: ConstructParallelPortfolioStatusInfo,
-                           portfolio_name: str) -> None:
-        """Set the portfolio name.
-
-        Args:
-            portfolio_name: name of the portfolio
-        """
-        self.data[self.portfolio_name_key] = portfolio_name
-
-    def set_list_of_solvers(self: ConstructParallelPortfolioStatusInfo,
-                            list_of_solvers: list[str]) -> None:
-        """Set the list of solvers.
-
-        Args:
-            list_of_solvers: list of solver names
-        """
-        self.data[self.list_of_solvers_key] = [str(x) for x in list_of_solvers]
-
-    def get_list_of_solvers(self: ConstructParallelPortfolioStatusInfo) -> list[str]:
-        """Access to the list of solvers."""
-        return self.data[self.list_of_solvers_key]
-
-    def get_portfolio_name(self: ConstructParallelPortfolioStatusInfo) -> str:
-        """Access to the portfolio name."""
-        return self.data[self.portfolio_name_key]
-
-    def get_key_string(self: ConstructParallelPortfolioStatusInfo) -> str:
-        """Create key string."""
-        return f"{self.get_portfolio_name()}_{tg.get_time_pid_random_string()}"
 
 
 class ConstructPortfolioSelectorStatusInfo(StatusInfo):

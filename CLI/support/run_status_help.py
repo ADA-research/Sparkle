@@ -5,8 +5,7 @@ from pathlib import Path
 
 import global_variables as gv
 from CLI.support import sparkle_job_help as sjh
-from CLI.help.status_info import (SolverRunStatusInfo,
-                                  StatusInfoType,
+from CLI.help.status_info import (StatusInfoType,
                                   ConfigureSolverStatusInfo,
                                   ConstructPortfolioSelectorStatusInfo,
                                   GenerateReportStatusInfo)
@@ -58,30 +57,6 @@ def get_running_jobs_for_command(command: CommandName) -> str:
     command_jobs_ids = " ".join([x["job_id"] for x in command_jobs])
 
     return command_jobs_ids
-
-
-def print_running_solver_jobs() -> None:
-    """Print a list of currently active run solver job."""
-    command = CommandName.RUN_SOLVERS
-    command_jobs_ids = get_running_jobs_for_command(command)
-    tmp_directory = f"{gv.sparkle_tmp_path}/{StatusInfoType.SOLVER_RUN}/"
-    statusinfo_files = get_list_all_extensions(Path(tmp_directory), ".statusinfo")
-    if len(command_jobs_ids) > 0:
-        print(f"The command {command} is running "
-              f"with job IDs {command_jobs_ids}")
-        if len(statusinfo_files) > 0:
-            print("Running solver jobs:")
-            for statusinfo_filename in statusinfo_files:
-                statusinfo_filepath = Path(
-                    tmp_directory
-                    + Path(statusinfo_filename).name)
-                status_info = SolverRunStatusInfo.from_file(statusinfo_filepath)
-                print(f"Start Time: {status_info.get_start_time()}")
-                print(f"Solver: {status_info.get_solver()}")
-                print(f"Instance: {status_info.get_instance()}")
-                print()
-    else:
-        print("No running solver jobs")
 
 
 def print_running_configuration_jobs() -> None:

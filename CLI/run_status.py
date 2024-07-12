@@ -32,7 +32,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Reporting current running status of Sparkle ...")
-    run_status_help.print_running_solver_jobs()
     run_status_help.print_running_configuration_jobs()
     run_status_help.print_running_portfolio_selector_construction_jobs()
     run_status_help.print_running_generate_report_jobs()
