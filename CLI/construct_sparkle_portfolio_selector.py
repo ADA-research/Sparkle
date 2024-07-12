@@ -5,7 +5,6 @@ import sys
 import argparse
 from pathlib import Path
 
-from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
 import global_variables as gv
 from sparkle.platform import settings_help
 from sparkle.structures import FeatureDataFrame
@@ -73,12 +72,6 @@ if __name__ == "__main__":
 
     print("Start constructing Sparkle portfolio selector ...")
 
-    status_info = ConstructPortfolioSelectorStatusInfo()
-    status_info.set_algorithm_selector_path(str(gv.sparkle_algorithm_selector_path))
-    status_info.set_feature_data_csv_path(str(gv.feature_data_csv_path))
-    status_info.set_performance_data_csv_path(str(gv.performance_data_csv_path))
-    status_info.save()
-
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
         gv.feature_data_csv_path, gv.performance_data_csv_path)
 
@@ -117,8 +110,6 @@ if __name__ == "__main__":
                                             flag_compute_actual=True,
                                             flag_recompute=flag_recompute_marg_cont,
                                             selector_timeout=args.selector_timeout)
-
-        status_info.delete()
 
     # Write used settings to file
     gv.settings.write_used_settings()
