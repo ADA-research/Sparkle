@@ -242,7 +242,6 @@ class Settings:
                     self.set_slurm_max_parallel_runs_per_node(value, state)
                     file_settings.remove_option(section, option)
 
-
             section = "ablation"
             option_names = ("racing", "ablation_racing")
             for option in option_names:

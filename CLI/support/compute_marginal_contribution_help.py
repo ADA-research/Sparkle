@@ -103,7 +103,7 @@ def compute_perfect_selector_marginal_contribution(
         performance_data_csv.calc_virtual_best_performance_of_portfolio(
             aggregation_function, minimise, capvalue_list, penalty_list))
     print("Virtual best performance for portfolio selector with all solvers is "
-          f"{str(virtual_best_performance)}")
+          f"{virtual_best_performance}")
     print("Computing done!")
 
     for solver in performance_data_csv.dataframe.columns:
@@ -436,16 +436,16 @@ def compute_actual_selector_marginal_contribution(
                 tmp_asp < actual_selector_performance:
             marginal_contribution = tmp_asp / actual_selector_performance
         else:
-            print("****** WARNING DUBIOUS SELECTOR/SOLVER:"
-                  f" The omission of solver {solver_name} yields an improvement."
-                  "The selector improves better without this solver. It may be usefull"
-                  " to construct a portfolio without this solver.")
+            print("****** WARNING DUBIOUS SELECTOR/SOLVER: "
+                  f"The omission of solver {solver_name} yields an improvement. "
+                  "The selector improves better without this solver. It may be usefull "
+                  "to construct a portfolio without this solver.")
             marginal_contribution = 0.0
 
         solver_tuple = (solver, marginal_contribution)
         rank_list.append(solver_tuple)
         print(f"Marginal contribution (to Actual Selector) for solver {solver_name} is "
-              f"{str(marginal_contribution)}")
+              f"{marginal_contribution}")
 
     rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1],
                    reverse=True)

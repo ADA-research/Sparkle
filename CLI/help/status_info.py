@@ -41,7 +41,6 @@ class StatusInfo(ABC):
         self.set_start_timestamp(str(start_time))
         self.path = None
 
-
     @classmethod
     def from_file(cls: Type[StatusInfo], path: Path) -> StatusInfo:
         """Constructs instance from existing file.
