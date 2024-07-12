@@ -1,21 +1,21 @@
 [INFO ] Logging to: /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/log-run3.txt
 [INFO ] Version of SMAC is v2.10.03-master-778 (3ee628ef9bf2), running on OpenJDK 64-Bit Server VM (1.8.0_402) and Linux 5.14.0-362.24.1.el9_3.0.1.x86_64 (amd64) 
 [INFO ] Call String: smac --scenario-file /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/PbO-CCSAT-Generic_PTN_scenario.txt --seed 3 --execdir /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp 
-[INFO ] SMAC started at: 17-Jun-2024 13:10:16. Minimizing penalized average runtime (PAR10).
-[WARN ] Algorithm Run Result reported a runtime of 61.0885 (secs) that exceeded it's cutoff time of 60.0 (secs) by 1.0885000000000034 (secs). Next warning at 2.0885000000000034 (secs)  
-[WARN ] Algorithm Run Result reported wallclock time of 70.149 (secs) that exceeded it's cutoff time of 60.0 (secs) by 10.149000000000001 (secs). Next warning at 11.149000000000001 (secs)  
+[INFO ] SMAC started at: 10-Jul-2024 09:30:46. Minimizing penalized average runtime (PAR10).
+[WARN ] Algorithm Run Result reported a runtime of 61.1054 (secs) that exceeded it's cutoff time of 60.0 (secs) by 1.105400000000003 (secs). Next warning at 2.105400000000003 (secs)  
+[WARN ] Algorithm Run Result reported wallclock time of 76.782 (secs) that exceeded it's cutoff time of 60.0 (secs) by 16.781999999999996 (secs). Next warning at 17.781999999999996 (secs)  
 [INFO ] First incumbent: config 1 (internal ID: 0x0009), with penalized average runtime (PAR10): 600.0; estimate based on 1 runs.
 [INFO ] Sample call for new incumbent config 1 (internal ID: 0x0009): 
 cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/bce7824.cnf 0 60.0 2147483647 7651328 -init_solution '1' -p_swt '0.3' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '0' -perform_pac '0' -q_swt '0.0' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '2' -sel_var_div '3' -threshold_swt '300'  
-[INFO ] Incumbent changed to: config 4 (internal ID: 0xE180), with penalized average runtime (PAR10): 300.274535; estimate based on 4 runs.
+[INFO ] Incumbent changed to: config 4 (internal ID: 0xE180), with penalized average runtime (PAR10): 300.2560705; estimate based on 4 runs.
 [INFO ] Sample call for new incumbent config 4 (internal ID: 0xE180): 
 cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/bce7824.cnf 0 60.0 2147483647 7651328 -beta_hscore '13155' -d_hscore '9' -init_solution '1' -p_swt '0.7061662290653931' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '1' -perform_pac '1' -prob_first_div '0.0010181209749711155' -prob_pac '1.139071396430544E-5' -q_swt '0.3718305885378975' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '3' -sel_var_div '2' -threshold_swt '72'  
 [INFO ] 
 =======================================================================================
-SMAC has finished. Reason: wall-clock time limit (656.589 s) has been reached.   
-Total number of runs performed: 16, total configurations tried: 5.
-Total CPU time used: 583 s, total wallclock time used: 657 s.
-SMAC's final incumbent: config 4 (internal ID: 0xE180), with estimated penalized average runtime (PAR10): 360.219628, based on 5 run(s) on 5 training instance(s).
+SMAC has finished. Reason: wall-clock time limit (631.264 s) has been reached.   
+Total number of runs performed: 15, total configurations tried: 5.
+Total CPU time used: 522 s, total wallclock time used: 631 s.
+SMAC's final incumbent: config 4 (internal ID: 0xE180), with estimated penalized average runtime (PAR10): 360.2048564, based on 5 run(s) on 5 training instance(s).
 Sample call for this final incumbent:
 cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b01.cnf 0 60.0 2147483647 14406056 -beta_hscore '13155' -d_hscore '9' -init_solution '1' -p_swt '0.7061662290653931' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '1' -perform_pac '1' -prob_first_div '0.0010181209749711155' -prob_pac '1.139071396430544E-5' -q_swt '0.3718305885378975' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '3' -sel_var_div '2' -threshold_swt '72'
 =======================================================================================

@@ -8,8 +8,7 @@ from pathlib import Path
 
 import global_variables as gv
 from sparkle.platform import file_help as sfh
-from sparkle.structures import feature_data_csv_help as sfdcsv
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.instance import InstanceSet
 import sparkle_logging as sl
 from CLI.help import command_help as ch
@@ -50,15 +49,14 @@ if __name__ == "__main__":
     print(f"Start removing all instances in directory {instances_path} ...")
     instance_set = InstanceSet(instances_path)
     # Remove from feature data and performance data
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                                    gv.extractor_list)
-    performance_data_csv = PerformanceDataFrame(gv.performance_data_csv_path)
+    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+    performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
     for instance in instance_set.get_instance_paths:
-        feature_data_csv.delete_row(str(instance))
-        performance_data_csv.remove_instance(str(instance))
+        feature_data.remove_instance(str(instance))
+        performance_data.remove_instance(str(instance))
 
-    feature_data_csv.save_csv()
-    performance_data_csv.save_csv()
+    feature_data.save_csv()
+    performance_data.save_csv()
 
     # Remove nickname, if it exists
     instances_nicknames = gv.file_storage_data_mapping[gv.instances_nickname_path]

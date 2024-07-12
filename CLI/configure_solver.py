@@ -18,7 +18,7 @@ from sparkle.platform import settings_help
 from CLI.support import ablation_help as sah
 from sparkle.platform.settings_help import SettingState
 from CLI.help.reporting_scenario import Scenario
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import FeatureDataFrame
 from CLI.help import command_help as ch
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
@@ -188,11 +188,10 @@ if __name__ == "__main__":
 
     feature_data_df = None
     if use_features:
-        feature_data_csv = sfdcsv.SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                                        gv.extractor_list)
+        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
 
         data_dict = {}
-        feature_data_df = feature_data_csv.dataframe
+        feature_data_df = feature_data.dataframe
 
         for label, row in feature_data_df.iterrows():
             # os.path.split(os.path.split(label)[0])[1] gives the dir/instance set name
@@ -209,7 +208,7 @@ if __name__ == "__main__":
         feature_data_df = DataFrame.from_dict(data_dict, orient="index",
                                               columns=feature_data_df.columns)
 
-        if feature_data_df.isnull().values.any():
+        if feature_data.has_missing_value():
             print("You have unfinished feature computation jobs, please run "
                   "compute_features.py")
             sys.exit(-1)

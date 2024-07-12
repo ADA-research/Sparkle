@@ -1,0 +1,8 @@
+Source: https://github.com/hadarshavit/revisiting_satzilla/tree/main/SAT-features-competition2024
+Version: SATzilla 2024
+Authors: Shavit, Hoos
+Paper: https://ada.liacs.leidenuniv.nl/papers/ShaHoo24.pdf
+License: Permission from the authors
+License location: -
+Requires: GCC 13.2.0 (module load bzip2/1.0.8-GCCcore-13.2.0)
+Modifications:

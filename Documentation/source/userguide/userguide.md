@@ -648,12 +648,8 @@ as follows:
 
 ### Slurm (focused on Grace)
 
-Slurm settings can be specified in the
-`Settings/sparkle_slurm_settings.txt` file. Currently these settings
-are inserted *as is* in any `srun` or `sbatch` calls done by
-Sparkle. This means that any options exclusive to one or the other
-currently should not be used (see
-{numref}`slurm-disallowed`).
+Slurm settings can be specified in the `Settings/settings.ini` file. Any Slurm Setting not internally recognised by Sparkle will be added to the `sbatch` or `srun` calls.
+Currently these settings are inserted *as is* in any Slurm calls done by Sparkle. This means that any options exclusive to one or the other currently should not be used (see {numref}`slurm-disallowed`).
 
 To overwrite the default settings specific to the cluster Grace in Leiden, you should set the option "--partition" with a valid value on your cluster.
 Also, you might have to adapt "--mem-per-cpu" to your system.
@@ -665,7 +661,7 @@ included. Most other options for these commands should also be safe to
 use (given they are valid), but have not been explicitly tested. Note
 that any options related to commands other than `srun` and `sbatch`
 should not be used with Sparkle, and should not be included in
-`Settings/sparkle_slurm_settings.txt`.
+`Settings/settings.ini`s Slurm section.
 
 - `-–partition / -p`
 - `-–exclude`

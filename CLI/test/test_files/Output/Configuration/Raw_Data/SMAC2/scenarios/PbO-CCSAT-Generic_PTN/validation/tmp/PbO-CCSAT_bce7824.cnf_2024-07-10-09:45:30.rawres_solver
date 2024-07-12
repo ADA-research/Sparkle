@@ -1,0 +1,31 @@
+['/home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic/PbO-CCSAT', '-inst', '/home/snelleman/Sparkle/Instances/PTN/bce7824.cnf', '-seed', '17', '-p_swt', '0.3', '-perform_aspiration', '1', '-perform_clause_weight', '1', '-perform_double_cc', '1', '-perform_first_div', '0', '-perform_pac', '0', '-q_swt', '0.0', '-sel_clause_div', '1', '-sel_clause_weight_scheme', '1', '-sel_var_break_tie_greedy', '2', '-sel_var_div', '3', '-threshold_swt', '300']
+c
+c This is PbO-CCSAT (a local_search SAT solver)
+c Version: 1.2.3
+c
+c
+c instance = /home/snelleman/Sparkle/Instances/PTN/bce7824.cnf
+c ori_num_vars = 7820
+c ori_num_clauses = 14652
+c maxi_clause_len = 3
+c mini_clause_len = 3
+c seed = 17
+c maxi_flips = 2000000000
+c init_solution_ptr = init_solution_all_true_or_false
+c decision_perform_double_cc = true
+c decision_perform_aspiration = true
+c select_var_by_break_tie_in_set_ptr = select_var_by_greatest_age_break_tie_in_set
+c decision_perform_clause_weight_scheme = true
+c init_clause_weight_scheme_ptr = init_clause_weight_scheme_swt
+c clause_weight_scheme_ptr = clause_weight_scheme_swt
+c threshold_swt = 300
+c p_swt = 0.3
+c q_swt = 0
+c select_unsat_clause_heuristic_div_ptr = select_unsat_clause_random_heuristic
+c select_var_from_clause_heuristic_div_ptr = select_var_from_clause_greatest_score_heuristic
+c
+c
+c caught signal... exiting
+s UNKNOWN
+c best_unsat_stack_fill_pointer = 5
+c

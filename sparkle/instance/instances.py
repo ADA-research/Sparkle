@@ -16,11 +16,11 @@ class InstanceSet:
                 for multi file instances, will read from instance_list.csv. If the path
                 is a file, will create an Instance set of size one.
         """
-        self.directory = directory
-        self.name = directory.name
-        self.multi_file = False
-        self._instance_names = []
-        self.instance_paths = []
+        self.directory: Path = directory
+        self.name: str = directory.name
+        self.multi_file: bool = False
+        self._instance_names: list[str] = []
+        self.instance_paths: list[Path] = []
 
         if self.directory.is_file():
             # Single instance set

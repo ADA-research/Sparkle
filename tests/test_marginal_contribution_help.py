@@ -5,7 +5,7 @@ from unittest import TestCase
 from pathlib import Path
 
 from CLI.support import compute_marginal_contribution_help as scmch
-from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.structures import FeatureDataFrame
 import global_variables as gv
 from sparkle.platform import settings_help
 
@@ -82,10 +82,10 @@ class TestMarginalContribution(TestCase):
         # TODO: Fix with mocker commands. There is a ticket for this.
         return
         pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
-              "sparkle_portfolio_selector__@@SPARKLE@@__"
+              "sparkle_portfolio_selector"
         file = "CLI/test/test_files/Feature_Data/"\
                "test_construct_sparkle_portfolio_selector.csv"
-        featurecsv = SparkleFeatureDataCSV(file)
+        featurecsv = FeatureDataFrame(file)
         prefix = "Instances/PTN/"
         instance_ids = [prefix + "Ptn-7824-b03.cnf", prefix + "Ptn-7824-b15.cnf",
                         prefix + "Ptn-7824-b05.cnf", prefix + "Ptn-7824-b13.cnf",
@@ -105,7 +105,7 @@ class TestMarginalContribution(TestCase):
             self: TestCase, patch_perf_for_instance: MagicMock) -> None:
         """Test for method compute_actual_selector_performance."""
         pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
-              "sparkle_portfolio_selector__@@SPARKLE@@__"
+              "sparkle_portfolio_selector"
         perf_path = "CLI/test/test_files/Performance_Data/"\
                     "test_construct_sparkle_portfolio_selector.csv"
         feature_csv_path = "CLI/test/test_files/Feature_Data/"\
@@ -140,10 +140,10 @@ class TestMarginalContribution(TestCase):
                                                            ) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
         # Test does not work on Mac
-        perf_path = "CLI/test/test_files/Performance_Data/"\
-                    "test_construct_sparkle_portfolio_selector.csv"
-        feature_csv_path = "CLI/test/test_files/Feature_Data/"\
-                           "test_construct_sparkle_portfolio_selector.csv"
+        performance_csv_path = Path("CLI/test/test_files/Performance_Data/"
+                                    "test_construct_sparkle_portfolio_selector.csv")
+        feature_csv_path = Path("CLI/test/test_files/Feature_Data/"
+                                "test_construct_sparkle_portfolio_selector.csv")
         mock_actual_performance.side_effect = [526.805294,
                                                526.805294,
                                                732.0]
@@ -154,7 +154,7 @@ class TestMarginalContribution(TestCase):
             aggregation_function=sum,
             capvalue_list=None,
             minimise=True,
-            performance_data_csv_path=perf_path,
+            performance_data_csv_path=performance_csv_path,
             feature_data_csv_path=feature_csv_path,
             flag_recompute=True,
             selector_timeout=60

@@ -54,29 +54,18 @@ class TestPerformanceData(TestCase):
         num_instances = 5
         assert self.pd.num_instances == num_instances
 
-    def test_get_list_recompute_performance_computation_job(self: TestPerformanceData)\
-            -> None:
-        """Test the list creator for which algorithm should be computed per instance."""
-        algs = ["AlgorithmA", "AlgorithmB", "AlgorithmC", "AlgorithmD", "AlgorithmE"]
-        list_recompute =\
-            [["Instance1", algs], ["Instance2", algs], ["Instance3", algs],
-             ["Instance4", algs], ["Instance5", algs]]
-        result = self.pd.get_list_recompute_performance_computation_job()
-        assert result == list_recompute
-
     def test_get_list_remaining_performance_computation_job(self: TestPerformanceData)\
             -> None:
         """Test get remaining performance computation job getter."""
-        remaining = [["Instance1", []], ["Instance2", []], ["Instance3", []],
-                     ["Instance4", []], ["Instance5", []]]
-        result = self.pd.get_list_remaining_performance_computation_job()
+        remaining = {}
+        result = self.pd.remaining_jobs()
         assert result == remaining
 
-        remaining = [["Instance1", ["AlgorithmA"]], ["Instance2", ["AlgorithmA"]],
-                     ["Instance3", ["AlgorithmA", "AlgorithmC"]],
-                     ["Instance4", ["AlgorithmA", "AlgorithmE"]],
-                     ["Instance5", ["AlgorithmA"]]]
-        result = self.pd_nan.get_list_remaining_performance_computation_job()
+        remaining = {"Instance1": {"AlgorithmA"}, "Instance2": {"AlgorithmA"},
+                     "Instance3": {"AlgorithmC", "AlgorithmA"},
+                     "Instance4": {"AlgorithmA", "AlgorithmE"},
+                     "Instance5": {"AlgorithmA"}}
+        result = self.pd_nan.remaining_jobs()
         assert result == remaining
 
     def test_get_best_performance_per_instance(self: TestPerformanceData) -> None:

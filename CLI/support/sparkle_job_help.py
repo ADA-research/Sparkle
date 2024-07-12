@@ -14,37 +14,6 @@ from CLI.help.command_help import COMMAND_DEPENDENCIES
 import global_variables as gv
 
 
-def get_num_of_total_job_from_list(list_jobs: list) -> int:
-    """Return the total number of jobs.
-
-    Args:
-      list_jobs: List of jobs. Each entry is a list itself where the type
-      of the entries depends on the job type (e.g., feature computation job).
-
-    Returns:
-      The total number of jobs.
-    """
-    return sum([len(job[1]) for job in list_jobs])
-
-
-def expand_total_job_from_list(list_jobs: list) -> list:
-    """Expand job list.
-
-    Args:
-      list_jobs: List of jobs. Each entry is a list itself where the type
-      of the entries depends on the job type (e.g., feature computation job).
-
-    Returns:
-      Expanded job list.
-    """
-    total_job_list = []
-    for job in list_jobs:
-        first_item = job[0]
-        for second_item in job[1]:
-            total_job_list.append([first_item, second_item])
-    return total_job_list
-
-
 # Wait until all dependencies of the command to run are completed
 def wait_for_dependencies(command_to_run: CommandName) -> None:
     """Wait for all dependencies of a given command to finish executing.

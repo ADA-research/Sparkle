@@ -87,7 +87,7 @@ def call_solver_solve_instance_within_cutoff(solver: Solver,
 
 # Only called in portfolio_core and run_sparkle_portfolio_selector
 def call_sparkle_portfolio_selector_solve_instance(
-        instance_path: str,
+        instance_path: Path,
         performance_data_csv_path: str = None) -> None:
     """Call the Sparkle portfolio selector to solve a single instance.
 
@@ -105,42 +105,30 @@ def call_sparkle_portfolio_selector_solve_instance(
         instance_file_list.append(Path(instance).name)
 
     instance_files_str = " ".join(instance_file_list)
-    instance_files_str_ = "_".join(instance_file_list)
 
-    print("Start running Sparkle portfolio selector on solving instance "
+    print("Running Sparkle portfolio selector on solving instance "
           f"{instance_files_str} ...")
 
-    Path("Tmp/").mkdir(exist_ok=True)
-
+    cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
     print(f"Sparkle computing features of instance {instance_files_str} ...")
-    list_feature_vector = []
-
-    if len(gv.extractor_list) == 0:
+    feature_vector = []
+    extractor_paths = [p for p in gv.extractor_dir.iterdir()]
+    if len(extractor_paths) == 0:
         print("ERROR: No feature extractor added to Sparkle.")
         sys.exit(-1)
-
-    cutoff_extractor = gv.settings.get_general_extractor_cutoff_time()
-
-    for extractor_path in gv.extractor_list:
+    for extractor_path in extractor_paths:
         extractor = Extractor(Path(extractor_path),
                               gv.runsolver_path,
-                              Path("Tmp"))
-        result_path = Path(f"{extractor.name}_{instance_files_str_}_"
-                           f"{tg.get_time_pid_random_string()}.rawres")
-        err_path = result_path.with_suffix(".err")
-        runsolver_watch_data_path = result_path.with_suffix(".log")
-        runsolver_value_data_path = result_path.with_suffix(".val")
-        run = extractor.run(instance, result_path,
-                            runsolver_args=["--cpu-limit", str(cutoff_extractor),
-                                            "-w", runsolver_watch_data_path,
-                                            "-v", runsolver_value_data_path],
-                            run_options=["EXTRACT_FEATURES", [], []],
-                            run_on=Runner.LOCAL)
-        run.wait()
-        list_feature_vector += extractor.get_feature_vector(result_path,
-                                                            runsolver_value_data_path)
-        sfh.rmfiles([result_path, err_path, runsolver_watch_data_path,
-                     runsolver_value_data_path])
+                              gv.sparkle_tmp_path)
+        # We create a watch log to filter out runsolver output
+        runsolver_watch_path =\
+            gv.sparkle_tmp_path / f"{extractor_path.name}_{instance_path}.wlog"
+        features = extractor.run(instance_path_list,
+                                 runsolver_args=["--cpu-limit", str(cutoff_extractor),
+                                                 "-w", runsolver_watch_path])
+        for _, _, value in features:
+            feature_vector.append(value)
+        runsolver_watch_path.unlink(missing_ok=True)
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
     predict_schedule_result_path = Path(
@@ -149,7 +137,7 @@ def call_sparkle_portfolio_selector_solve_instance(
     print("Sparkle portfolio selector predicting ...")
     cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
                 gv.sparkle_algorithm_selector_path, "--feature_vec",
-                " ".join(map(str, list_feature_vector))]
+                " ".join(map(str, feature_vector))]
     process = subprocess.run(cmd_list,
                              stdout=predict_schedule_result_path.open("w+"),
                              stderr=gv.sparkle_err_path.open("w+"))

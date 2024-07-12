@@ -1,0 +1,6 @@
+Source: https://satcompetition.github.io/2023/
+Version: -
+Authors: Tomas Balyo, Marijn Heule, Markus Iser, Matti Järvisalo, Martin Suda
+Paper: Proceedings of SAT Competition 2023: Solver, Benchmark and Proof Checker Descriptions
+License: -
+License location: -

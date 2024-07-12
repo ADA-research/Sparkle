@@ -9,7 +9,7 @@ from pathlib import Path
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
@@ -74,21 +74,19 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     if not Path("Tmp").exists():
         Path("Tmp").mkdir()
 
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
-                                                    gv.extractor_list)
-    bool_exists_missing_value = feature_data_csv.bool_exists_missing_value()
+    feature_data = FeatureDataFrame(feature_data_csv_path)
+    bool_exists_missing_value = feature_data.has_missing_value()
 
     if bool_exists_missing_value:
         print("****** WARNING: There are missing values in the feature data, and all "
               "missing values will be imputed as the mean value of all other non-missing"
               " values! ******")
-        print("Imputing all missing values starts ...")
-        feature_data_csv.impute_missing_value_of_all_columns()
-        print("Imputing all missing values done!")
+        print("Imputing all missing values...")
+        feature_data.impute_missing_values()
         impute_feature_data_csv_path = Path(
             f"{feature_data_csv_path}_{tg.get_time_pid_random_string()}"
             "_impute.csv")
-        feature_data_csv.save_csv(impute_feature_data_csv_path)
+        feature_data.save_csv(impute_feature_data_csv_path)
         feature_data_csv_path = impute_feature_data_csv_path
 
     log_file = selector_path.parent.name + "_autofolio.out"
@@ -96,17 +94,14 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     log_path_str = str(Path(sl.caller_log_dir / log_file))
     err_path_str = str(Path(sl.caller_log_dir / err_file))
     performance_data = PerformanceDataFrame(performance_data_csv_path)
-    pf_data_autofolio_path = performance_data.to_autofolio()
-    if selector_timeout is None:
-        cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
-                    str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
-                    objective_function, "--save", str(selector_path)]
-    else:
-        cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
-                    str(pf_data_autofolio_path), "--feature_csv", feature_data_csv_path,
-                    objective_function, "--runtime_cutoff", cutoff_time_str, "--tune",
-                    "--save", str(selector_path), "--wallclock_limit",
-                    str(selector_timeout)]
+    p_data_autofolio_path = performance_data.to_autofolio()
+    f_data_autofolio_path = feature_data.to_autofolio()
+    cmd_list = [python_executable, gv.autofolio_exec_path, "--performance_csv",
+                p_data_autofolio_path, "--feature_csv", f_data_autofolio_path,
+                objective_function, "--save", str(selector_path)]
+    if selector_timeout is not None:
+        cmd_list += ["--runtime_cutoff", cutoff_time_str, "--tune",
+                     "--wallclock_limit", str(selector_timeout)]
     # Write command line to log
     print("Running command below:\n", " ".join([str(c) for c in cmd_list]),
           file=open(log_path_str, "a+"))
@@ -132,5 +127,6 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         sys.exit(-1)
 
     # Remove the data copy for AutoFolio
-    pf_data_autofolio_path.unlink()
+    p_data_autofolio_path.unlink()
+    f_data_autofolio_path.unlink()
     return True

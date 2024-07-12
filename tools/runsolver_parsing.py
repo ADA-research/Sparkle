@@ -78,7 +78,8 @@ def get_solver_output(runsolver_configuration: list[str],
         if not isinstance(conf, str):
             # Looking for arg names
             continue
-        if "-o" in conf or "--solver-data" in conf:
+        conf = conf.strip()
+        if conf == "-o" or conf == "--solver-data":
             # solver output was redirected
             solver_data_file = Path(runsolver_configuration[idx + 1])
             solver_output = (log_dir / solver_data_file).open("r").read()

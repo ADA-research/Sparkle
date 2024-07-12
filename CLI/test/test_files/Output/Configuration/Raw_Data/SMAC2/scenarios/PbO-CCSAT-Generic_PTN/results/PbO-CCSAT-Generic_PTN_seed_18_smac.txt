@@ -1,25 +1,25 @@
 [INFO ] Logging to: /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/outdir_train_configuration/PbO-CCSAT-Generic_PTN_scenario/log-run18.txt
 [INFO ] Version of SMAC is v2.10.03-master-778 (3ee628ef9bf2), running on OpenJDK 64-Bit Server VM (1.8.0_402) and Linux 5.14.0-362.24.1.el9_3.0.1.x86_64 (amd64) 
 [INFO ] Call String: smac --scenario-file /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/PbO-CCSAT-Generic_PTN_scenario.txt --seed 18 --execdir /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp 
-[INFO ] SMAC started at: 17-Jun-2024 13:10:19. Minimizing penalized average runtime (PAR10).
-[WARN ] Algorithm Run Result reported a runtime of 61.1087 (secs) that exceeded it's cutoff time of 60.0 (secs) by 1.108699999999999 (secs). Next warning at 2.108699999999999 (secs)  
-[WARN ] Algorithm Run Result reported wallclock time of 82.12 (secs) that exceeded it's cutoff time of 60.0 (secs) by 22.120000000000005 (secs). Next warning at 23.120000000000005 (secs)  
+[INFO ] SMAC started at: 10-Jul-2024 09:30:46. Minimizing penalized average runtime (PAR10).
+[WARN ] Algorithm Run Result reported a runtime of 61.0665 (secs) that exceeded it's cutoff time of 60.0 (secs) by 1.0664999999999978 (secs). Next warning at 2.066499999999998 (secs)  
+[WARN ] Algorithm Run Result reported wallclock time of 76.709 (secs) that exceeded it's cutoff time of 60.0 (secs) by 16.709000000000003 (secs). Next warning at 17.709000000000003 (secs)  
 [INFO ] First incumbent: config 1 (internal ID: 0x0009), with penalized average runtime (PAR10): 600.0; estimate based on 1 runs.
 [INFO ] Sample call for new incumbent config 1 (internal ID: 0x0009): 
 cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b05.cnf 0 60.0 2147483647 938323 -init_solution '1' -p_swt '0.3' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '1' -perform_first_div '0' -perform_pac '0' -q_swt '0.0' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '2' -sel_var_div '3' -threshold_swt '300'  
-[INFO ] Incumbent changed to: config 2 (internal ID: 0x4472), with penalized average runtime (PAR10): 3.7413724999999998; estimate based on 2 runs.
+[INFO ] Incumbent changed to: config 2 (internal ID: 0x4472), with penalized average runtime (PAR10): 3.783716; estimate based on 2 runs.
 [INFO ] Sample call for new incumbent config 2 (internal ID: 0x4472): 
 cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b05.cnf 0 60.0 2147483647 938323 -gamma_hscore2 '15539' -init_solution '2' -p_swt '0.506274163372371' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '0' -perform_first_div '1' -perform_pac '1' -prob_first_div '0.0032348072582742346' -prob_novelty '0.7235645727037432' -prob_pac '9.535679825401345E-4' -q_swt '0.3121973641162751' -sel_clause_div '1' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '4' -sel_var_div '6' -threshold_swt '663'  
-[INFO ] Incumbent changed to: config 6 (internal ID: 0x11F31), with penalized average runtime (PAR10): 108.7836095; estimate based on 6 runs.
+[INFO ] Incumbent changed to: config 6 (internal ID: 0x11F31), with penalized average runtime (PAR10): 108.671127; estimate based on 6 runs.
 [INFO ] Sample call for new incumbent config 6 (internal ID: 0x11F31): 
 cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b03.cnf 0 60.0 2147483647 7675979 -gamma_hscore2 '15539' -init_solution '2' -p_swt '0.506274163372371' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '0' -perform_first_div '1' -perform_pac '1' -prob_first_div '0.0032348072582742346' -prob_novelty '0.7235645727037432' -prob_pac '9.535679825401345E-4' -q_swt '0.3121973641162751' -sel_clause_div '2' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '4' -sel_var_div '6' -threshold_swt '663'  
-[INFO ] Updated estimated penalized average runtime (PAR10) of the same incumbent: 67.1009167; estimate now based on 10 runs.
+[INFO ] Updated estimated penalized average runtime (PAR10) of the same incumbent: 67.03886879999999; estimate now based on 10 runs.
 [INFO ] 
 =======================================================================================
-SMAC has finished. Reason: wall-clock time limit (602.285 s) has been reached.   
-Total number of runs performed: 28, total configurations tried: 11.
-Total CPU time used: 504 s, total wallclock time used: 602 s.
-SMAC's final incumbent: config 6 (internal ID: 0x11F31), with estimated penalized average runtime (PAR10): 105.98500349999999, based on 12 run(s) on 12 training instance(s).
+SMAC has finished. Reason: wall-clock time limit (664.488 s) has been reached.   
+Total number of runs performed: 26, total configurations tried: 10.
+Total CPU time used: 499 s, total wallclock time used: 664 s.
+SMAC's final incumbent: config 6 (internal ID: 0x11F31), with estimated penalized average runtime (PAR10): 115.48988072727272, based on 11 run(s) on 11 training instance(s).
 Sample call for this final incumbent:
 cd /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp; /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic /home/snelleman/Sparkle/Instances/PTN/Ptn-7824-b03.cnf 0 60.0 2147483647 7675979 -gamma_hscore2 '15539' -init_solution '2' -p_swt '0.506274163372371' -perform_aspiration '1' -perform_clause_weight '1' -perform_double_cc '0' -perform_first_div '1' -perform_pac '1' -prob_first_div '0.0032348072582742346' -prob_novelty '0.7235645727037432' -prob_pac '9.535679825401345E-4' -q_swt '0.3121973641162751' -sel_clause_div '2' -sel_clause_weight_scheme '1' -sel_var_break_tie_greedy '4' -sel_var_div '6' -threshold_swt '663'
 =======================================================================================

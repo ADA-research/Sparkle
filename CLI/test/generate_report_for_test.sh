@@ -21,9 +21,9 @@ performance_data_path="Performance_Data/sparkle_performance_data.csv"
 performance_data_tmp="CLI/test/test_files/Performance_Data/sparkle_performance_data.csv.tmp"
 performance_data_test="CLI/test/test_files/Performance_Data/test_construct_sparkle_portfolio_selector.csv"
 
-selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
-selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__.tmp"
-selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector__@@SPARKLE@@__"
+selector_path="Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
+selector_tmp="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector.tmp"
+selector_test="CLI/test/test_files/Sparkle_Portfolio_Selector/sparkle_portfolio_selector"
 
 test_results_dir="Test_Cases/PTN2/"
 test_results_path="Test_Cases/PTN2/sparkle_performance_data.csv"

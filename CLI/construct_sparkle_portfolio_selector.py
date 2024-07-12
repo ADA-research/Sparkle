@@ -8,11 +8,10 @@ from pathlib import Path
 from CLI.help.status_info import ConstructPortfolioSelectorStatusInfo
 import global_variables as gv
 from sparkle.platform import settings_help
-from sparkle.structures import feature_data_csv_help as sfdcsv
+from sparkle.structures import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import compute_marginal_contribution_help as scmch
-from CLI.support import sparkle_job_help as sjh
 import sparkle_logging as sl
 from sparkle.platform.settings_help import SettingState
 from CLI.help import argparse_custom as ac
@@ -36,24 +35,14 @@ def parser_function() -> argparse.ArgumentParser:
     return parser
 
 
-def judge_exist_remaining_jobs(feature_data_csv_path: str,
-                               performance_data_csv_path: str) -> bool:
+def judge_exist_remaining_jobs(feature_data_csv: Path,
+                               performance_data_csv: Path) -> bool:
     """Return whether there are remaining feature or performance computation jobs."""
-    feature_data_csv = sfdcsv.SparkleFeatureDataCSV(feature_data_csv_path,
-                                                    gv.extractor_list)
-    feature_computation_jobs =\
-        feature_data_csv.remaining_feature_computation_job()
-    total_job_num = sjh.get_num_of_total_job_from_list(feature_computation_jobs)
-
-    if total_job_num > 0:
+    feature_data = FeatureDataFrame(feature_data_csv)
+    if feature_data.has_missing_vectors():
         return True
-
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
-    performance_computation_jobs =\
-        performance_data_csv.get_list_remaining_performance_computation_job()
-    total_job_num = sjh.get_num_of_total_job_from_list(performance_computation_jobs)
-
-    return total_job_num > 0
+    performance_data = PerformanceDataFrame(performance_data_csv)
+    return performance_data.has_missing_performance()
 
 
 if __name__ == "__main__":
@@ -91,8 +80,7 @@ if __name__ == "__main__":
     status_info.save()
 
     flag_judge_exist_remaining_jobs = judge_exist_remaining_jobs(
-        gv.feature_data_csv_path, gv.performance_data_csv_path
-    )
+        gv.feature_data_csv_path, gv.performance_data_csv_path)
 
     if flag_judge_exist_remaining_jobs:
         print("There remain unperformed feature computation jobs or performance "
@@ -100,7 +88,6 @@ if __name__ == "__main__":
         print("Please first execute all unperformed jobs before constructing Sparkle "
               "portfolio selector")
         print("Sparkle portfolio selector is not successfully constructed!")
-
         sys.exit(-1)
 
     success = scps.construct_sparkle_portfolio_selector(

@@ -9,9 +9,9 @@ import shutil
 import global_variables as gv
 from sparkle.platform import file_help as sfh, settings_help
 from sparkle.instance import InstanceSet
-from sparkle.structures.feature_data_csv_help import SparkleFeatureDataCSV
+from sparkle.structures.feature_dataframe import FeatureDataFrame
 from sparkle.structures.performance_dataframe import PerformanceDataFrame
-from CLI.help import compute_features_help as scf
+from CLI.compute_features import compute_features
 from CLI.run_solvers import running_solvers_performance_data
 import sparkle_logging as sl
 from CLI.help import command_help as ch
@@ -91,18 +91,16 @@ if __name__ == "__main__":
     instance_set = InstanceSet(instances_target)
 
     # Add the instances to the Feature Data / Performance Data
-    feature_data_csv = SparkleFeatureDataCSV(gv.feature_data_csv_path,
-                                             gv.extractor_list)
+    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
     # When adding instances, an empty performance DF has no objectives yet
     performance_data = PerformanceDataFrame(
         gv.performance_data_csv_path,
         objectives=gv.settings.get_general_sparkle_objectives())
     for instance_path in instance_set.get_instance_paths:
         # Construct a name path due to multi-file instances
-        feature_data_csv.add_row(str(instance_path))
+        feature_data.add_instance(str(instance_path))
         performance_data.add_instance(str(instance_path))
-
-    feature_data_csv.save_csv()
+    feature_data.save_csv()
     performance_data.save_csv()
 
     print(f"\nAdding instance set {instance_set.name} done!")
@@ -114,7 +112,7 @@ if __name__ == "__main__":
 
     if args.run_extractor_now:
         print("Start computing features ...")
-        scf.compute_features(Path(gv.feature_data_csv_path), False)
+        compute_features(Path(gv.feature_data_csv_path), False)
 
     if args.run_solver_now:
         num_job_in_parallel = gv.settings.get_number_of_jobs_in_parallel()

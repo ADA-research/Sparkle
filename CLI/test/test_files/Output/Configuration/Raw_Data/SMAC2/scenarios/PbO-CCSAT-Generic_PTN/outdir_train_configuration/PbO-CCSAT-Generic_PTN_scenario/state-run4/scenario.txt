@@ -1,0 +1,12 @@
+algo = /home/snelleman/Sparkle/Components/smac-v2.10.03-master-778/smac_target_algorithm.py /home/snelleman/Sparkle/Solvers/PbO-CCSAT-Generic
+execdir = /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/tmp/
+deterministic = 0
+run_obj = RUNTIME
+cutoffTime = 60
+cutoff_length = max
+paramfile = Solvers/PbO-CCSAT-Generic/PbO-CCSAT-params_test.pcs
+outdir = /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/outdir_train_configuration
+instance_file = /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/PTN_train.txt
+test_instance_file = /home/snelleman/Sparkle/Output/Configuration/Raw_Data/SMAC2/scenarios/PbO-CCSAT-Generic_PTN/PTN_train.txt
+wallclock-limit = 600
+validation = false

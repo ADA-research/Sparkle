@@ -25,8 +25,6 @@ def latest_scenario() -> ReportingScenario:
     return _latest_scenario
 
 
-sparkle_special_string = "__@@SPARKLE@@__"
-
 python_executable = "python3"
 
 sparkle_global_output_dir = Path("Output")
@@ -45,7 +43,7 @@ sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
 snapshot_dir = Path("Snapshots")
 sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
 
-sparkle_algorithm_selector_name = f"sparkle_portfolio_selector{sparkle_special_string}"
+sparkle_algorithm_selector_name = "sparkle_portfolio_selector"
 
 sparkle_algorithm_selector_path =\
     sparkle_algorithm_selector_dir / sparkle_algorithm_selector_name
@@ -104,8 +102,6 @@ instance_list_postfix = "_instance_list.txt"
 # NOTE: These data structures seem to be only written to / removed from but not read/used
 # NOTE: This could be a bug though, should test before removing stuff!
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
-extractor_list_path = reference_list_dir / "sparkle_extractor_list.txt"
-extractor_feature_dim_list_path = reference_list_dir / "extractor_feature_dim_list.txt"
 solver_nickname_list_path = reference_list_dir / "sparkle_solver_nickname_list.txt"
 instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.txt"
 
@@ -115,9 +111,7 @@ working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
 
 file_storage_data_mapping = {solver_nickname_list_path: {},
                              instances_nickname_path: {},
-                             extractor_list_path: [],
-                             extractor_nickname_list_path: {},
-                             extractor_feature_dim_list_path: {}
+                             extractor_nickname_list_path: {}
                              }
 
 for data_path in file_storage_data_mapping.keys():
@@ -127,6 +121,3 @@ for data_path in file_storage_data_mapping.keys():
             file_storage_data_mapping[data_path] = ast.literal_eval(fo.read())
 
 solver_nickname_mapping = file_storage_data_mapping[solver_nickname_list_path]
-extractor_list = file_storage_data_mapping[extractor_list_path]
-extractor_feature_vector_size_mapping =\
-    file_storage_data_mapping[extractor_feature_dim_list_path]
