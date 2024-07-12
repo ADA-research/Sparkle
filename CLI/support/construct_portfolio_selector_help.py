@@ -120,10 +120,10 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
 
     # Check if the selector was constructed successfully
     if process.returncode != 0 or not selector_path.is_file():
-        print("Sparkle portfolio selector is not successfully constructed!")
-        print("There might be some errors!")
-        print("Standard output log:", log_path_str)
-        print("Error output log:", err_path_str)
+        print("Sparkle portfolio selector is not successfully constructed!"
+              "There might be some errors!"
+              f"Standard output log: {log_path_str}"
+              f"Error output log: {err_path_str}")
         sys.exit(-1)
 
     # Remove the data copy for AutoFolio
