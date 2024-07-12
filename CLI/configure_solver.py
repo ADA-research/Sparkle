@@ -247,7 +247,7 @@ if __name__ == "__main__":
         run_on=run_on)
 
     # Update latest scenario
-    gv.latest_scenario().set_config_solver(solver.directory)
+    gv.latest_scenario().set_config_solver(solver)
     gv.latest_scenario().set_config_instance_set_train(instance_set_train.directory)
     gv.latest_scenario().set_latest_scenario(Scenario.CONFIGURATION)
 

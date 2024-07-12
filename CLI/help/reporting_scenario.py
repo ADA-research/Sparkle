@@ -296,11 +296,13 @@ class ReportingScenario:
 
     # Configuration settings ###
 
-    def set_config_solver(self: ReportingScenario, value: Path = DEFAULT_config_solver)\
-            -> None:
+    def set_config_solver(self: ReportingScenario,
+                          value: Solver | Path = DEFAULT_config_solver) -> None:
         """Set the path to the solver that was configured."""
         section = "configuration"
         name = "solver"
+        if isinstance(value, Solver):
+            value = value.directory
         self.path_setter(section, name, value)
 
     def get_config_solver(self: ReportingScenario) -> Solver:
