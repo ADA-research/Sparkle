@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-"""Configurator class to use different configurators like SMAC."""
+"""Configurator class to use different algorithm configurators like SMAC."""
 
 from __future__ import annotations
 from abc import abstractmethod

@@ -84,7 +84,7 @@ def create_configuration_file(solver: Solver, train_set: InstanceSet,
         opt_config_str = "-init_solution '1' " + opt_config_str
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
-    smac_each_run_cutoff_length = gv.settings.get_smac_target_cutoff_length()
+    smac_each_run_cutoff_length = gv.settings.get_configurator_target_cutoff_length()
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
     ablation_racing = gv.settings.get_ablation_racing_flag()

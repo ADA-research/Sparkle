@@ -230,7 +230,7 @@ if __name__ == "__main__":
     cpu_time = gv.settings.get_config_cpu_time()
     wallclock_time = gv.settings.get_config_wallclock_time()
     cutoff_time = gv.settings.get_general_target_cutoff_time()
-    cutoff_length = gv.settings.get_smac_target_cutoff_length()
+    cutoff_length = gv.settings.get_configurator_target_cutoff_length()
     sparkle_objective =\
         gv.settings.get_general_sparkle_objectives()[0]
     configurator = gv.settings.get_general_sparkle_configurator()

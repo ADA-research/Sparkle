@@ -64,12 +64,11 @@ class Settings:
     DEFAULT_config_cpu_time = None
     DEFAULT_config_solver_calls = None
     DEFAULT_config_number_of_runs = 25
+    DEFAULT_configurator_target_cutoff_length = "max"
 
     DEFAULT_portfolio_construction_timeout = None
 
     DEFAULT_slurm_max_parallel_runs_per_node = 8
-
-    DEFAULT_smac_target_cutoff_length = "max"
 
     DEFAULT_ablation_racing = False
 
@@ -105,8 +104,8 @@ class Settings:
         self.__run_on_set = SettingState.NOT_SET
         self.__number_of_jobs_in_parallel_set = SettingState.NOT_SET
         self.__slurm_max_parallel_runs_per_node_set = SettingState.NOT_SET
+        self.__configurator_target_cutoff_length_set = SettingState.NOT_SET
         self.__slurm_extra_options_set = dict()
-        self.__smac_target_cutoff_length_set = SettingState.NOT_SET
         self.__ablation_racing_flag_set = SettingState.NOT_SET
 
         self.__parallel_portfolio_check_interval_set = SettingState.NOT_SET
@@ -207,7 +206,6 @@ class Settings:
                     self.set_config_wallclock_time(value, state)
                     file_settings.remove_option(section, option)
 
-            section = "configuration"
             option_names = ("cpu_time", "smac_cpu_time_budget")
             for option in option_names:
                 if file_settings.has_option(section, option):
@@ -215,7 +213,6 @@ class Settings:
                     self.set_config_cpu_time(value, state)
                     file_settings.remove_option(section, option)
 
-            section = "configuration"
             option_names = ("solver_calls", "smac_solver_calls_budget")
             for option in option_names:
                 if file_settings.has_option(section, option):
@@ -223,12 +220,18 @@ class Settings:
                     self.set_config_solver_calls(value, state)
                     file_settings.remove_option(section, option)
 
-            section = "configuration"
             option_names = ("number_of_runs", "num_of_smac_runs")
             for option in option_names:
                 if file_settings.has_option(section, option):
                     value = file_settings.getint(section, option)
                     self.set_config_number_of_runs(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("target_cutoff_length", "smac_each_run_cutoff_length")
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_configurator_target_cutoff_length(value, state)
                     file_settings.remove_option(section, option)
 
             section = "slurm"
@@ -239,13 +242,6 @@ class Settings:
                     self.set_slurm_max_parallel_runs_per_node(value, state)
                     file_settings.remove_option(section, option)
 
-            section = "smac"
-            option_names = ("target_cutoff_length", "smac_each_run_cutoff_length")
-            for option in option_names:
-                if file_settings.has_option(section, option):
-                    value = file_settings.get(section, option)
-                    self.set_smac_target_cutoff_length(value, state)
-                    file_settings.remove_option(section, option)
 
             section = "ablation"
             option_names = ("racing", "ablation_racing")
@@ -650,25 +646,24 @@ class Settings:
 
     # Configuration: SMAC specific settings ###
 
-    def set_smac_target_cutoff_length(
-            self: Settings, value: str = DEFAULT_smac_target_cutoff_length,
+    def set_configurator_target_cutoff_length(
+            self: Settings, value: str = DEFAULT_configurator_target_cutoff_length,
             origin: SettingState = SettingState.DEFAULT) -> None:
         """Set the target algorithm cutoff length."""
-        section = "smac"
+        section = "configuration"
         name = "target_cutoff_length"
 
         if value is not None and self.__check_setting_state(
-                self.__smac_target_cutoff_length_set, origin, name):
+                self.__configurator_target_cutoff_length_set, origin, name):
             self.__init_section(section)
-            self.__smac_target_cutoff_length_set = origin
+            self.__configurator_target_cutoff_length_set = origin
             self.__settings[section][name] = str(value)
 
-    def get_smac_target_cutoff_length(self: Settings) -> str:
+    def get_configurator_target_cutoff_length(self: Settings) -> str:
         """Return the target algorithm cutoff length."""
-        if self.__smac_target_cutoff_length_set == SettingState.NOT_SET:
-            self.set_smac_target_cutoff_length()
-
-        return self.__settings["smac"]["target_cutoff_length"]
+        if self.__configurator_target_cutoff_length_set == SettingState.NOT_SET:
+            self.set_configurator_target_cutoff_length()
+        return self.__settings["configuration"]["target_cutoff_length"]
 
     # Slurm settings ###
 

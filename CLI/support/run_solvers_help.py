@@ -8,7 +8,7 @@ import global_variables as gv
 import tools.general as tg
 from sparkle.platform.settings_help import SolutionVerifier
 from sparkle.solver import Solver
-from sparkle.solver import sat_help as sssh
+from sparkle.solver import sat_help as sh
 from tools.runsolver_parsing import handle_timeouts
 
 
@@ -64,5 +64,5 @@ def verify(instance_path: str, raw_result_path: str, solver_path: str, status: s
     verifier = gv.settings.get_general_solution_verifier()
     # Use verifier if one is given and the solver did not time out
     if verifier == SolutionVerifier.SAT and status != "TIMEOUT" and status != "UNKNOWN":
-        return sssh.sat_verify(instance_path, raw_result_path, solver_path)
+        return sh.sat_verify(instance_path, raw_result_path, solver_path)
     return status
