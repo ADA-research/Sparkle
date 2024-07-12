@@ -8,14 +8,6 @@ import subprocess
 from sparkle.types import FeatureGroup, FeatureSubgroup, FeatureType
 from pathlib import Path
 
-parser = argparse.ArgumentParser(description="Handle I/O for the extractor.")
-parser.add_argument("-features",  action="store_true")
-parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
-parser.add_argument("-instance_file", type=str, help="Path to the instance file")
-parser.add_argument("-feature_group", type=str, help="The feature group to compute for this instance. If not present, all will be computed.")
-parser.add_argument("-output_file", type=str, help="Path to the output file")
-args = parser.parse_args()
-
 feature_mapping = {
     "nvarsOrig": (FeatureGroup.BASE, FeatureType.NUMBER_OF_VARS_ORIGINAL),
     "nclausesOrig": (FeatureGroup.BASE, FeatureType.NUMBER_OF_CLAUSES_ORIGINAL),
@@ -157,55 +149,63 @@ feature_mapping = {
     "lpTIME": (FeatureGroup.LP, FeatureType.FEATURE_TIME)
 }
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Handle I/O for the extractor.")
+    parser.add_argument("-features",  action="store_true")
+    parser.add_argument("-extractor_dir", type=str, help="Path to the extractor directory")
+    parser.add_argument("-instance_file", type=str, help="Path to the instance file")
+    parser.add_argument("-feature_group", type=str, help="The feature group to compute for this instance. If not present, all will be computed.")
+    parser.add_argument("-output_file", type=str, help="Path to the output file")
+    args = parser.parse_args()
 
-if args.features:
-    # Print the stringified features and the group they belong to
-    print([(feature_mapping[key][0].value, feature_mapping[key][1].value if isinstance(feature_mapping[key][1], Enum) else feature_mapping[key][1])
-           for key in feature_mapping.keys()])
-    sys.exit()
+    if args.features:
+        # Print the stringified features and the group they belong to
+        print([(feature_mapping[key][0].value, feature_mapping[key][1].value if isinstance(feature_mapping[key][1], Enum) else feature_mapping[key][1])
+            for key in feature_mapping.keys()])
+        sys.exit()
 
-extractor_dir = Path(args.extractor_dir)
-instance_path = Path(args.instance_file)
-output_file = Path(args.output_file) if args.output_file else None
+    extractor_dir = Path(args.extractor_dir)
+    instance_path = Path(args.instance_file)
+    output_file = Path(args.output_file) if args.output_file else None
 
-extractor_name = "SATFeatureCompetition2024"
-executable_name = "features"
-executable = extractor_dir / executable_name
-cmd = [extractor_dir / executable_name]
-#Feature group options: [-all] [-base] |[-sp] [-Dia] [-Cl] [-unit] [-ls] [-lp] [-lobjois] (lowercase)
-if args.feature_group is not None:
-    cmd.append(f"-{args.feature_group}")
-else:
-    cmd.append("-all")
-cmd.append(instance_path)
+    extractor_name = "SATFeatureCompetition2024"
+    executable_name = "features"
+    executable = extractor_dir / executable_name
+    cmd = [extractor_dir / executable_name]
+    #Feature group options: [-all] [-base] |[-sp] [-Dia] [-Cl] [-unit] [-ls] [-lp] [-lobjois] (lowercase)
+    if args.feature_group is not None:
+        cmd.append(f"-{args.feature_group}")
+    else:
+        cmd.append("-all")
+    cmd.append(instance_path)
 
-extractor = subprocess.run(cmd, capture_output=True)
+    extractor = subprocess.run(cmd, capture_output=True)
 
-# Read all lines from the input file
-raw_lines = extractor.stdout.decode().splitlines()
+    # Read all lines from the input file
+    raw_lines = extractor.stdout.decode().splitlines()
 
-# Process raw result file and write to the final result file
-# First, we need to map each feature_name to its standardised name
-if len(raw_lines) >= 2:
-    features = raw_lines[-2].strip().split(",")
-    values = raw_lines[-1].strip().split(",")
-    # Remove the solved feature
-    if features[-1] == "solved":
-        features = features[:-1]
-        values = values[:-1]
-    processed_features = []
-    for i, feature in enumerate(features):
-        feature_group, feature_name = feature_mapping[feature]
-        if isinstance(feature_name, Enum):
-            feature_name = feature_name.value
-        processed_features.append((feature_group.value, feature_name, values[i]))
-        
-else:
-    # Failed to compute features
-    sys.exit(extractor.stdout.decode())
+    # Process raw result file and write to the final result file
+    # First, we need to map each feature_name to its standardised name
+    if len(raw_lines) >= 2:
+        features = raw_lines[-2].strip().split(",")
+        values = raw_lines[-1].strip().split(",")
+        # Remove the solved feature
+        if features[-1] == "solved":
+            features = features[:-1]
+            values = values[:-1]
+        processed_features = []
+        for i, feature in enumerate(features):
+            feature_group, feature_name = feature_mapping[feature]
+            if isinstance(feature_name, Enum):
+                feature_name = feature_name.value
+            processed_features.append((feature_group.value, feature_name, values[i]))
+            
+    else:
+        # Failed to compute features
+        sys.exit(extractor.stdout.decode())
 
-if output_file is not None:
-    with open(output_file, "w") as out_file:
-        out_file.write(str(processed_features))
-else:
-    print(processed_features)
+    if output_file is not None:
+        with open(output_file, "w") as out_file:
+            out_file.write(str(processed_features))
+    else:
+        print(processed_features)
