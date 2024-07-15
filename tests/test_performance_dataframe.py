@@ -7,11 +7,11 @@ from unittest.mock import Mock, patch
 from pathlib import Path
 
 from sparkle.structures import PerformanceDataFrame
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 import global_variables as gv
 
 global settings
-gv.settings = settings_help.Settings()
+gv.settings = Settings()
 
 
 class TestPerformanceData(TestCase):

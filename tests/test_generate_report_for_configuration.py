@@ -7,7 +7,7 @@ from pytest_mock import MockFixture
 
 from sparkle.platform import generate_report_for_configuration as sgrch
 import global_variables as gv
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
@@ -16,9 +16,9 @@ from sparkle.instance import InstanceSet
 import csv
 
 global settings
-gv.settings = settings_help.Settings()
+settings = Settings()
 
-configurator = gv.settings.get_general_sparkle_configurator()
+configurator = settings.get_general_sparkle_configurator()
 solver_path = Path("tests/test_files/Solvers/Test-Solver")
 solver = Solver(solver_path, raw_output_directory=Path(""))
 train_instance = "train-instance"

@@ -10,9 +10,8 @@ from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
 import sparkle_logging as sl
-from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.platform import \
@@ -60,7 +59,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Compare current settings to latest.ini
     prev_settings = Settings(PurePath("Settings/latest.ini"))

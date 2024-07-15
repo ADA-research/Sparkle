@@ -7,13 +7,13 @@ from pathlib import Path
 from CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 import global_variables as gv
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 
 from unittest.mock import patch
 from unittest.mock import MagicMock, Mock
 
 global settings
-gv.settings = settings_help.Settings()
+gv.settings = Settings()
 
 
 class TestMarginalContribution(TestCase):

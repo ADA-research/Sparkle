@@ -429,11 +429,10 @@ class PerformanceDataFrame():
                     not minimise and virtual_best_score < score_solver:
                 virtual_best_score = score_solver
 
-        # Shouldn't this throw an error?
-        if virtual_best_score is None and len(self.dataframe.columns) == 0:
+        if virtual_best_score is None:
             print("WARNING: PerformanceDataFrame could not calculate best performance "
-                  f"for instance {instance}")
-            virtual_best_score = 0
+                  f"for instance {instance}.")
+            return PerformanceDataFrame.missing_value
 
         return virtual_best_score
 
@@ -459,20 +458,18 @@ class PerformanceDataFrame():
             The aggregated best performance of the portfolio over all instances.
         """
         objective = self.verify_objective(objective)
-        virtual_best = []
-        capvalue = None
-        penalty = None
+        instance_best = []
+        capvalue, penalty = None, None
         for idx, instance in enumerate(self.dataframe.index):
             if capvalue_list is not None:
                 capvalue = capvalue_list[idx]
             if penalty_list is not None:
                 penalty = penalty_list[idx]
-            virtual_best_score = (
-                self.best_performance_instance(
-                    instance, minimise, objective, capvalue, penalty, exclude_solvers))
-            virtual_best.append(virtual_best_score)
+            best_score = self.best_performance_instance(
+                instance, minimise, objective, capvalue, penalty, exclude_solvers)
+            instance_best.append(best_score)
 
-        return aggregation_function(virtual_best)
+        return aggregation_function(instance_best)
 
     def get_dict_vbs_penalty_time_on_each_instance(
             self: PerformanceDataFrame,

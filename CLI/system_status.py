@@ -9,7 +9,7 @@ import global_variables as gv
 from CLI.help import system_status as sssh
 import sparkle_logging as sl
 from CLI.help import argparse_custom as ac
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
     check_for_initialise(sys.argv, [])
 
     print("Reporting current system status of Sparkle ...")

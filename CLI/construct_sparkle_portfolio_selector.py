@@ -6,11 +6,10 @@ import argparse
 from pathlib import Path
 
 import global_variables as gv
-from sparkle.platform import settings_help
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
 import sparkle_logging as sl
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from CLI.help import command_help as ch
@@ -118,7 +117,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -156,6 +155,9 @@ if __name__ == "__main__":
 
     performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
     feature_data = FeatureDataFrame(gv.feature_data_csv_path)
+
+    output_path = gv.settings.get_
+
     success = construct_sparkle_portfolio_selector(
         gv.sparkle_algorithm_selector_path,
         performance_data,

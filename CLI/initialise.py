@@ -9,7 +9,7 @@ from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
 from CLI.help import snapshot_help as srh
 from CLI.help import snapshot_help as snh
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 import global_variables as gv
 import sparkle_logging as sl
@@ -112,6 +112,6 @@ if __name__ == "__main__":
     # Process command line arguments
     args = parser.parse_args()
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     initialise_sparkle(sys.argv)

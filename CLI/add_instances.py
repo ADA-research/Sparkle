@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 
 import global_variables as gv
-from sparkle.platform import file_help as sfh, settings_help
+from sparkle.platform import file_help as sfh, settings_objects
 from sparkle.instance import InstanceSet
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from CLI.compute_features import compute_features
@@ -16,7 +16,6 @@ import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
-from sparkle.platform.settings_help import SettingState
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -45,7 +44,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = settings_objects.Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -60,7 +59,7 @@ if __name__ == "__main__":
 
     if args.run_on is not None:
         gv.settings.set_run_on(
-            args.run_on.value, SettingState.CMD_LINE)
+            args.run_on.value, settings_objects.SettingState.CMD_LINE)
     run_on = gv.settings.get_run_on()
 
     check_for_initialise(sys.argv,

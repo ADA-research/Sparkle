@@ -14,9 +14,8 @@ import runrunner as rrr
 from CLI.help.status_info import ConfigureSolverStatusInfo
 import global_variables as gv
 import sparkle_logging as sl
-from sparkle.platform import settings_help
 from CLI.support import ablation_help as sah
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
 from CLI.help import command_help as ch
@@ -147,7 +146,7 @@ def run_after(solver: Path,
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

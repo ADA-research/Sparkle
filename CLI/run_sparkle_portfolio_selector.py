@@ -8,8 +8,7 @@ from pathlib import Path, PurePath
 import global_variables as gv
 from CLI.support import run_portfolio_selector_help as srpsh
 import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.structures import PerformanceDataFrame
@@ -38,7 +37,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

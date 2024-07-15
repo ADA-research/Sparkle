@@ -7,7 +7,7 @@ from pathlib import Path
 
 import global_variables as gv
 import tools.general as tg
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 from CLI.support import run_solvers_help as srs
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # Initialise settings
     global settings
     file_path_latest = Path("Settings/latest.ini")
-    gv.settings = settings_help.Settings(file_path_latest)
+    gv.settings = Settings(file_path_latest)
     perf_measure = gv.settings.DEFAULT_general_sparkle_objective.PerformanceMeasure
     # Define command line arguments
     parser = argparse.ArgumentParser()

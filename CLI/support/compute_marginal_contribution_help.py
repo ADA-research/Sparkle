@@ -92,8 +92,7 @@ def compute_perfect_selector_marginal_contribution(
 
     best_performance = performance_data.best_performance(
         aggregation_function, minimise, capvalue_list, penalty_list)
-    print("Virtual best performance for portfolio selector with all solvers is "
-          f"{best_performance}")
+    print(f"Virtual best performance for portfolio selector is {best_performance}")
 
     for solver in performance_data.dataframe.columns:
         solver_name = Path(solver).name
@@ -306,6 +305,7 @@ def compute_actual_selector_marginal_contribution(
     print("Computing done!")
 
     # Compute contribution per solver
+    #This could be parallelised
     for solver in performance_df.dataframe.columns:
         solver_name = Path(solver).name
         print("Computing actual performance for portfolio selector excluding solver "

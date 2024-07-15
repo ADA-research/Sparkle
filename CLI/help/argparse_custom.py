@@ -8,11 +8,9 @@ from typing import Any
 
 from runrunner.base import Runner
 
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import SettingState, Settings, SolutionVerifier
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.platform.settings_help import SolutionVerifier
 from CLI.help.command_help import CommandName
-from sparkle.platform.settings_help import Settings
 
 
 class SetByUser(argparse.Action):
