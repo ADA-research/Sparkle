@@ -11,8 +11,7 @@ from runrunner.base import Runner
 from CLI.support import ablation_help as sah
 import global_variables as gv
 import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from CLI.help import argparse_custom as ac
@@ -57,7 +56,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     sl.log_command(sys.argv)
 

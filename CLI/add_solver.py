@@ -9,7 +9,7 @@ from pathlib import Path
 
 import runrunner as rrr
 
-from sparkle.platform import file_help as sfh, settings_help
+from sparkle.platform import file_help as sfh
 import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from CLI.run_solvers import running_solvers_performance_data
@@ -19,7 +19,7 @@ from CLI.help.command_help import CommandName
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -48,7 +48,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

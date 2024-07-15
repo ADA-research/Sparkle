@@ -9,8 +9,7 @@ from runrunner.base import Runner
 
 import global_variables as gv
 import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import run_solver_help as srcsh
 from sparkle.instance import InstanceSet
 from CLI.help import command_help as ch
@@ -37,7 +36,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
