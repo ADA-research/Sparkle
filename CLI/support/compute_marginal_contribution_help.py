@@ -427,9 +427,9 @@ def compute_actual_selector_marginal_contribution(
                       "[removed] Temporary performance data")
         print("Computing done!")
 
-        # 1. If the performance remains equal, this solver has no contribution
-        # 2. If there is a performance decay without this solver, it has a contribution
-        # 3. If there is a performance improvement, we have a bad selector
+        # 1. If the performance remains equal, this solver did not contribute
+        # 2. If there is a performance decay without this solver, it does contribute
+        # 3. If there is a performance improvement, we have a bad portfolio selector
         if tmp_asp == actual_selector_performance:
             marginal_contribution = 0.0
         elif minimise and tmp_asp > actual_selector_performance or not minimise and\
