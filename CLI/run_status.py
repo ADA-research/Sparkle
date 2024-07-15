@@ -33,6 +33,5 @@ if __name__ == "__main__":
 
     print("Reporting current running status of Sparkle ...")
     run_status_help.print_running_configuration_jobs()
-    run_status_help.print_running_portfolio_selector_construction_jobs()
     run_status_help.print_running_generate_report_jobs()
     print("Current running status of Sparkle reported!")

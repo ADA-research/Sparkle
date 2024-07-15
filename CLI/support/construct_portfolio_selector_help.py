@@ -9,8 +9,7 @@ from pathlib import Path
 import global_variables as gv
 import tools.general as tg
 from sparkle.platform import file_help as sfh
-from sparkle.structures import FeatureDataFrame
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 
@@ -38,8 +37,6 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
     # unless the recompute flag is set
     if selector_path.exists() and not flag_recompute:
         print("Portfolio selector already exists. Set the recompute flag to re-create.")
-
-        # Nothing to do, success!
         return True
 
     # Remove contents of- and the selector path to ensure everything is (re)computed
@@ -67,8 +64,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
             perf_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MINIMISATION:
         objective_function = "--objective solution_quality"
     else:
-        print("ERROR: Unknown performance measure in "
-              "construct_sparkle_portfolio_selector")
+        print("ERROR: Unknown performance measure in portfolio selector construction.")
         sys.exit(-1)
 
     if not Path("Tmp").exists():

@@ -5,7 +5,7 @@ from unittest import TestCase
 from pathlib import Path
 
 from CLI.support import compute_marginal_contribution_help as scmch
-from sparkle.structures import FeatureDataFrame
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 import global_variables as gv
 from sparkle.platform import settings_help
 
@@ -106,8 +106,8 @@ class TestMarginalContribution(TestCase):
         """Test for method compute_actual_selector_performance."""
         pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
               "sparkle_portfolio_selector"
-        perf_path = "CLI/test/test_files/Performance_Data/"\
-                    "test_construct_sparkle_portfolio_selector.csv"
+        perf_path = Path("CLI/test/test_files/Performance_Data/"
+                    "test_construct_sparkle_portfolio_selector.csv")
         feature_csv_path = "CLI/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
 
@@ -118,9 +118,9 @@ class TestMarginalContribution(TestCase):
                                                (0.537186, True), (61.0, False),
                                                (61.0, False), (61.0, False),
                                                (61.0, False), (61.0, False)]
-
+        performance_df = PerformanceDataFrame(Path(perf_path))
         output = scmch.compute_actual_selector_performance(pth,
-                                                           perf_path,
+                                                           performance_df,
                                                            feature_csv_path,
                                                            True,
                                                            sum,

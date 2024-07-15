@@ -276,11 +276,11 @@ class Settings:
                         self.add_slurm_extra_option(option, value, state)
                     else:
                         print(f'Unrecognised section - option combination: "{section} '
-                              f'{option}" in file {str(file_path)} ignored')
+                              f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the settings
         else:
-            print(f"ERROR: Failed to read settings from {str(file_path)} The file may "
+            print(f"ERROR: Failed to read settings from {file_path} The file may "
                   "have been empty, located in a different path, or be in another format"
                   " than INI. Settings from different sources will be used (e.g. default"
                   " values).")

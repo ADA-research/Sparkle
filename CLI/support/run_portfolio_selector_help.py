@@ -138,6 +138,10 @@ def call_sparkle_portfolio_selector_solve_instance(
     cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
                 gv.sparkle_algorithm_selector_path, "--feature_vec",
                 " ".join(map(str, feature_vector))]
+
+    print(" ".join(cmd_list))
+    input()
+    # Run AutoFolio
     process = subprocess.run(cmd_list,
                              stdout=predict_schedule_result_path.open("w+"),
                              stderr=gv.sparkle_err_path.open("w+"))

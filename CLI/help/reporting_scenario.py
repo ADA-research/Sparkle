@@ -151,11 +151,11 @@ class ReportingScenario:
             for section in sections:
                 for option in file_scenario[section]:
                     print(f'Unrecognised section - option combination:"{section} '
-                          f'{option}" in file {str(file_path)} ignored')
+                          f'{option}" in file {file_path} ignored')
 
         # Print error if unable to read the scenario file
         else:
-            print(f"WARNING: Failed to read latest scenario from {str(file_path)} The "
+            print(f"WARNING: Failed to read latest scenario from {file_path} The "
                   "file may have been empty, or is in another format than INI. Default "
                   "values will be used.")
 

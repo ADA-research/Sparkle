@@ -13,12 +13,11 @@ from statistics import mean
 from sparkle.platform import file_help as sfh
 import global_variables as gv
 import tools.general as tg
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import construct_portfolio_selector_help as scps
 from CLI.support import run_portfolio_selector_help as srps
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.structures import FeatureDataFrame
 
 
 def read_marginal_contribution_csv(path: Path) -> list[tuple[str, float]]:
@@ -139,7 +138,7 @@ def compute_perfect_selector_marginal_contribution(
 
 
 def get_list_predict_schedule(actual_portfolio_selector_path: Path,
-                              feature_data_csv: FeatureDataFrame,
+                              feature_data: FeatureDataFrame,
                               instance: str) -> list[float]:
     """Return the solvers schedule suggested by the selector as a list.
 
@@ -152,11 +151,11 @@ def get_list_predict_schedule(actual_portfolio_selector_path: Path,
       List of floating point numbers.
     """
     list_predict_schedule = []
-    python_executable = gv.python_executable
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
-    feature_vector = [str(f) for f in feature_data_csv.get_instance(instance)]
-    feature_vector_string = " ".join(feature_vector)
+
+    # Get the feature vector for the instance as a space separated string
+    feature_vector = " ".join(map(str, feature_data.get_instance(instance)))
 
     pred_sched_file = ("predict_schedule_"
                        f"{tg.get_time_pid_random_string()}.predres")
@@ -166,8 +165,8 @@ def get_list_predict_schedule(actual_portfolio_selector_path: Path,
     log_path = sl.caller_log_dir / log_file
     err_path_str = str(sl.caller_log_dir) + "/" + err_file
 
-    cmd = [python_executable, gv.autofolio_exec_path, "--load",
-           actual_portfolio_selector_path, "--feature_vec", feature_vector_string]
+    cmd = [gv.python_executable, gv.autofolio_exec_path, "--load",
+           actual_portfolio_selector_path, "--feature_vec", feature_vector]
 
     with log_path.open("a+") as log_file:
         print("Running command below to get predicted schedule from autofolio:\n",
@@ -190,8 +189,8 @@ def get_list_predict_schedule(actual_portfolio_selector_path: Path,
 
 def compute_actual_selector_performance(
         actual_portfolio_selector_path: str,
-        performance_data_csv_path: str,
-        feature_data_csv_path: str,
+        performance_data: PerformanceDataFrame,
+        feature_data: FeatureDataFrame,
         minimise: bool,
         aggregation_function: Callable[[list[float]], float],
         capvalue_list: list[float] | None = None) -> float:
@@ -208,7 +207,6 @@ def compute_actual_selector_performance(
     Returns:
       The selector performance as a single floating point number.
     """
-    performance_data = PerformanceDataFrame(performance_data_csv_path)
     penalty_factor = gv.settings.get_general_penalty_multiplier()
     performances = []
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
@@ -216,8 +214,10 @@ def compute_actual_selector_performance(
     for index, instance in enumerate(performance_data.instances):
         if capvalue_list is not None:
             capvalue = capvalue_list[index]
+        # We get the performance for an instance by infering the model predicition
+        # for the instance.
         performance_instance, flag_success = compute_actual_performance_for_instance(
-            actual_portfolio_selector_path, instance, feature_data_csv_path,
+            actual_portfolio_selector_path, instance, feature_data,
             performance_data, minimise, perf_measure, capvalue)
 
         if not flag_success and capvalue is not None:
@@ -231,8 +231,8 @@ def compute_actual_selector_performance(
 def compute_actual_performance_for_instance(
         actual_portfolio_selector_path: Path,
         instance: str,
-        feature_data_csv_path: Path,
-        performance_data_csv: PerformanceDataFrame,
+        feature_data: FeatureDataFrame,
+        performance_data: PerformanceDataFrame,
         minimise: bool,
         objective_type: PerformanceMeasure,
         capvalue: float) -> tuple[float, bool]:
@@ -242,7 +242,7 @@ def compute_actual_performance_for_instance(
       actual_portfolio_selector_path: Path to the portfolio selector.
       instance: Instance name.
       feature_data_csv_path: Path to the CSV file with the feature data.
-      performance_data_csv: SparklePerformanceDataCSV object that holds the
+      performance_data: SparklePerformanceDataCSV object that holds the
         performance data.
       minimise: Whether the performance value should be minimized or maximized
       objective_type: Whether we are dealing with run time or not.
@@ -254,10 +254,9 @@ def compute_actual_performance_for_instance(
       within the cutoff time (Runtime) or at least one solver performance
       did not exceed capvalue
     """
-    feature_data_csv = FeatureDataFrame(feature_data_csv_path)
     # Get the prediction of the selector over the solvers
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
-                                                      feature_data_csv, instance)
+                                                      feature_data, instance)
 
     performance = None
     flag_successfully_solving = False
@@ -267,12 +266,12 @@ def compute_actual_performance_for_instance(
         # In case of Runtime, we loop through the selected solvers
         for prediction in list_predict_schedule:
             # A prediction is a solver and its score given by the Selector
-            performance = float(performance_data_csv.get_value(prediction[0], instance))
+            performance = float(performance_data.get_value(prediction[0], instance))
             performance_list.append(performance)
             scheduled_cutoff_time_this_run = prediction[1]
             # 1. if performance <= predicted runtime we have a successfull solver
             if performance <= scheduled_cutoff_time_this_run:
-                # 2. Succes if the tried solvers < selector cutoff_time
+                # 2. Success if the tried solvers < selector cutoff_time
                 if sum(performance_list) <= cutoff_time:
                     flag_successfully_solving = True
                 break
@@ -288,7 +287,7 @@ def compute_actual_performance_for_instance(
         # Minimum or maximum of predicted solvers (Aggregation function)
         performance_list = []
         for prediction in list_predict_schedule:
-            solver_performance = performance_data_csv.get_value(prediction[0], instance)
+            solver_performance = performance_data.get_value(prediction[0], instance)
             performance_list.append(float(solver_performance))
 
         if minimise:
@@ -344,6 +343,7 @@ def compute_actual_selector_marginal_contribution(
 
     # Get values from CSV while all solvers and instances are included
     performance_df = PerformanceDataFrame(performance_data_csv_path)
+    feature_df = FeatureDataFrame(feature_data_csv_path)
 
     if not Path("Tmp/").exists():
         Path("Tmp/").mkdir()
@@ -365,11 +365,11 @@ def compute_actual_selector_marginal_contribution(
         sys.exit(-1)
 
     actual_selector_performance = compute_actual_selector_performance(
-        actual_portfolio_selector_path, performance_data_csv_path,
-        feature_data_csv_path, minimise, aggregation_function, capvalue_list)
+        actual_portfolio_selector_path, performance_df,
+        feature_df, minimise, aggregation_function, capvalue_list)
 
     print("Actual performance for portfolio selector with all solvers is "
-          f"{str(actual_selector_performance)}")
+          f"{actual_selector_performance}")
     print("Computing done!")
 
     # Compute contribution per solver
@@ -417,11 +417,11 @@ def compute_actual_selector_marginal_contribution(
             sys.exit(-1)
 
         tmp_asp = compute_actual_selector_performance(
-            tmp_actual_portfolio_selector_path, tmp_performance_df_path,
+            tmp_actual_portfolio_selector_path, tmp_performance_df,
             feature_data_csv_path, minimise, aggregation_function, capvalue_list)
 
-        print(f"Actual performance for portfolio selector excluding solver "
-              f"{solver_name} is {str(tmp_asp)}")
+        print(f"Actual performance for portfolio selector excluding solver {solver_name}"
+              f" is {tmp_asp}")
         sfh.rmfiles(tmp_performance_df_path)
         sl.add_output(str(tmp_performance_df_path),
                       "[removed] Temporary performance data")

@@ -7,7 +7,6 @@ import global_variables as gv
 from CLI.support import sparkle_job_help as sjh
 from CLI.help.status_info import (StatusInfoType,
                                   ConfigureSolverStatusInfo,
-                                  ConstructPortfolioSelectorStatusInfo,
                                   GenerateReportStatusInfo)
 from CLI.help.command_help import CommandName
 
@@ -81,35 +80,6 @@ def print_running_configuration_jobs() -> None:
                 print()
     else:
         print("No running configuration jobs")
-
-
-def print_running_portfolio_selector_construction_jobs() -> None:
-    """Print a list of currently active ps construction jobs."""
-    command = CommandName.CONSTRUCT_SPARKLE_PORTFOLIO_SELECTOR
-    command_jobs_ids = get_running_jobs_for_command(command)
-    tmp_directory = (f"{gv.sparkle_tmp_path}/"
-                     f"{StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR}/")
-    statusinfo_files = get_list_all_extensions(Path(tmp_directory), ".statusinfo")
-    if len(command_jobs_ids) > 0:
-        print(f"The command {command} is running "
-              f"with job IDs {command_jobs_ids}")
-        if len(statusinfo_files) > 0:
-            print("Running portfolio selector construction jobs:")
-            for statusinfo_filename in statusinfo_files:
-                statusinfo_filepath = Path(
-                    tmp_directory
-                    + Path(statusinfo_filename).parent)
-                status_info = (ConstructPortfolioSelectorStatusInfo
-                               .from_file(statusinfo_filepath))
-                print(f"Start Time: {status_info.get_start_time()}")
-                print(f"Algorithm Selector: {status_info.get_algorithm_selector_path()}")
-                print(f"Feature data csv: "
-                      f"{str(status_info.get_feature_data_csv_path())}")
-                print(f"Performance data csv: "
-                      f"{str(status_info.get_performance_data_csv_path())}")
-                print()
-    else:
-        print("No running portfolio selector construction jobs")
 
 
 def print_running_generate_report_jobs() -> None:
