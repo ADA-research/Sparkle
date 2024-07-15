@@ -549,11 +549,12 @@ class PerformanceDataFrame():
 
         Args:
             csv_filepath: The new filepath to use for saving the object to.
-                Warning: If None, the original path is used and could lead to dataloss!
+                Warning: If the original path is used, it could lead to dataloss!
         """
         csv_filepath = self.csv_filepath if csv_filepath is None else csv_filepath
-        pd_copy = PerformanceDataFrame(csv_filepath, init_df=False)
+        pd_copy = PerformanceDataFrame(self.csv_filepath, init_df=False)
         pd_copy.dataframe = self.dataframe.copy()
+        pd_copy.csv_filepath = csv_filepath
         return pd_copy
 
     def to_autofolio(self: PerformanceDataFrame) -> Path:

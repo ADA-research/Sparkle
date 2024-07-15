@@ -6,7 +6,6 @@ import argparse
 from pathlib import Path
 
 import global_variables as gv
-import tools.general as tg
 from sparkle.platform import settings_help
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
@@ -45,16 +44,16 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
 
 
 def construct_sparkle_portfolio_selector(selector_path: Path,
-                                         performance_data_csv_path: str,
-                                         feature_data_csv_path: Path,
+                                         performance_data: PerformanceDataFrame,
+                                         feature_data: FeatureDataFrame,
                                          flag_recompute: bool = False,
                                          selector_timeout: int = None) -> bool:
     """Create the Sparkle portfolio selector.
 
     Args:
         selector_path: Portfolio selector path.
-        performance_data_csv_path: Performance data csv path.
-        feature_data_csv_path: Feature data csv path.
+        performance_data: Performance data.
+        feature_data: Feature data.
         flag_recompute: Whether or not to recompute if the selector exists and no data
             was changed. Defaults to False.
         selector_timeout: The cuttoff time to configure the algorithm selector. If None
@@ -96,7 +95,6 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         print("ERROR: Unknown performance measure in portfolio selector construction.")
         sys.exit(-1)
 
-    feature_data = FeatureDataFrame(feature_data_csv_path)
     bool_exists_missing_value = feature_data.has_missing_value()
 
     if bool_exists_missing_value:
@@ -105,13 +103,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
               " values! ******")
         print("Imputing all missing values...")
         feature_data.impute_missing_values()
-        impute_feature_data_csv_path = Path(
-            f"{feature_data_csv_path}_{tg.get_time_pid_random_string()}"
-            "_impute.csv")
-        feature_data.save_csv(impute_feature_data_csv_path)
-        feature_data_csv_path = impute_feature_data_csv_path
 
-    performance_data = PerformanceDataFrame(performance_data_csv_path)
     selector = gv.settings.get_general_sparkle_selector()
     selector_path = selector.construct(selector_path,
                                        performance_data,
@@ -120,8 +112,6 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
                                        cutoff_time,
                                        selector_timeout)
 
-    if bool_exists_missing_value:
-        impute_feature_data_csv_path.unlink()
     return True
 
 
@@ -164,10 +154,12 @@ if __name__ == "__main__":
         print("Sparkle portfolio selector is not successfully constructed!")
         sys.exit(-1)
 
+    performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
+    feature_data = FeatureDataFrame(gv.feature_data_csv_path)
     success = construct_sparkle_portfolio_selector(
         gv.sparkle_algorithm_selector_path,
-        gv.performance_data_csv_path,
-        gv.feature_data_csv_path,
+        performance_data,
+        feature_data,
         flag_recompute_portfolio,
         args.selector_timeout
     )

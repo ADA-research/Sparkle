@@ -9,7 +9,6 @@ from typing import Callable
 from statistics import mean
 
 import global_variables as gv
-import tools.general as tg
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.construct_sparkle_portfolio_selector import construct_sparkle_portfolio_selector
 import sparkle_logging as sl
@@ -91,33 +90,27 @@ def compute_perfect_selector_marginal_contribution(
         penalty_list = [cap * penalty_factor for cap in capvalue_list]
     performance_data = PerformanceDataFrame(performance_data_csv_path)
 
-    print("Computing virtual best performance for portfolio selector with all solvers "
-          "...")
-
-    virtual_best_performance = performance_data.best_performance(
-            aggregation_function, minimise, capvalue_list, penalty_list)
+    best_performance = performance_data.best_performance(
+        aggregation_function, minimise, capvalue_list, penalty_list)
     print("Virtual best performance for portfolio selector with all solvers is "
-          f"{virtual_best_performance}")
-    print("Computing done!")
+          f"{best_performance}")
+
     for solver in performance_data.dataframe.columns:
         solver_name = Path(solver).name
-        print("Computing virtual best performance for portfolio selector excluding "
-              f"solver {solver_name} ...")
-        tmp_virt_best_perf = performance_data.best_performance(aggregation_function,
-            minimise, capvalue_list, penalty_list, exclude_solvers=[solver])
+        tmp_virt_best_perf = performance_data.best_performance(
+            aggregation_function, minimise, capvalue_list, penalty_list, [solver])
         print("Virtual best performance for portfolio selector excluding solver "
               f"{solver_name} is {tmp_virt_best_perf}")
-        print("Computing done!")
-        if minimise and tmp_virt_best_perf > virtual_best_performance or\
-           not minimise and tmp_virt_best_perf < virtual_best_performance:
-            marginal_contribution = tmp_virt_best_perf / virtual_best_performance
+        if minimise and tmp_virt_best_perf > best_performance or\
+           not minimise and tmp_virt_best_perf < best_performance:
+            marginal_contribution = tmp_virt_best_perf / best_performance
         else:
             marginal_contribution = 0.0
 
         solver_tuple = (solver, marginal_contribution)
         rank_list.append(solver_tuple)
-        print("Marginal contribution (to Perfect Selector) for solver "
-              f"{solver_name} is {marginal_contribution}")
+        print(f"Marginal contribution (to Perfect Selector) for solver {solver_name} is "
+              f"{marginal_contribution}")
 
     rank_list.sort(key=lambda marginal_contribution: marginal_contribution[1],
                    reverse=True)
@@ -292,8 +285,8 @@ def compute_actual_selector_marginal_contribution(
     print("Computing actual performance for portfolio selector with all solvers ...")
     actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
     construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
-                                         performance_data_csv_path,
-                                         feature_data_csv_path,
+                                         performance_df,
+                                         feature_df,
                                          selector_timeout=selector_timeout)
 
     if not Path(actual_portfolio_selector_path).exists():
@@ -317,35 +310,22 @@ def compute_actual_selector_marginal_contribution(
         solver_name = Path(solver).name
         print("Computing actual performance for portfolio selector excluding solver "
               f"{solver_name} ...")
-        # 1. Create a temporary df file name
-        tmp_performance_df_file = (
-            f"tmp_performance_data_csv_without_{solver_name}_"
-            f"{tg.get_time_pid_random_string()}.csv")
-        # 2. Create the path using the log dir and the file name
-        tmp_performance_df_path = sl.caller_log_dir / tmp_performance_df_file
+        # 1. Copy the dataframe original df
+        tmp_performance_df = performance_df.copy()
 
-        # 3. Copy the dataframe original df
-        tmp_performance_df = performance_df.copy(tmp_performance_df_path)
-
-        # 4. Remove the solver from this copy
+        # 2. Remove the solver from this copy
         tmp_performance_df.remove_solver(solver)
 
-        # 5. Log this action
-        sl.add_output(str(tmp_performance_df_path),
-                      "[written] Temporary performance data")
-        # 6. Save the sub-dataframe with the removed solver
-        tmp_performance_df.save_csv()
-
-        # 7. create the actual selector path
+        # 3. create the actual selector path
         tmp_actual_portfolio_selector_path = (
             gv.sparkle_algorithm_selector_dir / f"without_{solver_name}"
             / f"{gv.sparkle_algorithm_selector_name}")
 
         if tmp_performance_df.num_solvers >= 1:
-            # 8. Construct the portfolio selector for this subset
+            # 4. Construct the portfolio selector for this subset
             construct_sparkle_portfolio_selector(
-                tmp_actual_portfolio_selector_path, tmp_performance_df_path,
-                feature_data_csv_path)
+                tmp_actual_portfolio_selector_path, tmp_performance_df,
+                feature_df)
         else:
             print("****** WARNING: No solver exists ! ******")
 
@@ -362,9 +342,6 @@ def compute_actual_selector_marginal_contribution(
 
         print(f"Actual performance for portfolio selector excluding solver {solver_name}"
               f" is {tmp_asp}")
-        tmp_performance_df_path.unlink()
-        sl.add_output(str(tmp_performance_df_path),
-                      "[removed] Temporary performance data")
         print("Computing done!")
 
         # 1. If the performance remains equal, this solver did not contribute
