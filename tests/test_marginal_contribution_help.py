@@ -85,8 +85,8 @@ class TestMarginalContribution(TestCase):
               "sparkle_portfolio_selector"
         perf_path = Path("CLI/test/test_files/Performance_Data/"
                          "test_construct_sparkle_portfolio_selector.csv")
-        feature_csv_path = "CLI/test/test_files/Feature_Data/"\
-                           "test_construct_sparkle_portfolio_selector.csv"
+        feature_csv_path = Path("CLI/test/test_files/Feature_Data/"
+                                "test_construct_sparkle_portfolio_selector.csv")
 
         result = 526.805294
         patch_perf_for_instance.side_effect = [(61.0, False), (28.1747, True),
@@ -95,10 +95,11 @@ class TestMarginalContribution(TestCase):
                                                (0.537186, True), (61.0, False),
                                                (61.0, False), (61.0, False),
                                                (61.0, False), (61.0, False)]
-        performance_df = PerformanceDataFrame(Path(perf_path))
+        performance_df = PerformanceDataFrame(perf_path)
+        feature_df = FeatureDataFrame(feature_csv_path)
         output = scmch.compute_actual_selector_performance(pth,
                                                            performance_df,
-                                                           feature_csv_path,
+                                                           feature_df,
                                                            True,
                                                            sum,
                                                            None)

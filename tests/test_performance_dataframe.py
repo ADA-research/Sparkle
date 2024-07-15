@@ -88,12 +88,12 @@ class TestPerformanceData(TestCase):
         vbs_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
         mock_penalty.return_value = 10
         for idx, instance in enumerate(self.pd.dataframe.index):
-            result = self.pd.calc_portfolio_vbs_instance(
+            result = self.pd.best_performance_instance(
                 instance=instance, minimise=True, capvalue=None
             )
             assert result == vbs_instance_min[idx]
 
-            result = self.pd.calc_portfolio_vbs_instance(
+            result = self.pd.best_performance_instance(
                 instance=instance, minimise=False, capvalue=None
             )
             assert result == vbs_instance_max[idx]
@@ -102,14 +102,14 @@ class TestPerformanceData(TestCase):
             -> None:
         """Test calculating vbs on the entire portfolio."""
         vbs_portfolio = 87.0
-        result = self.pd.calc_virtual_best_performance_of_portfolio(
+        result = self.pd.best_performance(
             aggregation_function=sum, minimise=True,
             capvalue_list=None, penalty_list=None
         )
         assert result == vbs_portfolio
 
         vbs_portfolio = 420.0
-        result = self.pd.calc_virtual_best_performance_of_portfolio(
+        result = self.pd.best_performance(
             aggregation_function=sum, minimise=False,
             capvalue_list=None, penalty_list=None
         )

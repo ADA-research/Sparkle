@@ -379,23 +379,25 @@ class PerformanceDataFrame():
             agg_runs = self.dataframe.loc[(objective), :].groupby(level=0).run_agg()
             return best(agg_runs, axis=1).to_list()
 
-    def calc_portfolio_vbs_instance(
+    def best_performance_instance(
             self: PerformanceDataFrame,
             instance: str,
             minimise: bool,
             objective: str = None,
             capvalue: float = None,
             penalty: float = None,
+            exclude_solvers: list[str] = None,
             run_aggregator: Callable = mean) -> float:
-        """Return the VBS performance for a specific instance.
+        """Return the best performance for a specific instance.
 
         Args:
-            instance: For which instance we shall calculate the VBS
+            instance: The instance in question
             minimise: Whether we should minimise or maximise the score
-            objective: The objective for which we calculate the VBS
+            objective: The objective for which we calculate the best performance
             capvalue: The minimum/maximum scoring value the VBS is allowed to have
             run_aggregator: How we aggregate multiple runs for an instance-solver
                 combination. Only relevant for multi-runs.
+            exclude_solvers: List of solvers to exclude in the calculation.
 
         Returns:
             The virtual best solver performance for this instance.
@@ -410,7 +412,11 @@ class PerformanceDataFrame():
             if not minimise:
                 penalty = penalty * -1
         virtual_best_score = None
+        print(exclude_solvers)
         for solver in self.dataframe.columns:
+            print(solver)
+            if exclude_solvers is not None and solver in exclude_solvers:
+                continue
             if isinstance(instance, str):
                 runs = self.dataframe.loc[(objective, instance), solver]
                 if minimise:
@@ -433,22 +439,26 @@ class PerformanceDataFrame():
 
         return virtual_best_score
 
-    def calc_virtual_best_performance_of_portfolio(
+    def best_performance(
             self: PerformanceDataFrame,
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
             capvalue_list: list[float],
             penalty_list: list[float],
+            exclude_solvers: list[str] = None,
             objective: str = None) -> float:
-        """Return the overall VBS performance of the portfolio.
+        """Return the overall best performance of the portfolio.
 
         Args:
             aggregation_function: The method of combining all VBS scores together
             minimise: Whether the scores are minimised or not
             capvalue_list: List of capvalue per instance
+            penalty_list: List of penalty per instance
+            exclude_solvers: List of solvers to exclude in the calculation.
+                Defaults to none.
 
         Returns:
-            The combined virtual best performance of the portfolio over all instances.
+            The aggregated best performance of the portfolio over all instances.
         """
         objective = self.verify_objective(objective)
         virtual_best = []
@@ -460,8 +470,8 @@ class PerformanceDataFrame():
             if penalty_list is not None:
                 penalty = penalty_list[idx]
             virtual_best_score = (
-                self.calc_portfolio_vbs_instance(
-                    instance, minimise, objective, capvalue, penalty))
+                self.best_performance_instance(
+                    instance, minimise, objective, capvalue, penalty, exclude_solvers))
             virtual_best.append(virtual_best_score)
 
         return aggregation_function(virtual_best)

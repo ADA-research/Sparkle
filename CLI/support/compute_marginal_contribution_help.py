@@ -57,7 +57,7 @@ def write_marginal_contribution_csv(path: Path,
 def compute_perfect_selector_marginal_contribution(
         aggregation_function: Callable[[list[float]], float] = mean,
         capvalue_list: list[float] = None,
-        minimise: bool = min,
+        minimise: bool = True,
         performance_data_csv_path: Path = gv.performance_data_csv_path,
         flag_recompute: bool = False) -> list[tuple[str, float]]:
     """Return the marginal contributions of solvers for the VBS.
@@ -89,27 +89,22 @@ def compute_perfect_selector_marginal_contribution(
     if capvalue_list is not None:
         penalty_factor = gv.settings.get_general_penalty_multiplier()
         penalty_list = [cap * penalty_factor for cap in capvalue_list]
-    performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
+    performance_data = PerformanceDataFrame(performance_data_csv_path)
 
     print("Computing virtual best performance for portfolio selector with all solvers "
           "...")
 
-    virtual_best_performance = (
-        performance_data_csv.calc_virtual_best_performance_of_portfolio(
-            aggregation_function, minimise, capvalue_list, penalty_list))
+    virtual_best_performance = performance_data.best_performance(
+            aggregation_function, minimise, capvalue_list, penalty_list)
     print("Virtual best performance for portfolio selector with all solvers is "
           f"{virtual_best_performance}")
     print("Computing done!")
-
-    for solver in performance_data_csv.dataframe.columns:
+    for solver in performance_data.dataframe.columns:
         solver_name = Path(solver).name
         print("Computing virtual best performance for portfolio selector excluding "
               f"solver {solver_name} ...")
-        tmp_performance_data_csv = PerformanceDataFrame(performance_data_csv_path)
-        tmp_performance_data_csv.remove_solver(solver)
-        tmp_virt_best_perf = (
-            tmp_performance_data_csv.calc_virtual_best_performance_of_portfolio(
-                aggregation_function, minimise, capvalue_list, penalty_list))
+        tmp_virt_best_perf = performance_data.best_performance(aggregation_function,
+            minimise, capvalue_list, penalty_list, exclude_solvers=[solver])
         print("Virtual best performance for portfolio selector excluding solver "
               f"{solver_name} is {tmp_virt_best_perf}")
         print("Computing done!")
@@ -144,8 +139,8 @@ def compute_actual_selector_performance(
 
     Args:
       actual_portfolio_selector_path: Path to portfolio selector.
-      performance_data_csv_path: Path to the CSV file with the performance data.
-      feature_data_csv_path: path to the CSV file with the features.
+      performance_data: The performance data.
+      feature_data: The feature data.
       minimise: Flag indicating, if scores should be minimised.
       aggregation_function: function to aggregate the performance per instance
       capvalue_list: Optional list of cap-values.
@@ -187,9 +182,8 @@ def compute_actual_performance_for_instance(
     Args:
       actual_portfolio_selector_path: Path to the portfolio selector.
       instance: Instance name.
-      feature_data_csv_path: Path to the CSV file with the feature data.
-      performance_data: SparklePerformanceDataCSV object that holds the
-        performance data.
+      feature_data: The feature data.
+      performance_data: The Performance data
       minimise: Whether the performance value should be minimized or maximized
       objective_type: Whether we are dealing with run time or not.
       capvalue: Cap value for this instance
