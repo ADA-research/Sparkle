@@ -412,9 +412,7 @@ class PerformanceDataFrame():
             if not minimise:
                 penalty = penalty * -1
         virtual_best_score = None
-        print(exclude_solvers)
         for solver in self.dataframe.columns:
-            print(solver)
             if exclude_solvers is not None and solver in exclude_solvers:
                 continue
             if isinstance(instance, str):
@@ -433,8 +431,8 @@ class PerformanceDataFrame():
 
         # Shouldn't this throw an error?
         if virtual_best_score is None and len(self.dataframe.columns) == 0:
-            print("WARNING: PerformanceDataFrame could not calculate VBS "
-                  f"instance {instance}")
+            print("WARNING: PerformanceDataFrame could not calculate best performance "
+                  f"for instance {instance}")
             virtual_best_score = 0
 
         return virtual_best_score
