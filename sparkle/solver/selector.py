@@ -5,6 +5,8 @@ import subprocess
 import ast
 
 from sparkle.types import SparkleCallable
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
+
 
 class Selector(SparkleCallable):
     """The Selector class for handling Algorithm Selection."""
@@ -15,7 +17,7 @@ class Selector(SparkleCallable):
         """Initialize the Selector object.
 
         Args:
-            directory: Path of the Selector executable.
+            executable_path: Path of the Selector executable.
             raw_output_directory: Directory where the Selector will write its raw output.
                 Defaults to directory / tmp
         """
@@ -27,7 +29,6 @@ class Selector(SparkleCallable):
         if not self.raw_output_directory.exists():
             self.raw_output_directory.mkdir(parents=True)
 
-
     def build_construction_cmd(
             self: Selector,
             target_file: Path,
@@ -35,10 +36,22 @@ class Selector(SparkleCallable):
             feature_data: Path,
             objective: str,
             runtime_cutoff: int | float | str = None,
-            wallclock_limit: int | float |str = None) -> list[str | Path]:
-        """Builds the commandline call string for constructing the Selector."""
+            wallclock_limit: int | float | str = None) -> list[str | Path]:
+        """Builds the commandline call string for constructing the Selector.
+
+        Args:
+            target_file: Path to the file to save the Selector to.
+            performance_data: Path to the performance data csv.
+            feature_data: Path to the feature data csv.
+            objective: The objective to optimize for selection.
+            runtime_cutoff: Cutoff for the runtime in seconds. Defaults to None
+            wallclock_limit: Cutoff for total wallclock in seconds. Defaults to None
+
+        Returns:
+            The command list for constructing the Selector.
+        """
         # Python3 to avoid execution rights
-        cmd = ["python3",self.selector_path,
+        cmd = ["python3", self.selector_path,
                "--performance_csv", performance_data,
                "--feature_csv", feature_data,
                "--objective", objective,
@@ -51,8 +64,8 @@ class Selector(SparkleCallable):
 
     def construct(self: Selector,
                   target_file: Path | str,
-                  performance_data: Path,
-                  feature_data: Path,
+                  performance_data: PerformanceDataFrame,
+                  feature_data: FeatureDataFrame,
                   objective: str,
                   runtime_cutoff: int | float | str = None,
                   wallclock_limit: int | float | str = None) -> Path:
@@ -67,17 +80,25 @@ class Selector(SparkleCallable):
             wallclock_limit: Cutoff for the wallclock time in seconds.
 
         Returns:
-            Path to the constructed Selector."""
+            Path to the constructed Selector.
+        """
         if isinstance(target_file, str):
             target_file = self.raw_output_directory / target_file
-        cmd = self.build_construction_cmd(target_file, 
-                                          performance_data,
-                                          feature_data,
+        # Convert the dataframes to Selector Format
+        performance_csv = performance_data.to_autofolio()
+        feature_csv = feature_data.to_autofolio()
+        cmd = self.build_construction_cmd(target_file,
+                                          performance_csv,
+                                          feature_csv,
                                           objective,
                                           runtime_cutoff,
                                           wallclock_limit)
-
         construct = subprocess.run(cmd, capture_output=True)
+
+        # Remove the data copy
+        performance_csv.unlink()
+        feature_csv.unlink()
+
         if construct.returncode != 0 or not target_file.is_file():
             print(f"Selector construction of {self.name} failed! Error:\n"
                   f"{construct.stdout.decode()}\n"
@@ -91,11 +112,10 @@ class Selector(SparkleCallable):
         """Builds the commandline call string for running the Selector."""
         if isinstance(feature_vector, list):
             feature_vector = " ".join(map(str, feature_vector))
-        
-        cmd = ["python3", self.selector_path,
-               "--load", selector_path,
-               "--feature_vec", feature_vector]
-        return cmd
+
+        return ["python3", self.selector_path,
+                "--load", selector_path,
+                "--feature_vec", feature_vector]
 
     def run(self: Selector,
             selector_path: Path,
@@ -114,6 +134,7 @@ class Selector(SparkleCallable):
                   f"{run.stderr.decode()}")
         return schedule
 
+    @staticmethod
     def process_predict_schedule_output(output: str) -> list:
         """Return the predicted algorithm schedule as a list."""
         prefix_string = "Selected Schedule [(algorithm, budget)]: "

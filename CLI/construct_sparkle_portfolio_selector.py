@@ -19,7 +19,6 @@ from CLI.initialise import check_for_initialise
 from sparkle.types.objective import PerformanceMeasure
 
 
-
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
     parser = argparse.ArgumentParser()
@@ -113,24 +112,17 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         feature_data_csv_path = impute_feature_data_csv_path
 
     performance_data = PerformanceDataFrame(performance_data_csv_path)
-    p_data_autofolio_path = performance_data.to_autofolio()
-    f_data_autofolio_path = feature_data.to_autofolio()
     selector = gv.settings.get_general_sparkle_selector()
     selector_path = selector.construct(selector_path,
-                                       p_data_autofolio_path,
-                                       f_data_autofolio_path,
+                                       performance_data,
+                                       feature_data,
                                        objective_function,
                                        cutoff_time,
                                        selector_timeout)
 
     if bool_exists_missing_value:
         impute_feature_data_csv_path.unlink()
-
-    # Remove the data copy for AutoFolio
-    p_data_autofolio_path.unlink()
-    f_data_autofolio_path.unlink()
     return True
-
 
 
 if __name__ == "__main__":

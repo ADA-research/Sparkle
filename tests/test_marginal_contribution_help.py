@@ -84,7 +84,7 @@ class TestMarginalContribution(TestCase):
         pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
               "sparkle_portfolio_selector"
         perf_path = Path("CLI/test/test_files/Performance_Data/"
-                    "test_construct_sparkle_portfolio_selector.csv")
+                         "test_construct_sparkle_portfolio_selector.csv")
         feature_csv_path = "CLI/test/test_files/Feature_Data/"\
                            "test_construct_sparkle_portfolio_selector.csv"
 

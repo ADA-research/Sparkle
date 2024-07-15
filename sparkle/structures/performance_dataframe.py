@@ -56,7 +56,8 @@ class PerformanceDataFrame():
             if self.csv_filepath.exists():
                 self.dataframe = pd.read_csv(csv_filepath)
                 has_rows = len(self.dataframe.index) > 0
-                if PerformanceDataFrame.multi_dim_names[0] not in self.dataframe.columns or not has_rows:
+                if (PerformanceDataFrame.multi_dim_names[0] not in self.dataframe.columns
+                        or not has_rows):
                     # No objective present, force into column
                     if objectives is None:
                         self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
@@ -64,26 +65,25 @@ class PerformanceDataFrame():
                     else:  # Constructor is provided with the objectives
                         objectives = [o.name if isinstance(o, SparkleObjective) else o
                                       for o in objectives]
-                        self.dataframe[PerformanceDataFrame.multi_dim_names[0]] = objectives
-                #else:
-                    # Objectives are present, extract names
-                #    self.objective_names =\
-                #        self.dataframe[PerformanceDataFrame.multi_dim_names[0]].unique().tolist()
-                if PerformanceDataFrame.multi_dim_names[2] not in self.dataframe.columns or not has_rows:
+                        self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
+                            objectives
+                if (PerformanceDataFrame.multi_dim_names[2] not in self.dataframe.columns
+                        or not has_rows):
                     # No runs column present, force into column
                     self.n_runs = 1
                     self.dataframe[PerformanceDataFrame.multi_dim_names[2]] = self.n_runs
                     self.run_ids = [self.n_runs]
                 else:
                     # Runs are present, determine run ids
-                    self.run_ids =\
-                        self.dataframe[PerformanceDataFrame.multi_dim_names[2]].unique().tolist()
+                    run_label = PerformanceDataFrame.multi_dim_names[2]
+                    self.run_ids = self.dataframe[run_label].unique().tolist()
                 if PerformanceDataFrame.multi_dim_names[1] not in self.dataframe.columns:
                     # Instances are listed as rows, force into column
                     self.dataframe = self.dataframe.reset_index().rename(
                         columns={"index": PerformanceDataFrame.multi_dim_names[1]})
                 # Now we can cast the columns into multi dim
-                self.dataframe = self.dataframe.set_index(PerformanceDataFrame.multi_dim_names)
+                self.dataframe = self.dataframe.set_index(
+                    PerformanceDataFrame.multi_dim_names)
             else:
                 # Initialize empty DataFrame
                 if objectives is None:
@@ -180,7 +180,6 @@ class PerformanceDataFrame():
                      instance_name: str,
                      initial_value: float | list[float] = None) -> None:
         """Add and instance to the DataFrame."""
-        #This no longer works now for some reason
         if self.dataframe.index.size == 0 or self.dataframe.columns.size == 0:
             # First instance or no Solvers yet
             solvers = self.dataframe.columns.to_list()
