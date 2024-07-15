@@ -18,6 +18,8 @@ from sparkle.types.objective import SparkleObjective
 class PerformanceDataFrame():
     """Class to manage performance data and common operations on them."""
     missing_value = math.nan
+    missing_objective = "DEFAULT:UNKNOWN"
+    multi_dim_names = ["Objective", "Instance", "Run"]
 
     def __init__(self: PerformanceDataFrame,
                  csv_filepath: Path,
@@ -47,19 +49,6 @@ class PerformanceDataFrame():
                 heavy IO loads.
         """
         self.csv_filepath = csv_filepath
-        # Sanity check, remove later
-        if not isinstance(self.csv_filepath, Path):
-            self.csv_filepath = Path(self.csv_filepath)
-        self.multi_dim_names = ["Objective", "Instance", "Run"]
-        # Objectives is a ``static'' dimension
-        if objectives is None:
-            # Set default objective names if the user does not specify any
-            self.objective_names = ["DEFAULT:UNKNOWN"]
-        else:
-            self.objective_names =\
-                [o.name if isinstance(o, SparkleObjective) else o
-                 for o in objectives]
-        self.multi_objective = len(self.objective_names) > 1
         # Runs is a ``static'' dimension
         self.n_runs = n_runs
         self.run_ids = list(range(1, self.n_runs + 1))  # We count runs from 1
@@ -67,33 +56,37 @@ class PerformanceDataFrame():
             if self.csv_filepath.exists():
                 self.dataframe = pd.read_csv(csv_filepath)
                 has_rows = len(self.dataframe.index) > 0
-                if self.multi_dim_names[0] not in self.dataframe.columns or not has_rows:
+                if PerformanceDataFrame.multi_dim_names[0] not in self.dataframe.columns or not has_rows:
                     # No objective present, force into column
-                    self.dataframe[self.multi_dim_names[0]] = self.objective_names[0]
-                else:
+                    self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
+                        PerformanceDataFrame.missing_objective
+                #else:
                     # Objectives are present, extract names
-                    self.objective_names =\
-                        self.dataframe[self.multi_dim_names[0]].unique().tolist()
-                if self.multi_dim_names[2] not in self.dataframe.columns or not has_rows:
+                #    self.objective_names =\
+                #        self.dataframe[PerformanceDataFrame.multi_dim_names[0]].unique().tolist()
+                if PerformanceDataFrame.multi_dim_names[2] not in self.dataframe.columns or not has_rows:
                     # No runs column present, force into column
                     self.n_runs = 1
-                    self.dataframe[self.multi_dim_names[2]] = self.n_runs
+                    self.dataframe[PerformanceDataFrame.multi_dim_names[2]] = self.n_runs
                     self.run_ids = [self.n_runs]
                 else:
                     # Runs are present, determine run ids
                     self.run_ids =\
-                        self.dataframe[self.multi_dim_names[2]].unique().tolist()
-                if self.multi_dim_names[1] not in self.dataframe.columns:
+                        self.dataframe[PerformanceDataFrame.multi_dim_names[2]].unique().tolist()
+                if PerformanceDataFrame.multi_dim_names[1] not in self.dataframe.columns:
                     # Instances are listed as rows, force into column
                     self.dataframe = self.dataframe.reset_index().rename(
-                        columns={"index": self.multi_dim_names[1]})
+                        columns={"index": PerformanceDataFrame.multi_dim_names[1]})
                 # Now we can cast the columns into multi dim
-                self.dataframe = self.dataframe.set_index(self.multi_dim_names)
+                self.dataframe = self.dataframe.set_index(PerformanceDataFrame.multi_dim_names)
             else:
                 # Initialize empty DataFrame
+                objective_names =\
+                    [o.name if isinstance(o, SparkleObjective) else o
+                     for o in objectives]
                 midx = pd.MultiIndex.from_product(
-                    [self.objective_names, instances, self.run_ids],
-                    names=self.multi_dim_names)
+                    [objective_names, instances, self.run_ids],
+                    names=PerformanceDataFrame.multi_dim_names)
                 self.dataframe = pd.DataFrame(PerformanceDataFrame.missing_value,
                                               index=midx,
                                               columns=solvers)
@@ -115,7 +108,10 @@ class PerformanceDataFrame():
             if self.multi_objective:
                 print("Error: MO Performance Data, but objective not specified.")
                 sys.exit(-1)
-            return self.objective_names[0]
+            elif self.num_objectives == 1:
+                return self.objective_names[0]
+            else:
+                return PerformanceDataFrame.missing_objective
         return objective
 
     def verify_run_id(self: PerformanceDataFrame,
@@ -182,7 +178,7 @@ class PerformanceDataFrame():
             instances = self.dataframe.index.levels[1].to_list() + [instance_name]
             midx = pd.MultiIndex.from_product(
                 [self.objective_names, instances, self.run_ids],
-                names=self.multi_dim_names)
+                names=PerformanceDataFrame.multi_dim_names)
             self.dataframe = pd.DataFrame(initial_value, index=midx, columns=solvers)
         else:
             if instance_name in self.dataframe.index.levels[1]:
@@ -193,7 +189,7 @@ class PerformanceDataFrame():
             levels = [self.dataframe.index.levels[0].tolist(),
                       [instance_name],
                       self.dataframe.index.levels[2].tolist()]
-            emidx = pd.MultiIndex(levels, names=self.multi_dim_names)
+            emidx = pd.MultiIndex(levels, names=PerformanceDataFrame.multi_dim_names)
             # Create the missing column values
             edf = pd.DataFrame(PerformanceDataFrame.missing_value,
                                index=emidx,
@@ -269,14 +265,24 @@ class PerformanceDataFrame():
         return self.dataframe.columns.size
 
     @property
-    def instances(self: PerformanceDataFrame) -> list[str]:
-        """Return the instances as a Pandas Index object."""
-        return self.dataframe.index.levels[1].tolist()
+    def multi_objective(self: PerformanceDataFrame) -> bool:
+        """Return whether the dataframe represent MO or not."""
+        return self.num_objectives > 1
 
     @property
     def solvers(self: PerformanceDataFrame) -> list[str]:
         """Return the solver present as a list of strings."""
         return self.dataframe.columns.tolist()
+
+    @property
+    def objective_names(self: PerformanceDataFrame) -> list[str]:
+        """Return the objective names as a list of strings."""
+        return self.dataframe.index.levels[0].tolist()
+
+    @property
+    def instances(self: PerformanceDataFrame) -> list[str]:
+        """Return the instances as a Pandas Index object."""
+        return self.dataframe.index.levels[1].tolist()
 
     def penalise(self: PerformanceDataFrame,
                  threshold: float,

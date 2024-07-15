@@ -21,11 +21,11 @@ class TestPerformanceData(TestCase):
         """Create csv objects from files for the tests."""
         self.csv_example_path =\
             Path("tests/test_files/performance/example-runtime-performance.csv")
-        self.pd = PerformanceDataFrame(str(self.csv_example_path))
+        self.pd = PerformanceDataFrame(self.csv_example_path)
         self.csv_example_with_nan_path =\
             Path("tests/test_files/performance/"
                  "example-runtime-performance-with-empty.csv")
-        self.pd_nan = PerformanceDataFrame(str(self.csv_example_with_nan_path))
+        self.pd_nan = PerformanceDataFrame(self.csv_example_with_nan_path)
 
     def test_get_job_list(self: TestPerformanceData) -> None:
         """Test job list method, without and with recompute bool."""

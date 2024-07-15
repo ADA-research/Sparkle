@@ -257,7 +257,6 @@ def compute_actual_performance_for_instance(
     # Get the prediction of the selector over the solvers
     list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
                                                       feature_data, instance)
-
     performance = None
     flag_successfully_solving = False
     cutoff_time = gv.settings.get_general_target_cutoff_time()
@@ -418,7 +417,7 @@ def compute_actual_selector_marginal_contribution(
 
         tmp_asp = compute_actual_selector_performance(
             tmp_actual_portfolio_selector_path, tmp_performance_df,
-            feature_data_csv_path, minimise, aggregation_function, capvalue_list)
+            feature_df, minimise, aggregation_function, capvalue_list)
 
         print(f"Actual performance for portfolio selector excluding solver {solver_name}"
               f" is {tmp_asp}")
