@@ -58,8 +58,13 @@ class PerformanceDataFrame():
                 has_rows = len(self.dataframe.index) > 0
                 if PerformanceDataFrame.multi_dim_names[0] not in self.dataframe.columns or not has_rows:
                     # No objective present, force into column
-                    self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
-                        PerformanceDataFrame.missing_objective
+                    if objectives is None:
+                        self.dataframe[PerformanceDataFrame.multi_dim_names[0]] =\
+                            PerformanceDataFrame.missing_objective
+                    else:  # Constructor is provided with the objectives
+                        objectives = [o.name if isinstance(o, SparkleObjective) else o
+                                      for o in objectives]
+                        self.dataframe[PerformanceDataFrame.multi_dim_names[0]] = objectives
                 #else:
                     # Objectives are present, extract names
                 #    self.objective_names =\
@@ -81,9 +86,12 @@ class PerformanceDataFrame():
                 self.dataframe = self.dataframe.set_index(PerformanceDataFrame.multi_dim_names)
             else:
                 # Initialize empty DataFrame
-                objective_names =\
-                    [o.name if isinstance(o, SparkleObjective) else o
-                     for o in objectives]
+                if objectives is None:
+                    objective_names = [PerformanceDataFrame.missing_objective]
+                else:
+                    objective_names =\
+                        [o.name if isinstance(o, SparkleObjective) else o
+                         for o in objectives]
                 midx = pd.MultiIndex.from_product(
                     [objective_names, instances, self.run_ids],
                     names=PerformanceDataFrame.multi_dim_names)
@@ -172,6 +180,7 @@ class PerformanceDataFrame():
                      instance_name: str,
                      initial_value: float | list[float] = None) -> None:
         """Add and instance to the DataFrame."""
+        #This no longer works now for some reason
         if self.dataframe.index.size == 0 or self.dataframe.columns.size == 0:
             # First instance or no Solvers yet
             solvers = self.dataframe.columns.to_list()
@@ -277,6 +286,8 @@ class PerformanceDataFrame():
     @property
     def objective_names(self: PerformanceDataFrame) -> list[str]:
         """Return the objective names as a list of strings."""
+        if self.num_objectives == 0:
+            return [PerformanceDataFrame.missing_objective]
         return self.dataframe.index.levels[0].tolist()
 
     @property

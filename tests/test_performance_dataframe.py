@@ -6,7 +6,7 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 from pathlib import Path
 
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame
 from sparkle.platform import settings_help
 import global_variables as gv
 

@@ -5,12 +5,10 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
-from CLI.help.status_info import GenerateReportStatusInfo
 import global_variables as gv
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
-from sparkle.platform import tex_help as th
 import sparkle_logging as sl
 from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
@@ -22,7 +20,7 @@ from sparkle.platform import \
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 
 from CLI.help import command_help as ch
@@ -138,9 +136,6 @@ if __name__ == "__main__":
             sys.exit(-1)
 
         print("Generating report for selection...")
-        status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(th.ReportType.ALGORITHM_SELECTION)
-        status_info.save()
         train_data = PerformanceDataFrame(gv.performance_data_csv_path)
         train_data.penalise(gv.settings.get_general_target_cutoff_time(),
                             gv.settings.get_penalised_time())
@@ -169,14 +164,9 @@ if __name__ == "__main__":
             print("Report generated ...")
         else:
             print("Report for test generated ...")
-        status_info.delete()
 
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
-        status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(th.ReportType.PARALLEL_PORTFOLIO)
-        status_info.save()
-
         sgrfpph.generate_report_parallel_portfolio(
             parallel_portfolio_path,
             gv.parallel_portfolio_output_analysis,
@@ -187,11 +177,7 @@ if __name__ == "__main__":
             gv.settings.get_penalised_time(),
             pap_instance_set)
         print("Parallel portfolio report generated ...")
-        status_info.delete()
     else:
-        status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(th.ReportType.ALGORITHM_CONFIGURATION)
-        status_info.save()
         # Reporting for algorithm configuration
         if solver is None:
             print("Error! No Solver found for configuration report generation.")
@@ -255,8 +241,6 @@ if __name__ == "__main__":
             instance_set_test,
             ablation=args.flag_ablation
         )
-
-        status_info.delete()
 
     # Write used settings to file
     gv.settings.write_used_settings()

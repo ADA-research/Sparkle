@@ -11,7 +11,7 @@ import runrunner as rrr
 
 from sparkle.platform import file_help as sfh, settings_help
 import global_variables as gv
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame
 from CLI.run_solvers import running_solvers_performance_data
 from sparkle.solver import Solver
 import sparkle_logging as sl

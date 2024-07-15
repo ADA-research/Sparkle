@@ -2,6 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import subprocess
+import ast
 
 from sparkle.types import SparkleCallable
 
@@ -10,31 +11,34 @@ class Selector(SparkleCallable):
 
     def __init__(self: SparkleCallable,
                  executable_path: Path,
-                 runsolver_exec: Path = None,
-                 raw_output_directory: Path = None) -> None:
+                 raw_output_directory: Path) -> None:
         """Initialize the Selector object.
 
         Args:
             directory: Path of the Selector executable.
-            runsolver_exec: Path to the runsolver executable.
-                By default, runsolver in solver_directory.
             raw_output_directory: Directory where the Selector will write its raw output.
                 Defaults to directory / tmp
         """
-        super().__init__(executable_path.parent, runsolver_exec, raw_output_directory)
         self.selector_path = executable_path
+        self.directory = self.selector_path.parent
         self.name = self.selector_path.name
+        self.raw_output_directory = raw_output_directory
 
-    def build_construction_cmd(self: Selector,
-                               target_file: Path,
-                               performance_data: Path,
-                               feature_data: Path,
-                               objective: str,
-                               runtime_cutoff: str = None,
-                               wallclock_limit: str = None) -> list[str | Path]:
+        if not self.raw_output_directory.exists():
+            self.raw_output_directory.mkdir(parents=True)
+
+
+    def build_construction_cmd(
+            self: Selector,
+            target_file: Path,
+            performance_data: Path,
+            feature_data: Path,
+            objective: str,
+            runtime_cutoff: int | float | str = None,
+            wallclock_limit: int | float |str = None) -> list[str | Path]:
         """Builds the commandline call string for constructing the Selector."""
-        
-        cmd = [self.selector_path,
+        # Python3 to avoid execution rights
+        cmd = ["python3",self.selector_path,
                "--performance_csv", performance_data,
                "--feature_csv", feature_data,
                "--objective", objective,
@@ -50,8 +54,8 @@ class Selector(SparkleCallable):
                   performance_data: Path,
                   feature_data: Path,
                   objective: str,
-                  runtime_cutoff: str = None,
-                  wallclock_limit: str = None) -> Path:
+                  runtime_cutoff: int | float | str = None,
+                  wallclock_limit: int | float | str = None) -> Path:
         """Construct the Selector.
 
         Args:
@@ -74,19 +78,52 @@ class Selector(SparkleCallable):
                                           wallclock_limit)
 
         construct = subprocess.run(cmd, capture_output=True)
-        if construct.returncode != 0:
+        if construct.returncode != 0 or not target_file.is_file():
             print(f"Selector construction of {self.name} failed! Error:\n"
-                  f"{construct.stderr}")
+                  f"{construct.stdout.decode()}\n"
+                  f"{construct.stderr.decode()}")
             return None
         return target_file
 
-    def build_cmd(self: Selector, selector_path: Path, feature_vector: str) -> list[str | Path]:
-         """Builds the commandline call string for running the Selector."""
-         cmd = [self.selector_path,
-                "--load", selector_path,
-                "--feature_vec", feature_vector]
-         return cmd
+    def build_cmd(self: Selector,
+                  selector_path: Path,
+                  feature_vector: list | str) -> list[str | Path]:
+        """Builds the commandline call string for running the Selector."""
+        if isinstance(feature_vector, list):
+            feature_vector = " ".join(map(str, feature_vector))
+        
+        cmd = ["python3", self.selector_path,
+               "--load", selector_path,
+               "--feature_vec", feature_vector]
+        return cmd
 
-    def run(self: Selector) -> list:
+    def run(self: Selector,
+            selector_path: Path,
+            feature_vector: list | str) -> list:
         """Run the Selector, returning the prediction schedule upon success."""
-        return
+        cmd = self.build_cmd(selector_path, feature_vector)
+        run = subprocess.run(cmd, capture_output=True)
+        if run.returncode != 0:
+            print(f"Selector run of {self.name} failed! Error:\n"
+                  f"{run.stderr.decode()}")
+            return None
+        # Process the prediction schedule from the output
+        schedule = Selector.process_predict_schedule_output(run.stdout.decode())
+        if schedule is None:
+            print(f"Error getting predict schedule! Selector {self.name} output:\n"
+                  f"{run.stderr.decode()}")
+        return schedule
+
+    def process_predict_schedule_output(output: str) -> list:
+        """Return the predicted algorithm schedule as a list."""
+        prefix_string = "Selected Schedule [(algorithm, budget)]: "
+        predict_schedule = ""
+        predict_schedule_lines = output.splitlines()
+        for line in predict_schedule_lines:
+            if line.strip().startswith(prefix_string):
+                predict_schedule = line.strip()
+                break
+        if predict_schedule == "":
+            return None
+        predict_schedule_string = predict_schedule[len(prefix_string):]
+        return ast.literal_eval(predict_schedule_string)

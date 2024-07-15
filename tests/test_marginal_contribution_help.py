@@ -76,29 +76,6 @@ class TestMarginalContribution(TestCase):
 
         self.assertListEqual(output, result)
 
-    def test_get_list_predict_schedule(self: TestCase) -> None:
-        """Test for method get_list_predict_schedule."""
-        # Does not work on server.
-        # TODO: Fix with mocker commands. There is a ticket for this.
-        return
-        pth = "CLI/test/test_files/Sparkle_Portfolio_Selector/"\
-              "sparkle_portfolio_selector"
-        file = "CLI/test/test_files/Feature_Data/"\
-               "test_construct_sparkle_portfolio_selector.csv"
-        featurecsv = FeatureDataFrame(file)
-        prefix = "Instances/PTN/"
-        instance_ids = [prefix + "Ptn-7824-b03.cnf", prefix + "Ptn-7824-b15.cnf",
-                        prefix + "Ptn-7824-b05.cnf", prefix + "Ptn-7824-b13.cnf",
-                        prefix + "Ptn-7824-b21.cnf", prefix + "Ptn-7824-b19.cnf",
-                        prefix + "Ptn-7824-b17.cnf", prefix + "bce7824.cnf",
-                        prefix + "Ptn-7824-b01.cnf", prefix + "Ptn-7824-b11.cnf",
-                        prefix + "Ptn-7824-b09.cnf", prefix + "Ptn-7824-b07.cnf"]
-        result = [("Solvers/CSCCSat", 61.0)]
-
-        for instance in instance_ids:
-            output = scmch.get_list_predict_schedule(pth, featurecsv, instance)
-            assert output == result
-
     @patch("CLI.support.compute_marginal_contribution_help."
            "compute_actual_performance_for_instance")
     def test_compute_actual_selector_performance(

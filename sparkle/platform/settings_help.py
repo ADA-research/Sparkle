@@ -11,6 +11,7 @@ import statistics
 
 import sparkle_logging as slog
 from sparkle.types.objective import SparkleObjective
+from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
 
@@ -54,6 +55,7 @@ class Settings:
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
+    DEFAULT_general_sparkle_selector = Path("Components/AutoFolio/scripts/autofolio")
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10
@@ -79,7 +81,9 @@ class Settings:
     DEFAULT_output = Path("Output")
     DEFAULT_tmp_output = Path("Tmp")
     DEFAULT_configuration_output = DEFAULT_output / "Configuration"
+    DEFAULT_selection_output = DEFAULT_output / "Selection"
     DEFAULT_configuration_output_raw = DEFAULT_configuration_output / "Raw_Data"
+    DEFAULT_selection_output_raw = DEFAULT_selection_output / "Raw_Data"
 
     def __init__(self: Settings, file_path: PurePath = None) -> None:
         """Initialise a settings object."""
@@ -89,6 +93,7 @@ class Settings:
         # Setting flags
         self.__general_sparkle_objective_set = SettingState.NOT_SET
         self.__general_sparkle_configurator_set = SettingState.NOT_SET
+        self.__general_sparkle_selector_set = SettingState.NOT_SET
         self.__general_solution_verifier_set = SettingState.NOT_SET
         self.__general_target_cutoff_time_set = SettingState.NOT_SET
         self.__general_cap_value_set = SettingState.NOT_SET
@@ -145,6 +150,13 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_general_sparkle_configurator(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("selector",)
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = file_settings.get(section, option)
+                    self.set_general_sparkle_selector(value, state)
                     file_settings.remove_option(section, option)
 
             option_names = ("solution_verifier",)
@@ -399,6 +411,26 @@ class Settings:
                       f'{self.__settings["general"]["configurator"]}. '
                       "Configurator not set.")
         return self.__general_sparkle_configurator
+
+    def set_general_sparkle_selector(
+            self: Settings,
+            value: Path = DEFAULT_general_sparkle_selector,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the Sparkle selector."""
+        section = "general"
+        name = "selector"
+        if value is not None and self.__check_setting_state(
+                self.__general_sparkle_selector_set, origin, name):
+            self.__init_section(section)
+            self.__general_sparkle_selector_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_general_sparkle_selector(self: Settings) -> Selector:
+        """Return the selector init method."""
+        if self.__general_sparkle_selector_set == SettingState.NOT_SET:
+            self.set_general_sparkle_selector()
+        return Selector(Path(self.__settings["general"]["selector"]),
+                        self.DEFAULT_selection_output_raw)
 
     def get_performance_metric_for_report(self: Settings) -> str:
         """Return a string describing the full performance metric, e.g. PAR10."""

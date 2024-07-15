@@ -87,7 +87,6 @@ selection_output_analysis = selection_output_general / analysis_dir_name
 
 runsolver_dir = Path("Components/runsolver/src/")
 runsolver_path = runsolver_dir / "runsolver"
-autofolio_exec_path = Path("Components/AutoFolio/scripts/autofolio")
 
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"

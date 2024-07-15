@@ -10,7 +10,7 @@ from collections import Counter
 import subprocess
 
 from sparkle.platform import file_help as sfh, tex_help as stex
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
@@ -148,14 +148,15 @@ def get_actual_portfolio_selector_performance_per_instance(
         A dict that maps instance name str to their penalised performance int.
     """
     objective = SparkleObjective(performance_data.objective_names[0])
-    minimise = (
-        objective.PerformanceMeasure != PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION)
+    minimise =\
+        objective.PerformanceMeasure != PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION
+    feature_data = FeatureDataFrame(feature_data_path)
 
     actual_selector_penalty = {}
     for instance in performance_data.instances:
         used_time_for_this_instance, flag_successfully_solving = \
             scmch.compute_actual_performance_for_instance(
-                actual_portfolio_selector_path, instance, feature_data_path,
+                actual_portfolio_selector_path, instance, feature_data,
                 performance_data, minimise, objective.PerformanceMeasure, capvalue)
 
         if flag_successfully_solving:

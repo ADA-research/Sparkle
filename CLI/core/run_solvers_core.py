@@ -12,7 +12,7 @@ from CLI.support import run_solvers_help as srs
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame
 
 
 if __name__ == "__main__":

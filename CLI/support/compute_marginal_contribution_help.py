@@ -2,20 +2,16 @@
 # -*- coding: UTF-8 -*-
 """Helper functions for marginal contribution computation."""
 from __future__ import annotations
-
-import subprocess
 import sys
 import csv
 from pathlib import Path
 from typing import Callable
 from statistics import mean
 
-from sparkle.platform import file_help as sfh
 import global_variables as gv
 import tools.general as tg
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-from CLI.support import construct_portfolio_selector_help as scps
-from CLI.support import run_portfolio_selector_help as srps
+from CLI.construct_sparkle_portfolio_selector import construct_sparkle_portfolio_selector
 import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 
@@ -137,56 +133,6 @@ def compute_perfect_selector_marginal_contribution(
     return rank_list
 
 
-def get_list_predict_schedule(actual_portfolio_selector_path: Path,
-                              feature_data: FeatureDataFrame,
-                              instance: str) -> list[float]:
-    """Return the solvers schedule suggested by the selector as a list.
-
-    Args:
-      actual_portfolio_selector_path: Path to portfolio selector.
-      feature_data_csv: SparkleFeatureDataCSV object with the feature data.
-      instance: Instance name.
-
-    Returns:
-      List of floating point numbers.
-    """
-    list_predict_schedule = []
-    if not Path("Tmp/").exists():
-        Path("Tmp/").mkdir()
-
-    # Get the feature vector for the instance as a space separated string
-    feature_vector = " ".join(map(str, feature_data.get_instance(instance)))
-
-    pred_sched_file = ("predict_schedule_"
-                       f"{tg.get_time_pid_random_string()}.predres")
-    log_file = "predict_schedule_autofolio.out"
-    err_file = "predict_schedule_autofolio.err"
-    predict_schedule_result_file = str(sl.caller_log_dir) + "/" + pred_sched_file
-    log_path = sl.caller_log_dir / log_file
-    err_path_str = str(sl.caller_log_dir) + "/" + err_file
-
-    cmd = [gv.python_executable, gv.autofolio_exec_path, "--load",
-           actual_portfolio_selector_path, "--feature_vec", feature_vector]
-
-    with log_path.open("a+") as log_file:
-        print("Running command below to get predicted schedule from autofolio:\n",
-              cmd, file=log_file)
-
-    process = subprocess.run(cmd,
-                             stdout=Path(predict_schedule_result_file).open("w+"),
-                             stderr=Path(err_path_str).open("w+"))
-    list_predict_schedule = (
-        srps.get_list_predict_schedule_from_file(predict_schedule_result_file))
-    if process.returncode != 0:
-        sl.add_output(str(log_path), "Predicted portfolio schedule command line call")
-        sl.add_output(predict_schedule_result_file, "Predicted portfolio schedule")
-        sl.add_output(err_path_str, "Predicted portfolio schedule error output")
-    else:
-        sfh.rmfiles([predict_schedule_result_file, err_path_str, log_path])
-
-    return list_predict_schedule
-
-
 def compute_actual_selector_performance(
         actual_portfolio_selector_path: str,
         performance_data: PerformanceDataFrame,
@@ -255,27 +201,28 @@ def compute_actual_performance_for_instance(
       did not exceed capvalue
     """
     # Get the prediction of the selector over the solvers
-    list_predict_schedule = get_list_predict_schedule(actual_portfolio_selector_path,
-                                                      feature_data, instance)
+    selector = gv.settings.get_general_sparkle_selector()
+    feature_vector = feature_data.get_instance(instance)
+    predict_schedule = selector.run(actual_portfolio_selector_path, feature_vector)
+
     performance = None
     flag_successfully_solving = False
     cutoff_time = gv.settings.get_general_target_cutoff_time()
     if objective_type == PerformanceMeasure.RUNTIME:
         performance_list = []
         # In case of Runtime, we loop through the selected solvers
-        for prediction in list_predict_schedule:
+        for solver, schedule_cutoff in predict_schedule:
             # A prediction is a solver and its score given by the Selector
-            performance = float(performance_data.get_value(prediction[0], instance))
+            performance = float(performance_data.get_value(solver, instance))
             performance_list.append(performance)
-            scheduled_cutoff_time_this_run = prediction[1]
             # 1. if performance <= predicted runtime we have a successfull solver
-            if performance <= scheduled_cutoff_time_this_run:
+            if performance <= schedule_cutoff:
                 # 2. Success if the tried solvers < selector cutoff_time
                 if sum(performance_list) <= cutoff_time:
                     flag_successfully_solving = True
                 break
             # 3. Else, we set the failed solver to the cutoff time
-            performance_list[-1] = scheduled_cutoff_time_this_run
+            performance_list[-1] = schedule_cutoff
 
             # 4. If we have exceeded cutoff_time, we are done
             if sum(performance_list) > cutoff_time:
@@ -285,8 +232,8 @@ def compute_actual_performance_for_instance(
     else:
         # Minimum or maximum of predicted solvers (Aggregation function)
         performance_list = []
-        for prediction in list_predict_schedule:
-            solver_performance = performance_data.get_value(prediction[0], instance)
+        for solver, _ in predict_schedule:
+            solver_performance = performance_data.get_value(solver, instance)
             performance_list.append(float(solver_performance))
 
         if minimise:
@@ -350,10 +297,10 @@ def compute_actual_selector_marginal_contribution(
     # Compute performance of actual selector
     print("Computing actual performance for portfolio selector with all solvers ...")
     actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
-    scps.construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
-                                              performance_data_csv_path,
-                                              feature_data_csv_path,
-                                              selector_timeout=selector_timeout)
+    construct_sparkle_portfolio_selector(actual_portfolio_selector_path,
+                                         performance_data_csv_path,
+                                         feature_data_csv_path,
+                                         selector_timeout=selector_timeout)
 
     if not Path(actual_portfolio_selector_path).exists():
         print(f"****** ERROR: {actual_portfolio_selector_path} does not exist! ******")
@@ -402,7 +349,7 @@ def compute_actual_selector_marginal_contribution(
 
         if tmp_performance_df.num_solvers >= 1:
             # 8. Construct the portfolio selector for this subset
-            scps.construct_sparkle_portfolio_selector(
+            construct_sparkle_portfolio_selector(
                 tmp_actual_portfolio_selector_path, tmp_performance_df_path,
                 feature_data_csv_path)
         else:
@@ -421,7 +368,7 @@ def compute_actual_selector_marginal_contribution(
 
         print(f"Actual performance for portfolio selector excluding solver {solver_name}"
               f" is {tmp_asp}")
-        sfh.rmfiles(tmp_performance_df_path)
+        tmp_performance_df_path.unlink()
         sl.add_output(str(tmp_performance_df_path),
                       "[removed] Temporary performance data")
         print("Computing done!")
