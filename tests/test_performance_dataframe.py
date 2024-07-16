@@ -81,7 +81,7 @@ class TestPerformanceData(TestCase):
     @patch("global_variables."
            "settings.get_general_penalty_multiplier")
     def test_calc_best_score_instance(self: TestPerformanceData,
-                                         mock_penalty: Mock)\
+                                      mock_penalty: Mock)\
             -> None:
         """Test calculating best score on instance."""
         bs_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]

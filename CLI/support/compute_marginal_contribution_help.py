@@ -62,21 +62,17 @@ def compute_perfect_selector_marginal_contribution(
     """Return the marginal contributions of solvers for the VBS.
 
     Args:
+      performance_data: Performance DataFrame to compute the contribution for.
       aggregation_function: function to aggregate the per instance scores
-      capvalue_list: list of cap values
       minimise: flag indicating if scores should be minimised or maximised
-      performance_data_csv_path: Path to the CSV file containing the performance data.
-      flag_recompute: Boolean indicating whether a recomputation of the marginal
-        contribution is enforced.
 
     Returns:
       A list of 3-tuples of the form:
         (solver name, marginal contribution, best score w/o solver).
     """
-    contribution_data = performance_data.marginal_contribution(
-        aggregation_function, minimise)
-    contribution_data.sort(key=lambda contribution: contribution[1],
-                                               reverse=True)
+    contribution_data = performance_data.marginal_contribution(aggregation_function,
+                                                               minimise)
+    contribution_data.sort(key=lambda contribution: contribution[1], reverse=True)
     return contribution_data
 
 
@@ -193,7 +189,7 @@ def compute_actual_selector_marginal_contribution(
     """Compute the marginal contributions of solvers in the selector.
 
     Args:
-      performance_data: Performance data object 
+      performance_data: Performance data object
       aggregation_function: Function to aggregate score values
       minimise: Flag indicating if scores should be minimised
       performance_cutoff: The cutoff performance of a solver
