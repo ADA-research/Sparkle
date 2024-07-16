@@ -71,7 +71,9 @@ class TestMarginalContribution(TestCase):
     @patch("CLI.support.compute_marginal_contribution_help."
            "compute_actual_selector_performance")
     @patch("pathlib.Path.mkdir")
+    @patch("pathlib.Path.exists")
     def test_compute_actual_selector_marginal_contribution(self: TestCase,
+                                                           mock_exists: Mock,
                                                            mock_mkdir: Mock,
                                                            mock_actual_performance: Mock
                                                            ) -> None:
@@ -86,15 +88,16 @@ class TestMarginalContribution(TestCase):
         mock_actual_performance.side_effect = [526.805294,
                                                526.805294,
                                                732.0]
+        mock_exists.return_value = True
         mock_mkdir.return_value = None
 
         result = [("Solvers/CSCCSat", 1.3895076764357648), ("Solvers/MiniSAT", 0.0)]
 
         output = scmch.compute_actual_selector_marginal_contribution(
+            performance_data,
+            feature_data,
             aggregation_function=sum,
             minimise=True,
-            performance_data=performance_data,
-            feature_data=feature_data,
             flag_recompute=True,
             selector_timeout=60
         )
