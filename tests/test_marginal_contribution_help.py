@@ -18,33 +18,6 @@ gv.settings = Settings()
 
 class TestMarginalContribution(TestCase):
     """Tests function of Marginal Contribution help."""
-    def test_read_marginal_contribution_csv(self: TestCase) -> None:
-        """Test for method read_marginal_contribution_csv."""
-        pth = Path("test_marginal_contribution.csv")
-        if not pth.exists():
-            Path.write_text(pth,
-                            "Solvers/CSCCSat,2.068482775510204\nSolvers/MiniSAT,0.0")
-
-        result = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
-        output = scmch.read_marginal_contribution_csv(pth)
-        assert result == output
-
-        pth.unlink()
-
-    def test_write_marginal_contribution_csv(self: TestCase) -> None:
-        """Test for method write_marginal_contribution_csv."""
-        pth = Path("test_marginal_contribution.csv")
-        object = [("Solvers/CSCCSat", 2.068482775510204), ("Solvers/MiniSAT", 0.0)]
-        result = "Solvers/CSCCSat,2.068482775510204\nSolvers/MiniSAT,0.0\n"
-
-        scmch.write_marginal_contribution_csv(pth, object)
-
-        output = ""
-        with pth.open("r") as file:
-            output = file.read()
-
-        assert result == output
-        pth.unlink()
 
     def test_compute_perfect_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_perfect_selector_marginal_contribution."""
@@ -97,7 +70,9 @@ class TestMarginalContribution(TestCase):
 
     @patch("CLI.support.compute_marginal_contribution_help."
            "compute_actual_selector_performance")
+    @patch("pathlib.Path.mkdir")
     def test_compute_actual_selector_marginal_contribution(self: TestCase,
+                                                           mock_mkdir: Mock,
                                                            mock_actual_performance: Mock
                                                            ) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
@@ -111,6 +86,7 @@ class TestMarginalContribution(TestCase):
         mock_actual_performance.side_effect = [526.805294,
                                                526.805294,
                                                732.0]
+        mock_mkdir.return_value = None
 
         result = [("Solvers/CSCCSat", 1.3895076764357648), ("Solvers/MiniSAT", 0.0)]
 

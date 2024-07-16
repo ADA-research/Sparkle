@@ -56,7 +56,7 @@ feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
 
 sparkle_marginal_contribution_actual_path =\
-    sparkle_algorithm_selector_dir / "marginal_contribution_actual.csv"
+    sparkle_algorithm_selector_dir / "marginal_contribution_actual.txt"
 
 sparkle_latex_dir = Path("Components/Sparkle-latex-generator")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Sparkle command to construct a portfolio selector."""
-import shutil
 import sys
 import argparse
 from pathlib import Path
@@ -45,8 +44,7 @@ def judge_exist_remaining_jobs(feature_data_csv: Path,
 def construct_sparkle_portfolio_selector(selector_path: Path,
                                          performance_data: PerformanceDataFrame,
                                          feature_data: FeatureDataFrame,
-                                         flag_recompute: bool = False,
-                                         selector_timeout: int = None) -> bool:
+                                         selector_timeout: int = None) -> None:
     """Create the Sparkle portfolio selector.
 
     Args:
@@ -57,31 +55,11 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
             was changed. Defaults to False.
         selector_timeout: The cuttoff time to configure the algorithm selector. If None
             uses the default selector configuration. Defaults to None.
-
-    Returns:
-        True if portfolio construction is successful.
     """
-    # If the selector exists and the data didn't change, do nothing;
-    # unless the recompute flag is set
-    if selector_path.exists() and not flag_recompute:
-        print("Portfolio selector already exists. Set the recompute flag to re-create.")
-        return True
-
-    # Remove contents of- and the selector path to ensure everything is (re)computed
-    # for the new selector when required
-    shutil.rmtree(selector_path.parent, ignore_errors=True)
-
-    # (Re)create the path to the selector
-    selector_path.parent.mkdir(parents=True, exist_ok=True)
-
     cutoff_time = gv.settings.get_general_target_cutoff_time()
-    cutoff_time_minimum = 2
 
     # Selector (AutoFolio) cannot handle cutoff time less than 2, adjust if needed
-    if cutoff_time < cutoff_time_minimum:
-        print(f"Warning: A cutoff time of {cutoff_time} is too small for Selector, "
-              f"setting it to {cutoff_time_minimum}")
-        cutoff_time = cutoff_time_minimum
+    cutoff_time = max(cutoff_time, 2)
 
     # Determine the objective function
     perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
@@ -94,9 +72,7 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
         print("ERROR: Unknown performance measure in portfolio selector construction.")
         sys.exit(-1)
 
-    bool_exists_missing_value = feature_data.has_missing_value()
-
-    if bool_exists_missing_value:
+    if feature_data.has_missing_value():
         print("****** WARNING: There are missing values in the feature data, and all "
               "missing values will be imputed as the mean value of all other non-missing"
               " values! ******")
@@ -110,8 +86,6 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
                                        objective_function,
                                        cutoff_time,
                                        selector_timeout)
-
-    return True
 
 
 if __name__ == "__main__":
@@ -156,35 +130,32 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
     feature_data = FeatureDataFrame(gv.feature_data_csv_path)
 
-    #output_path = gv.settings.get_
-
-    success = construct_sparkle_portfolio_selector(
-        gv.sparkle_algorithm_selector_path,
-        performance_data,
-        feature_data,
-        flag_recompute_portfolio,
-        args.selector_timeout
-    )
-
-    if success:
-        print("Sparkle portfolio selector constructed!")
-        print("Sparkle portfolio selector located at "
-              f"{gv.sparkle_algorithm_selector_path}")
-
-        # Update latest scenario
-        gv.latest_scenario().set_selection_portfolio_path(
-            Path(gv.sparkle_algorithm_selector_path)
+    selector_path = gv.sparkle_algorithm_selector_path
+    if selector_path.exists() and not flag_recompute_portfolio:
+        print("Portfolio selector already exists. Set the recompute flag to re-create.")
+    else:
+        construct_sparkle_portfolio_selector(
+            selector_path,
+            performance_data,
+            feature_data,
+            args.selector_timeout
         )
-        gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
-        # Set to default to overwrite possible old path
-        gv.latest_scenario().set_selection_test_case_directory()
+        print("Sparkle portfolio selector constructed!")
 
-        # Compute and print marginal contributions of the perfect and actual portfolio
-        # selectors
-        scmch.compute_marginal_contribution(flag_compute_perfect=True,
-                                            flag_compute_actual=True,
-                                            flag_recompute=flag_recompute_marg_cont,
-                                            selector_timeout=args.selector_timeout)
+    print(f"Sparkle portfolio selector located at {gv.sparkle_algorithm_selector_path}")
+
+    # Update latest scenario
+    gv.latest_scenario().set_selection_portfolio_path(gv.sparkle_algorithm_selector_path)
+    gv.latest_scenario().set_latest_scenario(Scenario.SELECTION)
+    # Set to default to overwrite possible old path
+    gv.latest_scenario().set_selection_test_case_directory()
+
+    # Compute and print marginal contributions of the perfect and actual portfolio
+    # selectors
+    scmch.compute_marginal_contribution(flag_compute_perfect=True,
+                                        flag_compute_actual=True,
+                                        flag_recompute=flag_recompute_marg_cont,
+                                        selector_timeout=args.selector_timeout)
 
     # Write used settings to file
     gv.settings.write_used_settings()
