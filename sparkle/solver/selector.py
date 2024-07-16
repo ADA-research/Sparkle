@@ -101,7 +101,6 @@ class Selector(SparkleCallable):
 
         if construct.returncode != 0 or not target_file.is_file():
             print(f"Selector construction of {self.name} failed! Error:\n"
-                  f"{construct.stdout.decode()}\n"
                   f"{construct.stderr.decode()}")
             return None
         return target_file
