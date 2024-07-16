@@ -3,7 +3,6 @@
 from __future__ import annotations
 import pandas
 from unittest import TestCase
-from unittest.mock import Mock, patch
 from pathlib import Path
 
 from sparkle.structures import PerformanceDataFrame
@@ -78,23 +77,19 @@ class TestPerformanceData(TestCase):
         result = self.pd_nan.get_best_performance_per_instance()
         assert result == min_perf
 
-    @patch("global_variables."
-           "settings.get_general_penalty_multiplier")
-    def test_calc_best_score_instance(self: TestPerformanceData,
-                                      mock_penalty: Mock)\
+    def test_calc_best_performance_instance(self: TestPerformanceData)\
             -> None:
         """Test calculating best score on instance."""
-        bs_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
-        bs_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
-        mock_penalty.return_value = 10
+        bp_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
+        bp_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
         for idx, instance in enumerate(self.pd.dataframe.index):
             result = self.pd.best_performance_instance(
                 instance=instance, minimise=True)
-            assert result == bs_instance_min[idx]
+            assert result == bp_instance_min[idx]
 
             result = self.pd.best_performance_instance(
                 instance=instance, minimise=False)
-            assert result == bs_instance_max[idx]
+            assert result == bp_instance_max[idx]
 
     def test_calc_best_performance(self: TestPerformanceData)\
             -> None:
