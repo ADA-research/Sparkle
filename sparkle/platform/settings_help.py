@@ -15,6 +15,7 @@ from sparkle.configurator.configurator import Configurator
 from sparkle.configurator import implementations as cim
 
 from runrunner import Runner
+from sparkle.platform.cli_types import VerbosityLevel
 
 
 class SolutionVerifier(Enum):
@@ -59,6 +60,8 @@ class Settings:
     DEFAULT_general_penalty_multiplier = 10
     DEFAULT_general_extractor_cutoff_time = 60
     DEFAULT_number_of_jobs_in_parallel = 25
+    DEFAULT_general_verbosity = VerbosityLevel.STANDARD
+    DEFAULT_general_check_interval = 10
 
     DEFAULT_config_wallclock_time = 600
     DEFAULT_config_cpu_time = None
@@ -95,6 +98,8 @@ class Settings:
         self.__general_penalty_multiplier_set = SettingState.NOT_SET
         self.__general_metric_aggregation_function_set = SettingState.NOT_SET
         self.__general_extractor_cutoff_time_set = SettingState.NOT_SET
+        self.__general_verbosity_set = SettingState.NOT_SET
+        self.__general_check_interval_set = SettingState.NOT_SET
 
         self.__config_wallclock_time_set = SettingState.NOT_SET
         self.__config_cpu_time_set = SettingState.NOT_SET
@@ -196,6 +201,21 @@ class Settings:
                 if file_settings.has_option(section, option):
                     value = file_settings.get(section, option)
                     self.set_run_on(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("verbosity", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = VerbosityLevel.from_string(
+                        file_settings.get(section, option))
+                    self.set_general_verbosity(value, state)
+                    file_settings.remove_option(section, option)
+
+            option_names = ("check_interval", )
+            for option in option_names:
+                if file_settings.has_option(section, option):
+                    value = int(file_settings.get(section, option))
+                    self.set_general_check_interval(value, state)
                     file_settings.remove_option(section, option)
 
             section = "configuration"
@@ -559,6 +579,51 @@ class Settings:
             self.set_number_of_jobs_in_parallel()
 
         return int(self.__settings["general"]["number_of_jobs_in_parallel"])
+
+    def set_general_verbosity(
+            self: Settings, value: VerbosityLevel = DEFAULT_general_verbosity,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general verbosity to use."""
+        section = "general"
+        name = "verbosity"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_verbosity_set, origin, name):
+            self.__init_section(section)
+            self.__general_verbosity_set = origin
+            self.__settings[section][name] = value.name
+
+        return
+
+    def get_general_verbosity(self: Settings) -> VerbosityLevel:
+        """Return the general verbosity."""
+        if self.__general_verbosity_set == SettingState.NOT_SET:
+            self.set_general_verbosity()
+
+        return VerbosityLevel.from_string(
+            self.__settings["general"]["verbosity"])
+
+    def set_general_check_interval(
+            self: Settings,
+            value: int = DEFAULT_general_check_interval,
+            origin: SettingState = SettingState.DEFAULT) -> None:
+        """Set the general check interval."""
+        section = "general"
+        name = "check_interval"
+
+        if value is not None and self.__check_setting_state(
+                self.__general_check_interval_set, origin, name):
+            self.__init_section(section)
+            self.__general_check_interval_set = origin
+            self.__settings[section][name] = str(value)
+
+    def get_general_check_interval(self: Settings) -> int:
+        """Return the general check interval."""
+        if self.__general_check_interval_set == SettingState.NOT_SET:
+            self.set_general_check_interval()
+
+        return int(
+            self.__settings["general"]["check_interval"])
 
     # Configuration settings ###
 

@@ -5,13 +5,16 @@ from __future__ import annotations
 
 from pathlib import Path
 import time
+import json
 
 from runrunner import SlurmRun
 from runrunner.base import Status
+from tabulate import tabulate
 
 from CLI.help.command_help import CommandName
 from CLI.help.command_help import COMMAND_DEPENDENCIES
 import global_variables as gv
+from sparkle.platform.cli_types import VerbosityLevel, TEXT
 
 
 # Wait until all dependencies of the command to run are completed
@@ -94,17 +97,85 @@ def get_running_jobs() -> list[SlurmRun]:
             if run.status == Status.WAITING or run.status == Status.RUNNING]
 
 
+def get_dependencies(jobs: list[SlurmRun]) -> list[SlurmRun]:
+    """Adds Dependencies. Should be removed once RunRunner provides this feature."""
+    for job in jobs:
+        with job.json_filepath.open() as file:
+            data = json.load(file)
+        if len(data["dependencies"]) > 0:
+            job_ids = [dep["run_id"] for dep in data["dependencies"]]
+        else:
+            job_ids = []
+        job.dependencies = job_ids
+    return jobs
+
+
+def clear_console_lines(lines: int) -> None:
+    """Clears the last lines of the console."""
+    # \033 is the escape character (ESC) in ASCII
+    # [{lines}A is the escape sequence that moves the cursor up.
+    print(f"\033[{lines}A", end="")
+    # [J is the exape sequence that clears the console from the cursor down
+    print("\033[J", end="")
+
+
 def wait_for_all_jobs() -> None:
     """Wait for all active jobs to finish executing."""
-    running_jobs = get_running_jobs()
-    prev_jobs = len(running_jobs) + 1
-    while len(running_jobs) > 0:
-        if len(running_jobs) < prev_jobs:
-            print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
-        time.sleep(10.0)
-        prev_jobs = len(running_jobs)
-        running_jobs = [run for run in running_jobs
-                        if run.status == Status.WAITING or run.status == Status.RUNNING]
+    jobs = get_running_jobs()
+    verbosity_setting = gv.settings.get_general_verbosity()
+    running_jobs = jobs
+    # Interval at which to refresh the table
+    check_interval = gv.settings.get_general_check_interval()
+    # If verbosity is quiet there is no need for further information
+    if verbosity_setting == VerbosityLevel.QUIET:
+        prev_jobs = len(running_jobs) + 1
+        while len(running_jobs) > 0:
+            if len(running_jobs) < prev_jobs:
+                print(f"Waiting for {len(running_jobs)} jobs...", flush=True)
+            time.sleep(check_interval)
+            prev_jobs = len(running_jobs)
+            running_jobs = [run for run in running_jobs
+                            if run.status == Status.WAITING
+                            or run.status == Status.RUNNING]
+
+    # If verbosity is standard the command will print a table with relevant information
+    elif verbosity_setting == VerbosityLevel.STANDARD:
+        # Collect dependencies and partitions for each job
+        jobs = get_dependencies(jobs)
+        # Order in which to display the jobs
+        priority = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
+        while len(running_jobs) > 0:
+            # Information to be printed to the table
+            information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
+            running_jobs = [run for run in running_jobs
+                            if run.status == Status.WAITING
+                            or run.status == Status.RUNNING]
+            sorted_jobs = sorted(jobs, key=lambda job: priority[job.status])
+            for job in sorted_jobs:
+                # Count number of jobs that have finished
+                finished_jobs_count = sum(1 for status in job.all_status
+                                          if status == Status.COMPLETED)
+                # Format job.status
+                status_text = \
+                    TEXT.format_text([TEXT.BOLD], job.status) \
+                    if job.status == Status.RUNNING else \
+                    (TEXT.format_text([TEXT.ITALIC], job.status)
+                        if job.status == Status.COMPLETED else job.status)
+                information.append(
+                    [job.run_id,
+                     job.name,
+                     status_text,
+                     "None" if len(job.dependencies) == 0
+                        else ", ".join(job.dependencies),
+                     f"{finished_jobs_count}/{len(job.all_status)}"])
+            # Print the table
+            table = tabulate(information, headers="firstrow", tablefmt="grid")
+            print(table)
+            time.sleep(check_interval)
+
+            # Clears the table for the new table to be printed
+            lines = table.count("\n") + 1
+            clear_console_lines(lines)
 
     print("All jobs done!")
 
