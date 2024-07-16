@@ -156,7 +156,7 @@ if __name__ == "__main__":
     performance_data = PerformanceDataFrame(gv.performance_data_csv_path)
     feature_data = FeatureDataFrame(gv.feature_data_csv_path)
 
-    output_path = gv.settings.get_
+    #output_path = gv.settings.get_
 
     success = construct_sparkle_portfolio_selector(
         gv.sparkle_algorithm_selector_path,

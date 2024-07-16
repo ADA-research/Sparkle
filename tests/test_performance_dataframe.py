@@ -80,39 +80,33 @@ class TestPerformanceData(TestCase):
 
     @patch("global_variables."
            "settings.get_general_penalty_multiplier")
-    def test_calc_portfolio_vbs_instance(self: TestPerformanceData,
+    def test_calc_best_score_instance(self: TestPerformanceData,
                                          mock_penalty: Mock)\
             -> None:
-        """Test calculating virtual best score on instance."""
-        vbs_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
-        vbs_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
+        """Test calculating best score on instance."""
+        bs_instance_min = [30.0, 5.0, 3.0, 8.0, 41.0]
+        bs_instance_max = [64.0, 87.0, 87.0, 96.0, 86.0]
         mock_penalty.return_value = 10
         for idx, instance in enumerate(self.pd.dataframe.index):
             result = self.pd.best_performance_instance(
-                instance=instance, minimise=True, capvalue=None
-            )
-            assert result == vbs_instance_min[idx]
+                instance=instance, minimise=True)
+            assert result == bs_instance_min[idx]
 
             result = self.pd.best_performance_instance(
-                instance=instance, minimise=False, capvalue=None
-            )
-            assert result == vbs_instance_max[idx]
+                instance=instance, minimise=False)
+            assert result == bs_instance_max[idx]
 
-    def test_calc_virtual_best_performance_of_portfolio(self: TestPerformanceData)\
+    def test_calc_best_performance(self: TestPerformanceData)\
             -> None:
         """Test calculating vbs on the entire portfolio."""
         vbs_portfolio = 87.0
         result = self.pd.best_performance(
-            aggregation_function=sum, minimise=True,
-            capvalue_list=None, penalty_list=None
-        )
+            aggregation_function=sum, minimise=True)
         assert result == vbs_portfolio
 
         vbs_portfolio = 420.0
         result = self.pd.best_performance(
-            aggregation_function=sum, minimise=False,
-            capvalue_list=None, penalty_list=None
-        )
+            aggregation_function=sum, minimise=False)
         assert result == vbs_portfolio
 
     def test_get_dict_vbs_penalty_time_on_each_instance(self: TestPerformanceData)\

@@ -28,7 +28,7 @@ class PerformanceDataFrame():
                  instances: list[str] = [],
                  n_runs: int = 1,
                  init_df: bool = True) -> None:
-        """Initialise a SparklePerformanceDataCSV object.
+        """Initialise a PerformanceDataFrame.
 
         Consists of:
             - Columns representing the Solvers
@@ -99,6 +99,8 @@ class PerformanceDataFrame():
                                               index=midx,
                                               columns=solvers)
                 self.save_csv()
+            # Sort the index to optimize lookup speed
+            self.dataframe = self.dataframe.sort_index()
 
     def verify_objective(self: PerformanceDataFrame,
                          objective: str) -> str:
@@ -384,9 +386,7 @@ class PerformanceDataFrame():
             instance: str,
             minimise: bool,
             objective: str = None,
-            capvalue: float = None,
-            penalty: float = None,
-            exclude_solvers: list[str] = None,
+            exclude_solvers: list[str] = [],
             run_aggregator: Callable = mean) -> float:
         """Return the best performance for a specific instance.
 
@@ -403,46 +403,31 @@ class PerformanceDataFrame():
             The virtual best solver performance for this instance.
         """
         objective = self.verify_objective(objective)
-        if capvalue is None:
-            capvalue = sys.float_info.max
-            if not minimise:
-                capvalue = capvalue * -1
-        if penalty is None:
-            penalty = sys.float_info.max
-            if not minimise:
-                penalty = penalty * -1
-        virtual_best_score = None
-        for solver in self.dataframe.columns:
-            if exclude_solvers is not None and solver in exclude_solvers:
+        best_score = None
+        compare = operator.lt if minimise else operator.gt
+        for solver in self.solvers:
+            if solver in exclude_solvers:
                 continue
             if isinstance(instance, str):
                 runs = self.dataframe.loc[(objective, instance), solver]
-                if minimise:
-                    runs[runs > capvalue] = penalty
-                else:
-                    runs[runs < capvalue] = penalty
                 score_solver = run_aggregator(runs)
             else:
                 score_solver = float(self.dataframe.loc[instance, solver])
-            if virtual_best_score is None or\
-                    minimise and virtual_best_score > score_solver or\
-                    not minimise and virtual_best_score < score_solver:
-                virtual_best_score = score_solver
+            if best_score is None or compare(score_solver, best_score):
+                best_score = score_solver
 
-        if virtual_best_score is None:
+        if best_score is None:
             print("WARNING: PerformanceDataFrame could not calculate best performance "
                   f"for instance {instance}.")
             return PerformanceDataFrame.missing_value
 
-        return virtual_best_score
+        return best_score
 
     def best_performance(
             self: PerformanceDataFrame,
             aggregation_function: Callable[[list[float]], float],
             minimise: bool,
-            capvalue_list: list[float],
-            penalty_list: list[float],
-            exclude_solvers: list[str] = None,
+            exclude_solvers: list[str] = [],
             objective: str = None) -> float:
         """Return the overall best performance of the portfolio.
 
@@ -459,17 +444,51 @@ class PerformanceDataFrame():
         """
         objective = self.verify_objective(objective)
         instance_best = []
-        capvalue, penalty = None, None
-        for idx, instance in enumerate(self.dataframe.index):
-            if capvalue_list is not None:
-                capvalue = capvalue_list[idx]
-            if penalty_list is not None:
-                penalty = penalty_list[idx]
+        for instance in self.instances:
             best_score = self.best_performance_instance(
-                instance, minimise, objective, capvalue, penalty, exclude_solvers)
+                instance, minimise, objective, exclude_solvers)
             instance_best.append(best_score)
 
         return aggregation_function(instance_best)
+
+    def marginal_contribution(self: PerformanceDataFrame,
+                              aggregation_function: Callable[[list[float]], float],
+                              minimise: bool,
+                              pre_selection: list[str] = None,
+                              objective: str = None,
+                              ) -> list[float]:
+        """Return the marginal contribution of the solvers on the instances.
+
+        Args:
+            aggregation_function: Function for combining scores over instances together.
+            minimise: Whether we should minimise or maximise the score of the objective.
+            capvalue_list: List of capvalue per instance
+            penalty_list: List of penalty per instance
+            objective: The objective for which we calculate the marginal contribution.
+
+        Returns:
+            The marginal contribution of each solver.
+        """
+        output = []
+        objective = self.verify_objective(objective)
+        best_performance = self.best_performance(
+            aggregation_function, minimise, objective=objective)
+        for solver in self.solvers:
+            # By calculating the best performance excluding this Solver,
+            # we can determine its relative impact on the portfolio.
+            missing_solver_best = self.best_performance(
+                aggregation_function,
+                minimise,
+                exclude_solvers=[solver],
+                objective=objective)
+            # Now we need to see how much the portfolio's best performance
+            # decreases without this solver.
+            marginal_contribution = missing_solver_best / best_performance
+            if missing_solver_best == best_performance:
+                # No change, no contribution
+                marginal_contribution = 0.0
+            output.append((solver, marginal_contribution, missing_solver_best))
+        return output
 
     def get_dict_vbs_penalty_time_on_each_instance(
             self: PerformanceDataFrame,

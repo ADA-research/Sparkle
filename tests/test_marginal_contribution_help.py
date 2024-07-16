@@ -48,32 +48,16 @@ class TestMarginalContribution(TestCase):
 
     def test_compute_perfect_selector_marginal_contribution(self: TestCase) -> None:
         """Test for method compute_perfect_selector_marginal_contribution."""
-        pth = Path("CLI/test/test_files/Performance_Data/"
-                   "test_construct_sparkle_portfolio_selector.csv")
-
-        # Settings have no impact yet on the unit test, this needs to be reconfigured
-        """tmp_settings = ""
-        source_settings = Path("tests/test_files/Settings/mc-settings.ini")
-        with Path("Settings/sparkle_settings.ini").open("r+") as file_target:
-            tmp_settings = file_target.read()
-            file_target.truncate()
-            with source_settings.open("r") as file_source:
-                source_settings = file_source.read()
-                file_target.write(source_settings)"""
-
-        result = [("Solvers/CSCCSat", 1.7980089765503102), ("Solvers/MiniSAT", 0.0)]
+        performance_data = PerformanceDataFrame(
+            Path("CLI/test/test_files/Performance_Data/"
+                 "test_construct_sparkle_portfolio_selector.csv"))
+        result = [("Solvers/CSCCSat", 1.7980089765503102, 33117.589),
+                  ("Solvers/MiniSAT", 0.0, 18419.034293999997)]
         output = scmch.compute_perfect_selector_marginal_contribution(
             aggregation_function=sum,
-            capvalue_list=None,
             minimise=True,
-            performance_data_csv_path=pth,
-            flag_recompute=True
+            performance_data=performance_data
         )
-
-        """with Path("Settings/sparkle_settings.ini").open("w") as f:
-            f.truncate()
-            f.write(tmp_settings)"""
-
         self.assertListEqual(output, result)
 
     @patch("CLI.support.compute_marginal_contribution_help."
@@ -118,10 +102,12 @@ class TestMarginalContribution(TestCase):
                                                            ) -> None:
         """Test for method compute_actual_selector_marginal_contribution."""
         # Test does not work on Mac
-        performance_csv_path = Path("CLI/test/test_files/Performance_Data/"
-                                    "test_construct_sparkle_portfolio_selector.csv")
-        feature_csv_path = Path("CLI/test/test_files/Feature_Data/"
-                                "test_construct_sparkle_portfolio_selector.csv")
+        performance_data = PerformanceDataFrame(
+            Path("CLI/test/test_files/Performance_Data/"
+                 "test_construct_sparkle_portfolio_selector.csv"))
+        feature_data = FeatureDataFrame(
+            Path("CLI/test/test_files/Feature_Data/"
+                 "test_construct_sparkle_portfolio_selector.csv"))
         mock_actual_performance.side_effect = [526.805294,
                                                526.805294,
                                                732.0]
@@ -130,10 +116,9 @@ class TestMarginalContribution(TestCase):
 
         output = scmch.compute_actual_selector_marginal_contribution(
             aggregation_function=sum,
-            capvalue_list=None,
             minimise=True,
-            performance_data_csv_path=performance_csv_path,
-            feature_data_csv_path=feature_csv_path,
+            performance_data=performance_data,
+            feature_data=feature_data,
             flag_recompute=True,
             selector_timeout=60
         )
