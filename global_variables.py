@@ -55,13 +55,8 @@ extractor_dir = Path("Extractors")
 feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
 
-sparkle_parallel_portfolio_dir = Path("Sparkle_Parallel_Portfolio")
-
-sparkle_marginal_contribution_perfect_path =\
-    sparkle_algorithm_selector_dir / "marginal_contribution_perfect.csv"
-
 sparkle_marginal_contribution_actual_path =\
-    sparkle_algorithm_selector_dir / "marginal_contribution_actual.csv"
+    sparkle_algorithm_selector_dir / "marginal_contribution_actual.txt"
 
 sparkle_latex_dir = Path("Components/Sparkle-latex-generator")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
@@ -87,7 +82,6 @@ selection_output_analysis = selection_output_general / analysis_dir_name
 
 runsolver_dir = Path("Components/runsolver/src/")
 runsolver_path = runsolver_dir / "runsolver"
-autofolio_exec_path = Path("Components/AutoFolio/scripts/autofolio")
 
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
@@ -107,7 +101,7 @@ instances_nickname_path = reference_list_dir / "sparkle_instance_nickname_list.t
 
 working_dirs = [instance_dir, output_dir, solver_dir, extractor_dir,
                 feature_data_dir, performance_data_dir, reference_list_dir,
-                sparkle_algorithm_selector_dir, sparkle_parallel_portfolio_dir]
+                sparkle_algorithm_selector_dir]
 
 file_storage_data_mapping = {solver_nickname_list_path: {},
                              instances_nickname_path: {},

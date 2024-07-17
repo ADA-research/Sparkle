@@ -11,12 +11,10 @@ from pandas import DataFrame
 from runrunner.base import Runner
 import runrunner as rrr
 
-from CLI.help.status_info import ConfigureSolverStatusInfo
 import global_variables as gv
 import sparkle_logging as sl
-from sparkle.platform import settings_help
 from CLI.support import ablation_help as sah
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
 from CLI.help import command_help as ch
@@ -147,7 +145,7 @@ def run_after(solver: Path,
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -218,13 +216,6 @@ if __name__ == "__main__":
 
     sah.clean_ablation_scenarios(solver, instance_set_train)
 
-    status_info = ConfigureSolverStatusInfo()
-    status_info.set_solver(solver.name)
-    status_info.set_instance_set_train(instance_set_train.name)
-    status_info.set_instance_set_test(
-        instance_set_test.name if instance_set_test is not None else None)
-    status_info.save()
-
     number_of_runs = gv.settings.get_config_number_of_runs()
     solver_calls = gv.settings.get_config_solver_calls()
     cpu_time = gv.settings.get_config_cpu_time()
@@ -279,7 +270,6 @@ if __name__ == "__main__":
     else:
         print("Running configuration finished!")
 
-    status_info.delete()
     # Write used settings to file
     gv.settings.write_used_settings()
     # Write used scenario to file

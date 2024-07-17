@@ -12,11 +12,10 @@ from pathlib import Path
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from sparkle.platform import settings_help
-import global_variables as gv
+from sparkle.platform.settings_objects import Settings
 
 global settings
-gv.settings = settings_help.Settings()
+settings = Settings()
 
 
 class TestConfigurationScenario(TestCase):
@@ -40,8 +39,8 @@ class TestConfigurationScenario(TestCase):
         self.cutoff_time = 60
         self.cutoff_length = "max"
         self.sparkle_objective =\
-            gv.settings.get_general_sparkle_objectives()[0]
-        self.configurator = gv.settings.get_general_sparkle_configurator()
+            settings.get_general_sparkle_objectives()[0]
+        self.configurator = settings.get_general_sparkle_configurator()
         self.scenario = ConfigurationScenario(
             solver=self.solver,
             instance_set=self.instance_set,

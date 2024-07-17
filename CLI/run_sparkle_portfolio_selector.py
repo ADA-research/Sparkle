@@ -8,11 +8,10 @@ from pathlib import Path, PurePath
 import global_variables as gv
 from CLI.support import run_portfolio_selector_help as srpsh
 import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame
 from CLI.help import command_help as ch
 from CLI.help.reporting_scenario import Scenario
 from CLI.initialise import check_for_initialise
@@ -38,7 +37,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)
@@ -99,7 +98,8 @@ if __name__ == "__main__":
         # Write used scenario to file
         gv.latest_scenario().write_scenario_ini()
         test_performance_data = PerformanceDataFrame(
-            test_case_path / "sparkle_performance_data.csv")
+            test_case_path / "sparkle_performance_data.csv",
+            objectives=gv.settings.get_general_sparkle_objectives())
         srpsh.run_portfolio_selector_on_instances(
             instance_set.instance_paths, test_performance_data, selector_path,
             run_on=run_on)

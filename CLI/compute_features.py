@@ -11,8 +11,7 @@ from runrunner.base import Runner, Status
 from sparkle.solver import Extractor
 import global_variables as gv
 import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.command_help import COMMAND_DEPENDENCIES, CommandName
 from CLI.initialise import check_for_initialise
@@ -22,8 +21,6 @@ from sparkle.structures import FeatureDataFrame
 
 def parser_function() -> argparse.ArgumentParser:
     """Define the command line arguments."""
-    gv.settings = settings_help.Settings()
-
     parser = argparse.ArgumentParser()
     parser.add_argument(*apc.RecomputeFeaturesArgument.names,
                         **apc.RecomputeFeaturesArgument.kwargs)
@@ -122,7 +119,7 @@ def compute_features(
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

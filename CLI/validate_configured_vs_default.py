@@ -8,7 +8,7 @@ from pathlib import PurePath
 import global_variables as gv
 from sparkle.solver import pcs
 import sparkle_logging as sl
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
 from sparkle.configurator.configurator import Configurator
@@ -16,7 +16,6 @@ from sparkle.solver.validator import Validator
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from CLI.help import command_help as ch
-from sparkle.platform import settings_help
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
 
@@ -49,7 +48,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

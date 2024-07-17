@@ -10,11 +10,9 @@ import runrunner as rrr
 from runrunner.base import Runner
 
 import global_variables as gv
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame
 import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SolutionVerifier
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState, SolutionVerifier
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
@@ -181,7 +179,7 @@ def run_solvers_on_instances(
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

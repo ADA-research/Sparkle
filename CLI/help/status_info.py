@@ -127,50 +127,6 @@ class ConfigureSolverStatusInfo(StatusInfo):
                 f"_{self.get_instance_set_test()}")
 
 
-class ConstructPortfolioSelectorStatusInfo(StatusInfo):
-    """Status info for construction of portfolio selectors."""
-    job_path = StatusInfoType.CONSTRUCT_PORTFOLIO_SELECTOR
-    algorithm_selector_path_key = "Algorithm selector path"
-    feature_data_csv_path_key = "Feature data csv path"
-    performance_data_csv_path_key = "Performance data csv path"
-
-    def set_algorithm_selector_path(self: ConstructPortfolioSelectorStatusInfo,
-                                    algorithm_selector_path: str) -> None:
-        """Set algorithm selector path."""
-        self.data[self.algorithm_selector_path_key] = algorithm_selector_path
-
-    def set_feature_data_csv_path(self: ConstructPortfolioSelectorStatusInfo,
-                                  feature_data_csv_path: str) -> None:
-        """Set feature data csv path."""
-        self.data[self.feature_data_csv_path_key] = feature_data_csv_path
-
-    def set_performance_data_csv_path(self: ConstructPortfolioSelectorStatusInfo,
-                                      performance_data_csv_path: str) -> None:
-        """Set performance data csv path."""
-        self.data[self.performance_data_csv_path_key] = performance_data_csv_path
-
-    def get_performance_data_csv_path(self: ConstructPortfolioSelectorStatusInfo) -> str:
-        """"Access to performance data csv path."""
-        return self.data[self.performance_data_csv_path_key]
-
-    def get_feature_data_csv_path(self: ConstructPortfolioSelectorStatusInfo) -> str:
-        """Access to feature data csv path."""
-        return self.data[self.feature_data_csv_path_key]
-
-    def get_algorithm_selector_path(self: ConstructPortfolioSelectorStatusInfo) -> str:
-        """Access to algorithm selector path."""
-        return self.data[self.algorithm_selector_path_key]
-
-    def get_key_string(self: ConstructPortfolioSelectorStatusInfo) -> str:
-        """Create key string."""
-        algorithm_selector = self.get_algorithm_selector_path().split("/")[-1]
-        feature_data = self.get_feature_data_csv_path().split("/")[-1]
-        performance_data = self.get_performance_data_csv_path().split("/")[-1]
-        random_string = tg.get_time_pid_random_string()
-
-        return f"{algorithm_selector}_{feature_data}_{performance_data}_{random_string}"
-
-
 class GenerateReportStatusInfo(StatusInfo):
     """Status info for generation of reports."""
     job_path = StatusInfoType.GENERATE_REPORT

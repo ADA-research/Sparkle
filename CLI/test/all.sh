@@ -31,6 +31,20 @@ CLI/test/add_instances.sh
 
 # Test add solver
 CLI/test/add_solver.sh
+# Test save snapshot
+CLI/test/save_snapshot.sh
+
+# Test load snapshot
+CLI/test/load_snapshot.sh
+
+# Test remove feature extractor
+CLI/test/remove_feature_extractor.sh
+
+# Test remove instances
+CLI/test/remove_instances.sh
+
+# Test remove solver
+CLI/test/remove_solver.sh
 
 # Test run solvers
 CLI/test/run_solvers.sh
@@ -56,30 +70,6 @@ CLI/test/construct_sparkle_portfolio_selector.sh
 # Test run sparkle portfolio selector
 CLI/test/run_sparkle_portfolio_selector.sh
 
-# Test generate report (selection)
-CLI/test/generate_report_selection.sh
-
-# Test generate report (selection) for test set
-CLI/test/generate_report_for_test.sh
-
-# Test generate report for configuration
-CLI/test/generate_report_for_configuration.sh
-
-# Test save snapshot
-CLI/test/save_snapshot.sh
-
-# Test load snapshot
-CLI/test/load_snapshot.sh
-
-# Test remove feature extractor
-CLI/test/remove_feature_extractor.sh
-
-# Test remove instances
-CLI/test/remove_instances.sh
-
-# Test remove solver
-CLI/test/remove_solver.sh
-
 # Test validate configured vs default
 CLI/test/validate_configured_vs_default.sh
 
@@ -91,6 +81,15 @@ CLI/test/run_configured_solver.sh
 
 # Test run parallel portfolio
 CLI/test/run_parallel_portfolio.sh
+
+# Test generate report (selection)
+CLI/test/generate_report_selection.sh
+
+# Test generate report (selection) for test set
+CLI/test/generate_report_for_test.sh
+
+# Test generate report for configuration
+CLI/test/generate_report_for_configuration.sh
 
 # Test generate report for parallel portfolio
 CLI/test/generate_report_parallel_portfolio.sh

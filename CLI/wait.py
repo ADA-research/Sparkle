@@ -9,7 +9,7 @@ from CLI.support import sparkle_job_help as sjh
 from CLI.help.command_help import CommandName
 from CLI.help import argparse_custom as ac
 import global_variables as gv
-from sparkle.platform import settings_help
+from sparkle.platform.settings_objects import Settings
 
 
 def parser_function() -> argparse.ArgumentParser:
@@ -30,7 +30,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

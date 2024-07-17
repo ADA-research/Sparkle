@@ -3,8 +3,7 @@
 """Helper functions to inform about Sparkle's system status."""
 from pathlib import Path
 
-from sparkle.structures import FeatureDataFrame
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 
 
 def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> None:

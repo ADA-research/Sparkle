@@ -7,8 +7,7 @@ import argparse
 import global_variables as gv
 from CLI.support import compute_marginal_contribution_help as scmch
 import sparkle_logging as sl
-from sparkle.platform import settings_help
-from sparkle.platform.settings_help import SettingState
+from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
@@ -38,7 +37,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

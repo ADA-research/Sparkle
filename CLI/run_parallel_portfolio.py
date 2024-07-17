@@ -17,10 +17,9 @@ from runrunner.slurm import Status
 
 from CLI.help.reporting_scenario import Scenario
 import sparkle_logging as sl
-from sparkle.platform import settings_help
 from sparkle.types.objective import PerformanceMeasure
 import global_variables as gv
-from sparkle.platform.settings_help import SettingState, Settings
+from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
 from CLI.help import command_help as sch
@@ -216,7 +215,7 @@ def parser_function() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     # Initialise settings
-    gv.settings = settings_help.Settings()
+    gv.settings = Settings()
 
     # Log command call
     sl.log_command(sys.argv)

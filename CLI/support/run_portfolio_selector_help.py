@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """Helper functions for the execution of a portfolio selector."""
-import subprocess
 import sys
-import fcntl
 from filelock import FileLock, Timeout
 from pathlib import Path
-import ast
 
 import runrunner as rrr
 from runrunner.base import Runner
@@ -14,36 +11,10 @@ from runrunner.base import Runner
 from sparkle.platform import file_help as sfh
 from sparkle.solver import Extractor, Solver
 import global_variables as gv
-import tools.general as tg
-from sparkle.structures.performance_dataframe import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame
 from CLI.support import run_solvers_help as srs
 
 from CLI.help.command_help import CommandName
-
-
-# Called in call_sparkle_portfolio_selector_solve_instance
-# Called in compute_marginal_contribution_help
-def get_list_predict_schedule_from_file(predict_schedule_result_path: str) -> list:
-    """Return the predicted algorithm schedule as a list."""
-    prefix_string = "Selected Schedule [(algorithm, budget)]: "
-    predict_schedule = ""
-    with Path(predict_schedule_result_path).open("r+") as fin:
-        fcntl.flock(fin.fileno(), fcntl.LOCK_EX)
-        predict_schedule_lines = fin.readlines()
-        for line in predict_schedule_lines:
-            if line.strip().startswith(prefix_string):
-                predict_schedule = line.strip()
-                break
-    if predict_schedule == "":
-        print("ERROR: Failed to get schedule from algorithm portfolio. Stopping "
-              "execution!\n"
-              f"Schedule file appears to be empty: {predict_schedule_result_path}\n"
-              f"Selector error output path: {gv.sparkle_err_path}")
-        sys.exit(-1)
-
-    predict_schedule_string = predict_schedule[len(prefix_string):]
-    # eval insecure, so use ast.literal_eval instead
-    return ast.literal_eval(predict_schedule_string)
 
 
 # Only called in call_sparkle_portfolio_selector_solve_instance
@@ -131,33 +102,18 @@ def call_sparkle_portfolio_selector_solve_instance(
         runsolver_watch_path.unlink(missing_ok=True)
     print(f"Sparkle computing features of instance {instance_files_str} done!")
 
-    predict_schedule_result_path = Path(
-        f"Tmp/predict_schedule_{tg.get_time_pid_random_string()}.predres")
-
     print("Sparkle portfolio selector predicting ...")
-    cmd_list = [gv.python_executable, gv.autofolio_exec_path, "--load",
-                gv.sparkle_algorithm_selector_path, "--feature_vec",
-                " ".join(map(str, feature_vector))]
-    process = subprocess.run(cmd_list,
-                             stdout=predict_schedule_result_path.open("w+"),
-                             stderr=gv.sparkle_err_path.open("w+"))
+    selector = gv.settings.get_general_sparkle_selector()
+    predict_schedule = selector.run(gv.sparkle_algorithm_selector_path, feature_vector)
 
-    if process.returncode != 0:
-        # AutoFolio Error: "TypeError: Argument 'placement' has incorrect type"
-        print(f"Error getting predict schedule! See {gv.sparkle_err_path} for output.")
-        sys.exit(process.returncode)
+    if predict_schedule is None:
+        # Selector Failed to produce prediction
+        sys.exit(-1)
     print("Predicting done!")
 
-    print(predict_schedule_result_path.open("r").read())
-    list_predict_schedule = get_list_predict_schedule_from_file(
-        predict_schedule_result_path)
-    sfh.rmfiles([predict_schedule_result_path, gv.sparkle_err_path])
-
-    for pred in list_predict_schedule:
-        solver = Solver(Path(pred[0]))
-        cutoff_time = pred[1]
-        print(f"Calling solver {solver.name} with "
-              f"time budget {cutoff_time} for solving ...")
+    for solver, cutoff_time in predict_schedule:
+        solver = Solver(Path(solver))
+        print(f"Calling solver {solver.name} with time budget {cutoff_time} ...")
         flag_solved = call_solver_solve_instance_within_cutoff(
             solver, instance_path, cutoff_time, performance_data_csv_path)
         print(f"Calling solver {solver.name} done!")

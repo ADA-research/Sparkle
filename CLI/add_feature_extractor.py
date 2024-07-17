@@ -6,7 +6,7 @@ import shutil
 import argparse
 from pathlib import Path
 
-from sparkle.platform import file_help as sfh, settings_help
+from sparkle.platform import file_help as sfh, settings_objects
 import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from CLI.compute_features import compute_features
@@ -36,7 +36,7 @@ def parser_function() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     # Initialise settings
     global settings
-    gv.settings = settings_help.Settings()
+    gv.settings = settings_objects.Settings()
 
     # Log command call
     sl.log_command(sys.argv)

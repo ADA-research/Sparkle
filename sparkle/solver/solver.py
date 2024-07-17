@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """File to handle a solver and its directories."""
 
 from __future__ import annotations
