@@ -6,6 +6,7 @@ import sys
 import subprocess
 from pathlib import Path
 from tools.slurm_parsing import parse_commandline_dict
+from sparkle.types import SolverStatus
 
 # Convert the argument of the target_algorithm script to dictionary
 args = parse_commandline_dict(sys.argv[1:])
@@ -55,14 +56,14 @@ except Exception as ex:
 # Convert Solver output to dictionary for configurator target algorithm script
 output_str = solver_call.stdout.decode()
 
-status = r'CRASHED'
+status = SolverStatus.CRASHED
 for line in output_str.splitlines():
     line = line.strip()
     if (line == r's SATISFIABLE') or (line == r's UNSATISFIABLE'):
-        status = r'SUCCESS'
+        status = SolverStatus.SUCCESS
         break
     elif line == r's UNKNOWN':
-        status = r'TIMEOUT'
+        status = SolverStatus.TIMEOUT
         break
 
 if specifics == 'rawres':
@@ -78,7 +79,7 @@ if specifics == 'rawres':
     with raw_result_path.open('w') as outfile:
         outfile.write(str(solver_cmd + params) + "\n" + output_str)
 
-outdir = {"status": status,
+outdir = {"status": status.value,
           "quality": 0,
           "solver_call": solver_cmd + params}
 

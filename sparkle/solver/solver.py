@@ -11,8 +11,7 @@ from pathlib import Path
 import subprocess
 from tools import runsolver_parsing
 import pcsparser
-from sparkle.types import SparkleCallable
-from sparkle.types.solver_status import SolverStatus
+from sparkle.types import SparkleCallable, SolverStatus
 
 
 class Solver(SparkleCallable):
@@ -177,7 +176,7 @@ class Solver(SparkleCallable):
     def parse_solver_output(solver_output: str,
                             runsolver_configuration: list[str] = None,
                             cwd: Path = None) -> dict[str, Any]:
-        """TODO"""
+        """Parse the output of the solver."""
         if runsolver_configuration is not None:
             parsed_output = runsolver_parsing.get_solver_output(runsolver_configuration,
                                                                 solver_output,

@@ -5,7 +5,7 @@ import ast
 import subprocess
 from pathlib import Path
 from tools.general import get_time_pid_random_string
-
+from sparkle.types import SolverStatus
 
 # Convert the argument of the target_algorithm script to dictionary
 args = ast.literal_eval(sys.argv[1])
@@ -52,14 +52,14 @@ output_list = solver_call.stdout.decode().splitlines()
 
 Path(runsolver_watch_data_path).unlink(missing_ok=True)
 
-status = r'CRASHED'
+status = SolverStatus.CRASHED
 for line in output_list:
     line = line.strip()
     if (line == r's SATISFIABLE') or (line == r's UNSATISFIABLE'):
-        status = r'SUCCESS'
+        status = SolverStatus.SUCCESS
         break
     elif line == r's UNKNOWN':
-        status = r'TIMEOUT'
+        status = SolverStatus.TIMEOUT
         break
 
 if specifics == 'rawres':
@@ -68,7 +68,7 @@ if specifics == 'rawres':
         for line in output_list:
             outfile.write(line)
 
-outdir = {"status": status,
+outdir = {"status": status.value,
           "solver_call": runsolver_call + params,
           "raw_output": output_list}
 

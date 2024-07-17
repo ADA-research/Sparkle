@@ -7,6 +7,7 @@ import sys
 import subprocess
 from pathlib import Path
 from tools.slurm_parsing import parse_commandline_dict
+from sparkle.types import SolverStatus
 
 # Convert the arguments to a dictionary
 args = parse_commandline_dict(sys.argv[1:])
@@ -54,22 +55,22 @@ except Exception as ex:
 output_str = solver_call.stdout.decode()
 
 solution_quality = sys.maxsize
-status = 'CRASHED'
+status = SolverStatus.CRASHED
 
 for line in output_str.splitlines():
     words = line.strip().split()
     if len(words) <= 0:
         continue
-    if status != "SUCCESS" and len(words) == 18 and words[1] == 'We' and words[2] == 'recommend':
+    if status != SolverStatus.SUCCESS and len(words) == 18 and words[1] == 'We' and words[2] == 'recommend':
         # First output line is normal, probably no crash
         # If no actual solution is found, we probably reach the cutoff time before finding a solution
-        status = 'TIMEOUT'
+        status = SolverStatus.TIMEOUT
     words[1].replace('.','',1).isdigit()
     if len(words) == 4 and words[1].replace('.','',1).isdigit() and words[2].replace('.','',1).isdigit() and words[3].replace('.','',1).isdigit():
         temp_solution_quality = int(words[2])
         if temp_solution_quality < solution_quality:
             solution_quality = temp_solution_quality
-            status = 'SUCCESS'
+            status = SolverStatus.SUCCESS
 
 if specifics == "rawres":
     tmp_directory = Path("tmp/")
@@ -83,7 +84,7 @@ if specifics == "rawres":
     with raw_result_path.open("w") as outfile:
         outfile.write(output_str)
 
-outdir = {"status": status,
+outdir = {"status": status.value,
           "quality": solution_quality,
           "solver_call": solver_cmd + params}
 
