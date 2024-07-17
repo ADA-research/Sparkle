@@ -282,8 +282,8 @@ def selection_report_variables(
     latex_dict["featureComputationCutoffTime"] = str(extractor_cutoff)
     latex_dict["performanceComputationCutoffTime"] = str(cutoff)
     rank_list_perfect = scmch.compute_perfect_selector_marginal_contribution(train_data)
-    rank_list_actual = scmch.compute_actual_selector_marginal_contribution(train_data,
-                                                                           feature_data)
+    rank_list_actual = scmch.compute_actual_selector_marginal_contribution(
+        train_data, feature_data, performance_cutoff=cutoff)
     latex_dict["solverPerfectRankingList"] = solver_rank_list_latex(rank_list_perfect)
     latex_dict["solverActualRankingList"] = solver_rank_list_latex(rank_list_actual)
     latex_dict["PARRankingList"] = get_par_ranking_list(train_data, objective)

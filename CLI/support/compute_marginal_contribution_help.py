@@ -82,7 +82,7 @@ def compute_actual_performance_for_instance(
         performance_data: PerformanceDataFrame,
         minimise: bool,
         objective_type: PerformanceMeasure,
-        performance_cutoff: float) -> tuple[float, bool]:
+        performance_cutoff: float = None) -> tuple[float, bool]:
     """Return the actual performance of the selector on a given instance.
 
     Args:
@@ -123,12 +123,10 @@ def compute_actual_performance_for_instance(
                 break
             # 3. Else, we set the failed solver to the cutoff time
             performance_list[-1] = schedule_cutoff
-
+            performance = sum(performance_list)
             # 4. If we have exceeded cutoff_time, we are done
-            if sum(performance_list) > performance_cutoff:
+            if performance_cutoff is not None and  performance > performance_cutoff:
                 break
-
-        performance = sum(performance_list)
     else:
         # Minimum or maximum of predicted solvers
         for solver, _ in predict_schedule:
@@ -169,8 +167,7 @@ def compute_actual_selector_marginal_contribution(
               "from file instead! Use --recompute to force recomputation.")
         return ast.literal_eval(actual_margi_cont_path.open().read())
 
-    print("In this calculation, cutoff time for each run is "
-          f"{gv.settings.get_general_target_cutoff_time()} seconds")
+    print(f"In this calculation, cutoff is {performance_cutoff} seconds")
 
     # Compute performance of actual selector
     # NOTE: Should we recompute for all solvers?
