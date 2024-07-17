@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 import runrunner as rrr
-from runrunner.base import Runner, Status
+from runrunner.base import Runner, Status, Run
 
 from sparkle.solver import Extractor
 import global_variables as gv
@@ -35,7 +35,7 @@ def parser_function() -> argparse.ArgumentParser:
 def compute_features(
         feature_data_csv_path: Path,
         recompute: bool,
-        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+        run_on: Runner = Runner.SLURM) -> Run:
     """Compute features for all instance and feature extractor combinations.
 
     A RunRunner run is submitted for the computation of the features.

@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from pandas import DataFrame
 
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
 import runrunner as rrr
 
 import global_variables as gv
@@ -101,9 +101,9 @@ def apply_settings_from_args(args: argparse.Namespace) -> None:
 def run_after(solver: Path,
               train_set: InstanceSet,
               test_set: InstanceSet,
-              dependency: list[rrr.SlurmRun | rrr.LocalRun],
+              dependency: list[Run],
               command: CommandName,
-              run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+              run_on: Runner = Runner.SLURM) -> Run:
     """Add a command to run after configuration to RunRunner queue.
 
     Args:

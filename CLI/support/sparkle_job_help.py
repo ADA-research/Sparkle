@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 import json
 
-from runrunner import SlurmRun
+from runrunner.slurm import SlurmRun
 from runrunner.base import Status
 from tabulate import tabulate
 

@@ -7,7 +7,7 @@ import argparse
 from pathlib import PurePath, Path
 
 import runrunner as rrr
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
 
 import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
@@ -45,7 +45,7 @@ def running_solvers_performance_data(
         performance_data_csv_path: Path,
         num_job_in_parallel: int,
         rerun: bool = False,
-        run_on: Runner = Runner.SLURM) -> rrr.SlurmRun | rrr.LocalRun:
+        run_on: Runner = Runner.SLURM) -> Run:
     """Run the solvers for the performance data.
 
     Parameters

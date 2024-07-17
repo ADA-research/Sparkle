@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 import runrunner as rrr
+from runrunner.slurm import SlurmRun
 from runrunner.base import Runner
 
 import global_variables as gv
@@ -179,7 +180,7 @@ def read_ablation_table(solver: Solver, train_set: InstanceSet,
 
 def submit_ablation(ablation_scenario_dir: Path,
                     test_set: InstanceSet = None,
-                    run_on: Runner = Runner.SLURM) -> list[rrr.SlurmRun]:
+                    run_on: Runner = Runner.SLURM) -> list[SlurmRun]:
     """Submit an ablation job.
 
     Args:
