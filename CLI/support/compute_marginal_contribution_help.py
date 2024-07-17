@@ -125,7 +125,7 @@ def compute_actual_performance_for_instance(
             performance_list[-1] = schedule_cutoff
             performance = sum(performance_list)
             # 4. If we have exceeded cutoff_time, we are done
-            if performance_cutoff is not None and  performance > performance_cutoff:
+            if performance_cutoff is not None and performance > performance_cutoff:
                 break
     else:
         # Minimum or maximum of predicted solvers
