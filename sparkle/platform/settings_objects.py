@@ -331,8 +331,7 @@ class Settings:
     def write_settings_ini(self: Settings, file_path: Path) -> None:
         """Write the settings to an INI file."""
         # Create needed directories if they don't exist
-        file_dir = file_path.parents[0]
-        file_dir.mkdir(parents=True, exist_ok=True)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         slurm_extra_section_options = None
         if self.__settings.has_section("slurm_extra"):
             # Slurm extra options are not written as a seperate section

@@ -160,21 +160,18 @@ def compute_actual_selector_marginal_contribution(
 
     Returns:
       A list of 2-tuples where every 2-tuple is of the form
-      (solver name, marginal contribution).
+        (solver name, marginal contribution, best_performance).
     """
     actual_margi_cont_path = gv.sparkle_marginal_contribution_actual_path
     # If the marginal contribution already exists in file, read it and return
     if not flag_recompute and actual_margi_cont_path.is_file():
         print("Marginal contribution for the actual selector already computed, reading "
               "from file instead! Use --recompute to force recomputation.")
-        rank_list = ast.literal_eval(actual_margi_cont_path.open().read())
-
-        return rank_list
+        return ast.literal_eval(actual_margi_cont_path.open().read())
 
     print("In this calculation, cutoff time for each run is "
           f"{gv.settings.get_general_target_cutoff_time()} seconds")
 
-    rank_list = []
     # Compute performance of actual selector
     # NOTE: Should we recompute for all solvers?
     print("Computing actual performance for portfolio selector with all solvers ...")
@@ -198,7 +195,8 @@ def compute_actual_selector_marginal_contribution(
 
     print("Actual performance for portfolio selector with all solvers is "
           f"{actual_selector_performance}")
-    print("Computing done!")
+
+    rank_list = []
     compare = operator.lt if minimise else operator.gt
     # Compute contribution per solver
     # NOTE: This could be parallelised
@@ -214,7 +212,11 @@ def compute_actual_selector_marginal_contribution(
         tmp_actual_portfolio_selector = (
             gv.sparkle_algorithm_selector_dir / f"without_{solver_name}"
             / f"{gv.sparkle_algorithm_selector_name}")
-        tmp_actual_portfolio_selector.parent.mkdir(parents=True)
+
+        if tmp_actual_portfolio_selector.exists():
+            tmp_actual_portfolio_selector.unlink()
+        else:
+            tmp_actual_portfolio_selector.parent.mkdir(parents=True, exist_ok=True)
 
         if tmp_performance_df.num_solvers >= 1:
             # 4. Construct the portfolio selector for this subset
@@ -250,7 +252,7 @@ def compute_actual_selector_marginal_contribution(
                   "to construct a portfolio without this solver.")
             marginal_contribution = 0.0
 
-        rank_list.append((solver, marginal_contribution))
+        rank_list.append((solver, marginal_contribution, tmp_asp))
         print(f"Marginal contribution (to Actual Selector) for solver {solver_name} is "
               f"{marginal_contribution}")
 
@@ -296,8 +298,7 @@ def compute_marginal_contribution(
         sys.exit(-1)
 
     if flag_compute_perfect:
-        print("Start computing each solver's marginal contribution "
-              "to perfect selector ...")
+        print("Computing each solver's marginal contribution to perfect selector ...")
         contribution_data = compute_perfect_selector_marginal_contribution(
             performance_data,
             aggregation_function,
@@ -309,9 +310,8 @@ def compute_marginal_contribution(
         print("Marginal contribution (perfect selector) computing done!")
 
     if flag_compute_actual:
-        print("Start computing each solver's marginal contribution "
-              "to actual selector ...")
-        rank_list = compute_actual_selector_marginal_contribution(
+        print("Start computing marginal contribution per Solver to actual selector...")
+        contribution_data = compute_actual_selector_marginal_contribution(
             performance_data,
             feature_data,
             aggregation_function,
@@ -320,12 +320,8 @@ def compute_marginal_contribution(
             flag_recompute=flag_recompute,
             selector_timeout=selector_timeout
         )
-        print("******")
-        print("Solver ranking list via marginal contribution (Margi_Contr) with regards "
-              "to actual selector")
-        for i, rank in enumerate(rank_list):
-            solver = rank[0]
-            marginal_contribution = rank[1]
-            print(f"#{i+1}: {Path(solver).name}\t Margi_Contr: {marginal_contribution}")
-        print("******")
+        table = tabulate.tabulate(
+            contribution_data,
+            headers=["Solver", "Marginal Contribution", "Best Performance"],)
+        print(table, "\n")
         print("Marginal contribution (actual selector) computing done!")

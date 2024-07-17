@@ -19,7 +19,7 @@ from sparkle.platform import \
 from sparkle.solver import Solver
 from sparkle.solver.validator import Validator
 from sparkle.instance import InstanceSet
-from sparkle.structures import PerformanceDataFrame
+from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 
 from CLI.help import command_help as ch
@@ -136,6 +136,7 @@ if __name__ == "__main__":
 
         print("Generating report for selection...")
         train_data = PerformanceDataFrame(gv.performance_data_csv_path)
+        feature_data = FeatureDataFrame(gv.feature_data_csv_path)
         train_data.penalise(gv.settings.get_general_target_cutoff_time(),
                             gv.settings.get_penalised_time())
         test_data = None
@@ -153,7 +154,7 @@ if __name__ == "__main__":
                                        gv.sparkle_report_bibliography_path,
                                        gv.extractor_dir,
                                        actual_portfolio_selector_path,
-                                       gv.feature_data_csv_path,
+                                       feature_data,
                                        train_data,
                                        gv.settings.get_general_extractor_cutoff_time(),
                                        gv.settings.get_general_target_cutoff_time(),

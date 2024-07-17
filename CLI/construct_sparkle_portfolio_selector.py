@@ -47,6 +47,8 @@ def construct_sparkle_portfolio_selector(selector_path: Path,
                                          selector_timeout: int = None) -> None:
     """Create the Sparkle portfolio selector.
 
+    Applies several checks before executing, such as missing data imputation.
+
     Args:
         selector_path: Portfolio selector path.
         performance_data: Performance data.
