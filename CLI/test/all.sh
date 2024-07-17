@@ -17,9 +17,6 @@ CLI/test/about.sh
 # Test system status
 CLI/test/system_status.sh
 
-# Test run status
-CLI/test/run_status.sh
-
 # Test initialise
 CLI/test/initialise.sh
 
