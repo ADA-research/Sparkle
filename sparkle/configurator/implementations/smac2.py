@@ -11,7 +11,8 @@ import operator
 import fcntl
 import glob
 
-from runrunner import add_to_queue, Runner, Run
+import runrunner as rrr
+from runrunner import Runner, Run
 
 from sparkle.configurator.configurator import Configurator
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
@@ -87,7 +88,7 @@ class SMAC2(Configurator):
             parallel_jobs = max(num_parallel_jobs,
                                 self.scenario.number_of_runs)
 
-        configuration_run = add_to_queue(
+        configuration_run = rrr.add_to_queue(
             runner=run_on,
             cmd=cmds,
             name=CommandName.CONFIGURE_SOLVER,
