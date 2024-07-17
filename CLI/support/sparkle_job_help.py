@@ -146,7 +146,8 @@ def wait_for_all_jobs() -> None:
         priority = {Status.COMPLETED: 0, Status.RUNNING: 1, Status.WAITING: 2}
         while len(running_jobs) > 0:
             # Information to be printed to the table
-            information = [["RunId", "Name", "Status", "Dependencies", "Finished Jobs"]]
+            information = [["RunId", "Name", "Partition",
+                            "Status", "Dependencies", "Finished Jobs"]]
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
                             or run.status == Status.RUNNING]
@@ -164,6 +165,7 @@ def wait_for_all_jobs() -> None:
                 information.append(
                     [job.run_id,
                      job.name,
+                     job.partition,
                      status_text,
                      "None" if len(job.dependencies) == 0
                         else ", ".join(job.dependencies),
