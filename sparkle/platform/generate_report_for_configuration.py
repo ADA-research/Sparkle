@@ -602,3 +602,69 @@ def generate_report_for_configuration(solver: Solver,
                          "Sparkle_Report_for_Configuration",
                          variables_dict)
     sl.add_output(str(target_path), "Sparkle Configuration report")
+
+
+def get_validation_dict(solver: Solver, instance_set: InstanceSet, config: str,
+                         validator: Validator, cutoff_time: int, penalty_multiplier: int,
+                         objective: SparkleObjective):
+    res_default = validator.get_validation_results(
+            solver, instance_set, config="")
+    res_conf = validator.get_validation_results(
+        solver, instance_set, config=config)
+
+    # Convert to dictionary format
+    default_res_dict = {
+        "solver": res_default[0][0],
+        "configuration": res_default[0][1],
+        "instance_set": res_default[0][2],
+        "results": []
+    }
+    for res in res_default:
+        default_res_dict["results"].append(
+            {
+                "instance": res[3],
+                "status": res[4],
+                "quality": res[5],
+                "runtime": res[6]
+                }
+        )
+
+    configured_res_dict = {
+        "solver": res_conf[0][0],
+        "configuration": res_conf[0][1],
+        "instance_set": res_conf[0][2],
+        "results": []
+    }
+    for res in res_conf:
+        configured_res_dict["results"].append(
+            {
+                "instance": res[3],
+                "status": res[4],
+                "quality": res[5],
+                "runtime": res[6]
+                }
+        )
+    
+    # Get PAR10 score
+    penalty = penalty_multiplier * cutoff_time
+    perf_par_train_conf = get_par_performance(res_conf,
+                                cutoff_time,
+                                penalty,
+                                objective)
+    perf_par_train_def = get_par_performance(res_default, 
+                                    cutoff_time,
+                                    penalty,
+                                    objective)
+    # Agregate results into dictionary
+    dict = {
+        "performance": {
+            "default (PAR10)": perf_par_train_def,
+            "configured (PAR10)": perf_par_train_conf
+        },
+        "results": {
+            "default": default_res_dict,
+            "configured": configured_res_dict
+        }
+    }
+
+    return dict

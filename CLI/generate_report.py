@@ -26,6 +26,7 @@ from sparkle.structures.performance_dataframe import PerformanceDataFrame
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 
 from CLI.help import command_help as ch
+from CLI.support import ablation_help as sah
 from CLI.initialise import check_for_initialise
 from CLI.help.nicknames import resolve_object_name
 
@@ -121,8 +122,11 @@ if __name__ == "__main__":
     flag_instance_set_train = instance_set_train is not None
     flag_instance_set_test = instance_set_test is not None
 
-    # Reporting for algorithm selection
+    report = {}
+    report["solver"] = solver
+
     if selection or test_case_dir is not None:
+        # Reporting for algorithm selection
         performance_measure =\
             gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
         if performance_measure == PerformanceMeasure.QUALITY_ABSOLUTE_MAXIMISATION or \
@@ -138,9 +142,6 @@ if __name__ == "__main__":
             sys.exit(-1)
 
         print("Generating report for selection...")
-        status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(th.ReportType.ALGORITHM_SELECTION)
-        status_info.save()
         train_data = PerformanceDataFrame(gv.performance_data_csv_path)
         train_data.penalise(gv.settings.get_general_target_cutoff_time(),
                             gv.settings.get_penalised_time())
@@ -152,13 +153,19 @@ if __name__ == "__main__":
                 test_case_path / "sparkle_performance_data.csv")
             test_data.penalise(gv.settings.get_general_target_cutoff_time(),
                                gv.settings.get_penalised_time())
-        actual_portfolio_selector_path = gv.sparkle_algorithm_selector_path
+        
+        settings_dict = {}
+        settings_dict["performance_measure"] = performance_measure
+        settings_dict["general_extractor_cutoff_time"] = gv.settings.get_general_extractor_cutoff_time()
+        settings_dict["target_cutoff_time"] = gv.settings.get_general_target_cutoff_time()
+        settings_dict["penalised_time"] = gv.settings.get_penalised_time()
+        report["settings"] = settings_dict
         sgfs.generate_report_selection(gv.selection_output_analysis,
                                        gv.sparkle_latex_dir,
                                        "template-Sparkle-for-selection.tex",
                                        gv.sparkle_report_bibliography_path,
                                        gv.extractor_dir,
-                                       actual_portfolio_selector_path,
+                                       gv.sparkle_algorithm_selector_path,
                                        gv.feature_data_csv_path,
                                        train_data,
                                        gv.settings.get_general_extractor_cutoff_time(),
@@ -169,14 +176,9 @@ if __name__ == "__main__":
             print("Report generated ...")
         else:
             print("Report for test generated ...")
-        status_info.delete()
 
     elif gv.latest_scenario().get_latest_scenario() == Scenario.PARALLEL_PORTFOLIO:
         # Reporting for parallel portfolio
-        status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(th.ReportType.PARALLEL_PORTFOLIO)
-        status_info.save()
-
         sgrfpph.generate_report_parallel_portfolio(
             parallel_portfolio_path,
             gv.parallel_portfolio_output_analysis,
@@ -187,11 +189,7 @@ if __name__ == "__main__":
             gv.settings.get_penalised_time(),
             pap_instance_set)
         print("Parallel portfolio report generated ...")
-        status_info.delete()
     else:
-        status_info = GenerateReportStatusInfo()
-        status_info.set_report_type(th.ReportType.ALGORITHM_CONFIGURATION)
-        status_info.save()
         # Reporting for algorithm configuration
         if solver is None:
             print("Error! No Solver found for configuration report generation.")
@@ -228,19 +226,73 @@ if __name__ == "__main__":
             sys.exit(-1)
         # Extract config scenario data for report, but this should be read from the
         # scenario file instead as we can't know wether features were used or not now
-        number_of_runs = gv.settings.get_config_number_of_runs()
+
+        # Collect scenario settings
+        settings_dict = {}
+        number_of_runs =  gv.settings.get_config_number_of_runs()
         solver_calls = gv.settings.get_config_solver_calls()
         cpu_time = gv.settings.get_config_cpu_time()
         wallclock_time = gv.settings.get_config_wallclock_time()
-        cutoff_time = gv.settings.get_general_target_cutoff_time()
-        cutoff_length = gv.settings.get_configurator_target_cutoff_length()
+        if number_of_runs is not None:
+            settings_dict["number_of_runs"] =  number_of_runs
+        if solver_calls is not None:
+            settings_dict["solver_calls"] = solver_calls
+        if cpu_time is not None:
+            settings_dict["cpu_time"] = cpu_time
+        if wallclock_time is not None:
+            settings_dict["wallclock_time"] = wallclock_time
+
+        settings_dict["cutoff_time"] = gv.settings.get_general_target_cutoff_time()
+        settings_dict["cutoff_length"] =\
+            gv.settings.get_configurator_target_cutoff_length()
+        settings_dict["performance_measure"] =\
+            gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+        report["scenario"] = settings_dict
+
+        # Set up configurator scenario
+        # Warning: This code can't be removed, the object is cached and then used in sgrfch
+        configurator = gv.settings.get_general_sparkle_configurator()
         sparkle_objective =\
             gv.settings.get_general_sparkle_objectives()[0]
-        configurator = gv.settings.get_general_sparkle_configurator()
         configurator.scenario = ConfigurationScenario(
             solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
-            wallclock_time, cutoff_time, cutoff_length, sparkle_objective)
+            wallclock_time, settings_dict["cutoff_time"], settings_dict["cutoff_length"], sparkle_objective)
         configurator.scenario._set_paths(configurator.output_path)
+
+        # Get training results
+        objective = configurator.scenario.sparkle_objective
+        _, opt_config = configurator.get_optimal_configuration(
+            solver, instance_set_train, objective.PerformanceMeasure)
+        penalty_multiplier = gv.settings.get_general_penalty_multiplier()
+        
+        training_dict = sgrfch.get_validation_dict(solver, instance_set_train, opt_config, validator, 
+                                   settings_dict["cutoff_time"], penalty_multiplier, 
+                                   objective)
+
+        report["best_config"] = opt_config
+        report["training"] = training_dict
+        
+        # Get test results
+        if flag_instance_set_test:
+            result_dict = sgrfch.get_validation_dict(solver, instance_set_test, opt_config, validator, 
+                                   settings_dict["cutoff_time"], penalty_multiplier, 
+                                   objective)
+            report["test"] = result_dict
+
+            if sgrfch.get_ablation_bool(solver, instance_set_train, instance_set_test):
+                res_ablation = sah.read_ablation_table(solver, instance_set_train, instance_set_test)
+                ablation_list = []
+                # Skip first entry (header)
+                for res in res_ablation[1:]:
+                    ablation_list.append({
+                        "round": res[0],
+                        "flipped_parameter": res[1],
+                        "source_value": res[2],
+                        "target_value": res[3],
+                        "validation_result": res[4]
+                    })
+                report["ablation"] = ablation_list
+
         sgrfch.generate_report_for_configuration(
             solver,
             gv.settings.get_general_sparkle_configurator(),
@@ -256,7 +308,7 @@ if __name__ == "__main__":
             ablation=args.flag_ablation
         )
 
-        status_info.delete()
-
     # Write used settings to file
     gv.settings.write_used_settings()
+
+    print(report)
