@@ -49,7 +49,7 @@ output=$(CLI/validate_configured_vs_default.py --solver $solver_path --instance-
 output_true="Running validation done!"
 if [[ $slurm_available =~ "${slurm_true}" ]];
 then
-	output_true="RunRunner Submitted a run to Slurm (job "
+	output_true="[RunRunner] Submitted a run to Slurm (job "
 fi
 
 if [[ $output =~ "${output_true}" ]];
