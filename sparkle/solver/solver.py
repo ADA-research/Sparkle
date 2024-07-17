@@ -176,7 +176,17 @@ class Solver(SparkleCallable):
     def parse_solver_output(solver_output: str,
                             runsolver_configuration: list[str] = None,
                             cwd: Path = None) -> dict[str, Any]:
-        """Parse the output of the solver."""
+        """Parse the output of the solver.
+
+        Args:
+            solver_output: The output of the solver run which needs to be parsed
+            runsolver_configuration: The runsolver configuration to wrap the solver
+                with. If runsolver was not used this should be None.
+            cwd: Path where to execute. Defaults to self.raw_output_directory.
+
+        Returns:
+            Dictionary representing the parsed solver output
+        """
         if runsolver_configuration is not None:
             parsed_output = runsolver_parsing.get_solver_output(runsolver_configuration,
                                                                 solver_output,
