@@ -17,17 +17,17 @@ from runrunner.slurm import Status
 
 from CLI.help.reporting_scenario import Scenario
 from CLI.help import sparkle_logging as sl
-from sparkle.types.objective import PerformanceMeasure
 from CLI.help import global_variables as gv
-from sparkle.platform.settings_objects import Settings, SettingState
-from sparkle.solver import Solver
-from sparkle.instance import InstanceSet
 from CLI.help import command_help as sch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as ac
 from CLI.help.command_help import CommandName
-from tools.runsolver_parsing import get_runtime, get_status
 from CLI.help.nicknames import resolve_object_name
+from sparkle.types.objective import PerformanceMeasure
+from sparkle.platform.settings_objects import Settings, SettingState
+from sparkle.solver import Solver
+from sparkle.instance import InstanceSet
+from sparkle.tools.runsolver_parsing import get_runtime, get_status
 
 
 def run_parallel_portfolio(instances_set: InstanceSet,

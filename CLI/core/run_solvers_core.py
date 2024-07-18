@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from CLI.help import global_variables as gv
-import tools.general as tg
+import sparkle.tools.general as tg
 from sparkle.platform.settings_objects import Settings
 from CLI.support import run_solvers_help as srs
 from sparkle.solver import Solver

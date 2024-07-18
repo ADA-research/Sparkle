@@ -7,7 +7,7 @@ from pathlib import Path
 import zipfile
 
 from CLI.help import global_variables as gv
-from tools.general import get_time_pid_random_string
+from sparkle.tools.general import get_time_pid_random_string
 from sparkle.platform import file_help as sfh
 
 

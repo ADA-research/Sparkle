@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import fcntl
 
-import tools.general as tg
+import sparkle.tools.general as tg
 from sparkle.platform import file_help as sfh
 
 sat_verifier_path = Path("Components/Sparkle-SAT-verifier/SAT")

@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 from sparkle.solver import Solver
-from tools.runsolver_parsing import get_runtime
+from sparkle.tools.runsolver_parsing import get_runtime
 
 
 if __name__ == "__main__":
