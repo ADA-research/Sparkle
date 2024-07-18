@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 import math
 
-import sparkle_logging as sl
 from sparkle.platform import generate_report_for_selection as sgfs
 from CLI.support import ablation_help as sah
 from sparkle.solver.validator import Validator
@@ -601,4 +600,3 @@ def generate_report_for_configuration(solver: Solver,
                          target_path,
                          "Sparkle_Report_for_Configuration",
                          variables_dict)
-    sl.add_output(str(target_path), "Sparkle Configuration report")

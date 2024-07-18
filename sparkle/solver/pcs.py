@@ -3,8 +3,6 @@
 from pathlib import Path
 from sparkle.solver import Solver
 
-import sparkle_logging as sl
-
 
 def get_pcs_file_from_solver_directory(solver_directory: Path) -> Path:
     """Return the name of the PCS file in a solver directory.
@@ -91,7 +89,3 @@ def write_configuration_pcs(solver: Solver, config_str: str, tmp_path: Path) -> 
     with latest_configuration_pcs_path.open("w") as outfile:
         for element in pcs_file_out:
             outfile.write(str(element))
-    # Log output
-    sl.add_output(str(latest_configuration_pcs_path), "PCS file with configured "
-                  "algorithm parameters of the most recent configuration process "
-                  "as default values")

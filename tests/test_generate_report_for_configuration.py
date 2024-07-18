@@ -659,8 +659,6 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
                              return_value=value_dict)
     mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection."
                                         "generate_report", return_value=None)
-    mock_log = mocker.patch("sparkle_logging.add_output",
-                            return_value=None)
 
     sgrch.generate_report_for_configuration(solver,
                                             configurator,
@@ -677,7 +675,6 @@ def test_generate_report_for_configuration_train(mocker: MockFixture) -> None:
                                       configurator, validator, Path(),
                                       Path(), 1.0, 1, train_instance, None, True)
     mock_generate_report.assert_called_once()
-    mock_log.assert_called_once()
 
 
 def test_generate_report_for_configuration(mocker: MockFixture) -> None:
@@ -700,8 +697,6 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
                              return_value=value_dict)
     mock_generate_report = mocker.patch("sparkle.platform.generate_report_for_selection"
                                         ".generate_report", return_value=None)
-    mock_log = mocker.patch("sparkle_logging.add_output",
-                            return_value=None)
 
     sgrch.generate_report_for_configuration(solver,
                                             configurator,
@@ -719,4 +714,3 @@ def test_generate_report_for_configuration(mocker: MockFixture) -> None:
         gv.configuration_output_analysis, solver, configurator, validator,
         Path(), Path(), 1.0, 1, train_instance, test_instance, ablation)
     mock_generate_report.assert_called_once()
-    mock_log.assert_called_once()

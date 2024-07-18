@@ -12,7 +12,6 @@ import subprocess
 from sparkle.platform import file_help as sfh, tex_help as stex
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
-import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure, SparkleObjective
 
 
@@ -574,4 +573,3 @@ def generate_report_selection(target_path: Path,
                     target_path,
                     latex_report_filename,
                     dict_variable_to_value)
-    sl.add_output(str(target_path), "Sparkle portfolio selector report")

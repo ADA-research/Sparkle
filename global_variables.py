@@ -24,6 +24,7 @@ def latest_scenario() -> ReportingScenario:
         _latest_scenario = ReportingScenario()
     return _latest_scenario
 
+
 sparkle_tmp_path = Path("Tmp")
 
 sparkle_err_path = sparkle_tmp_path / "sparkle_log.err"

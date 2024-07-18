@@ -9,7 +9,6 @@ from typing import Callable
 import builtins
 import statistics
 
-import sparkle_logging as slog
 from sparkle.types.objective import SparkleObjective
 from sparkle.solver import Selector
 from sparkle.configurator.configurator import Configurator
@@ -319,14 +318,8 @@ class Settings:
 
     def write_used_settings(self: Settings) -> None:
         """Write the used settings to the default locations."""
-        # Write to general output directory
-        file_path_output = PurePath(Settings.DEFAULT_output / slog.caller_out_dir
-                                    / self.__settings_dir / self.__settings_file)
-        self.write_settings_ini(Path(file_path_output))
-
         # Write to latest settings file
-        file_path_latest = PurePath(self.__settings_dir / "latest.ini")
-        self.write_settings_ini(Path(file_path_latest))
+        self.write_settings_ini(self.__settings_dir / "latest.ini")
 
     def write_settings_ini(self: Settings, file_path: Path) -> None:
         """Write the settings to an INI file."""
@@ -343,8 +336,6 @@ class Settings:
         # Write the settings to file
         with file_path.open("w") as settings_file:
             self.__settings.write(settings_file)
-            # Log the settings file location
-            slog.add_output(str(file_path), "Settings used by Sparkle for this command")
         # Rebuild slurm extra if needed
         if slurm_extra_section_options is not None:
             self.__settings.add_section("slurm_extra")
