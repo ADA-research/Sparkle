@@ -27,7 +27,7 @@ class SolutionVerifier(Enum):
     @staticmethod
     def from_str(verifier: str) -> SolutionVerifier:
         """Return a given str as SolutionVerifier."""
-        if verifier == "NONE":
+        if verifier == "NONE":       
             verifier = SolutionVerifier.NONE
         elif verifier == "SAT":
             verifier = SolutionVerifier.SAT
