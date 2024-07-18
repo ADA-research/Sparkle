@@ -17,5 +17,4 @@ setup(name="SparkleAI",
       long_description_content_type="text/markdown",
       packages=find_packages(exclude=["tests"]),
       include_package_data=True,
-      #data_files=["Components"],
       entry_points={"console_scripts": ["sparkle=sparkle.cli:main"], },)
