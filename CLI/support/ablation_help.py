@@ -7,8 +7,7 @@ import subprocess
 from pathlib import Path
 
 import runrunner as rrr
-from runrunner.slurm import SlurmRun
-from runrunner.base import Runner
+from runrunner.base import Runner, Run
 
 import global_variables as gv
 
@@ -139,7 +138,7 @@ def create_instance_file(instance_set: InstanceSet, ablation_scenario_dir: str,
 
 def check_for_ablation(solver: Solver, train_set: InstanceSet,
                        test_set: InstanceSet) -> bool:
-    """Run a solver on an instance, only for internal calls from Sparkle."""
+    """Checks if ablation has terminated successfully."""
     scenario_dir = get_ablation_scenario_directory(solver, train_set,
                                                    test_set, exec_path=False)
     path = Path(scenario_dir, "ablationValidation.txt")
@@ -180,7 +179,7 @@ def read_ablation_table(solver: Solver, train_set: InstanceSet,
 
 def submit_ablation(ablation_scenario_dir: Path,
                     test_set: InstanceSet = None,
-                    run_on: Runner = Runner.SLURM) -> list[SlurmRun]:
+                    run_on: Runner = Runner.SLURM) -> list[Run]:
     """Submit an ablation job.
 
     Args:
@@ -189,7 +188,7 @@ def submit_ablation(ablation_scenario_dir: Path,
         run_on: Determines to which RunRunner queue the job is added
 
     Returns:
-        A (potential empty) list of SlurmJobs. Empty when running locally.
+        A  list of Run objects. Empty when running locally.
     """
     # This script sumbits 4 jobs: Normal, normal callback, validation, validation cb
     # The callback is nothing but a copy script from Albation/scenario/DIR/log to
@@ -214,8 +213,7 @@ def submit_ablation(ablation_scenario_dir: Path,
     dependencies = []
     if run_on == Runner.LOCAL:
         run_ablation.wait()
-    else:
-        dependencies.append(run_ablation)
+    dependencies.append(run_ablation)
 
     # 2. Submit intermediate actions (copy path from log)
     log_source = "log/ablation-run1234.txt"
@@ -237,8 +235,7 @@ def submit_ablation(ablation_scenario_dir: Path,
 
     if run_on == Runner.LOCAL:
         run_cb.wait()
-    else:
-        dependencies.append(run_cb)
+    dependencies.append(run_cb)
 
     # 3. Submit ablation validation run when nessesary, repeat process for the test set
     if test_set is not None:
@@ -258,8 +255,7 @@ def submit_ablation(ablation_scenario_dir: Path,
 
         if run_on == Runner.LOCAL:
             run_ablation_validation.wait()
-        else:
-            dependencies.append(run_ablation_validation)
+        dependencies.append(run_ablation_validation)
 
         log_source = "log/ablation-validation-run1234.txt"
         ablation_path = "ablationValidation.txt"
@@ -281,7 +277,6 @@ def submit_ablation(ablation_scenario_dir: Path,
 
         if run_on == Runner.LOCAL:
             run_v_cb.wait()
-        else:
-            dependencies.append(run_v_cb)
+        dependencies.append(run_v_cb)
 
     return dependencies
