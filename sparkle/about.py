@@ -13,4 +13,4 @@ authors = ["Koen van der Blom",
            ]
 contact = "sparkle@aim.rwth-aachen.de"
 
-about_str = f"{name}-{version}"
+about_str = f"{name}-{version}"      
