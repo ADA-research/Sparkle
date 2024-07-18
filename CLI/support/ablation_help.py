@@ -9,7 +9,7 @@ from pathlib import Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
-import global_variables as gv
+from CLI.help import global_variables as gv
 
 from sparkle.configurator.implementations import SMAC2
 from CLI.help.command_help import CommandName

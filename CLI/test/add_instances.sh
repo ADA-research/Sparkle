@@ -17,7 +17,7 @@ CLI/initialise.py > /dev/null
 # Add instances
 instances_path="Examples/Resources/Instances/PTN"
 output_true="Adding instance set PTN done!"
-output_true_b="Removing Sparkle report Components/Sparkle-latex-generator/Sparkle_Report.pdf done!"
+output_true_b=""
 output=$(CLI/add_instances.py $instances_path | tail -1)
 
 if [[ $output == $output_true ]] || [[ $output == $output_true_b ]];

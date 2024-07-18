@@ -9,10 +9,10 @@ import ast
 from runrunner import Runner, Run
 
 from CLI.help.command_help import CommandName
+from CLI.help import run_solver_help as rcsh
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from CLI.help import run_solver_help as rcsh
-from tools.runsolver_parsing import get_solver_output, get_solver_args
+from sparkle.tools.runsolver_parsing import get_solver_output, get_solver_args
 
 
 class Validator():

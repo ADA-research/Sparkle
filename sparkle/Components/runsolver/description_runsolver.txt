@@ -1,0 +1,6 @@
+Source: https://www.cril.univ-artois.fr/~roussel/runsolver/
+Version: 3.4.0
+Authors: Roussel
+Paper: Roussel 2011 - Controlling a Solver Execution with the runsolver Tool
+License: GPLv3
+License location: runsolver/src/LICENSE-GPL-3.0.txt

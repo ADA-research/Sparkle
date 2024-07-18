@@ -6,7 +6,7 @@ import sys
 import ast
 import subprocess
 from pathlib import Path
-from tools.general import get_time_pid_random_string
+from sparkle.tools.general import get_time_pid_random_string
 
 
 # Convert the argument of the target_algorithm script to dictionary

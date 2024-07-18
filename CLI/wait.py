@@ -4,11 +4,11 @@
 import sys
 import argparse
 
-import CLI.help.sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from CLI.support import sparkle_job_help as sjh
 from CLI.help.command_help import CommandName
 from CLI.help import argparse_custom as ac
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
 
 

@@ -1,0 +1,16 @@
+Verifiers are getting passed the instance file name as first argument
+and the solver output file name as second argument.
+
+Verifiers are supposed to write a textual (ASCII) integer result code at the end of their
+output after a newline '\n' character. There must not (!) be any other characters
+(including newline characters etc.) after the integer result code.
+
+Example: "some output ...\nother output\n124332" - 124332 will be the result code.
+
+All result codes that begin with a decimal '1' are interpreted as certificates for 'correct'
+answers by the EDACC GUI application and the Web Frontend.
+
+The whole output of the verifier will get saved in the verifierOutput column, its exit code
+in the verifierExitCode column.
+
+Please see the provided CNF-Satisifiability verifier for a full example.

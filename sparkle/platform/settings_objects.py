@@ -55,7 +55,8 @@ class Settings:
     # Constant default values
     DEFAULT_general_sparkle_objective = SparkleObjective("RUNTIME:PAR10")
     DEFAULT_general_sparkle_configurator = cim.SMAC2.__name__
-    DEFAULT_general_sparkle_selector = Path("Components/AutoFolio/scripts/autofolio")
+    DEFAULT_general_sparkle_selector =\
+        Path("sparkle/Components/AutoFolio/scripts/autofolio")
     DEFAULT_general_solution_verifier = SolutionVerifier.NONE
     DEFAULT_general_target_cutoff_time = 60
     DEFAULT_general_penalty_multiplier = 10

@@ -2,8 +2,8 @@
 
 from pathlib import Path, PurePath
 
-import CLI.help.sparkle_logging as sl
-import global_variables as gv
+from CLI.help import sparkle_logging as sl
+from CLI.help import global_variables as gv
 
 
 def test__update_caller() -> None:

@@ -6,7 +6,7 @@ import shlex
 import ast
 from pathlib import Path
 import subprocess
-from tools import runsolver_parsing
+from sparkle.tools import runsolver_parsing
 import pcsparser
 from sparkle.types import SparkleCallable
 

@@ -3,7 +3,7 @@
 """Execute Sparkle portfolio, only for internal calls from Sparkle."""
 import argparse
 
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
 from CLI.support import run_portfolio_selector_help as srpsh
 

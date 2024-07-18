@@ -6,7 +6,7 @@ import time
 import sys
 import subprocess
 from pathlib import Path
-from tools.slurm_parsing import parse_commandline_dict
+from sparkle.tools.slurm_parsing import parse_commandline_dict
 
 # Convert the arguments to a dictionary
 args = parse_commandline_dict(sys.argv[1:])

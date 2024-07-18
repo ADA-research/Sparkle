@@ -10,7 +10,7 @@ from typing import Callable
 from statistics import mean
 import tabulate
 
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.construct_sparkle_portfolio_selector import construct_sparkle_portfolio_selector
 from sparkle.types.objective import PerformanceMeasure

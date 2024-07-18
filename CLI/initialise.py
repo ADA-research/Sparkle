@@ -11,8 +11,8 @@ from CLI.help import snapshot_help as srh
 from CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-import global_variables as gv
-import CLI.help.sparkle_logging as sl
+from CLI.help import global_variables as gv
+from CLI.help import sparkle_logging as sl
 
 
 def parser_function() -> argparse.ArgumentParser:

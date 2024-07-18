@@ -5,11 +5,11 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
-import global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
-import CLI.help.sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
 from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac

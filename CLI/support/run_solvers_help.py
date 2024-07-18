@@ -4,12 +4,12 @@
 from __future__ import annotations
 from pathlib import Path
 
-import global_variables as gv
-import tools.general as tg
+from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import SolutionVerifier
 from sparkle.solver import Solver
 from sparkle.solver import sat_help as sh
-from tools.runsolver_parsing import handle_timeouts
+import sparkle.tools.general as tg
+from sparkle.tools.runsolver_parsing import handle_timeouts
 
 
 def run_solver_on_instance_and_process_results(

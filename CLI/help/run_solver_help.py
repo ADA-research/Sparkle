@@ -9,12 +9,12 @@ import runrunner as rrr
 from runrunner.base import Runner, Run
 from runrunner.slurm import SlurmRun
 
-import global_variables as gv
-import tools.general as tg
+from CLI.help import global_variables as gv
 from CLI.help.command_help import CommandName
+import sparkle.tools.general as tg
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet
-from tools.runsolver_parsing import get_solver_output
+from sparkle.tools.runsolver_parsing import get_solver_output
 
 
 def call_solver(
