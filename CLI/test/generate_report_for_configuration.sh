@@ -12,7 +12,7 @@
 #SBATCH --nodes=1
 
 # Settings
-sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
 
 # Prepare for test
 examples_path="Examples/Resources/"
@@ -25,7 +25,7 @@ solver_src_path="${examples_path}${solver_path}"
 
 scenario_path="Output/latest_scenario.ini"
 scenario_tmp="${scenario_path}_tmp"
-scenario_test="CLI/test/test_files/latest_scenario.ini"
+scenario_test="CLI/test/test_files/Settings/latest_scenario.ini"
 
 config_scenario_path="Output/Configuration/Raw_Data/SMAC2/scenarios/"
 validation_scenario_path="Output/Validation/"

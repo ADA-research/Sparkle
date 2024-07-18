@@ -44,7 +44,7 @@ extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revis
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
 
-sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null

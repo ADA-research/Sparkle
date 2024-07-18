@@ -15,7 +15,7 @@
 #SBATCH --nodes=1
 
 # Settings
-sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
 slurm_true="slurm"
 slurm_available=$(detect_slurm)
 

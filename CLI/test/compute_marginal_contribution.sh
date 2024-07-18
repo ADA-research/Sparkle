@@ -31,7 +31,7 @@ mv $performance_data_path $performance_data_tmp 2> /dev/null
 mv $selector_path $selector_tmp 2> /dev/null
 
 # Prepare for test
-settings_file="CLI/test/test_files/sparkle_settings.ini"
+settings_file="CLI/test/test_files/Settings/sparkle_settings.ini"
 instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
