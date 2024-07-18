@@ -36,7 +36,7 @@ mv $scenario_path $scenario_tmp 2> /dev/null # Save user scenario
 cp $scenario_test $scenario_path # Activate test scenario
 
 # Settings
-sparkle_test_settings_path="CLI/test/test_files/sparkle_settings.ini"
+sparkle_test_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
 
 # Instance and solver paths
 instances_path_train="Examples/Resources/Instances/PTN"

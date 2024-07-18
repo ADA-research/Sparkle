@@ -35,6 +35,7 @@ instances_path="Examples/Resources/Instances/PTN"
 extractor_path="Examples/Resources/Extractors/SAT-features-competition2012_revised_without_SatELite_sparkle"
 solverA_path="Examples/Resources/Solvers/CSCCSat/"
 solverB_path="Examples/Resources/Solvers/MiniSAT/"
+sparkle_settings_path="CLI/test/test_files/Settings/sparkle_settings.ini"
 
 CLI/initialise.py > /dev/null
 CLI/add_instances.py $instances_path > /dev/null
@@ -49,7 +50,7 @@ cp $selector_test $selector_path
 
 # Generate report
 output_true="Report generated ..."
-output=$(CLI/generate_report.py --selection | tail -1)
+output=$(CLI/generate_report.py --selection --settings-file $sparkle_settings_path | tail -1)
 
 if [[ $output == $output_true ]];
 then

@@ -24,23 +24,10 @@ def latest_scenario() -> ReportingScenario:
         _latest_scenario = ReportingScenario()
     return _latest_scenario
 
-
-python_executable = "python3"
-
-sparkle_global_output_dir = Path("Output")
-
-# Log that keeps track of which commands were executed and where output details can be
-# found
-sparkle_global_log_dir = Path("Log")
-sparkle_global_log_path = sparkle_global_output_dir / "sparkle.log"
-
 sparkle_tmp_path = Path("Tmp")
 
 sparkle_err_path = sparkle_tmp_path / "sparkle_log.err"
 
-sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
-
-snapshot_dir = Path("Snapshots")
 sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
 
 sparkle_algorithm_selector_name = "sparkle_portfolio_selector"
@@ -54,6 +41,13 @@ solver_dir = Path("Solvers")
 extractor_dir = Path("Extractors")
 feature_data_dir = Path("Feature_Data")
 performance_data_dir = Path("Performance_Data")
+snapshot_dir = Path("Snapshots")
+
+# Log that keeps track of which commands were executed and where output details can be
+# found
+sparkle_global_log_dir = Path("Log")
+sparkle_global_log_path = output_dir / "sparkle.log"
+sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
 
 sparkle_marginal_contribution_actual_path =\
     sparkle_algorithm_selector_dir / "marginal_contribution_actual.txt"
@@ -92,7 +86,6 @@ feature_data_csv_path = feature_data_dir / "sparkle_feature_data.csv"
 performance_data_csv_path = performance_data_dir / "sparkle_performance_data.csv"
 
 reference_list_dir = Path("Reference_Lists")
-instance_list_postfix = "_instance_list.txt"
 # NOTE: These data structures seem to be only written to / removed from but not read/used
 # NOTE: This could be a bug though, should test before removing stuff!
 extractor_nickname_list_path = reference_list_dir / "sparkle_extractor_nickname_list.txt"
