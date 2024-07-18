@@ -11,7 +11,7 @@ from CLI.help import snapshot_help as srh
 from CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
-import global_variables as gv
+import CLI.help.global_variables as gv
 import CLI.help.sparkle_logging as sl
 
 

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from sparkle.structures import PerformanceDataFrame
 from sparkle.platform.settings_objects import Settings
-import global_variables as gv
+import CLI.help.global_variables as gv
 
 global settings
 gv.settings = Settings()

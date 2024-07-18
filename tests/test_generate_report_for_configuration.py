@@ -6,7 +6,7 @@ from pathlib import Path
 from pytest_mock import MockFixture
 
 from sparkle.platform import generate_report_for_configuration as sgrch
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.platform.settings_objects import Settings
 from sparkle.configurator.configuration_scenario import ConfigurationScenario
 from sparkle.solver.validator import Validator

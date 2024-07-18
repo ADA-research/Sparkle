@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.structures import FeatureDataFrame
 import CLI.help.sparkle_logging as sl
 from CLI.help import command_help as ch

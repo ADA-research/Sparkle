@@ -4,7 +4,7 @@ import sys
 import argparse
 from pathlib import Path
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
 import CLI.help.sparkle_logging as sl

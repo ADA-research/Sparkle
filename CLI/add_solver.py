@@ -10,7 +10,7 @@ from pathlib import Path
 import runrunner as rrr
 
 from sparkle.platform import file_help as sfh
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.structures import PerformanceDataFrame
 from CLI.run_solvers import running_solvers_performance_data
 from sparkle.solver import Solver

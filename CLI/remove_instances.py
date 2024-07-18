@@ -6,7 +6,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from sparkle.instance import InstanceSet

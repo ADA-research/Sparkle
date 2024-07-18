@@ -6,7 +6,7 @@ from pathlib import Path
 
 from CLI.support import compute_marginal_contribution_help as scmch
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.platform.settings_objects import Settings
 
 from unittest.mock import patch

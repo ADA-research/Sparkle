@@ -9,7 +9,7 @@ from pathlib import PurePath
 from runrunner.base import Runner
 
 from CLI.support import ablation_help as sah
-import global_variables as gv
+import CLI.help.global_variables as gv
 import CLI.help.sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver

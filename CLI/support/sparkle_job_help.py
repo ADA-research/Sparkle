@@ -13,7 +13,7 @@ from tabulate import tabulate
 
 from CLI.help.command_help import CommandName
 from CLI.help.command_help import COMMAND_DEPENDENCIES
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.platform.cli_types import VerbosityLevel, TEXT
 
 

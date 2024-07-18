@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 import zipfile
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 from tools.general import get_time_pid_random_string
 from sparkle.platform import file_help as sfh
 

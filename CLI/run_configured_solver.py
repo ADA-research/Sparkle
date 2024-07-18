@@ -7,7 +7,7 @@ from pathlib import PurePath
 
 from runrunner.base import Runner
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 import CLI.help.sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import run_solver_help as srcsh

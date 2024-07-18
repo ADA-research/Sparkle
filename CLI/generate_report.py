@@ -5,7 +5,7 @@ import sys
 import argparse
 from pathlib import Path, PurePath
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch

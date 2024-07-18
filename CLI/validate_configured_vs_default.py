@@ -5,7 +5,7 @@ import sys
 import argparse
 from pathlib import PurePath
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.solver import pcs
 import CLI.help.sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState

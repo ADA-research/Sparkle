@@ -4,7 +4,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 import tools.general as tg
 from sparkle.platform.settings_objects import SolutionVerifier
 from sparkle.solver import Solver

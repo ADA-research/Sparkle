@@ -4,7 +4,7 @@
 import sys
 import argparse
 
-import global_variables as gv
+import CLI.help.global_variables as gv
 from CLI.support import compute_marginal_contribution_help as scmch
 import CLI.help.sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState

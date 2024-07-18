@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 
 from sparkle.platform import file_help as sfh, settings_objects
-import global_variables as gv
+import CLI.help.global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from CLI.compute_features import compute_features
 import CLI.help.sparkle_logging as sl
