@@ -86,7 +86,7 @@ cp -r $validation_train_data $validation_scenario_path
 cp -r $validation_test_data $validation_scenario_path
 
 # Run ablation on train set
-output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --run-on $slurm_available | tail -1)
+output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 output_true="Ablation analysis "
 
 if [[ $output =~ "${output_true}" ]];
@@ -107,9 +107,8 @@ else
 fi
 
 
-
 # Run ablation on test set
-output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --run-on $slurm_available | tail -1)
+output=$(CLI/run_ablation.py --solver $solver_path --instance-set-train $instances_path_train --instance-set-test $instances_path_test --settings-file $sparkle_test_settings_path --run-on $slurm_available | tail -1)
 
 if [[ $output =~ "${output_true}" ]];
 then
