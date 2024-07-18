@@ -12,7 +12,7 @@ from runrunner.base import Runner, Run
 import runrunner as rrr
 
 import global_variables as gv
-import sparkle_logging as sl
+import CLI.help.sparkle_logging as sl
 from CLI.support import ablation_help as sah
 from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help.reporting_scenario import Scenario

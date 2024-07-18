@@ -2,7 +2,7 @@
 """Sparkle command to show information about Sparkle."""
 
 import sys
-import sparkle_logging as sl
+import CLI.help.sparkle_logging as sl
 import argparse
 import sparkle
 

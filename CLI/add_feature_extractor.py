@@ -10,7 +10,7 @@ from sparkle.platform import file_help as sfh, settings_objects
 import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from CLI.compute_features import compute_features
-import sparkle_logging as sl
+import CLI.help.sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc

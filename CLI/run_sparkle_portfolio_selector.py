@@ -7,7 +7,7 @@ from pathlib import Path, PurePath
 
 import global_variables as gv
 from CLI.support import run_portfolio_selector_help as srpsh
-import sparkle_logging as sl
+import CLI.help.sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from sparkle.types.objective import PerformanceMeasure

@@ -13,7 +13,7 @@ from sparkle.instance import InstanceSet
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from CLI.compute_features import compute_features
 from CLI.run_solvers import running_solvers_performance_data
-import sparkle_logging as sl
+import CLI.help.sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc

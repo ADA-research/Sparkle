@@ -7,7 +7,7 @@ from pathlib import Path
 import global_variables as gv
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.support import compute_marginal_contribution_help as scmch
-import sparkle_logging as sl
+import CLI.help.sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help import argparse_custom as ac
 from CLI.help.reporting_scenario import Scenario
