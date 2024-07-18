@@ -9,7 +9,7 @@ import runrunner as rrr
 from runrunner.base import Runner, Run
 from runrunner.slurm import SlurmRun
 
-import CLI.help.global_variables as gv
+from CLI.help import global_variables as gv
 import tools.general as tg
 from CLI.help.command_help import CommandName
 from sparkle.solver import Solver

@@ -16,9 +16,9 @@ from runrunner.base import Runner
 from runrunner.slurm import Status
 
 from CLI.help.reporting_scenario import Scenario
-import CLI.help.sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from sparkle.types.objective import PerformanceMeasure
-import CLI.help.global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.solver import Solver
 from sparkle.instance import InstanceSet

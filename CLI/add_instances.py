@@ -6,14 +6,14 @@ import argparse
 from pathlib import Path
 import shutil
 
-import CLI.help.global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.platform import file_help as sfh
 from sparkle.platform.settings_objects import Settings, SettingState
 from sparkle.instance import InstanceSet
 from sparkle.structures import FeatureDataFrame, PerformanceDataFrame
 from CLI.compute_features import compute_features
 from CLI.run_solvers import running_solvers_performance_data
-import CLI.help.sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from CLI.help import command_help as ch
 from CLI.initialise import check_for_initialise
 from CLI.help import argparse_custom as apc

@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 from filelock import FileLock
 
-import CLI.help.global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.structures import FeatureDataFrame
 from sparkle.instance import InstanceSet
 from sparkle.solver import Extractor

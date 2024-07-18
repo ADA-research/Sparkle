@@ -5,9 +5,9 @@ import sys
 import argparse
 
 from CLI.initialise import check_for_initialise
-import CLI.help.global_variables as gv
+from CLI.help import global_variables as gv
 from CLI.help import system_status as sssh
-import CLI.help.sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from CLI.help import argparse_custom as ac
 from sparkle.platform.settings_objects import Settings
 

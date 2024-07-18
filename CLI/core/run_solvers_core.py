@@ -5,7 +5,7 @@ from filelock import FileLock
 import argparse
 from pathlib import Path
 
-import CLI.help.global_variables as gv
+from CLI.help import global_variables as gv
 import tools.general as tg
 from sparkle.platform.settings_objects import Settings
 from CLI.support import run_solvers_help as srs

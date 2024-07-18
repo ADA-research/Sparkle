@@ -9,9 +9,9 @@ from pathlib import PurePath, Path
 import runrunner as rrr
 from runrunner.base import Runner, Run
 
-import CLI.help.global_variables as gv
+from CLI.help import global_variables as gv
 from sparkle.structures import PerformanceDataFrame
-import CLI.help.sparkle_logging as sl
+from CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState, SolutionVerifier
 from CLI.help.command_help import CommandName
 from CLI.help import command_help as sch
