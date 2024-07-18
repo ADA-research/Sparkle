@@ -375,7 +375,7 @@ def generate_pdf(eps_file: str,
                  output_dir: Path = None) -> None:
     """Generate PDF using epstopdf."""
     # Some systems are missing epstopdf so a copy is included
-    epsbackup = Path(os.path.abspath(Path.cwd())) / "Components/epstopdf.pl"
+    epsbackup = Path(os.path.abspath(Path.cwd())) / "sparkle/Components/epstopdf.pl"
     epstopdf = which("epstopdf") or epsbackup
     subprocess_epstopdf = subprocess.run([epstopdf, eps_file],
                                          capture_output=True,

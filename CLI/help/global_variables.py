@@ -53,7 +53,7 @@ sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
 sparkle_marginal_contribution_actual_path =\
     sparkle_algorithm_selector_dir / "marginal_contribution_actual.txt"
 
-sparkle_latex_dir = Path("Components/Sparkle-latex-source")
+sparkle_latex_dir = Path("sparkle/Components/Sparkle-latex-source")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
 
 # Directories for CLI commands
@@ -75,13 +75,13 @@ parallel_portfolio_output_analysis =\
     parallel_portfolio_output_general / analysis_dir_name
 selection_output_analysis = selection_output_general / analysis_dir_name
 
-runsolver_dir = Path("Components/runsolver/src/")
+runsolver_dir = Path("sparkle/Components/runsolver/src/")
 runsolver_path = runsolver_dir / "runsolver"
 
 sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
-ablation_dir = Path("Components/ablationAnalysis-0.9.4/")
+ablation_dir = Path("sparkle/Components/ablationAnalysis-0.9.4/")
 
 feature_data_csv_path = feature_data_dir / "sparkle_feature_data.csv"
 performance_data_csv_path = performance_data_dir / "sparkle_performance_data.csv"

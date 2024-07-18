@@ -1,0 +1,17 @@
+algo = ruby spear_wrapper.rb
+execdir = example_spear_small
+experimentDir = .
+deterministic = 0
+run_obj = runtime
+overall_obj = mean
+cutoff_time = 20
+cutoff_length = max
+seed = 1234
+cli-concurrent-execution = true
+cli-cores = 1
+useRacing = false
+paramfile = example_spear_small/spear-params.txt
+instance_file = example_spear_small/SPEAR-QCP-train.txt
+test_instance_file = example_spear_small/SPEAR-QCP-test.txt
+sourceConfiguration=DEFAULT
+targetConfiguration="-sp-update-dec-queue '1' -sp-clause-decay '1.4' -sp-variable-decay '1.4' -sp-orig-clause-sort-heur '12' -sp-learned-clauses-inc '1.2' -sp-clause-del-heur '2' -sp-restart-inc '1.5' -sp-learned-clause-sort-heur '15' -sp-clause-activity-inc '1.5' -sp-resolution '0' -sp-rand-var-dec-freq '0.05' -sp-rand-var-dec-scaling '1' -sp-var-activity-inc '0.5' -sp-use-pure-literal-rule '1' -sp-learned-size-factor '0.4' -sp-var-dec-heur '16' -sp-phase-dec-heur '2' -sp-first-restart '800'"

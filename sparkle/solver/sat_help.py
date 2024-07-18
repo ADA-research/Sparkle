@@ -7,7 +7,7 @@ import fcntl
 import sparkle.tools.general as tg
 from sparkle.platform import file_help as sfh
 
-sat_verifier_path = Path("Components/Sparkle-SAT-verifier/SAT")
+sat_verifier_path = Path("sparkle/Components/Sparkle-SAT-verifier/SAT")
 
 
 def sat_verify(instance_path: str, raw_result_path: str, solver_path: str) -> str:

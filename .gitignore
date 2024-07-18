@@ -15,10 +15,10 @@ Snapshots/*
 Test_Cases/*
 Settings/latest.ini
 tests/test_files/tmp
-Components/ablationAnalysis-0.9.4/scenarios
-Components/runsolver/src/*.o
-Components/runsolver/src/runsolver.d
-Components/runsolver/src/runsolver
+sparkle/Components/ablationAnalysis-0.9.4/scenarios
+sparkle/Components/runsolver/src/*.o
+sparkle/Components/runsolver/src/runsolver.d
+sparkle/Components/runsolver/src/runsolver
 
 Examples/Resources/CCAG/Solvers/TCA/src/
 Examples/Resources/CCAG/Solvers/FastCA/src/

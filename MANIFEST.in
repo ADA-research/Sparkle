@@ -1,1 +1,1 @@
-recursive-include Components *
+recursive-include sparkle/Components *
