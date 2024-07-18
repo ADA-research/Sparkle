@@ -53,7 +53,7 @@ sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
 sparkle_marginal_contribution_actual_path =\
     sparkle_algorithm_selector_dir / "marginal_contribution_actual.txt"
 
-sparkle_latex_dir = Path("Components/Sparkle-latex-generator")
+sparkle_latex_dir = Path("Components/Sparkle-latex-source")
 sparkle_report_bibliography_path = sparkle_latex_dir / "SparkleReport.bib"
 
 # Directories for CLI commands
