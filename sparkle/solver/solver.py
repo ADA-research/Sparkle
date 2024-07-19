@@ -84,6 +84,14 @@ class Solver(SparkleCallable):
             pass
         return False
 
+    def get_pcs(self: Solver) -> dict[str, tuple[str, str, str]]:
+        """Get the parameter content of the PCS file."""
+        if not (pcs_file := self.get_pcs_file()):
+            return None
+        parser = pcsparser.PCSParser()
+        parser.load(str(pcs_file), convention="smac")
+        return [p for p in parser.pcs.params if p["type"] == "parameter"]
+
     def build_cmd(self: Solver, instance: str | list[str], configuration: dict = None,
                   runsolver_configuration: list[str] = None) -> list[str]:
         """Build the solver call on an instance with a configuration."""

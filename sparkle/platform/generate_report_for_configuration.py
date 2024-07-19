@@ -267,7 +267,8 @@ def get_timeouts_instanceset(solver: Solver,
         A tuple containing the number of timeouts for the different configurations
     """
     objective = configurator.scenario.sparkle_objective
-    _, config = configurator.get_optimal_configuration(solver, instance_set)
+    _, config = configurator.get_optimal_configuration(
+        solver, instance_set, objective.PerformanceMeasure)
     res_default = validator.get_validation_results(solver,
                                                    instance_set,
                                                    config="")

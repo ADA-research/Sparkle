@@ -147,7 +147,7 @@ if __name__ == "__main__":
         shutil.rmtree(gv.ablation_dir / ablation_scenario_dir)
 
     # Prepare ablation scenario directory
-    ablation_scenario_dir = sah.prepare_ablation_scenario(
+    ablation_scenario_dir = sah.get_ablation_scenario_directory(
         solver, instance_set_train, instance_set_test)
 
     # Instances

@@ -4,6 +4,7 @@
 import re
 import shutil
 import subprocess
+import decimal
 from pathlib import Path
 
 import runrunner as rrr
@@ -39,20 +40,6 @@ def clean_ablation_scenarios(solver: Solver, train_set: InstanceSet) -> None:
         for ablation_scenario in ablation_scenario_dir.glob(
                 f"{solver.name}_{train_set.name}_*"):
             shutil.rmtree(ablation_scenario, ignore_errors=True)
-    return
-
-
-def prepare_ablation_scenario(solver: Solver, train_set: InstanceSet,
-                              test_set: InstanceSet) -> Path:
-    """Prepare directories and files for ablation analysis."""
-    ablation_scenario_dir = get_ablation_scenario_directory(solver,
-                                                            train_set,
-                                                            test_set)
-
-    ablation_scenario_solver_dir = Path(ablation_scenario_dir, "solver/")
-    # Copy solver
-    shutil.copytree(solver.directory, ablation_scenario_solver_dir, dirs_exist_ok=True)
-    return ablation_scenario_dir
 
 
 def print_ablation_help() -> None:
@@ -77,44 +64,57 @@ def create_configuration_file(solver: Solver, train_set: InstanceSet,
     ablation_scenario_dir = get_ablation_scenario_directory(solver,
                                                             train_set,
                                                             test_set)
+    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
     configurator = gv.settings.get_general_sparkle_configurator()
     _, opt_config_str = configurator.get_optimal_configuration(
-        solver, train_set)
-    if "-init_solution" not in opt_config_str:
-        opt_config_str = "-init_solution '1' " + opt_config_str
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
+        solver, train_set, performance=perf_measure)
+
+    # We need to check which params are missing and supplement with default values
+    pcs = solver.get_pcs()
+    for p in pcs:
+        if p["name"] not in opt_config_str:
+            opt_config_str += f" -{p['name']} {p['default']}"
+
+    # Ablation cannot deal with E scientific notation in floats
+    ctx = decimal.Context(prec=16)
+    for config in opt_config_str.split(" -"):
+        _, value = config.strip().split(" ")
+        if "e" in value.lower():
+            value = value.strip("'")
+            float_value = float(value.lower())
+            formatted = format(ctx.create_decimal(float_value), "f")
+            opt_config_str = opt_config_str.replace(value, formatted)
+
     smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
+    objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
     smac_each_run_cutoff_length = gv.settings.get_configurator_target_cutoff_length()
     smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
     concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
     ablation_racing = gv.settings.get_ablation_racing_flag()
     configurator = gv.settings.get_general_sparkle_configurator()
+    # Get PCS file name from solver directory
+    pcs_file_path = f"{solver.get_pcs_file().absolute()}"
 
     with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
         # We need to append the solver dir to the configurator call to avoid
         # Issues with ablation's call to the wrapper
         fout.write(f'algo = "{configurator.configurator_target.absolute()} '
-                   f'{Path(ablation_scenario_dir).absolute()}/solver"\n'
+                   f'{solver.directory.absolute()}"\n'
                    "execdir = ./solver/\n"
-                   "experimentDir = ./\n")
-        # USER SETTINGS
-        fout.write(f"deterministic = {1 if solver.deterministic else 0}\n"
-                   f"run_obj = {smac_run_obj}\n")
-        objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
-        fout.write(f"overall_obj = {objective_str}\n"
+                   "experimentDir = ./\n"
+                   f"deterministic = {1 if solver.deterministic else 0}\n"
+                   f"run_obj = {smac_run_obj}\n"
+                   f"overall_obj = {objective_str}\n"
                    f"cutoffTime = {smac_each_run_cutoff_time}\n"
                    f"cutoff_length = {smac_each_run_cutoff_length}\n"
                    f"cli-cores = {concurrent_clis}\n"
                    f"useRacing = {ablation_racing}\n"
-                   "seed = 1234\n")
-        # Get PCS file name from solver directory
-        pcs_file_path = f"./solver/{solver.get_pcs_file().name}"
-        fout.write(f"paramfile = {pcs_file_path}\n"
+                   "seed = 1234\n"
+                   f"paramfile = {pcs_file_path}\n"
                    "instance_file = instances_train.txt\n"
                    "test_instance_file = instances_test.txt\n"
                    "sourceConfiguration=DEFAULT\n"
                    f'targetConfiguration="{opt_config_str}"')
-    return
 
 
 def create_instance_file(instance_set: InstanceSet, ablation_scenario_dir: str,
