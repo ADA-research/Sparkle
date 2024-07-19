@@ -7,10 +7,26 @@ Notable changes to Sparkle will be documented in this file.
 ### Changed
 - The use of --parallel arguments is now deprecrated and all related functionality is now controlled by the settings file general number of jobs parallel setting. [SPRK-275]
 - The slurm_settings are now handled by the general sparkle settings, where the user can add any unknown options to the Slurm settings
+- Components are now part of the sparkle library directory, to ensure existence after pip install.
+- The wait command has had a major revision, now aimed to encapsulate all information presented by squeue. Can be turned off to work as in previous version by turning verbosity to quiet.
+- Extractors now have a preliminary object representation.
+- SparkleFeatureDataCSV has been replaced with FeatureDataFrame.
+- FeatureDataFrame and PerformanceDataFrame are now sorted after initialisation (once) to avoid slow look up by pandas.DataFrame.loc.
+- Marginal Contribution computation (Virtual Best) now mostly done by PerformanceDataFrame. Cap values no longer part of computation and most be done beforehand.
 
 ### Added
+- Object representation for Instance Sets. Can deal with Multi-file instances, and single instances are considered a set of one.
+- Documentation website has a new design and GitHub pages has been added instead of Read the Docs, and will soon replace Read the Docs.
+- The run-on argument is now also available as a general setting, which will be overriden if the CLI argument is also given.
+- SATZilla2024 has been added to the Examples.
 
 ### Fixed
+- Bug fix regarding the retrieval of the best configuration from SMAC2.
+- When changing settings in between commands, Sparkle no longer crashes when a whole section has been removed.
+- Bug fix regarding running AutoFolio selector on a single instance after training.
+
+### Removed
+- Command run_status has been removed as a Command, as it is no longer yields more information than the Wait command
 
 ## [0.8.2] - 2024/06/19
 
