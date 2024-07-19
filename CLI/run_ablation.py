@@ -7,7 +7,7 @@ from pathlib import PurePath
 
 from runrunner.base import Runner
 
-from CLI.support.ablation_help import AblationScenario
+from sparkle.solver.ablation import AblationScenario
 from CLI.help import global_variables as gv
 from CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState

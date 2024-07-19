@@ -8,7 +8,7 @@ from pathlib import Path
 import math
 
 from sparkle.platform import generate_report_for_selection as sgfs
-from CLI.support.ablation_help import AblationScenario
+from sparkle.solver.ablation import AblationScenario
 from sparkle.solver.validator import Validator
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
