@@ -89,14 +89,6 @@ AblationArgument = ArgumentContainer(names=["--ablation"],
                                              "action": "store_true",
                                              "help": "run ablation after configuration"})
 
-AblationSettingsHelpArgument = \
-    ArgumentContainer(names=["--ablation-settings-help"],
-                      kwargs={"required": False,
-                              "dest": "ablation_settings_help",
-                              "action": "store_true",
-                              "help": "Prints a list of setting that can be used for "
-                                      "the ablation analysis"})
-
 ActualArgument = ArgumentContainer(names=["--actual"],
                                    kwargs={"action": "store_true",
                                            "help": "compute the marginal contribution "

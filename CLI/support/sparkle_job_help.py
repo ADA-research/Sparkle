@@ -151,8 +151,8 @@ def wait_for_all_jobs() -> None:
             running_jobs = [run for run in running_jobs
                             if run.status == Status.WAITING
                             or run.status == Status.RUNNING]
-            sorted_jobs = sorted(jobs,
-                                 key=lambda job: (status_order[job.status], job.run_id))
+            sorted_jobs = sorted(
+                jobs, key=lambda job: (status_order.get(job.status, 4), job.run_id))
             for job in sorted_jobs:
                 # Count number of jobs that have finished
                 finished_jobs_count = sum(1 for status in job.all_status

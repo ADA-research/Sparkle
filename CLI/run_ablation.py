@@ -33,8 +33,6 @@ def parser_function() -> argparse.ArgumentParser:
                         **ac.InstanceSetTrainAblationArgument.kwargs)
     parser.add_argument(*ac.InstanceSetTestAblationArgument.names,
                         **ac.InstanceSetTestAblationArgument.kwargs)
-    parser.add_argument(*ac.AblationSettingsHelpArgument.names,
-                        **ac.AblationSettingsHelpArgument.kwargs)
     parser.add_argument(*ac.PerformanceMeasureArgument.names,
                         **ac.PerformanceMeasureArgument.kwargs)
     parser.add_argument(*ac.TargetCutOffTimeAblationArgument.names,
@@ -65,10 +63,6 @@ if __name__ == "__main__":
 
     # Process command line arguments
     args = parser.parse_args()
-
-    if args.ablation_settings_help:
-        sah.print_ablation_help()
-        sys.exit()
 
     solver_path = resolve_object_name(args.solver,
                                       gv.solver_nickname_mapping, gv.solver_dir)
