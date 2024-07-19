@@ -391,7 +391,6 @@ def configuration_report_variables(target_dir: Path,
                                                   ablation,
                                                   bib_path,
                                                   instance_set_train,
-                                                  instance_set_test,
                                                   target_dir,
                                                   penalty_multiplier)
 
@@ -400,6 +399,7 @@ def configuration_report_variables(target_dir: Path,
                                                     solver,
                                                     configurator,
                                                     validator,
+                                                    ablation,
                                                     instance_set_train,
                                                     instance_set_test,
                                                     penalty_multiplier)
@@ -425,7 +425,6 @@ def get_dict_variable_to_value_common(solver: Solver,
                                       ablation: AblationScenario,
                                       bibliography_path: Path,
                                       train_set: InstanceSet,
-                                      test_set: InstanceSet,
                                       target_directory: Path,
                                       penalty_multiplier: int) -> dict:
     """Return a dict matching LaTeX variables and values used for all config. reports.
