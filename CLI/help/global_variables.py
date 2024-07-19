@@ -61,6 +61,7 @@ configuration_output_general = output_dir / "Configuration"
 parallel_portfolio_output_general = output_dir / "Parallel_Portfolio"
 selection_output_general = output_dir / "Selection"
 validation_output_general = output_dir / "Validation"
+ablation_output_general = output_dir / "Ablation"
 
 # Raw output
 rawdata_dir_name = Path("Raw_Data")
@@ -82,6 +83,7 @@ sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
 ablation_dir = Path("sparkle/Components/ablationAnalysis-0.9.4/")
+ablation_exec = Path("sparkle/Components/ablationAnalysis-0.9.4/ablationAnalysis")
 
 feature_data_csv_path = feature_data_dir / "sparkle_feature_data.csv"
 performance_data_csv_path = performance_data_dir / "sparkle_performance_data.csv"

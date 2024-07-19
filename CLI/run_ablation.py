@@ -3,12 +3,11 @@
 
 import argparse
 import sys
-import shutil
 from pathlib import PurePath
 
 from runrunner.base import Runner
 
-from CLI.support import ablation_help as sah
+from CLI.support.ablation_help import AblationScenario
 from CLI.help import global_variables as gv
 from CLI.help import sparkle_logging as sl
 from sparkle.platform.settings_objects import Settings, SettingState
@@ -131,33 +130,18 @@ if __name__ == "__main__":
     else:
         print("Configuration exists!")
 
-    # REMOVE SCENARIO
-    ablation_scenario_dir = sah.get_ablation_scenario_directory(
-        solver, instance_set_train, instance_set_test)
-    if sah.check_for_ablation(solver, instance_set_train,
-                              instance_set_test):
-        print("Warning: found existing ablation scenario for this combination. "
-              "This will be removed.")
-        shutil.rmtree(gv.ablation_dir / ablation_scenario_dir)
-
-    # Prepare ablation scenario directory
-    ablation_scenario_dir = sah.get_ablation_scenario_directory(
-        solver, instance_set_train, instance_set_test)
+    ablation_scenario = AblationScenario(
+        solver, instance_set_train, instance_set_test, gv.ablation_output_general,
+        gv.ablation_exec, override_dirs=True)
 
     # Instances
-    sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=False)
-    if instance_set_test_name is not None:
-        sah.create_instance_file(instance_set_test, ablation_scenario_dir, test=True)
-    else:
-        # TODO: check if needed
-        sah.create_instance_file(instance_set_train, ablation_scenario_dir, test=True)
+    ablation_scenario.create_instance_file()
+    ablation_scenario.create_instance_file(test=True)
 
     # Configurations
-    sah.create_configuration_file(
-        solver, instance_set_train, instance_set_test
-    )
+    ablation_scenario.create_configuration_file()
     print("Submiting ablation run...")
-    runs = sah.submit_ablation(ablation_scenario_dir, instance_set_test, run_on=run_on)
+    runs = ablation_scenario.submit_ablation(run_on=run_on)
 
     if run_on == Runner.LOCAL:
         print("Ablation analysis finished!")

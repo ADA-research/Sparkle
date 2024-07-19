@@ -13,7 +13,6 @@ import runrunner as rrr
 
 from CLI.help import global_variables as gv
 from CLI.help import sparkle_logging as sl
-from CLI.support import ablation_help as sah
 from sparkle.platform.settings_objects import Settings, SettingState
 from CLI.help.reporting_scenario import Scenario
 from sparkle.structures import FeatureDataFrame
@@ -213,8 +212,6 @@ if __name__ == "__main__":
 
         for index, column in enumerate(feature_data_df):
             feature_data_df.rename(columns={column: f"Feature{index+1}"}, inplace=True)
-
-    sah.clean_ablation_scenarios(solver, instance_set_train)
 
     number_of_runs = gv.settings.get_config_number_of_runs()
     solver_calls = gv.settings.get_config_solver_calls()

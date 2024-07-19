@@ -8,7 +8,7 @@ from pathlib import Path
 import math
 
 from sparkle.platform import generate_report_for_selection as sgfs
-from CLI.support import ablation_help as sah
+from CLI.support.ablation_help import AblationScenario
 from sparkle.solver.validator import Validator
 from sparkle.configurator.configurator import Configurator, ConfigurationScenario
 from sparkle.solver import Solver
@@ -105,8 +105,7 @@ def get_performance_measure(objective: SparkleObjective,
         return "performance"
 
 
-def get_ablation_bool(solver: Solver, train_set: InstanceSet,
-                      test_set: InstanceSet) -> str:
+def get_ablation_bool(scenario: AblationScenario) -> str:
     """Return the ablation bool as LaTeX string.
 
     Args:
@@ -117,7 +116,7 @@ def get_ablation_bool(solver: Solver, train_set: InstanceSet,
     Returns:
         A string describing whether ablation was run or not
     """
-    if sah.check_for_ablation(solver, train_set, test_set):
+    if scenario.check_for_ablation():
         return "\\ablationtrue"
     return "\\ablationfalse"
 
@@ -313,8 +312,7 @@ def get_timeouts(instance_to_par_configured: dict,
     return configured_timeouts, default_timeouts, overlapping_timeouts
 
 
-def get_ablation_table(solver: Solver, train_set: InstanceSet,
-                       test_set: InstanceSet = None) -> str:
+def get_ablation_table(scenario: AblationScenario) -> str:
     """Generate a LaTeX table of the ablation path.
 
     This is the result of the ablation analysis to determine the parameter importance.
@@ -327,7 +325,7 @@ def get_ablation_table(solver: Solver, train_set: InstanceSet,
     Returns:
         A string containing the LaTeX table code of the ablation path
     """
-    results = sah.read_ablation_table(solver, train_set, test_set)
+    results = scenario.read_ablation_table()
     table_string = r"\begin{tabular}{rp{0.25\linewidth}rrr}"
     # "Round", "Flipped parameter", "Source value", "Target value", "Validation result"
     for i, line in enumerate(results):
@@ -373,7 +371,7 @@ def configuration_report_variables(target_dir: Path,
                                    penalty_multiplier: float,
                                    extractor_cuttoff: int,
                                    instance_set_test: InstanceSet = None,
-                                   ablation: bool = True) -> dict:
+                                   ablation: AblationScenario = None) -> dict:
     """Return a dict matching LaTeX variables and their values.
 
     Args:
@@ -390,6 +388,7 @@ def configuration_report_variables(target_dir: Path,
     full_dict = get_dict_variable_to_value_common(solver,
                                                   configurator,
                                                   validator,
+                                                  ablation,
                                                   bib_path,
                                                   instance_set_train,
                                                   instance_set_test,
@@ -407,7 +406,7 @@ def configuration_report_variables(target_dir: Path,
         full_dict.update(test_dict)
     full_dict["testBool"] = f"\\test{str(has_test).lower()}"
 
-    if not ablation:
+    if ablation is None:
         full_dict["ablationBool"] = "\\ablationfalse"
 
     if full_dict["featuresBool"] == "\\featurestrue":
@@ -423,6 +422,7 @@ def configuration_report_variables(target_dir: Path,
 def get_dict_variable_to_value_common(solver: Solver,
                                       configurator: Configurator,
                                       validator: Validator,
+                                      ablation: AblationScenario,
                                       bibliography_path: Path,
                                       train_set: InstanceSet,
                                       test_set: InstanceSet,
@@ -493,8 +493,8 @@ def get_dict_variable_to_value_common(solver: Solver,
     latex_dict["timeoutsTrainDefault"] = str(default_timeouts_train)
     latex_dict["timeoutsTrainConfigured"] = str(configured_timeouts_train)
     latex_dict["timeoutsTrainOverlap"] = str(overlapping_timeouts_train)
-    latex_dict["ablationBool"] = get_ablation_bool(solver, train_set, test_set)
-    latex_dict["ablationPath"] = get_ablation_table(solver, train_set, test_set)
+    latex_dict["ablationBool"] = get_ablation_bool(ablation)
+    latex_dict["ablationPath"] = get_ablation_table(ablation)
     latex_dict["featuresBool"] = get_features_bool(
         configurator.scenario, solver.name, train_set)
 
@@ -505,6 +505,7 @@ def get_dict_variable_to_value_test(target_dir: Path,
                                     solver: Solver,
                                     configurator: Configurator,
                                     validator: Validator,
+                                    ablation: AblationScenario,
                                     train_set: InstanceSet,
                                     test_set: InstanceSet,
                                     penalty_multiplier: int) -> dict:
@@ -558,8 +559,8 @@ def get_dict_variable_to_value_test(target_dir: Path,
     test_dict["timeoutsTestDefault"] = str(default_timeouts_test)
     test_dict["timeoutsTestConfigured"] = str(configured_timeouts_test)
     test_dict["timeoutsTestOverlap"] = str(overlapping_timeouts_test)
-    test_dict["ablationBool"] = get_ablation_bool(solver, train_set, test_set)
-    test_dict["ablationPath"] = get_ablation_table(solver, train_set, test_set)
+    test_dict["ablationBool"] = get_ablation_bool(ablation)
+    test_dict["ablationPath"] = get_ablation_table(ablation)
     return test_dict
 
 
@@ -574,7 +575,7 @@ def generate_report_for_configuration(solver: Solver,
                                       penalty_multiplier: float,
                                       extractor_cuttoff: int,
                                       test_set: InstanceSet = None,
-                                      ablation: bool = True) -> None:
+                                      ablation: AblationScenario = None) -> None:
     """Generate a report for algorithm configuration.
 
     Args:

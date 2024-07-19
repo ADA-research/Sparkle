@@ -24,8 +24,11 @@ class AblationScenario:
                  solver: Solver,
                  train_set: InstanceSet,
                  test_set: InstanceSet,
-                 output_dir: Path) -> Path:
+                 output_dir: Path,
+                 ablation_executable: Path = None,
+                 override_dirs: bool = False) -> None:
         """Initialize ablation scenario."""
+        self.ablation_exec = ablation_executable
         self.solver = solver
         self.train_set = train_set
         self.test_set = test_set
@@ -34,10 +37,12 @@ class AblationScenario:
         if self.test_set is not None:
             self.scenario_name += f"_{self.test_set.name}"
         self.scenario_dir = self.output_dir / self.scenario_name
-        if self.scenario_dir.exists():
+        if override_dirs and self.scenario_dir.exists():
+            print("Warning: found existing ablation scenario. This will be removed.")
             shutil.rmtree(self.scenario_dir)
-        self.scenario_dir.mkdir(parents=True)
-        return self.scenario_dir
+        self.scenario_dir.mkdir(parents=True, exist_ok=True)
+        self.tmp_dir = self.scenario_dir / "tmp"
+        self.tmp_dir.mkdir(exist_ok=True)
 
     def create_configuration_file(self: AblationScenario) -> None:
         """Create a configuration file for ablation analysis.
@@ -87,7 +92,7 @@ class AblationScenario:
             # Issues with ablation's call to the wrapper
             fout.write(f'algo = "{configurator.configurator_target.absolute()} '
                        f'{self.solver.directory.absolute()}"\n'
-                       "execdir = ./solver/\n"
+                       f"execdir = {self.tmp_dir.absolute()}\n"
                        "experimentDir = ./\n"
                        f"deterministic = {1 if self.solver.deterministic else 0}\n"
                        f"run_obj = {smac_run_obj}\n"
@@ -110,7 +115,7 @@ class AblationScenario:
         if test:
             file_suffix = "_test.txt"
             instance_set = self.test_set if self.test_set is not None else self.train_set
-        # We give the Ablation script directly the paths of the instances (no copying)
+        # We give the Ablation script the paths of the instances
         file_instance = self.scenario_dir / f"instances{file_suffix}"
         with file_instance.open("w") as fh:
             for instance in instance_set.instance_paths:
@@ -129,141 +134,17 @@ class AblationScenario:
             return False
         return path.open().readline().strip() == "Ablation analysis validation complete."
 
+    def read_ablation_table(self: AblationScenario) -> list[list[str]]:
+        """Read from ablation table of a scenario."""
+        if not self.check_for_ablation():
+            # No ablation table exists for this solver-instance pair
+            return []
 
-def get_ablation_scenario_directory(solver: Solver, train_set: InstanceSet,
-                                    test_set: InstanceSet, exec_path: str = False)\
-        -> str:
-    """Return the directory where ablation analysis is executed.
+        table_file = self.scenario_dir / "ablationValidation.txt"
+        results = [["Round", "Flipped parameter", "Source value", "Target value",
+                    "Validation result"]]
 
-    exec_path: overwrite of the default ablation path to put the scenario in
-    """
-    test_extension = f"_{test_set.name}" if test_set is not None else ""
-
-    ablation_scenario_dir = "" if exec_path else f"{gv.ablation_dir / 'scenarios'}/"
-    scenario_dir = f"{ablation_scenario_dir}"\
-                   f"{solver.name}_{train_set.name}{test_extension}/"
-    return scenario_dir
-
-
-def clean_ablation_scenarios(solver: Solver, train_set: InstanceSet) -> None:
-    """Clean up ablation analysis directory."""
-    ablation_scenario_dir = gv.ablation_dir / "scenarios"
-    if ablation_scenario_dir.is_dir():
-        for ablation_scenario in ablation_scenario_dir.glob(
-                f"{solver.name}_{train_set.name}_*"):
-            shutil.rmtree(ablation_scenario, ignore_errors=True)
-
-
-def create_configuration_file(solver: Solver, train_set: InstanceSet,
-                              test_set: InstanceSet) -> None:
-    """Create a configuration file for ablation analysis.
-
-    Args:
-        solver: Solver object
-        instance_train_name: The training instance
-        instance_test_name: The test instance
-
-    Returns:
-        None
-    """
-    ablation_scenario_dir = get_ablation_scenario_directory(solver, train_set, test_set)
-    perf_measure = gv.settings.get_general_sparkle_objectives()[0].PerformanceMeasure
-    configurator = gv.settings.get_general_sparkle_configurator()
-    _, opt_config_str = configurator.get_optimal_configuration(
-        solver, train_set, performance=perf_measure)
-
-    # We need to check which params are missing and supplement with default values
-    pcs = solver.get_pcs()
-    for p in pcs:
-        if p["name"] not in opt_config_str:
-            opt_config_str += f" -{p['name']} {p['default']}"
-
-    # Ablation cannot deal with E scientific notation in floats
-    ctx = decimal.Context(prec=16)
-    for config in opt_config_str.split(" -"):
-        _, value = config.strip().split(" ")
-        if "e" in value.lower():
-            value = value.strip("'")
-            float_value = float(value.lower())
-            formatted = format(ctx.create_decimal(float_value), "f")
-            opt_config_str = opt_config_str.replace(value, formatted)
-
-    smac_run_obj = SMAC2.get_smac_run_obj(perf_measure)
-    objective_str = "MEAN10" if smac_run_obj == "RUNTIME" else "MEAN"
-    smac_each_run_cutoff_length = gv.settings.get_configurator_target_cutoff_length()
-    smac_each_run_cutoff_time = gv.settings.get_general_target_cutoff_time()
-    concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
-    ablation_racing = gv.settings.get_ablation_racing_flag()
-    configurator = gv.settings.get_general_sparkle_configurator()
-    # Get PCS file name from solver directory
-    pcs_file_path = f"{solver.get_pcs_file().absolute()}"
-
-    with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
-        # We need to append the solver dir to the configurator call to avoid
-        # Issues with ablation's call to the wrapper
-        fout.write(f'algo = "{configurator.configurator_target.absolute()} '
-                   f'{solver.directory.absolute()}"\n'
-                   "execdir = ./solver/\n"
-                   "experimentDir = ./\n"
-                   f"deterministic = {1 if solver.deterministic else 0}\n"
-                   f"run_obj = {smac_run_obj}\n"
-                   f"overall_obj = {objective_str}\n"
-                   f"cutoffTime = {smac_each_run_cutoff_time}\n"
-                   f"cutoff_length = {smac_each_run_cutoff_length}\n"
-                   f"cli-cores = {concurrent_clis}\n"
-                   f"useRacing = {ablation_racing}\n"
-                   "seed = 1234\n"
-                   f"paramfile = {pcs_file_path}\n"
-                   "instance_file = instances_train.txt\n"
-                   "test_instance_file = instances_test.txt\n"
-                   "sourceConfiguration=DEFAULT\n"
-                   f'targetConfiguration="{opt_config_str}"')
-
-
-def create_instance_file(instance_set: InstanceSet, ablation_scenario_dir: str,
-                         test: bool = False) -> None:
-    """Create an instance file for ablation analysis."""
-    file_suffix = "_train.txt"
-    if test:
-        file_suffix = "_test.txt"
-    # We give the Ablation script directly the paths of the instances (no copying)
-    file_instance_path = ablation_scenario_dir + "instances" + file_suffix
-    with Path(file_instance_path).open("w") as fh:
-        for instance in instance_set.instance_paths:
-            # We need to unpack the multi instance file paths in quotes
-            if isinstance(instance, list):
-                joined_instances = " ".join([str(file.absolute()) for file in instance])
-                fh.write(f"{joined_instances}\n")
-            else:
-                fh.write(f"{instance.absolute()}\n")
-
-
-def check_for_ablation(solver: Solver, train_set: InstanceSet,
-                       test_set: InstanceSet) -> bool:
-    """Checks if ablation has terminated successfully."""
-    scenario_dir = get_ablation_scenario_directory(solver, train_set,
-                                                   test_set, exec_path=False)
-    path = Path(scenario_dir, "ablationValidation.txt")
-    if not path.is_file():
-        return False
-    return path.open().readline().strip() == "Ablation analysis validation complete."
-
-
-def read_ablation_table(solver: Solver, train_set: InstanceSet,
-                        test_set: InstanceSet) -> list[list[str]]:
-    """Read from ablation table of a scenario."""
-    if not check_for_ablation(solver, train_set, test_set):
-        # No ablation table exists for this solver-instance pair
-        return []
-    scenario_dir = get_ablation_scenario_directory(solver, train_set,
-                                                   test_set, exec_path=False)
-    table_file = Path(scenario_dir) / "ablationValidation.txt"
-
-    results = [["Round", "Flipped parameter", "Source value", "Target value",
-                "Validation result"]]
-
-    with Path(table_file).open("r") as fh:
-        for line in fh.readlines():
+        for line in table_file.open().readlines():
             # Pre-process lines from the ablation file and add to the results dictionary.
             # Sometimes ablation rounds switch multiple parameters at once.
             # EXAMPLE: 2 EDR, EDRalpha   0, 0.1   1, 0.1013241633106732 486.31691
@@ -276,109 +157,62 @@ def read_ablation_table(solver: Solver, train_set: InstanceSet,
             if len(values) == 5:
                 results.append(values)
 
-    return results
+        return results
 
+    def submit_ablation(self: AblationScenario,
+                        run_on: Runner = Runner.SLURM) -> list[Run]:
+        """Submit an ablation job.
 
-def submit_ablation(ablation_scenario_dir: Path,
-                    test_set: InstanceSet = None,
-                    run_on: Runner = Runner.SLURM) -> list[Run]:
-    """Submit an ablation job.
+        Args:
+            ablation_scenario_dir: The prepared dir where the ablation will be executed,
+            test_set: The optional test set to run ablation on too.
+            run_on: Determines to which RunRunner queue the job is added
 
-    Args:
-        ablation_scenario_dir: The prepared dir where the ablation will be executed,
-        test_set: The optional test set to run ablation on too.
-        run_on: Determines to which RunRunner queue the job is added
+        Returns:
+            A  list of Run objects. Empty when running locally.
+        """
+        # This script sumbits 4 jobs: Normal, normal callback, validation, validation cb
+        # The callback is nothing but a copy script from Albation/scenario/DIR/log to
+        # the Log/Ablation/.. folder.
 
-    Returns:
-        A  list of Run objects. Empty when running locally.
-    """
-    # This script sumbits 4 jobs: Normal, normal callback, validation, validation cb
-    # The callback is nothing but a copy script from Albation/scenario/DIR/log to
-    # the Log/Ablation/.. folder.
+        # 1. submit the ablation to the runrunner queue
+        cmd = f"{self.ablation_exec.absolute()} --optionFile ablation_config.txt"
+        sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
+        srun_options = ["-N1", "-n1"] + sbatch_options
 
-    # 1. submit the ablation to the runrunner queue
-    clis = gv.settings.get_slurm_max_parallel_runs_per_node()
-    cmd = "../../ablationAnalysis --optionFile ablation_config.txt"
-    srun_options = ["-N1", "-n1", f"-c{clis}"]
-    sbatch_options = [f"--cpus-per-task={clis}"] +\
-        gv.settings.get_slurm_extra_options(as_args=True)
-
-    run_ablation = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd,
-        name=CommandName.RUN_ABLATION,
-        base_dir=gv.sparkle_tmp_path,
-        path=ablation_scenario_dir,
-        sbatch_options=sbatch_options,
-        srun_options=srun_options)
-
-    dependencies = []
-    if run_on == Runner.LOCAL:
-        run_ablation.wait()
-    dependencies.append(run_ablation)
-
-    # 2. Submit intermediate actions (copy path from log)
-    log_source = "log/ablation-run1234.txt"
-    ablation_path = "ablationPath.txt"
-    log_path = gv.sparkle_global_log_dir / "Ablation" / run_ablation.name
-    log_path.mkdir(parents=True, exist_ok=True)
-
-    cmd_list = [f"cp {log_source} {ablation_path}", f"cp -r log/ {log_path.absolute()}"]
-    srun_options_cb = ["-N1", "-n1", "-c1"]
-    run_cb = rrr.add_to_queue(
-        runner=run_on,
-        cmd=cmd_list,
-        name=CommandName.ABLATION_CALLBACK,
-        path=ablation_scenario_dir,
-        base_dir=gv.sparkle_tmp_path,
-        dependencies=run_ablation,
-        sbatch_options=sbatch_options,
-        srun_options=srun_options_cb)
-
-    if run_on == Runner.LOCAL:
-        run_cb.wait()
-    dependencies.append(run_cb)
-
-    # 3. Submit ablation validation run when nessesary, repeat process for the test set
-    if test_set is not None:
-        # NOTE: The test set is not actually used?
-        cmd = "../../ablationValidation --optionFile ablation_config.txt "\
-            "--ablationLogFile ablationPath.txt"
-
-        run_ablation_validation = rrr.add_to_queue(
+        run_ablation = rrr.add_to_queue(
             runner=run_on,
             cmd=cmd,
-            name=CommandName.RUN_ABLATION_VALIDATION,
-            path=ablation_scenario_dir,
+            name=CommandName.RUN_ABLATION,
             base_dir=gv.sparkle_tmp_path,
-            dependencies=dependencies,
+            path=self.scenario_dir,
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 
+        dependencies = []
         if run_on == Runner.LOCAL:
-            run_ablation_validation.wait()
-        dependencies.append(run_ablation_validation)
+            run_ablation.wait()
+        dependencies.append(run_ablation)
 
-        log_source = "log/ablation-validation-run1234.txt"
-        ablation_path = "ablationValidation.txt"
-        val_dir = run_ablation_validation.name + "_validation"
-        log_path = gv.sparkle_global_log_dir / "Ablation" / val_dir
-        log_path.mkdir(parents=True, exist_ok=True)
-        cmd_list = [f"cp {log_source} {ablation_path}",
-                    f"cp -r log/ {log_path.absolute()}"]
+        # 2. Run ablation validation run if we have a test set to run on
+        if self.test_set is not None:
+            # NOTE: The test set is not actually used?
+            validation_exec = self.ablation_exec.parent / "ablationValidation"
+            cmd = f"{validation_exec.absolute()} --optionFile ablation_config.txt "
+            #      "--ablationLogFile ablationPath.txt"
 
-        run_v_cb = rrr.add_to_queue(
-            runner=run_on,
-            cmd=cmd_list,
-            name=CommandName.ABLATION_VALIDATION_CALLBACK,
-            path=ablation_scenario_dir,
-            base_dir=gv.sparkle_tmp_path,
-            dependencies=run_ablation_validation,
-            sbatch_options=sbatch_options,
-            srun_options=srun_options_cb)
+            run_ablation_validation = rrr.add_to_queue(
+                runner=run_on,
+                cmd=cmd,
+                name=CommandName.RUN_ABLATION_VALIDATION,
+                path=self.scenario_dir,
+                base_dir=gv.sparkle_tmp_path,
+                dependencies=dependencies,
+                sbatch_options=sbatch_options,
+                srun_options=srun_options)
 
-        if run_on == Runner.LOCAL:
-            run_v_cb.wait()
-        dependencies.append(run_v_cb)
+            if run_on == Runner.LOCAL:
+                run_ablation_validation.wait()
+            dependencies.append(run_ablation_validation)
 
-    return dependencies
+        return dependencies
