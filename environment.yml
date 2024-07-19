@@ -68,3 +68,4 @@ dependencies:
     - tornado==6.4
     - xgboost==2.0.3
     - zict==3.0.0
+    - pre-commit==3.7.1
