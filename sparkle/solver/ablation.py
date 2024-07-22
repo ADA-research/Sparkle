@@ -37,13 +37,18 @@ class AblationScenario:
         if self.test_set is not None:
             self.scenario_name += f"_{self.test_set.name}"
         self.scenario_dir = self.output_dir / self.scenario_name
-        self.table_file = self.scenario_dir / "log" / "ablation-validation-run1234.txt"
         if override_dirs and self.scenario_dir.exists():
             print("Warning: found existing ablation scenario. This will be removed.")
             shutil.rmtree(self.scenario_dir)
-        self.scenario_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create required scenario directories
         self.tmp_dir = self.scenario_dir / "tmp"
-        self.tmp_dir.mkdir(exist_ok=True)
+        self.tmp_dir.mkdir(parents=True, exist_ok=True)
+
+        self.validation_dir = self.scenario_dir / "validation"
+        self.validation_dir_tmp = self.validation_dir / "tmp"
+        self.validation_dir_tmp.mkdir(parents=True, exist_ok=True)
+        self.table_file = self.validation_dir / "log" / "ablation-validation-run1234.txt"
 
     def create_configuration_file(self: AblationScenario) -> None:
         """Create a configuration file for ablation analysis.
@@ -85,29 +90,32 @@ class AblationScenario:
         concurrent_clis = gv.settings.get_slurm_max_parallel_runs_per_node()
         ablation_racing = gv.settings.get_ablation_racing_flag()
         configurator = gv.settings.get_general_sparkle_configurator()
-        # Get PCS file name from solver directory
-        pcs_file_path = f"{self.solver.get_pcs_file().absolute()}"
+        pcs_file_path = f"{self.solver.get_pcs_file().absolute()}"  # Get Solver PCS
 
-        with Path(f"{ablation_scenario_dir}/ablation_config.txt").open("w") as fout:
-            # We need to append the solver dir to the configurator call to avoid
-            # Issues with ablation's call to the wrapper
-            fout.write(f'algo = "{configurator.configurator_target.absolute()} '
-                       f'{self.solver.directory.absolute()}"\n'
-                       f"execdir = {self.tmp_dir.absolute()}\n"
-                       "experimentDir = ./\n"
-                       f"deterministic = {1 if self.solver.deterministic else 0}\n"
-                       f"run_obj = {smac_run_obj}\n"
-                       f"overall_obj = {objective_str}\n"
-                       f"cutoffTime = {smac_each_run_cutoff_time}\n"
-                       f"cutoff_length = {smac_each_run_cutoff_length}\n"
-                       f"cli-cores = {concurrent_clis}\n"
-                       f"useRacing = {ablation_racing}\n"
-                       "seed = 1234\n"
-                       f"paramfile = {pcs_file_path}\n"
-                       "instance_file = instances_train.txt\n"
-                       "test_instance_file = instances_test.txt\n"
-                       "sourceConfiguration=DEFAULT\n"
-                       f'targetConfiguration="{opt_config_str}"')
+        # Create config file
+        config_file = Path(f"{ablation_scenario_dir}/ablation_config.txt")
+        config = (f'algo = "{configurator.configurator_target.absolute()} '
+                  f'{self.solver.directory.absolute()}"\n'
+                  f"execdir = {self.tmp_dir.absolute()}\n"
+                  "experimentDir = ./\n"
+                  f"deterministic = {1 if self.solver.deterministic else 0}\n"
+                  f"run_obj = {smac_run_obj}\n"
+                  f"overall_obj = {objective_str}\n"
+                  f"cutoffTime = {smac_each_run_cutoff_time}\n"
+                  f"cutoff_length = {smac_each_run_cutoff_length}\n"
+                  f"cli-cores = {concurrent_clis}\n"
+                  f"useRacing = {ablation_racing}\n"
+                  "seed = 1234\n"
+                  f"paramfile = {pcs_file_path}\n"
+                  "instance_file = instances_train.txt\n"
+                  "test_instance_file = instances_test.txt\n"
+                  "sourceConfiguration=DEFAULT\n"
+                  f'targetConfiguration="{opt_config_str}"')
+        config_file.open("w").write(config)
+        # Write config to validation directory
+        conf_valid = config.replace(f"execdir = {self.tmp_dir.absolute()}\n",
+                                    f"execdir = {self.validation_dir_tmp.absolute()}\n")
+        (self.validation_dir / config_file.name).open("w").write(conf_valid)
 
     def create_instance_file(self: AblationScenario, test: bool = False) -> None:
         """Create an instance file for ablation analysis."""
@@ -127,6 +135,8 @@ class AblationScenario:
                     fh.write(f"{joined_instances}\n")
                 else:
                     fh.write(f"{instance.absolute()}\n")
+        # Copy to validation directory
+        shutil.copyfile(file_instance, self.validation_dir / file_instance.name)
 
     def check_for_ablation(self: AblationScenario) -> bool:
         """Checks if ablation has terminated successfully."""
@@ -163,8 +173,6 @@ class AblationScenario:
         """Submit an ablation job.
 
         Args:
-            ablation_scenario_dir: The prepared dir where the ablation will be executed,
-            test_set: The optional test set to run ablation on too.
             run_on: Determines to which RunRunner queue the job is added
 
         Returns:
@@ -186,30 +194,31 @@ class AblationScenario:
             sbatch_options=sbatch_options,
             srun_options=srun_options)
 
-        dependencies = []
+        runs = []
         if run_on == Runner.LOCAL:
             run_ablation.wait()
-        dependencies.append(run_ablation)
+        runs.append(run_ablation)
 
         # 2. Run ablation validation run if we have a test set to run on
         if self.test_set is not None:
-            # NOTE: The test set is not actually used?
+            # Validation dir should have a copy of all needed files, except for the
+            # output of the ablation run, which is stored in ablation-run[seed].txt
             validation_exec = self.ablation_exec.parent / "ablationValidation"
             cmd = f"{validation_exec.absolute()} --optionFile ablation_config.txt "\
-                  "--ablationLogFile log/ablation-run1234.txt"
+                  "--ablationLogFile ../log/ablation-run1234.txt"
 
             run_ablation_validation = rrr.add_to_queue(
                 runner=run_on,
                 cmd=cmd,
                 name=CommandName.RUN_ABLATION_VALIDATION,
-                path=self.scenario_dir,
+                path=self.validation_dir,
                 base_dir=gv.sparkle_tmp_path,
-                dependencies=dependencies,
+                dependencies=run_ablation,
                 sbatch_options=sbatch_options,
                 srun_options=srun_options)
 
             if run_on == Runner.LOCAL:
                 run_ablation_validation.wait()
-            dependencies.append(run_ablation_validation)
+            runs.append(run_ablation_validation)
 
-        return dependencies
+        return runs
