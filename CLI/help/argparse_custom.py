@@ -131,6 +131,12 @@ DeterministicArgument =\
                       kwargs={"action": "store_true",
                               "help": "Flag indicating the solver is deterministic"})
 
+DownloadExamplesArgument =\
+    ArgumentContainer(names=["--download-examples"],
+                      kwargs={"action": argparse.BooleanOptionalAction,
+                              "default": False,
+                              "help": "Download the Examples into the directory."})
+
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                           kwargs={"metavar": "extractor-path",
                                                   "type": str,
