@@ -13,6 +13,7 @@ Notable changes to Sparkle will be documented in this file.
 - SparkleFeatureDataCSV has been replaced with FeatureDataFrame.
 - FeatureDataFrame and PerformanceDataFrame are now sorted after initialisation (once) to avoid slow look up by pandas.DataFrame.loc.
 - Marginal Contribution computation (Virtual Best) now mostly done by PerformanceDataFrame. Cap values no longer part of computation and most be done beforehand.
+- Ablation scenarios are now stored in the Output/Ablation directory, and the validation is stored in a subdirectory of the scenario.
 
 ### Added
 - Object representation for Instance Sets. Can deal with Multi-file instances, and single instances are considered a set of one.
@@ -24,6 +25,7 @@ Notable changes to Sparkle will be documented in this file.
 - Bug fix regarding the retrieval of the best configuration from SMAC2.
 - When changing settings in between commands, Sparkle no longer crashes when a whole section has been removed.
 - Bug fix regarding running AutoFolio selector on a single instance after training.
+- Bug fix for ablation analysis missing parameters, now they will be supplemented with the default values from PCS file.
 
 ### Removed
 - Command run_status has been removed as a Command, as it is no longer yields more information than the Wait command
