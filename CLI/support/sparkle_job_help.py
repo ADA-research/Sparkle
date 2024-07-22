@@ -11,27 +11,8 @@ from runrunner.slurm import SlurmRun
 from runrunner.base import Status
 from tabulate import tabulate
 
-from CLI.help.command_help import CommandName
-from CLI.help.command_help import COMMAND_DEPENDENCIES
 from CLI.help import global_variables as gv
 from sparkle.platform.cli_types import VerbosityLevel, TEXT
-
-
-# Wait until all dependencies of the command to run are completed
-def wait_for_dependencies(command_to_run: CommandName) -> None:
-    """Wait for all dependencies of a given command to finish executing.
-
-    Args:
-      command_to_run: Command name.
-    """
-    dependencies = COMMAND_DEPENDENCIES[command_to_run]
-    dependent_job_ids = []
-
-    for dependency in dependencies:
-        dependent_job_ids.extend(get_job_ids_for_command(dependency))
-
-    for job_id in dependent_job_ids:
-        wait_for_job(job_id)
 
 
 def wait_for_job(job: str | SlurmRun) -> None:
@@ -182,32 +163,3 @@ def wait_for_all_jobs() -> None:
             clear_console_lines(lines)
 
     print("All jobs done!")
-
-
-def get_active_jobs() -> list[dict[str, str, str]]:
-    """Get active jobs from file and return them as list of [job_id, command, status].
-
-    Returns:
-      List of dictionaries with string keys and dict values.
-    """
-    jobs = get_running_jobs()
-    return [{"job_id": j.run_id, "command": j.name, "status": j.status} for j in jobs]
-
-
-def get_job_ids_for_command(command: CommandName) -> list[str]:
-    """Return the IDs of active jobs for a given command.
-
-    Args:
-      command: Command name.
-
-    Returns:
-      List of job IDs (in string format).
-    """
-    jobs_list = get_active_jobs()
-    job_ids = []
-
-    for job in jobs_list:
-        if job["command"] == command.name:
-            job_ids.append(job["job_id"])
-
-    return job_ids

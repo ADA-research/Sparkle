@@ -6,7 +6,6 @@ import argparse
 
 from CLI.help import sparkle_logging as sl
 from CLI.support import sparkle_job_help as sjh
-from CLI.help.command_help import CommandName
 from CLI.help import argparse_custom as ac
 from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
@@ -22,8 +21,6 @@ def parser_function() -> argparse.ArgumentParser:
     group = parser.add_mutually_exclusive_group()
     group.add_argument(*ac.JobIdArgument.names,
                        **ac.JobIdArgument.kwargs)
-    group.add_argument(*ac.CommandArgument.names,
-                       **ac.CommandArgument.kwargs)
     return parser
 
 
@@ -43,8 +40,5 @@ if __name__ == "__main__":
 
     if args.job_id is not None:
         sjh.wait_for_job(args.job_id)
-    elif args.command is not None:
-        command = CommandName.from_str(args.command)
-        sjh.wait_for_dependencies(command)
     else:
         sjh.wait_for_all_jobs()
