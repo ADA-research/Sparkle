@@ -25,19 +25,19 @@ def print_sparkle_list(objects: list[str], type: str, details: bool = False) -> 
     print()
 
 
-def print_list_remaining_feature_computation_job(feature_data_csv_path: Path,
+def print_list_remaining_feature_computation_job(feature_data_csv: Path,
                                                  verbose: bool = False) -> None:
     """Print a list of remaining feature computation jobs.
 
     Args:
-        feature_data_csv_path: Path to the feature data csv
+        feature_data_csv: Path to the feature data csv
         verbose: Indicating, if output should be verbose
     """
-    if not feature_data_csv_path.exists():
+    if not feature_data_csv.exists():
         print("\nNo feature data found, cannot determine remaining jobs.")
 
-    feature_data_csv = FeatureDataFrame(feature_data_csv_path)
-    jobs = feature_data_csv.remaining_jobs()
+    feature_data = FeatureDataFrame(feature_data_csv)
+    jobs = feature_data.remaining_jobs()
 
     print(f"\nCurrently Sparkle has {len(jobs)} remaining feature computation "
           "jobs that need to be performed before creating an algorithm selector"

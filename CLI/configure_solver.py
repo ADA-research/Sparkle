@@ -109,7 +109,7 @@ def run_after(solver: Path,
       solver: Path (object) to solver.
       train_set: Instances used for training.
       test_set: Instances used for testing.
-      dependency: String of job dependencies.
+      dependency: List of job dependencies.
       command: The command to run. Currently supported: Validation and Ablation.
       run_on: Whether the job is executed on Slurm or locally.
 
