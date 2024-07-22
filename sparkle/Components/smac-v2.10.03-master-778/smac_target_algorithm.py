@@ -27,12 +27,13 @@ if __name__ == "__main__":
     args["cutoff_time"] = float(sys.argv[4])
     args["run_length"] = int(sys.argv[5])
     args["seed"] = int(sys.argv[6])
-    cutoff_time = int(args["cutoff_time"])+1
+    cutoff_time = int(args["cutoff_time"])
     # 2. Build Run Solver call
     runsolver_binary = solver_dir / "runsolver"
-    log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-    runsolver_watch_data_path = Path(f"runsolver_{int(random.getrandbits(32))}_{log_timestamp}.log")
-    runsolver_var_data_path = Path(f"runsolver_{int(random.getrandbits(32))}_{log_timestamp}.var")
+    log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    log_randstamp = int(random.getrandbits(32))
+    runsolver_watch_data_path = Path(f"runsolver_{log_randstamp}_{log_timestamp}.log")
+    runsolver_var_data_path = Path(f"runsolver_{log_randstamp}_{log_timestamp}.var")
 
     runsolver_call = [str(runsolver_binary),
                       "-w", str(runsolver_watch_data_path),
@@ -89,7 +90,8 @@ if __name__ == "__main__":
     if "quality" in outdict.keys():
         quality = outdict["quality"]
         if isinstance(quality, dict):
-            #SMAC2 does not support multi-objective so always opt for the first value
+            # SMAC2 does not support multi-objective so always opt for the first value
             quality = quality[quality.keys()[0]]
-        
-    print(f"Result for SMAC: {outdict['status']}, {run_time}, 0, {quality}, {args['seed']}")
+
+    print("Result for SMAC: "
+          f"{outdict['status']}, {run_time}, 0, {quality}, {args['seed']}")

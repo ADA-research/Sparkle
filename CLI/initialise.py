@@ -1,25 +1,27 @@
 #!/usr/bin/env python3
 """Command to initialise a Sparkle platform."""
-import sys
+import fsspec
 import subprocess
 import argparse
 import shutil
+from pathlib import Path
 
 from sparkle.platform import file_help as sfh
 from CLI.help.command_help import CommandName
+from CLI.help.argparse_custom import DownloadExamplesArgument
 from CLI.help import snapshot_help as srh
 from CLI.help import snapshot_help as snh
 from sparkle.platform.settings_objects import Settings
 from sparkle.structures import PerformanceDataFrame, FeatureDataFrame
 from CLI.help import global_variables as gv
-from CLI.help import sparkle_logging as sl
 
 
 def parser_function() -> argparse.ArgumentParser:
     """Parse CLI arguments for the initialise command."""
     parser = argparse.ArgumentParser(
-        description=("Initialise the Sparkle platform, this command does not have any "
-                     "arguments."))
+        description=("Initialise the Sparkle platform in the current directory."))
+    parser.add_argument(*DownloadExamplesArgument.names,
+                        **DownloadExamplesArgument.kwargs)
     return parser
 
 
@@ -47,14 +49,14 @@ def check_for_initialise(argv: list[str], requirements: list[CommandName] = None
         initialise_sparkle(argv)
 
 
-def initialise_sparkle(argv: list[str]) -> None:
+def initialise_sparkle(download_examples: bool = False) -> None:
     """Initialize a new Sparkle platform.
 
     Args:
-        argv: The argument list for the log_command
+        download_examples: Downloads examples from the Sparkle Github.
+            WARNING: May take a some time to complete due to the large amount of data.
     """
     print("Start initialising Sparkle platform ...")
-
     gv.snapshot_dir.mkdir(exist_ok=True)
     if snh.detect_current_sparkle_platform_exists(check_all_dirs=False):
         snh.save_current_sparkle_platform()
@@ -63,8 +65,6 @@ def initialise_sparkle(argv: list[str]) -> None:
         print("Current Sparkle platform found!")
         print("Current Sparkle platform recorded!")
 
-    # Log command call
-    sl.log_command(argv)
     sfh.create_temporary_directories()
     for working_dir in gv.working_dirs:
         working_dir.mkdir(exist_ok=True)
@@ -101,17 +101,22 @@ def initialise_sparkle(argv: list[str]) -> None:
         # NOTE: An automatic resolution of Java at this point would be good
         # However, loading modules from Python has thusfar not been successfull.
         print("Could not find Java as an executable!")
+
+    if download_examples:
+        # Download Sparkle examples from Github
+        # NOTE: Needs to be thoroughly tested after Pip install is working
+        print("Downloading examples ...")
+        fs = fsspec.filesystem("github", org="ADA-research", repo="Sparkle")
+        fs.get(fs.ls("Examples/"), Path("Examples").as_posix(), recursive=True)
+
     print("New Sparkle platform initialised!")
 
 
 if __name__ == "__main__":
     # Define command line arguments
-    parser = argparse.ArgumentParser(
-        description=("Initialise the Sparkle platform, this command does not have any "
-                     "arguments."))
+    parser = parser_function()
     # Process command line arguments
     args = parser.parse_args()
     global settings
     gv.settings = Settings()
-
-    initialise_sparkle(sys.argv)
+    initialise_sparkle(download_examples=args.download_examples)

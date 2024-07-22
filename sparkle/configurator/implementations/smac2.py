@@ -138,6 +138,7 @@ class SMAC2(Configurator):
         for config in configurations:
             values = [float(row[column]) for row in results if row[1] == config]
             config_scores.append(aggregate_config(values))
+
         # Now determine which is the best based on the perf measure
         if performance is None:
             performance = self.objectives[0].PerformanceMeasure
@@ -157,6 +158,7 @@ class SMAC2(Configurator):
         for i, score in enumerate(config_scores):
             if comparison(score, current_optimal):
                 min_index, current_optimal = i, score
+
         # Return the optimal configuration dictionary as commandline args
         config_str = configurations[min_index].strip(" ")
         if config_str.startswith("{"):

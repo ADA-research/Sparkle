@@ -89,14 +89,6 @@ AblationArgument = ArgumentContainer(names=["--ablation"],
                                              "action": "store_true",
                                              "help": "run ablation after configuration"})
 
-AblationSettingsHelpArgument = \
-    ArgumentContainer(names=["--ablation-settings-help"],
-                      kwargs={"required": False,
-                              "dest": "ablation_settings_help",
-                              "action": "store_true",
-                              "help": "Prints a list of setting that can be used for "
-                                      "the ablation analysis"})
-
 ActualArgument = ArgumentContainer(names=["--actual"],
                                    kwargs={"action": "store_true",
                                            "help": "compute the marginal contribution "
@@ -138,6 +130,12 @@ DeterministicArgument =\
     ArgumentContainer(names=["--deterministic"],
                       kwargs={"action": "store_true",
                               "help": "Flag indicating the solver is deterministic"})
+
+DownloadExamplesArgument =\
+    ArgumentContainer(names=["--download-examples"],
+                      kwargs={"action": argparse.BooleanOptionalAction,
+                              "default": False,
+                              "help": "Download the Examples into the directory."})
 
 ExtractorPathArgument = ArgumentContainer(names=["extractor_path"],
                                           kwargs={"metavar": "extractor-path",

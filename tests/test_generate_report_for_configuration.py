@@ -5,6 +5,7 @@ from pathlib import Path
 
 from pytest_mock import MockFixture
 
+from sparkle.solver.ablation import AblationScenario
 from sparkle.platform import generate_report_for_configuration as sgrch
 from CLI.help import global_variables as gv
 from sparkle.platform.settings_objects import Settings
@@ -27,6 +28,8 @@ configurator_path = configurator.configurator_path
 configurator.scenario =\
     ConfigurationScenario(solver, Path(train_instance))
 configurator.scenario._set_paths(configurator_path)
+ablation_scenario = AblationScenario(
+    solver, Path(train_instance), Path(test_instance), Path(""))
 validator = Validator(Path())
 test_objective_runtime = SparkleObjective("RUNTIME:PAR10")
 test_objective_quality = SparkleObjective("QUALITY_ABSOLUTE:ACCURACY")
@@ -100,44 +103,28 @@ def test_get_performance_measure_quality(mocker: MockFixture) -> None:
 
 def test_get_ablation_bool_true(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is True."""
-    mock_check = mocker.patch("CLI.support.ablation_help."
+    mock_check = mocker.patch("sparkle.solver.ablation.AblationScenario."
                               "check_for_ablation",
                               return_value=True)
-
-    ablation_bool = sgrch.get_ablation_bool("test-solver",
-                                            "train-instance",
-                                            "test-instance")
-
-    mock_check.assert_called_once_with("test-solver",
-                                       "train-instance",
-                                       "test-instance")
+    ablation_bool = sgrch.get_ablation_bool(ablation_scenario)
+    mock_check.assert_called_once()
     assert ablation_bool == r"\ablationtrue"
 
 
 def test_get_ablation_bool_false(mocker: MockFixture) -> None:
     """Test get_ablation_bool returns correct string if get_ablation_bool is False."""
-    mock_check = mocker.patch("CLI.support.ablation_help."
+    mock_check = mocker.patch("sparkle.solver.ablation.AblationScenario."
                               "check_for_ablation",
                               return_value=False)
-
-    ablation_bool = sgrch.get_ablation_bool("test-solver",
-                                            "train-instance",
-                                            "test-instance")
-
-    mock_check.assert_called_once_with("test-solver",
-                                       "train-instance",
-                                       "test-instance")
+    ablation_bool = sgrch.get_ablation_bool(ablation_scenario)
+    mock_check.assert_called_once()
     assert ablation_bool == r"\ablationfalse"
 
 
 def test_get_data_for_plot_same_instance(mocker: MockFixture) -> None:
     """Test get_data_for_plot returns list of values if dicts are correct."""
-    dict_configured = {
-        "instance-1.cnf": 1.0
-    }
-    dict_default = {
-        "instance-1.cnf": 0.01
-    }
+    dict_configured = {"instance-1.cnf": 1.0}
+    dict_default = {"instance-1.cnf": 0.01}
     mock_dict = mocker.patch("sparkle.platform.generate_report_for_configuration."
                              "get_dict_instance_to_performance",
                              side_effect=[dict_configured, dict_default])
@@ -304,13 +291,13 @@ def test_get_ablation_table(mocker: MockFixture) -> None:
          ["0", "-source-", "N/A", "N/A", "76.53275"],
          ["1", "sel_var_div", "3", "6", "68.41392"],
          ["2", "-target-", "N/A", "N/A", "92.06944"]])
-    mock_table = mocker.patch("CLI.support.ablation_help."
+    mock_table = mocker.patch("sparkle.solver.ablation.AblationScenario."
                               "read_ablation_table",
                               return_value=sah_ablation_table)
 
-    table_string = sgrch.get_ablation_table(solver, train_instance, test_instance)
+    table_string = sgrch.get_ablation_table(ablation_scenario)
 
-    mock_table.assert_called_once_with(solver, train_instance, test_instance)
+    mock_table.assert_called_once()
     assert table_string == (r"\begin{tabular}{rp{0.25\linewidth}rrr}"
                             r"\textbf{Round} & \textbf{Flipped parameter} & "
                             r"\textbf{Source value} & \textbf{Target value} & "
@@ -330,7 +317,6 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
     train_instance = "train-instance"
     test_instance = "test-instance"
     output_dir = gv.configuration_output_analysis
-    ablation = False
     common_dict = {
         "common-1": "1",
         "common-2": "2",
@@ -349,12 +335,13 @@ def test_get_dict_variable_to_value_with_test(mocker: MockFixture) -> None:
 
     full_dict = sgrch.configuration_report_variables(
         gv.configuration_output_analysis, solver, configurator, validator, Path(),
-        Path(), train_instance, 1, 1, test_instance, ablation)
+        Path(), train_instance, 1, 1, test_instance, None)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
-                                        train_instance, test_instance, output_dir, 1)
+    mock_common.assert_called_once_with(solver, configurator, validator,
+                                        None, Path(), train_instance,
+                                        output_dir, 1)
     mock_test.assert_called_once_with(output_dir, solver, configurator, validator,
-                                      train_instance, test_instance, 1)
+                                      None, train_instance, test_instance, 1)
     assert full_dict == {
         "testBool": r"\testtrue",
         "ablationBool": r"\ablationfalse"
@@ -370,7 +357,6 @@ def test_configuration_report_variables_without_test(mocker: MockFixture) -> Non
     train_instance = "train-instance"
     test_instance = None
     output_dir = gv.configuration_output_analysis
-    ablation = False
     common_dict = {
         "common-1": "1",
         "common-2": "2",
@@ -382,10 +368,10 @@ def test_configuration_report_variables_without_test(mocker: MockFixture) -> Non
 
     full_dict = sgrch.configuration_report_variables(
         output_dir, solver, configurator, validator, Path(),
-        Path(), train_instance, 1, 1, test_instance, ablation)
+        Path(), train_instance, 1, 1, test_instance, None)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
-                                        train_instance, test_instance, output_dir, 1)
+    mock_common.assert_called_once_with(solver, configurator, validator, None, Path(),
+                                        train_instance, output_dir, 1)
     assert full_dict == {
         "testBool": r"\testfalse",
         "ablationBool": r"\ablationfalse"
@@ -401,7 +387,6 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
     train_instance = "train-instance"
     test_instance = "test-instance"
     output_dir = gv.configuration_output_analysis
-    ablation = True
     common_dict = {
         "common-1": "1",
         "common-2": "2",
@@ -420,12 +405,14 @@ def test_configuration_report_variables_with_ablation(mocker: MockFixture) -> No
 
     full_dict = sgrch.configuration_report_variables(
         output_dir, solver, configurator, validator, Path(),
-        Path(), train_instance, 1, 1, test_instance, ablation)
+        Path(), train_instance, 1, 1, test_instance, ablation_scenario)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
-                                        train_instance, test_instance, output_dir, 1)
-    mock_test.assert_called_once_with(output_dir, solver, configurator, validator,
-                                      train_instance, test_instance, 1)
+    mock_common.assert_called_once_with(
+        solver, configurator, validator, ablation_scenario,
+        Path(), train_instance, output_dir, 1)
+    mock_test.assert_called_once_with(
+        output_dir, solver, configurator, validator,
+        ablation_scenario, train_instance, test_instance, 1)
     assert full_dict == {
         "testBool": r"\testtrue"
     } | common_dict | test_dict
@@ -440,7 +427,6 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     train_instance = "train-instance"
     test_instance = "test-instance"
     output_dir = gv.configuration_output_analysis
-    ablation = True
     common_dict = {
         "common-1": "1",
         "common-2": "2",
@@ -465,12 +451,14 @@ def test_configuration_report_variables_with_features(mocker: MockFixture) -> No
     extractor_dir = Path("extract/dir")
     full_dict = sgrch.configuration_report_variables(
         output_dir, solver, configurator, validator, extractor_dir,
-        Path(), train_instance, 1, 1, test_instance, ablation)
+        Path(), train_instance, 1, 1, test_instance, ablation_scenario)
 
-    mock_common.assert_called_once_with(solver, configurator, validator, Path(),
-                                        train_instance, test_instance, output_dir, 1)
-    mock_test.assert_called_once_with(output_dir, solver, configurator, validator,
-                                      train_instance, test_instance, 1)
+    mock_common.assert_called_once_with(
+        solver, configurator, validator, ablation_scenario, Path(), train_instance,
+        output_dir, 1)
+    mock_test.assert_called_once_with(
+        output_dir, solver, configurator, validator, ablation_scenario, train_instance,
+        test_instance, 1)
     mock_iterdir.assert_called_once()
     mock_extractor_list.assert_called_once_with(extractor_dir)
     assert full_dict == {
@@ -488,7 +476,6 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
     values are added to the common dictionary.
     """
     train_instance = Path("train-instance")
-    test_instance = Path("test-instance")
     validation_data = [
         ["SolverName", "{}", "InstanceSetName", "InstanceName", "STATUS", "0", "25.323"]]
     report_dir = "reports/directory"
@@ -530,7 +517,7 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                  return_value=validation_data)
     bib_path = Path("tex/bib.bib")
     common_dict = sgrch.get_dict_variable_to_value_common(
-        solver, configurator, validator, bib_path, train_instance, test_instance,
+        solver, configurator, validator, ablation_scenario, bib_path, train_instance,
         report_dir, 1)
 
     mock_figure.assert_called_once_with(solver, train_instance.name, validation_data,
@@ -538,10 +525,8 @@ def test_get_dict_variable_to_value_common(mocker: MockFixture) -> None:
                                         float(cutoff), 1, test_objective_quality)
     mock_timeouts.assert_called_once_with(
         solver, train_instance, configurator, validator, float(cutoff), 60)
-    mock_ablation_bool.assert_called_once_with(solver, train_instance,
-                                               test_instance)
-    mock_ablation_table.assert_called_once_with(solver, train_instance,
-                                                test_instance)
+    mock_ablation_bool.assert_called_once_with(ablation_scenario)
+    mock_ablation_table.assert_called_once_with(ablation_scenario)
 
     assert common_dict == {
         "performanceMeasure": "performance",
@@ -612,6 +597,7 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
                                                       solver,
                                                       configurator,
                                                       validator,
+                                                      ablation_scenario,
                                                       train_set,
                                                       test_set,
                                                       1)
@@ -622,10 +608,8 @@ def test_get_dict_variable_to_value_test(mocker: MockFixture) -> None:
         test_objective_quality, data_type="test")
     mock_timeouts.assert_called_once_with(
         solver, test_set, configurator, validator, float(cutoff), 60)
-    mock_ablation_bool.assert_called_once_with(solver, train_set,
-                                               test_set)
-    mock_ablation_table.assert_called_once_with(solver, train_set,
-                                                test_set)
+    mock_ablation_bool.assert_called_once_with(ablation_scenario)
+    mock_ablation_table.assert_called_once_with(ablation_scenario)
     assert test_dict == {
         "instanceSetTest": test_set.name,
         "numInstanceInTestingInstanceSet": "1",

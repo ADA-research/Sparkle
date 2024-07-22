@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path, PurePath
 
 from CLI.help import global_variables as gv
+from sparkle.solver.ablation import AblationScenario
 from sparkle.platform import generate_report_for_selection as sgfs
 from sparkle.platform import \
     generate_report_for_configuration as sgrfch
@@ -227,6 +228,11 @@ if __name__ == "__main__":
             solver, instance_set_train, number_of_runs, solver_calls, cpu_time,
             wallclock_time, cutoff_time, cutoff_length, sparkle_objective)
         configurator.scenario._set_paths(configurator.output_path)
+        ablation_scenario = None
+        if args.flag_ablation:
+            ablation_scenario = AblationScenario(
+                solver, instance_set_train, instance_set_test,
+                gv.ablation_output_general)
         sgrfch.generate_report_for_configuration(
             solver,
             gv.settings.get_general_sparkle_configurator(),
@@ -239,7 +245,7 @@ if __name__ == "__main__":
             gv.settings.get_general_penalty_multiplier(),
             gv.settings.get_general_extractor_cutoff_time(),
             instance_set_test,
-            ablation=args.flag_ablation
+            ablation=ablation_scenario
         )
 
     # Write used settings to file
