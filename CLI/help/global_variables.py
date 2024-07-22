@@ -27,8 +27,6 @@ def latest_scenario() -> ReportingScenario:
 
 sparkle_tmp_path = Path("Tmp")
 
-sparkle_err_path = sparkle_tmp_path / "sparkle_log.err"
-
 sparkle_algorithm_selector_dir = Path("Sparkle_Portfolio_Selector")
 
 sparkle_algorithm_selector_name = "sparkle_portfolio_selector"
@@ -48,7 +46,6 @@ snapshot_dir = Path("Snapshots")
 # found
 sparkle_global_log_dir = Path("Log")
 sparkle_global_log_path = output_dir / "sparkle.log"
-sparkle_system_log_path = sparkle_global_log_dir / "sparkle_system_log_path.txt"
 
 sparkle_marginal_contribution_actual_path =\
     sparkle_algorithm_selector_dir / "marginal_contribution_actual.txt"
@@ -83,7 +80,7 @@ sparkle_solver_wrapper = "sparkle_solver_wrapper.py"
 sparkle_extractor_wrapper = "sparkle_extractor_wrapper.py"
 
 ablation_dir = Path("sparkle/Components/ablationAnalysis-0.9.4/")
-ablation_exec = Path("sparkle/Components/ablationAnalysis-0.9.4/ablationAnalysis")
+ablation_exec = ablation_dir / "ablationAnalysis"
 
 feature_data_csv_path = feature_data_dir / "sparkle_feature_data.csv"
 performance_data_csv_path = performance_data_dir / "sparkle_performance_data.csv"
