@@ -37,6 +37,7 @@ class AblationScenario:
         if self.test_set is not None:
             self.scenario_name += f"_{self.test_set.name}"
         self.scenario_dir = self.output_dir / self.scenario_name
+        self.table_file = self.scenario_dir / "log" / "ablation-validation-run1234.txt"
         if override_dirs and self.scenario_dir.exists():
             print("Warning: found existing ablation scenario. This will be removed.")
             shutil.rmtree(self.scenario_dir)
@@ -129,22 +130,21 @@ class AblationScenario:
 
     def check_for_ablation(self: AblationScenario) -> bool:
         """Checks if ablation has terminated successfully."""
-        path = self.scenario_dir / "ablationValidation.txt"
-        if not path.is_file():
+        if not self.table_file.is_file():
             return False
-        return path.open().readline().strip() == "Ablation analysis validation complete."
+        # First line in the table file should be "Ablation analysis validation complete."
+        table_line = self.table_file.open().readline().strip()
+        return table_line == "Ablation analysis validation complete."
 
     def read_ablation_table(self: AblationScenario) -> list[list[str]]:
         """Read from ablation table of a scenario."""
         if not self.check_for_ablation():
             # No ablation table exists for this solver-instance pair
             return []
-
-        table_file = self.scenario_dir / "ablationValidation.txt"
         results = [["Round", "Flipped parameter", "Source value", "Target value",
                     "Validation result"]]
 
-        for line in table_file.open().readlines():
+        for line in self.table_file.open().readlines():
             # Pre-process lines from the ablation file and add to the results dictionary.
             # Sometimes ablation rounds switch multiple parameters at once.
             # EXAMPLE: 2 EDR, EDRalpha   0, 0.1   1, 0.1013241633106732 486.31691
@@ -156,7 +156,6 @@ class AblationScenario:
             values = [val.replace(",", ", ") for val in values.split(" ")]
             if len(values) == 5:
                 results.append(values)
-
         return results
 
     def submit_ablation(self: AblationScenario,
@@ -171,14 +170,12 @@ class AblationScenario:
         Returns:
             A  list of Run objects. Empty when running locally.
         """
-        # This script sumbits 4 jobs: Normal, normal callback, validation, validation cb
-        # The callback is nothing but a copy script from Albation/scenario/DIR/log to
-        # the Log/Ablation/.. folder.
-
         # 1. submit the ablation to the runrunner queue
+        clis = gv.settings.get_slurm_max_parallel_runs_per_node()
         cmd = f"{self.ablation_exec.absolute()} --optionFile ablation_config.txt"
-        sbatch_options = gv.settings.get_slurm_extra_options(as_args=True)
-        srun_options = ["-N1", "-n1"] + sbatch_options
+        srun_options = ["-N1", "-n1", f"-c{clis}"]
+        sbatch_options = [f"--cpus-per-task={clis}"] +\
+            gv.settings.get_slurm_extra_options(as_args=True)
 
         run_ablation = rrr.add_to_queue(
             runner=run_on,
@@ -198,8 +195,8 @@ class AblationScenario:
         if self.test_set is not None:
             # NOTE: The test set is not actually used?
             validation_exec = self.ablation_exec.parent / "ablationValidation"
-            cmd = f"{validation_exec.absolute()} --optionFile ablation_config.txt "
-            #      "--ablationLogFile ablationPath.txt"
+            cmd = f"{validation_exec.absolute()} --optionFile ablation_config.txt "\
+                  "--ablationLogFile log/ablation-run1234.txt"
 
             run_ablation_validation = rrr.add_to_queue(
                 runner=run_on,
