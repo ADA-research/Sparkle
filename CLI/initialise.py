@@ -104,10 +104,10 @@ def initialise_sparkle(download_examples: bool = False) -> None:
 
     if download_examples:
         # Download Sparkle examples from Github
+        # NOTE: Needs to be thoroughly tested after Pip install is working
         print("Downloading examples ...")
-        destination = Path("Examples")
         fs = fsspec.filesystem("github", org="ADA-research", repo="Sparkle")
-        fs.get(fs.ls("Examples/"), destination.as_posix(), recursive=True)
+        fs.get(fs.ls("Examples/"), Path("Examples").as_posix(), recursive=True)
 
     print("New Sparkle platform initialised!")
 
